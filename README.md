@@ -1,13 +1,14 @@
 NetSurf
 =======
 
-This document should help point you at various useful bits of information.
+This is a lightweight browser written in C that uses GTK4. It's a fork of NetSurf.
 
 
 Building NetSurf
 ----------------
 
-Read the [Quick Start](docs/quick-start.md) document for instructions.
+* Read the [Quick Start](docs/quick-start.md) document for instructions.
+* Also have [`tinyxxd`](https://github.com/xyproto/tinyxxd) or another `xxd` implementation installed.
 
 
 Creating a new port
@@ -25,3 +26,10 @@ Further documentation
 * [Developer documentation](https://www.netsurf-browser.org/developers/)
 * [Developer wiki](https://wiki.netsurf-browser.org/Documentation/)
 * [Code style guide](https://www.netsurf-browser.org/developers/StyleGuide.pdf)
+
+
+General info
+------------
+
+* Version: 3.12.0
+* License: see the `LICENSE` file
