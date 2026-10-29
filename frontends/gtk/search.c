@@ -40,11 +40,11 @@
 
 
 struct gtk_search {
-	GtkToolbar *bar;
+	GtkWidget *bar;
 	GtkEntry *entry;
-	GtkToolButton *back;
-	GtkToolButton *forward;
-	GtkToolButton *close;
+	GtkButton *back;
+	GtkButton *forward;
+	GtkButton *close;
 	GtkCheckButton *checkAll;
 	GtkCheckButton *caseSens;
 
@@ -88,16 +88,16 @@ nsgtk_search_forward_button_clicked(GtkWidget *widget, gpointer data)
 
 	flags = SEARCH_FLAG_FORWARDS;
 
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(search->caseSens))) {
+	if (gtk_check_button_get_active(GTK_CHECK_BUTTON(search->caseSens))) {
 		flags |= SEARCH_FLAG_CASE_SENSITIVE;
 	}
 
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(search->checkAll))) {
+	if (gtk_check_button_get_active(GTK_CHECK_BUTTON(search->checkAll))) {
 		flags |= SEARCH_FLAG_SHOWALL;
 	}
 
 	browser_window_search(search->bw, search, flags,
-			      gtk_entry_get_text(search->entry));
+			      gtk_editable_get_text(GTK_EDITABLE(search->entry)));
 
 	return TRUE;
 }
@@ -115,16 +115,16 @@ nsgtk_search_back_button_clicked(GtkWidget *widget, gpointer data)
 
 	flags = 0;
 
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(search->caseSens))) {
+	if (gtk_check_button_get_active(GTK_CHECK_BUTTON(search->caseSens))) {
 		flags |= SEARCH_FLAG_CASE_SENSITIVE;
 	}
 
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(search->checkAll))) {
+	if (gtk_check_button_get_active(GTK_CHECK_BUTTON(search->checkAll))) {
 		flags |= SEARCH_FLAG_SHOWALL;
 	}
 
 	browser_window_search(search->bw, search, flags,
-			      gtk_entry_get_text(search->entry));
+			      gtk_editable_get_text(GTK_EDITABLE(search->entry)));
 
 	return TRUE;
 }
@@ -157,16 +157,16 @@ static gboolean nsgtk_search_entry_changed(GtkWidget *widget, gpointer data)
 
 	flags = 0;
 
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(search->caseSens))) {
+	if (gtk_check_button_get_active(GTK_CHECK_BUTTON(search->caseSens))) {
 		flags |= SEARCH_FLAG_CASE_SENSITIVE;
 	}
 
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(search->checkAll))) {
+	if (gtk_check_button_get_active(GTK_CHECK_BUTTON(search->checkAll))) {
 		flags |= SEARCH_FLAG_SHOWALL;
 	}
 
 	browser_window_search(search->bw, search, flags,
-			      gtk_entry_get_text(search->entry));
+			      gtk_editable_get_text(GTK_EDITABLE(search->entry)));
 
 	return TRUE;
 }
@@ -183,16 +183,16 @@ static gboolean nsgtk_search_entry_activate(GtkWidget *widget, gpointer data)
 
 	flags = SEARCH_FLAG_FORWARDS;
 
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(search->caseSens))) {
+	if (gtk_check_button_get_active(GTK_CHECK_BUTTON(search->caseSens))) {
 		flags |= SEARCH_FLAG_CASE_SENSITIVE;
 	}
 
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(search->checkAll))) {
+	if (gtk_check_button_get_active(GTK_CHECK_BUTTON(search->checkAll))) {
 		flags |= SEARCH_FLAG_SHOWALL;
 	}
 
 	browser_window_search(search->bw, search, flags,
-			      gtk_entry_get_text(search->entry));
+			      gtk_editable_get_text(GTK_EDITABLE(search->entry)));
 
 	return FALSE;
 }
@@ -201,9 +201,13 @@ static gboolean nsgtk_search_entry_activate(GtkWidget *widget, gpointer data)
  * allows escape key to close search bar too
  */
 static gboolean
-nsgtk_search_entry_key(GtkWidget *widget, GdkEventKey *event, gpointer data)
+nsgtk_search_entry_key(GtkEventControllerKey *controller,
+		       guint keyval,
+		       guint keycode,
+		       GdkModifierType state,
+		       gpointer data)
 {
-	if (event->keyval == GDK_KEY(Escape)) {
+	if (keyval == GDK_KEY(Escape)) {
 		struct gtk_search *search;
 		search = (struct gtk_search *)data;
 
@@ -230,9 +234,9 @@ nserror nsgtk_search_toggle_visibility(struct gtk_search *search)
 
 	g_object_get(G_OBJECT(search->bar), "visible", &vis, NULL);
 	if (vis) {
-		gtk_widget_hide(GTK_WIDGET(search->bar));
+		gtk_widget_set_visible(GTK_WIDGET(search->bar), FALSE);
 	} else {
-		gtk_widget_show(GTK_WIDGET(search->bar));
+		gtk_widget_set_visible(GTK_WIDGET(search->bar), TRUE);
 		gtk_widget_grab_focus(GTK_WIDGET(search->entry));
 		nsgtk_search_entry_changed(GTK_WIDGET(search->entry), search);
 	}
@@ -244,37 +248,17 @@ nserror nsgtk_search_toggle_visibility(struct gtk_search *search)
 /* exported interface documented in gtk/search.h */
 nserror nsgtk_search_restyle(struct gtk_search *search)
 {
-	switch (nsoption_int(button_type)) {
+	int button_type = nsoption_int(button_type);
 
-	case 1: /* Small icons */
-		gtk_toolbar_set_style(GTK_TOOLBAR(search->bar),
-				      GTK_TOOLBAR_ICONS);
-		gtk_toolbar_set_icon_size(GTK_TOOLBAR(search->bar),
-					  GTK_ICON_SIZE_SMALL_TOOLBAR);
-		break;
-
-	case 2: /* Large icons */
-		gtk_toolbar_set_style(GTK_TOOLBAR(search->bar),
-				      GTK_TOOLBAR_ICONS);
-		gtk_toolbar_set_icon_size(GTK_TOOLBAR(search->bar),
-					  GTK_ICON_SIZE_LARGE_TOOLBAR);
-		break;
-
-	case 3: /* Large icons with text */
-		gtk_toolbar_set_style(GTK_TOOLBAR(search->bar),
-				      GTK_TOOLBAR_BOTH);
-		gtk_toolbar_set_icon_size(GTK_TOOLBAR(search->bar),
-					  GTK_ICON_SIZE_LARGE_TOOLBAR);
-		break;
-
-	case 4: /* Text icons only */
-		gtk_toolbar_set_style(GTK_TOOLBAR(search->bar),
-				      GTK_TOOLBAR_TEXT);
-		break;
-
-	default:
-		break;
-	}
+	nsgtk_button_set_style(search->back, "go-up",
+			       gtk_widget_get_tooltip_text(GTK_WIDGET(search->back)),
+			       button_type);
+	nsgtk_button_set_style(search->forward, "go-down",
+			       gtk_widget_get_tooltip_text(GTK_WIDGET(search->forward)),
+			       button_type);
+	nsgtk_button_set_style(search->close, NSGTK_STOCK_CLOSE,
+			       gtk_widget_get_tooltip_text(GTK_WIDGET(search->close)),
+			       button_type);
 	return NSERROR_OK;
 }
 
@@ -286,6 +270,7 @@ nsgtk_search_create(GtkBuilder *builder,
 		    struct gtk_search **search_out)
 {
 	struct gtk_search *search;
+	GtkEventController *controller;
 
 	search = malloc(sizeof(struct gtk_search));
 	if (search == NULL) {
@@ -294,13 +279,13 @@ nsgtk_search_create(GtkBuilder *builder,
 
 	search->bw = bw;
 
-	search->bar = GTK_TOOLBAR(gtk_builder_get_object(builder, "findbar"));
+	search->bar = GTK_WIDGET(gtk_builder_get_object(builder, "findbar"));
 	search->entry = GTK_ENTRY(gtk_builder_get_object(builder, "Find"));
-	search->back = GTK_TOOL_BUTTON(gtk_builder_get_object(builder,
+	search->back = GTK_BUTTON(gtk_builder_get_object(builder,
 							"FindBack"));
-	search->forward = GTK_TOOL_BUTTON(gtk_builder_get_object(builder,
+	search->forward = GTK_BUTTON(gtk_builder_get_object(builder,
 							"FindForward"));
-	search->close = GTK_TOOL_BUTTON(gtk_builder_get_object(builder,
+	search->close = GTK_BUTTON(gtk_builder_get_object(builder,
 							"FindClose"));
 	search->checkAll = GTK_CHECK_BUTTON(gtk_builder_get_object(builder,
 							"FindHighlightAll"));
@@ -327,10 +312,12 @@ nsgtk_search_create(GtkBuilder *builder,
 			 G_CALLBACK(nsgtk_search_entry_activate),
 			 search);
 
-	g_signal_connect(search->entry,
-			 "key-press-event",
+	controller = gtk_event_controller_key_new();
+	g_signal_connect(controller,
+			 "key-pressed",
 			 G_CALLBACK(nsgtk_search_entry_key),
 			 search);
+	gtk_widget_add_controller(GTK_WIDGET(search->entry), controller);
 
 	g_signal_connect(search->close,
 			 "clicked",

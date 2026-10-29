@@ -44,7 +44,7 @@ static inline void nsfont_pango_check(void)
 {
 	if (nsfont_pango_context == NULL) {
 		NSLOG(netsurf, INFO, "Creating nsfont_pango_context.");
-		nsfont_pango_context = gdk_pango_context_get();
+		nsfont_pango_context = pango_font_map_create_context(pango_cairo_font_map_get_default());
 	}
 
 	if (nsfont_pango_layout == NULL) {
@@ -235,7 +235,7 @@ nsfont_split(const plot_font_style_t *fstyle,
 	size_t str_len;
 	PangoRectangle pos;
 
-	context = gdk_pango_context_get();
+	context = pango_font_map_create_context(pango_cairo_font_map_get_default());
 	layout = pango_layout_new(context);
 
 	desc = nsfont_style_to_description(fstyle);

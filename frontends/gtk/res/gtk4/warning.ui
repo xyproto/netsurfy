@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <object class="GtkWindow" id="wndWarning">
+    <property name="title" translatable="1">Warning from NetSurf</property>
+    <property name="icon-name">dialog-warning</property>
+    <property name="hide-on-close">1</property>
+    <property name="default-widget">button14</property>
+    <property name="child">
+      <object class="GtkBox" id="vbox32">
+        <property name="orientation">vertical</property>
+        <property name="spacing">6</property>
+        <property name="margin-top">6</property>
+        <property name="margin-bottom">6</property>
+        <property name="margin-start">6</property>
+        <property name="margin-end">6</property>
+        <child>
+          <object class="GtkBox" id="hbox30">
+            <property name="spacing">12</property>
+            <child>
+              <object class="GtkImage" id="image519">
+                <property name="margin-start">12</property>
+                <property name="icon-size">large</property>
+                <property name="icon-name">dialog-warning</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="labelWarning">
+                <property name="label" translatable="1">Help help help!  I&apos;m being held prisoner by a bunch of RISC OS zealots!</property>
+                <property name="wrap">1</property>
+                <property name="hexpand">1</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkSeparator" id="hseparator2"/>
+        </child>
+        <child>
+          <object class="GtkBox" id="hbuttonbox2">
+            <property name="halign">end</property>
+            <child>
+              <object class="GtkButton" id="button14">
+                <property name="label" translatable="1">OK</property>
+                <signal name="clicked" handler="gtk_window_close" object="wndWarning"/>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+  </object>
+</interface>

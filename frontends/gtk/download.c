@@ -89,6 +89,7 @@ struct gui_download_window {
 
 	GString *name;
 	GString *time_left;
+	gchar *path;
 	unsigned long long int size_total;
 	unsigned long long int size_downloaded;
 	gint progress;
@@ -426,7 +427,7 @@ static void nsgtk_download_store_update_item(struct gui_download_window *dl)
 static gboolean nsgtk_download_update(gboolean force_update)
 {
 	/* Be sure we need to update */
-	if (!nsgtk_widget_get_visible(GTK_WIDGET(dl_ctx.window))) {
+	if (!gtk_widget_get_visible(GTK_WIDGET(dl_ctx.window))) {
 		return TRUE;
 	}
 
@@ -523,6 +524,7 @@ nsgtk_download_store_clear_item(struct gui_download_window *dl,	void *user_data)
 		download_context_destroy(dl->ctx);
 		g_string_free(dl->name, TRUE);
 		g_string_free(dl->time_left, TRUE);
+		g_free(dl->path);
 		g_free(dl);
 
 		nsgtk_download_sensitivity_evaluate(dl_ctx.selection);
@@ -539,10 +541,25 @@ nsgtk_download_tree_view_row_activated(GtkTreeView *tree,
 {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
+	struct gui_download_window *dl;
 
 	model = gtk_tree_view_get_model(tree);
 
 	if (gtk_tree_model_get_iter(model, &iter, path)) {
+		gtk_tree_model_get(model, &iter, NSGTK_DOWNLOAD, &dl, -1);
+		if (dl != NULL && dl->status == NSGTK_DOWNLOAD_COMPLETE) {
+			gchar *argv[] = { (gchar *)"xdg-open", dl->path, NULL };
+			GError *error = NULL;
+
+			if (!g_spawn_async(NULL, argv, NULL,
+					   G_SPAWN_SEARCH_PATH, NULL, NULL,
+					   NULL, &error)) {
+				NSLOG(netsurf, WARNING, "xdg-open failed: %s",
+				      error->message);
+				g_error_free(error);
+			}
+			return;
+		}
 		/* TODO: This will be a context action (pause, start, clear) */
 		nsgtk_download_do(nsgtk_download_store_clear_item);
 	}
@@ -596,13 +613,6 @@ nsgtk_download_store_cancel_item(struct gui_download_window *dl,
 }
 
 
-static gboolean nsgtk_download_hide(GtkWidget *window)
-{
-	gtk_widget_hide(window);
-	return TRUE;
-}
-
-
 /**
  * Prompt user for downloaded file name
  *
@@ -615,8 +625,13 @@ nsgtk_download_dialog_show(const gchar *filename,
 			   const gchar *domain,
 			   const gchar *size)
 {
-	enum { GTK_RESPONSE_DOWNLOAD, GTK_RESPONSE_SAVE_AS };
-	GtkWidget *dialog;
+	enum { RESPONSE_DOWNLOAD, RESPONSE_CANCEL, RESPONSE_SAVE_AS };
+	const char *buttons[] = {
+		messages_get("Save"),
+		messages_get("Cancel"),
+		messages_get("SaveAs"),
+		NULL
+	};
 	char *destination = NULL;
 	gchar *message;
 	gchar *info;
@@ -624,52 +639,24 @@ nsgtk_download_dialog_show(const gchar *filename,
 	message = g_strdup(messages_get("gtkStartDownload"));
 	info = g_strdup_printf(messages_get("gtkInfo"), filename, domain, size);
 
-	dialog = gtk_message_dialog_new_with_markup(
-		dl_ctx.parent,
-		GTK_DIALOG_DESTROY_WITH_PARENT,
-		GTK_MESSAGE_QUESTION, GTK_BUTTONS_NONE,
-		"<span size=\"x-large\" weight=\"ultrabold\">%s</span>"
-		"\n\n<small>%s</small>",
-		message,
-		info);
-
-	gtk_dialog_add_buttons(GTK_DIALOG(dialog),
-			       NSGTK_STOCK_SAVE, GTK_RESPONSE_DOWNLOAD,
-			       NSGTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-			       NSGTK_STOCK_SAVE_AS, GTK_RESPONSE_SAVE_AS,
-			       NULL);
-
-	gint result = gtk_dialog_run(GTK_DIALOG(dialog));
-	gtk_widget_destroy(dialog);
+	int result = nsgtk_alert_choose(dl_ctx.parent, message, info, buttons,
+					RESPONSE_CANCEL, RESPONSE_DOWNLOAD);
 	g_free(message);
 	g_free(info);
 
 	switch (result) {
-	case GTK_RESPONSE_SAVE_AS: {
-		dialog = gtk_file_chooser_dialog_new(
-			messages_get("gtkSave"),
-			dl_ctx.parent,
-			GTK_FILE_CHOOSER_ACTION_SAVE,
-			NSGTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-			NSGTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
-			NULL);
-		gtk_file_chooser_set_current_name
-			(GTK_FILE_CHOOSER(dialog), filename);
-		gtk_file_chooser_set_current_folder
-			(GTK_FILE_CHOOSER(dialog),
-			 nsoption_charp(downloads_directory));
-		gtk_file_chooser_set_do_overwrite_confirmation
-			(GTK_FILE_CHOOSER(dialog),
-			 nsoption_bool(request_overwrite));
-
-		gint result = gtk_dialog_run(GTK_DIALOG(dialog));
-		if (result == GTK_RESPONSE_ACCEPT)
-			destination = gtk_file_chooser_get_filename
-				(GTK_FILE_CHOOSER(dialog));
-		gtk_widget_destroy(dialog);
+	case RESPONSE_SAVE_AS: {
+		char *chosen = nsgtk_save_file_choose(dl_ctx.parent,
+						      messages_get("gtkSave"),
+						      nsoption_charp(downloads_directory),
+						      filename);
+		if (chosen != NULL) {
+			destination = strdup(chosen);
+			g_free(chosen);
+		}
 		break;
 	}
-	case GTK_RESPONSE_DOWNLOAD: {
+	case RESPONSE_DOWNLOAD: {
 		size_t destsize;
 		destsize = strlen(nsoption_charp(downloads_directory)) +
 			SLEN("/") + strlen(filename) + 1;
@@ -684,40 +671,23 @@ nsgtk_download_dialog_show(const gchar *filename,
 		 * confirmation if needed */
 		if (g_file_test(destination, G_FILE_TEST_EXISTS) &&
 		    nsoption_bool(request_overwrite)) {
-			GtkWidget *button;
+			const char *overwrite_buttons[] = {
+				messages_get("Cancel"),
+				messages_get("Replace"),
+				NULL
+			};
 
 			message = g_strdup_printf(messages_get("gtkOverwrite"),
 						  filename);
 			info = g_strdup_printf(messages_get("gtkOverwriteInfo"),
 					       nsoption_charp(downloads_directory));
 
-			dialog = gtk_message_dialog_new_with_markup(
-				dl_ctx.parent,
-				GTK_DIALOG_DESTROY_WITH_PARENT,
-				GTK_MESSAGE_QUESTION,
-				GTK_BUTTONS_CANCEL,
-				"<b>%s</b>",
-				message);
-			gtk_message_dialog_format_secondary_markup(
-				GTK_MESSAGE_DIALOG(dialog),
-				"%s",
-				info);
-
-			button = gtk_dialog_add_button(GTK_DIALOG(dialog),
-						       "_Replace",
-						       GTK_RESPONSE_DOWNLOAD);
-			gtk_button_set_image(GTK_BUTTON(button),
-					     nsgtk_image_new_from_stock(
-						     NSGTK_STOCK_SAVE,
-						     GTK_ICON_SIZE_BUTTON));
-
-			gint result = gtk_dialog_run(GTK_DIALOG(dialog));
-			if (result == GTK_RESPONSE_CANCEL) {
+			if (nsgtk_alert_choose(dl_ctx.parent, message, info,
+					       overwrite_buttons, 0, 0) == 0) {
 				free(destination);
 				destination = NULL;
 			}
 
-			gtk_widget_destroy(dialog);
 			g_free(message);
 			g_free(info);
 		}
@@ -730,25 +700,16 @@ nsgtk_download_dialog_show(const gchar *filename,
 
 static gboolean nsgtk_download_handle_error(GError *error)
 {
-	GtkWidget*dialog;
+	const char *buttons[] = { messages_get("OK"), NULL };
 	gchar *message;
 
 	if (error != NULL) {
 		message = g_strdup_printf(messages_get("gtkFileError"),
 					  error->message);
 
-		dialog = gtk_message_dialog_new_with_markup(
-					dl_ctx.parent,
-					GTK_DIALOG_MODAL,
-					GTK_MESSAGE_ERROR,
-					GTK_BUTTONS_OK,
-					"<big><b>%s</b></big>\n\n"
-					"<small>%s</small>",
-					messages_get("gtkFailed"),
-					message);
-
-		gtk_dialog_run(GTK_DIALOG(dialog));
-		gtk_widget_destroy(dialog);
+		nsgtk_alert_choose(dl_ctx.parent, messages_get("gtkFailed"),
+				   message, buttons, 0, 0);
+		g_free(message);
 		return TRUE;
 	}
 	return FALSE;
@@ -837,6 +798,7 @@ gui_download_window_create(download_context *ctx, struct gui_window *gui)
 	download->ctx = ctx;
 	download->name = g_string_new(download_context_get_filename(ctx));
 	download->time_left = g_string_new("");
+	download->path = g_strdup(destination);
 	download->size_total = total_size;
 	download->size_downloaded = 0;
 	download->speed = 0;
@@ -848,10 +810,12 @@ gui_download_window_create(download_context *ctx, struct gui_window *gui)
 	download->write = g_io_channel_new_file(destination,
 						"w",
 						&download->error);
+	free(destination);
 
 	if (nsgtk_download_handle_error(download->error)) {
 		g_string_free(download->name, TRUE);
 		g_string_free(download->time_left, TRUE);
+		g_free(download->path);
 		free(download);
 		return NULL;
 	}
@@ -962,7 +926,6 @@ nserror nsgtk_download_init(void)
 		return res;
 	}
 
-	gtk_builder_connect_signals(builder, NULL);
 
 	dl_ctx.pause = GTK_BUTTON(gtk_builder_get_object(builder,
 							 "buttonPause"));
@@ -1033,11 +996,6 @@ nserror nsgtk_download_init(void)
 				 G_CALLBACK(nsgtk_download_do),
 				 nsgtk_download_store_cancel_item);
 
-	g_signal_connect(G_OBJECT(dl_ctx.window),
-			 "delete-event",
-			 G_CALLBACK(nsgtk_download_hide),
-			 NULL);
-
 	return NSERROR_OK;
 }
 
@@ -1052,32 +1010,20 @@ void nsgtk_download_destroy(void)
 /* exported interface documented in gtk/download.h */
 bool nsgtk_check_for_downloads(GtkWindow *parent)
 {
-	GtkWidget *dialog;
-	gint response;
+	const char *buttons[] = {
+		messages_get("Cancel"),
+		messages_get("Quit"),
+		NULL
+	};
 
 	if (dl_ctx.num_active == 0) {
 		return false;
 	}
 
-	dialog = gtk_message_dialog_new_with_markup(
-				parent,
-				GTK_DIALOG_MODAL,
-				GTK_MESSAGE_WARNING,
-				GTK_BUTTONS_NONE,
-				"<big><b>%s</b></big>\n\n"
-				"<small>%s</small>",
-				messages_get("gtkQuit"),
-				messages_get("gtkDownloadsRunning"));
-
-	gtk_dialog_add_buttons(GTK_DIALOG(dialog),
-			       "gtk-cancel", GTK_RESPONSE_CANCEL,
-			       "gtk-quit", GTK_RESPONSE_CLOSE,
-			       NULL);
-
-	response = gtk_dialog_run(GTK_DIALOG(dialog));
-	gtk_widget_destroy(dialog);
-
-	if (response == GTK_RESPONSE_CANCEL) {
+	if (nsgtk_alert_choose(parent,
+			       messages_get("gtkQuit"),
+			       messages_get("gtkDownloadsRunning"),
+			       buttons, 0, 0) == 0) {
 		return true;
 	}
 

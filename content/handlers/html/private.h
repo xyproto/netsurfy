@@ -201,6 +201,11 @@ typedef struct html_content {
 	/** Current input focus target */
 	union html_focus_owner focus_owner;
 
+	/** Box for the text control with the autofocus attribute, or NULL */
+	struct box *autofocus_box;
+	/** Whether the autofocus box has already been given the focus */
+	bool autofocus_done;
+
 	/** HTML content's own text selection object */
 	struct selection *sel;
 

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <menu id="menubar_model">
+    <submenu>
+      <attribute name="label" translatable="yes">gtkFile</attribute>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">gtkExport</attribute>
+          <attribute name="action">win.export</attribute>
+        </item>
+      </section>
+      <section>
+        <item>
+          <attribute name="label" translatable="yes">gtkLaunch</attribute>
+          <attribute name="action">win.launch</attribute>
+        </item>
+      </section>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">gtkEdit</attribute>
+      <item>
+        <attribute name="label" translatable="yes">gtkDelete</attribute>
+        <attribute name="action">win.delete_selected</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">gtkDeleteAll</attribute>
+        <attribute name="action">win.delete_all</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">gtkSelectAll</attribute>
+        <attribute name="action">win.select_all</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">gtkClear</attribute>
+        <attribute name="action">win.clear_selection</attribute>
+      </item>
+    </submenu>
+    <submenu>
+      <attribute name="label" translatable="yes">gtkView</attribute>
+      <submenu>
+        <attribute name="label" translatable="yes">gtkExpand</attribute>
+        <item>
+          <attribute name="label" translatable="yes">gtkAll</attribute>
+          <attribute name="action">win.expand_all</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">gtkFolders</attribute>
+          <attribute name="action">win.expand_directories</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">gtkLinks</attribute>
+          <attribute name="action">win.expand_addresses</attribute>
+        </item>
+      </submenu>
+      <submenu>
+        <attribute name="label" translatable="yes">gtkCollapse</attribute>
+        <item>
+          <attribute name="label" translatable="yes">gtkAll</attribute>
+          <attribute name="action">win.collapse_all</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">gtkFolders</attribute>
+          <attribute name="action">win.collapse_directories</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">gtkLinks</attribute>
+          <attribute name="action">win.collapse_addresses</attribute>
+        </item>
+      </submenu>
+    </submenu>
+  </menu>
+  <object class="GtkWindow" id="wndHistory">
+    <property name="title" translatable="yes">gtkGlobalHistoryTitle</property>
+    <property name="default_width">600</property>
+    <property name="default_height">500</property>
+    <property name="child">
+      <object class="GtkBox" id="box1">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkPopoverMenuBar" id="menubar1">
+            <property name="menu_model">menubar_model</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow" id="globalHistoryScrolled">
+            <property name="vexpand">True</property>
+            <property name="child">
+              <object class="GtkViewport" id="globalHistoryViewport">
+                <property name="child">
+                  <object class="GtkDrawingArea" id="globalHistoryDrawingArea">
+                    <property name="focusable">True</property>
+                  </object>
+                </property>
+              </object>
+            </property>
+          </object>
+        </child>
+      </object>
+    </property>
+  </object>
+</interface>

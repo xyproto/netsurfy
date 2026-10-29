@@ -33,6 +33,7 @@
 #include "gtk/cookies.h"
 #include "gtk/plotters.h"
 #include "gtk/resources.h"
+#include "gtk/compat.h"
 #include "gtk/corewindow.h"
 
 struct nsgtk_cookie_window {
@@ -44,9 +45,9 @@ struct nsgtk_cookie_window {
 static struct nsgtk_cookie_window *cookie_window = NULL;
 
 #define MENUPROTO(x) static gboolean nsgtk_on_##x##_activate(	\
-		GtkMenuItem *widget, gpointer g)
+		GtkWidget *widget, gpointer g)
 #define MENUEVENT(x) { #x, G_CALLBACK(nsgtk_on_##x##_activate) }
-#define MENUHANDLER(x) gboolean nsgtk_on_##x##_activate(GtkMenuItem *widget, \
+#define MENUHANDLER(x) gboolean nsgtk_on_##x##_activate(GtkWidget *widget, \
 		gpointer g)
 
 struct menu_events {
@@ -162,23 +163,19 @@ MENUHANDLER(collapse_cookies)
 static void nsgtk_cookies_init_menu(struct nsgtk_cookie_window *ncwin)
 {
 	struct menu_events *event = menu_events;
-	GtkWidget *w;
+	GSimpleActionGroup *group;
 
+	group = g_simple_action_group_new();
 	while (event->widget != NULL) {
-		w = GTK_WIDGET(gtk_builder_get_object(ncwin->builder,
-						      event->widget));
-		if (w == NULL) {
-			NSLOG(netsurf, INFO,
-			      "Unable to connect menu widget ""%s""",
-			      event->widget);
-		} else {
-			g_signal_connect(G_OBJECT(w),
-					 "activate",
-					 event->handler,
-					 ncwin);
-		}
+		nsgtk_action_map_add_menu_action(G_ACTION_MAP(group),
+						 event->widget,
+						 event->handler,
+						 ncwin);
 		event++;
 	}
+	gtk_widget_insert_action_group(GTK_WIDGET(ncwin->wnd), "win",
+				       G_ACTION_GROUP(group));
+	g_object_unref(group);
 }
 
 /**
@@ -263,7 +260,6 @@ static nserror nsgtk_cookies_init(void)
 		return res;
 	}
 
-	gtk_builder_connect_signals(ncwin->builder, NULL);
 
 	ncwin->wnd = GTK_WINDOW(gtk_builder_get_object(ncwin->builder,
 						       "wndCookies"));
@@ -274,11 +270,8 @@ static nserror nsgtk_cookies_init(void)
 	ncwin->core.drawing_area = GTK_DRAWING_AREA(
 		gtk_builder_get_object(ncwin->builder, "cookiesDrawingArea"));
 
-	/* make the delete event hide the window */
-	g_signal_connect(G_OBJECT(ncwin->wnd),
-			 "delete_event",
-			 G_CALLBACK(gtk_widget_hide_on_delete),
-			 NULL);
+	/* make closing the window hide it */
+	gtk_window_set_hide_on_close(ncwin->wnd, TRUE);
 
 	nsgtk_cookies_init_menu(ncwin);
 
@@ -333,7 +326,7 @@ nserror nsgtk_cookies_destroy(void)
 	res = cookie_manager_fini();
 	if (res == NSERROR_OK) {
 		res = nsgtk_corewindow_fini(&cookie_window->core);
-		gtk_widget_destroy(GTK_WIDGET(cookie_window->wnd));
+		gtk_window_destroy(GTK_WINDOW(cookie_window->wnd));
 		g_object_unref(G_OBJECT(cookie_window->builder));
 		free(cookie_window);
 		cookie_window = NULL;

@@ -136,7 +136,7 @@ gboolean nsgtk_completion_update(GtkEntry *entry)
 	gtk_list_store_clear(nsgtk_completion_list);
 
 	if (nsoption_bool(url_suggestion) == true) {
-		urldb_iterate_partial(gtk_entry_get_text(entry),
+		urldb_iterate_partial(gtk_editable_get_text(GTK_EDITABLE(entry)),
 				      nsgtk_completion_udb_callback);
 	}
 

@@ -35,8 +35,8 @@ NETSURF_USE_INLINE_PIXBUF := AUTO
 # Enable building the source object cache filesystem based backing store.
 NETSURF_FS_BACKING_STORE := YES
 
-# Set default GTK version to build for (2 or 3)
-NETSURF_GTK_MAJOR ?= 2
+# GTK version to build for
+NETSURF_GTK_MAJOR ?= 4
 
 # Optimisation levels
 CFLAGS += -O2

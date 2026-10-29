@@ -86,7 +86,7 @@ nserror nsgtk_window_search_toggle(struct gui_window *gw);
  *
  * \param gw gui window handle
  */
-GtkLayout *nsgtk_window_get_layout(struct gui_window *gw);
+GtkWidget *nsgtk_window_get_layout(struct gui_window *gw);
 
 
 /**
@@ -97,20 +97,6 @@ GtkLayout *nsgtk_window_get_layout(struct gui_window *gw);
  */
 nserror nsgtk_window_item_activate(struct gui_window *gw, nsgtk_toolbar_button itemid);
 
-/**
- * position page_info appropriately
- *
- * \param gw The gui window handle to position relative to
- * \param win The page-info window to position
- */
-nserror nsgtk_window_position_page_info(struct gui_window *gw,
-					struct nsgtk_pi_window *win);
 
-/**
- * position local_history appropriately
- *
- * \param gw The gui window handle to position relative to
- */
-nserror nsgtk_window_position_local_history(struct gui_window *gw);
 
 #endif /* NETSURF_GTK_WINDOW_H */

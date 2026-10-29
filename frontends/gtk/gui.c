@@ -112,36 +112,36 @@ nserror nsgtk_warning(const char *warning, const char *detail)
 
 	gtk_label_set_text(WarningLabel, buf);
 
-	gtk_widget_show_all(GTK_WIDGET(nsgtk_warning_window));
+	gtk_window_present(nsgtk_warning_window);
 
 	return NSERROR_OK;
 }
 
 
 /* exported interface documented in gtk/gui.h */
-uint32_t gtk_gui_gdkkey_to_nskey(GdkEventKey *key)
+uint32_t gtk_gui_gdkkey_to_nskey(guint keyval, GdkModifierType state)
 {
 	/* this function will need to become much more complex to support
 	 * everything that the RISC OS version does.  But this will do for
 	 * now.  I hope.
 	 */
-	switch (key->keyval) {
+	switch (keyval) {
 
 	case GDK_KEY(Tab):
 		return NS_KEY_TAB;
 
 	case GDK_KEY(BackSpace):
-		if (key->state & GDK_SHIFT_MASK)
+		if (state & GDK_SHIFT_MASK)
 			return NS_KEY_DELETE_LINE_START;
-		else if (key->state & GDK_CONTROL_MASK)
+		else if (state & GDK_CONTROL_MASK)
 			return NS_KEY_DELETE_WORD_LEFT;
 		else
 			return NS_KEY_DELETE_LEFT;
 
 	case GDK_KEY(Delete):
-		if (key->state & GDK_SHIFT_MASK)
+		if (state & GDK_SHIFT_MASK)
 			return NS_KEY_DELETE_LINE_END;
-		else if (key->state & GDK_CONTROL_MASK)
+		else if (state & GDK_CONTROL_MASK)
 			return NS_KEY_DELETE_WORD_RIGHT;
 		else
 			return NS_KEY_DELETE_RIGHT;
@@ -154,13 +154,13 @@ uint32_t gtk_gui_gdkkey_to_nskey(GdkEventKey *key)
 
 	case GDK_KEY(Left):
 	case GDK_KEY(KP_Left):
-		if (key->state & GDK_CONTROL_MASK)
+		if (state & GDK_CONTROL_MASK)
 			return NS_KEY_WORD_LEFT;
 		return NS_KEY_LEFT;
 
 	case GDK_KEY(Right):
 	case GDK_KEY(KP_Right):
-		if (key->state & GDK_CONTROL_MASK)
+		if (state & GDK_CONTROL_MASK)
 			return NS_KEY_WORD_RIGHT;
 		return NS_KEY_RIGHT;
 
@@ -174,14 +174,14 @@ uint32_t gtk_gui_gdkkey_to_nskey(GdkEventKey *key)
 
 	case GDK_KEY(Home):
 	case GDK_KEY(KP_Home):
-		if (key->state & GDK_CONTROL_MASK)
+		if (state & GDK_CONTROL_MASK)
 			return NS_KEY_LINE_START;
 		else
 			return NS_KEY_TEXT_START;
 
 	case GDK_KEY(End):
 	case GDK_KEY(KP_End):
-		if (key->state & GDK_CONTROL_MASK)
+		if (state & GDK_CONTROL_MASK)
 			return NS_KEY_LINE_END;
 		else
 			return NS_KEY_TEXT_END;
@@ -195,40 +195,40 @@ uint32_t gtk_gui_gdkkey_to_nskey(GdkEventKey *key)
 		return NS_KEY_PAGE_DOWN;
 
 	case 'a':
-		if (key->state & GDK_CONTROL_MASK)
+		if (state & GDK_CONTROL_MASK)
 			return NS_KEY_SELECT_ALL;
-		return gdk_keyval_to_unicode(key->keyval);
+		return gdk_keyval_to_unicode(keyval);
 
 	case 'u':
-		if (key->state & GDK_CONTROL_MASK)
+		if (state & GDK_CONTROL_MASK)
 			return NS_KEY_DELETE_LINE;
-		return gdk_keyval_to_unicode(key->keyval);
+		return gdk_keyval_to_unicode(keyval);
 
 	case 'c':
-		if (key->state & GDK_CONTROL_MASK)
+		if (state & GDK_CONTROL_MASK)
 			return NS_KEY_COPY_SELECTION;
-		return gdk_keyval_to_unicode(key->keyval);
+		return gdk_keyval_to_unicode(keyval);
 
 	case 'v':
-		if (key->state & GDK_CONTROL_MASK)
+		if (state & GDK_CONTROL_MASK)
 			return NS_KEY_PASTE;
-		return gdk_keyval_to_unicode(key->keyval);
+		return gdk_keyval_to_unicode(keyval);
 
 	case 'x':
-		if (key->state & GDK_CONTROL_MASK)
+		if (state & GDK_CONTROL_MASK)
 			return NS_KEY_CUT_SELECTION;
-		return gdk_keyval_to_unicode(key->keyval);
+		return gdk_keyval_to_unicode(keyval);
 
 	case 'Z':
 	case 'y':
-		if (key->state & GDK_CONTROL_MASK)
+		if (state & GDK_CONTROL_MASK)
 			return NS_KEY_REDO;
-		return gdk_keyval_to_unicode(key->keyval);
+		return gdk_keyval_to_unicode(keyval);
 
 	case 'z':
-		if (key->state & GDK_CONTROL_MASK)
+		if (state & GDK_CONTROL_MASK)
 			return NS_KEY_UNDO;
-		return gdk_keyval_to_unicode(key->keyval);
+		return gdk_keyval_to_unicode(keyval);
 
 	case GDK_KEY(Escape):
 		return NS_KEY_ESCAPE;
@@ -251,7 +251,7 @@ uint32_t gtk_gui_gdkkey_to_nskey(GdkEventKey *key)
 		return 0;
 
 	}
-	return gdk_keyval_to_unicode(key->keyval);
+	return gdk_keyval_to_unicode(keyval);
 }
 
 
@@ -491,9 +491,6 @@ static bool nslog_stream_configure(FILE *fptr)
 static nserror set_defaults(struct nsoption_s *defaults)
 {
 	char *fname;
-	GtkSettings *settings;
-	GtkIconSize tooliconsize;
-	GtkToolbarStyle toolbarstyle;
 
 	/* cookie file default */
 	fname = NULL;
@@ -546,34 +543,8 @@ static nserror set_defaults(struct nsoption_s *defaults)
 	nsoption_set_charp(font_cursive, strdup("Serif"));
 	nsoption_set_charp(font_fantasy, strdup("Serif"));
 
-	/* Default toolbar button type to system defaults */
-
-	settings = gtk_settings_get_default();
-	g_object_get(settings,
-		     "gtk-toolbar-icon-size", &tooliconsize,
-		     "gtk-toolbar-style", &toolbarstyle, NULL);
-
-	switch (toolbarstyle) {
-	case GTK_TOOLBAR_ICONS:
-		if (tooliconsize == GTK_ICON_SIZE_SMALL_TOOLBAR) {
-			nsoption_set_int(button_type, 1);
-		} else {
-			nsoption_set_int(button_type, 2);
-		}
-		break;
-
-	case GTK_TOOLBAR_TEXT:
-		nsoption_set_int(button_type, 4);
-		break;
-
-	case GTK_TOOLBAR_BOTH:
-	case GTK_TOOLBAR_BOTH_HORIZ:
-		/* no labels in default configuration */
-	default:
-		/* No system default, so use large icons */
-		nsoption_set_int(button_type, 2);
-		break;
-	}
+	/* Default toolbar button type to large icons */
+	nsoption_set_int(button_type, 2);
 
 	/* set default items in toolbar */
 	nsoption_set_charp(toolbar_items,
@@ -778,7 +749,7 @@ static nserror nsgtk_init(int *pargc, char ***pargv, char **cache_home)
 	}
 
 	/* Initialise gtk */
-	gtk_init(pargc, pargv);
+	gtk_init();
 
 	/* initialise logging. Not fatal if it fails but not much we
 	 * can do about it either.
@@ -839,8 +810,9 @@ static nserror nsgtk_init(int *pargc, char ***pargv, char **cache_home)
  */
 static nserror nsgtk_add_named_icons_to_theme(void)
 {
-	gtk_icon_theme_add_resource_path(gtk_icon_theme_get_default(),
-					 "/org/netsurf/icons");
+	gtk_icon_theme_add_resource_path(
+		gtk_icon_theme_get_for_display(gdk_display_get_default()),
+		"/org/netsurf/icons");
 	return NSERROR_OK;
 }
 
@@ -931,14 +903,12 @@ static nserror nsgtk_setup(int argc, char** argv, char **respath)
 		return res;
 	}
 
-	gtk_builder_connect_signals(warning_builder, NULL);
-
 	/* set default icon if its available */
 	res = nsgdk_pixbuf_new_from_resname("netsurf.xpm",
 					    &win_default_icon_pixbuf);
 	if (res == NSERROR_OK) {
 		NSLOG(netsurf, INFO, "Seting default window icon");
-		gtk_window_set_default_icon(win_default_icon_pixbuf);
+		gtk_window_set_default_icon_name("netsurf");
 	}
 
 	/* Search engine sources */
@@ -979,7 +949,12 @@ static nserror nsgtk_setup(int argc, char** argv, char **respath)
 	 * find that out here, rather than when we create a first browser
 	 * window.
 	 */
-	browser_set_dpi(gdk_screen_get_resolution(gdk_screen_get_default()));
+	{
+		gint xft_dpi = -1;
+
+		g_object_get(gtk_settings_get_default(), "gtk-xft-dpi", &xft_dpi, NULL);
+		browser_set_dpi(xft_dpi > 0 ? xft_dpi / 1024 : 96);
+	}
 	NSLOG(netsurf, INFO, "Set CSS DPI to %d", browser_get_dpi());
 
 	bitmap_set_format(&(bitmap_fmt_t) {
@@ -1067,8 +1042,8 @@ static void nsgtk_main(void)
 		FD_ZERO(&write_fd_set);
 		FD_ZERO(&exc_fd_set);
 
-		while (gtk_events_pending())
-			gtk_main_iteration_do(TRUE);
+		while (g_main_context_pending(NULL))
+			g_main_context_iteration(NULL, TRUE);
 
 		schedule_run();
 
@@ -1097,7 +1072,7 @@ static void nsgtk_main(void)
 			}
 		}
 
-		gtk_main_iteration();
+		g_main_context_iteration(NULL, TRUE);
 
 		for (unsigned int i = 0; i != fd_count; i++) {
 			g_main_context_remove_poll(0, fd_list[i]);

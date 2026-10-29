@@ -81,33 +81,27 @@ ifeq ($(TARGET),)
     TARGET := windows
     SUBTARGET=
   else
-    # Default target is GTK 3 backend
+    # Default target is GTK 4 backend
     override TARGET := gtk
-    SUBTARGET = 3
+    SUBTARGET = 4
   endif
 else
   ifeq ($(TARGET),gtk)
-    # unspecified gtk is gtk3
-    SUBTARGET = 3
+    # unspecified gtk is gtk4
+    SUBTARGET = 4
   else
-    ifeq ($(TARGET),gtk3)
-      # gtk3 is gtk target with subtarget of 3
+    ifeq ($(TARGET),gtk4)
+      # gtk4 is gtk target with subtarget of 4
       override TARGET := gtk
-      SUBTARGET = 3
+      SUBTARGET = 4
     else
-      ifeq ($(TARGET),gtk2)
-        # gtk2 is gtk target with subtarget of 2
-        override TARGET := gtk
-        SUBTARGET = 2
+      ifeq ($(TARGET),amigaos3)
+        override TARGET := amiga
+        SUBTARGET = os3
       else
-        ifeq ($(TARGET),amigaos3)
-          override TARGET := amiga
-          SUBTARGET = os3
-        else
-          ifeq ($(TARGET),haiku)
-            override TARGET := beos
-            SUBTARGET=
-          endif
+        ifeq ($(TARGET),haiku)
+          override TARGET := beos
+          SUBTARGET=
         endif
       endif
     endif

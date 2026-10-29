@@ -67,43 +67,43 @@ static struct ppref ppref;
  */
 #define TOGGLEBUTTON_SIGNALS(WIDGET, OPTION)				\
 G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_toggled(GtkToggleButton *togglebutton,	\
-				     struct ppref *priv);		\
+nsgtk_preferences_##WIDGET##_toggled(GtkCheckButton *togglebutton,	\
+				     gpointer user_data);		\
 G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_toggled(GtkToggleButton *togglebutton,	\
-				     struct ppref *priv)		\
+nsgtk_preferences_##WIDGET##_toggled(GtkCheckButton *togglebutton,	\
+				     gpointer user_data)		\
 {									\
 	nsoption_set_bool(OPTION,					\
-			  gtk_toggle_button_get_active(togglebutton));	\
+			  gtk_check_button_get_active(togglebutton));	\
 }									\
 									\
 G_MODULE_EXPORT void							\
 nsgtk_preferences_##WIDGET##_realize(GtkWidget *widget,			\
-				     struct ppref *priv);		\
+				     gpointer user_data);		\
 G_MODULE_EXPORT void							\
 nsgtk_preferences_##WIDGET##_realize(GtkWidget *widget,			\
-				     struct ppref *priv)		\
+				     gpointer user_data)		\
 {									\
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget),		\
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(widget),		\
 				     nsoption_bool(OPTION));		\
 }
 
 #define SPINBUTTON_SIGNALS(WIDGET, OPTION, MULTIPLIER)			\
 G_MODULE_EXPORT void							\
 nsgtk_preferences_##WIDGET##_valuechanged(GtkSpinButton *spinbutton,	\
-					  struct ppref *priv);		\
+					  gpointer user_data);		\
 G_MODULE_EXPORT void							\
 nsgtk_preferences_##WIDGET##_valuechanged(GtkSpinButton *spinbutton,	\
-					  struct ppref *priv)		\
+					  gpointer user_data)		\
 {									\
 	nsoption_set_int(OPTION,					\
 		round(gtk_spin_button_get_value(spinbutton) * MULTIPLIER)); \
 }									\
 									\
 G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_realize(GtkWidget *widget, struct ppref *priv); \
+nsgtk_preferences_##WIDGET##_realize(GtkWidget *widget, gpointer user_data); \
 G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_realize(GtkWidget *widget, struct ppref *priv) \
+nsgtk_preferences_##WIDGET##_realize(GtkWidget *widget, gpointer user_data) \
 {									\
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(widget),		\
 		((gdouble)nsoption_int(OPTION)) / MULTIPLIER);		\
@@ -112,19 +112,19 @@ nsgtk_preferences_##WIDGET##_realize(GtkWidget *widget, struct ppref *priv) \
 #define SPINBUTTON_UINT_SIGNALS(WIDGET, OPTION, MULTIPLIER)		\
 G_MODULE_EXPORT void							\
 nsgtk_preferences_##WIDGET##_valuechanged(GtkSpinButton *spinbutton,	\
-					  struct ppref *priv);		\
+					  gpointer user_data);		\
 G_MODULE_EXPORT void							\
 nsgtk_preferences_##WIDGET##_valuechanged(GtkSpinButton *spinbutton,	\
-					  struct ppref *priv)		\
+					  gpointer user_data)		\
 {									\
 	nsoption_set_uint(OPTION,					\
 		round(gtk_spin_button_get_value(spinbutton) * MULTIPLIER)); \
 }									\
 									\
 G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_realize(GtkWidget *widget, struct ppref *priv); \
+nsgtk_preferences_##WIDGET##_realize(GtkWidget *widget, gpointer user_data); \
 G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_realize(GtkWidget *widget, struct ppref *priv) \
+nsgtk_preferences_##WIDGET##_realize(GtkWidget *widget, gpointer user_data) \
 {									\
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(widget),		\
 		((gdouble)nsoption_uint(OPTION)) / MULTIPLIER);		\
@@ -132,55 +132,55 @@ nsgtk_preferences_##WIDGET##_realize(GtkWidget *widget, struct ppref *priv) \
 
 #define ENTRY_SIGNALS(WIDGET, OPTION)					\
 G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_changed(GtkEditable *editable, struct ppref *priv); \
+nsgtk_preferences_##WIDGET##_changed(GtkEditable *editable, gpointer user_data); \
 G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_changed(GtkEditable *editable, struct ppref *priv)\
+nsgtk_preferences_##WIDGET##_changed(GtkEditable *editable, gpointer user_data)\
 {									\
 	nsoption_set_charp(OPTION,					\
-		strdup(gtk_entry_get_text(GTK_ENTRY(editable))));	\
+		strdup(gtk_editable_get_text(GTK_EDITABLE(editable))));	\
 }									\
 									\
 G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_realize(GtkWidget *widget,	struct ppref *priv); \
+nsgtk_preferences_##WIDGET##_realize(GtkWidget *widget,	gpointer user_data); \
 G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_realize(GtkWidget *widget,	struct ppref *priv) \
+nsgtk_preferences_##WIDGET##_realize(GtkWidget *widget,	gpointer user_data) \
 {									\
 	const char *OPTION;						\
 	OPTION = nsoption_charp(OPTION);				\
 	if (OPTION != NULL) {						\
-		gtk_entry_set_text(GTK_ENTRY(widget), OPTION);		\
+		gtk_editable_set_text(GTK_EDITABLE(widget), OPTION);		\
 	}								\
 }
 
 /* GTK module requires these to be exported symbols so these all need
  * forward declaring to avoid warnings
  */
-G_MODULE_EXPORT void nsgtk_preferences_comboProxyType_changed(GtkComboBox *combo, struct ppref *priv);
-G_MODULE_EXPORT void nsgtk_preferences_comboProxyType_realize(GtkWidget *widget, struct ppref *priv);
-G_MODULE_EXPORT void nsgtk_preferences_comboboxLoadImages_changed(GtkComboBox *combo, struct ppref *priv);
-G_MODULE_EXPORT void nsgtk_preferences_comboboxLoadImages_realize(GtkWidget *widget, struct ppref *priv);
-G_MODULE_EXPORT void nsgtk_preferences_comboDefault_changed(GtkComboBox *combo, struct ppref *priv);
-G_MODULE_EXPORT void nsgtk_preferences_comboDefault_realize(GtkWidget *widget, struct ppref *priv);
-G_MODULE_EXPORT void nsgtk_preferences_fontPreview_clicked(GtkButton *button, struct ppref *priv);
-G_MODULE_EXPORT void nsgtk_preferences_comboboxLanguage_changed(GtkComboBox *combo, struct ppref *priv);
-G_MODULE_EXPORT void nsgtk_preferences_comboboxLanguage_realize(GtkWidget *widget, struct ppref *priv);
-G_MODULE_EXPORT void nsgtk_preferences_checkShowSingleTab_toggled(GtkToggleButton *togglebutton, struct ppref *priv);
-G_MODULE_EXPORT void nsgtk_preferences_checkShowSingleTab_realize(GtkWidget *widget, struct ppref *priv);
-G_MODULE_EXPORT void nsgtk_preferences_comboTabPosition_changed(GtkComboBox *widget, struct ppref *priv);
-G_MODULE_EXPORT void nsgtk_preferences_comboTabPosition_realize(GtkWidget *widget, struct ppref *priv);
-G_MODULE_EXPORT void nsgtk_preferences_comboDeveloperView_changed(GtkComboBox *widget, struct ppref *priv);
-G_MODULE_EXPORT void nsgtk_preferences_comboDeveloperView_realize(GtkWidget *widget, struct ppref *priv);
-G_MODULE_EXPORT void nsgtk_preferences_comboButtonType_changed(GtkComboBox *widget, struct ppref *priv);
-G_MODULE_EXPORT void nsgtk_preferences_comboButtonType_realize(GtkWidget *widget, struct ppref *priv);
-G_MODULE_EXPORT void nsgtk_preferences_setCurrentPage_clicked(GtkButton *button, struct ppref *priv);
-G_MODULE_EXPORT void nsgtk_preferences_setDefaultPage_clicked(GtkButton *button, struct ppref *priv);
-G_MODULE_EXPORT void nsgtk_preferences_comboSearch_changed(GtkComboBox *widget, struct ppref *priv);
-G_MODULE_EXPORT void nsgtk_preferences_comboSearch_realize(GtkWidget *widget, struct ppref *priv);
-G_MODULE_EXPORT void nsgtk_preferences_fileChooserDownloads_selectionchanged(GtkFileChooser *chooser, struct ppref *priv);
-G_MODULE_EXPORT void nsgtk_preferences_fileChooserDownloads_realize(GtkWidget *widget, struct ppref *priv);
-G_MODULE_EXPORT void nsgtk_preferences_dialogPreferences_response(GtkDialog *dlg, gint resid);
-G_MODULE_EXPORT gboolean nsgtk_preferences_dialogPreferences_deleteevent(GtkDialog *dlg, struct ppref *priv);
-G_MODULE_EXPORT void nsgtk_preferences_dialogPreferences_destroy(GtkDialog *dlg, struct ppref *priv);
+G_MODULE_EXPORT void nsgtk_preferences_comboProxyType_changed(GtkComboBox *combo, gpointer user_data);
+G_MODULE_EXPORT void nsgtk_preferences_comboProxyType_realize(GtkWidget *widget, gpointer user_data);
+G_MODULE_EXPORT void nsgtk_preferences_comboboxLoadImages_changed(GtkComboBox *combo, gpointer user_data);
+G_MODULE_EXPORT void nsgtk_preferences_comboboxLoadImages_realize(GtkWidget *widget, gpointer user_data);
+G_MODULE_EXPORT void nsgtk_preferences_comboDefault_changed(GtkComboBox *combo, gpointer user_data);
+G_MODULE_EXPORT void nsgtk_preferences_comboDefault_realize(GtkWidget *widget, gpointer user_data);
+G_MODULE_EXPORT void nsgtk_preferences_fontPreview_clicked(GtkButton *button, gpointer user_data);
+G_MODULE_EXPORT void nsgtk_preferences_comboboxLanguage_changed(GtkComboBox *combo, gpointer user_data);
+G_MODULE_EXPORT void nsgtk_preferences_comboboxLanguage_realize(GtkWidget *widget, gpointer user_data);
+G_MODULE_EXPORT void nsgtk_preferences_checkShowSingleTab_toggled(GtkCheckButton *togglebutton, gpointer user_data);
+G_MODULE_EXPORT void nsgtk_preferences_checkShowSingleTab_realize(GtkWidget *widget, gpointer user_data);
+G_MODULE_EXPORT void nsgtk_preferences_comboTabPosition_changed(GtkComboBox *widget, gpointer user_data);
+G_MODULE_EXPORT void nsgtk_preferences_comboTabPosition_realize(GtkWidget *widget, gpointer user_data);
+G_MODULE_EXPORT void nsgtk_preferences_comboDeveloperView_changed(GtkComboBox *widget, gpointer user_data);
+G_MODULE_EXPORT void nsgtk_preferences_comboDeveloperView_realize(GtkWidget *widget, gpointer user_data);
+G_MODULE_EXPORT void nsgtk_preferences_comboButtonType_changed(GtkComboBox *widget, gpointer user_data);
+G_MODULE_EXPORT void nsgtk_preferences_comboButtonType_realize(GtkWidget *widget, gpointer user_data);
+G_MODULE_EXPORT void nsgtk_preferences_setCurrentPage_clicked(GtkButton *button, gpointer user_data);
+G_MODULE_EXPORT void nsgtk_preferences_setDefaultPage_clicked(GtkButton *button, gpointer user_data);
+G_MODULE_EXPORT void nsgtk_preferences_comboSearch_changed(GtkComboBox *widget, gpointer user_data);
+G_MODULE_EXPORT void nsgtk_preferences_comboSearch_realize(GtkWidget *widget, gpointer user_data);
+G_MODULE_EXPORT void nsgtk_preferences_fileChooserDownloads_clicked(GtkButton *button, gpointer user_data);
+G_MODULE_EXPORT void nsgtk_preferences_fileChooserDownloads_realize(GtkWidget *widget, gpointer user_data);
+G_MODULE_EXPORT void nsgtk_preferences_close_clicked(GtkButton *button, gpointer user_data);
+G_MODULE_EXPORT gboolean nsgtk_preferences_dialogPreferences_closerequest(GtkWindow *dlg, gpointer user_data);
+G_MODULE_EXPORT void nsgtk_preferences_dialogPreferences_destroy(GtkWindow *dlg, gpointer user_data);
 
 
 /********* PDF **********/
@@ -279,8 +279,9 @@ static void set_proxy_widgets_sensitivity(int proxyval, struct ppref *priv)
 }
 
 G_MODULE_EXPORT void
-nsgtk_preferences_comboProxyType_changed(GtkComboBox *combo, struct ppref *priv)
+nsgtk_preferences_comboProxyType_changed(GtkComboBox *combo, gpointer user_data)
 {
+	struct ppref *priv = &ppref;
 	int proxy_sel;
 	proxy_sel = gtk_combo_box_get_active(combo);
 
@@ -314,8 +315,9 @@ nsgtk_preferences_comboProxyType_changed(GtkComboBox *combo, struct ppref *priv)
 }
 
 G_MODULE_EXPORT void
-nsgtk_preferences_comboProxyType_realize(GtkWidget *widget, struct ppref *priv)
+nsgtk_preferences_comboProxyType_realize(GtkWidget *widget, gpointer user_data)
 {
+	struct ppref *priv = &ppref;
 	int proxytype = 0; /* no proxy by default */
 
 	if (nsoption_bool(http_proxy) == true) {
@@ -415,7 +417,7 @@ TOGGLEBUTTON_SIGNALS(checkEnableJavascript, enable_javascript)
 /* load and display of images */
 G_MODULE_EXPORT void
 nsgtk_preferences_comboboxLoadImages_changed(GtkComboBox *combo,
-					     struct ppref *priv)
+					     gpointer user_data)
 {
 	int img_sel;
 	/* get the row number for the selection */
@@ -449,7 +451,7 @@ nsgtk_preferences_comboboxLoadImages_changed(GtkComboBox *combo,
 
 G_MODULE_EXPORT void
 nsgtk_preferences_comboboxLoadImages_realize(GtkWidget *widget,
-					   struct ppref *priv)
+					   gpointer user_data)
 {
 	if (nsoption_bool(foreground_images)) {
 		if (nsoption_bool(background_images)) {
@@ -479,7 +481,7 @@ TOGGLEBUTTON_SIGNALS(checkEnableAnimations, animate_images)
 
 /* default font */
 G_MODULE_EXPORT void
-nsgtk_preferences_comboDefault_changed(GtkComboBox *combo, struct ppref *priv)
+nsgtk_preferences_comboDefault_changed(GtkComboBox *combo, gpointer user_data)
 {
 	int font_sel;
 	/* get the row number for the selection */
@@ -490,7 +492,7 @@ nsgtk_preferences_comboDefault_changed(GtkComboBox *combo, struct ppref *priv)
 }
 
 G_MODULE_EXPORT void
-nsgtk_preferences_comboDefault_realize(GtkWidget *widget, struct ppref *priv)
+nsgtk_preferences_comboDefault_realize(GtkWidget *widget, gpointer user_data)
 {
 	gtk_combo_box_set_active(GTK_COMBO_BOX(widget),
 				 nsoption_int(font_default));
@@ -501,7 +503,7 @@ SPINBUTTON_SIGNALS(spinDefaultSize, font_size, 10.0)
 
 /* preview - actually reflow all views */
 G_MODULE_EXPORT void
-nsgtk_preferences_fontPreview_clicked(GtkButton *button, struct ppref *priv)
+nsgtk_preferences_fontPreview_clicked(GtkButton *button, gpointer user_data)
 {
 	nsgtk_window_update_all();
 }
@@ -512,7 +514,7 @@ nsgtk_preferences_fontPreview_clicked(GtkButton *button, struct ppref *priv)
 /* accept language */
 G_MODULE_EXPORT void
 nsgtk_preferences_comboboxLanguage_changed(GtkComboBox *combo,
-					   struct ppref *priv)
+					   gpointer user_data)
 {
 	gchar *lang = NULL;
 	GtkTreeIter iter;
@@ -651,8 +653,9 @@ comboboxLanguage_add_from_file(GtkListStore *liststore,
  */
 G_MODULE_EXPORT void
 nsgtk_preferences_comboboxLanguage_realize(GtkWidget *widget,
-					   struct ppref *priv)
+					   gpointer user_data)
 {
+	struct ppref *priv = &ppref;
 	nserror res;
 	const uint8_t *data;
 	size_t data_size;
@@ -700,19 +703,19 @@ nsgtk_preferences_comboboxLanguage_realize(GtkWidget *widget,
 
 /* always show tab bar */
 G_MODULE_EXPORT void
-nsgtk_preferences_checkShowSingleTab_toggled(GtkToggleButton *togglebutton,
-					     struct ppref *priv)
+nsgtk_preferences_checkShowSingleTab_toggled(GtkCheckButton *togglebutton,
+					     gpointer user_data)
 {
 	nsoption_set_bool(show_single_tab,
-			  gtk_toggle_button_get_active(togglebutton));
+			  gtk_check_button_get_active(togglebutton));
 	nsgtk_window_update_all();
 }
 
 G_MODULE_EXPORT void
 nsgtk_preferences_checkShowSingleTab_realize(GtkWidget *widget,
-				     struct ppref *priv)
+				     gpointer user_data)
 {
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget),
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(widget),
 				     nsoption_bool(show_single_tab));
 }
 
@@ -725,7 +728,7 @@ TOGGLEBUTTON_SIGNALS(checkNewBlank, new_blank)
 /* tab position */
 G_MODULE_EXPORT void
 nsgtk_preferences_comboTabPosition_changed(GtkComboBox *widget,
-					   struct ppref *priv)
+					   gpointer user_data)
 {
 	/* set the option */
 	nsoption_set_int(position_tab, gtk_combo_box_get_active(widget));
@@ -736,7 +739,7 @@ nsgtk_preferences_comboTabPosition_changed(GtkComboBox *widget,
 
 G_MODULE_EXPORT void
 nsgtk_preferences_comboTabPosition_realize(GtkWidget *widget,
-					   struct ppref *priv)
+					   gpointer user_data)
 {
 	gtk_combo_box_set_active(GTK_COMBO_BOX(widget),
 				 nsoption_int(position_tab));
@@ -747,7 +750,7 @@ nsgtk_preferences_comboTabPosition_realize(GtkWidget *widget,
 /* developer view opening */
 G_MODULE_EXPORT void
 nsgtk_preferences_comboDeveloperView_changed(GtkComboBox *widget,
-					   struct ppref *priv)
+					   gpointer user_data)
 {
 	/* set the option */
 	nsoption_set_int(developer_view, gtk_combo_box_get_active(widget));
@@ -755,7 +758,7 @@ nsgtk_preferences_comboDeveloperView_changed(GtkComboBox *widget,
 
 G_MODULE_EXPORT void
 nsgtk_preferences_comboDeveloperView_realize(GtkWidget *widget,
-					   struct ppref *priv)
+					   gpointer user_data)
 {
 	gtk_combo_box_set_active(GTK_COMBO_BOX(widget),
 				 nsoption_int(developer_view));
@@ -772,7 +775,7 @@ TOGGLEBUTTON_SIGNALS(checkDisplayRecentURLs, url_suggestion)
 /* button position */
 G_MODULE_EXPORT void
 nsgtk_preferences_comboButtonType_changed(GtkComboBox *widget,
-					   struct ppref *priv)
+					   gpointer user_data)
 {
 	nsoption_set_int(button_type, gtk_combo_box_get_active(widget) + 1);
 
@@ -782,7 +785,7 @@ nsgtk_preferences_comboButtonType_changed(GtkComboBox *widget,
 
 G_MODULE_EXPORT void
 nsgtk_preferences_comboButtonType_realize(GtkWidget *widget,
-					   struct ppref *priv)
+					   gpointer user_data)
 {
 	gtk_combo_box_set_active(GTK_COMBO_BOX(widget),
 				 nsoption_int(button_type) - 1);
@@ -799,24 +802,26 @@ ENTRY_SIGNALS(entryHomePageURL, homepage_url)
 
 /* put current page into homepage url */
 G_MODULE_EXPORT void
-nsgtk_preferences_setCurrentPage_clicked(GtkButton *button, struct ppref *priv)
+nsgtk_preferences_setCurrentPage_clicked(GtkButton *button, gpointer user_data)
 {
+	struct ppref *priv = &ppref;
 	const gchar *url = nsurl_access(browser_window_access_url(priv->bw));
 
 	if (priv->entryHomePageURL != NULL) {
-		gtk_entry_set_text(GTK_ENTRY(priv->entryHomePageURL), url);
+		gtk_editable_set_text(GTK_EDITABLE(priv->entryHomePageURL), url);
 		nsoption_set_charp(homepage_url, strdup(url));
 	}
 }
 
 /* put default page into homepage */
 G_MODULE_EXPORT void
-nsgtk_preferences_setDefaultPage_clicked(GtkButton *button, struct ppref *priv)
+nsgtk_preferences_setDefaultPage_clicked(GtkButton *button, gpointer user_data)
 {
+	struct ppref *priv = &ppref;
 	const gchar *url = NETSURF_HOMEPAGE;
 
 	if (priv->entryHomePageURL != NULL) {
-		gtk_entry_set_text(GTK_ENTRY(priv->entryHomePageURL), url);
+		gtk_editable_set_text(GTK_EDITABLE(priv->entryHomePageURL), url);
 		nsoption_set_charp(homepage_url, strdup(url));
 	}
 }
@@ -828,7 +833,7 @@ TOGGLEBUTTON_SIGNALS(checkUrlSearch, search_url_bar)
 
 /* provider combo */
 G_MODULE_EXPORT void
-nsgtk_preferences_comboSearch_changed(GtkComboBox *widget, struct ppref *priv)
+nsgtk_preferences_comboSearch_changed(GtkComboBox *widget, gpointer user_data)
 {
 	gboolean set;
 	GtkTreeIter iter;
@@ -860,8 +865,9 @@ nsgtk_preferences_comboSearch_changed(GtkComboBox *widget, struct ppref *priv)
 }
 
 G_MODULE_EXPORT void
-nsgtk_preferences_comboSearch_realize(GtkWidget *widget, struct ppref *priv)
+nsgtk_preferences_comboSearch_realize(GtkWidget *widget, gpointer user_data)
 {
+	struct ppref *priv = &ppref;
 	int iter;
 	const char *name;
 	const char *provider;
@@ -898,28 +904,74 @@ TOGGLEBUTTON_SIGNALS(checkClearDownloads, downloads_clear)
 /* request overwite */
 TOGGLEBUTTON_SIGNALS(checkRequestOverwrite, request_overwrite)
 
-/* download location
- *
- * note selection-changed is used instead of file-set as the returned
- * filename when that signal are used is incorrect. Though this signal
- * does update frequently often with the same data.
- */
-G_MODULE_EXPORT void
-nsgtk_preferences_fileChooserDownloads_selectionchanged(GtkFileChooser *chooser,
-					       struct ppref *priv)
+/* download location */
+static void
+fileChooserDownloads_set_label(GtkButton *button)
 {
-	gchar *dir;
-	dir = gtk_file_chooser_get_filename(chooser);
-	nsoption_set_charp(downloads_directory, strdup(dir));
-	g_free(dir);
+	const char *dir = nsoption_charp(downloads_directory);
+	char *name;
+
+	if (dir == NULL) {
+		gtk_button_set_label(button, "");
+		return;
+	}
+	name = g_filename_display_name(dir);
+	gtk_button_set_label(button, name);
+	g_free(name);
+}
+
+static void
+fileChooserDownloads_chosen(GObject *source, GAsyncResult *result, gpointer data)
+{
+	GtkButton *button = GTK_BUTTON(data);
+	GFile *folder;
+	char *dir;
+
+	folder = gtk_file_dialog_select_folder_finish(GTK_FILE_DIALOG(source),
+						       result,
+						       NULL);
+	if (folder != NULL) {
+		dir = g_file_get_path(folder);
+		if (dir != NULL) {
+			nsoption_set_charp(downloads_directory, strdup(dir));
+			g_free(dir);
+		}
+		g_object_unref(folder);
+		fileChooserDownloads_set_label(button);
+	}
+	g_object_unref(button);
+}
+
+G_MODULE_EXPORT void
+nsgtk_preferences_fileChooserDownloads_clicked(GtkButton *button,
+					       gpointer user_data)
+{
+	GtkFileDialog *dialog;
+	GtkWidget *toplevel;
+	const char *dir = nsoption_charp(downloads_directory);
+
+	toplevel = gtk_widget_get_ancestor(GTK_WIDGET(button), GTK_TYPE_WINDOW);
+
+	dialog = gtk_file_dialog_new();
+	gtk_file_dialog_set_title(dialog, messages_get("preferencesDownloadsLocationTooltip"));
+	if (dir != NULL) {
+		GFile *folder = g_file_new_for_path(dir);
+		gtk_file_dialog_set_initial_folder(dialog, folder);
+		g_object_unref(folder);
+	}
+	gtk_file_dialog_select_folder(dialog,
+				      GTK_WINDOW(toplevel),
+				      NULL,
+				      fileChooserDownloads_chosen,
+				      g_object_ref(button));
+	g_object_unref(dialog);
 }
 
 G_MODULE_EXPORT void
 nsgtk_preferences_fileChooserDownloads_realize(GtkWidget *widget,
-					       struct ppref *priv)
+					       gpointer user_data)
 {
-	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(widget),
-					   nsoption_charp(downloads_directory));
+	fileChooserDownloads_set_label(GTK_BUTTON(widget));
 }
 
 
@@ -927,23 +979,17 @@ nsgtk_preferences_fileChooserDownloads_realize(GtkWidget *widget,
 
 /* dialog close and destroy events */
 G_MODULE_EXPORT void
-nsgtk_preferences_dialogPreferences_response(GtkDialog *dlg, gint resid)
+nsgtk_preferences_close_clicked(GtkButton *button, gpointer user_data)
 {
-	char *choices = NULL;
+	GtkWidget *toplevel;
 
-	if (resid == GTK_RESPONSE_CLOSE) {
-		netsurf_mkpath(&choices, NULL, 2, nsgtk_config_home, "Choices");
-		if (choices != NULL) {
-			nsoption_write(choices, NULL, NULL);
-			free(choices);
-		}
-		gtk_widget_hide(GTK_WIDGET(dlg));
-	}
+	toplevel = gtk_widget_get_ancestor(GTK_WIDGET(button), GTK_TYPE_WINDOW);
+	gtk_window_close(GTK_WINDOW(toplevel));
 }
 
 G_MODULE_EXPORT gboolean
-nsgtk_preferences_dialogPreferences_deleteevent(GtkDialog *dlg,
-						struct ppref *priv)
+nsgtk_preferences_dialogPreferences_closerequest(GtkWindow *dlg,
+						 gpointer user_data)
 {
 	char *choices = NULL;
 
@@ -953,16 +999,11 @@ nsgtk_preferences_dialogPreferences_deleteevent(GtkDialog *dlg,
 		free(choices);
 	}
 
-	gtk_widget_hide(GTK_WIDGET(dlg));
-
-	/* Delt with it by hiding window, no need to destory widget by
-	 * default.
-	 */
-	return TRUE;
+	return FALSE;
 }
 
 G_MODULE_EXPORT void
-nsgtk_preferences_dialogPreferences_destroy(GtkDialog *dlg, struct ppref *priv)
+nsgtk_preferences_dialogPreferences_destroy(GtkWindow *dlg, gpointer user_data)
 {
 	char *choices = NULL;
 
@@ -1019,9 +1060,7 @@ GtkWidget* nsgtk_preferences(struct browser_window *bw, GtkWindow *parent)
 	priv->entryProxyNoproxy = GB(ENTRY, entryProxyNoproxy);
 #undef GB
 
-	/* connect all signals ready to use */
-	gtk_builder_connect_signals(preferences_builder, priv);
-
+	
 	/* release builder as were done with it */
 	g_object_unref(G_OBJECT(preferences_builder));
 

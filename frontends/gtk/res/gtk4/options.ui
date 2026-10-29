@@ -1,0 +1,1921 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<interface>
+  <requires lib="gtk" version="4.0" />
+  <object class="GtkAdjustment" id="adjustment_animation_time">
+    <property name="lower">0.10000000000000001</property>
+    <property name="upper">10</property>
+    <property name="value">0.10000000000000001</property>
+    <property name="step_increment">0.10000000000000001</property>
+    <property name="page_increment">1</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment_cache_disc_size">
+    <property name="upper">4096</property>
+    <property name="value">1024</property>
+    <property name="step_increment">4</property>
+    <property name="page_increment">16</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment_cache_memory_size">
+    <property name="upper">1024</property>
+    <property name="value">16</property>
+    <property name="step_increment">4</property>
+    <property name="page_increment">16</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment_disc_cache_age">
+    <property name="upper">999</property>
+    <property name="value">28</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment_fetching_cached">
+    <property name="upper">100</property>
+    <property name="value">1</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment_fetching_max">
+    <property name="lower">1</property>
+    <property name="upper">100</property>
+    <property name="value">10</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment_fetching_perhost">
+    <property name="lower">1</property>
+    <property name="upper">100</property>
+    <property name="value">1</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment_font_default_size">
+    <property name="lower">1</property>
+    <property name="upper">99.900000000000006</property>
+    <property name="value">16</property>
+    <property name="step_increment">0.10000000000000001</property>
+    <property name="page_increment">2</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment_history_age">
+    <property name="upper">999</property>
+    <property name="value">28</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">28</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment_pdf_lmargin">
+    <property name="upper">999</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment_pdf_scale">
+    <property name="lower">1</property>
+    <property name="upper">1000</property>
+    <property name="value">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment_proxy_port">
+    <property name="lower">1</property>
+    <property name="upper">65535</property>
+    <property name="value">3128</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkWindow" id="dialogPreferences">
+    <property name="title" translatable="1">preferencesTitle</property>
+    <property name="destroy_with_parent">1</property>
+    <property name="hide-on-close">1</property>
+    <signal name="destroy" handler="nsgtk_preferences_dialogPreferences_destroy" swapped="no" />
+    <signal name="close-request" handler="nsgtk_preferences_dialogPreferences_closerequest" swapped="no" />
+    <child>
+      <object class="GtkBox" id="vbox_dialog">
+        <property name="orientation">vertical</property>
+        <property name="spacing">6</property>
+        <property name="margin-top">6</property>
+        <property name="margin-bottom">6</property>
+        <property name="margin-start">6</property>
+        <property name="margin-end">6</property>
+        <child>
+          <object class="GtkNotebook" id="notebook1">
+            <property name="focusable">1</property>
+            <child>
+              <object class="GtkNotebookPage">
+                <property name="child">
+                  <object class="GtkBox" id="vbox_main">
+                    <property name="orientation">vertical</property>
+                    <property name="valign">start</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkFrame" id="frame_main_startup">
+                        <child>
+                          <object class="GtkBox" id="alignment1">
+                            <property name="margin-top">6</property>
+                            <property name="margin-start">12</property>
+                            <property name="margin-end">12</property>
+                            <child>
+                              <object class="GtkBox" id="vbox2">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">6</property>
+                                <child>
+                                  <object class="GtkBox" id="hbox1">
+                                    <property name="vexpand">1</property>
+                                    <property name="spacing">12</property>
+                                    <child>
+                                      <object class="GtkLabel" id="label_startup_page">
+                                        <property name="halign">center</property>
+                                        <property name="label" translatable="1">preferencesStartupPage</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkEntry" id="entryHomePageURL">
+                                        <property name="hexpand">1</property>
+                                        <property name="focusable">1</property>
+                                        <property name="tooltip_text" translatable="1">preferencesStartupPageTooltip</property>
+                                        <signal name="changed" handler="nsgtk_preferences_entryHomePageURL_changed" swapped="no" />
+                                        <signal name="realize" handler="nsgtk_preferences_entryHomePageURL_realize" swapped="no" />
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkBox" id="hbox2">
+                                    <property name="valign">center</property>
+                                    <property name="vexpand">1</property>
+                                    <property name="spacing">6</property>
+                                    <child>
+                                      <placeholder />
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton" id="setDefaultPage">
+                                        <property name="halign">center</property>
+                                        <property name="label" translatable="1">preferencesStartupPageDefault</property>
+                                        <property name="focusable">1</property>
+                                        <signal name="clicked" handler="nsgtk_preferences_setDefaultPage_clicked" swapped="no" />
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton" id="setCurrentPage">
+                                        <property name="halign">center</property>
+                                        <property name="label" translatable="1">preferencesStartupPageCurrent</property>
+                                        <property name="focusable">1</property>
+                                        <signal name="clicked" handler="nsgtk_preferences_setCurrentPage_clicked" swapped="no" />
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label_main_startup">
+                            <property name="label" translatable="1">preferencesStartup</property>
+                            <property name="use_markup">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkFrame" id="frame_main_search">
+                        <child>
+                          <object class="GtkBox" id="alignment2">
+                            <property name="margin-top">6</property>
+                            <property name="margin-start">12</property>
+                            <property name="margin-end">12</property>
+                            <child>
+                              <object class="GtkBox" id="vbox3">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">6</property>
+                                <child>
+                                  <object class="GtkCheckButton" id="checkUrlSearch">
+                                    <property name="vexpand">1</property>
+                                    <property name="label" translatable="1">preferencesSearchURLBar</property>
+                                    <property name="focusable">1</property>
+                                    <property name="halign">start</property>
+                                    <signal name="toggled" handler="nsgtk_preferences_checkUrlSearch_toggled" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_checkUrlSearch_realize" swapped="no" />
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkBox" id="hbox3">
+                                    <property name="vexpand">1</property>
+                                    <property name="spacing">12</property>
+                                    <child>
+                                      <object class="GtkLabel" id="label5">
+                                        <property name="halign">center</property>
+                                        <property name="label" translatable="1">preferencesSearchProvider</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkComboBox" id="comboSearch">
+                                        <property name="hexpand">1</property>
+                                        <property name="tooltip_text" translatable="1">preferencesSearchProviderTooltip</property>
+                                        <property name="halign">start</property>
+                                        <property name="model">liststore_search_provider</property>
+                                        <signal name="changed" handler="nsgtk_preferences_comboSearch_changed" swapped="no" />
+                                        <signal name="realize" handler="nsgtk_preferences_comboSearch_realize" swapped="no" />
+                                        <child>
+                                          <object class="GtkCellRendererText" id="cellrenderertext1" />
+                                          <attributes>
+                                            <attribute name="text">0</attribute>
+                                          </attributes>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label4">
+                            <property name="label" translatable="1">preferencesSearch</property>
+                            <property name="use_markup">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkFrame" id="frame_main_downloads">
+                        <child>
+                          <object class="GtkBox" id="alignment3">
+                            <property name="margin-top">6</property>
+                            <property name="margin-start">12</property>
+                            <property name="margin-end">12</property>
+                            <child>
+                              <object class="GtkBox" id="vbox4">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">6</property>
+                                <child>
+                                  <object class="GtkCheckButton" id="checkClearDownloads">
+                                    <property name="label" translatable="1">preferencesDownloadsRemove</property>
+                                    <property name="focusable">1</property>
+                                    <property name="halign">start</property>
+                                    <signal name="toggled" handler="nsgtk_preferences_checkClearDownloads_toggled" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_checkClearDownloads_realize" swapped="no" />
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkCheckButton" id="checkRequestOverwrite">
+                                    <property name="label" translatable="1">preferencesDownloadsConfirm</property>
+                                    <property name="focusable">1</property>
+                                    <property name="halign">start</property>
+                                    <signal name="toggled" handler="nsgtk_preferences_checkRequestOverwrite_toggled" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_checkRequestOverwrite_realize" swapped="no" />
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkBox" id="hbox4">
+                                    <property name="spacing">12</property>
+                                    <child>
+                                      <object class="GtkLabel" id="label8">
+                                        <property name="label" translatable="1">preferencesDownloadsLocation</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton" id="fileChooserDownloads">
+                                        <property name="hexpand">1</property>
+                                        <property name="tooltip_text" translatable="1">preferencesDownloadsLocationTooltip</property>
+                                        <property name="halign">start</property>
+                                        <signal name="clicked" handler="nsgtk_preferences_fileChooserDownloads_clicked" swapped="no" />
+                                        <signal name="realize" handler="nsgtk_preferences_fileChooserDownloads_realize" swapped="no" />
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label7">
+                            <property name="label" translatable="1">preferencesDownloads</property>
+                            <property name="use_markup">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="tab">
+                  <object class="GtkLabel" id="label1">
+                    <property name="label" translatable="1">preferencesMainTabtitle</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkNotebookPage">
+                <property name="position">1</property>
+                <property name="child">
+                  <object class="GtkBox" id="vbox_appearance">
+                    <property name="orientation">vertical</property>
+                    <property name="valign">start</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkFrame" id="frame_appearance_tabs">
+                        <child>
+                          <object class="GtkBox" id="alignment5">
+                            <property name="margin-top">6</property>
+                            <property name="margin-start">12</property>
+                            <property name="margin-end">12</property>
+                            <child>
+                              <object class="GtkBox" id="vbox5">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">6</property>
+                                <child>
+                                  <object class="GtkCheckButton" id="checkShowSingleTab">
+                                    <property name="vexpand">1</property>
+                                    <property name="label" translatable="1">preferencesTabsAlways</property>
+                                    <property name="focusable">1</property>
+                                    <property name="halign">start</property>
+                                    <signal name="toggled" handler="nsgtk_preferences_checkShowSingleTab_toggled" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_checkShowSingleTab_realize" swapped="no" />
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkCheckButton" id="checkForegroundNew">
+                                    <property name="vexpand">1</property>
+                                    <property name="label" translatable="1">preferencesTabsSwitch</property>
+                                    <property name="focusable">1</property>
+                                    <property name="halign">start</property>
+                                    <signal name="toggled" handler="nsgtk_preferences_checkForegroundNew_toggled" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_checkForegroundNew_realize" swapped="no" />
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkCheckButton" id="checkNewBlank">
+                                    <property name="vexpand">1</property>
+                                    <property name="label" translatable="1">preferencesTabsNewly</property>
+                                    <property name="focusable">1</property>
+                                    <property name="halign">start</property>
+                                    <signal name="toggled" handler="nsgtk_preferences_checkNewBlank_toggled" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_checkNewBlank_realize" swapped="no" />
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkBox" id="hbox5">
+                                    <property name="vexpand">1</property>
+                                    <property name="spacing">12</property>
+                                    <child>
+                                      <object class="GtkLabel" id="label9">
+                                        <property name="halign">center</property>
+                                        <property name="label" translatable="1">preferencesTabsPosition</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkComboBox" id="comboTabPosition">
+                                        <property name="hexpand">1</property>
+                                        <property name="halign">start</property>
+                                        <property name="model">liststore_tab_position</property>
+                                        <signal name="changed" handler="nsgtk_preferences_comboTabPosition_changed" swapped="no" />
+                                        <signal name="realize" handler="nsgtk_preferences_comboTabPosition_realize" swapped="no" />
+                                        <child>
+                                          <object class="GtkCellRendererText" id="cellrenderertext2" />
+                                          <attributes>
+                                            <attribute name="text">0</attribute>
+                                          </attributes>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label6">
+                            <property name="label" translatable="1">preferencesTabs</property>
+                            <property name="use_markup">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkFrame" id="frame_appearance_tools">
+                        <child>
+                          <object class="GtkBox" id="alignment7">
+                            <property name="margin-top">6</property>
+                            <property name="margin-start">12</property>
+                            <property name="margin-end">12</property>
+                            <child>
+                              <object class="GtkBox" id="vbox1">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">6</property>
+                                <child>
+                                  <object class="GtkBox" id="hbox6">
+                                    <property name="vexpand">1</property>
+                                    <property name="spacing">12</property>
+                                    <child>
+                                      <object class="GtkLabel" id="label13">
+                                        <property name="label" translatable="1">preferencesDeveloperView</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkComboBox" id="comboboxDeveloperView">
+                                        <property name="hexpand">1</property>
+                                        <property name="halign">start</property>
+                                        <property name="model">liststore_developer_view</property>
+                                        <signal name="changed" handler="nsgtk_preferences_comboDeveloperView_changed" swapped="no" />
+                                        <signal name="realize" handler="nsgtk_preferences_comboDeveloperView_realize" swapped="no" />
+                                        <child>
+                                          <object class="GtkCellRendererText" id="cellrenderertext10" />
+                                          <attributes>
+                                            <attribute name="text">0</attribute>
+                                          </attributes>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label12">
+                            <property name="label" translatable="1">preferencesTools</property>
+                            <property name="use_markup">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkFrame" id="frame_appearance_url">
+                        <child>
+                          <object class="GtkBox" id="alignment8">
+                            <property name="margin-top">6</property>
+                            <property name="margin-start">12</property>
+                            <property name="margin-end">12</property>
+                            <child>
+                              <object class="GtkBox" id="vbox7">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">6</property>
+                                <child>
+                                  <object class="GtkCheckButton" id="checkDisplayRecentURLs">
+                                    <property name="vexpand">1</property>
+                                    <property name="label" translatable="1">preferencesURLbarDisplay</property>
+                                    <property name="focusable">1</property>
+                                    <property name="halign">start</property>
+                                    <signal name="toggled" handler="nsgtk_preferences_checkDisplayRecentURLs_toggled" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_checkDisplayRecentURLs_realize" swapped="no" />
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label14">
+                            <property name="label" translatable="1">preferencesURLbar</property>
+                            <property name="use_markup">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkFrame" id="frame_appearance_toolbar">
+                        <child>
+                          <object class="GtkBox" id="alignment9">
+                            <property name="margin-top">6</property>
+                            <property name="margin-start">12</property>
+                            <property name="margin-end">12</property>
+                            <child>
+                              <object class="GtkBox" id="vbox8">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">6</property>
+                                <child>
+                                  <object class="GtkBox" id="hbox7">
+                                    <property name="vexpand">1</property>
+                                    <property name="spacing">6</property>
+                                    <child>
+                                      <object class="GtkLabel" id="label16">
+                                        <property name="label" translatable="1">preferencesToolbarButtons</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkComboBox" id="comboButtonType">
+                                        <property name="hexpand">1</property>
+                                        <property name="halign">start</property>
+                                        <property name="model">liststore_toolbar_buttontype</property>
+                                        <signal name="changed" handler="nsgtk_preferences_comboButtonType_changed" swapped="no" />
+                                        <signal name="realize" handler="nsgtk_preferences_comboButtonType_realize" swapped="no" />
+                                        <child>
+                                          <object class="GtkCellRendererText" id="cellrenderertext3" />
+                                          <attributes>
+                                            <attribute name="text">0</attribute>
+                                          </attributes>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label15">
+                            <property name="label" translatable="1">preferencesToolbar</property>
+                            <property name="use_markup">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="tab">
+                  <object class="GtkLabel" id="label2">
+                    <property name="label" translatable="1">preferencesAppearanceTabtitle</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkNotebookPage">
+                <property name="position">2</property>
+                <property name="child">
+                  <object class="GtkBox" id="vbox_content">
+                    <property name="valign">start</property>
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkFrame" id="frame_content_control">
+                        <child>
+                          <object class="GtkBox" id="alignment6">
+                            <property name="margin-top">6</property>
+                            <property name="margin-start">12</property>
+                            <property name="margin-end">12</property>
+                            <child>
+                              <object class="GtkBox" id="vbox6">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">6</property>
+                                <child>
+                                  <object class="GtkCheckButton" id="checkDisablePopups">
+                                    <property name="valign">center</property>
+                                    <property name="label" translatable="1">preferencesControlPrevent</property>
+                                    <property name="focusable">1</property>
+                                    <property name="halign">start</property>
+                                    <signal name="toggled" handler="nsgtk_preferences_checkDisablePopups_toggled" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_checkDisablePopups_realize" swapped="no" />
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkCheckButton" id="checkHideAdverts">
+                                    <property name="valign">center</property>
+                                    <property name="label" translatable="1">preferencesControlHide</property>
+                                    <property name="focusable">1</property>
+                                    <property name="halign">start</property>
+                                    <signal name="toggled" handler="nsgtk_preferences_checkHideAdverts_toggled" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_checkHideAdverts_realize" swapped="no" />
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkCheckButton" id="checkEnableJavascript">
+                                    <property name="valign">center</property>
+                                    <property name="label" translatable="1">preferencesControlEnable</property>
+                                    <property name="focusable">1</property>
+                                    <property name="halign">start</property>
+                                    <signal name="toggled" handler="nsgtk_preferences_checkEnableJavascript_toggled" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_checkEnableJavascript_realize" swapped="no" />
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkBox" id="hbox8">
+                                    <property name="vexpand">1</property>
+                                    <property name="spacing">6</property>
+                                    <child>
+                                      <object class="GtkLabel" id="label17">
+                                        <property name="label" translatable="1">preferencesControlLoad</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkComboBox" id="comboboxLoadImages">
+                                        <property name="hexpand">1</property>
+                                        <property name="halign">start</property>
+                                        <property name="model">liststore_image_loading</property>
+                                        <signal name="changed" handler="nsgtk_preferences_comboboxLoadImages_changed" swapped="no" />
+                                        <signal name="realize" handler="nsgtk_preferences_comboboxLoadImages_realize" swapped="no" />
+                                        <child>
+                                          <object class="GtkCellRendererText" id="cellrenderertext4" />
+                                          <attributes>
+                                            <attribute name="text">0</attribute>
+                                          </attributes>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label11">
+                            <property name="label" translatable="1">preferencesControl</property>
+                            <property name="use_markup">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkFrame" id="frame_content_animation">
+                        <child>
+                          <object class="GtkBox" id="alignment10">
+                            <property name="margin-top">6</property>
+                            <property name="margin-start">12</property>
+                            <property name="margin-end">12</property>
+                            <child>
+                              <object class="GtkBox" id="vbox9">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">6</property>
+                                <child>
+                                  <object class="GtkCheckButton" id="checkEnableAnimations">
+                                    <property name="vexpand">1</property>
+                                    <property name="label" translatable="1">preferencesAnimationEnable</property>
+                                    <property name="focusable">1</property>
+                                    <property name="halign">start</property>
+                                    <signal name="toggled" handler="nsgtk_preferences_checkEnableAnimations_toggled" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_checkEnableAnimations_realize" swapped="no" />
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label18">
+                            <property name="label" translatable="1">preferencesAnimation</property>
+                            <property name="use_markup">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkFrame" id="frame_content_fonts">
+                        <child>
+                          <object class="GtkBox" id="alignment14">
+                            <property name="margin-top">6</property>
+                            <property name="margin-start">12</property>
+                            <property name="margin-end">12</property>
+                            <child>
+                              <object class="GtkBox" id="hbox11">
+                                <property name="spacing">12</property>
+                                <child>
+                                  <object class="GtkBox" id="hbox12">
+                                    <property name="hexpand">1</property>
+                                    <property name="spacing">6</property>
+                                    <child>
+                                      <object class="GtkLabel" id="label26">
+                                        <property name="label" translatable="1">preferencesFontsDefault</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkComboBox" id="comboDefault">
+                                        <property name="hexpand">1</property>
+                                        <property name="model">liststore_defaultfont</property>
+                                        <signal name="changed" handler="nsgtk_preferences_comboDefault_changed" swapped="no" />
+                                        <signal name="realize" handler="nsgtk_preferences_comboDefault_realize" swapped="no" />
+                                        <child>
+                                          <object class="GtkCellRendererText" id="cellrenderertext5" />
+                                          <attributes>
+                                            <attribute name="text">0</attribute>
+                                          </attributes>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkBox" id="hbox13">
+                                    <property name="spacing">6</property>
+                                    <child>
+                                      <object class="GtkLabel" id="label27">
+                                        <property name="label" translatable="1">preferencesFontsSize</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSpinButton" id="spinDefaultSize">
+                                        <property name="focusable">1</property>
+                                        <property name="tooltip_text" translatable="1">preferencesFontsSizeTooltip</property>
+                                        <property name="width_chars">4</property>
+                                        <property name="adjustment">adjustment_font_default_size</property>
+                                        <property name="climb_rate">1</property>
+                                        <property name="digits">1</property>
+                                        <property name="numeric">1</property>
+                                        <signal name="value-changed" handler="nsgtk_preferences_spinDefaultSize_valuechanged" swapped="no" />
+                                        <signal name="realize" handler="nsgtk_preferences_spinDefaultSize_realize" swapped="no" />
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkButton" id="fontPreview">
+                                    <property name="label" translatable="1">preferencesFontsPreview</property>
+                                    <property name="focusable">1</property>
+                                    <property name="use_underline">1</property>
+                                    <signal name="clicked" handler="nsgtk_preferences_fontPreview_clicked" swapped="no" />
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label20">
+                            <property name="label" translatable="1">preferencesFonts</property>
+                            <property name="use_markup">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkFrame" id="frame_content_font">
+                        <child>
+                          <object class="GtkBox" id="alignment11">
+                            <property name="margin-top">6</property>
+                            <property name="margin-start">12</property>
+                            <property name="margin-end">12</property>
+                            <child>
+                              <object class="GtkBox" id="vbox10">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">6</property>
+                                <child>
+                                  <object class="GtkBox" id="hbox10">
+                                    <property name="vexpand">1</property>
+                                    <property name="spacing">12</property>
+                                    <child>
+                                      <object class="GtkLabel" id="label21">
+                                        <property name="label" translatable="1">preferencesLanguagePreferred</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkComboBox" id="comboboxLanguage">
+                                        <property name="hexpand">1</property>
+                                        <property name="tooltip_text" translatable="1">preferencesLanguagePreferredTooltip</property>
+                                        <property name="halign">start</property>
+                                        <property name="model">liststore_content_language</property>
+                                        <signal name="changed" handler="nsgtk_preferences_comboboxLanguage_changed" swapped="no" />
+                                        <signal name="realize" handler="nsgtk_preferences_comboboxLanguage_realize" swapped="no" />
+                                        <child>
+                                          <object class="GtkCellRendererText" id="cellrenderertext7">
+                                            <property name="xalign">0</property>
+                                          </object>
+                                          <attributes>
+                                            <attribute name="text">1</attribute>
+                                          </attributes>
+                                        </child>
+                                        <child>
+                                          <object class="GtkCellRendererText" id="cellrenderertext8">
+                                            <property name="xalign">1</property>
+                                          </object>
+                                          <attributes>
+                                            <attribute name="text">0</attribute>
+                                          </attributes>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label25">
+                            <property name="label" translatable="1">preferencesLanguage</property>
+                            <property name="use_markup">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="tab">
+                  <object class="GtkLabel" id="label10">
+                    <property name="label" translatable="1">preferencesContentTabtitle</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkNotebookPage">
+                <property name="position">3</property>
+                <property name="child">
+                  <object class="GtkBox" id="vbox_privacy">
+                    <property name="valign">start</property>
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkFrame" id="frame_privacy_general">
+                        <child>
+                          <object class="GtkBox" id="alignment20">
+                            <property name="margin-top">6</property>
+                            <property name="margin-start">12</property>
+                            <property name="margin-end">12</property>
+                            <child>
+                              <object class="GtkBox" id="vbox15">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">6</property>
+                                <child>
+                                  <object class="GtkCheckButton" id="checkSendReferer">
+                                    <property name="vexpand">1</property>
+                                    <property name="label" translatable="1">preferencesGeneralReferral</property>
+                                    <property name="focusable">1</property>
+                                    <property name="halign">start</property>
+                                    <signal name="toggled" handler="nsgtk_preferences_checkSendReferer_toggled" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_checkSendReferer_realize" swapped="no" />
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkCheckButton" id="checkSendDNT">
+                                    <property name="vexpand">1</property>
+                                    <property name="label" translatable="1">preferencesGeneralDNT</property>
+                                    <property name="focusable">1</property>
+                                    <property name="halign">start</property>
+                                    <signal name="toggled" handler="nsgtk_preferences_checkSendDNT_toggled" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_checkSendDNT_realize" swapped="no" />
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label61">
+                            <property name="label" translatable="1">preferencesGeneral</property>
+                            <property name="use_markup">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkFrame" id="frame_privacy_history">
+                        <child>
+                          <object class="GtkBox" id="alignment12">
+                            <property name="margin-top">6</property>
+                            <property name="margin-start">12</property>
+                            <property name="margin-end">12</property>
+                            <child>
+                              <object class="GtkBox" id="vbox11">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">6</property>
+                                <child>
+                                  <object class="GtkCheckButton" id="checkHoverURLs">
+                                    <property name="vexpand">1</property>
+                                    <property name="label" translatable="1">preferencesHistoryShow</property>
+                                    <property name="focusable">1</property>
+                                    <property name="halign">start</property>
+                                    <signal name="toggled" handler="nsgtk_preferences_checkHoverURLs_toggled" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_checkHoverURLs_realize" swapped="no" />
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkBox" id="hbox14">
+                                    <property name="vexpand">1</property>
+                                    <property name="spacing">6</property>
+                                    <child>
+                                      <object class="GtkLabel" id="label28">
+                                        <property name="label" translatable="1">preferencesHistoryRemember</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSpinButton" id="spinHistoryAge">
+                                        <property name="focusable">1</property>
+                                        <property name="width_chars">4</property>
+                                        <property name="adjustment">adjustment_history_age</property>
+                                        <property name="climb_rate">1</property>
+                                        <property name="numeric">1</property>
+                                        <signal name="value-changed" handler="nsgtk_preferences_spinHistoryAge_valuechanged" swapped="no" />
+                                        <signal name="realize" handler="nsgtk_preferences_spinHistoryAge_realize" swapped="no" />
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="label29">
+                                        <property name="label" translatable="1">preferencesHistoryDays</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label23">
+                            <property name="label" translatable="1">preferencesHistory</property>
+                            <property name="use_markup">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkFrame" id="frame_privacy_cache">
+                        <child>
+                          <object class="GtkBox" id="alignment13">
+                            <property name="margin-top">6</property>
+                            <property name="margin-start">12</property>
+                            <property name="margin-end">12</property>
+                            <child>
+                              <object class="GtkBox" id="vbox12">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">6</property>
+                                <child>
+                                  <object class="GtkGrid" id="table3">
+                                    <property name="vexpand">1</property>
+                                    <property name="column_spacing">6</property>
+                                    <property name="row_spacing">6</property>
+                                    <child>
+                                      <object class="GtkLabel" id="label30">
+                                        <property name="xalign">0</property>
+                                        <property name="label" translatable="1">preferencesCacheMemory</property>
+                                        <layout>
+                                          <property name="column">0</property>
+                                          <property name="row">0</property>
+                                          <property name="column-span">1</property>
+                                          <property name="row-span">1</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="label31">
+                                        <property name="xalign">0</property>
+                                        <property name="label" translatable="1">preferencesCacheDisc</property>
+                                        <layout>
+                                          <property name="column">0</property>
+                                          <property name="row">1</property>
+                                          <property name="column-span">1</property>
+                                          <property name="row-span">1</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="label34">
+                                        <property name="xalign">0</property>
+                                        <property name="label" translatable="1">preferencesCacheExpire</property>
+                                        <layout>
+                                          <property name="column">0</property>
+                                          <property name="row">2</property>
+                                          <property name="column-span">1</property>
+                                          <property name="row-span">1</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSpinButton" id="spinMemoryCacheSize">
+                                        <property name="focusable">1</property>
+                                        <property name="width_chars">5</property>
+                                        <property name="adjustment">adjustment_cache_memory_size</property>
+                                        <property name="climb_rate">1</property>
+                                        <property name="numeric">1</property>
+                                        <signal name="value-changed" handler="nsgtk_preferences_spinMemoryCacheSize_valuechanged" swapped="no" />
+                                        <signal name="realize" handler="nsgtk_preferences_spinMemoryCacheSize_realize" swapped="no" />
+                                        <layout>
+                                          <property name="column">1</property>
+                                          <property name="row">0</property>
+                                          <property name="column-span">1</property>
+                                          <property name="row-span">1</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSpinButton" id="spinDiscCacheSize">
+                                        <property name="focusable">1</property>
+                                        <property name="width_chars">5</property>
+                                        <property name="adjustment">adjustment_cache_disc_size</property>
+                                        <property name="climb_rate">1</property>
+                                        <property name="numeric">1</property>
+                                        <signal name="value-changed" handler="nsgtk_preferences_spinDiscCacheSize_valuechanged" swapped="no" />
+                                        <signal name="realize" handler="nsgtk_preferences_spinDiscCacheSize_realize" swapped="no" />
+                                        <layout>
+                                          <property name="column">1</property>
+                                          <property name="row">1</property>
+                                          <property name="column-span">1</property>
+                                          <property name="row-span">1</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSpinButton" id="spinDiscCacheAge">
+                                        <property name="focusable">1</property>
+                                        <property name="width_chars">3</property>
+                                        <property name="adjustment">adjustment_disc_cache_age</property>
+                                        <property name="climb_rate">1</property>
+                                        <property name="numeric">1</property>
+                                        <signal name="value-changed" handler="nsgtk_preferences_spinDiscCacheAge_valuechanged" swapped="no" />
+                                        <signal name="realize" handler="nsgtk_preferences_spinDiscCacheAge_realize" swapped="no" />
+                                        <layout>
+                                          <property name="column">1</property>
+                                          <property name="row">2</property>
+                                          <property name="column-span">1</property>
+                                          <property name="row-span">1</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="label32">
+                                        <property name="xalign">0</property>
+                                        <property name="label" translatable="1">MB</property>
+                                        <layout>
+                                          <property name="column">2</property>
+                                          <property name="row">0</property>
+                                          <property name="column-span">1</property>
+                                          <property name="row-span">1</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="label33">
+                                        <property name="xalign">0</property>
+                                        <property name="label" translatable="0">MB</property>
+                                        <layout>
+                                          <property name="column">2</property>
+                                          <property name="row">1</property>
+                                          <property name="column-span">1</property>
+                                          <property name="row-span">1</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="label35">
+                                        <property name="xalign">0</property>
+                                        <property name="label" translatable="1">preferencesCacheDays</property>
+                                        <layout>
+                                          <property name="column">2</property>
+                                          <property name="row">2</property>
+                                          <property name="column-span">1</property>
+                                          <property name="row-span">1</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkBox" id="hbox17">
+                                    <property name="vexpand">1</property>
+                                    <child>
+                                      <placeholder />
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton" id="buttonCacheMaintenance">
+                                        <property name="label" translatable="1">preferencesCacheMaintenance</property>
+                                        <property name="focusable">1</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label24">
+                            <property name="label" translatable="1">preferencesCache</property>
+                            <property name="use_markup">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="tab">
+                  <object class="GtkLabel" id="label22">
+                    <property name="label" translatable="1">preferencesPrivacyTabtitle</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkNotebookPage">
+                <property name="position">4</property>
+                <property name="child">
+                  <object class="GtkBox" id="vbox_network">
+                    <property name="valign">start</property>
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkFrame" id="frame_network_proxy">
+                        <child>
+                          <object class="GtkBox" id="alignment15">
+                            <property name="margin-top">6</property>
+                            <property name="margin-start">12</property>
+                            <property name="margin-end">12</property>
+                            <child>
+                              <object class="GtkGrid" id="table2">
+                                <property name="column_spacing">6</property>
+                                <property name="row_spacing">6</property>
+                                <child>
+                                  <object class="GtkLabel" id="label42">
+                                    <property name="xalign">0</property>
+                                    <property name="label" translatable="1">preferencesProxyType</property>
+                                    <layout>
+                                      <property name="column">0</property>
+                                      <property name="row">0</property>
+                                      <property name="column-span">1</property>
+                                      <property name="row-span">1</property>
+                                    </layout>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="label43">
+                                    <property name="xalign">0</property>
+                                    <property name="label" translatable="1">preferencesProxyHost</property>
+                                    <layout>
+                                      <property name="column">0</property>
+                                      <property name="row">1</property>
+                                      <property name="column-span">1</property>
+                                      <property name="row-span">1</property>
+                                    </layout>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="label44">
+                                    <property name="xalign">0</property>
+                                    <property name="label" translatable="1">preferencesProxyUsername</property>
+                                    <layout>
+                                      <property name="column">0</property>
+                                      <property name="row">2</property>
+                                      <property name="column-span">1</property>
+                                      <property name="row-span">1</property>
+                                    </layout>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="label45">
+                                    <property name="xalign">0</property>
+                                    <property name="label" translatable="1">preferencesProxyPassword</property>
+                                    <layout>
+                                      <property name="column">0</property>
+                                      <property name="row">3</property>
+                                      <property name="column-span">1</property>
+                                      <property name="row-span">1</property>
+                                    </layout>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkComboBox" id="comboProxyType">
+                                    <property name="tooltip_text" translatable="1">preferencesProxyTypeTooltip</property>
+                                    <property name="model">liststore_proxy_type</property>
+                                    <property name="hexpand">1</property>
+                                    <signal name="changed" handler="nsgtk_preferences_comboProxyType_changed" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_comboProxyType_realize" swapped="no" />
+                                    <child>
+                                      <object class="GtkCellRendererText" id="cellrenderertext6" />
+                                      <attributes>
+                                        <attribute name="text">0</attribute>
+                                      </attributes>
+                                    </child>
+                                    <layout>
+                                      <property name="column">1</property>
+                                      <property name="row">0</property>
+                                      <property name="column-span">1</property>
+                                      <property name="row-span">1</property>
+                                    </layout>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkBox" id="hbox19">
+                                    <property name="spacing">6</property>
+                                    <property name="hexpand">1</property>
+                                    <child>
+                                      <object class="GtkEntry" id="entryProxyHost">
+                                        <property name="hexpand">1</property>
+                                        <property name="focusable">1</property>
+                                        <property name="tooltip_text" translatable="1">preferencesProxyHostTooltip</property>
+                                        <signal name="changed" handler="nsgtk_preferences_entryProxyHost_changed" swapped="no" />
+                                        <signal name="realize" handler="nsgtk_preferences_entryProxyHost_realize" swapped="no" />
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="label46">
+                                        <property name="label" translatable="0">:</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSpinButton" id="spinProxyPort">
+                                        <property name="focusable">1</property>
+                                        <property name="tooltip_text" translatable="1">preferencesProxyPortTooltip</property>
+                                        <property name="width_chars">5</property>
+                                        <property name="adjustment">adjustment_proxy_port</property>
+                                        <property name="climb_rate">1</property>
+                                        <property name="numeric">1</property>
+                                        <signal name="value-changed" handler="nsgtk_preferences_spinProxyPort_valuechanged" swapped="no" />
+                                        <signal name="realize" handler="nsgtk_preferences_spinProxyPort_realize" swapped="no" />
+                                      </object>
+                                    </child>
+                                    <layout>
+                                      <property name="column">1</property>
+                                      <property name="row">1</property>
+                                      <property name="column-span">1</property>
+                                      <property name="row-span">1</property>
+                                    </layout>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkEntry" id="entryProxyUser">
+                                    <property name="focusable">1</property>
+                                    <property name="tooltip_text" translatable="1">preferencesProxyUsernameTooltip</property>
+                                    <property name="hexpand">1</property>
+                                    <signal name="changed" handler="nsgtk_preferences_entryProxyUser_changed" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_entryProxyUser_realize" swapped="no" />
+                                    <layout>
+                                      <property name="column">1</property>
+                                      <property name="row">2</property>
+                                      <property name="column-span">1</property>
+                                      <property name="row-span">1</property>
+                                    </layout>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkEntry" id="entryProxyPassword">
+                                    <property name="focusable">1</property>
+                                    <property name="tooltip_text" translatable="1">preferencesProxyPasswordTooltip</property>
+                                    <property name="visibility">0</property>
+                                    <property name="hexpand">1</property>
+                                    <signal name="changed" handler="nsgtk_preferences_entryProxyPassword_changed" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_entryProxyPassword_realize" swapped="no" />
+                                    <layout>
+                                      <property name="column">1</property>
+                                      <property name="row">3</property>
+                                      <property name="column-span">1</property>
+                                      <property name="row-span">1</property>
+                                    </layout>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="label55">
+                                    <property name="xalign">0</property>
+                                    <property name="label" translatable="1">preferencesProxyNoproxy</property>
+                                    <layout>
+                                      <property name="column">0</property>
+                                      <property name="row">4</property>
+                                      <property name="column-span">1</property>
+                                      <property name="row-span">1</property>
+                                    </layout>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkEntry" id="entryProxyNoproxy">
+                                    <property name="focusable">1</property>
+                                    <property name="tooltip_text" translatable="1">preferencesProxyNoproxyTooltip</property>
+                                    <property name="hexpand">1</property>
+                                    <signal name="changed" handler="nsgtk_preferences_entryProxyNoproxy_changed" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_entryProxyNoproxy_realize" swapped="no" />
+                                    <layout>
+                                      <property name="column">1</property>
+                                      <property name="row">4</property>
+                                      <property name="column-span">1</property>
+                                      <property name="row-span">1</property>
+                                    </layout>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label37">
+                            <property name="label" translatable="1">preferencesProxy</property>
+                            <property name="use_markup">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkFrame" id="frame_network_fetching">
+                        <child>
+                          <object class="GtkBox" id="alignment16">
+                            <property name="margin-top">6</property>
+                            <property name="margin-start">12</property>
+                            <property name="margin-end">12</property>
+                            <child>
+                              <object class="GtkGrid" id="table1">
+                                <property name="column_spacing">6</property>
+                                <property name="row_spacing">6</property>
+                                <child>
+                                  <object class="GtkLabel" id="label39">
+                                    <property name="xalign">0</property>
+                                    <property name="label" translatable="1">preferencesFetchingMax</property>
+                                    <layout>
+                                      <property name="column">0</property>
+                                      <property name="row">0</property>
+                                      <property name="column-span">1</property>
+                                      <property name="row-span">1</property>
+                                    </layout>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="label40">
+                                    <property name="xalign">0</property>
+                                    <property name="label" translatable="1">preferencesFetchingPerhost</property>
+                                    <layout>
+                                      <property name="column">0</property>
+                                      <property name="row">1</property>
+                                      <property name="column-span">1</property>
+                                      <property name="row-span">1</property>
+                                    </layout>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="label41">
+                                    <property name="xalign">0</property>
+                                    <property name="label" translatable="1">preferencesFetchingCached</property>
+                                    <layout>
+                                      <property name="column">0</property>
+                                      <property name="row">2</property>
+                                      <property name="column-span">1</property>
+                                      <property name="row-span">1</property>
+                                    </layout>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkSpinButton" id="spinMaxFetchers">
+                                    <property name="focusable">1</property>
+                                    <property name="tooltip_text" translatable="1">preferencesFetchingMaxTooltip</property>
+                                    <property name="width_chars">3</property>
+                                    <property name="adjustment">adjustment_fetching_max</property>
+                                    <property name="climb_rate">1</property>
+                                    <property name="numeric">1</property>
+                                    <signal name="value-changed" handler="nsgtk_preferences_spinMaxFetchers_valuechanged" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_spinMaxFetchers_realize" swapped="no" />
+                                    <layout>
+                                      <property name="column">1</property>
+                                      <property name="row">0</property>
+                                      <property name="column-span">1</property>
+                                      <property name="row-span">1</property>
+                                    </layout>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkSpinButton" id="spinFetchesPerHost">
+                                    <property name="focusable">1</property>
+                                    <property name="tooltip_text" translatable="1">preferencesFetchingPerhostTooltip</property>
+                                    <property name="width_chars">3</property>
+                                    <property name="adjustment">adjustment_fetching_perhost</property>
+                                    <property name="climb_rate">1</property>
+                                    <property name="numeric">1</property>
+                                    <signal name="value-changed" handler="nsgtk_preferences_spinFetchesPerHost_valuechanged" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_spinFetchesPerHost_realize" swapped="no" />
+                                    <layout>
+                                      <property name="column">1</property>
+                                      <property name="row">1</property>
+                                      <property name="column-span">1</property>
+                                      <property name="row-span">1</property>
+                                    </layout>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkSpinButton" id="spinCachedConnections">
+                                    <property name="focusable">1</property>
+                                    <property name="tooltip_text" translatable="1">preferencesFetchingCachedTooltip</property>
+                                    <property name="width_chars">3</property>
+                                    <property name="adjustment">adjustment_fetching_cached</property>
+                                    <property name="climb_rate">1</property>
+                                    <property name="numeric">1</property>
+                                    <signal name="value-changed" handler="nsgtk_preferences_spinCachedConnections_valuechanged" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_spinCachedConnections_realize" swapped="no" />
+                                    <layout>
+                                      <property name="column">1</property>
+                                      <property name="row">2</property>
+                                      <property name="column-span">1</property>
+                                      <property name="row-span">1</property>
+                                    </layout>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label38">
+                            <property name="label" translatable="1">preferencesFetching</property>
+                            <property name="use_markup">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="tab">
+                  <object class="GtkLabel" id="label36">
+                    <property name="label" translatable="1">preferencesNetworkTabtitle</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkNotebookPage">
+                <property name="position">5</property>
+                <property name="child">
+                  <object class="GtkBox" id="vbox_pdfexport">
+                    <property name="valign">start</property>
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkFrame" id="frame_pdfexport_appearance">
+                        <child>
+                          <object class="GtkBox" id="alignment17">
+                            <property name="margin-top">6</property>
+                            <property name="margin-start">12</property>
+                            <property name="margin-end">12</property>
+                            <child>
+                              <object class="GtkBox" id="vbox13">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">6</property>
+                                <child>
+                                  <object class="GtkCheckButton" id="checkSuppressImages">
+                                    <property name="vexpand">1</property>
+                                    <property name="label" translatable="1">preferencesAppearanceImages</property>
+                                    <property name="focusable">1</property>
+                                    <property name="halign">start</property>
+                                    <signal name="toggled" handler="nsgtk_preferences_checkSuppressImages_toggled" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_checkSuppressImages_realize" swapped="no" />
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkCheckButton" id="checkRemoveBackgrounds">
+                                    <property name="vexpand">1</property>
+                                    <property name="label" translatable="1">preferencesAppearanceBackground</property>
+                                    <property name="focusable">1</property>
+                                    <property name="halign">start</property>
+                                    <signal name="toggled" handler="nsgtk_preferences_checkRemoveBackgrounds_toggled" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_checkRemoveBackgrounds_realize" swapped="no" />
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkCheckButton" id="checkFitPage">
+                                    <property name="vexpand">1</property>
+                                    <property name="label" translatable="1">preferencesAppearanceScalefit</property>
+                                    <property name="focusable">1</property>
+                                    <property name="halign">start</property>
+                                    <signal name="toggled" handler="nsgtk_preferences_checkFitPage_toggled" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_checkFitPage_realize" swapped="no" />
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkBox" id="hbox15">
+                                    <property name="vexpand">1</property>
+                                    <property name="spacing">6</property>
+                                    <child>
+                                      <object class="GtkLabel" id="label59">
+                                        <property name="label" translatable="1">preferencesAppearanceScale</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSpinButton" id="spinExportScale">
+                                        <property name="focusable">1</property>
+                                        <property name="width_chars">4</property>
+                                        <property name="xalign">1</property>
+                                        <property name="adjustment">adjustment_pdf_scale</property>
+                                        <property name="climb_rate">1</property>
+                                        <property name="numeric">1</property>
+                                        <signal name="value-changed" handler="nsgtk_preferences_spinExportScale_valuechanged" swapped="no" />
+                                        <signal name="realize" handler="nsgtk_preferences_spinExportScale_realize" swapped="no" />
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="label60">
+                                        <property name="label" translatable="0">%</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label48">
+                            <property name="label" translatable="1">preferencesAppearance</property>
+                            <property name="use_markup">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkFrame" id="frame_pdfexport_margins">
+                        <child>
+                          <object class="GtkBox" id="alignment18">
+                            <property name="margin-top">6</property>
+                            <property name="margin-start">12</property>
+                            <property name="margin-end">12</property>
+                            <child>
+                              <object class="GtkBox" id="vbox16">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">6</property>
+                                <child>
+                                  <object class="GtkBox" id="hbox22">
+                                    <property name="vexpand">1</property>
+                                    <child>
+                                      <object class="GtkLabel" id="label62">
+                                        <property name="label" translatable="1">preferencesMarginsMeasurements</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <placeholder />
+                                    </child>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkGrid" id="table4">
+                                    <property name="vexpand">1</property>
+                                    <child>
+                                      <object class="GtkBox" id="hbox16">
+                                        <property name="spacing">6</property>
+                                        <property name="hexpand">1</property>
+                                        <child>
+                                          <object class="GtkLabel" id="label51">
+                                            <property name="label" translatable="1">Top</property>
+                                          </object>
+                                        </child>
+                                        <child>
+                                          <object class="GtkSpinButton" id="spinMarginTop">
+                                            <property name="focusable">1</property>
+                                            <property name="width_chars">5</property>
+                                            <property name="xalign">1</property>
+                                            <property name="climb_rate">1</property>
+                                            <property name="digits">1</property>
+                                            <property name="numeric">1</property>
+                                            <signal name="value-changed" handler="nsgtk_preferences_spinMarginTop_valuechanged" swapped="no" />
+                                            <signal name="realize" handler="nsgtk_preferences_spinMarginTop_realize" swapped="no" />
+                                          </object>
+                                        </child>
+                                        <layout>
+                                          <property name="column">1</property>
+                                          <property name="row">0</property>
+                                          <property name="column-span">1</property>
+                                          <property name="row-span">1</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkBox" id="hbox18">
+                                        <property name="spacing">6</property>
+                                        <property name="hexpand">1</property>
+                                        <child>
+                                          <object class="GtkLabel" id="label52">
+                                            <property name="label" translatable="1">Left</property>
+                                          </object>
+                                        </child>
+                                        <child>
+                                          <object class="GtkSpinButton" id="spinMarginLeft">
+                                            <property name="focusable">1</property>
+                                            <property name="width_chars">5</property>
+                                            <property name="xalign">1</property>
+                                            <property name="adjustment">adjustment_pdf_lmargin</property>
+                                            <property name="climb_rate">1</property>
+                                            <property name="digits">1</property>
+                                            <property name="numeric">1</property>
+                                            <signal name="value-changed" handler="nsgtk_preferences_spinMarginLeft_valuechanged" swapped="no" />
+                                            <signal name="realize" handler="nsgtk_preferences_spinMarginLeft_realize" swapped="no" />
+                                          </object>
+                                        </child>
+                                        <layout>
+                                          <property name="column">0</property>
+                                          <property name="row">1</property>
+                                          <property name="column-span">1</property>
+                                          <property name="row-span">1</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkBox" id="hbox20">
+                                        <property name="spacing">6</property>
+                                        <property name="hexpand">1</property>
+                                        <child>
+                                          <object class="GtkLabel" id="label53">
+                                            <property name="label" translatable="1">Bottom</property>
+                                          </object>
+                                        </child>
+                                        <child>
+                                          <object class="GtkSpinButton" id="spinMarginBottom">
+                                            <property name="focusable">1</property>
+                                            <property name="width_chars">5</property>
+                                            <property name="xalign">1</property>
+                                            <property name="climb_rate">1</property>
+                                            <property name="digits">1</property>
+                                            <property name="numeric">1</property>
+                                            <signal name="value-changed" handler="nsgtk_preferences_spinMarginBottom_valuechanged" swapped="no" />
+                                            <signal name="realize" handler="nsgtk_preferences_spinMarginBottom_realize" swapped="no" />
+                                          </object>
+                                        </child>
+                                        <layout>
+                                          <property name="column">1</property>
+                                          <property name="row">2</property>
+                                          <property name="column-span">1</property>
+                                          <property name="row-span">1</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkBox" id="hbox21">
+                                        <property name="spacing">6</property>
+                                        <property name="hexpand">1</property>
+                                        <child>
+                                          <object class="GtkLabel" id="label54">
+                                            <property name="label" translatable="1">Right</property>
+                                          </object>
+                                        </child>
+                                        <child>
+                                          <object class="GtkSpinButton" id="spinMarginRight">
+                                            <property name="focusable">1</property>
+                                            <property name="width_chars">5</property>
+                                            <property name="xalign">1</property>
+                                            <property name="climb_rate">1</property>
+                                            <property name="digits">1</property>
+                                            <property name="numeric">1</property>
+                                            <signal name="value-changed" handler="nsgtk_preferences_spinMarginRight_valuechanged" swapped="no" />
+                                            <signal name="realize" handler="nsgtk_preferences_spinMarginRight_realize" swapped="no" />
+                                          </object>
+                                        </child>
+                                        <layout>
+                                          <property name="column">2</property>
+                                          <property name="row">1</property>
+                                          <property name="column-span">1</property>
+                                          <property name="row-span">1</property>
+                                        </layout>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label49">
+                            <property name="label" translatable="1">preferencesMargins</property>
+                            <property name="use_markup">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkFrame" id="frame_pdfexport_generation">
+                        <child>
+                          <object class="GtkBox" id="alignment19">
+                            <property name="margin-top">6</property>
+                            <property name="margin-start">12</property>
+                            <property name="margin-end">12</property>
+                            <child>
+                              <object class="GtkBox" id="vbox14">
+                                <property name="orientation">vertical</property>
+                                <property name="spacing">7</property>
+                                <child>
+                                  <object class="GtkCheckButton" id="checkCompressPDF">
+                                    <property name="vexpand">1</property>
+                                    <property name="label" translatable="1">preferencesGenerationCompressed</property>
+                                    <property name="focusable">1</property>
+                                    <property name="halign">start</property>
+                                    <signal name="toggled" handler="nsgtk_preferences_checkCompressPDF_toggled" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_checkCompressPDF_realize" swapped="no" />
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkCheckButton" id="checkPasswordPDF">
+                                    <property name="vexpand">1</property>
+                                    <property name="label" translatable="1">preferencesGenerationPassword</property>
+                                    <property name="focusable">1</property>
+                                    <property name="halign">start</property>
+                                    <signal name="toggled" handler="nsgtk_preferences_checkPasswordPDF_toggled" swapped="no" />
+                                    <signal name="realize" handler="nsgtk_preferences_checkPasswordPDF_realize" swapped="no" />
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label50">
+                            <property name="label" translatable="1">preferencesGeneration</property>
+                            <property name="use_markup">1</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <property name="tab">
+                  <object class="GtkLabel" id="label47">
+                    <property name="label" translatable="1">preferencesPDFTabtitle</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox" id="dialog-action_area1">
+            <property name="halign">end</property>
+            <property name="spacing">6</property>
+            <child>
+              <object class="GtkButton" id="close">
+                <property name="label" translatable="yes">Close</property>
+                <property name="use-underline">1</property>
+                <signal name="clicked" handler="nsgtk_preferences_close_clicked" swapped="no" />
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkListStore" id="liststore_content_language">
+    <columns>
+      <column type="gchararray" />
+      <column type="gchararray" />
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">en</col>
+        <col id="1" translatable="yes">English</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="liststore_defaultfont">
+    <columns>
+      <column type="gchararray" />
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">preferencesFonttypeSans</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">preferencesFonttypeSerif</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">preferencesFonttypeMonospace</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">preferencesFonttypeCursive</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">preferencesFonttypeFantasy</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="liststore_developer_view">
+    <columns>
+      <column type="gchararray" />
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">preferencesDeveloperViewWindow</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">preferencesDeveloperViewTab</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">preferencesDeveloperViewEditor</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="liststore_image_loading">
+    <columns>
+      <column type="gchararray" />
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">preferencesImageLoadBoth</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">preferencesImageLoadFore</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">preferencesImageLoadBack</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">preferencesImageLoadNone</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="liststore_proxy_type">
+    <columns>
+      <column type="gchararray" />
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">preferencesProxyTypeDirect</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">preferencesProxyTypeManual</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">preferencesProxyTypeBasic</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">preferencesProxyTypeNLTM</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">preferencesProxyTypeSystem</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="liststore_search_provider">
+    <columns>
+      <column type="gchararray" />
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="no">Google</col>
+      </row>
+      <row>
+        <col id="0" translatable="no">Yahoo!</col>
+      </row>
+      <row>
+        <col id="0" translatable="no">Microsoft Live</col>
+      </row>
+      <row>
+        <col id="0" translatable="no">Buisiness.com</col>
+      </row>
+      <row>
+        <col id="0" translatable="no">Omgili</col>
+      </row>
+      <row>
+        <col id="0" translatable="no">BBC News</col>
+      </row>
+      <row>
+        <col id="0" translatable="no">Ubuntu Packages</col>
+      </row>
+      <row>
+        <col id="0" translatable="no">Creative Commons</col>
+      </row>
+      <row>
+        <col id="0" translatable="no">Ask</col>
+      </row>
+      <row>
+        <col id="0" translatable="no">Answers</col>
+      </row>
+      <row>
+        <col id="0" translatable="no">Dictionary.com</col>
+      </row>
+      <row>
+        <col id="0" translatable="no">YouTube</col>
+      </row>
+      <row>
+        <col id="0" translatable="no">AeroMP3</col>
+      </row>
+      <row>
+        <col id="0" translatable="no">AOL</col>
+      </row>
+      <row>
+        <col id="0" translatable="no">Baidu</col>
+      </row>
+      <row>
+        <col id="0" translatable="no">Amazon</col>
+      </row>
+      <row>
+        <col id="0" translatable="no">Ebay</col>
+      </row>
+      <row>
+        <col id="0" translatable="no">IMBD</col>
+      </row>
+      <row>
+        <col id="0" translatable="no">ESPN</col>
+      </row>
+      <row>
+        <col id="0" translatable="no">Wikipedia</col>
+      </row>
+      <row>
+        <col id="0" translatable="no">DuckDuckGo</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="liststore_tab_position">
+    <columns>
+      <column type="gchararray" />
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">preferencesTabLocTop</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">preferencesTabLocLeft</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">preferencesTabLocRight</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">preferencesTabLocBottom</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="liststore_toolbar_buttontype">
+    <columns>
+      <column type="gchararray" />
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">preferencesButtonTypeSmall</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">preferencesButtonTypeLarge</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">preferencesButtonTypeLargeText</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">preferencesButtonTypeText</col>
+      </row>
+    </data>
+  </object>
+</interface>

@@ -49,8 +49,8 @@ struct nsgtk_pi_window {
 	struct nsgtk_corewindow core;
 	/** GTK builder for window */
 	GtkBuilder *builder;
-	/** GTK window being shown */
-	GtkWindow *dlg;
+	/** GTK popover being shown */
+	GtkWidget *dlg;
 	/** Core page-info window */
 	struct page_info *pi;
 };
@@ -59,8 +59,7 @@ struct nsgtk_pi_window {
 /**
  * destroy a previously created page information window
  */
-static gboolean
-nsgtk_pi_delete_event(GtkWidget *w, GdkEvent  *event, gpointer data)
+static gboolean nsgtk_pi_destroy(gpointer data)
 {
 	struct nsgtk_pi_window *pi_win;
 	pi_win = (struct nsgtk_pi_window *)data;
@@ -68,31 +67,27 @@ nsgtk_pi_delete_event(GtkWidget *w, GdkEvent  *event, gpointer data)
 	page_info_destroy(pi_win->pi);
 
 	nsgtk_corewindow_fini(&pi_win->core);
-	gtk_widget_destroy(GTK_WIDGET(pi_win->dlg));
+	gtk_widget_unparent(pi_win->dlg);
 	g_object_unref(G_OBJECT(pi_win->builder));
 	free(pi_win);
 
-	return FALSE;
+	return G_SOURCE_REMOVE;
 }
 
-/**
- * Called to cause the page-info window to close cleanly
- */
+static void
+nsgtk_pi_closed(GtkPopover *popover, gpointer data)
+{
+	g_idle_add(nsgtk_pi_destroy, data);
+}
+
 static void
 nsgtk_pi_close_callback(void *pw)
 {
-	nsgtk_pi_delete_event(NULL, NULL, pw);
+	struct nsgtk_pi_window *pi_win = pw;
+
+	gtk_popover_popdown(GTK_POPOVER(pi_win->dlg));
 }
 
-/**
- * callback for mouse action for certificate verify on core window
- *
- * \param nsgtk_cw The nsgtk core window structure.
- * \param mouse_state netsurf mouse state on event
- * \param x location of event
- * \param y location of event
- * \return NSERROR_OK on success otherwise appropriate error code
- */
 static nserror
 nsgtk_pi_mouse(struct nsgtk_corewindow *nsgtk_cw,
 		    browser_mouse_state mouse_state,
@@ -160,11 +155,10 @@ nsgtk_pi_draw(struct nsgtk_corewindow *nsgtk_cw, struct rect *r)
 }
 
 /* exported interface documented in gtk/page_info.h */
-nserror nsgtk_page_info(struct browser_window *bw)
+nserror nsgtk_page_info(GtkWidget *anchor, struct browser_window *bw)
 {
 	struct nsgtk_pi_window *ncwin;
 	nserror res;
-	GtkWindow *scaffwin = nsgtk_scaffolding_window(nsgtk_current_scaffolding());
 
 	ncwin = calloc(1, sizeof(struct nsgtk_pi_window));
 	if (ncwin == NULL) {
@@ -178,46 +172,17 @@ nserror nsgtk_page_info(struct browser_window *bw)
 		return res;
 	}
 
-	gtk_builder_connect_signals(ncwin->builder, NULL);
-
-	ncwin->dlg = GTK_WINDOW(gtk_builder_get_object(ncwin->builder,
+	ncwin->dlg = GTK_WIDGET(gtk_builder_get_object(ncwin->builder,
 						       "PGIWindow"));
-
-	/* Configure for transient behaviour */
-	gtk_window_set_type_hint(GTK_WINDOW(ncwin->dlg),
-				 GDK_WINDOW_TYPE_HINT_DROPDOWN_MENU);
-
-	gtk_window_set_modal(GTK_WINDOW(ncwin->dlg), TRUE);
-
-	gtk_window_group_add_window(gtk_window_get_group(scaffwin),
-				    GTK_WINDOW(ncwin->dlg));
-
-	gtk_window_set_transient_for(GTK_WINDOW(ncwin->dlg), scaffwin);
-
-	gtk_window_set_screen(GTK_WINDOW(ncwin->dlg),
-			      gtk_widget_get_screen(GTK_WIDGET(scaffwin)));
-
-	/* Attempt to place the window in the right place */
-	nsgtk_scaffolding_position_page_info(nsgtk_current_scaffolding(),
-					     ncwin);
+	gtk_widget_set_parent(ncwin->dlg, anchor);
 
 	ncwin->core.drawing_area = GTK_DRAWING_AREA(
 		gtk_builder_get_object(ncwin->builder, "PGIDrawingArea"));
 
-	/* make the delete event call our destructor */
+	/* closing the popover calls our destructor */
 	g_signal_connect(G_OBJECT(ncwin->dlg),
-			 "delete_event",
-			 G_CALLBACK(nsgtk_pi_delete_event),
-			 ncwin);
-	/* Ditto if we lose the grab */
-	g_signal_connect(G_OBJECT(ncwin->dlg),
-			 "grab-broken-event",
-			 G_CALLBACK(nsgtk_pi_delete_event),
-			 ncwin);
-	/* Handle button press events */
-	g_signal_connect(G_OBJECT(ncwin->dlg),
-			 "button-press-event",
-			 G_CALLBACK(nsgtk_pi_delete_event),
+			 "closed",
+			 G_CALLBACK(nsgtk_pi_closed),
 			 ncwin);
 
 	/* initialise GTK core window */
@@ -227,30 +192,24 @@ nserror nsgtk_page_info(struct browser_window *bw)
 
 	res = nsgtk_corewindow_init(&ncwin->core);
 	if (res != NSERROR_OK) {
-		g_object_unref(G_OBJECT(ncwin->dlg));
+		gtk_widget_unparent(ncwin->dlg);
+		g_object_unref(G_OBJECT(ncwin->builder));
 		free(ncwin);
 		return res;
 	}
 
 	res = page_info_create((struct core_window *)ncwin, bw, &ncwin->pi);
 	if (res != NSERROR_OK) {
-		g_object_unref(G_OBJECT(ncwin->dlg));
+		nsgtk_corewindow_fini(&ncwin->core);
+		gtk_widget_unparent(ncwin->dlg);
+		g_object_unref(G_OBJECT(ncwin->builder));
 		free(ncwin);
 		return res;
 	}
 
-	gtk_widget_show(GTK_WIDGET(ncwin->dlg));
+	gtk_popover_popup(GTK_POPOVER(ncwin->dlg));
 
-	gtk_widget_grab_focus(GTK_WIDGET(ncwin->dlg));
+	gtk_widget_grab_focus(GTK_WIDGET(ncwin->core.drawing_area));
 
 	return NSERROR_OK;
-}
-
-/* exported interface documented in gtk/page_info.h */
-void
-nsgtk_page_info_set_position(struct nsgtk_pi_window *win, int x, int y)
-{
-	NSLOG(netsurf, INFO, "win=%p x=%d y=%d", win, x, y);
-
-	gtk_window_move(GTK_WINDOW(win->dlg), x, y);
 }

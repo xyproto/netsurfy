@@ -22,19 +22,11 @@
 /**
  * Page information window
  *
+ * \param anchor The widget the page information is shown below
  * \param bw the browser window to get page information for
  * \return NSERROR_OK or error code if prompt creation failed.
  */
-nserror nsgtk_page_info(struct browser_window *bw);
+nserror nsgtk_page_info(GtkWidget *anchor, struct browser_window *bw);
 
-/**
- * Position the given page information window at the given
- * coordinates.
- *
- * \param pi the page info window to position
- * \param x the X coordinate for the top left of the window
- * \param y the Y coordinate for the top left of the window
- */
-void nsgtk_page_info_set_position(struct nsgtk_pi_window *pi, int x, int y);
 
 #endif

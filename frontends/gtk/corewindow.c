@@ -56,18 +56,19 @@
  * \param event The GDK mouse event to convert.
  * \return The netsurf mouse state.
  */
-static browser_mouse_state nsgtk_cw_gdkbutton_to_nsstate(GdkEventButton *event)
+static browser_mouse_state
+nsgtk_cw_gdkbutton_to_nsstate(guint button, gint n_press, GdkModifierType state)
 {
 	browser_mouse_state ms;
 
-	if (event->type == GDK_2BUTTON_PRESS) {
+	if (n_press == 2) {
 		ms = BROWSER_MOUSE_DOUBLE_CLICK;
 	} else {
 		ms = BROWSER_MOUSE_HOVER;
 	}
 
 	/* button state */
-	switch (event->button) {
+	switch (button) {
 	case 1:
 		ms |= BROWSER_MOUSE_PRESS_1;
 		break;
@@ -78,15 +79,15 @@ static browser_mouse_state nsgtk_cw_gdkbutton_to_nsstate(GdkEventButton *event)
 	}
 
 	/* Handle the modifiers too */
-	if (event->state & GDK_SHIFT_MASK) {
+	if (state & GDK_SHIFT_MASK) {
 		ms |= BROWSER_MOUSE_MOD_1;
 	}
 
-	if (event->state & GDK_CONTROL_MASK) {
+	if (state & GDK_CONTROL_MASK) {
 		ms |= BROWSER_MOUSE_MOD_2;
 	}
 
-	if (event->state & GDK_MOD1_MASK) {
+	if (state & GDK_ALT_MASK) {
 		/* usually alt */
 		ms |= BROWSER_MOUSE_MOD_3;
 	}
@@ -105,27 +106,29 @@ static browser_mouse_state nsgtk_cw_gdkbutton_to_nsstate(GdkEventButton *event)
  * \param event The event that occurred.
  * \param g The context pointer passed when the event was registered.
  */
-static gboolean
-nsgtk_cw_button_press_event(GtkWidget *widget,
-			    GdkEventButton *event,
+static void
+nsgtk_cw_button_press_event(GtkGestureClick *gesture,
+			    gint n_press,
+			    gdouble x,
+			    gdouble y,
 			    gpointer g)
 {
 	struct nsgtk_corewindow *nsgtk_cw = (struct nsgtk_corewindow *)g;
 	struct nsgtk_corewindow_mouse *mouse = &nsgtk_cw->mouse_state;
+	guint button = gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture));
+	GdkModifierType state = gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture));
 
 	gtk_im_context_reset(nsgtk_cw->input_method);
 	gtk_widget_grab_focus(GTK_WIDGET(nsgtk_cw->drawing_area));
 
 	/* record event information for potentially starting a drag. */
-	mouse->pressed_x = mouse->last_x = event->x;
-	mouse->pressed_y = mouse->last_y = event->y;
+	mouse->pressed_x = mouse->last_x = x;
+	mouse->pressed_y = mouse->last_y = y;
 	mouse->pressed = true;
 
-	mouse->state = nsgtk_cw_gdkbutton_to_nsstate(event);
+	mouse->state = nsgtk_cw_gdkbutton_to_nsstate(button, n_press, state);
 
-	nsgtk_cw->mouse(nsgtk_cw, mouse->state, event->x, event->y);
-
-	return TRUE;
+	nsgtk_cw->mouse(nsgtk_cw, mouse->state, x, y);
 }
 
 
@@ -139,13 +142,16 @@ nsgtk_cw_button_press_event(GtkWidget *widget,
  * \param event The event that occurred.
  * \param g The context pointer passed when the event was registered.
  */
-static gboolean
-nsgtk_cw_button_release_event(GtkWidget *widget,
-			      GdkEventButton *event,
+static void
+nsgtk_cw_button_release_event(GtkGestureClick *gesture,
+			      gint n_press,
+			      gdouble x,
+			      gdouble y,
 			      gpointer g)
 {
 	struct nsgtk_corewindow *nsgtk_cw = (struct nsgtk_corewindow *)g;
 	struct nsgtk_corewindow_mouse *mouse = &nsgtk_cw->mouse_state;
+	GdkModifierType state = gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture));
 	bool was_drag = false;
 
 	/* only button 1 clicks are considered double clicks. If the
@@ -179,15 +185,15 @@ nsgtk_cw_button_release_event(GtkWidget *widget,
 
 	/* Handle modifiers being removed */
 	if ((mouse->state & BROWSER_MOUSE_MOD_1) &&
-	    !(event->state & GDK_SHIFT_MASK)) {
+	    !(state & GDK_SHIFT_MASK)) {
 		mouse->state ^= BROWSER_MOUSE_MOD_1;
 	}
 	if ((mouse->state & BROWSER_MOUSE_MOD_2) &&
-	    !(event->state & GDK_CONTROL_MASK)) {
+	    !(state & GDK_CONTROL_MASK)) {
 		mouse->state ^= BROWSER_MOUSE_MOD_2;
 	}
 	if ((mouse->state & BROWSER_MOUSE_MOD_3) &&
-	    !(event->state & GDK_MOD1_MASK)) {
+	    !(state & GDK_ALT_MASK)) {
 		mouse->state ^= BROWSER_MOUSE_MOD_3;
 	}
 
@@ -199,11 +205,9 @@ nsgtk_cw_button_release_event(GtkWidget *widget,
 		mouse->state = BROWSER_MOUSE_HOVER;
 	}
 
-	nsgtk_cw->mouse(nsgtk_cw, mouse->state, event->x, event->y);
+	nsgtk_cw->mouse(nsgtk_cw, mouse->state, x, y);
 
 	mouse->pressed = false;
-
-	return TRUE;
 }
 
 
@@ -216,28 +220,30 @@ nsgtk_cw_button_release_event(GtkWidget *widget,
  * \param event The motion event that occurred.
  * \param g The context pointer passed when the event was registered.
  */
-static gboolean
-nsgtk_cw_motion_notify_event(GtkWidget *widget,
-			     GdkEventMotion *event,
+static void
+nsgtk_cw_motion_notify_event(GtkEventControllerMotion *controller,
+			     gdouble x,
+			     gdouble y,
 			     gpointer g)
 {
 	struct nsgtk_corewindow *nsgtk_cw = (struct nsgtk_corewindow *)g;
 	struct nsgtk_corewindow_mouse *mouse = &nsgtk_cw->mouse_state;
+	GdkModifierType state = gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(controller));
 
 	if (mouse->pressed == false) {
 		nsgtk_cw->mouse(nsgtk_cw,
 				BROWSER_MOUSE_HOVER,
-				event->x,
-				event->y);
-		return TRUE;
+				x,
+				y);
+		return;
 	}
 
-	if ((fabs(event->x - mouse->last_x) < 5.0) &&
-	    (fabs(event->y - mouse->last_y) < 5.0)) {
+	if ((fabs(x - mouse->last_x) < 5.0) &&
+	    (fabs(y - mouse->last_y) < 5.0)) {
 		/* Mouse hasn't moved far enough from press coordinate
 		 * for this to be considered a drag.
 		 */
-		return FALSE;
+		return;
 	}
 
 	/* This is a drag, ensure it's always treated as such, even if
@@ -276,15 +282,15 @@ nsgtk_cw_motion_notify_event(GtkWidget *widget,
 
 		/* Handle modifiers being removed */
 		if ((mouse->state & BROWSER_MOUSE_MOD_1) &&
-		    !(event->state & GDK_SHIFT_MASK)) {
+		    !(state & GDK_SHIFT_MASK)) {
 			mouse->state ^= BROWSER_MOUSE_MOD_1;
 		}
 		if ((mouse->state & BROWSER_MOUSE_MOD_2) &&
-		    !(event->state & GDK_CONTROL_MASK)) {
+		    !(state & GDK_CONTROL_MASK)) {
 			mouse->state ^= BROWSER_MOUSE_MOD_2;
 		}
 		if ((mouse->state & BROWSER_MOUSE_MOD_3) &&
-		    !(event->state & GDK_MOD1_MASK)) {
+		    !(state & GDK_ALT_MASK)) {
 			mouse->state ^= BROWSER_MOUSE_MOD_3;
 		}
 
@@ -292,11 +298,9 @@ nsgtk_cw_motion_notify_event(GtkWidget *widget,
 		    (BROWSER_MOUSE_HOLDING_1 | BROWSER_MOUSE_HOLDING_2)) {
 			nsgtk_cw->mouse(nsgtk_cw,
 					mouse->state,
-					event->x, event->y);
+					x, y);
 		}
 	}
-
-	return TRUE;
 }
 
 
@@ -323,64 +327,64 @@ static nserror nsgtk_cw_key(struct nsgtk_corewindow *nsgtk_cw, uint32_t nskey)
 	switch(nskey) {
 	case NS_KEY_TEXT_START:
 		scroll = vscroll;
-		value = nsgtk_adjustment_get_lower(scroll);
+		value = gtk_adjustment_get_lower(scroll);
 		break;
 
 	case NS_KEY_TEXT_END:
 		scroll = vscroll;
-		value = nsgtk_adjustment_get_upper(scroll) - vpage;
-		if (value < nsgtk_adjustment_get_lower(scroll))
-			value = nsgtk_adjustment_get_lower(scroll);
+		value = gtk_adjustment_get_upper(scroll) - vpage;
+		if (value < gtk_adjustment_get_lower(scroll))
+			value = gtk_adjustment_get_lower(scroll);
 		break;
 
 	case NS_KEY_LEFT:
 		scroll = hscroll;
 		value = gtk_adjustment_get_value(scroll) -
-			nsgtk_adjustment_get_step_increment(scroll);
-		if (value < nsgtk_adjustment_get_lower(scroll))
-			value = nsgtk_adjustment_get_lower(scroll);
+			gtk_adjustment_get_step_increment(scroll);
+		if (value < gtk_adjustment_get_lower(scroll))
+			value = gtk_adjustment_get_lower(scroll);
 		break;
 
 	case NS_KEY_RIGHT:
 		scroll = hscroll;
 		value = gtk_adjustment_get_value(scroll) +
-			nsgtk_adjustment_get_step_increment(scroll);
-		if (value > nsgtk_adjustment_get_upper(scroll) - hpage)
-			value = nsgtk_adjustment_get_upper(scroll) - hpage;
+			gtk_adjustment_get_step_increment(scroll);
+		if (value > gtk_adjustment_get_upper(scroll) - hpage)
+			value = gtk_adjustment_get_upper(scroll) - hpage;
 		break;
 	case NS_KEY_UP:
 		scroll = vscroll;
 		value = gtk_adjustment_get_value(scroll) -
-			nsgtk_adjustment_get_step_increment(scroll);
-		if (value < nsgtk_adjustment_get_lower(scroll))
-			value = nsgtk_adjustment_get_lower(scroll);
+			gtk_adjustment_get_step_increment(scroll);
+		if (value < gtk_adjustment_get_lower(scroll))
+			value = gtk_adjustment_get_lower(scroll);
 		break;
 
 	case NS_KEY_DOWN:
 		scroll = vscroll;
 		value = gtk_adjustment_get_value(scroll) +
-			nsgtk_adjustment_get_step_increment(scroll);
-		if (value > nsgtk_adjustment_get_upper(scroll) - vpage)
-			value = nsgtk_adjustment_get_upper(scroll) - vpage;
+			gtk_adjustment_get_step_increment(scroll);
+		if (value > gtk_adjustment_get_upper(scroll) - vpage)
+			value = gtk_adjustment_get_upper(scroll) - vpage;
 		break;
 
 	case NS_KEY_PAGE_UP:
 		scroll = vscroll;
 		value = gtk_adjustment_get_value(scroll) -
-			nsgtk_adjustment_get_page_increment(scroll);
+			gtk_adjustment_get_page_increment(scroll);
 
-		if (value < nsgtk_adjustment_get_lower(scroll))
-			value = nsgtk_adjustment_get_lower(scroll);
+		if (value < gtk_adjustment_get_lower(scroll))
+			value = gtk_adjustment_get_lower(scroll);
 
 		break;
 
 	case NS_KEY_PAGE_DOWN:
 		scroll = vscroll;
 		value = gtk_adjustment_get_value(scroll) +
-			nsgtk_adjustment_get_page_increment(scroll);
+			gtk_adjustment_get_page_increment(scroll);
 
-		if (value > nsgtk_adjustment_get_upper(scroll) - vpage)
-			value = nsgtk_adjustment_get_upper(scroll) - vpage;
+		if (value > gtk_adjustment_get_upper(scroll) - vpage)
+			value = gtk_adjustment_get_upper(scroll) - vpage;
 		break;
 
 	}
@@ -403,19 +407,18 @@ static nserror nsgtk_cw_key(struct nsgtk_corewindow *nsgtk_cw, uint32_t nskey)
  * \param g The context pointer passed when the event was registered.
  */
 static gboolean
-nsgtk_cw_keypress_event(GtkWidget *widget, GdkEventKey *event, gpointer g)
+nsgtk_cw_keypress_event(GtkEventControllerKey *controller,
+			guint keyval,
+			guint keycode,
+			GdkModifierType state,
+			gpointer g)
 {
 	struct nsgtk_corewindow *nsgtk_cw = (struct nsgtk_corewindow *)g;
 	nserror res;
 	uint32_t nskey;
 
-	/* check to see if gtk input method swallowed the keypress */
-	if (gtk_im_context_filter_keypress(nsgtk_cw->input_method, event)) {
-		return TRUE;
-	}
-
 	/* convert gtk event to nskey */
-	nskey = gtk_gui_gdkkey_to_nskey(event);
+	nskey = gtk_gui_gdkkey_to_nskey(keyval, state);
 
 	/* attempt to handle keypress in caller */
 	res = nsgtk_cw->key(nsgtk_cw, nskey);
@@ -433,25 +436,6 @@ nsgtk_cw_keypress_event(GtkWidget *widget, GdkEventKey *event, gpointer g)
 		return FALSE;
 	}
 	return TRUE;
-}
-
-
-/**
- * gtk event on key release.
- *
- * Service gtk key-release-event for key transition on a widget from
- * pressed to released.
- *
- * \param widget The gtk widget the event occurred for.
- * \param event The event that occurred.
- * \param g The context pointer passed when the event was registered.
- */
-static gboolean
-nsgtk_cw_keyrelease_event(GtkWidget *widget, GdkEventKey *event, gpointer g)
-{
-	struct nsgtk_corewindow *nsgtk_cw = (struct nsgtk_corewindow *)g;
-
-	return gtk_im_context_filter_keypress(nsgtk_cw->input_method, event);
 }
 
 
@@ -484,19 +468,17 @@ nsgtk_cw_input_method_commit(GtkIMContext *ctx, const gchar *str, gpointer g)
 }
 
 
-#if GTK_CHECK_VERSION(3,0,0)
-
-
 /**
- * handler for gtk draw event on a nsgtk core window for GTK 3
+ * draw function of a nsgtk core window
  *
- * \param widget The GTK widget to redraw.
+ * \param area The GTK drawing area to redraw.
  * \param cr The cairo drawing context of the widget
- * \param data The context pointer passed when the event was registered.
- * \return FALSE indicating no error.
+ * \param width The width of the drawing area
+ * \param height The height of the drawing area
+ * \param data The context pointer passed when the function was set.
  */
-static gboolean
-nsgtk_cw_draw_event(GtkWidget *widget, cairo_t *cr, gpointer data)
+static void
+nsgtk_cw_draw_event(GtkDrawingArea *area, cairo_t *cr, int width, int height, gpointer data)
 {
 	struct nsgtk_corewindow *nsgtk_cw = (struct nsgtk_corewindow *)data;
 	double x1;
@@ -504,6 +486,10 @@ nsgtk_cw_draw_event(GtkWidget *widget, cairo_t *cr, gpointer data)
 	double x2;
 	double y2;
 	struct rect clip;
+
+	/* the default background colour of the drawing area is white */
+	cairo_set_source_rgb(cr, 1, 1, 1);
+	cairo_paint(cr);
 
 	current_cr = cr;
 
@@ -515,44 +501,7 @@ nsgtk_cw_draw_event(GtkWidget *widget, cairo_t *cr, gpointer data)
 	clip.y1 = y2;
 
 	nsgtk_cw->draw(nsgtk_cw, &clip);
-
-	return FALSE;
 }
-
-#else
-
-
-/**
- * handler for gtk draw event on a nsgtk core window for GTK 2
- *
- * \param widget The GTK widget to redraw.
- * \param event The GDK expose event
- * \param g The context pointer passed when the event was registered.
- * \return FALSE indicating no error.
- */
-static gboolean
-nsgtk_cw_draw_event(GtkWidget *widget,
-		    GdkEventExpose *event,
-		    gpointer g)
-{
-	struct nsgtk_corewindow *nsgtk_cw = (struct nsgtk_corewindow *)g;
-	struct rect clip;
-
-	clip.x0 = event->area.x;
-	clip.y0 = event->area.y;
-	clip.x1 = event->area.x + event->area.width;
-	clip.y1 = event->area.y + event->area.height;
-
-	current_cr = gdk_cairo_create(nsgtk_widget_get_window(widget));
-
-	nsgtk_cw->draw(nsgtk_cw, &clip);
-
-	cairo_destroy(current_cr);
-
-	return FALSE;
-}
-
-#endif
 
 
 /**
@@ -571,16 +520,7 @@ nsgtk_cw_invalidate_area(struct core_window *cw, const struct rect *rect)
 {
 	struct nsgtk_corewindow *nsgtk_cw = (struct nsgtk_corewindow *)cw;
 
-	if (rect == NULL) {
-		gtk_widget_queue_draw(GTK_WIDGET(nsgtk_cw->drawing_area));
-		return NSERROR_OK;
-	}
-
-	gtk_widget_queue_draw_area(GTK_WIDGET(nsgtk_cw->drawing_area),
-				   rect->x0,
-				   rect->y0,
-				   rect->x1 - rect->x0,
-				   rect->y1 - rect->y0);
+	gtk_widget_queue_draw(GTK_WIDGET(nsgtk_cw->drawing_area));
 
 	return NSERROR_OK;
 }
@@ -689,11 +629,8 @@ nsgtk_cw_get_window_dimensions(const struct core_window *cw,
 		g_object_get(vadj, "page-size", &page, NULL);
 		*height = page;
 	} else {
-		GtkAllocation allocation;
-		gtk_widget_get_allocation(GTK_WIDGET(nsgtk_cw->drawing_area),
-					  &allocation);
-		*width = allocation.width;
-		*height = allocation.height;
+		*width = gtk_widget_get_width(GTK_WIDGET(nsgtk_cw->drawing_area));
+		*height = gtk_widget_get_height(GTK_WIDGET(nsgtk_cw->drawing_area));
 	}
 	return NSERROR_OK;
 }
@@ -732,12 +669,15 @@ struct core_window_table *nsgtk_core_window_table = &nsgtk_cw_cb_table;
 /* exported function documented gtk/corewindow.h */
 nserror nsgtk_corewindow_init(struct nsgtk_corewindow *nsgtk_cw)
 {
+	GtkWidget *area = GTK_WIDGET(nsgtk_cw->drawing_area);
+	GtkEventController *controller;
+	GtkGesture *gesture;
+
 	nsgtk_cw->drag_status = CORE_WINDOW_DRAG_NONE;
 
 	/* input method setup */
 	nsgtk_cw->input_method = gtk_im_multicontext_new();
-	gtk_im_context_set_client_window(nsgtk_cw->input_method,
-		gtk_widget_get_parent_window(GTK_WIDGET(nsgtk_cw->drawing_area)));
+	gtk_im_context_set_client_widget(nsgtk_cw->input_method, area);
 	gtk_im_context_set_use_preedit(nsgtk_cw->input_method, FALSE);
 
 	g_signal_connect(G_OBJECT(nsgtk_cw->input_method),
@@ -745,39 +685,31 @@ nserror nsgtk_corewindow_init(struct nsgtk_corewindow *nsgtk_cw)
 			 G_CALLBACK(nsgtk_cw_input_method_commit),
 			 nsgtk_cw);
 
-	nsgtk_connect_draw_event(GTK_WIDGET(nsgtk_cw->drawing_area),
-				 G_CALLBACK(nsgtk_cw_draw_event),
-				 nsgtk_cw);
+	gtk_widget_set_focusable(area, TRUE);
+	gtk_drawing_area_set_draw_func(nsgtk_cw->drawing_area,
+				       nsgtk_cw_draw_event,
+				       nsgtk_cw,
+				       NULL);
 
-	g_signal_connect(G_OBJECT(nsgtk_cw->drawing_area),
-			 "button-press-event",
-			 G_CALLBACK(nsgtk_cw_button_press_event),
-			 nsgtk_cw);
+	gesture = gtk_gesture_click_new();
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), 0);
+	g_signal_connect(gesture, "pressed",
+			 G_CALLBACK(nsgtk_cw_button_press_event), nsgtk_cw);
+	g_signal_connect(gesture, "released",
+			 G_CALLBACK(nsgtk_cw_button_release_event), nsgtk_cw);
+	gtk_widget_add_controller(area, GTK_EVENT_CONTROLLER(gesture));
 
-	g_signal_connect(G_OBJECT(nsgtk_cw->drawing_area),
-			 "button-release-event",
-			 G_CALLBACK(nsgtk_cw_button_release_event),
-			 nsgtk_cw);
+	controller = gtk_event_controller_motion_new();
+	g_signal_connect(controller, "motion",
+			 G_CALLBACK(nsgtk_cw_motion_notify_event), nsgtk_cw);
+	gtk_widget_add_controller(area, controller);
 
-	g_signal_connect(G_OBJECT(nsgtk_cw->drawing_area),
-			 "motion-notify-event",
-			 G_CALLBACK(nsgtk_cw_motion_notify_event),
-			 nsgtk_cw);
-
-	g_signal_connect(G_OBJECT(nsgtk_cw->drawing_area),
-			 "key-press-event",
-			 G_CALLBACK(nsgtk_cw_keypress_event),
-			 nsgtk_cw);
-
-	g_signal_connect(G_OBJECT(nsgtk_cw->drawing_area),
-			 "key-release-event",
-			 G_CALLBACK(nsgtk_cw_keyrelease_event),
-			 nsgtk_cw);
-
-	nsgtk_widget_override_background_color(
-		GTK_WIDGET(nsgtk_cw->drawing_area),
-		GTK_STATE_FLAG_NORMAL,
-		0, 0xffff, 0xffff, 0xffff);
+	controller = gtk_event_controller_key_new();
+	gtk_event_controller_key_set_im_context(GTK_EVENT_CONTROLLER_KEY(controller),
+						nsgtk_cw->input_method);
+	g_signal_connect(controller, "key-pressed",
+			 G_CALLBACK(nsgtk_cw_keypress_event), nsgtk_cw);
+	gtk_widget_add_controller(area, controller);
 
 	return NSERROR_OK;
 }

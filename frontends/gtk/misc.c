@@ -43,19 +43,9 @@
 
 static nserror gui_launch_url(struct nsurl *url)
 {
-	gboolean ok;
-	GError *error = NULL;
+	nsgtk_show_uri(NULL, nsurl_access(url));
 
-	ok = nsgtk_show_uri(NULL, nsurl_access(url), GDK_CURRENT_TIME, &error);
-	if (ok == TRUE) {
-		return NSERROR_OK;
-	}
-
-	if (error) {
-		nsgtk_warning(messages_get("URIOpenError"), error->message);
-		g_error_free(error);
-	}
-	return NSERROR_NO_FETCH_HANDLER;
+	return NSERROR_OK;
 }
 
 static void nsgtk_PDF_set_pass(GtkButton *w, gpointer data)
@@ -69,17 +59,17 @@ static void nsgtk_PDF_set_pass(GtkButton *w, gpointer data)
 	char *op, *op1;
 	char *up, *up1;
 
-	op = strdup(gtk_entry_get_text(
-			GTK_ENTRY(gtk_builder_get_object(password_builder,
+	op = strdup(gtk_editable_get_text(
+			GTK_EDITABLE(gtk_builder_get_object(password_builder,
 					"entryPDFOwnerPassword"))));
-	op1 = strdup(gtk_entry_get_text(
-			GTK_ENTRY(gtk_builder_get_object(password_builder,
+	op1 = strdup(gtk_editable_get_text(
+			GTK_EDITABLE(gtk_builder_get_object(password_builder,
 					"entryPDFOwnerPassword1"))));
-	up = strdup(gtk_entry_get_text(
-			GTK_ENTRY(gtk_builder_get_object(password_builder,
+	up = strdup(gtk_editable_get_text(
+			GTK_EDITABLE(gtk_builder_get_object(password_builder,
 					"entryPDFUserPassword"))));
-	up1 = strdup(gtk_entry_get_text(
-			GTK_ENTRY(gtk_builder_get_object(password_builder,
+	up1 = strdup(gtk_editable_get_text(
+			GTK_EDITABLE(gtk_builder_get_object(password_builder,
 					"entryPDFUserPassword1"))));
 
 
@@ -104,7 +94,7 @@ static void nsgtk_PDF_set_pass(GtkButton *w, gpointer data)
 			*user_pass = up;
 
 		free(data);
-		gtk_widget_destroy(GTK_WIDGET(wnd));
+		gtk_window_destroy(wnd);
 		g_object_unref(G_OBJECT(password_builder));
 
 		save_pdf(path);
@@ -129,7 +119,7 @@ static void nsgtk_PDF_no_pass(GtkButton *w, gpointer data)
 
 	free(data);
 
-	gtk_widget_destroy(GTK_WIDGET(wnd));
+	gtk_window_destroy(wnd);
 	g_object_unref(G_OBJECT(password_builder));
 
 	save_pdf(path);
@@ -151,7 +141,6 @@ static void nsgtk_pdf_password(char **owner_pass, char **user_pass, char *path)
 		return;
 	}
 
-	gtk_builder_connect_signals(password_builder, NULL);
 
 	wnd = GTK_WINDOW(gtk_builder_get_object(password_builder,
 						"wndPDFPassword"));
@@ -177,7 +166,7 @@ static void nsgtk_pdf_password(char **owner_pass, char **user_pass, char *path)
 	g_signal_connect(G_OBJECT(no), "clicked",
 			 G_CALLBACK(nsgtk_PDF_no_pass), (gpointer)data);
 
-	gtk_widget_show(GTK_WIDGET(wnd));
+	gtk_widget_set_visible(GTK_WIDGET(wnd), TRUE);
 }
 
 

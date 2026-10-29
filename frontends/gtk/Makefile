@@ -29,11 +29,6 @@ GTKDEPFLAGS := -DG_DISABLE_SINGLE_INCLUDES \
 # libsexy currently means we cannot enable this
 #		-DGDK_DISABLE_DEPRECATED 
 
-# gtk3 is depricating interfaces we use a lot
-ifeq ($(NETSURF_GTK_MAJOR),2)
-GTKDEPFLAGS += -DGTK_DISABLE_DEPRECATED
-endif
-
 # C library API control
 ifeq ($(HOST),FreeBSD)
 CAPIFLAGS :=
@@ -51,9 +46,9 @@ GTKCFLAGS := -std=c99 -Dgtk -Dnsgtk -g \
 		-DGTK_RESPATH=\"$(NETSURF_GTK_RES_PATH)\"
 
 # non optional pkg-configed libs
-$(eval $(call pkg_config_find_and_add,gtk+-$(NETSURF_GTK_MAJOR).0,GTK-$(NETSURF_GTK_MAJOR)))
+$(eval $(call pkg_config_find_and_add,gtk4,GTK-4))
 $(eval $(call pkg_config_find_and_add,gthread-2.0,GThread2))
-$(eval $(call pkg_config_find_and_add,gmodule-2.0,GModule2))
+$(eval $(call pkg_config_find_and_add,gmodule-export-2.0,GModuleExport2))
 
 
 CFLAGS += $(GTKCFLAGS)

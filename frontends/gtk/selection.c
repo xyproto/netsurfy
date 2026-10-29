@@ -28,7 +28,23 @@
 #include "gtk/window.h"
  
 static GString *current_selection = NULL;
-static GtkClipboard *clipboard;
+
+/**
+ * Result of reading the clipboard.
+ */
+struct clipboard_read {
+	gboolean done;
+	char *text;
+};
+
+static void
+clipboard_read_done(GObject *source, GAsyncResult *result, gpointer data)
+{
+	struct clipboard_read *cr = data;
+
+	cr->text = gdk_clipboard_read_text_finish(GDK_CLIPBOARD(source), result, NULL);
+	cr->done = TRUE;
+}
 
 
 /**
@@ -39,29 +55,33 @@ static GtkClipboard *clipboard;
  */
 static void gui_get_clipboard(char **buffer, size_t *length)
 {
-	gchar *gtext;
+	GdkClipboard *clipboard;
+	struct clipboard_read cr = { FALSE, NULL };
 
 	*buffer = NULL;
 	*length = 0;
 
-	/* get clipboard contents from gtk */
-	clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
-	gtext = gtk_clipboard_wait_for_text(clipboard); /* conv to utf-8 */
+	/* get clipboard contents from gtk, waiting for the result */
+	clipboard = gdk_display_get_clipboard(gdk_display_get_default());
+	gdk_clipboard_read_text_async(clipboard, NULL, clipboard_read_done, &cr);
+	while (!cr.done) {
+		g_main_context_iteration(NULL, TRUE);
+	}
 
-	if (gtext == NULL)
+	if (cr.text == NULL)
 		return;
 
-	*length = strlen(gtext);
+	*length = strlen(cr.text);
 	*buffer = malloc(*length);
 	if (*buffer == NULL) {
 		*length = 0;
-		g_free(gtext);
+		g_free(cr.text);
 		return;
 	}
 
-	memcpy(*buffer, gtext, *length);
+	memcpy(*buffer, cr.text, *length);
 
-	g_free(gtext);
+	g_free(cr.text);
 }
 
 
@@ -76,8 +96,6 @@ static void gui_get_clipboard(char **buffer, size_t *length)
 static void gui_set_clipboard(const char *buffer, size_t length,
 		nsclipboard_styles styles[], int n_styles)
 {
-	clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
-
 	if (!current_selection)
 		current_selection = g_string_new(NULL);
 	else
@@ -86,7 +104,8 @@ static void gui_set_clipboard(const char *buffer, size_t length,
 	current_selection = g_string_append_len(current_selection,
 			buffer, length);
 
-	gtk_clipboard_set_text(clipboard, current_selection->str, -1);
+	gdk_clipboard_set_text(gdk_display_get_clipboard(gdk_display_get_default()),
+			       current_selection->str);
 }
  
 static struct gui_clipboard_table clipboard_table = {

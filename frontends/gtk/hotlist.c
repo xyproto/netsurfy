@@ -50,9 +50,9 @@ struct nsgtk_hotlist_window {
 static struct nsgtk_hotlist_window *hotlist_window = NULL;
 
 #define MENUPROTO(x) static gboolean nsgtk_on_##x##_activate( \
-		GtkMenuItem *widget, gpointer g)
+		GtkWidget *widget, gpointer g)
 #define MENUEVENT(x) { #x, G_CALLBACK(nsgtk_on_##x##_activate) }
-#define MENUHANDLER(x) gboolean nsgtk_on_##x##_activate(GtkMenuItem *widget, \
+#define MENUHANDLER(x) gboolean nsgtk_on_##x##_activate(GtkWidget *widget, \
 		gpointer g)
 
 struct menu_events {
@@ -110,35 +110,23 @@ static struct menu_events menu_events[] = {
 
 
 /* file menu*/
+static void nsgtk_hotlist_export_to(const char *filename, void *pw)
+{
+	hotlist_export(filename, NULL);
+}
+
 MENUHANDLER(export)
 {
 	struct nsgtk_hotlist_window *hlwin;
-	GtkWidget *save_dialog;
 
 	hlwin = (struct nsgtk_hotlist_window *)g;
 
-	save_dialog = gtk_file_chooser_dialog_new("Save File",
-			hlwin->wnd,
-			GTK_FILE_CHOOSER_ACTION_SAVE,
-			NSGTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-			NSGTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
-			NULL);
-
-	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(save_dialog),
-			getenv("HOME") ? getenv("HOME") : "/");
-
-	gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(save_dialog),
-			"hotlist.html");
-
-	if (gtk_dialog_run(GTK_DIALOG(save_dialog)) == GTK_RESPONSE_ACCEPT) {
-		gchar *filename = gtk_file_chooser_get_filename(
-				GTK_FILE_CHOOSER(save_dialog));
-
-		hotlist_export(filename, NULL);
-		g_free(filename);
-	}
-
-	gtk_widget_destroy(save_dialog);
+	nsgtk_save_file_dialog(hlwin->wnd,
+			       "Save File",
+			       getenv("HOME") ? getenv("HOME") : "/",
+			       "hotlist.html",
+			       nsgtk_hotlist_export_to,
+			       NULL);
 
 	return TRUE;
 }
@@ -232,23 +220,19 @@ MENUHANDLER(launch)
 static void nsgtk_hotlist_init_menu(struct nsgtk_hotlist_window *hlwin)
 {
 	struct menu_events *event = menu_events;
-	GtkWidget *w;
+	GSimpleActionGroup *group;
 
+	group = g_simple_action_group_new();
 	while (event->widget != NULL) {
-		w = GTK_WIDGET(gtk_builder_get_object(hlwin->builder,
-						      event->widget));
-		if (w == NULL) {
-			NSLOG(netsurf, INFO,
-			      "Unable to connect menu widget ""%s""",
-			      event->widget);
-		} else {
-			g_signal_connect(G_OBJECT(w),
-					 "activate",
-					 event->handler,
-					 hlwin);
-		}
+		nsgtk_action_map_add_menu_action(G_ACTION_MAP(group),
+						 event->widget,
+						 event->handler,
+						 hlwin);
 		event++;
 	}
+	gtk_widget_insert_action_group(GTK_WIDGET(hlwin->wnd), "win",
+				       G_ACTION_GROUP(group));
+	g_object_unref(group);
 }
 
 
@@ -334,7 +318,6 @@ static nserror nsgtk_hotlist_init(void)
 		return res;
 	}
 
-	gtk_builder_connect_signals(ncwin->builder, NULL);
 
 	ncwin->wnd = GTK_WINDOW(gtk_builder_get_object(ncwin->builder,
 						       "wndHotlist"));
@@ -345,11 +328,8 @@ static nserror nsgtk_hotlist_init(void)
 	ncwin->core.drawing_area = GTK_DRAWING_AREA(
 		gtk_builder_get_object(ncwin->builder, "hotlistDrawingArea"));
 
-	/* make the delete event hide the window */
-	g_signal_connect(G_OBJECT(ncwin->wnd),
-			 "delete_event",
-			 G_CALLBACK(gtk_widget_hide_on_delete),
-			 NULL);
+	/* make closing the window hide it */
+	gtk_window_set_hide_on_close(ncwin->wnd, TRUE);
 
 	nsgtk_hotlist_init_menu(ncwin);
 
@@ -403,7 +383,7 @@ nserror nsgtk_hotlist_destroy(void)
 	res = hotlist_manager_fini();
 	if (res == NSERROR_OK) {
 		res = nsgtk_corewindow_fini(&hotlist_window->core);
-		gtk_widget_destroy(GTK_WIDGET(hotlist_window->wnd));
+		gtk_window_destroy(GTK_WINDOW(hotlist_window->wnd));
 		g_object_unref(G_OBJECT(hotlist_window->builder));
 		free(hotlist_window);
 		hotlist_window = NULL;

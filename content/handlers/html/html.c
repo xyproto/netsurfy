@@ -1090,6 +1090,19 @@ static void html_reformat(struct content *c, int width, int height)
 	htmlc->reflowing = false;
 	htmlc->had_initial_layout = true;
 
+	/* The layout is now valid, so a text control that requested
+	 * autofocus can be given the input focus.  Placing the caret at
+	 * the start makes the control report its caret through the html
+	 * focus machinery, which also routes keyboard input to it. */
+	if (htmlc->autofocus_box != NULL && htmlc->autofocus_done == false) {
+		struct form_control *gadget = htmlc->autofocus_box->gadget;
+
+		htmlc->autofocus_done = true;
+		if (gadget != NULL && gadget->data.text.ta != NULL) {
+			textarea_set_caret(gadget->data.text.ta, 0);
+		}
+	}
+
 	/* calculate next reflow time at three times what it took to reflow */
 	nsu_getmonotonic_ms(&ms_after);
 

@@ -36,57 +36,39 @@
 static gint srcpagenum;
 
 /**
- * callback to update sizes when style-set gtk signal
+ * Remove a page from the notebook it is in.
  */
-static void
-nsgtk_tab_update_size(GtkWidget *hbox,
-		      GtkStyle *previous_style,
-		      GtkWidget *close_button)
+static void nsgtk_tab_close_page(GtkWidget *page)
 {
-	PangoFontMetrics *metrics;
-	PangoContext *context;
-	int char_width, h, w;
-	GtkStyleContext *style;
-	GtkStateFlags state;
+	GtkNotebook *notebook;
 
-	state = nsgtk_widget_get_state_flags(hbox);
-	style = nsgtk_widget_get_style_context(hbox);
+	notebook = GTK_NOTEBOOK(gtk_widget_get_ancestor(page, GTK_TYPE_NOTEBOOK));
+	if (notebook != NULL) {
+		gtk_notebook_remove_page(notebook, gtk_notebook_page_num(notebook, page));
+	}
+}
 
-	context = gtk_widget_get_pango_context(hbox);
-	metrics = pango_context_get_metrics(context,
-				nsgtk_style_context_get_font(style, state),
-				pango_context_get_language(context));
 
-	char_width = pango_font_metrics_get_approximate_digit_width(metrics);
-	pango_font_metrics_unref(metrics);
-
-	nsgtk_icon_size_lookup_for_settings(gtk_widget_get_settings (hbox),
-			GTK_ICON_SIZE_MENU, &w, &h);
-
-	gtk_widget_set_size_request(hbox,
-			TAB_WIDTH_N_CHARS * PANGO_PIXELS(char_width) + 2 * w,
-			-1);
-
-	gtk_widget_set_size_request(close_button, w + 4, h + 4);
+/**
+ * gtk handler for clicking the close button of a tab
+ */
+static void nsgtk_tab_close_clicked(GtkButton *button, gpointer user_data)
+{
+	nsgtk_tab_close_page(GTK_WIDGET(user_data));
 }
 
 
 /**
  * gtk event handler for button release on tab hbox
  */
-static gboolean
-nsgtk_tab_button_release(GtkWidget *widget,
-			 GdkEventButton *event,
+static void
+nsgtk_tab_button_release(GtkGestureClick *gesture,
+			 gint n_press,
+			 gdouble x,
+			 gdouble y,
 			 gpointer user_data)
 {
-	GtkWidget *page;
-
-	if ((event->type == GDK_BUTTON_RELEASE) && (event->button == 2)) {
-		page = (GtkWidget *)user_data;
-		gtk_widget_destroy(page);
-		return TRUE;
-	}
-	return FALSE;
+	nsgtk_tab_close_page(GTK_WIDGET(user_data));
 }
 
 
@@ -102,68 +84,59 @@ nsgtk_tab_label_setup(GtkWidget *page,
 		      const char *title,
 		      GdkPixbuf *icon_pixbuf)
 {
-	GtkWidget *ebox, *hbox, *favicon, *label, *button, *close;
+	GtkWidget *hbox, *favicon, *label, *button;
+	GtkGesture *gesture;
 
 	/* horizontal box */
-	hbox = nsgtk_hbox_new(FALSE, 3);
-
-	/* event box */
-	ebox = gtk_event_box_new();
-	gtk_widget_set_events(ebox, GDK_BUTTON_PRESS_MASK);
-	gtk_container_add(GTK_CONTAINER(ebox), hbox);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 3);
 
 	/* construct a favicon */
 	favicon = gtk_image_new();
 	if (icon_pixbuf != NULL) {
-		gtk_image_set_from_pixbuf(GTK_IMAGE(favicon), icon_pixbuf);
+		nsgtk_image_set_from_pixbuf(GTK_IMAGE(favicon), icon_pixbuf);
 	}
 
 	/* construct a label */
 	label = gtk_label_new(title);
 	gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);
 	gtk_label_set_single_line_mode(GTK_LABEL(label), TRUE);
+	gtk_label_set_width_chars(GTK_LABEL(label), TAB_WIDTH_N_CHARS);
+	gtk_label_set_max_width_chars(GTK_LABEL(label), TAB_WIDTH_N_CHARS);
+	gtk_widget_set_hexpand(label, TRUE);
+	gtk_label_set_xalign(GTK_LABEL(label), 0.0);
 	nsgtk_widget_set_alignment(label, GTK_ALIGN_START, GTK_ALIGN_CENTER);
 	nsgtk_widget_set_margins(label, 0, 0);
-	gtk_widget_show(label);
 
 	/* construct a close button  */
-	button = gtk_button_new();
-
-	close = nsgtk_image_new_from_stock(NSGTK_STOCK_CLOSE,
-					   GTK_ICON_SIZE_LARGE_TOOLBAR);
-	gtk_container_add(GTK_CONTAINER(button), close);
-	nsgtk_button_set_focus_on_click(GTK_BUTTON(button), FALSE);
-	gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
+	button = gtk_button_new_from_icon_name(NSGTK_STOCK_CLOSE);
+	gtk_widget_set_focus_on_click(button, FALSE);
+	gtk_button_set_has_frame(GTK_BUTTON(button), FALSE);
 	gtk_widget_set_tooltip_text(button, "Close this tab.");
 
 	/* pack the widgets into the label box */
-	gtk_box_pack_start(GTK_BOX(hbox), favicon, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(hbox), favicon);
+	gtk_box_append(GTK_BOX(hbox), label);
+	gtk_box_append(GTK_BOX(hbox), button);
 
 	/* make the icon and label widgets findable by name */
-	g_object_set_data(G_OBJECT(ebox), "favicon", favicon);
-	g_object_set_data(G_OBJECT(ebox), "label", label);
+	g_object_set_data(G_OBJECT(hbox), "favicon", favicon);
+	g_object_set_data(G_OBJECT(hbox), "label", label);
 
 	/* attach signal handlers */
-	g_signal_connect_swapped(button,
-				 "clicked",
-				 G_CALLBACK(gtk_widget_destroy), page);
+	g_signal_connect(button,
+			 "clicked",
+			 G_CALLBACK(nsgtk_tab_close_clicked), page);
 
-	g_signal_connect(hbox,
-			 "style-set",
-			 G_CALLBACK(nsgtk_tab_update_size),
-			 button);
-
-	g_signal_connect(ebox,
-			 "button-release-event",
+	/* middle click closes the tab */
+	gesture = gtk_gesture_click_new();
+	gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(gesture), 2);
+	g_signal_connect(gesture,
+			 "released",
 			 G_CALLBACK(nsgtk_tab_button_release),
 			 page);
+	gtk_widget_add_controller(hbox, GTK_EVENT_CONTROLLER(gesture));
 
-
-	gtk_widget_show_all(ebox);
-
-	return ebox;
+	return hbox;
 }
 
 
@@ -205,7 +178,7 @@ nsgtk_tab_switch_page_after(GtkNotebook *notebook,
 {
 	GtkWidget *srcpage;
 	GtkWidget *addpage;
-	GtkMenuBar *menubar;
+	GtkWidget *menubar;
 	struct gui_window *gw = NULL;
 	nserror res = NSERROR_INVALID;
 
@@ -219,11 +192,11 @@ nsgtk_tab_switch_page_after(GtkNotebook *notebook,
 		if (gw != NULL) {
 			/* tab with web page in it */
 			nsgtk_scaffolding_set_top_level(gw);
-			gtk_widget_show(GTK_WIDGET(addpage));
+			gtk_widget_set_visible(GTK_WIDGET(addpage), TRUE);
 			gtk_widget_set_sensitive(GTK_WIDGET(menubar), true);
 		} else {
 			/* tab with non browser content (e.g. tb customize) */
-			gtk_widget_hide(GTK_WIDGET(addpage));
+			gtk_widget_set_visible(GTK_WIDGET(addpage), FALSE);
 			gtk_widget_set_sensitive(GTK_WIDGET(menubar), false);
 		}
 		return;
@@ -315,22 +288,17 @@ nsgtk_tab_add_newtab(GtkNotebook *notebook)
 	GtkWidget *tabcontents;
 	GtkWidget *add;
 
-	tablabel = nsgtk_hbox_new(FALSE, 1);
-	tabcontents = nsgtk_hbox_new(FALSE, 1);
+	tablabel = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 1);
+	tabcontents = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 1);
 
-	add = gtk_image_new_from_icon_name(NSGTK_STOCK_ADD,
-					   GTK_ICON_SIZE_LARGE_TOOLBAR);
+	add = gtk_image_new_from_icon_name(NSGTK_STOCK_ADD);
 	gtk_widget_set_tooltip_text(add, "New Tab");
 
-	gtk_box_pack_start(GTK_BOX(tablabel), add, FALSE, FALSE, 0);
-
-	gtk_widget_show_all(tablabel);
+	gtk_box_append(GTK_BOX(tablabel), add);
 
 	gtk_notebook_append_page(notebook, tabcontents, tablabel);
 
 	gtk_notebook_set_tab_reorderable(notebook, tabcontents, false);
-
-	gtk_widget_show_all(tabcontents);
 
 	g_object_set_data(G_OBJECT(notebook), "addtab", tabcontents);
 
@@ -436,7 +404,7 @@ nsgtk_tab_add_page(GtkNotebook *notebook,
 
 	gtk_notebook_set_tab_reorderable(notebook, tab_contents, true);
 
-	gtk_widget_show_all(tab_contents);
+	gtk_widget_set_visible(tab_contents, TRUE);
 
 	if (background) {
 		gtk_notebook_set_current_page(notebook, remember);
@@ -488,7 +456,7 @@ nserror nsgtk_tab_set_icon(GtkWidget *page, GdkPixbuf *pixbuf)
 
 	favicon = GTK_IMAGE(g_object_get_data(G_OBJECT(tab_label), "favicon"));
 
-	gtk_image_set_from_pixbuf(favicon, pixbuf);
+	nsgtk_image_set_from_pixbuf(favicon, pixbuf);
 
 	return NSERROR_OK;
 }

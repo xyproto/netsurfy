@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <object class="GtkWindow" id="wndDownloads">
+    <property name="title" translatable="1">Downloads - NetSurf</property>
+    <property name="default-width">500</property>
+    <property name="default-height">300</property>
+    <property name="destroy-with-parent">1</property>
+    <property name="hide-on-close">1</property>
+    <property name="child">
+      <object class="GtkBox" id="vbox1">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkScrolledWindow" id="scrolledwindow1">
+            <property name="vexpand">1</property>
+            <property name="hscrollbar-policy">never</property>
+            <property name="child">
+              <object class="GtkTreeView" id="treeDownloads">
+                <property name="search-column">2</property>
+                <property name="show-expanders">0</property>
+                <property name="rubber-banding">1</property>
+              </object>
+            </property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkSeparator" id="hseparator1"/>
+        </child>
+        <child>
+          <object class="GtkBox" id="hbox1">
+            <property name="spacing">6</property>
+            <child>
+              <object class="GtkProgressBar" id="progressBar">
+                <property name="hexpand">1</property>
+                <property name="valign">center</property>
+                <property name="margin-top">2</property>
+                <property name="margin-bottom">2</property>
+                <property name="margin-start">2</property>
+                <property name="margin-end">2</property>
+                <property name="show-text">1</property>
+                <property name="text" translatable="1">0% of 0 files</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="buttonPause">
+                <property name="sensitive">0</property>
+                <property name="has-frame">0</property>
+                <property name="child">
+                  <object class="GtkBox">
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkImage">
+                        <property name="icon-name">media-playback-pause</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label" translatable="1">Pause</property>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="buttonPlay">
+                <property name="sensitive">0</property>
+                <property name="has-frame">0</property>
+                <property name="child">
+                  <object class="GtkBox">
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkImage">
+                        <property name="icon-name">media-playback-start</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label" translatable="1">Resume</property>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="buttonCancel">
+                <property name="sensitive">0</property>
+                <property name="has-frame">0</property>
+                <property name="child">
+                  <object class="GtkBox">
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkImage">
+                        <property name="icon-name">process-stop</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label" translatable="1">Cancel</property>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="buttonClear">
+                <property name="sensitive">0</property>
+                <property name="has-frame">0</property>
+                <property name="child">
+                  <object class="GtkBox">
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkImage">
+                        <property name="icon-name">edit-clear</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label" translatable="1">Clear</property>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+  </object>
+</interface>

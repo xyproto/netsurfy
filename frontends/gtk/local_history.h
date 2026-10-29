@@ -29,14 +29,12 @@ struct browser_window;
 /**
  * make the local history window visible.
  *
+ * \param anchor The widget the local history is shown below
+ * \param bw The browser window to show the history of
  * \return NSERROR_OK on success else appropriate error code on faliure.
  */
-nserror nsgtk_local_history_present(GtkWindow *parent, struct browser_window *bw);
+nserror nsgtk_local_history_present(GtkWidget *anchor, struct browser_window *bw);
 
-/**
- * set the local history window position.
- */
-void nsgtk_local_history_set_position(int x, int y);
 
 /**
  * hide the local history window from being visible.

@@ -153,8 +153,9 @@ GdkCursor *nsgtk_create_menu_cursor(void)
 
 	res = nsgdk_pixbuf_new_from_resname("menu_cursor.png", &pixbuf);
 	if (res == NSERROR_OK) {
-		cursor = gdk_cursor_new_from_pixbuf(gdk_display_get_default(),
-						    pixbuf, 0, 3);
+		GdkTexture *texture = nsgtk_texture_new_for_pixbuf(pixbuf);
+		cursor = gdk_cursor_new_from_texture(texture, 0, 3, NULL);
+		g_object_unref(texture);
 		g_object_unref(pixbuf);
 	}
 

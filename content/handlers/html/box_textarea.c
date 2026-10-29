@@ -26,6 +26,7 @@
 
 #include "utils/config.h"
 #include "utils/log.h"
+#include "utils/corestrings.h"
 #include "utils/messages.h"
 #include "netsurf/keypress.h"
 #include "netsurf/misc.h"
@@ -257,6 +258,7 @@ static void box_textarea_callback(void *data, struct textarea_msg *msg)
 bool box_textarea_create_textarea(html_content *html,
 		struct box *box, struct dom_node *node)
 {
+	bool autofocus = false;
 	dom_string *dom_text = NULL;
 	dom_exception err;
 	textarea_setup ta_setup;
@@ -333,6 +335,16 @@ bool box_textarea_create_textarea(html_content *html,
 
 	if (read_only || disabled)
 		ta_flags |= TEXTAREA_READONLY;
+
+	/* Remember text controls that have the autofocus attribute, so
+	 * they can be given the input focus once the layout is valid */
+	if (html->autofocus_box == NULL) {
+		err = dom_element_has_attribute(
+				(dom_element *) node, corestring_dom_autofocus,
+				&autofocus);
+		if (err == DOM_NO_ERR && autofocus)
+			html->autofocus_box = box;
+	}
 
 	gadget->data.text.data.gadget = gadget;
 

@@ -31,7 +31,7 @@ extern GdkPixbuf *favicon_pixbuf;
 extern char **respaths;
 
 /** input conversion. */
-uint32_t gtk_gui_gdkkey_to_nskey(GdkEventKey *eventkey);
+uint32_t gtk_gui_gdkkey_to_nskey(guint keyval, GdkModifierType state);
 
 /** set when no windows remain open. */
 extern bool nsgtk_complete;

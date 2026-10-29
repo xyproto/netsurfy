@@ -33,11 +33,8 @@
 
 #include "gtk/warn.h"
 #include "gtk/compat.h"
+#include "gtk/resources.h"
 #include "gtk/about.h"
-
-#define ABOUT_RESPONSE_ID_LICENCE 1
-#define ABOUT_RESPONSE_ID_CREDITS 2
-
 
 /**
  * Open a url and a browser window/tab
@@ -65,62 +62,59 @@ static void about_open(const char *url_text)
 	}
 }
 
-/**
- * About dialog response handling.
- *
- * \param dialog The dialog widget
- * \param response_id The response ID from the user clicking.
- * \param user_data The value from the signal connection.
- */
-static void
-nsgtk_about_dialog_response(GtkDialog *dialog,
-			    gint response_id,
-			    gpointer user_data)
+static void nsgtk_about_licence_clicked(GtkButton *button, gpointer data)
 {
-	switch (response_id) {
+	about_open("about:licence");
+	gtk_window_destroy(GTK_WINDOW(data));
+}
 
-	case ABOUT_RESPONSE_ID_LICENCE:
-		about_open("about:licence");
-		break;
+static void nsgtk_about_credits_clicked(GtkButton *button, gpointer data)
+{
+	about_open("about:credits");
+	gtk_window_destroy(GTK_WINDOW(data));
+}
 
-	case ABOUT_RESPONSE_ID_CREDITS:
-		about_open("about:credits");
-		break;
-	}
+static void nsgtk_about_close_clicked(GtkButton *button, gpointer data)
+{
+	gtk_window_destroy(GTK_WINDOW(data));
+}
 
-	/* close about dialog */
-	gtk_widget_destroy(GTK_WIDGET(dialog));
+static GtkWidget *about_add_button(GtkWidget *box, GtkWidget *dialog, const char *label, GCallback callback)
+{
+	GtkWidget *button = gtk_button_new_with_label(label);
+
+	g_signal_connect(button, "clicked", callback, dialog);
+	gtk_box_append(GTK_BOX(box), button);
+
+	return button;
 }
 
 void nsgtk_about_dialog_init(GtkWindow *parent)
 {
-	GtkWidget *dialog, *vbox, *label;
+	GtkWidget *dialog, *vbox, *buttons, *label, *close;
 	gchar *name_string;
-	GList *pixbufs;
+	GdkPixbuf *pixbuf;
 
 	/* Create the dialog */
-	dialog = gtk_dialog_new_with_buttons("About NetSurf",
-					     parent,
-					     GTK_DIALOG_DESTROY_WITH_PARENT,
-					     "Licence", ABOUT_RESPONSE_ID_LICENCE,
-					     "Credits", ABOUT_RESPONSE_ID_CREDITS,
-					     "Close", GTK_RESPONSE_CANCEL,
-					     NULL, NULL);
+	dialog = gtk_window_new();
+	gtk_window_set_title(GTK_WINDOW(dialog), "About NetSurf");
+	gtk_window_set_transient_for(GTK_WINDOW(dialog), parent);
+	gtk_window_set_destroy_with_parent(GTK_WINDOW(dialog), TRUE);
+	gtk_window_set_resizable(GTK_WINDOW(dialog), FALSE);
 
-	vbox = nsgtk_vbox_new(FALSE, 8);
-
-	gtk_box_pack_start(GTK_BOX(nsgtk_dialog_get_content_area(GTK_DIALOG(dialog))), vbox, TRUE, TRUE, 0);
+	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 8);
+	nsgtk_widget_set_margins(vbox, 12, 12);
+	gtk_window_set_child(GTK_WINDOW(dialog), vbox);
 
 	/* NetSurf icon */
-	pixbufs = gtk_window_get_default_icon_list();
-	if (pixbufs != NULL) {
+	if (nsgdk_pixbuf_new_from_resname("netsurf.xpm", &pixbuf) == NSERROR_OK) {
 		GtkWidget *image;
 
-		image = nsgtk_image_new_from_pixbuf_icon(GDK_PIXBUF(g_list_nth_data(pixbufs, 0)),
-							 GTK_ICON_SIZE_DIALOG);
-		g_list_free(pixbufs);
+		image = nsgtk_image_new_from_pixbuf(pixbuf);
+		gtk_image_set_pixel_size(GTK_IMAGE(image), 48);
+		g_object_unref(pixbuf);
 
-		gtk_box_pack_start(GTK_BOX(vbox), image, FALSE, FALSE, 0);
+		gtk_box_append(GTK_BOX(vbox), image);
 	}
 
 	/* version string */
@@ -130,28 +124,29 @@ void nsgtk_about_dialog_init(GtkWindow *parent)
 	g_free(name_string);
 	gtk_label_set_selectable (GTK_LABEL (label), TRUE);
 	gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
-	gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(vbox), label);
 
 	label = gtk_label_new(messages_get("AboutDesc"));
 	gtk_label_set_selectable(GTK_LABEL (label), TRUE);
 	gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
-	gtk_label_set_line_wrap (GTK_LABEL (label), TRUE);
-	gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
+	gtk_label_set_wrap(GTK_LABEL (label), TRUE);
+	gtk_box_append(GTK_BOX(vbox), label);
 
 	label = gtk_label_new(messages_get("NetSurfCopyright"));
 	gtk_label_set_selectable(GTK_LABEL(label), TRUE);
 	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_CENTER);
-	gtk_box_pack_start(GTK_BOX (vbox), label, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(vbox), label);
 
-	/* Remove separator */
-	nsgtk_dialog_set_has_separator(GTK_DIALOG (dialog), FALSE);
+	buttons = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+	gtk_widget_set_halign(buttons, GTK_ALIGN_END);
+	gtk_widget_set_margin_top(buttons, 6);
+	about_add_button(buttons, dialog, "Licence", G_CALLBACK(nsgtk_about_licence_clicked));
+	about_add_button(buttons, dialog, "Credits", G_CALLBACK(nsgtk_about_credits_clicked));
+	close = about_add_button(buttons, dialog, "Close", G_CALLBACK(nsgtk_about_close_clicked));
+	gtk_box_append(GTK_BOX(vbox), buttons);
 
-	/* Ensure that the dialog box response is processed. */
-	g_signal_connect_swapped(dialog,
-				  "response",
-				  G_CALLBACK(nsgtk_about_dialog_response),
-				  dialog);
+	gtk_window_set_default_widget(GTK_WINDOW(dialog), close);
+	gtk_window_set_focus(GTK_WINDOW(dialog), close);
 
-	/* Add the label, and show everything we've added to the dialog. */
-	gtk_widget_show_all(dialog);
+	gtk_window_present(GTK_WINDOW(dialog));
 }

@@ -54,28 +54,14 @@ nserror nsgtk_scaffolding_throbber(struct gui_window* gw, bool active);
 /**
  * open the toolbar context menu
  */
-nserror nsgtk_scaffolding_toolbar_context_menu(struct nsgtk_scaffolding *gs);
+nserror nsgtk_scaffolding_toolbar_context_menu(struct nsgtk_scaffolding *gs, GtkWidget *widget, gdouble x, gdouble y);
 
-/**
- * Position the page-info popup in the right place
- *
- * \param gs The scaffolding to position relative to
- * \param win The page-info window to position
- */
-nserror nsgtk_scaffolding_position_page_info(struct nsgtk_scaffolding *gs,
-					     struct nsgtk_pi_window *win);
 
-/**
- * Position the local-history popup in the right place
- *
- * \param gs The scaffolding to position relative to
- */
-nserror nsgtk_scaffolding_position_local_history(struct nsgtk_scaffolding *gs);
 
 /**
  * open the burger menu
  */
-nserror nsgtk_scaffolding_burger_menu(struct nsgtk_scaffolding *gs);
+nserror nsgtk_scaffolding_burger_menu(struct nsgtk_scaffolding *gs, GtkWidget *widget);
 
 /**
  * Obtain the most recently used scaffolding element.
@@ -98,7 +84,7 @@ GtkNotebook *nsgtk_scaffolding_notebook(struct nsgtk_scaffolding *g);
 
 struct gtk_search *nsgtk_scaffolding_search(struct nsgtk_scaffolding *g);
 
-GtkMenuBar *nsgtk_scaffolding_menu_bar(struct nsgtk_scaffolding *g);
+GtkWidget *nsgtk_scaffolding_menu_bar(struct nsgtk_scaffolding *g);
 
 struct gui_window *nsgtk_scaffolding_top_level(struct nsgtk_scaffolding *g);
 
@@ -145,7 +131,7 @@ void nsgtk_scaffolding_set_sensitivity(struct nsgtk_scaffolding *g);
  * \param x The x co-ordinate.
  * \param y The y co-ordinate.
  */
-void nsgtk_scaffolding_context_menu(struct nsgtk_scaffolding *g, gdouble x, gdouble y);
+void nsgtk_scaffolding_context_menu(struct nsgtk_scaffolding *g, GtkWidget *widget, gdouble wx, gdouble wy, gdouble x, gdouble y);
 
 /**
  * set the title in the window

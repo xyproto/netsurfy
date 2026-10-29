@@ -47,14 +47,12 @@
  * menu entry context
  */
 struct nsgtk_menu {
-	GtkWidget *main; /* main menu entry */
-	GtkWidget *burger; /* right click menu */
-	GtkWidget *popup; /* popup menu entry */
+	/** action activated by all menus and the keyboard shortcut */
+	GSimpleAction *action;
 	/**
 	 * menu item handler
 	 */
-	gboolean (*mhandler)(GtkMenuItem *widget, gpointer data);
-	const char *iconname; /* name of the icon to use */
+	gboolean (*mhandler)(GtkWidget *widget, gpointer data);
 	bool sensitivity; /* menu item is sensitive */
 };
 
@@ -80,19 +78,13 @@ struct nsgtk_scaffolding {
 	/** handler id for tabs remove callback */
 	gulong tabs_remove_handler_id;
 
-	/** menu bar hierarchy */
-	struct nsgtk_bar_submenu *menu_bar;
+	/** menu bar */
+	GtkWidget *menu_bar;
 
-	/** burger menu hierarchy */
-	struct nsgtk_burger_menu *burger_menu;
+	/** actions activated by the menus */
+	GSimpleActionGroup *actions;
 
-	/** right click popup menu hierarchy */
-	struct nsgtk_popup_menu *popup_menu;
-
-	/** link popup menu */
-	struct nsgtk_link_menu *link_menu;
-
-	/** menu entries widgets for sensitivity adjustment */
+	/** menu entries for sensitivity adjustment */
 	struct nsgtk_menu menus[PLACEHOLDER_BUTTON];
 };
 
@@ -111,69 +103,6 @@ static struct nsgtk_scaffolding *scaf_list = NULL;
  *  contextual menu is opened.
  */
 static struct browser_window_features current_menu_features;
-
-
-/**
- * Helper to hide popup menu entries by grouping.
- *
- * \param menu The popup menu to modify.
- * \param nav flag to indicate if navigation entries should be hidden.
- * \param cnp flag to indicate if cut and paste entries should be hidden.
- * \param custom flag to indicate if menu customisation is hidden.
- */
-static void
-popup_menu_hide(struct nsgtk_popup_menu *menu, bool nav, bool cnp)
-{
-	if (nav) {
-		gtk_widget_hide(GTK_WIDGET(menu->back_menuitem));
-		gtk_widget_hide(GTK_WIDGET(menu->forward_menuitem));
-		gtk_widget_hide(GTK_WIDGET(menu->stop_menuitem));
-		gtk_widget_hide(GTK_WIDGET(menu->reload_menuitem));
-
-		gtk_widget_hide(menu->first_separator);
-	}
-
-	if (cnp) {
-		gtk_widget_hide(GTK_WIDGET(menu->cut_menuitem));
-		gtk_widget_hide(GTK_WIDGET(menu->copy_menuitem));
-		gtk_widget_hide(GTK_WIDGET(menu->paste_menuitem));
-
-		gtk_widget_hide(menu->second_separator);
-	}
-
-
-}
-
-
-/**
- * Helper to show popup menu entries by grouping.
- *
- * \param menu The popup menu to modify.
- * \param nav flag to indicate if navigation entries should be visible.
- * \param cnp flag to indicate if cut and paste entries should be visible.
- * \param custom flag to indicate if menu customisation is visible.
- */
-static void
-popup_menu_show(struct nsgtk_popup_menu *menu, bool nav, bool cnp)
-{
-	if (nav) {
-		gtk_widget_show(GTK_WIDGET(menu->back_menuitem));
-		gtk_widget_show(GTK_WIDGET(menu->forward_menuitem));
-		gtk_widget_show(GTK_WIDGET(menu->stop_menuitem));
-		gtk_widget_show(GTK_WIDGET(menu->reload_menuitem));
-
-		gtk_widget_show(menu->first_separator);
-	}
-
-	if (cnp) {
-		gtk_widget_show(GTK_WIDGET(menu->cut_menuitem));
-		gtk_widget_show(GTK_WIDGET(menu->copy_menuitem));
-		gtk_widget_show(GTK_WIDGET(menu->paste_menuitem));
-
-		gtk_widget_show(menu->second_separator);
-	}
-
-}
 
 
 /**
@@ -216,13 +145,10 @@ static void scaffolding_window_destroy(GtkWidget *widget, gpointer data)
 
 	NSLOG(netsurf, INFO, "scaffold list head: %p", scaf_list);
 
-	/* ensure menu resources are freed */
-	nsgtk_menu_bar_destroy(gs->menu_bar);
-	nsgtk_burger_menu_destroy(gs->burger_menu);
-	nsgtk_popup_menu_destroy(gs->popup_menu);
-	nsgtk_link_menu_destroy(gs->link_menu);
-
 	g_signal_handler_disconnect(gs->notebook, gs->tabs_remove_handler_id);
+	g_object_unref(gs->notebook);
+
+	g_object_unref(gs->actions);
 
 	free(gs);
 
@@ -234,24 +160,21 @@ static void scaffolding_window_destroy(GtkWidget *widget, gpointer data)
 
 
 /**
- * gtk event callback on window delete event.
+ * gtk event callback on window close request.
  *
  * prevent window close if download is in progress
  *
- * \param widget The widget receiving the delete event
- * \param event The event
+ * \param window The window being closed
  * \param data The context pointer passed when the connection was made.
- * \return TRUE to indicate message handled.
+ * \return TRUE to indicate the close request is handled.
  */
 static gboolean
-scaffolding_window_delete_event(GtkWidget *widget,
-				GdkEvent *event,
-				gpointer data)
+scaffolding_window_close_request(GtkWindow *window, gpointer data)
 {
 	struct nsgtk_scaffolding *g = data;
 
-	if (nsgtk_check_for_downloads(GTK_WINDOW(widget)) == false) {
-		gtk_widget_destroy(GTK_WIDGET(g->window));
+	if (nsgtk_check_for_downloads(window) == false) {
+		gtk_window_destroy(g->window);
 	}
 	return TRUE;
 }
@@ -334,57 +257,63 @@ nsgtk_scaffolding_enable_edit_actions_sensitivity(struct nsgtk_scaffolding *g)
 	g->menus[COPY_BUTTON].sensitivity = true;
 	g->menus[CUT_BUTTON].sensitivity = true;
 	nsgtk_scaffolding_set_sensitivity(g);
-
-	popup_menu_show(g->popup_menu, false, true);
 }
 
 /* signal handling functions for the toolbar, URL bar, and menu bar */
 
-/**
- * gtk event for edit menu being show
- *
- * \param widget The menu widget
- * \param g scaffolding handle
- * \return TRUE to indicate event handled
- */
-static gboolean
-nsgtk_window_edit_menu_shown(GtkWidget *widget,
-			     struct nsgtk_scaffolding *g)
+static gboolean unparent_popover(gpointer data)
 {
-	nsgtk_scaffolding_update_edit_actions_sensitivity(g);
-
-	return TRUE;
+	gtk_widget_unparent(GTK_WIDGET(data));
+	g_object_unref(data);
+	return G_SOURCE_REMOVE;
 }
 
 /**
- * gtk event handler for edit menu being hidden
+ * gtk event handler for a popup menu being closed.
  *
- * \param widget The menu widget
+ * \param popover The popup menu
  * \param g scaffolding handle
- * \return TRUE to indicate event handled
  */
-static gboolean
-nsgtk_window_edit_menu_hidden(GtkWidget *widget,
-			      struct nsgtk_scaffolding *g)
+static void
+nsgtk_window_popup_menu_closed(GtkPopover *popover, struct nsgtk_scaffolding *g)
 {
 	nsgtk_scaffolding_enable_edit_actions_sensitivity(g);
-
-	return TRUE;
+	g_object_ref(popover);
+	g_idle_add(unparent_popover, popover);
 }
 
-
 /**
- * gtk event handler for popup menu being hidden.
+ * Open a popup menu on a widget.
  *
- * \param widget The menu widget
  * \param g scaffolding handle
- * \return TRUE to indicate event handled
+ * \param model The menu to show, the reference is taken
+ * \param widget The widget the menu belongs to
+ * \param point true to open the menu at x, y in the widget
+ * \param x The horizontal position in the widget
+ * \param y The vertical position in the widget
  */
-static gboolean
-nsgtk_window_popup_menu_hidden(GtkWidget *widget, struct nsgtk_scaffolding *g)
+static void
+nsgtk_scaffolding_popup(struct nsgtk_scaffolding *g,
+			GMenuModel *model,
+			GtkWidget *widget,
+			bool point,
+			gdouble x,
+			gdouble y)
 {
-	nsgtk_scaffolding_enable_edit_actions_sensitivity(g);
-	return TRUE;
+	GtkWidget *popover;
+
+	popover = gtk_popover_menu_new_from_model(model);
+	g_object_unref(model);
+	gtk_widget_set_parent(popover, widget);
+	if (point) {
+		GdkRectangle rect = { (int)x, (int)y, 1, 1 };
+		gtk_popover_set_pointing_to(GTK_POPOVER(popover), &rect);
+		gtk_popover_set_has_arrow(GTK_POPOVER(popover), FALSE);
+		gtk_widget_set_halign(popover, GTK_ALIGN_START);
+	}
+	g_signal_connect(popover, "closed",
+			 G_CALLBACK(nsgtk_window_popup_menu_closed), g);
+	gtk_popover_popup(GTK_POPOVER(popover));
 }
 
 
@@ -406,14 +335,6 @@ nsgtk_window_tabs_add(GtkNotebook *notebook,
 		      struct nsgtk_scaffolding *g)
 {
 	gboolean visible = gtk_notebook_get_show_tabs(g->notebook);
-	g_object_set(g->menu_bar->view_submenu->tabs_menuitem,
-		     "visible",
-		     visible,
-		     NULL);
-	g_object_set(g->burger_menu->view_submenu->tabs_menuitem,
-		     "visible",
-		     visible,
-		     NULL);
 
 	g->menus[NEXTTAB_BUTTON].sensitivity = visible;
 	g->menus[PREVTAB_BUTTON].sensitivity = visible;
@@ -451,15 +372,11 @@ nsgtk_window_tabs_remove(GtkNotebook *notebook,
 
 	/* if this is the last tab destroy the scaffold in addition */
 	if (gtk_notebook_get_n_pages(notebook) == 1) {
-		gtk_widget_destroy(GTK_WIDGET(gs->window));
+		gtk_window_destroy(gs->window);
 		return;
 	}
 
 	visible = gtk_notebook_get_show_tabs(gs->notebook);
-	g_object_set(gs->menu_bar->view_submenu->tabs_menuitem,
-		     "visible", visible, NULL);
-	g_object_set(gs->burger_menu->view_submenu->tabs_menuitem,
-		     "visible", visible, NULL);
 
 	gs->menus[NEXTTAB_BUTTON].sensitivity = visible;
 	gs->menus[PREVTAB_BUTTON].sensitivity = visible;
@@ -468,7 +385,6 @@ nsgtk_window_tabs_remove(GtkNotebook *notebook,
 	nsgtk_scaffolding_set_sensitivity(gs);
 }
 
-
 /* signal handlers for menu entries */
 
 /**
@@ -476,7 +392,7 @@ nsgtk_window_tabs_remove(GtkNotebook *notebook,
  */
 #define TOOLBAR_ITEM_p(identifier, name)				\
 	static gboolean							\
-nsgtk_on_##name##_activate_menu(GtkMenuItem *widget, gpointer data)	\
+nsgtk_on_##name##_activate_menu(GtkWidget *widget, gpointer data)	\
 {									\
 	struct nsgtk_scaffolding *gs = (struct nsgtk_scaffolding *)data;\
 	nsgtk_window_item_activate(gs->top_level, identifier);		\
@@ -494,7 +410,7 @@ nsgtk_on_##name##_activate_menu(GtkMenuItem *widget, gpointer data)	\
 
 
 static gboolean
-nsgtk_on_savelink_activate_menu(GtkMenuItem *widget, gpointer data)
+nsgtk_on_savelink_activate_menu(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_scaffolding *g = (struct nsgtk_scaffolding *) data;
 	struct gui_window *gui = g->top_level;
@@ -523,7 +439,7 @@ nsgtk_on_savelink_activate_menu(GtkMenuItem *widget, gpointer data)
  * Handler for opening new window from a link. attached to the popup menu.
  */
 static gboolean
-nsgtk_on_link_openwin_activate_menu(GtkMenuItem *widget, gpointer data)
+nsgtk_on_link_openwin_activate_menu(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_scaffolding *g = (struct nsgtk_scaffolding *) data;
 	struct gui_window *gui = g->top_level;
@@ -547,7 +463,7 @@ nsgtk_on_link_openwin_activate_menu(GtkMenuItem *widget, gpointer data)
  * Handler for opening new tab from a link. attached to the popup menu.
  */
 static gboolean
-nsgtk_on_link_opentab_activate_menu(GtkMenuItem *widget, gpointer data)
+nsgtk_on_link_opentab_activate_menu(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_scaffolding *g = (struct nsgtk_scaffolding *) data;
 	struct gui_window *gui = g->top_level;
@@ -573,7 +489,7 @@ nsgtk_on_link_opentab_activate_menu(GtkMenuItem *widget, gpointer data)
  * Handler for bookmarking a link. attached to the popup menu.
  */
 static gboolean
-nsgtk_on_link_bookmark_activate_menu(GtkMenuItem *widget, gpointer data)
+nsgtk_on_link_bookmark_activate_menu(GtkWidget *widget, gpointer data)
 {
 	if (current_menu_features.link == NULL)
 		return FALSE;
@@ -588,22 +504,21 @@ nsgtk_on_link_bookmark_activate_menu(GtkMenuItem *widget, gpointer data)
  * Handler for copying a link. attached to the popup menu.
  */
 static gboolean
-nsgtk_on_link_copy_activate_menu(GtkMenuItem *widget, gpointer data)
+nsgtk_on_link_copy_activate_menu(GtkWidget *widget, gpointer data)
 {
-	GtkClipboard *clipboard;
+	struct nsgtk_scaffolding *g = (struct nsgtk_scaffolding *) data;
 
 	if (current_menu_features.link == NULL)
 		return FALSE;
 
-	clipboard = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
-	gtk_clipboard_set_text(clipboard,
-			       nsurl_access(current_menu_features.link), -1);
+	gdk_clipboard_set_text(gtk_widget_get_clipboard(GTK_WIDGET(g->window)),
+			       nsurl_access(current_menu_features.link));
 
 	return TRUE;
 }
 
 
-static gboolean nsgtk_on_find_activate_menu(GtkMenuItem *widget, gpointer data)
+static gboolean nsgtk_on_find_activate_menu(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_scaffolding *g = (struct nsgtk_scaffolding *)data;
 
@@ -662,104 +577,38 @@ static nserror set_bar_show(const char *bar, bool show)
 	return NSERROR_OK;
 }
 
-static gboolean
-nsgtk_on_menubar_activate_menu(GtkMenuItem *widget, gpointer data)
+/**
+ * Show or hide the menu bar when the state of its toggle action changes.
+ */
+static void
+nsgtk_on_menubar_change_state(GSimpleAction *action, GVariant *state, gpointer data)
 {
 	struct nsgtk_scaffolding *gs = (struct nsgtk_scaffolding *)data;
-	GtkCheckMenuItem *bmcmi; /* burger menu check */
-	GtkCheckMenuItem *mbcmi; /* menu bar check */
-	GtkCheckMenuItem *tbcmi; /* popup menu check */
+	bool show = g_variant_get_boolean(state);
 
-	bmcmi = GTK_CHECK_MENU_ITEM(gs->burger_menu->view_submenu->toolbars_submenu->menubar_menuitem);
-	mbcmi = GTK_CHECK_MENU_ITEM(gs->menu_bar->view_submenu->toolbars_submenu->menubar_menuitem);
-	tbcmi = GTK_CHECK_MENU_ITEM(gs->popup_menu->toolbars_submenu->menubar_menuitem);
+	g_simple_action_set_state(action, state);
+	gtk_widget_set_visible(gs->menu_bar, show);
+	set_bar_show("menu", show);
+}
 
-	/* ensure menubar and burger menu checkboxes are both updated */
-	if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
-		if (gtk_check_menu_item_get_active(bmcmi) == FALSE) {
-			gtk_check_menu_item_set_active(bmcmi, TRUE);
-		}
 
-		if (gtk_check_menu_item_get_active(mbcmi) == FALSE) {
-			gtk_check_menu_item_set_active(mbcmi, TRUE);
-		}
+/**
+ * Show or hide the toolbar when the state of its toggle action changes.
+ */
+static void
+nsgtk_on_toolbar_change_state(GSimpleAction *action, GVariant *state, gpointer data)
+{
+	struct nsgtk_scaffolding *gs = (struct nsgtk_scaffolding *)data;
+	bool show = g_variant_get_boolean(state);
 
-		if (gtk_check_menu_item_get_active(tbcmi) == FALSE) {
-			gtk_check_menu_item_set_active(tbcmi, TRUE);
-		}
-
-		gtk_widget_show(GTK_WIDGET(gs->menu_bar->bar_menu));
-		set_bar_show("menu", true);
-	} else {
-		if (gtk_check_menu_item_get_active(bmcmi) == TRUE) {
-			gtk_check_menu_item_set_active(bmcmi, FALSE);
-		}
-
-		if (gtk_check_menu_item_get_active(mbcmi) == TRUE) {
-			gtk_check_menu_item_set_active(mbcmi, FALSE);
-		}
-
-		if (gtk_check_menu_item_get_active(tbcmi) == TRUE) {
-			gtk_check_menu_item_set_active(tbcmi, FALSE);
-		}
-
-		gtk_widget_hide(GTK_WIDGET(gs->menu_bar->bar_menu));
-		set_bar_show("menu", false);
-	}
-	return TRUE;
+	g_simple_action_set_state(action, state);
+	nsgtk_window_toolbar_show(gs, show);
+	set_bar_show("tool", show);
 }
 
 
 static gboolean
-nsgtk_on_toolbar_activate_menu(GtkMenuItem *widget, gpointer data)
-{
-	struct nsgtk_scaffolding *gs = (struct nsgtk_scaffolding *)data;
-	GtkCheckMenuItem *bmcmi; /* burger menu check */
-	GtkCheckMenuItem *mbcmi; /* menu bar check */
-	GtkCheckMenuItem *tbcmi; /* popup menu check */
-
-	bmcmi = GTK_CHECK_MENU_ITEM(gs->burger_menu->view_submenu->toolbars_submenu->toolbar_menuitem);
-	mbcmi = GTK_CHECK_MENU_ITEM(gs->menu_bar->view_submenu->toolbars_submenu->toolbar_menuitem);
-	tbcmi = GTK_CHECK_MENU_ITEM(gs->popup_menu->toolbars_submenu->toolbar_menuitem);
-
-	/* ensure menubar and burger menu checkboxes are both updated */
-	if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget))) {
-		if (gtk_check_menu_item_get_active(bmcmi) == FALSE) {
-			gtk_check_menu_item_set_active(bmcmi, TRUE);
-		}
-
-		if (gtk_check_menu_item_get_active(mbcmi) == FALSE) {
-			gtk_check_menu_item_set_active(mbcmi, TRUE);
-		}
-
-		if (gtk_check_menu_item_get_active(tbcmi) == FALSE) {
-			gtk_check_menu_item_set_active(tbcmi, TRUE);
-		}
-
-		nsgtk_window_toolbar_show(gs, true);
-		set_bar_show("tool", true);
-	} else {
-		if (gtk_check_menu_item_get_active(bmcmi) == TRUE) {
-			gtk_check_menu_item_set_active(bmcmi, FALSE);
-		}
-
-		if (gtk_check_menu_item_get_active(mbcmi) == TRUE) {
-			gtk_check_menu_item_set_active(mbcmi, FALSE);
-		}
-
-		if (gtk_check_menu_item_get_active(tbcmi) == TRUE) {
-			gtk_check_menu_item_set_active(tbcmi, FALSE);
-		}
-
-		nsgtk_window_toolbar_show(gs, false);
-		set_bar_show("tool", false);
-	}
-	return TRUE;
-}
-
-
-static gboolean
-nsgtk_on_nexttab_activate_menu(GtkMenuItem *widget, gpointer data)
+nsgtk_on_nexttab_activate_menu(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_scaffolding *g = (struct nsgtk_scaffolding *)data;
 
@@ -770,7 +619,7 @@ nsgtk_on_nexttab_activate_menu(GtkMenuItem *widget, gpointer data)
 
 
 static gboolean
-nsgtk_on_prevtab_activate_menu(GtkMenuItem *widget, gpointer data)
+nsgtk_on_prevtab_activate_menu(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_scaffolding *g = (struct nsgtk_scaffolding *)data;
 
@@ -784,7 +633,7 @@ nsgtk_on_prevtab_activate_menu(GtkMenuItem *widget, gpointer data)
  * menu signal handler for activation on close tab item
  */
 static gboolean
-nsgtk_on_closetab_activate_menu(GtkMenuItem *widget, gpointer data)
+nsgtk_on_closetab_activate_menu(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_scaffolding *g = (struct nsgtk_scaffolding *)data;
 
@@ -795,396 +644,102 @@ nsgtk_on_closetab_activate_menu(GtkMenuItem *widget, gpointer data)
 
 /* end of menu callback handlers */
 
+
 /**
- * attach gtk signal handlers for menus
+ * Context for an action that calls a menu entry handler.
  */
-static void nsgtk_menu_connect_signals(struct nsgtk_scaffolding *g)
+struct nsgtk_menu_action {
+	struct nsgtk_scaffolding *gs;
+	gboolean (*mhandler)(GtkWidget *widget, gpointer data);
+};
+
+static void nsgtk_menu_action_free(gpointer data, GClosure *closure)
 {
-	int idx; /* item index */
-	for (idx = BACK_BUTTON; idx < PLACEHOLDER_BUTTON; idx++) {
-		if (g->menus[idx].main != NULL) {
-			g_signal_connect(g->menus[idx].main,
-					 "activate",
-					 G_CALLBACK(g->menus[idx].mhandler),
-					 g);
-		}
-		if (g->menus[idx].burger != NULL) {
-			g_signal_connect(g->menus[idx].burger,
-					 "activate",
-					 G_CALLBACK(g->menus[idx].mhandler),
-					 g);
-		}
-		if (g->menus[idx].popup != NULL) {
-			g_signal_connect(g->menus[idx].popup,
-					 "activate",
-					G_CALLBACK(g->menus[idx].mhandler),
-					 g);
-		}
-	}
+	g_free(data);
+}
+
+static void
+nsgtk_menu_action_activate(GSimpleAction *action, GVariant *parameter, gpointer data)
+{
+	struct nsgtk_menu_action *ma = data;
+
+	ma->mhandler(GTK_WIDGET(ma->gs->window), ma->gs);
+}
+
+/**
+ * Add an action to the scaffolding which calls a menu entry handler.
+ */
+static GSimpleAction *
+nsgtk_menu_add_action(struct nsgtk_scaffolding *gs,
+		      const char *name,
+		      gboolean (*mhandler)(GtkWidget *widget, gpointer data))
+{
+	GSimpleAction *action;
+	struct nsgtk_menu_action *ma;
+
+	ma = g_new(struct nsgtk_menu_action, 1);
+	ma->gs = gs;
+	ma->mhandler = mhandler;
+
+	action = g_simple_action_new(name, NULL);
+	g_signal_connect_data(action, "activate",
+			      G_CALLBACK(nsgtk_menu_action_activate), ma,
+			      nsgtk_menu_action_free, 0);
+	g_action_map_add_action(G_ACTION_MAP(gs->actions), G_ACTION(action));
+	g_object_unref(action);
+	return action;
 }
 
 
 /**
- * Create and connect handlers to bar menu.
- *
- * \param gs scaffolding to attach popup menu to.
- * \param group The accelerator group to use for the popup.
- * \param showmenu if the bar menu should be shown
- * \param showtool if the toolabar should be shown
- * \return menu structure on success or NULL on error.
- */
-static struct nsgtk_bar_submenu *
-create_scaffolding_bar_menu(struct nsgtk_scaffolding *gs,
-			    GtkAccelGroup *group,
-			    bool showmenu,
-			    bool showtool)
-{
-	GtkMenuShell *menushell;
-	struct nsgtk_bar_submenu *nmenu;
-
-	menushell = GTK_MENU_SHELL(gtk_builder_get_object(gs->builder,
-							  "menubar"));
-
-	nmenu = nsgtk_menu_bar_create(menushell, group);
-	if (nmenu == NULL) {
-		return NULL;
-	}
-
-	/* set menu bar visibility */
-	if (showmenu) {
-		gtk_widget_show(GTK_WIDGET(nmenu->bar_menu));
-	} else {
-		gtk_widget_hide(GTK_WIDGET(nmenu->bar_menu));
-	}
-
-	/* set checks correct way on toolbar submenu */
-	gtk_check_menu_item_set_active(nmenu->view_submenu->toolbars_submenu->menubar_menuitem, showmenu);
-	gtk_check_menu_item_set_active(nmenu->view_submenu->toolbars_submenu->toolbar_menuitem, showtool);
-
-	/* bar menu signal handlers for edit controls */
-	g_signal_connect(nmenu->edit_submenu->edit,
-			 "show",
-			 G_CALLBACK(nsgtk_window_edit_menu_shown),
-			 gs);
-
-	g_signal_connect(nmenu->edit_submenu->edit,
-			 "hide",
-			 G_CALLBACK(nsgtk_window_edit_menu_hidden),
-			 gs);
-
-	/*
-	 * attach signal handlers for menubar and toolbar visibility toggling
-	 */
-	g_signal_connect(nmenu->view_submenu->toolbars_submenu->menubar_menuitem,
-			 "toggled",
-			 G_CALLBACK(nsgtk_on_menubar_activate_menu),
-			 gs);
-
-	g_signal_connect(nmenu->view_submenu->toolbars_submenu->toolbar_menuitem,
-			 "toggled",
-			 G_CALLBACK(nsgtk_on_toolbar_activate_menu),
-			 gs);
-
-
-	return nmenu;
-}
-
-
-/**
- * Create and connect handlers to burger menu.
- *
- * \param g scaffolding to attach popup menu to.
- * \param group The accelerator group to use for the popup.
- * \param showbar if the bar menu should be shown
- * \param showtool if the toolabar should be shown
- * \return menu structure on success or NULL on error.
- */
-static struct nsgtk_burger_menu *
-create_scaffolding_burger_menu(struct nsgtk_scaffolding *gs,
-			       GtkAccelGroup *group,
-			       bool showbar,
-			       bool showtool)
-{
-	struct nsgtk_burger_menu *nmenu;
-
-	nmenu = nsgtk_burger_menu_create(group);
-
-	if (nmenu == NULL) {
-		return NULL;
-	}
-
-	/* set checks correct way on toolbar submenu */
-	gtk_check_menu_item_set_active(nmenu->view_submenu->toolbars_submenu->menubar_menuitem, showbar);
-	gtk_check_menu_item_set_active(nmenu->view_submenu->toolbars_submenu->toolbar_menuitem, showtool);
-
-	g_signal_connect(nmenu->view_submenu->toolbars_submenu->menubar_menuitem,
-			 "toggled",
-			 G_CALLBACK(nsgtk_on_menubar_activate_menu),
-			 gs);
-	g_signal_connect(nmenu->view_submenu->toolbars_submenu->toolbar_menuitem,
-			 "toggled",
-			 G_CALLBACK(nsgtk_on_toolbar_activate_menu),
-			 gs);
-	return nmenu;
-}
-
-
-/**
- * Create and connect handlers to popup menu.
- *
- * \param gs scaffolding to attach popup menu to.
- * \param group The accelerator group to use for the popup.
- * \param showbar if the bar menu should be shown
- * \param showtool if the toolabar should be shown
- * \return menu structure on success or NULL on error.
- */
-static struct nsgtk_popup_menu *
-create_scaffolding_popup_menu(struct nsgtk_scaffolding *gs,
-			      GtkAccelGroup *group,
-			      bool showbar,
-			      bool showtool)
-{
-	struct nsgtk_popup_menu *nmenu;
-
-	nmenu = nsgtk_popup_menu_create(group);
-
-	if (nmenu == NULL) {
-		return NULL;
-	}
-	/* set checks correct way on toolbar submenu */
-	gtk_check_menu_item_set_active(nmenu->toolbars_submenu->menubar_menuitem, showbar);
-	gtk_check_menu_item_set_active(nmenu->toolbars_submenu->toolbar_menuitem, showtool);
-
-	g_signal_connect(nmenu->popup_menu,
-			 "hide",
-			 G_CALLBACK(nsgtk_window_popup_menu_hidden),
-			 gs);
-
-	g_signal_connect(nmenu->toolbars_submenu->menubar_menuitem,
-			 "toggled",
-			 G_CALLBACK(nsgtk_on_menubar_activate_menu),
-			 gs);
-	g_signal_connect(nmenu->toolbars_submenu->toolbar_menuitem,
-			 "toggled",
-			 G_CALLBACK(nsgtk_on_toolbar_activate_menu),
-			 gs);
-
-	/* set initial popup menu visibility */
-	popup_menu_hide(nmenu, false, false);
-
-	return nmenu;
-}
-
-
-/**
- * Create and connect handlers to link popup menu.
- *
- * \param g scaffolding to attach popup menu to.
- * \param group The accelerator group to use for the popup.
- * \return true on success or false on error.
- */
-static struct nsgtk_link_menu *
-create_scaffolding_link_menu(struct nsgtk_scaffolding *g, GtkAccelGroup *group)
-{
-	struct nsgtk_link_menu *nmenu;
-
-	nmenu = nsgtk_link_menu_create(group);
-
-	if (nmenu == NULL) {
-		return NULL;
-	}
-
-	g_signal_connect(nmenu->save_menuitem,
-			 "activate",
-			 G_CALLBACK(nsgtk_on_savelink_activate_menu),
-			 g);
-
-	g_signal_connect(nmenu->opentab_menuitem,
-			 "activate",
-			 G_CALLBACK(nsgtk_on_link_opentab_activate_menu),
-			 g);
-
-	g_signal_connect(nmenu->openwin_menuitem,
-			 "activate",
-			 G_CALLBACK(nsgtk_on_link_openwin_activate_menu),
-			 g);
-
-	g_signal_connect(nmenu->bookmark_menuitem,
-			 "activate",
-			 G_CALLBACK(nsgtk_on_link_bookmark_activate_menu),
-			 g);
-
-	g_signal_connect(nmenu->copy_menuitem,
-			 "activate",
-			 G_CALLBACK(nsgtk_on_link_copy_activate_menu),
-			 g);
-
-	return nmenu;
-}
-
-
-/**
- * initialiase the menu signal handlers ready for connection
+ * initialiase the menu handlers and create their actions
  */
 static nserror nsgtk_menu_initialise(struct nsgtk_scaffolding *g)
 {
-#define TOOLBAR_ITEM_p(identifier, name, iconame)			\
-	g->menus[identifier].mhandler = nsgtk_on_##name##_activate_menu; \
-	g->menus[identifier].iconname = iconame;
-#define TOOLBAR_ITEM_y(identifier, name, iconame)			\
-	g->menus[identifier].mhandler = nsgtk_on_##name##_activate_menu; \
-	g->menus[identifier].iconname = iconame;
-#define TOOLBAR_ITEM_n(identifier, name, iconame)			\
-	g->menus[identifier].mhandler = NULL;				\
-	g->menus[identifier].iconname = iconame;
+#define TOOLBAR_ITEM_p(identifier, name)				\
+	g->menus[identifier].mhandler = nsgtk_on_##name##_activate_menu;
+#define TOOLBAR_ITEM_y(identifier, name)				\
+	g->menus[identifier].mhandler = nsgtk_on_##name##_activate_menu;
+#define TOOLBAR_ITEM_n(identifier, name)				\
+	g->menus[identifier].mhandler = NULL;
 #define TOOLBAR_ITEM(identifier, name, snstvty, clicked, activate, label, iconame) \
 	g->menus[identifier].sensitivity = snstvty;			\
-	TOOLBAR_ITEM_ ## activate(identifier, name, iconame)
+	TOOLBAR_ITEM_ ## activate(identifier, name)			\
+	if (g->menus[identifier].mhandler != NULL) {			\
+		g->menus[identifier].action = nsgtk_menu_add_action(g, #name, \
+						g->menus[identifier].mhandler); \
+	}
 #include "gtk/toolbar_items.h"
 #undef TOOLBAR_ITEM_y
 #undef TOOLBAR_ITEM_n
+#undef TOOLBAR_ITEM_p
 #undef TOOLBAR_ITEM
 
-	/* items on menubar, burger */
-#define ITEM_MB(p, q, r)						\
-	g->menus[p##_BUTTON].main = g->menu_bar->r##_submenu->q##_menuitem; \
-	g->menus[p##_BUTTON].burger = g->burger_menu->r##_submenu->q##_menuitem
-
-	/* items on menubar, burger and context popup submenu */
-#define ITEM_MBP(p, q, r)						\
-	g->menus[p##_BUTTON].main = g->menu_bar->r##_submenu->q##_menuitem; \
-	g->menus[p##_BUTTON].burger = g->burger_menu->r##_submenu->q##_menuitem; \
-	g->menus[p##_BUTTON].popup = g->popup_menu->r##_submenu->q##_menuitem
-
-	/* items on menubar, burger and context popup */
-#define ITEM_MBp(p, q, r)						\
-	g->menus[p##_BUTTON].main = g->menu_bar->r##_submenu->q##_menuitem; \
-	g->menus[p##_BUTTON].burger = g->burger_menu->r##_submenu->q##_menuitem; \
-	g->menus[p##_BUTTON].popup = g->popup_menu->q##_menuitem
-
-
-	/* file menu */
-	ITEM_MB(NEWWINDOW, newwindow, file);
-	ITEM_MB(NEWTAB, newtab, file);
-	ITEM_MB(OPENFILE, openfile, file);
-	ITEM_MB(CLOSEWINDOW, closewindow, file);
-	ITEM_MB(PRINTPREVIEW, printpreview, file);
-	ITEM_MB(PRINT, print, file);
-	ITEM_MB(QUIT, quit, file);
-	/* file - export submenu */
-	ITEM_MB(SAVEPAGE, savepage, file_submenu->export);
-	ITEM_MB(PLAINTEXT, plaintext, file_submenu->export);
-	ITEM_MB(PDF, pdf, file_submenu->export);
-
-	/* edit menu */
-	ITEM_MBp(CUT, cut, edit);
-	ITEM_MBp(COPY, copy, edit);
-	ITEM_MBp(PASTE, paste, edit);
-	ITEM_MB(DELETE, delete, edit);
-	ITEM_MB(SELECTALL, selectall, edit);
-	ITEM_MB(FIND, find, edit);
-	ITEM_MB(PREFERENCES, preferences, edit);
-
-	/* view menu */
-	ITEM_MB(FULLSCREEN, fullscreen, view);
-	ITEM_MB(SAVEWINDOWSIZE, savewindowsize, view);
-	/* view - scale submenu */
-	ITEM_MB(ZOOMPLUS, zoomplus, view_submenu->scaleview);
-	ITEM_MB(ZOOMMINUS, zoomminus, view_submenu->scaleview);
-	ITEM_MB(ZOOMNORMAL, zoomnormal, view_submenu->scaleview);
-	/* view - tabs submenu */
-	ITEM_MB(NEXTTAB, nexttab, view_submenu->tabs);
-	ITEM_MB(PREVTAB, prevtab, view_submenu->tabs);
-	ITEM_MB(CLOSETAB, closetab, view_submenu->tabs);
-	/* view - toolbars submenu */
-	ITEM_MB(CUSTOMIZE, customize, view_submenu->toolbars);
-	g->menus[CUSTOMIZE_BUTTON].popup = g->popup_menu->toolbars_submenu->customize_menuitem;
-
-	/* navigation menu */
-	ITEM_MBp(BACK, back, nav);
-	ITEM_MBp(FORWARD, forward, nav);
-	ITEM_MBp(STOP, stop, nav);
-	ITEM_MBp(RELOAD, reload, nav);
-	ITEM_MB(HOME, home, nav);
-	ITEM_MB(LOCALHISTORY, localhistory, nav);
-	ITEM_MB(GLOBALHISTORY, globalhistory, nav);
-	ITEM_MB(ADDBOOKMARKS, addbookmarks, nav);
-	ITEM_MB(SHOWBOOKMARKS, showbookmarks, nav);
-	ITEM_MB(OPENLOCATION, openlocation, nav);
-
-	/* tools menu */
-	ITEM_MBP(DOWNLOADS, downloads, tools);
-	ITEM_MBP(SHOWCOOKIES, showcookies, tools);
-	/* tools > developer submenu */
-	ITEM_MBP(VIEWSOURCE, viewsource, tools_submenu->developer);
-	ITEM_MBP(TOGGLEDEBUGGING, toggledebugging, tools_submenu->developer);
-	ITEM_MBP(SAVEBOXTREE, debugboxtree, tools_submenu->developer);
-	ITEM_MBP(SAVEDOMTREE, debugdomtree, tools_submenu->developer);
-
-	/* help menu */
-	ITEM_MB(CONTENTS, contents, help);
-	ITEM_MB(GUIDE, guide, help);
-	ITEM_MB(INFO, info, help);
-	ITEM_MB(ABOUT, about, help);
-
-
-#undef ITEM_MB
-#undef ITEM_MBp
-#undef ITEM_MBP
+	nsgtk_menu_add_action(g, "link-opentab", nsgtk_on_link_opentab_activate_menu);
+	nsgtk_menu_add_action(g, "link-openwin", nsgtk_on_link_openwin_activate_menu);
+	nsgtk_menu_add_action(g, "link-save", nsgtk_on_savelink_activate_menu);
+	nsgtk_menu_add_action(g, "link-bookmark", nsgtk_on_link_bookmark_activate_menu);
+	nsgtk_menu_add_action(g, "link-copy", nsgtk_on_link_copy_activate_menu);
 
 	return NSERROR_OK;
 }
 
 
-static void nsgtk_menu_set_sensitivity(struct nsgtk_scaffolding *g)
+/**
+ * Add a toggle action to the scaffolding.
+ */
+static void
+nsgtk_menu_add_toggle(struct nsgtk_scaffolding *gs,
+		      const char *name,
+		      bool state,
+		      void (*change_state)(GSimpleAction *action, GVariant *state, gpointer data))
 {
+	GSimpleAction *action;
 
-	for (int i = BACK_BUTTON; i < PLACEHOLDER_BUTTON; i++) {
-		if (g->menus[i].main != NULL) {
-			gtk_widget_set_sensitive(GTK_WIDGET(
-					g->menus[i].main),
-					g->menus[i].sensitivity);
-		}
-		if (g->menus[i].burger != NULL) {
-			gtk_widget_set_sensitive(GTK_WIDGET(
-					g->menus[i].burger),
-					g->menus[i].sensitivity);
-		}
-		if (g->menus[i].popup != NULL) {
-			gtk_widget_set_sensitive(GTK_WIDGET(
-					g->menus[i].popup),
-					g->menus[i].sensitivity);
-		}
-	}
-}
-
-
-/* set menu items to have icons */
-static void nsgtk_menu_set_icons(struct nsgtk_scaffolding *g)
-{
-	GtkWidget *img;
-	for (int i = BACK_BUTTON; i < PLACEHOLDER_BUTTON; i++) {
-		/* ensure there is an icon name */
-		if (g->menus[i].iconname == NULL) {
-			continue;
-		}
-
-		if (g->menus[i].main != NULL) {
-		img = gtk_image_new_from_icon_name(g->menus[i].iconname,
-						   GTK_ICON_SIZE_MENU);
-			nsgtk_image_menu_item_set_image(GTK_WIDGET(g->menus[i].main), img);
-		}
-		if (g->menus[i].burger != NULL) {
-		img = gtk_image_new_from_icon_name(g->menus[i].iconname,
-						   GTK_ICON_SIZE_MENU);
-			nsgtk_image_menu_item_set_image(GTK_WIDGET(g->menus[i].burger), img);
-		}
-		if (g->menus[i].popup != NULL) {
-		img = gtk_image_new_from_icon_name(g->menus[i].iconname,
-						   GTK_ICON_SIZE_MENU);
-			nsgtk_image_menu_item_set_image(GTK_WIDGET(g->menus[i].popup), img);
-		}
-	}
+	action = g_simple_action_new_stateful(name, NULL, g_variant_new_boolean(state));
+	g_signal_connect(action, "change-state", G_CALLBACK(change_state), gs);
+	g_action_map_add_action(G_ACTION_MAP(gs->actions), G_ACTION(action));
+	g_object_unref(action);
 }
 
 
@@ -1204,32 +759,33 @@ static void nsgtk_menu_set_icons(struct nsgtk_scaffolding *g)
  *     Opened like the other popup menu when the mouse is over a link in the
  *        browser area
  *
- * The cut, copy, paste, delete and back, forwards, stop, reload groups of
- *   menu entries are context sensitive and must be updated as appropriate
- *   when a menu is opened which contains those groups.
+ * All menu entries activate actions in the "win" group of the window, so the
+ * sensitivity of an entry is the enabled state of its action.
  */
 static nserror nsgtk_menus_create(struct nsgtk_scaffolding *gs)
 {
-	GtkAccelGroup *group;
+	GMenuModel *model;
 	bool showmenu; /* show menubar */
 	bool showtool; /* show toolbar */
 
 	get_bar_show(&showmenu, &showtool);
 
-	group = gtk_accel_group_new();
-
-	gtk_window_add_accel_group(gs->window, group);
-
-	gs->menu_bar = create_scaffolding_bar_menu(gs, group, showmenu, showtool);
-	gs->burger_menu = create_scaffolding_burger_menu(gs, group, showmenu, showtool);
-	gs->popup_menu = create_scaffolding_popup_menu(gs, group, showmenu, showtool);
-	gs->link_menu = create_scaffolding_link_menu(gs, group);
-
-	/* set up the menu signal handlers */
+	gs->actions = g_simple_action_group_new();
 	nsgtk_menu_initialise(gs);
-	nsgtk_menu_set_icons(gs);
-	nsgtk_menu_connect_signals(gs);
-	nsgtk_menu_set_sensitivity(gs);
+	nsgtk_menu_add_toggle(gs, "showmenubar", showmenu, nsgtk_on_menubar_change_state);
+	nsgtk_menu_add_toggle(gs, "showtoolbar", showtool, nsgtk_on_toolbar_change_state);
+	gtk_widget_insert_action_group(GTK_WIDGET(gs->window), "win",
+				       G_ACTION_GROUP(gs->actions));
+
+	gs->menu_bar = GTK_WIDGET(gtk_builder_get_object(gs->builder, "menubar"));
+	model = nsgtk_menu_bar_model();
+	gtk_popover_menu_bar_set_menu_model(GTK_POPOVER_MENU_BAR(gs->menu_bar), model);
+	g_object_unref(model);
+	gtk_widget_set_visible(gs->menu_bar, showmenu);
+
+	nsgtk_menu_add_shortcuts(GTK_WIDGET(gs->window));
+
+	nsgtk_scaffolding_set_sensitivity(gs);
 
 	return NSERROR_OK;
 }
@@ -1299,7 +855,7 @@ nserror nsgtk_scaffolding_destroy_all(void)
 	/* iterate all scaffolding windows and destroy them */
 	while (gs != NULL) {
 		struct nsgtk_scaffolding *next = gs->next;
-		gtk_widget_destroy(GTK_WIDGET(gs->window));
+		gtk_window_destroy(gs->window);
 		gs = next;
 	}
 	return NSERROR_OK;
@@ -1320,12 +876,12 @@ GtkNotebook* nsgtk_scaffolding_notebook(struct nsgtk_scaffolding *g)
 
 
 /* exported interface documented in gtk/scaffolding.h */
-GtkMenuBar *nsgtk_scaffolding_menu_bar(struct nsgtk_scaffolding *gs)
+GtkWidget *nsgtk_scaffolding_menu_bar(struct nsgtk_scaffolding *gs)
 {
 	if (gs == NULL) {
 		return NULL;
 	}
-	return gs->menu_bar->bar_menu;
+	return gs->menu_bar;
 }
 
 /* exported interface documented in gtk/scaffolding.h */
@@ -1376,49 +932,34 @@ void nsgtk_scaffolding_set_top_level(struct gui_window *gw)
 void nsgtk_scaffolding_set_sensitivity(struct nsgtk_scaffolding *g)
 {
 	int i;
-#define SENSITIVITY(q)							\
-	i = q##_BUTTON;							\
-	if (g->menus[i].main != NULL)					\
-		gtk_widget_set_sensitive(GTK_WIDGET(g->menus[i].main),	\
-					 g->menus[i].sensitivity);	\
-	if (g->menus[i].burger != NULL)					\
-		gtk_widget_set_sensitive(GTK_WIDGET(g->menus[i].burger), \
-					 g->menus[i].sensitivity);	\
-	if (g->menus[i].popup != NULL)					\
-		gtk_widget_set_sensitive(GTK_WIDGET(g->menus[i].popup), \
-					 g->menus[i].sensitivity);
 
-	SENSITIVITY(STOP)
-	SENSITIVITY(RELOAD)
-	SENSITIVITY(CUT)
-	SENSITIVITY(COPY)
-	SENSITIVITY(PASTE)
-	SENSITIVITY(BACK)
-	SENSITIVITY(FORWARD)
-	SENSITIVITY(NEXTTAB)
-	SENSITIVITY(PREVTAB)
-	SENSITIVITY(CLOSETAB)
-#undef SENSITIVITY
-
+	for (i = BACK_BUTTON; i < PLACEHOLDER_BUTTON; i++) {
+		if (g->menus[i].action != NULL) {
+			g_simple_action_set_enabled(g->menus[i].action,
+						    g->menus[i].sensitivity);
+		}
+	}
 }
 
 
 /* exported interface documented in gtk/scaffolding.h */
-nserror nsgtk_scaffolding_toolbar_context_menu(struct nsgtk_scaffolding *gs)
+nserror
+nsgtk_scaffolding_toolbar_context_menu(struct nsgtk_scaffolding *gs,
+				       GtkWidget *widget,
+				       gdouble x,
+				       gdouble y)
 {
-	/* set visibility for right-click popup menu */
-	popup_menu_hide(gs->popup_menu, false, true);
-
-	nsgtk_menu_popup_at_pointer(gs->popup_menu->popup_menu, NULL);
+	nsgtk_scaffolding_popup(gs, nsgtk_popup_menu_model(false, false),
+				widget, true, x, y);
 
 	return NSERROR_OK;
 }
 
 
 /* exported interface documented in gtk/scaffolding.h */
-nserror nsgtk_scaffolding_burger_menu(struct nsgtk_scaffolding *gs)
+nserror nsgtk_scaffolding_burger_menu(struct nsgtk_scaffolding *gs, GtkWidget *widget)
 {
-	nsgtk_menu_popup_at_pointer(gs->burger_menu->burger_menu, NULL);
+	nsgtk_scaffolding_popup(gs, nsgtk_burger_menu_model(), widget, false, 0, 0);
 
 	return NSERROR_OK;
 }
@@ -1427,10 +968,13 @@ nserror nsgtk_scaffolding_burger_menu(struct nsgtk_scaffolding *gs)
 /* exported interface documented in gtk/scaffolding.h */
 void
 nsgtk_scaffolding_context_menu(struct nsgtk_scaffolding *g,
+			       GtkWidget *widget,
+			       gdouble wx,
+			       gdouble wy,
 			       gdouble x,
 			       gdouble y)
 {
-	GtkMenu	*gtkmenu;
+	GMenuModel *model;
 	struct browser_window *bw;
 
 	bw = nsgtk_get_browser_window(g->top_level);
@@ -1440,33 +984,13 @@ nsgtk_scaffolding_context_menu(struct nsgtk_scaffolding *g,
 
 	if (current_menu_features.link != NULL) {
 		/* menu is opening over a link */
-		gtkmenu = g->link_menu->link_menu;
+		model = nsgtk_link_menu_model();
 	} else {
-		gtkmenu = g->popup_menu->popup_menu;
-
 		nsgtk_scaffolding_update_edit_actions_sensitivity(g);
-
-		if (!(g->menus[COPY_BUTTON].sensitivity)) {
-			gtk_widget_hide(GTK_WIDGET(g->popup_menu->copy_menuitem));
-		} else {
-			gtk_widget_show(GTK_WIDGET(g->popup_menu->copy_menuitem));
-		}
-
-		if (!(g->menus[CUT_BUTTON].sensitivity)) {
-			gtk_widget_hide(GTK_WIDGET(g->popup_menu->cut_menuitem));
-		} else {
-			gtk_widget_show(GTK_WIDGET(g->popup_menu->cut_menuitem));
-		}
-
-		if (!(g->menus[PASTE_BUTTON].sensitivity)) {
-			gtk_widget_hide(GTK_WIDGET(g->popup_menu->paste_menuitem));
-		} else {
-			gtk_widget_show(GTK_WIDGET(g->popup_menu->paste_menuitem));
-		}
-
+		model = nsgtk_popup_menu_model(true, true);
 	}
 
-	nsgtk_menu_popup_at_pointer(gtkmenu, NULL);
+	nsgtk_scaffolding_popup(g, model, widget, true, wx, wy);
 }
 
 /* exported interface documented in gtk/scaffolding.h */
@@ -1514,23 +1038,18 @@ struct nsgtk_scaffolding *nsgtk_new_scaffolding(struct gui_window *toplevel)
 		return NULL;
 	}
 
-	gtk_builder_connect_signals(gs->builder, NULL);
-
 	/* containing window setup */
 	gs->window = GTK_WINDOW(gtk_builder_get_object(gs->builder,
 						       "wndBrowser"));
 
 	/**
-	 * set this window's size and position to what's in the options, or
+	 * set this window's size to what's in the options, or
 	 *   some sensible default if they are not set yet.
 	 */
 	if (nsoption_int(window_width) > 0) {
-		gtk_window_move(gs->window,
-				nsoption_int(window_x),
-				nsoption_int(window_y));
-		gtk_window_resize(gs->window,
-				  nsoption_int(window_width),
-				  nsoption_int(window_height));
+		gtk_window_set_default_size(gs->window,
+					    nsoption_int(window_width),
+					    nsoption_int(window_height));
 	} else {
 		/* Set to 1000x700, so we're very likely to fit even on
 		 * 1024x768 displays, not being able to take into account
@@ -1540,8 +1059,8 @@ struct nsgtk_scaffolding *nsgtk_new_scaffolding(struct gui_window *toplevel)
 	}
 
 	g_signal_connect(gs->window,
-			 "delete-event",
-			 G_CALLBACK(scaffolding_window_delete_event),
+			 "close-request",
+			 G_CALLBACK(scaffolding_window_close_request),
 			 gs);
 
 	g_signal_connect(gs->window,
@@ -1565,6 +1084,7 @@ struct nsgtk_scaffolding *nsgtk_new_scaffolding(struct gui_window *toplevel)
 			       "page-removed",
 			       G_CALLBACK(nsgtk_window_tabs_remove),
 			       gs);
+	g_object_ref(gs->notebook);
 
 
 	res = nsgtk_menus_create(gs);
@@ -1581,23 +1101,15 @@ struct nsgtk_scaffolding *nsgtk_new_scaffolding(struct gui_window *toplevel)
 	gs->prev = NULL;
 	scaf_list = gs;
 
+	g_object_unref(gs->builder);
+	gs->builder = NULL;
+
 	/* finally, show the window. */
-	gtk_widget_show(GTK_WIDGET(gs->window));
+	gtk_window_present(gs->window);
 
 	NSLOG(netsurf, INFO, "creation complete");
 
 	return gs;
 }
 
-/* exported interface documented in gtk/scaffolding.h */
-nserror nsgtk_scaffolding_position_page_info(struct nsgtk_scaffolding *gs,
-					     struct nsgtk_pi_window *win)
-{
-	return nsgtk_window_position_page_info(gs->top_level, win);
-}
 
-/* exported interface documented in gtk/scaffolding.h */
-nserror nsgtk_scaffolding_position_local_history(struct nsgtk_scaffolding *gs)
-{
-	return nsgtk_window_position_local_history(gs->top_level);
-}

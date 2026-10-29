@@ -42,7 +42,7 @@ struct nsgtk_local_history_window {
 
 	GtkBuilder *builder;
 
-	GtkWindow *wnd;
+	GtkWidget *wnd;
 
 	struct local_history_session *session;
 };
@@ -154,15 +154,11 @@ nsgtk_local_history_init(struct browser_window *bw,
 		return res;
 	}
 
-	gtk_builder_connect_signals(ncwin->builder, NULL);
 
-	ncwin->wnd = GTK_WINDOW(gtk_builder_get_object(ncwin->builder,
+	ncwin->wnd = GTK_WIDGET(gtk_builder_get_object(ncwin->builder,
 						       "wndHistory"));
-
-	/* Configure for transient behaviour */
-	gtk_window_set_type_hint(GTK_WINDOW(ncwin->wnd),
-				 GDK_WINDOW_TYPE_HINT_DROPDOWN_MENU);
-	gtk_window_set_modal(GTK_WINDOW(ncwin->wnd), TRUE);
+	/* keep the popover while it is moved between toolbars */
+	g_object_ref_sink(ncwin->wnd);
 
 
 	ncwin->core.scrolled = GTK_SCROLLED_WINDOW(
@@ -172,22 +168,6 @@ nsgtk_local_history_init(struct browser_window *bw,
 	ncwin->core.drawing_area = GTK_DRAWING_AREA(
 		gtk_builder_get_object(ncwin->builder,
 				       "HistoryDrawingArea"));
-
-	/* make the delete event hide the window */
-	g_signal_connect(G_OBJECT(ncwin->wnd),
-			 "delete_event",
-			 G_CALLBACK(gtk_widget_hide_on_delete),
-			 NULL);
-	/* Ditto if we lose the grab */
-	g_signal_connect(G_OBJECT(ncwin->wnd),
-			 "grab-broken-event",
-			 G_CALLBACK(gtk_widget_hide_on_delete),
-			 ncwin);
-	/* Handle button press events */
-	g_signal_connect(G_OBJECT(ncwin->wnd),
-			 "button-press-event",
-			 G_CALLBACK(gtk_widget_hide_on_delete),
-			 ncwin);
 
 	ncwin->core.draw = nsgtk_local_history_draw;
 	ncwin->core.key = nsgtk_local_history_key;
@@ -214,41 +194,36 @@ nsgtk_local_history_init(struct browser_window *bw,
 
 
 /* exported function documented gtk/history.h */
-nserror nsgtk_local_history_present(GtkWindow *parent,
+nserror nsgtk_local_history_present(GtkWidget *anchor,
 				    struct browser_window *bw)
 {
 	nserror res;
-	int prnt_width, prnt_height;
-	int width, height;
+	GtkWidget *toplevel;
+
 	res = nsgtk_local_history_init(bw, &local_history_window);
 	if (res == NSERROR_OK) {
-		gtk_window_group_add_window(gtk_window_get_group(parent),
-					    local_history_window->wnd);
-		gtk_window_set_transient_for(local_history_window->wnd, parent);
-		gtk_window_set_screen(local_history_window->wnd,
-				      gtk_widget_get_screen(GTK_WIDGET(parent)));
+		GtkWidget *wnd = local_history_window->wnd;
 
-		gtk_window_get_size(parent, &prnt_width, &prnt_height);
-
-		/* resize history widget ensureing the drawing area is
-		 * no larger than parent window
-		 */
-		res = local_history_get_size(local_history_window->session,
-					     &width,
-					     &height);
-		if (width > prnt_width) {
-			width = prnt_width;
+		if (gtk_widget_get_parent(wnd) != anchor) {
+			if (gtk_widget_get_parent(wnd) != NULL) {
+				gtk_widget_unparent(wnd);
+			}
+			gtk_widget_set_parent(wnd, anchor);
 		}
-		if (height > prnt_height) {
-			height = prnt_height;
+
+		/* ensure the drawing area is no larger than parent window */
+		toplevel = gtk_widget_get_ancestor(anchor, GTK_TYPE_WINDOW);
+		if (toplevel != NULL) {
+			gtk_scrolled_window_set_max_content_width(
+				local_history_window->core.scrolled,
+				gtk_widget_get_width(toplevel));
+			gtk_scrolled_window_set_max_content_height(
+				local_history_window->core.scrolled,
+				gtk_widget_get_height(toplevel));
 		}
-		gtk_window_resize(local_history_window->wnd, width, height);
 
-		/* Attempt to place the window in the right place */
-		nsgtk_scaffolding_position_local_history(nsgtk_current_scaffolding());
-
-		gtk_widget_show(GTK_WIDGET(local_history_window->wnd));
-		gtk_widget_grab_focus(GTK_WIDGET(local_history_window->wnd));
+		gtk_popover_popup(GTK_POPOVER(wnd));
+		gtk_widget_grab_focus(GTK_WIDGET(local_history_window->core.drawing_area));
 
 		local_history_scroll_to_cursor(local_history_window->session);
 	}
@@ -263,7 +238,7 @@ nserror nsgtk_local_history_hide(void)
 	nserror res = NSERROR_OK;
 
 	if (local_history_window != NULL) {
-		gtk_widget_hide(GTK_WIDGET(local_history_window->wnd));
+		gtk_popover_popdown(GTK_POPOVER(local_history_window->wnd));
 
 		res = local_history_set(local_history_window->session, NULL);
 	}
@@ -284,7 +259,10 @@ nserror nsgtk_local_history_destroy(void)
 	res = local_history_fini(local_history_window->session);
 	if (res == NSERROR_OK) {
 		res = nsgtk_corewindow_fini(&local_history_window->core);
-		gtk_widget_destroy(GTK_WIDGET(local_history_window->wnd));
+		if (gtk_widget_get_parent(local_history_window->wnd) != NULL) {
+			gtk_widget_unparent(local_history_window->wnd);
+		}
+		g_object_unref(local_history_window->wnd);
 		g_object_unref(G_OBJECT(local_history_window->builder));
 		free(local_history_window);
 		local_history_window = NULL;
@@ -292,12 +270,4 @@ nserror nsgtk_local_history_destroy(void)
 
 	return res;
 
-}
-
-/* exported function documented gtk/history.h */
-void nsgtk_local_history_set_position(int x, int y)
-{
-	NSLOG(netsurf, INFO, "x=%d y=%d", x, y);
-
-	gtk_window_move(local_history_window->wnd, x, y);
 }

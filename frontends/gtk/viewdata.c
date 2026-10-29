@@ -73,7 +73,7 @@ static char viewdata_zoomlevel = 10;
 
 #define MENUEVENT(x) { #x, G_CALLBACK(nsgtk_on_##x##_activate) }
 #define MENUPROTO(x) static gboolean nsgtk_on_##x##_activate(	\
-		GtkMenuItem *widget, gpointer g)
+		GtkWidget *widget, gpointer g)
 
 MENUPROTO(viewdata_save_as);
 MENUPROTO(viewdata_print);
@@ -104,16 +104,32 @@ static struct menu_events viewdata_menu_events[] = {
 	{NULL, NULL}
 };
 
-static void nsgtk_attach_viewdata_menu_handlers(GtkBuilder *xml, gpointer g)
+static GSimpleActionGroup *
+nsgtk_attach_viewdata_menu_handlers(GtkWindow *window, gpointer g)
 {
 	struct menu_events *event = viewdata_menu_events;
+	GSimpleActionGroup *group;
 
+	group = g_simple_action_group_new();
 	while (event->widget != NULL)
 	{
-		GtkWidget *w = GTK_WIDGET(gtk_builder_get_object(xml, event->widget));
-		g_signal_connect(G_OBJECT(w), "activate", event->handler, g);
+		nsgtk_action_map_add_menu_action(G_ACTION_MAP(group),
+						 event->widget,
+						 event->handler,
+						 g);
 		event++;
 	}
+	gtk_widget_insert_action_group(GTK_WIDGET(window), "win",
+				       G_ACTION_GROUP(group));
+	g_object_unref(group);
+	return group;
+}
+
+static void nsgtk_viewdata_disable_action(GSimpleActionGroup *group, const char *name)
+{
+	GAction *action = g_action_map_lookup_action(G_ACTION_MAP(group), name);
+
+	g_simple_action_set_enabled(G_SIMPLE_ACTION(action), FALSE);
 }
 
 static gboolean nsgtk_viewdata_destroy_event(GtkBuilder *window, gpointer g)
@@ -133,28 +149,17 @@ static gboolean nsgtk_viewdata_destroy_event(GtkBuilder *window, gpointer g)
 	/* release the data */
 	free(vdctx->data);
 
-	/* free the builder */
-	g_object_unref(G_OBJECT(vdctx->builder));
-
 	/* free the context structure */
 	free(vdctx);
 
 	return FALSE;
 }
 
-static gboolean nsgtk_viewdata_delete_event(GtkWindow * window, gpointer g)
-{
-	return FALSE;
-}
-
-
-
 static void nsgtk_viewdata_file_save(GtkWindow *parent, const char *filename,
 				     const char *data, size_t data_size)
 {
 	FILE *f;
-	GtkWidget *notif;
-	GtkWidget *label;
+	GtkAlertDialog *notif;
 
 	f = fopen(filename, "w+");
 	if (f != NULL) {
@@ -164,74 +169,61 @@ static void nsgtk_viewdata_file_save(GtkWindow *parent, const char *filename,
 	}
 
 	/* inform user of faliure */
-	notif = gtk_dialog_new_with_buttons(messages_get("gtkSaveFailedTitle"),
-					    parent,
-					    GTK_DIALOG_MODAL,
-					    NSGTK_STOCK_OK,
-					    GTK_RESPONSE_NONE,
-					    NULL);
-
-	g_signal_connect_swapped(notif, "response",
-				 G_CALLBACK(gtk_widget_destroy), notif);
-
-	label = gtk_label_new(messages_get("gtkSaveFailed"));
-	gtk_container_add(GTK_CONTAINER(nsgtk_dialog_get_content_area(GTK_DIALOG(notif))), label);
-	gtk_widget_show_all(notif);
-
+	notif = gtk_alert_dialog_new("%s", messages_get("gtkSaveFailedTitle"));
+	gtk_alert_dialog_set_detail(notif, messages_get("gtkSaveFailed"));
+	gtk_alert_dialog_show(notif, parent);
+	g_object_unref(notif);
 }
 
 
-gboolean nsgtk_on_viewdata_save_as_activate(GtkMenuItem *widget, gpointer g)
+static void nsgtk_viewdata_save_to(const char *filename, void *pw)
+{
+	struct nsgtk_viewdata_ctx *nsg = pw;
+	struct nsgtk_viewdata_ctx *ctx;
+
+	/* the window may have been closed while the dialog was open */
+	for (ctx = nsgtk_viewdata_list; ctx != NULL && ctx != nsg; ctx = ctx->next) {
+		continue;
+	}
+	if (ctx != NULL) {
+		nsgtk_viewdata_file_save(nsg->window, filename, nsg->data, nsg->data_len);
+	}
+}
+
+gboolean nsgtk_on_viewdata_save_as_activate(GtkWidget *widget, gpointer g)
 {
 	struct nsgtk_viewdata_ctx *nsg = (struct nsgtk_viewdata_ctx *) g;
-	GtkWidget *fc;
 
-	fc = gtk_file_chooser_dialog_new(messages_get("gtkSaveFile"),
-					 nsg->window,
-					 GTK_FILE_CHOOSER_ACTION_SAVE,
-					 NSGTK_STOCK_CANCEL,
-					 GTK_RESPONSE_CANCEL,
-					 NSGTK_STOCK_SAVE,
-					 GTK_RESPONSE_ACCEPT,
-					 NULL);
-
-	gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(fc), nsg->filename);
-
-	gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(fc),
-						       TRUE);
-
-	if (gtk_dialog_run(GTK_DIALOG(fc)) == GTK_RESPONSE_ACCEPT) {
-		char *filename;
-		filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fc));
-		nsgtk_viewdata_file_save(nsg->window, filename, nsg->data, nsg->data_len);
-		g_free(filename);
-	}
-
-	gtk_widget_destroy(fc);
+	nsgtk_save_file_dialog(nsg->window,
+			       messages_get("gtkSaveFile"),
+			       NULL,
+			       nsg->filename,
+			       nsgtk_viewdata_save_to,
+			       nsg);
 
 	return TRUE;
 }
 
 
-gboolean nsgtk_on_viewdata_print_activate( GtkMenuItem *widget, gpointer g)
+gboolean nsgtk_on_viewdata_print_activate( GtkWidget *widget, gpointer g)
 {
 	/* correct printing */
 
 	return TRUE;
 }
 
-gboolean nsgtk_on_viewdata_close_activate( GtkMenuItem *widget, gpointer g)
+gboolean nsgtk_on_viewdata_close_activate( GtkWidget *widget, gpointer g)
 {
 	struct nsgtk_viewdata_ctx *nsg = (struct nsgtk_viewdata_ctx *) g;
 
-	gtk_widget_destroy(GTK_WIDGET(nsg->window));
+	gtk_window_destroy(GTK_WINDOW(nsg->window));
 
 	return TRUE;
 }
 
 
 
-gboolean nsgtk_on_viewdata_select_all_activate (GtkMenuItem *widget, gpointer g)
+gboolean nsgtk_on_viewdata_select_all_activate (GtkWidget *widget, gpointer g)
 {
 	struct nsgtk_viewdata_ctx *nsg = (struct nsgtk_viewdata_ctx *) g;
 	GtkTextBuffer *buf = gtk_text_view_get_buffer(nsg->gv);
@@ -244,28 +236,28 @@ gboolean nsgtk_on_viewdata_select_all_activate (GtkMenuItem *widget, gpointer g)
 	return TRUE;
 }
 
-gboolean nsgtk_on_viewdata_cut_activate(GtkMenuItem *widget, gpointer g)
+gboolean nsgtk_on_viewdata_cut_activate(GtkWidget *widget, gpointer g)
 {
 	return TRUE;
 }
 
-gboolean nsgtk_on_viewdata_copy_activate(GtkMenuItem *widget, gpointer g)
+gboolean nsgtk_on_viewdata_copy_activate(GtkWidget *widget, gpointer g)
 {
 	struct nsgtk_viewdata_ctx *nsg = (struct nsgtk_viewdata_ctx *) g;
 	GtkTextBuffer *buf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(nsg->gv));
 
 	gtk_text_buffer_copy_clipboard(buf,
-		gtk_clipboard_get(GDK_SELECTION_CLIPBOARD));
+		gtk_widget_get_clipboard(GTK_WIDGET(nsg->gv)));
 
 	return TRUE;
 }
 
-gboolean nsgtk_on_viewdata_paste_activate(GtkMenuItem *widget, gpointer g)
+gboolean nsgtk_on_viewdata_paste_activate(GtkWidget *widget, gpointer g)
 {
 	return TRUE;
 }
 
-gboolean nsgtk_on_viewdata_delete_activate(GtkMenuItem *widget, gpointer g)
+gboolean nsgtk_on_viewdata_delete_activate(GtkWidget *widget, gpointer g)
 {
 	return TRUE;
 }
@@ -308,7 +300,7 @@ static void nsgtk_viewdata_update_zoomlevel(gpointer g)
 	}
 }
 
-gboolean nsgtk_on_viewdata_zoom_in_activate(GtkMenuItem *widget, gpointer g)
+gboolean nsgtk_on_viewdata_zoom_in_activate(GtkWidget *widget, gpointer g)
 {
 	viewdata_zoomlevel++;
 	nsgtk_viewdata_update_zoomlevel(g);
@@ -316,7 +308,7 @@ gboolean nsgtk_on_viewdata_zoom_in_activate(GtkMenuItem *widget, gpointer g)
 	return TRUE;
 }
 
-gboolean nsgtk_on_viewdata_zoom_out_activate(GtkMenuItem *widget, gpointer g)
+gboolean nsgtk_on_viewdata_zoom_out_activate(GtkWidget *widget, gpointer g)
 {
 	if (viewdata_zoomlevel > 1) {
 		viewdata_zoomlevel--;
@@ -327,7 +319,7 @@ gboolean nsgtk_on_viewdata_zoom_out_activate(GtkMenuItem *widget, gpointer g)
 }
 
 
-gboolean nsgtk_on_viewdata_zoom_normal_activate(GtkMenuItem *widget, gpointer g)
+gboolean nsgtk_on_viewdata_zoom_normal_activate(GtkWidget *widget, gpointer g)
 {
 	viewdata_zoomlevel = 10;
 	nsgtk_viewdata_update_zoomlevel(g);
@@ -335,7 +327,7 @@ gboolean nsgtk_on_viewdata_zoom_normal_activate(GtkMenuItem *widget, gpointer g)
 	return TRUE;
 }
 
-gboolean nsgtk_on_viewdata_about_activate(GtkMenuItem *widget, gpointer g)
+gboolean nsgtk_on_viewdata_about_activate(GtkWidget *widget, gpointer g)
 {
 	struct nsgtk_viewdata_ctx *nsg = (struct nsgtk_viewdata_ctx *) g;
 
@@ -354,12 +346,8 @@ window_init(const char *title,
 	    size_t ndata_len)
 {
 	GtkWindow *window;
-	GtkWidget *cutbutton;
-	GtkWidget *pastebutton;
-	GtkWidget *deletebutton;
-	GtkWidget *printbutton;
+	GSimpleActionGroup *group;
 	GtkTextView *dataview;
-	PangoFontDescription *fontdesc;
 	GtkTextBuffer *tb;
 	struct nsgtk_viewdata_ctx *newctx;
 	nserror res;
@@ -376,7 +364,6 @@ window_init(const char *title,
 		return res;
 	}
 
-	gtk_builder_connect_signals(newctx->builder, NULL);
 
 	window = GTK_WINDOW(gtk_builder_get_object(newctx->builder,
 						   "ViewDataWindow"));
@@ -392,17 +379,6 @@ window_init(const char *title,
 		return NSERROR_INIT_FAILED;
 	}
 
-	cutbutton = GTK_WIDGET(gtk_builder_get_object(newctx->builder, "viewdata_cut"));
-	pastebutton = GTK_WIDGET(gtk_builder_get_object(newctx->builder, "viewdata_paste"));
-	deletebutton = GTK_WIDGET(gtk_builder_get_object(newctx->builder, "viewdata_delete"));
-	printbutton = GTK_WIDGET(gtk_builder_get_object(newctx->builder, "viewdata_print"));
-	gtk_widget_set_sensitive(cutbutton, FALSE);
-	gtk_widget_set_sensitive(pastebutton, FALSE);
-	gtk_widget_set_sensitive(deletebutton, FALSE);
-	/* for now */
-	gtk_widget_set_sensitive(printbutton, FALSE);
-
-
 	newctx->filename = strdup(filename);
 
 	newctx->data = ndata;
@@ -417,29 +393,32 @@ window_init(const char *title,
 	}
 	nsgtk_viewdata_list = newctx;
 
-	nsgtk_attach_viewdata_menu_handlers(newctx->builder, newctx);
+	group = nsgtk_attach_viewdata_menu_handlers(window, newctx);
+	nsgtk_viewdata_disable_action(group, "viewdata_cut");
+	nsgtk_viewdata_disable_action(group, "viewdata_paste");
+	nsgtk_viewdata_disable_action(group, "viewdata_delete");
+	/* for now */
+	nsgtk_viewdata_disable_action(group, "viewdata_print");
 
 	gtk_window_set_title(window, title);
 
 	g_signal_connect(G_OBJECT(window), "destroy",
 			 G_CALLBACK(nsgtk_viewdata_destroy_event),
 			 newctx);
-	g_signal_connect(G_OBJECT(window), "delete-event",
-			 G_CALLBACK(nsgtk_viewdata_delete_event),
-			 newctx);
 
 	dataview = GTK_TEXT_VIEW(gtk_builder_get_object(newctx->builder,
 							"viewdata_view"));
 
-	fontdesc = pango_font_description_from_string("Monospace 8");
-
 	newctx->gv = dataview;
-	nsgtk_widget_modify_font(GTK_WIDGET(dataview), fontdesc);
+	gtk_text_view_set_monospace(dataview, TRUE);
 
 	tb = gtk_text_view_get_buffer(dataview);
 	gtk_text_buffer_set_text(tb, newctx->data, -1);
 
-	gtk_widget_show(GTK_WIDGET(window));
+	g_object_unref(G_OBJECT(newctx->builder));
+	newctx->builder = NULL;
+
+	gtk_widget_set_visible(GTK_WIDGET(window), TRUE);
 
 	return NSERROR_OK;
 }

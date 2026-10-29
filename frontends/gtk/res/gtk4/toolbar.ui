@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <object class="GtkBox" id="customisation">
+    <property name="orientation">vertical</property>
+    <property name="spacing">6</property>
+    <child>
+      <object class="GtkBox" id="toolbar">
+        <property name="css-classes">toolbar</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkLabel">
+        <property name="margin-start">6</property>
+        <property name="margin-end">6</property>
+        <property name="label" translatable="1">gtkCustomizeToolbarInstructions</property>
+        <property name="wrap">1</property>
+        <property name="xalign">0</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkScrolledWindow">
+        <property name="vexpand">1</property>
+        <property name="has-frame">1</property>
+        <property name="child">
+          <object class="GtkViewport">
+            <property name="child">
+              <object class="GtkBox" id="toolbox">
+                <property name="orientation">vertical</property>
+              </object>
+            </property>
+          </object>
+        </property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkBox">
+        <property name="halign">end</property>
+        <property name="spacing">6</property>
+        <property name="margin-top">6</property>
+        <property name="margin-bottom">6</property>
+        <property name="margin-start">6</property>
+        <property name="margin-end">6</property>
+        <child>
+          <object class="GtkButton" id="reset">
+            <property name="child">
+              <object class="GtkBox">
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="icon-name">view-refresh</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="label" translatable="1">Reset</property>
+                  </object>
+                </child>
+              </object>
+            </property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="discard">
+            <property name="label" translatable="1">Discard</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="apply">
+            <property name="label" translatable="1">Apply</property>
+            <property name="css-classes">suggested-action</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>

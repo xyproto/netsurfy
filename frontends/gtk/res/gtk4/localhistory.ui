@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <object class="GtkPopover" id="wndHistory">
+    <property name="has_arrow">False</property>
+    <property name="child">
+      <object class="GtkScrolledWindow" id="HistoryScrolled">
+        <property name="propagate_natural_width">True</property>
+        <property name="propagate_natural_height">True</property>
+        <property name="child">
+          <object class="GtkViewport" id="HistoryViewport">
+            <property name="child">
+              <object class="GtkDrawingArea" id="HistoryDrawingArea">
+                <property name="focusable">True</property>
+              </object>
+            </property>
+          </object>
+        </property>
+      </object>
+    </property>
+  </object>
+</interface>
