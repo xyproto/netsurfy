@@ -158,8 +158,11 @@ struct fbtk_widget_s {
 		/* toolkit base handle */
 		struct {
 			nsfb_t *fb;
-			struct fbtk_widget_s *prev; /* previous widget pointer wasin */
-			struct fbtk_widget_s *grabbed; /* widget that has grabbed pointer movement. */
+			struct fbtk_widget_s
+				*prev; /* previous widget pointer wasin */
+			struct fbtk_widget_s
+				*grabbed; /* widget that has grabbed pointer
+					     movement. */
 			struct fbtk_widget_s *input;
 
 			/* caret */
@@ -179,7 +182,7 @@ struct fbtk_widget_s {
 
 		/* text */
 		struct {
-			char* text;
+			char *text;
 			bool outline;
 			fbtk_enter_t enter;
 			void *pw;
@@ -203,7 +206,8 @@ struct fbtk_widget_s {
 			int drag; /* offset to start of drag */
 			int drag_position; /* indicator bar pos at drag start */
 			struct fbtk_widget_s *btnul; /* scroll button up/left */
-			struct fbtk_widget_s *btndr; /* scroll button down/right*/
+			struct fbtk_widget_s
+				*btndr; /* scroll button down/right*/
 		} scroll;
 
 	} u;
@@ -234,7 +238,12 @@ struct fbtk_widget_s {
  *          is used, if the value is negative the largest value that will fit
  *          within the parent less the value given will be used.
  */
-fbtk_widget_t *fbtk_widget_new(fbtk_widget_t *parent, enum fbtk_widgettype_e type, int x, int y, int width, int height);
+fbtk_widget_t *fbtk_widget_new(fbtk_widget_t *parent,
+			       enum fbtk_widgettype_e type,
+			       int x,
+			       int y,
+			       int width,
+			       int height);
 
 /** find the root widget from any widget in the toolkit hierarchy.
  *

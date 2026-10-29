@@ -62,17 +62,14 @@ static wimp_window *dialog_pageinfo_template;
  * \param originy The risc os plotter y origin.
  * \return NSERROR_OK on success otherwise apropriate error code
  */
-static nserror
-ro_pageinfo_draw(struct ro_corewindow *ro_cw,
-		      int originx,
-		      int originy,
-		      struct rect *r)
+static nserror ro_pageinfo_draw(struct ro_corewindow *ro_cw,
+				int originx,
+				int originy,
+				struct rect *r)
 {
-	struct redraw_context ctx = {
-		.interactive = true,
-		.background_images = true,
-		.plot = &ro_plotters
-	};
+	struct redraw_context ctx = {.interactive = true,
+				     .background_images = true,
+				     .plot = &ro_plotters};
 	struct ro_pageinfo_window *lhw;
 
 	lhw = (struct ro_pageinfo_window *)ro_cw;
@@ -96,8 +93,7 @@ ro_pageinfo_draw(struct ro_corewindow *ro_cw,
  *         NSERROR_NOT_IMPLEMENTED if key not processed
  *         otherwise apropriate error code
  */
-static nserror
-ro_pageinfo_key(struct ro_corewindow *ro_cw, uint32_t nskey)
+static nserror ro_pageinfo_key(struct ro_corewindow *ro_cw, uint32_t nskey)
 {
 	struct ro_pageinfo_window *lhw;
 
@@ -119,17 +115,19 @@ ro_pageinfo_key(struct ro_corewindow *ro_cw, uint32_t nskey)
  * \param y location of event
  * \return NSERROR_OK on sucess otherwise apropriate error code.
  */
-static nserror
-ro_pageinfo_mouse(struct ro_corewindow *ro_cw,
-		       browser_mouse_state mouse_state,
-		       int x, int y)
+static nserror ro_pageinfo_mouse(struct ro_corewindow *ro_cw,
+				 browser_mouse_state mouse_state,
+				 int x,
+				 int y)
 {
 	struct ro_pageinfo_window *pgiw;
 
 	pgiw = (struct ro_pageinfo_window *)ro_cw;
 	bool did_something = false;
 
-	if (page_info_mouse_action(pgiw->pgi, mouse_state, x, y, &did_something) == NSERROR_OK) {
+	if (page_info_mouse_action(
+		    pgiw->pgi, mouse_state, x, y, &did_something) ==
+	    NSERROR_OK) {
 		if (did_something == true) {
 			/* Something happened so we need to close ourselves */
 			ro_gui_dialog_close(ro_cw->wh);
@@ -150,8 +148,7 @@ ro_pageinfo_mouse(struct ro_corewindow *ro_cw,
  * \return NSERROR_OK on success else appropriate error code on faliure.
  */
 static nserror
-ro_pageinfo_init(struct browser_window *bw,
-		      struct ro_pageinfo_window **win_out)
+ro_pageinfo_init(struct browser_window *bw, struct ro_pageinfo_window **win_out)
 {
 	os_error *error;
 	struct ro_pageinfo_window *ncwin;
@@ -171,11 +168,13 @@ ro_pageinfo_init(struct browser_window *bw,
 	}
 
 	/* create window from template */
-	error = xwimp_create_window(dialog_pageinfo_template,
-				    &ncwin->core.wh);
+	error = xwimp_create_window(dialog_pageinfo_template, &ncwin->core.wh);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_create_window: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_create_window: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		free(ncwin);
 		return NSERROR_NOMEM;
@@ -187,19 +186,13 @@ ro_pageinfo_init(struct browser_window *bw,
 	ncwin->core.mouse = ro_pageinfo_mouse;
 
 	/* initialise core window */
-	res = ro_corewindow_init(&ncwin->core,
-				 NULL,
-				 NULL,
-				 0,
-				 NULL);
+	res = ro_corewindow_init(&ncwin->core, NULL, NULL, 0, NULL);
 	if (res != NSERROR_OK) {
 		free(ncwin);
 		return res;
 	}
 
-	res = page_info_create((struct core_window *)ncwin,
-			       bw,
-			       &ncwin->pgi);
+	res = page_info_create((struct core_window *)ncwin, bw, &ncwin->pgi);
 	if (res != NSERROR_OK) {
 		free(ncwin);
 		return res;
@@ -214,8 +207,7 @@ ro_pageinfo_init(struct browser_window *bw,
 /**
  * open RISC OS page info window at the correct size
  */
-static nserror
-ro_pageinfo_open(struct ro_pageinfo_window *lhw, wimp_w parent)
+static nserror ro_pageinfo_open(struct ro_pageinfo_window *lhw, wimp_w parent)
 {
 	nserror res;
 	int width, height;
@@ -236,8 +228,11 @@ ro_pageinfo_open(struct ro_pageinfo_window *lhw, wimp_w parent)
 	box.y0 = -height;
 	error = xwimp_set_extent(lhw->core.wh, &box);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_set_extent: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_set_extent: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return NSERROR_NOMEM;
 	}
@@ -246,8 +241,11 @@ ro_pageinfo_open(struct ro_pageinfo_window *lhw, wimp_w parent)
 	state.w = lhw->core.wh;
 	error = xwimp_get_window_state(&state);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_window_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_window_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return NSERROR_NOMEM;
 	}
@@ -258,8 +256,11 @@ ro_pageinfo_open(struct ro_pageinfo_window *lhw, wimp_w parent)
 	state.next = wimp_HIDDEN;
 	error = xwimp_open_window(PTR_WIMP_OPEN(&state));
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_open_window: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_open_window: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return NSERROR_NOMEM;
 	}
@@ -269,7 +270,8 @@ ro_pageinfo_open(struct ro_pageinfo_window *lhw, wimp_w parent)
 	/* Give the window focus. */
 	error = xwimp_set_caret_position(lhw->core.wh, -1, 0, 0, -1, 0);
 	if (error) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "xwimp_set_caret_position: 0x%x : %s",
 		      error->errnum,
 		      error->errmess);

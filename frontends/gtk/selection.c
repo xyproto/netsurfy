@@ -26,7 +26,7 @@
 
 #include "gtk/toolbar_items.h"
 #include "gtk/window.h"
- 
+
 static GString *current_selection = NULL;
 
 /**
@@ -42,7 +42,9 @@ clipboard_read_done(GObject *source, GAsyncResult *result, gpointer data)
 {
 	struct clipboard_read *cr = data;
 
-	cr->text = gdk_clipboard_read_text_finish(GDK_CLIPBOARD(source), result, NULL);
+	cr->text = gdk_clipboard_read_text_finish(GDK_CLIPBOARD(source),
+						  result,
+						  NULL);
 	cr->done = TRUE;
 }
 
@@ -56,14 +58,15 @@ clipboard_read_done(GObject *source, GAsyncResult *result, gpointer data)
 static void gui_get_clipboard(char **buffer, size_t *length)
 {
 	GdkClipboard *clipboard;
-	struct clipboard_read cr = { FALSE, NULL };
+	struct clipboard_read cr = {FALSE, NULL};
 
 	*buffer = NULL;
 	*length = 0;
 
 	/* get clipboard contents from gtk, waiting for the result */
 	clipboard = gdk_display_get_clipboard(gdk_display_get_default());
-	gdk_clipboard_read_text_async(clipboard, NULL, clipboard_read_done, &cr);
+	gdk_clipboard_read_text_async(
+		clipboard, NULL, clipboard_read_done, &cr);
 	while (!cr.done) {
 		g_main_context_iteration(NULL, TRUE);
 	}
@@ -93,8 +96,10 @@ static void gui_get_clipboard(char **buffer, size_t *length)
  * \param  styles    Array of styles given to text runs, owned by core, or NULL
  * \param  n_styles  Number of text run styles in array
  */
-static void gui_set_clipboard(const char *buffer, size_t length,
-		nsclipboard_styles styles[], int n_styles)
+static void gui_set_clipboard(const char *buffer,
+			      size_t length,
+			      nsclipboard_styles styles[],
+			      int n_styles)
 {
 	if (!current_selection)
 		current_selection = g_string_new(NULL);
@@ -102,12 +107,14 @@ static void gui_set_clipboard(const char *buffer, size_t length,
 		g_string_set_size(current_selection, 0);
 
 	current_selection = g_string_append_len(current_selection,
-			buffer, length);
+						buffer,
+						length);
 
-	gdk_clipboard_set_text(gdk_display_get_clipboard(gdk_display_get_default()),
+	gdk_clipboard_set_text(gdk_display_get_clipboard(
+				       gdk_display_get_default()),
 			       current_selection->str);
 }
- 
+
 static struct gui_clipboard_table clipboard_table = {
 	.get = gui_get_clipboard,
 	.set = gui_set_clipboard,

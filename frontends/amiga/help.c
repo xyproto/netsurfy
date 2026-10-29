@@ -27,52 +27,57 @@ static Class *AmigaGuideClass = NULL;
 static Object *AmigaGuideObject = NULL;
 
 /* This array needs to match the enum in help.h */
-CONST_STRPTR context_nodes[] = {
-	"Main",
-	"GUI",
-	"Prefs",
-	NULL
-};
+CONST_STRPTR context_nodes[] = {"Main", "GUI", "Prefs", NULL};
 
 static void ami_help_init(struct Screen *screen)
 {
 	AmigaGuideClass = initAGClass();
 
-	AmigaGuideObject = NewObject(AmigaGuideClass, NULL,
-		AMIGAGUIDE_Name, "PROGDIR:NetSurf.guide",
-		AMIGAGUIDE_BaseName, "NetSurf",
-		AMIGAGUIDE_Screen, screen,
-		AMIGAGUIDE_ContextArray, context_nodes,
-		AMIGAGUIDE_ContextID, AMI_HELP_MAIN,
-		TAG_DONE);
+	AmigaGuideObject = NewObject(AmigaGuideClass,
+				     NULL,
+				     AMIGAGUIDE_Name,
+				     "PROGDIR:NetSurf.guide",
+				     AMIGAGUIDE_BaseName,
+				     "NetSurf",
+				     AMIGAGUIDE_Screen,
+				     screen,
+				     AMIGAGUIDE_ContextArray,
+				     context_nodes,
+				     AMIGAGUIDE_ContextID,
+				     AMI_HELP_MAIN,
+				     TAG_DONE);
 }
 
 void ami_help_open(ULONG node, struct Screen *screen)
 {
-	if(AmigaGuideObject == NULL) ami_help_init(screen);
+	if (AmigaGuideObject == NULL)
+		ami_help_init(screen);
 	SetAttrs(AmigaGuideObject, AMIGAGUIDE_ContextID, node, TAG_DONE);
 	IDoMethod(AmigaGuideObject, AGM_OPEN, NULL);
 }
 
 void ami_help_free(void)
 {
-	if (AmigaGuideObject) DisposeObject(AmigaGuideObject);
-	if (AmigaGuideClass) freeAGClass(AmigaGuideClass);
-	
+	if (AmigaGuideObject)
+		DisposeObject(AmigaGuideObject);
+	if (AmigaGuideClass)
+		freeAGClass(AmigaGuideClass);
+
 	AmigaGuideObject = NULL;
 	AmigaGuideClass = NULL;
 }
 
 void ami_help_new_screen(struct Screen *screen)
 {
-	if(AmigaGuideObject == NULL) return;
+	if (AmigaGuideObject == NULL)
+		return;
 	SetAttrs(AmigaGuideObject, AMIGAGUIDE_Screen, screen, TAG_DONE);
 }
 
 ULONG ami_help_signal(void)
 {
 	ULONG ag_sig = 0;
-	if(AmigaGuideObject)
+	if (AmigaGuideObject)
 		GetAttr(AMIGAGUIDE_Signal, AmigaGuideObject, &ag_sig);
 	return ag_sig;
 }
@@ -80,6 +85,6 @@ ULONG ami_help_signal(void)
 void ami_help_process(void)
 {
 	ULONG ret = IDoMethod(AmigaGuideObject, AGM_PROCESS, NULL);
-	if(ret) ami_help_free();
+	if (ret)
+		ami_help_free();
 }
-

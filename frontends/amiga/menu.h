@@ -40,20 +40,28 @@ struct ami_menu_data {
 void ami_menu_free_glyphs(void);
 
 /* generic menu alloc/free/layout */
-void ami_menu_alloc_item(struct ami_menu_data **md, int num, UBYTE type,
-			const char *restrict label, const char *restrict key, const char *restrict icon,
-			void *restrict func, void *restrict hookdata, UWORD flags);
+void ami_menu_alloc_item(struct ami_menu_data **md,
+			 int num,
+			 UBYTE type,
+			 const char *restrict label,
+			 const char *restrict key,
+			 const char *restrict icon,
+			 void *restrict func,
+			 void *restrict hookdata,
+			 UWORD flags);
 struct Menu *ami_menu_layout(struct ami_menu_data **md, int max);
 void ami_menu_free_menu(struct ami_menu_data **md, int max, struct Menu *imenu);
 void ami_menu_free_lab_item(struct ami_menu_data **md, int i);
 
 /* refresh a menu's children */
-void ami_menu_refresh(struct Menu *menu, struct ami_menu_data **md, int menu_item, int max,
-	nserror (*cb)(struct ami_menu_data **md));
+void ami_menu_refresh(struct Menu *menu,
+		      struct ami_menu_data **md,
+		      int menu_item,
+		      int max,
+		      nserror (*cb)(struct ami_menu_data **md));
 
 /**
  * Get the selected state of a menu item
  */
 bool ami_menu_get_selected(struct Menu *menu, struct IntuiMessage *msg);
 #endif
-

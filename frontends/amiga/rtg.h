@@ -26,16 +26,27 @@
 #include <proto/Picasso96API.h>
 
 /* Wrappers for Alloc/FreeBitMap */
-struct BitMap *ami_rtg_allocbitmap(ULONG width, ULONG height, ULONG depth,
-	ULONG flags, struct BitMap *friend, RGBFTYPE format);
+struct BitMap *ami_rtg_allocbitmap(ULONG width,
+				   ULONG height,
+				   ULONG depth,
+				   ULONG flags,
+				   struct BitMap *friend,
+				   RGBFTYPE format);
 void ami_rtg_freebitmap(struct BitMap *bm);
 
 /* WritePixelArray wrapper */
-void ami_rtg_writepixelarray(UBYTE *pixdata, struct BitMap *bm,
-	ULONG width, ULONG height, ULONG bpr, ULONG format);
+void ami_rtg_writepixelarray(UBYTE *pixdata,
+			     struct BitMap *bm,
+			     ULONG width,
+			     ULONG height,
+			     ULONG bpr,
+			     ULONG format);
 
 /* ReadPixelArray wrapper */
-void ami_rtg_readpixelarray(struct BitMap *bm, UBYTE **pixdata,
-	ULONG width, ULONG height, ULONG bpr, ULONG format);
+void ami_rtg_readpixelarray(struct BitMap *bm,
+			    UBYTE **pixdata,
+			    ULONG width,
+			    ULONG height,
+			    ULONG bpr,
+			    ULONG format);
 #endif
-

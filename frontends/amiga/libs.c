@@ -56,114 +56,176 @@
 #endif
 
 #ifdef __amigaos4__
-#define AMINS_LIB_OPEN(LIB, LIBVER, PREFIX, INTERFACE, INTVER, FAIL)	\
-	NSLOG(netsurf, INFO, "Opening %s v%d", LIB, LIBVER);		\
-	if((PREFIX##Base = (struct PREFIX##Base *)OpenLibrary(LIB, LIBVER))) {	\
-		NSLOG(netsurf, INFO, " -> opened v%d.%d", ((struct Library *)PREFIX##Base)->lib_Version, ((struct Library *)PREFIX##Base)->lib_Revision);	\
-		I##PREFIX = (struct PREFIX##IFace *)GetInterface((struct Library *)PREFIX##Base, INTERFACE, INTVER, NULL);	\
-		if(I##PREFIX == NULL) {	\
-			NSLOG(netsurf, INFO, "Failed to get %s interface v%d of %s", INTERFACE, INTVER, LIB); \
-			AMINS_LIB_CLOSE(PREFIX)	\
-			if(FAIL == true) {	\
-				STRPTR error = ASPrintf("Unable to open interface %s v%d\nof %s v%ld (fatal error - not an OS4 lib?)", INTERFACE, INTVER, LIB, LIBVER);	\
-				ami_misc_fatal_error(error);	\
-				FreeVec(error);	\
-				return false;	\
-			}	\
-		}	\
-	} else {	\
-		NSLOG(netsurf, INFO, "Failed to open %s v%d", LIB, LIBVER); \
-		if(FAIL == true) {	\
-			STRPTR error = ASPrintf("Unable to open %s v%ld (fatal error)", LIB, LIBVER);	\
-			ami_misc_fatal_error(error);	\
-			FreeVec(error);	\
-			return false;	\
-		}	\
+#define AMINS_LIB_OPEN(LIB, LIBVER, PREFIX, INTERFACE, INTVER, FAIL)                                                   \
+	NSLOG(netsurf, INFO, "Opening %s v%d", LIB, LIBVER);                                                           \
+	if ((PREFIX##Base = (struct PREFIX##Base *)OpenLibrary(LIB,                                                    \
+							       LIBVER))) {                                             \
+		NSLOG(netsurf,                                                                                         \
+		      INFO,                                                                                            \
+		      " -> opened v%d.%d",                                                                             \
+		      ((struct Library *)PREFIX##Base)->lib_Version,                                                   \
+		      ((struct Library *)PREFIX##Base)->lib_Revision);                                                 \
+		I##PREFIX = (struct PREFIX##IFace *)GetInterface(                                                      \
+			(struct Library *)PREFIX##Base,                                                                \
+			INTERFACE,                                                                                     \
+			INTVER,                                                                                        \
+			NULL);                                                                                         \
+		if (I##PREFIX == NULL) {                                                                               \
+			NSLOG(netsurf,                                                                                 \
+			      INFO,                                                                                    \
+			      "Failed to get %s interface v%d of %s",                                                  \
+			      INTERFACE,                                                                               \
+			      INTVER,                                                                                  \
+			      LIB);                                                                                    \
+			AMINS_LIB_CLOSE(PREFIX)                                                                        \
+			if (FAIL == true) {                                                                            \
+				STRPTR error = ASPrintf(                                                               \
+					"Unable to open interface %s v%d\nof %s v%ld (fatal error - not an OS4 lib?)", \
+					INTERFACE,                                                                     \
+					INTVER,                                                                        \
+					LIB,                                                                           \
+					LIBVER);                                                                       \
+				ami_misc_fatal_error(error);                                                           \
+				FreeVec(error);                                                                        \
+				return false;                                                                          \
+			}                                                                                              \
+		}                                                                                                      \
+	} else {                                                                                                       \
+		NSLOG(netsurf, INFO, "Failed to open %s v%d", LIB, LIBVER);                                            \
+		if (FAIL == true) {                                                                                    \
+			STRPTR error = ASPrintf(                                                                       \
+				"Unable to open %s v%ld (fatal error)",                                                \
+				LIB,                                                                                   \
+				LIBVER);                                                                               \
+			ami_misc_fatal_error(error);                                                                   \
+			FreeVec(error);                                                                                \
+			return false;                                                                                  \
+		}                                                                                                      \
 	}
 
-#define AMINS_LIB_CLOSE(PREFIX)	\
-	if(I##PREFIX) DropInterface((struct Interface *)I##PREFIX);	\
-	if(PREFIX##Base) CloseLibrary((struct Library *)PREFIX##Base);	\
-	I##PREFIX = NULL;	\
+#define AMINS_LIB_CLOSE(PREFIX)                                                \
+	if (I##PREFIX)                                                         \
+		DropInterface((struct Interface *)I##PREFIX);                  \
+	if (PREFIX##Base)                                                      \
+		CloseLibrary((struct Library *)PREFIX##Base);                  \
+	I##PREFIX = NULL;                                                      \
 	PREFIX##Base = NULL;
 
-#define AMINS_LIB_STRUCT(PREFIX)	\
-	struct PREFIX##Base *PREFIX##Base = NULL;	\
+#define AMINS_LIB_STRUCT(PREFIX)                                               \
+	struct PREFIX##Base *PREFIX##Base = NULL;                              \
 	struct PREFIX##IFace *I##PREFIX = NULL;
 
-#define AMINS_CLASS_OPEN(CLASS, CLASSVER, PREFIX, CLASSGET, NEEDINTERFACE)	\
-	NSLOG(netsurf, INFO, "Opening %s v%d", CLASS, CLASSVER);		\
-	if((PREFIX##Base = OpenClass(CLASS, CLASSVER, &PREFIX##Class))) {	\
-		NSLOG(netsurf, INFO, " -> opened v%d.%d", ((struct Library *)PREFIX##Base)->lib_Version, ((struct Library *)PREFIX##Base)->lib_Revision);	\
-		if(NEEDINTERFACE == true) {	\
-			NSLOG(netsurf, INFO, "        + interface");	\
-			I##PREFIX = (struct PREFIX##IFace *)GetInterface((struct Library *)PREFIX##Base, "main", 1, NULL);	\
-			if(I##PREFIX == NULL) {	\
-				NSLOG(netsurf, ERROR, "Failed to get main interface v1 of %s", CLASS); \
-			}	\
-		}	\
-	}	\
-	if(PREFIX##Class == NULL) {	\
-		NSLOG(netsurf, INFO, "Failed to open %s v%d", CLASS, CLASSVER); \
-		STRPTR error = ASPrintf("Unable to open %s v%d (fatal error)", CLASS, CLASSVER);	\
-		ami_misc_fatal_error(error);	\
-		FreeVec(error);	\
-		return false;	\
+#define AMINS_CLASS_OPEN(CLASS, CLASSVER, PREFIX, CLASSGET, NEEDINTERFACE)     \
+	NSLOG(netsurf, INFO, "Opening %s v%d", CLASS, CLASSVER);               \
+	if ((PREFIX##Base = OpenClass(CLASS, CLASSVER, &PREFIX##Class))) {     \
+		NSLOG(netsurf,                                                 \
+		      INFO,                                                    \
+		      " -> opened v%d.%d",                                     \
+		      ((struct Library *)PREFIX##Base)->lib_Version,           \
+		      ((struct Library *)PREFIX##Base)->lib_Revision);         \
+		if (NEEDINTERFACE == true) {                                   \
+			NSLOG(netsurf, INFO, "        + interface");           \
+			I##PREFIX = (struct PREFIX##IFace *)GetInterface(      \
+				(struct Library *)PREFIX##Base,                \
+				"main",                                        \
+				1,                                             \
+				NULL);                                         \
+			if (I##PREFIX == NULL) {                               \
+				NSLOG(netsurf,                                 \
+				      ERROR,                                   \
+				      "Failed to get main interface v1 of %s", \
+				      CLASS);                                  \
+			}                                                      \
+		}                                                              \
+	}                                                                      \
+	if (PREFIX##Class == NULL) {                                           \
+		NSLOG(netsurf,                                                 \
+		      INFO,                                                    \
+		      "Failed to open %s v%d",                                 \
+		      CLASS,                                                   \
+		      CLASSVER);                                               \
+		STRPTR error = ASPrintf("Unable to open %s v%d (fatal error)", \
+					CLASS,                                 \
+					CLASSVER);                             \
+		ami_misc_fatal_error(error);                                   \
+		FreeVec(error);                                                \
+		return false;                                                  \
 	}
 
-#define AMINS_CLASS_CLOSE(PREFIX)	\
-	if(I##PREFIX) DropInterface((struct Interface *)I##PREFIX);	\
-	if(PREFIX##Base) CloseClass(PREFIX##Base);	\
-	I##PREFIX = NULL;	\
+#define AMINS_CLASS_CLOSE(PREFIX)                                              \
+	if (I##PREFIX)                                                         \
+		DropInterface((struct Interface *)I##PREFIX);                  \
+	if (PREFIX##Base)                                                      \
+		CloseClass(PREFIX##Base);                                      \
+	I##PREFIX = NULL;                                                      \
 	PREFIX##Base = NULL;
 
-#define AMINS_CLASS_STRUCT(PREFIX)	\
-	struct ClassLibrary *PREFIX##Base = NULL;	\
-	struct PREFIX##IFace *I##PREFIX = NULL;	\
+#define AMINS_CLASS_STRUCT(PREFIX)                                             \
+	struct ClassLibrary *PREFIX##Base = NULL;                              \
+	struct PREFIX##IFace *I##PREFIX = NULL;                                \
 	Class *PREFIX##Class = NULL;
 
 #else
-#define AMINS_LIB_OPEN(LIB, LIBVER, PREFIX, INTERFACE, INTVER, FAIL)	\
-	NSLOG(netsurf, INFO, "Opening %s v%d", LIB, LIBVER);		\
-	if((PREFIX##Base = (struct PREFIX##Base *)OpenLibrary(LIB, LIBVER))) {	\
-		NSLOG(netsurf, INFO, " -> opened v%d.%d", ((struct Library *)PREFIX##Base)->lib_Version, ((struct Library *)PREFIX##Base)->lib_Revision);	\
-	} else {	\
-		NSLOG(netsurf, INFO, "Failed to open %s v%d", LIB, LIBVER); \
-		if(FAIL == true) {	\
-			STRPTR error = ASPrintf("Unable to open %s v%d (fatal error)", LIB, LIBVER);	\
-			ami_misc_fatal_error(error);	\
-			FreeVec(error);	\
-			return false;	\
-		}	\
+#define AMINS_LIB_OPEN(LIB, LIBVER, PREFIX, INTERFACE, INTVER, FAIL)           \
+	NSLOG(netsurf, INFO, "Opening %s v%d", LIB, LIBVER);                   \
+	if ((PREFIX##Base = (struct PREFIX##Base *)OpenLibrary(LIB,            \
+							       LIBVER))) {     \
+		NSLOG(netsurf,                                                 \
+		      INFO,                                                    \
+		      " -> opened v%d.%d",                                     \
+		      ((struct Library *)PREFIX##Base)->lib_Version,           \
+		      ((struct Library *)PREFIX##Base)->lib_Revision);         \
+	} else {                                                               \
+		NSLOG(netsurf, INFO, "Failed to open %s v%d", LIB, LIBVER);    \
+		if (FAIL == true) {                                            \
+			STRPTR error = ASPrintf(                               \
+				"Unable to open %s v%d (fatal error)",         \
+				LIB,                                           \
+				LIBVER);                                       \
+			ami_misc_fatal_error(error);                           \
+			FreeVec(error);                                        \
+			return false;                                          \
+		}                                                              \
 	}
 
-#define AMINS_LIB_CLOSE(PREFIX)	\
-	if(PREFIX##Base) CloseLibrary((struct Library *)PREFIX##Base);	\
+#define AMINS_LIB_CLOSE(PREFIX)                                                \
+	if (PREFIX##Base)                                                      \
+		CloseLibrary((struct Library *)PREFIX##Base);                  \
 	PREFIX##Base = NULL;
 
-#define AMINS_LIB_STRUCT(PREFIX)	\
-	struct PREFIX##Base *PREFIX##Base = NULL;
+#define AMINS_LIB_STRUCT(PREFIX) struct PREFIX##Base *PREFIX##Base = NULL;
 
-#define AMINS_CLASS_OPEN(CLASS, CLASSVER, PREFIX, CLASSGET, NEEDINTERFACE)	\
-	NSLOG(netsurf, INFO, "Opening %s v%d", CLASS, CLASSVER);	\
-	if((PREFIX##Base = OpenLibrary(CLASS, CLASSVER))) {	\
-		NSLOG(netsurf, INFO, " -> opened v%d.%d", ((struct Library *)PREFIX##Base)->lib_Version, ((struct Library *)PREFIX##Base)->lib_Revision);	\
-		PREFIX##Class = CLASSGET##_GetClass();	\
-	}	\
-	if(PREFIX##Class == NULL) {	\
-		NSLOG(netsurf, INFO, "Failed to open %s v%d", CLASS, CLASSVER); \
-		STRPTR error = ASPrintf("Unable to open %s v%d (fatal error)", CLASS, CLASSVER);	\
-		ami_misc_fatal_error(error);	\
-		FreeVec(error);	\
-		return false;	\
+#define AMINS_CLASS_OPEN(CLASS, CLASSVER, PREFIX, CLASSGET, NEEDINTERFACE)     \
+	NSLOG(netsurf, INFO, "Opening %s v%d", CLASS, CLASSVER);               \
+	if ((PREFIX##Base = OpenLibrary(CLASS, CLASSVER))) {                   \
+		NSLOG(netsurf,                                                 \
+		      INFO,                                                    \
+		      " -> opened v%d.%d",                                     \
+		      ((struct Library *)PREFIX##Base)->lib_Version,           \
+		      ((struct Library *)PREFIX##Base)->lib_Revision);         \
+		PREFIX##Class = CLASSGET##_GetClass();                         \
+	}                                                                      \
+	if (PREFIX##Class == NULL) {                                           \
+		NSLOG(netsurf,                                                 \
+		      INFO,                                                    \
+		      "Failed to open %s v%d",                                 \
+		      CLASS,                                                   \
+		      CLASSVER);                                               \
+		STRPTR error = ASPrintf("Unable to open %s v%d (fatal error)", \
+					CLASS,                                 \
+					CLASSVER);                             \
+		ami_misc_fatal_error(error);                                   \
+		FreeVec(error);                                                \
+		return false;                                                  \
 	}
 
-#define AMINS_CLASS_CLOSE(PREFIX)	\
-	if(PREFIX##Base) CloseLibrary(PREFIX##Base);	\
+#define AMINS_CLASS_CLOSE(PREFIX)                                              \
+	if (PREFIX##Base)                                                      \
+		CloseLibrary(PREFIX##Base);                                    \
 	PREFIX##Base = NULL;
 
-#define AMINS_CLASS_STRUCT(PREFIX)	\
-	struct Library *PREFIX##Base = NULL;	\
+#define AMINS_CLASS_STRUCT(PREFIX)                                             \
+	struct Library *PREFIX##Base = NULL;                                   \
 	Class *PREFIX##Class = NULL;
 
 #endif
@@ -222,43 +284,46 @@ bool ami_libs_open(void)
 {
 #ifdef __amigaos4__
 	/* Libraries only needed on OS4 */
-	AMINS_LIB_OPEN("application.library",  53, Application, "application", 2, false)
-	AMINS_LIB_OPEN("dos.library",          37, DOS,         "main",        1, true)
+	AMINS_LIB_OPEN(
+		"application.library", 53, Application, "application", 2, false)
+	AMINS_LIB_OPEN("dos.library", 37, DOS, "main", 1, true)
 #else
 	/* Libraries we get automatically on OS4 but not OS3 */
-	AMINS_LIB_OPEN("utility.library",      37, Utility,     "main",        1, true)
+	AMINS_LIB_OPEN("utility.library", 37, Utility, "main", 1, true)
 #endif
 	/* Standard libraries for both versions */
-	AMINS_LIB_OPEN("asl.library",          37, Asl,         "main",        1, true)
-	AMINS_LIB_OPEN("datatypes.library",    39, DataTypes,   "main",        1, true)
-	AMINS_LIB_OPEN("diskfont.library",     40, Diskfont,    "main",        1, true)
-	AMINS_LIB_OPEN("gadtools.library",     37, GadTools,    "main",        1, true)
-	AMINS_LIB_OPEN("graphics.library",     40, Graphics,    "main",        1, true)
-	AMINS_LIB_OPEN("icon.library",         44, Icon,        "main",        1, true)
-	AMINS_LIB_OPEN("iffparse.library",     37, IFFParse,    "main",        1, true)
-	AMINS_LIB_OPEN("intuition.library",    40, Intuition,   "main",        1, true)
-	AMINS_LIB_OPEN("keymap.library",       37, Keymap,      "main",        1, true)
-	AMINS_LIB_OPEN("layers.library",       37, Layers,      "main",        1, true)
-	AMINS_LIB_OPEN("locale.library",       38, Locale,      "main",        1, true)
-	AMINS_LIB_OPEN("workbench.library",    37, Workbench,   "main",        1, true)
+	AMINS_LIB_OPEN("asl.library", 37, Asl, "main", 1, true)
+	AMINS_LIB_OPEN("datatypes.library", 39, DataTypes, "main", 1, true)
+	AMINS_LIB_OPEN("diskfont.library", 40, Diskfont, "main", 1, true)
+	AMINS_LIB_OPEN("gadtools.library", 37, GadTools, "main", 1, true)
+	AMINS_LIB_OPEN("graphics.library", 40, Graphics, "main", 1, true)
+	AMINS_LIB_OPEN("icon.library", 44, Icon, "main", 1, true)
+	AMINS_LIB_OPEN("iffparse.library", 37, IFFParse, "main", 1, true)
+	AMINS_LIB_OPEN("intuition.library", 40, Intuition, "main", 1, true)
+	AMINS_LIB_OPEN("keymap.library", 37, Keymap, "main", 1, true)
+	AMINS_LIB_OPEN("layers.library", 37, Layers, "main", 1, true)
+	AMINS_LIB_OPEN("locale.library", 38, Locale, "main", 1, true)
+	AMINS_LIB_OPEN("workbench.library", 37, Workbench, "main", 1, true)
 
 	/* This is down here as we need to check the graphics.library version
-	 * before opening.  If it is sufficiently new enough we can avoid using P96.
+	 * before opening.  If it is sufficiently new enough we can avoid using
+	 * P96.
 	 */
-	if(GfxBase->LibNode.lib_Version < 54)
-		AMINS_LIB_OPEN("Picasso96API.library",  0, P96,         "main",        1, false)
+	if (GfxBase->LibNode.lib_Version < 54)
+		AMINS_LIB_OPEN("Picasso96API.library", 0, P96, "main", 1, false)
 
 	/* Non-OS provided libraries */
-	AMINS_LIB_OPEN("codesets.library",    6, Codesets,   "main",        1, false)
-	AMINS_LIB_OPEN("guigfx.library",      9, GuiGFX,     "main",        1, false)
+	AMINS_LIB_OPEN("codesets.library", 6, Codesets, "main", 1, false)
+	AMINS_LIB_OPEN("guigfx.library", 9, GuiGFX, "main", 1, false)
 
-	/* NB: timer.device is opened in schedule.c (ultimately by the scheduler process).
-	 * The library base and interface are obtained there, rather than here, due to
-	 * the additional complexities of opening devices, which aren't important here
-	 * (as we only need the library interface), but are important for the scheduler
-	 * (as it also uses the device interface).  We trust that the scheduler has
-	 * initialised before any other code requires the timer's library interface,
-	 * to avoid opening it twice.
+	/* NB: timer.device is opened in schedule.c (ultimately by the scheduler
+	 * process). The library base and interface are obtained there, rather
+	 * than here, due to the additional complexities of opening devices,
+	 * which aren't important here (as we only need the library interface),
+	 * but are important for the scheduler (as it also uses the device
+	 * interface).  We trust that the scheduler has initialised before any
+	 * other code requires the timer's library interface, to avoid opening
+	 * it twice.
 	 */
 
 	/* BOOPSI classes.
@@ -268,27 +333,44 @@ bool ami_libs_open(void)
 	 * NB: the last argument should be "true" only if the class also has
 	 * library functions we use.
 	 */
-	AMINS_CLASS_OPEN("arexx.class",                  41, ARexx,         AREXX,         false)
-	AMINS_CLASS_OPEN("images/bevel.image",           41, Bevel,         BEVEL,         false)
-	AMINS_CLASS_OPEN("images/bitmap.image",          41, BitMap,        BITMAP,        false)
-	AMINS_CLASS_OPEN("gadgets/button.gadget",        42, Button,        BUTTON,        false)
-	AMINS_CLASS_OPEN("gadgets/checkbox.gadget",      41, CheckBox,      CHECKBOX,      false)
-	AMINS_CLASS_OPEN("gadgets/chooser.gadget",       41, Chooser,       CHOOSER,       true)
-	AMINS_CLASS_OPEN("gadgets/clicktab.gadget",      42, ClickTab,      CLICKTAB,      true)
-	AMINS_CLASS_OPEN("gadgets/fuelgauge.gadget",     41, FuelGauge,     FUELGAUGE,     false)
-	AMINS_CLASS_OPEN("gadgets/getfile.gadget",       41, GetFile,       GETFILE,       false)
-	AMINS_CLASS_OPEN("gadgets/getfont.gadget",       41, GetFont,       GETFONT,       false)
-	AMINS_CLASS_OPEN("gadgets/getscreenmode.gadget", 41, GetScreenMode, GETSCREENMODE, false)
-	AMINS_CLASS_OPEN("gadgets/integer.gadget",       41, Integer,       INTEGER,       false)
-	AMINS_CLASS_OPEN("images/label.image",           41, Label,         LABEL,         false)
-	AMINS_CLASS_OPEN("gadgets/layout.gadget",        43, Layout,        LAYOUT,        true)
-	AMINS_CLASS_OPEN("gadgets/listbrowser.gadget",   41, ListBrowser,   LISTBROWSER,   true)
-	AMINS_CLASS_OPEN("gadgets/radiobutton.gadget",   41, RadioButton,   RADIOBUTTON,   false)
-	AMINS_CLASS_OPEN("gadgets/scroller.gadget",      42, Scroller,      SCROLLER,      false)
-	AMINS_CLASS_OPEN("gadgets/space.gadget",         41, Space,         SPACE,         false)
-	AMINS_CLASS_OPEN("gadgets/speedbar.gadget",      41, SpeedBar,      SPEEDBAR,      true)
-	AMINS_CLASS_OPEN("gadgets/string.gadget",        41, String,        STRING,        false)
-	AMINS_CLASS_OPEN("window.class",                 42, Window,        WINDOW,        false)
+	AMINS_CLASS_OPEN("arexx.class", 41, ARexx, AREXX, false)
+	AMINS_CLASS_OPEN("images/bevel.image", 41, Bevel, BEVEL, false)
+	AMINS_CLASS_OPEN("images/bitmap.image", 41, BitMap, BITMAP, false)
+	AMINS_CLASS_OPEN("gadgets/button.gadget", 42, Button, BUTTON, false)
+	AMINS_CLASS_OPEN(
+		"gadgets/checkbox.gadget", 41, CheckBox, CHECKBOX, false)
+	AMINS_CLASS_OPEN("gadgets/chooser.gadget", 41, Chooser, CHOOSER, true)
+	AMINS_CLASS_OPEN(
+		"gadgets/clicktab.gadget", 42, ClickTab, CLICKTAB, true)
+	AMINS_CLASS_OPEN(
+		"gadgets/fuelgauge.gadget", 41, FuelGauge, FUELGAUGE, false)
+	AMINS_CLASS_OPEN("gadgets/getfile.gadget", 41, GetFile, GETFILE, false)
+	AMINS_CLASS_OPEN("gadgets/getfont.gadget", 41, GetFont, GETFONT, false)
+	AMINS_CLASS_OPEN("gadgets/getscreenmode.gadget",
+			 41,
+			 GetScreenMode,
+			 GETSCREENMODE,
+			 false)
+	AMINS_CLASS_OPEN("gadgets/integer.gadget", 41, Integer, INTEGER, false)
+	AMINS_CLASS_OPEN("images/label.image", 41, Label, LABEL, false)
+	AMINS_CLASS_OPEN("gadgets/layout.gadget", 43, Layout, LAYOUT, true)
+	AMINS_CLASS_OPEN("gadgets/listbrowser.gadget",
+			 41,
+			 ListBrowser,
+			 LISTBROWSER,
+			 true)
+	AMINS_CLASS_OPEN("gadgets/radiobutton.gadget",
+			 41,
+			 RadioButton,
+			 RADIOBUTTON,
+			 false)
+	AMINS_CLASS_OPEN(
+		"gadgets/scroller.gadget", 42, Scroller, SCROLLER, false)
+	AMINS_CLASS_OPEN("gadgets/space.gadget", 41, Space, SPACE, false)
+	AMINS_CLASS_OPEN(
+		"gadgets/speedbar.gadget", 41, SpeedBar, SPEEDBAR, true)
+	AMINS_CLASS_OPEN("gadgets/string.gadget", 41, String, STRING, false)
+	AMINS_CLASS_OPEN("window.class", 42, Window, WINDOW, false)
 
 #ifndef __amigaos4__
 	/* BOOPSI classes only required prior to OS4 */
@@ -349,4 +431,3 @@ void ami_libs_close(void)
 	AMINS_LIB_CLOSE(Utility)
 #endif
 }
-

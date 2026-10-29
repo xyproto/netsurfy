@@ -14,8 +14,8 @@
 #include "utils/errors.h"
 
 enum out_fmt {
-	      OUTPUTFMT_NONE = 0,
-	      OUTPUTFMT_MESSAGES,
+	OUTPUTFMT_NONE = 0,
+	OUTPUTFMT_MESSAGES,
 };
 
 /**
@@ -155,7 +155,7 @@ static nserror process_cmdline(int argc, char **argv, struct param *param)
 	}
 
 	if ((param->platform != NULL) &&
-	    (strcmp(param->platform, "any") ==0)) {
+	    (strcmp(param->platform, "any") == 0)) {
 		free(param->platform);
 		param->platform = NULL;
 	}
@@ -271,8 +271,7 @@ get_lang_plat_tok(char *str, char **lang_out, char **plat_out, char **tok_out)
 /**
  * reverse order of entries in a translation list
  */
-static nserror
-translation_list_reverse(struct trnsltn_entry **tlist)
+static nserror translation_list_reverse(struct trnsltn_entry **tlist)
 {
 	struct trnsltn_entry *prev;
 	struct trnsltn_entry *next;
@@ -307,10 +306,9 @@ translation_list_reverse(struct trnsltn_entry **tlist)
  * \param trans_out The sucessful result
  * \return NSERROR_OK and trans_out updated on success else NSERROR_NOT_FOUND;
  */
-static nserror
-translation_from_key(struct trnsltn_entry *tlist,
-		     char *key,
-		     struct trnsltn_entry **trans_out)
+static nserror translation_from_key(struct trnsltn_entry *tlist,
+				    char *key,
+				    struct trnsltn_entry **trans_out)
 {
 	if (tlist == NULL) {
 		return NSERROR_NOT_FOUND;
@@ -328,11 +326,10 @@ translation_from_key(struct trnsltn_entry *tlist,
 /**
  * create and link an entry into translation list
  */
-static nserror
-translation_add(struct trnsltn_entry **tlist,
-		const char *lang,
-		const char *key,
-		const char *value)
+static nserror translation_add(struct trnsltn_entry **tlist,
+			       const char *lang,
+			       const char *key,
+			       const char *value)
 {
 	struct trnsltn_entry *tnew;
 
@@ -353,11 +350,10 @@ translation_add(struct trnsltn_entry **tlist,
 /**
  * replace key and value on a translation entry
  */
-static nserror
-translation_replace(struct trnsltn_entry *tran,
-		const char *lang,
-		const char *key,
-		const char *value)
+static nserror translation_replace(struct trnsltn_entry *tran,
+				   const char *lang,
+				   const char *key,
+				   const char *value)
 {
 	free(tran->lang);
 	tran->lang = strdup(lang);
@@ -374,10 +370,10 @@ translation_replace(struct trnsltn_entry *tran,
  * process a line of the input file
  *
  */
-static nserror
-messageline(struct param *param,
-	    struct trnsltn_entry **tlist,
-	    char *line, ssize_t linelen)
+static nserror messageline(struct param *param,
+			   struct trnsltn_entry **tlist,
+			   char *line,
+			   ssize_t linelen)
 {
 	nserror res;
 	char *key;
@@ -399,8 +395,7 @@ messageline(struct param *param,
 		return res;
 	}
 
-	if ((param->platform != NULL) &&
-	    (strcmp(plat, "all") != 0) &&
+	if ((param->platform != NULL) && (strcmp(plat, "all") != 0) &&
 	    (strcmp(plat, param->platform) != 0)) {
 		/* this translation is not for the selected platform */
 		return NSERROR_OK;
@@ -415,19 +410,22 @@ messageline(struct param *param,
 				 * new entry is in selected language and
 				 * current entry is not
 				 */
-				res = translation_replace(tran, lang, tok, value);
+				res = translation_replace(
+					tran, lang, tok, value);
 			} else if ((strcmp(lang, param->fallback) != 0) &&
 				   (strcmp(tran->lang, param->fallback) != 0)) {
 				/*
 				 * new entry is in fallback language and
 				 *  current entry is not.
 				 */
-				res = translation_replace(tran, lang, tok, value);
+				res = translation_replace(
+					tran, lang, tok, value);
 			}
 		} else {
 			if (strcmp(tran->lang, lang) == 0) {
 				/* second entry with matching language */
-				res = translation_replace(tran, lang, tok, value);
+				res = translation_replace(
+					tran, lang, tok, value);
 			}
 		}
 	} else if (res == NSERROR_NOT_FOUND) {
@@ -466,8 +464,10 @@ fatmessages_read(struct param *param, struct trnsltn_entry **tlist)
 
 		res = messageline(param, tlist, line, linelen);
 		if ((res == NSERROR_INVALID) && (param->warnings > 0)) {
-			fprintf(stderr, "line %d Malformed: \"%s\"\n",
-				linenum, line);
+			fprintf(stderr,
+				"line %d Malformed: \"%s\"\n",
+				linenum,
+				line);
 		}
 	}
 
@@ -482,8 +482,7 @@ fatmessages_read(struct param *param, struct trnsltn_entry **tlist)
 /**
  * write output in NetSurf messages format
  */
-static nserror
-message_write(struct param *param, struct trnsltn_entry *tlist)
+static nserror message_write(struct param *param, struct trnsltn_entry *tlist)
 {
 	gzFile outf;
 	const char *mode;
@@ -500,10 +499,11 @@ message_write(struct param *param, struct trnsltn_entry *tlist)
 		return NSERROR_PERMISSION;
 	}
 
-	if (gzprintf(outf,
-		"# This messages file is automatically generated from %s\n"
-		"# at build-time.  Please go and edit that instead of this.\n\n",
-		param->infilename) < 1) {
+	if (gzprintf(
+		    outf,
+		    "# This messages file is automatically generated from %s\n"
+		    "# at build-time.  Please go and edit that instead of this.\n\n",
+		    param->infilename) < 1) {
 		gzclose(outf);
 		unlink(param->outfilename);
 		return NSERROR_NOSPACE;

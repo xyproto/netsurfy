@@ -73,17 +73,14 @@ static wimp_window *dialog_local_history_template;
  * \param originy The risc os plotter y origin.
  * \return NSERROR_OK on success otherwise apropriate error code
  */
-static nserror
-ro_local_history_draw(struct ro_corewindow *ro_cw,
-		      int originx,
-		      int originy,
-		      struct rect *r)
+static nserror ro_local_history_draw(struct ro_corewindow *ro_cw,
+				     int originx,
+				     int originy,
+				     struct rect *r)
 {
-	struct redraw_context ctx = {
-		.interactive = true,
-		.background_images = true,
-		.plot = &ro_plotters
-	};
+	struct redraw_context ctx = {.interactive = true,
+				     .background_images = true,
+				     .plot = &ro_plotters};
 	struct ro_local_history_window *lhw;
 
 	lhw = (struct ro_local_history_window *)ro_cw;
@@ -107,8 +104,7 @@ ro_local_history_draw(struct ro_corewindow *ro_cw,
  *         NSERROR_NOT_IMPLEMENTED if key not processed
  *         otherwise apropriate error code
  */
-static nserror
-ro_local_history_key(struct ro_corewindow *ro_cw, uint32_t nskey)
+static nserror ro_local_history_key(struct ro_corewindow *ro_cw, uint32_t nskey)
 {
 	struct ro_local_history_window *lhw;
 
@@ -154,8 +150,11 @@ ro_local_history_tooltip(struct ro_local_history_window *lhw, int x, int y)
 		/* not over a tree entry => close tooltip window. */
 		error = xwimp_close_window(dialog_tooltip);
 		if (error) {
-			NSLOG(netsurf, INFO, "xwimp_close_window: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_close_window: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 			return NSERROR_NOMEM;
 		}
@@ -164,11 +163,16 @@ ro_local_history_tooltip(struct ro_local_history_window *lhw, int x, int y)
 
 	/* get width of string */
 	error = xwimptextop_string_width(nsurl_access(url),
-					 nsurl_length(url) > 256 ? 256 : nsurl_length(url),
+					 nsurl_length(url) > 256
+						 ? 256
+						 : nsurl_length(url),
 					 &width);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimptextop_string_width: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimptextop_string_width: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		nsurl_unref(url);
 		return NSERROR_NOMEM;
@@ -182,17 +186,26 @@ ro_local_history_tooltip(struct ro_local_history_window *lhw, int x, int y)
 	ic.i = 0;
 	error = xwimp_get_icon_state(&ic);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_icon_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_icon_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return NSERROR_NOMEM;
 	}
-	error = xwimp_resize_icon(dialog_tooltip, 0,
-				  ic.icon.extent.x0, ic.icon.extent.y0,
-				  width + 16, ic.icon.extent.y1);
+	error = xwimp_resize_icon(dialog_tooltip,
+				  0,
+				  ic.icon.extent.x0,
+				  ic.icon.extent.y0,
+				  width + 16,
+				  ic.icon.extent.y1);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_resize_icon: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_resize_icon: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return NSERROR_NOMEM;
 	}
@@ -200,8 +213,11 @@ ro_local_history_tooltip(struct ro_local_history_window *lhw, int x, int y)
 	state.w = dialog_tooltip;
 	error = xwimp_get_window_state(&state);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_window_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_window_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return NSERROR_NOMEM;
 	}
@@ -211,16 +227,22 @@ ro_local_history_tooltip(struct ro_local_history_window *lhw, int x, int y)
 	box.y0 = -36;
 	error = xwimp_set_extent(dialog_tooltip, &box);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_set_extent: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_set_extent: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return NSERROR_NOMEM;
 	}
 
 	error = xwimp_get_pointer_info(&pointer);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_pointer_info: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_pointer_info: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return NSERROR_NOMEM;
 	}
@@ -234,8 +256,11 @@ ro_local_history_tooltip(struct ro_local_history_window *lhw, int x, int y)
 	/* open window */
 	error = xwimp_open_window(PTR_WIMP_OPEN(&state));
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_open_window: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_open_window: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return NSERROR_NOMEM;
 	}
@@ -252,10 +277,10 @@ ro_local_history_tooltip(struct ro_local_history_window *lhw, int x, int y)
  * \param y location of event
  * \return NSERROR_OK on sucess otherwise apropriate error code.
  */
-static nserror
-ro_local_history_mouse(struct ro_corewindow *ro_cw,
-		       browser_mouse_state mouse_state,
-		       int x, int y)
+static nserror ro_local_history_mouse(struct ro_corewindow *ro_cw,
+				      browser_mouse_state mouse_state,
+				      int x,
+				      int y)
 {
 	struct ro_local_history_window *lhw;
 
@@ -285,9 +310,8 @@ ro_local_history_mouse(struct ro_corewindow *ro_cw,
  *
  * \return NSERROR_OK on success else appropriate error code on faliure.
  */
-static nserror
-ro_local_history_init(struct browser_window *bw,
-		      struct ro_local_history_window **win_out)
+static nserror ro_local_history_init(struct browser_window *bw,
+				     struct ro_local_history_window **win_out)
 {
 	os_error *error;
 	struct ro_local_history_window *ncwin;
@@ -310,8 +334,11 @@ ro_local_history_init(struct browser_window *bw,
 	error = xwimp_create_window(dialog_local_history_template,
 				    &ncwin->core.wh);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_create_window: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_create_window: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		free(ncwin);
 		return NSERROR_NOMEM;
@@ -323,11 +350,7 @@ ro_local_history_init(struct browser_window *bw,
 	ncwin->core.mouse = ro_local_history_mouse;
 
 	/* initialise core window */
-	res = ro_corewindow_init(&ncwin->core,
-				 NULL,
-				 NULL,
-				 0,
-				 NULL);
+	res = ro_corewindow_init(&ncwin->core, NULL, NULL, 0, NULL);
 	if (res != NSERROR_OK) {
 		free(ncwin);
 		return res;
@@ -372,8 +395,11 @@ ro_local_history_open(struct ro_local_history_window *lhw, wimp_w parent)
 	box.y0 = -height;
 	error = xwimp_set_extent(lhw->core.wh, &box);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_set_extent: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_set_extent: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return NSERROR_NOMEM;
 	}
@@ -382,8 +408,11 @@ ro_local_history_open(struct ro_local_history_window *lhw, wimp_w parent)
 	state.w = lhw->core.wh;
 	error = xwimp_get_window_state(&state);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_window_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_window_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return NSERROR_NOMEM;
 	}
@@ -394,8 +423,11 @@ ro_local_history_open(struct ro_local_history_window *lhw, wimp_w parent)
 	state.next = wimp_HIDDEN;
 	error = xwimp_open_window(PTR_WIMP_OPEN(&state));
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_open_window: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_open_window: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return NSERROR_NOMEM;
 	}
@@ -405,7 +437,8 @@ ro_local_history_open(struct ro_local_history_window *lhw, wimp_w parent)
 	/* Give the window focus. */
 	error = xwimp_set_caret_position(lhw->core.wh, -1, 0, 0, -1, 0);
 	if (error) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "xwimp_set_caret_position: 0x%x : %s",
 		      error->errnum,
 		      error->errmess);

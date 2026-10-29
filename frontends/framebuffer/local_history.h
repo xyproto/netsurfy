@@ -31,7 +31,8 @@ struct browser_window;
  *
  * \return NSERROR_OK on success else appropriate error code on faliure.
  */
-nserror fb_local_history_present(fbtk_widget_t *parent, struct browser_window *bw);
+nserror
+fb_local_history_present(fbtk_widget_t *parent, struct browser_window *bw);
 
 /**
  * hide the local history window from being visible.

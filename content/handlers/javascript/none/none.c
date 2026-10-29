@@ -46,7 +46,8 @@ void js_destroyheap(jsheap *heap)
 {
 }
 
-nserror js_newthread(jsheap *heap, void *win_priv, void *doc_priv, jsthread **thread)
+nserror
+js_newthread(jsheap *heap, void *win_priv, void *doc_priv, jsthread **thread)
 {
 	*thread = NULL;
 	return NSERROR_NOT_IMPLEMENTED;
@@ -61,12 +62,18 @@ void js_destroythread(jsthread *thread)
 {
 }
 
-bool js_exec(jsthread *thread, const uint8_t *txt, size_t txtlen, const char *name)
+bool js_exec(jsthread *thread,
+	     const uint8_t *txt,
+	     size_t txtlen,
+	     const char *name)
 {
 	return true;
 }
 
-bool js_fire_event(jsthread *thread, const char *type, struct dom_document *doc, struct dom_node *target)
+bool js_fire_event(jsthread *thread,
+		   const char *type,
+		   struct dom_document *doc,
+		   struct dom_node *target)
 {
 	return true;
 }

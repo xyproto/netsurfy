@@ -31,8 +31,8 @@
 #define PATH_MAX 1024
 #endif
 
-#define CARET_STATE_VISIBLE		0x01
-#define CARET_STATE_ENABLED		0x02
+#define CARET_STATE_VISIBLE 0x01
+#define CARET_STATE_ENABLED 0x02
 
 struct s_caret {
 	GRECT dimensions;
@@ -50,11 +50,10 @@ typedef struct point_s POINT;
 
 #define MFORM_EX_FLAG_USERFORM 0x01
 
-struct mform_ex_s
-{
+struct mform_ex_s {
 	unsigned char flags;
 	int number;
-	OBJECT * tree;
+	OBJECT *tree;
 };
 
 typedef struct mform_ex_s MFORM_EX;
@@ -77,28 +76,22 @@ struct s_gem_cursors {
 	MFORM_EX arrow;
 } gem_cursors;
 
-enum focus_element_type {
-	WIDGET_NONE=0,
-	URL_WIDGET,
-	SEARCH_INPUT,
-	BROWSER
-};
+enum focus_element_type { WIDGET_NONE = 0, URL_WIDGET, SEARCH_INPUT, BROWSER };
 
 
-struct s_focus_info
-{
+struct s_focus_info {
 	enum focus_element_type type;
-	void * element;
+	void *element;
 };
 
 /* defines for data attached to components: */
-#define CDT_OBJECT	            0x004f424aUL
-#define CDT_OWNER 	            0x03UL
-#define CDT_ICON 	            0x04UL
-#define CDT_ICON_TYPE	        0x05UL
-#	define CDT_ICON_TYPE_NONE      0x00UL
-#	define CDT_ICON_TYPE_OBJECT    0x01UL
-#	define CDT_ICON_TYPE_BITMAP    0x02UL
+#define CDT_OBJECT 0x004f424aUL
+#define CDT_OWNER 0x03UL
+#define CDT_ICON 0x04UL
+#define CDT_ICON_TYPE 0x05UL
+#define CDT_ICON_TYPE_NONE 0x00UL
+#define CDT_ICON_TYPE_OBJECT 0x01UL
+#define CDT_ICON_TYPE_BITMAP 0x02UL
 
 
 struct gui_window;
@@ -106,24 +99,23 @@ struct s_browser;
 struct s_statusbar;
 struct s_toolbar;
 
-typedef struct s_toolbar * CMP_TOOLBAR;
-typedef struct s_statusbar * CMP_STATUSBAR;
-typedef struct s_browser * CMP_BROWSER;
+typedef struct s_toolbar *CMP_TOOLBAR;
+typedef struct s_statusbar *CMP_STATUSBAR;
+typedef struct s_browser *CMP_BROWSER;
 
 /*
 	This is the "main" window. It can consist of several components
 	and also holds information shared by several frames within
 	the window.
 */
-struct s_gui_win_root
-{
+struct s_gui_win_root {
 	short aes_handle;
 	GUIWIN *win;
 	CMP_TOOLBAR toolbar;
 	CMP_STATUSBAR statusbar;
 	struct s_focus_info focus;
-	char * title;
-	struct bitmap * icon;
+	char *title;
+	struct bitmap *icon;
 	struct gui_window *active_gui_window;
 	struct s_redrw_slots redraw_slots;
 	struct s_caret caret;
@@ -132,9 +124,8 @@ struct s_gui_win_root
 };
 typedef struct s_gui_win_root ROOTWIN;
 
-struct s_browser
-{
-	struct browser_window * bw;
+struct s_browser {
+	struct browser_window *bw;
 	bool attached;
 };
 
@@ -145,15 +136,15 @@ struct s_browser
 	to this structure.
 */
 struct gui_window {
-	struct s_gui_win_root * root;
-	struct s_browser * browser;
+	struct s_gui_win_root *root;
+	struct s_browser *browser;
 	MFORM_EX *cursor;
-    /* icon to be drawn when iconified, or NULL for default resource. */
-    char * status;
-    char * title;
-    char * url;
+	/* icon to be drawn when iconified, or NULL for default resource. */
+	char *status;
+	char *title;
+	char *url;
 	float scale;
-	struct bitmap * icon;
+	struct bitmap *icon;
 	struct s_caret caret;
 	struct s_search_form_session *search;
 	struct gui_window *next, *prev;

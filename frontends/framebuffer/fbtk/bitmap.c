@@ -32,8 +32,7 @@
 
 #include "widget.h"
 
-static int
-fb_redraw_bitmap(fbtk_widget_t *widget, fbtk_callback_info *cbi)
+static int fb_redraw_bitmap(fbtk_widget_t *widget, fbtk_callback_info *cbi)
 {
 	nsfb_bbox_t bbox;
 	nsfb_bbox_t rect;
@@ -68,8 +67,7 @@ fb_redraw_bitmap(fbtk_widget_t *widget, fbtk_callback_info *cbi)
 }
 
 /* exported function documented in fbtk.h */
-void
-fbtk_set_bitmap(fbtk_widget_t *widget, struct fbtk_bitmap *image)
+void fbtk_set_bitmap(fbtk_widget_t *widget, struct fbtk_bitmap *image)
 {
 	if ((widget == NULL) || (widget->type != FB_WIDGET_TYPE_BITMAP))
 		return;
@@ -80,18 +78,18 @@ fbtk_set_bitmap(fbtk_widget_t *widget, struct fbtk_bitmap *image)
 }
 
 /* exported function documented in fbtk.h */
-fbtk_widget_t *
-fbtk_create_bitmap(fbtk_widget_t *parent,
-		   int x,
-		   int y,
-		   int width,
-		   int height,
-		   colour c,
-		   struct fbtk_bitmap *image)
+fbtk_widget_t *fbtk_create_bitmap(fbtk_widget_t *parent,
+				  int x,
+				  int y,
+				  int width,
+				  int height,
+				  colour c,
+				  struct fbtk_bitmap *image)
 {
 	fbtk_widget_t *neww;
 
-	neww = fbtk_widget_new(parent, FB_WIDGET_TYPE_BITMAP, x, y, width, height);
+	neww = fbtk_widget_new(
+		parent, FB_WIDGET_TYPE_BITMAP, x, y, width, height);
 
 	neww->bg = c;
 	neww->mapped = true;
@@ -103,20 +101,20 @@ fbtk_create_bitmap(fbtk_widget_t *parent,
 }
 
 /* exported function documented in fbtk.h */
-fbtk_widget_t *
-fbtk_create_button(fbtk_widget_t *parent,
-		   int x,
-		   int y,
-		   int width,
-		   int height,
-		   colour c,
-		   struct fbtk_bitmap *image,
-		   fbtk_callback click,
-		   void *pw)
+fbtk_widget_t *fbtk_create_button(fbtk_widget_t *parent,
+				  int x,
+				  int y,
+				  int width,
+				  int height,
+				  colour c,
+				  struct fbtk_bitmap *image,
+				  fbtk_callback click,
+				  void *pw)
 {
 	fbtk_widget_t *neww;
 
-	neww = fbtk_widget_new(parent, FB_WIDGET_TYPE_BITMAP, x, y, width, height);
+	neww = fbtk_widget_new(
+		parent, FB_WIDGET_TYPE_BITMAP, x, y, width, height);
 
 	neww->bg = c;
 	neww->mapped = true;
@@ -124,7 +122,8 @@ fbtk_create_button(fbtk_widget_t *parent,
 
 	fbtk_set_handler(neww, FBTK_CBT_REDRAW, fb_redraw_bitmap, NULL);
 	fbtk_set_handler(neww, FBTK_CBT_CLICK, click, pw);
-	fbtk_set_handler(neww, FBTK_CBT_POINTERENTER, fbtk_set_ptr, &hand_image);
+	fbtk_set_handler(
+		neww, FBTK_CBT_POINTERENTER, fbtk_set_ptr, &hand_image);
 
 	return neww;
 }

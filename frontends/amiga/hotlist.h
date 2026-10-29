@@ -30,7 +30,13 @@ nserror ami_hotlist_present(void);
 void ami_hotlist_close(void);
 
 /** Scan the hotlist */
-nserror ami_hotlist_scan(void *userdata, int first_item, const char *folder,
-	bool (*cb_add_item)(void *userdata, int level, int item, const char *title, nsurl *url, bool folder));
+nserror ami_hotlist_scan(void *userdata,
+			 int first_item,
+			 const char *folder,
+			 bool (*cb_add_item)(void *userdata,
+					     int level,
+					     int item,
+					     const char *title,
+					     nsurl *url,
+					     bool folder));
 #endif
-

@@ -22,4 +22,3 @@
 /** Open the cookie viewer */
 nserror ami_cookies_present(const char *search_term);
 #endif
-

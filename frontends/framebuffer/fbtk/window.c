@@ -39,8 +39,7 @@
  * @param cbi The callback parameters.
  * @return The callback result.
  */
-static int
-fb_redraw_window(fbtk_widget_t *widget, fbtk_callback_info *cbi)
+static int fb_redraw_window(fbtk_widget_t *widget, fbtk_callback_info *cbi)
 {
 	nsfb_bbox_t bbox;
 	nsfb_t *nsfb;
@@ -62,20 +61,20 @@ fb_redraw_window(fbtk_widget_t *widget, fbtk_callback_info *cbi)
 }
 
 /* exported function documented in fbtk.h */
-fbtk_widget_t *
-fbtk_create_window(fbtk_widget_t *parent,
-		   int x,
-		   int y,
-		   int width,
-		   int height,
-		   colour bg)
+fbtk_widget_t *fbtk_create_window(fbtk_widget_t *parent,
+				  int x,
+				  int y,
+				  int width,
+				  int height,
+				  colour bg)
 {
 	fbtk_widget_t *neww;
 
 	if (parent == NULL)
 		return NULL;
 
-	neww = fbtk_widget_new(parent, FB_WIDGET_TYPE_WINDOW, x, y, width, height);
+	neww = fbtk_widget_new(
+		parent, FB_WIDGET_TYPE_WINDOW, x, y, width, height);
 
 	neww->bg = bg;
 

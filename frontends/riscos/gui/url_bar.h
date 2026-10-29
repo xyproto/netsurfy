@@ -31,7 +31,7 @@
 /* A list of possible URL bar actions. */
 
 typedef enum {
-	TOOLBAR_URL_NONE = 0,		/* Special case: no action */
+	TOOLBAR_URL_NONE = 0, /* Special case: no action */
 	TOOLBAR_URL_DRAG_URL,
 	TOOLBAR_URL_DRAG_FAVICON,
 	TOOLBAR_URL_SELECT_HOTLIST,
@@ -84,8 +84,11 @@ struct url_bar *ro_gui_url_bar_create(struct theme_descriptor *theme);
  */
 
 bool ro_gui_url_bar_rebuild(struct url_bar *url_bar,
-		struct theme_descriptor *theme, theme_style style,
-		wimp_w window, bool display, bool shaded);
+			    struct theme_descriptor *theme,
+			    theme_style style,
+			    wimp_w window,
+			    bool display,
+			    bool shaded);
 
 
 /**
@@ -107,8 +110,7 @@ void ro_gui_url_bar_destroy(struct url_bar *url_bar);
  * \return			true if values are returned; else false.
  */
 
-bool ro_gui_url_bar_get_dims(struct url_bar *url_bar,
-		int *width, int *height);
+bool ro_gui_url_bar_get_dims(struct url_bar *url_bar, int *width, int *height);
 
 
 /**
@@ -125,7 +127,10 @@ bool ro_gui_url_bar_get_dims(struct url_bar *url_bar,
  */
 
 bool ro_gui_url_bar_set_extent(struct url_bar *url_bar,
-		int x0, int y0, int x1, int y1);
+			       int x0,
+			       int y0,
+			       int x1,
+			       int y1);
 
 
 /**
@@ -162,8 +167,9 @@ void ro_gui_url_bar_redraw(struct url_bar *url_bar, wimp_draw *redraw);
  */
 
 bool ro_gui_url_bar_click(struct url_bar *url_bar,
-		wimp_pointer *pointer, wimp_window_state *state,
-		url_bar_action *action);
+			  wimp_pointer *pointer,
+			  wimp_window_state *state,
+			  url_bar_action *action);
 
 
 /**
@@ -176,8 +182,10 @@ bool ro_gui_url_bar_click(struct url_bar *url_bar,
  * \return			true if the event is claimed; else false.
  */
 
-bool ro_gui_url_bar_menu_prepare(struct url_bar *url_bar, wimp_i i,
-		wimp_menu *menu, wimp_pointer *pointer);
+bool ro_gui_url_bar_menu_prepare(struct url_bar *url_bar,
+				 wimp_i i,
+				 wimp_menu *menu,
+				 wimp_pointer *pointer);
 
 
 /**
@@ -191,8 +199,11 @@ bool ro_gui_url_bar_menu_prepare(struct url_bar *url_bar, wimp_i i,
  * \return			true if the event is claimed; else false.
  */
 
-bool ro_gui_url_bar_menu_select(struct url_bar *url_bar, wimp_i i,
-		wimp_menu *menu, wimp_selection *selection, menu_action action);
+bool ro_gui_url_bar_menu_select(struct url_bar *url_bar,
+				wimp_i i,
+				wimp_menu *menu,
+				wimp_selection *selection,
+				menu_action action);
 
 
 /**
@@ -207,9 +218,12 @@ bool ro_gui_url_bar_menu_select(struct url_bar *url_bar, wimp_i i,
  * \return			true if handled exclusively; else false.
  */
 
-bool ro_gui_url_bar_help_suffix(struct url_bar *url_bar, wimp_i i,
-		os_coord *mouse, wimp_window_state *state,
-		wimp_mouse_state buttons, const char **suffix);
+bool ro_gui_url_bar_help_suffix(struct url_bar *url_bar,
+				wimp_i i,
+				os_coord *mouse,
+				wimp_window_state *state,
+				wimp_mouse_state buttons,
+				const char **suffix);
 
 
 /**
@@ -233,8 +247,10 @@ bool ro_gui_url_bar_take_caret(struct url_bar *url_bar);
  *				else false.
  */
 
-void ro_gui_url_bar_set_url(struct url_bar *url_bar, const char *url,
-		bool is_utf8, bool set_caret);
+void ro_gui_url_bar_set_url(struct url_bar *url_bar,
+			    const char *url,
+			    bool is_utf8,
+			    bool set_caret);
 
 
 /**
@@ -278,7 +294,7 @@ bool ro_gui_url_bar_get_url_extent(struct url_bar *url_bar, os_box *extent);
  */
 
 bool ro_gui_url_bar_test_for_text_field_click(struct url_bar *url_bar,
-		wimp_pointer *pointer);
+					      wimp_pointer *pointer);
 
 
 /**
@@ -290,7 +306,7 @@ bool ro_gui_url_bar_test_for_text_field_click(struct url_bar *url_bar,
  */
 
 bool ro_gui_url_bar_test_for_text_field_keypress(struct url_bar *url_bar,
-		wimp_key *key);
+						 wimp_key *key);
 
 
 /**
@@ -303,7 +319,7 @@ bool ro_gui_url_bar_test_for_text_field_keypress(struct url_bar *url_bar,
  */
 
 bool ro_gui_url_bar_set_site_favicon(struct url_bar *url_bar,
-		struct hlcache_handle *h);
+				     struct hlcache_handle *h);
 
 
 /**
@@ -316,7 +332,7 @@ bool ro_gui_url_bar_set_site_favicon(struct url_bar *url_bar,
  */
 
 bool ro_gui_url_bar_set_content_favicon(struct url_bar *url_bar,
-		struct gui_window *g);
+					struct gui_window *g);
 
 
 /**
@@ -338,4 +354,3 @@ bool ro_gui_url_bar_page_info_change(struct url_bar *url_bar);
 
 
 #endif
-

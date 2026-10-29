@@ -33,20 +33,20 @@
 #include "riscos/url_suggest.h"
 
 struct url_suggest_item {
-	const char		*url;	/*< The URL being stored.         */
-	unsigned int		weight; /*< A weight assigned to the URL. */
-	struct url_suggest_item	*next;  /*< The next URL in the list.     */
+	const char *url; /*< The URL being stored.         */
+	unsigned int weight; /*< A weight assigned to the URL. */
+	struct url_suggest_item *next; /*< The next URL in the list.     */
 };
 
-static bool ro_gui_url_suggest_callback(nsurl *url,
-		const struct url_data *data);
+static bool
+ro_gui_url_suggest_callback(nsurl *url, const struct url_data *data);
 
 static int suggest_entries;
 static time_t suggest_time;
 static struct url_suggest_item *suggest_list;
 
 static wimp_MENU(URL_SUGGEST_MAX_URLS) url_suggest_menu_block;
-wimp_menu *ro_gui_url_suggest_menu = (wimp_menu *) &url_suggest_menu_block;
+wimp_menu *ro_gui_url_suggest_menu = (wimp_menu *)&url_suggest_menu_block;
 
 
 /**
@@ -58,10 +58,10 @@ wimp_menu *ro_gui_url_suggest_menu = (wimp_menu *) &url_suggest_menu_block;
 
 bool ro_gui_url_suggest_init(void)
 {
-	ro_gui_url_suggest_menu->title_data.indirected_text.text =
-			(char *) messages_get("URLSuggest");
-	ro_gui_menu_init_structure((wimp_menu *) ro_gui_url_suggest_menu,
-			URL_SUGGEST_MAX_URLS);
+	ro_gui_url_suggest_menu->title_data.indirected_text.text = (char *)
+		messages_get("URLSuggest");
+	ro_gui_menu_init_structure((wimp_menu *)ro_gui_url_suggest_menu,
+				   URL_SUGGEST_MAX_URLS);
 
 	suggest_entries = 0;
 
@@ -93,7 +93,7 @@ bool ro_gui_url_suggest_get_menu_available(void)
 
 bool ro_gui_url_suggest_prepare_menu(void)
 {
-	struct url_suggest_item	*list, *next;
+	struct url_suggest_item *list, *next;
 
 	/* Fetch the URLs we want to include from URLdb. */
 
@@ -120,12 +120,11 @@ bool ro_gui_url_suggest_prepare_menu(void)
 			i--;
 
 			ro_gui_url_suggest_menu->entries[i].menu_flags = 0;
-			ro_gui_url_suggest_menu->
-					entries[i].data.indirected_text.text =
-					(char *) list->url;
-			ro_gui_url_suggest_menu->
-					entries[i].data.indirected_text.size =
-					strlen(list->url) + 1;
+			ro_gui_url_suggest_menu->entries[i]
+				.data.indirected_text.text = (char *)list->url;
+			ro_gui_url_suggest_menu->entries[i]
+				.data.indirected_text.size = strlen(list->url) +
+							     1;
 
 			next = list->next;
 			free(list);
@@ -135,10 +134,9 @@ bool ro_gui_url_suggest_prepare_menu(void)
 		assert(i == 0);
 
 		ro_gui_url_suggest_menu->entries[0].menu_flags |=
-				wimp_MENU_TITLE_INDIRECTED;
-		ro_gui_url_suggest_menu->
-				entries[suggest_entries - 1].menu_flags |=
-				wimp_MENU_LAST;
+			wimp_MENU_TITLE_INDIRECTED;
+		ro_gui_url_suggest_menu->entries[suggest_entries - 1]
+			.menu_flags |= wimp_MENU_LAST;
 
 		return true;
 	}
@@ -157,14 +155,14 @@ bool ro_gui_url_suggest_prepare_menu(void)
 
 bool ro_gui_url_suggest_callback(nsurl *url, const struct url_data *data)
 {
-	int			count;
-	unsigned int		weight;
-	struct url_suggest_item	**list, *new;
+	int count;
+	unsigned int weight;
+	struct url_suggest_item **list, *new;
 
 	/* Ignore unvisited URLs, and those that don't apply to HTML or Text. */
 
-	if (data->visits == 0 || (data->type != CONTENT_HTML &&
-			data->type != CONTENT_TEXTPLAIN))
+	if (data->visits == 0 ||
+	    (data->type != CONTENT_HTML && data->type != CONTENT_TEXTPLAIN))
 		return true;
 
 	/* Calculate a weight for the URL. */
@@ -188,8 +186,8 @@ bool ro_gui_url_suggest_callback(nsurl *url, const struct url_data *data)
 	}
 
 	if (count > 0 || suggest_entries < URL_SUGGEST_MAX_URLS) {
-		new = (struct url_suggest_item *)
-				malloc(sizeof(struct url_suggest_item));
+		new = (struct url_suggest_item *)malloc(
+			sizeof(struct url_suggest_item));
 
 		if (new != NULL) {
 			suggest_entries++;
@@ -209,7 +207,7 @@ bool ro_gui_url_suggest_callback(nsurl *url, const struct url_data *data)
 	 */
 
 	while (suggest_list != NULL && suggest_entries > URL_SUGGEST_MAX_URLS) {
-		struct url_suggest_item	*old = suggest_list;
+		struct url_suggest_item *old = suggest_list;
 		suggest_list = suggest_list->next;
 
 		free(old);
@@ -232,8 +230,8 @@ const char *ro_gui_url_suggest_get_selection(wimp_selection *selection)
 	const char *url = NULL;
 
 	if (selection->items[0] >= 0)
-		url = ro_gui_url_suggest_menu->entries[selection->items[0]].
-				data.indirected_text.text;
+		url = ro_gui_url_suggest_menu->entries[selection->items[0]]
+			      .data.indirected_text.text;
 
 	return url;
 }

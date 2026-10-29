@@ -36,7 +36,7 @@ typedef union window_open_state {
 } window_open_state;
 
 /* Convert a pointer to a wimp_window_state into a pointer to a wimp_open */
-#define PTR_WIMP_OPEN(pstate) ((wimp_open *) (window_open_state *) (pstate))
+#define PTR_WIMP_OPEN(pstate) ((wimp_open *)(window_open_state *)(pstate))
 
 /* Similarly for wimp_message_list */
 typedef struct ns_wimp_message_list {
@@ -50,7 +50,7 @@ typedef union message_list {
 	ns_wimp_message_list ns;
 } message_list;
 
-#define PTR_WIMP_MESSAGE_LIST(l) ((wimp_message_list *) (message_list *) (l))
+#define PTR_WIMP_MESSAGE_LIST(l) ((wimp_message_list *)(message_list *)(l))
 
 /* Also for VDU variable lists */
 typedef struct ns_os_vdu_var_list {
@@ -63,7 +63,7 @@ typedef union vdu_var_list {
 	ns_os_vdu_var_list ns;
 } vdu_var_list;
 
-#define PTR_OS_VDU_VAR_LIST(l) ((os_vdu_var_list *) (vdu_var_list *) (l))
+#define PTR_OS_VDU_VAR_LIST(l) ((os_vdu_var_list *)(vdu_var_list *)(l))
 
 /**
  * Check whether the OS supports text selection in writiable icons.
@@ -79,9 +79,11 @@ static inline bool ns_wimp_has_text_selection(void)
 
 	error = xwimpreadsysinfo_text_selection(&bg, &fg, &flags);
 	if (error) {
-		NSLOG(netsurf, WARNING,
-				"xwimpreadsysinfo_text_selection: 0x%x: %s",
-				error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      WARNING,
+		      "xwimpreadsysinfo_text_selection: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		return false;
 	}
 

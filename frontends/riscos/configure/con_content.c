@@ -43,16 +43,21 @@ static bool ro_gui_options_content_ok(wimp_w w);
 bool ro_gui_options_content_initialise(wimp_w w)
 {
 	/* set the current values */
-	ro_gui_set_icon_selected_state(w, CONTENT_BLOCK_ADVERTISEMENTS,
-                                       nsoption_bool(block_advertisements));
-	ro_gui_set_icon_selected_state(w, CONTENT_BLOCK_POPUPS,
-                                       nsoption_bool(disable_popups));
-	ro_gui_set_icon_selected_state(w, CONTENT_BLOCK_CSS,
-                                       !nsoption_bool(author_level_css));
-	ro_gui_set_icon_selected_state(w, CONTENT_TARGET_BLANK,
-                                       nsoption_bool(target_blank));
-	ro_gui_set_icon_selected_state(w, CONTENT_NO_JAVASCRIPT,
-                                       !nsoption_bool(enable_javascript));
+	ro_gui_set_icon_selected_state(w,
+				       CONTENT_BLOCK_ADVERTISEMENTS,
+				       nsoption_bool(block_advertisements));
+	ro_gui_set_icon_selected_state(w,
+				       CONTENT_BLOCK_POPUPS,
+				       nsoption_bool(disable_popups));
+	ro_gui_set_icon_selected_state(w,
+				       CONTENT_BLOCK_CSS,
+				       !nsoption_bool(author_level_css));
+	ro_gui_set_icon_selected_state(w,
+				       CONTENT_TARGET_BLANK,
+				       nsoption_bool(target_blank));
+	ro_gui_set_icon_selected_state(w,
+				       CONTENT_NO_JAVASCRIPT,
+				       !nsoption_bool(enable_javascript));
 
 	/* initialise all functions for a newly created window */
 	ro_gui_wimp_event_register_checkbox(w, CONTENT_BLOCK_ADVERTISEMENTS);
@@ -60,48 +65,53 @@ bool ro_gui_options_content_initialise(wimp_w w)
 	ro_gui_wimp_event_register_checkbox(w, CONTENT_BLOCK_CSS);
 	ro_gui_wimp_event_register_checkbox(w, CONTENT_TARGET_BLANK);
 	ro_gui_wimp_event_register_checkbox(w, CONTENT_NO_JAVASCRIPT);
-	ro_gui_wimp_event_register_button(w, CONTENT_DEFAULT_BUTTON,
-			ro_gui_options_content_default);
+	ro_gui_wimp_event_register_button(w,
+					  CONTENT_DEFAULT_BUTTON,
+					  ro_gui_options_content_default);
 	ro_gui_wimp_event_register_cancel(w, CONTENT_CANCEL_BUTTON);
-	ro_gui_wimp_event_register_ok(w, CONTENT_OK_BUTTON,
-			ro_gui_options_content_ok);
+	ro_gui_wimp_event_register_ok(w,
+				      CONTENT_OK_BUTTON,
+				      ro_gui_options_content_ok);
 	ro_gui_wimp_event_set_help_prefix(w, "HelpContentConfig");
 	ro_gui_wimp_event_memorise(w);
 	return true;
-
 }
 
 void ro_gui_options_content_default(wimp_pointer *pointer)
 {
 	/* set the default values */
-	ro_gui_set_icon_selected_state(pointer->w, CONTENT_BLOCK_ADVERTISEMENTS,
-			false);
-	ro_gui_set_icon_selected_state(pointer->w, CONTENT_BLOCK_POPUPS,
-			false);
-	ro_gui_set_icon_selected_state(pointer->w, CONTENT_BLOCK_CSS,
-			false);
-	ro_gui_set_icon_selected_state(pointer->w, CONTENT_TARGET_BLANK,
-			true);
-	ro_gui_set_icon_selected_state(pointer->w, CONTENT_NO_JAVASCRIPT,
-			false);
+	ro_gui_set_icon_selected_state(pointer->w,
+				       CONTENT_BLOCK_ADVERTISEMENTS,
+				       false);
+	ro_gui_set_icon_selected_state(pointer->w, CONTENT_BLOCK_POPUPS, false);
+	ro_gui_set_icon_selected_state(pointer->w, CONTENT_BLOCK_CSS, false);
+	ro_gui_set_icon_selected_state(pointer->w, CONTENT_TARGET_BLANK, true);
+	ro_gui_set_icon_selected_state(pointer->w,
+				       CONTENT_NO_JAVASCRIPT,
+				       false);
 }
 
 bool ro_gui_options_content_ok(wimp_w w)
 {
 	nsoption_set_bool(block_advertisements,
-			  ro_gui_get_icon_selected_state(w, CONTENT_BLOCK_ADVERTISEMENTS));
+			  ro_gui_get_icon_selected_state(
+				  w, CONTENT_BLOCK_ADVERTISEMENTS));
 
 	nsoption_set_bool(disable_popups,
-			  ro_gui_get_icon_selected_state(w, CONTENT_BLOCK_POPUPS));
+			  ro_gui_get_icon_selected_state(w,
+							 CONTENT_BLOCK_POPUPS));
 	nsoption_set_bool(author_level_css,
-			  !ro_gui_get_icon_selected_state(w, CONTENT_BLOCK_CSS));
+			  !ro_gui_get_icon_selected_state(w,
+							  CONTENT_BLOCK_CSS));
 
 	nsoption_set_bool(target_blank,
-			  ro_gui_get_icon_selected_state(w, CONTENT_TARGET_BLANK));
+			  ro_gui_get_icon_selected_state(w,
+							 CONTENT_TARGET_BLANK));
 
-	nsoption_set_bool(enable_javascript,
-			!ro_gui_get_icon_selected_state(w, CONTENT_NO_JAVASCRIPT));
+	nsoption_set_bool(
+		enable_javascript,
+		!ro_gui_get_icon_selected_state(w, CONTENT_NO_JAVASCRIPT));
 
 	ro_gui_save_options();
-  	return true;
+	return true;
 }

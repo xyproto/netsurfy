@@ -104,15 +104,19 @@ browser_window_history__clone_entry(struct history *history,
 		size_t bmsize;
 
 		new_entry->page.bitmap = guit->bitmap->create(
-				LOCAL_HISTORY_WIDTH,
-				LOCAL_HISTORY_HEIGHT,
-				BITMAP_OPAQUE);
+			LOCAL_HISTORY_WIDTH,
+			LOCAL_HISTORY_HEIGHT,
+			BITMAP_OPAQUE);
 
 		if (new_entry->page.bitmap != NULL) {
-			bmsrc_data = guit->bitmap->get_buffer(entry->page.bitmap);
-			bmdst_data = guit->bitmap->get_buffer(new_entry->page.bitmap);
-			bmsize = guit->bitmap->get_rowstride(new_entry->page.bitmap) *
-				guit->bitmap->get_height(new_entry->page.bitmap);
+			bmsrc_data = guit->bitmap->get_buffer(
+				entry->page.bitmap);
+			bmdst_data = guit->bitmap->get_buffer(
+				new_entry->page.bitmap);
+			bmsize = guit->bitmap->get_rowstride(
+					 new_entry->page.bitmap) *
+				 guit->bitmap->get_height(
+					 new_entry->page.bitmap);
 			memcpy(bmdst_data, bmsrc_data, bmsize);
 		}
 	}
@@ -191,7 +195,9 @@ static void browser_window_history__free_entry(struct history_entry *entry)
  */
 
 static int browser_window_history__layout_subtree(struct history *history,
-		struct history_entry *entry, int x, int y)
+						  struct history_entry *entry,
+						  int x,
+						  int y)
 {
 	struct history_entry *child;
 	int y1 = y;
@@ -207,8 +213,11 @@ static int browser_window_history__layout_subtree(struct history *history,
 
 	/* layout child subtrees below each other */
 	for (child = entry->forward; child; child = child->next) {
-		y1 = browser_window_history__layout_subtree(history, child,
-				x + LOCAL_HISTORY_WIDTH + LOCAL_HISTORY_RIGHT_MARGIN, y1);
+		y1 = browser_window_history__layout_subtree(
+			history,
+			child,
+			x + LOCAL_HISTORY_WIDTH + LOCAL_HISTORY_RIGHT_MARGIN,
+			y1);
 		if (child->next)
 			y1 += LOCAL_HISTORY_BOTTOM_MARGIN;
 	}
@@ -237,18 +246,16 @@ static void browser_window_history__layout(struct history *history)
 	history->width = 0;
 	if (history->start)
 		history->height = browser_window_history__layout_subtree(
-				history, history->start,
-				LOCAL_HISTORY_RIGHT_MARGIN / 2,
-				LOCAL_HISTORY_BOTTOM_MARGIN / 2);
+			history,
+			history->start,
+			LOCAL_HISTORY_RIGHT_MARGIN / 2,
+			LOCAL_HISTORY_BOTTOM_MARGIN / 2);
 	else
 		history->height = 0;
 
 	history->width += LOCAL_HISTORY_RIGHT_MARGIN / 2;
 	history->height += LOCAL_HISTORY_BOTTOM_MARGIN / 2;
 }
-
-
-
 
 
 /**
@@ -261,23 +268,25 @@ static void browser_window_history__layout(struct history *history)
  * \param	ud			context pointer passed to cb
  * \return	true to continue enumeration, false to cancel
  */
-static bool browser_window_history__enumerate_entry(
-		const struct browser_window *bw,
-		const struct history_entry *entry,
-		browser_window_history_enumerate_cb cb,
-		void *ud)
+static bool
+browser_window_history__enumerate_entry(const struct browser_window *bw,
+					const struct history_entry *entry,
+					browser_window_history_enumerate_cb cb,
+					void *ud)
 {
 	const struct history_entry *child;
 
-	if (!cb(bw, entry->x, entry->y,
-			entry->x + LOCAL_HISTORY_WIDTH,
-			entry->y + LOCAL_HISTORY_HEIGHT,
-			entry, ud))
+	if (!cb(bw,
+		entry->x,
+		entry->y,
+		entry->x + LOCAL_HISTORY_WIDTH,
+		entry->y + LOCAL_HISTORY_HEIGHT,
+		entry,
+		ud))
 		return false;
 
 	for (child = entry->forward; child; child = child->next) {
-		if (!browser_window_history__enumerate_entry(bw, child,
-				cb, ud))
+		if (!browser_window_history__enumerate_entry(bw, child, cb, ud))
 			return false;
 	}
 
@@ -311,14 +320,14 @@ nserror browser_window_history_create(struct browser_window *bw)
 
 /* exported interface documented in desktop/browser_history.h */
 nserror browser_window_history_clone(const struct browser_window *existing,
-		struct browser_window *clone)
+				     struct browser_window *clone)
 {
 	struct history *new_history;
 
 	clone->history = NULL;
 
 	if (existing == NULL || existing->history == NULL ||
-			existing->history->start == NULL)
+	    existing->history->start == NULL)
 		/* Nothing to clone, create new history for clone window */
 		return browser_window_history_create(clone);
 
@@ -330,8 +339,8 @@ nserror browser_window_history_clone(const struct browser_window *existing,
 	clone->history = new_history;
 	memcpy(new_history, existing->history, sizeof *new_history);
 
-	new_history->start = browser_window_history__clone_entry(new_history,
-			new_history->start);
+	new_history->start = browser_window_history__clone_entry(
+		new_history, new_history->start);
 	if (!new_history->start) {
 		NSLOG(netsurf, INFO, "Insufficient memory to clone history");
 		browser_window_history_destroy(clone);
@@ -344,10 +353,9 @@ nserror browser_window_history_clone(const struct browser_window *existing,
 
 
 /* exported interface documented in desktop/browser_history.h */
-nserror
-browser_window_history_add(struct browser_window *bw,
-			   struct hlcache_handle *content,
-			   lwc_string *frag_id)
+nserror browser_window_history_add(struct browser_window *bw,
+				   struct hlcache_handle *content,
+				   lwc_string *frag_id)
 {
 	struct history *history;
 	struct history_entry *entry;
@@ -379,12 +387,14 @@ browser_window_history_add(struct browser_window *bw,
 	entry->page.scroll_y = 0.0f;
 
 	/* create thumbnail for localhistory view */
-	NSLOG(netsurf, DEBUG,
-	      "Creating thumbnail for %s", nsurl_access(entry->page.url));
+	NSLOG(netsurf,
+	      DEBUG,
+	      "Creating thumbnail for %s",
+	      nsurl_access(entry->page.url));
 
-	entry->page.bitmap = guit->bitmap->create(
-			LOCAL_HISTORY_WIDTH, LOCAL_HISTORY_HEIGHT,
-			BITMAP_CLEAR | BITMAP_OPAQUE);
+	entry->page.bitmap = guit->bitmap->create(LOCAL_HISTORY_WIDTH,
+						  LOCAL_HISTORY_HEIGHT,
+						  BITMAP_CLEAR | BITMAP_OPAQUE);
 	if (entry->page.bitmap != NULL) {
 		ret = guit->bitmap->render(entry->page.bitmap, content);
 		if (ret != NSERROR_OK) {
@@ -421,7 +431,7 @@ browser_window_history_add(struct browser_window *bw,
 
 /* exported interface documented in desktop/browser_history.h */
 nserror browser_window_history_update(struct browser_window *bw,
-		struct hlcache_handle *content)
+				      struct hlcache_handle *content)
 {
 	struct history *history;
 	char *title;
@@ -462,11 +472,13 @@ nserror browser_window_history_update(struct browser_window *bw,
 			content_width = 1;
 		}
 		/* Successfully got scroll offsets, update the entry */
-		history->current->page.scroll_x = \
-			(float)sx / (float)content_width;
-		history->current->page.scroll_y = \
-			(float)sy / (float)content_height;
-		NSLOG(netsurf, INFO, "Updated scroll offsets to %g by %g",
+		history->current->page.scroll_x = (float)sx /
+						  (float)content_width;
+		history->current->page.scroll_y = (float)sy /
+						  (float)content_height;
+		NSLOG(netsurf,
+		      INFO,
+		      "Updated scroll offsets to %g by %g",
 		      history->current->page.scroll_x,
 		      history->current->page.scroll_y);
 	}
@@ -474,9 +486,9 @@ nserror browser_window_history_update(struct browser_window *bw,
 }
 
 /* exported interface documented in desktop/browser_private.h */
-nserror
-browser_window_history_get_scroll(struct browser_window *bw,
-				  float *sx, float *sy)
+nserror browser_window_history_get_scroll(struct browser_window *bw,
+					  float *sx,
+					  float *sy)
 {
 	struct history *history;
 
@@ -484,7 +496,7 @@ browser_window_history_get_scroll(struct browser_window *bw,
 
 	history = bw->history;
 
-	if ((history== NULL) || (history->current == NULL)) {
+	if ((history == NULL) || (history->current == NULL)) {
 		return NSERROR_INVALID;
 	}
 
@@ -509,17 +521,18 @@ void browser_window_history_destroy(struct browser_window *bw)
 }
 
 
-
 /* exported interface documented in desktop/browser_history.h */
 nserror browser_window_history_back(struct browser_window *bw, bool new_window)
 {
 	if (bw != NULL && bw->internal_nav) {
 		/* All internal nav back operations ignore new_window */
 		if (bw->current_parameters.url != NULL) {
-			/* There are some internal parameters, restart from there */
+			/* There are some internal parameters, restart from
+			 * there */
 			return browser_window__reload_current_parameters(bw);
 		} else {
-			/* No internal parameters, just navigate to about:blank */
+			/* No internal parameters, just navigate to about:blank
+			 */
 			return browser_window_navigate(
 				bw,
 				corestring_nsurl_about_blank,
@@ -527,7 +540,7 @@ nserror browser_window_history_back(struct browser_window *bw, bool new_window)
 				BW_NAVIGATE_HISTORY,
 				NULL, /* Post */
 				NULL, /* Post */
-				NULL  /* parent fetch */);
+				NULL /* parent fetch */);
 		}
 	}
 
@@ -535,21 +548,22 @@ nserror browser_window_history_back(struct browser_window *bw, bool new_window)
 	    !bw->history->current->back) {
 		return NSERROR_BAD_PARAMETER;
 	}
-	return browser_window_history_go(bw, bw->history->current->back,
+	return browser_window_history_go(bw,
+					 bw->history->current->back,
 					 new_window);
 }
 
 
-
 /* exported interface documented in desktop/browser_history.h */
-nserror browser_window_history_forward(struct browser_window *bw,
-				       bool new_window)
+nserror
+browser_window_history_forward(struct browser_window *bw, bool new_window)
 {
 	if (!bw || !bw->history || !bw->history->current ||
 	    !bw->history->current->forward_pref) {
 		return NSERROR_BAD_PARAMETER;
 	}
-	return browser_window_history_go(bw, bw->history->current->forward_pref,
+	return browser_window_history_go(bw,
+					 bw->history->current->forward_pref,
 					 new_window);
 }
 
@@ -558,7 +572,7 @@ nserror browser_window_history_forward(struct browser_window *bw,
 bool browser_window_history_back_available(struct browser_window *bw)
 {
 	return (bw && bw->history && bw->history->current &&
-			bw->history->current->back);
+		bw->history->current->back);
 }
 
 
@@ -566,13 +580,12 @@ bool browser_window_history_back_available(struct browser_window *bw)
 bool browser_window_history_forward_available(struct browser_window *bw)
 {
 	return (bw && bw->history && bw->history->current &&
-			bw->history->current->forward_pref);
+		bw->history->current->forward_pref);
 }
 
 /* exported interface documented in desktop/browser_history.h */
-nserror
-browser_window_history_get_thumbnail(struct browser_window *bw,
-				 struct bitmap **bitmap_out)
+nserror browser_window_history_get_thumbnail(struct browser_window *bw,
+					     struct bitmap **bitmap_out)
 {
 	struct bitmap *bitmap;
 
@@ -593,7 +606,8 @@ browser_window_history_get_thumbnail(struct browser_window *bw,
 
 /* exported interface documented in desktop/browser_history.h */
 nserror browser_window_history_go(struct browser_window *bw,
-		struct history_entry *entry, bool new_window)
+				  struct history_entry *entry,
+				  bool new_window)
 {
 	struct history *history;
 	nsurl *url;
@@ -605,7 +619,8 @@ nserror browser_window_history_go(struct browser_window *bw,
 
 	if (entry->page.frag_id) {
 		error = nsurl_refragment(entry->page.url,
-				entry->page.frag_id, &url);
+					 entry->page.frag_id,
+					 &url);
 
 		if (error != NSERROR_OK) {
 			return error;
@@ -618,17 +633,22 @@ nserror browser_window_history_go(struct browser_window *bw,
 		current = history->current;
 		history->current = entry;
 
-		error = browser_window_create(BW_CREATE_CLONE,
-				url, NULL, bw, NULL);
+		error = browser_window_create(
+			BW_CREATE_CLONE, url, NULL, bw, NULL);
 		history->current = current;
 	} else {
 		if (bw->current_content != NULL) {
 			browser_window_history_update(bw, bw->current_content);
 		}
 		history->current = entry;
-		error = browser_window_navigate(bw, url, NULL,
-				BW_NAVIGATE_NO_TERMINAL_HISTORY_UPDATE,
-				NULL, NULL, NULL);
+		error = browser_window_navigate(
+			bw,
+			url,
+			NULL,
+			BW_NAVIGATE_NO_TERMINAL_HISTORY_UPDATE,
+			NULL,
+			NULL,
+			NULL);
 	}
 
 	nsurl_unref(url);
@@ -638,8 +658,10 @@ nserror browser_window_history_go(struct browser_window *bw,
 
 
 /* exported interface documented in desktop/browser_history.h */
-void browser_window_history_enumerate_forward(const struct browser_window *bw,
-		browser_window_history_enumerate_cb cb, void *user_data)
+void browser_window_history_enumerate_forward(
+	const struct browser_window *bw,
+	browser_window_history_enumerate_cb cb,
+	void *user_data)
 {
 	struct history_entry *e;
 
@@ -648,17 +670,23 @@ void browser_window_history_enumerate_forward(const struct browser_window *bw,
 
 	e = bw->history->current->forward_pref;
 	for (; e != NULL; e = e->forward_pref) {
-		if (!cb(bw, e->x, e->y, e->x + LOCAL_HISTORY_WIDTH,
-				e->y + LOCAL_HISTORY_HEIGHT,
-				e, user_data))
+		if (!cb(bw,
+			e->x,
+			e->y,
+			e->x + LOCAL_HISTORY_WIDTH,
+			e->y + LOCAL_HISTORY_HEIGHT,
+			e,
+			user_data))
 			break;
 	}
 }
 
 
 /* exported interface documented in desktop/browser_history.h */
-void browser_window_history_enumerate_back(const struct browser_window *bw,
-		browser_window_history_enumerate_cb cb, void *user_data)
+void browser_window_history_enumerate_back(
+	const struct browser_window *bw,
+	browser_window_history_enumerate_cb cb,
+	void *user_data)
 {
 	struct history_entry *e;
 
@@ -666,9 +694,13 @@ void browser_window_history_enumerate_back(const struct browser_window *bw,
 		return;
 
 	for (e = bw->history->current->back; e != NULL; e = e->back) {
-		if (!cb(bw, e->x, e->y, e->x + LOCAL_HISTORY_WIDTH,
-				e->y + LOCAL_HISTORY_HEIGHT,
-				e, user_data))
+		if (!cb(bw,
+			e->x,
+			e->y,
+			e->x + LOCAL_HISTORY_WIDTH,
+			e->y + LOCAL_HISTORY_HEIGHT,
+			e,
+			user_data))
 			break;
 	}
 }
@@ -676,12 +708,13 @@ void browser_window_history_enumerate_back(const struct browser_window *bw,
 
 /* exported interface documented in desktop/browser_history.h */
 void browser_window_history_enumerate(const struct browser_window *bw,
-		browser_window_history_enumerate_cb cb, void *user_data)
+				      browser_window_history_enumerate_cb cb,
+				      void *user_data)
 {
 	if (bw == NULL || bw->history == NULL)
 		return;
-	browser_window_history__enumerate_entry(bw,
-			bw->history->start, cb, user_data);
+	browser_window_history__enumerate_entry(
+		bw, bw->history->start, cb, user_data);
 }
 
 
@@ -693,16 +726,16 @@ nsurl *browser_window_history_entry_get_url(const struct history_entry *entry)
 
 
 /* exported interface documented in desktop/browser_history.h */
-const char *browser_window_history_entry_get_fragment_id(
-		const struct history_entry *entry)
+const char *
+browser_window_history_entry_get_fragment_id(const struct history_entry *entry)
 {
 	return (entry->page.frag_id) ? lwc_string_data(entry->page.frag_id) : 0;
 }
 
 
 /* exported interface documented in desktop/browser_history.h */
-const char *browser_window_history_entry_get_title(
-		const struct history_entry *entry)
+const char *
+browser_window_history_entry_get_title(const struct history_entry *entry)
 {
 	return entry->page.title;
 }

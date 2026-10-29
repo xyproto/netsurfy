@@ -119,7 +119,7 @@ include Makefile.defaults
 # Pull in the user configuration
 -include Makefile.config
 
-# libraries enabled by feature switch without pkgconfig file 
+# libraries enabled by feature switch without pkgconfig file
 $(eval $(call feature_switch,JPEG,JPEG (libjpeg),-DWITH_JPEG,-ljpeg,-UWITH_JPEG,))
 $(eval $(call feature_switch,HARU_PDF,PDF export (haru),-DWITH_PDF_EXPORT,-lhpdf -lpng,-UWITH_PDF_EXPORT,))
 $(eval $(call feature_switch,LIBICONV_PLUG,glibc internal iconv,-DLIBICONV_PLUG,,-ULIBICONV_PLUG,-liconv))
@@ -295,6 +295,12 @@ clean-messages:
 	$(Q)$(RM) $(CLEAN_MESSAGES)
 CLEANS += clean-messages
 
+# ----------------------------------------------------------------------------
+# Source code formatting
+# ----------------------------------------------------------------------------
+
+fmt:
+	@./fmt.sh
 
 # ----------------------------------------------------------------------------
 # Source file setup
@@ -461,4 +467,3 @@ messages-fetch-tfx:
 # merge property files into fat messages
 messages-import-tfx: messages-fetch-tfx
 	for tfxlang in $(FAT_LANGUAGES);do $(PERL) ./utils/import-messages.pl -l $${tfxlang} -p any -f transifex -o resources/FatMessages -i resources/FatMessages -I Messages.any.$${tfxlang}.tfx ; $(RM) Messages.any.$${tfxlang}.tfx; done
-

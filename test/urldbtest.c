@@ -67,18 +67,21 @@ struct netsurf_table *guit = NULL;
 
 
 struct test_urls {
-	const char* url;
-	const char* title;
+	const char *url;
+	const char *title;
 	const content_type type;
 	const bool persistent;
 };
 
 
-#define NELEMS(x)  (sizeof(x) / sizeof((x)[0]))
+#define NELEMS(x) (sizeof(x) / sizeof((x)[0]))
 
 
 /* Stubs */
-nserror nslog_set_filter_by_options() { return NSERROR_OK; }
+nserror nslog_set_filter_by_options()
+{
+	return NSERROR_OK;
+}
 
 /**
  * generate test output filenames
@@ -153,8 +156,8 @@ static nsurl *make_url(const char *url)
 }
 
 
-static bool test_urldb_set_cookie(const char *header, const char *url,
-		const char *referer)
+static bool
+test_urldb_set_cookie(const char *header, const char *url, const char *referer)
 {
 	nsurl *r = NULL;
 	nsurl *nsurl = make_url(url);
@@ -232,8 +235,12 @@ static void urldb_lwc_iterator(lwc_string *str, void *pw)
 {
 	int *scount = pw;
 
-	NSLOG(netsurf, INFO, "[%3u] %.*s", str->refcnt,
-	      (int)lwc_string_length(str), lwc_string_data(str));
+	NSLOG(netsurf,
+	      INFO,
+	      "[%3u] %.*s",
+	      str->refcnt,
+	      (int)lwc_string_length(str),
+	      lwc_string_data(str));
 	(*scount)++;
 }
 
@@ -253,9 +260,6 @@ static void urldb_teardown(void)
 }
 
 
-
-
-
 START_TEST(urldb_original_test)
 {
 	nsurl *url;
@@ -263,45 +267,66 @@ START_TEST(urldb_original_test)
 	char *cdata;
 
 	/* fragments */
-	url = make_url("http://netsurf.strcprstskrzkrk.co.uk/path/to/resource.htm?a=b");
+	url = make_url(
+		"http://netsurf.strcprstskrzkrk.co.uk/path/to/resource.htm?a=b");
 	ck_assert(urldb_add_url(url) == true);
 	nsurl_unref(url);
 
-	url = make_url("http://netsurf.strcprstskrzkrk.co.uk/path/to/resource.htm#zz?a=b");
+	url = make_url(
+		"http://netsurf.strcprstskrzkrk.co.uk/path/to/resource.htm#zz?a=b");
 	ck_assert(urldb_add_url(url) == true);
 	nsurl_unref(url);
 
-	url = make_url("http://netsurf.strcprstskrzkrk.co.uk/path/to/resource.htm#aa?a=b");
+	url = make_url(
+		"http://netsurf.strcprstskrzkrk.co.uk/path/to/resource.htm#aa?a=b");
 	ck_assert(urldb_add_url(url) == true);
 	nsurl_unref(url);
 
-	url = make_url("http://netsurf.strcprstskrzkrk.co.uk/path/to/resource.htm#yy?a=b");
+	url = make_url(
+		"http://netsurf.strcprstskrzkrk.co.uk/path/to/resource.htm#yy?a=b");
 	ck_assert(urldb_add_url(url) == true);
 	nsurl_unref(url);
 
 
 	/* set cookies on urls */
-	url = make_url("http://www.minimarcos.org.uk/cgi-bin/forum/Blah.pl?,v=login,p=2");
-	urldb_set_cookie("mmblah=foo; path=/; expires=Thur, 31-Dec-2099 00:00:00 GMT\r\n", url, NULL);
+	url = make_url(
+		"http://www.minimarcos.org.uk/cgi-bin/forum/Blah.pl?,v=login,p=2");
+	urldb_set_cookie(
+		"mmblah=foo; path=/; expires=Thur, 31-Dec-2099 00:00:00 GMT\r\n",
+		url,
+		NULL);
 	nsurl_unref(url);
 
-	url = make_url("http://www.minimarcos.org.uk/cgi-bin/forum/Blah.pl?,v=login,p=2");
-	urldb_set_cookie("BlahPW=bar; path=/; expires=Thur, 31-Dec-2099 00:00:00 GMT\r\n", url, NULL);
+	url = make_url(
+		"http://www.minimarcos.org.uk/cgi-bin/forum/Blah.pl?,v=login,p=2");
+	urldb_set_cookie(
+		"BlahPW=bar; path=/; expires=Thur, 31-Dec-2099 00:00:00 GMT\r\n",
+		url,
+		NULL);
 	nsurl_unref(url);
 
 	url = make_url("http://ccdb.cropcircleresearch.com/");
-	urldb_set_cookie("details=foo|bar|Sun, 03-Jun-2007;expires=Mon, 24-Jul-2006 09:53:45 GMT\r\n", url, NULL);
+	urldb_set_cookie(
+		"details=foo|bar|Sun, 03-Jun-2007;expires=Mon, 24-Jul-2006 09:53:45 GMT\r\n",
+		url,
+		NULL);
 	nsurl_unref(url);
 
 	url = make_url("http://www.google.com/");
-	urldb_set_cookie("PREF=ID=a:TM=b:LM=c:S=d; path=/; domain=.google.com\r\n", url, NULL);
+	urldb_set_cookie(
+		"PREF=ID=a:TM=b:LM=c:S=d; path=/; domain=.google.com\r\n",
+		url,
+		NULL);
 	nsurl_unref(url);
 
 	url = make_url("http://www.bbc.co.uk/");
-	urldb_set_cookie("test=foo, bar, baz; path=/, quux=blah; path=/", url, NULL);
+	urldb_set_cookie("test=foo, bar, baz; path=/, quux=blah; path=/",
+			 url,
+			 NULL);
 	nsurl_unref(url);
 
-//	urldb_set_cookie("a=b; path=/; domain=.a.com", "http://a.com/", NULL);
+	//	urldb_set_cookie("a=b; path=/; domain=.a.com", "http://a.com/",
+	//NULL);
 
 	url = make_url("https://www.foo.com/blah/moose");
 	urlr = make_url("https://www.foo.com/blah/moose");
@@ -312,24 +337,35 @@ START_TEST(urldb_original_test)
 	url = make_url("https://www.foo.com/blah/wxyzabc");
 	cdata = urldb_get_cookie(url, true);
 	nsurl_unref(url);
-	ck_assert(strcmp(cdata,"foo=bar") == 0);
+	ck_assert(strcmp(cdata, "foo=bar") == 0);
 	free(cdata);
 
 	/* Valid path */
-	ck_assert(test_urldb_set_cookie("name=value;Path=/\r\n", "http://www.google.com/", NULL));
+	ck_assert(test_urldb_set_cookie(
+		"name=value;Path=/\r\n", "http://www.google.com/", NULL));
 
 	/* Valid path (non-root directory) */
-	ck_assert(test_urldb_set_cookie("name=value;Path=/foo/bar/\r\n", "http://www.example.org/foo/bar/", NULL));
+	ck_assert(test_urldb_set_cookie("name=value;Path=/foo/bar/\r\n",
+					"http://www.example.org/foo/bar/",
+					NULL));
 
 	/* Defaulted path */
-	ck_assert(test_urldb_set_cookie("name=value\r\n", "http://www.example.org/foo/bar/baz/bat.html", NULL));
-	cdata = test_urldb_get_cookie("http://www.example.org/foo/bar/baz/quux.htm");
+	ck_assert(test_urldb_set_cookie(
+		"name=value\r\n",
+		"http://www.example.org/foo/bar/baz/bat.html",
+		NULL));
+	cdata = test_urldb_get_cookie(
+		"http://www.example.org/foo/bar/baz/quux.htm");
 	ck_assert(cdata != NULL);
 	free(cdata);
 
 	/* Defaulted path with no non-leaf path segments */
-	ck_assert(test_urldb_set_cookie("name=value\r\n", "http://no-non-leaf.example.org/index.html", NULL));
-	cdata = test_urldb_get_cookie("http://no-non-leaf.example.org/page2.html");
+	ck_assert(test_urldb_set_cookie(
+		"name=value\r\n",
+		"http://no-non-leaf.example.org/index.html",
+		NULL));
+	cdata = test_urldb_get_cookie(
+		"http://no-non-leaf.example.org/page2.html");
 	ck_assert(cdata != NULL);
 	free(cdata);
 	cdata = test_urldb_get_cookie("http://no-non-leaf.example.org/");
@@ -337,82 +373,116 @@ START_TEST(urldb_original_test)
 	free(cdata);
 
 	/* Valid path (includes leafname) */
-	ck_assert(test_urldb_set_cookie("name=value;Version=1;Path=/index.cgi\r\n", "http://example.org/index.cgi", NULL));
+	ck_assert(test_urldb_set_cookie(
+		"name=value;Version=1;Path=/index.cgi\r\n",
+		"http://example.org/index.cgi",
+		NULL));
 	cdata = test_urldb_get_cookie("http://example.org/index.cgi");
 	ck_assert(cdata != NULL);
 	free(cdata);
 
 	/* Valid path (includes leafname in non-root directory) */
-	ck_assert(test_urldb_set_cookie("name=value;Path=/foo/index.html\r\n", "http://www.example.org/foo/index.html", NULL));
+	ck_assert(test_urldb_set_cookie("name=value;Path=/foo/index.html\r\n",
+					"http://www.example.org/foo/index.html",
+					NULL));
 	/* Should _not_ match the above, as the leafnames differ */
 	cdata = test_urldb_get_cookie("http://www.example.org/foo/bar.html");
 	ck_assert(cdata == NULL);
 
 	/* Invalid path (contains different leafname) */
-	ck_assert(test_urldb_set_cookie("name=value;Path=/index.html\r\n", "http://example.org/index.htm", NULL) == false);
+	ck_assert(test_urldb_set_cookie("name=value;Path=/index.html\r\n",
+					"http://example.org/index.htm",
+					NULL) == false);
 
 	/* Invalid path (contains leafname in different directory) */
-	ck_assert(test_urldb_set_cookie("name=value;Path=/foo/index.html\r\n", "http://www.example.org/bar/index.html", NULL) == false);
+	ck_assert(test_urldb_set_cookie("name=value;Path=/foo/index.html\r\n",
+					"http://www.example.org/bar/index.html",
+					NULL) == false);
 
 	/* Test partial domain match with IP address failing */
-	ck_assert(test_urldb_set_cookie("name=value;Domain=.foo.org\r\n", "http://192.168.0.1/", NULL) == false);
+	ck_assert(test_urldb_set_cookie("name=value;Domain=.foo.org\r\n",
+					"http://192.168.0.1/",
+					NULL) == false);
 
 	/* Test handling of non-domain cookie sent by server (domain part should
 	 * be ignored) */
-	ck_assert(test_urldb_set_cookie("foo=value;Domain=blah.com\r\n", "http://www.example.com/", NULL));
+	ck_assert(test_urldb_set_cookie("foo=value;Domain=blah.com\r\n",
+					"http://www.example.com/",
+					NULL));
 	cdata = test_urldb_get_cookie("http://www.example.com/");
 	ck_assert(strcmp(cdata, "foo=value") == 0);
 	free(cdata);
 
 	/* Test handling of domain cookie from wrong host (strictly invalid but
 	 * required to support the real world) */
-	ck_assert(test_urldb_set_cookie("name=value;Domain=.example.com\r\n", "http://foo.bar.example.com/", NULL));
+	ck_assert(test_urldb_set_cookie("name=value;Domain=.example.com\r\n",
+					"http://foo.bar.example.com/",
+					NULL));
 	cdata = test_urldb_get_cookie("http://www.example.com/");
 	ck_assert(strcmp(cdata, "foo=value; name=value") == 0);
 	free(cdata);
 
 	/* Test presence of separators in cookie value */
-	ck_assert(test_urldb_set_cookie("name=\"value=foo\\\\bar\\\\\\\";\\\\baz=quux\";Version=1\r\n", "http://www.example.org/", NULL));
+	ck_assert(test_urldb_set_cookie(
+		"name=\"value=foo\\\\bar\\\\\\\";\\\\baz=quux\";Version=1\r\n",
+		"http://www.example.org/",
+		NULL));
 	cdata = test_urldb_get_cookie("http://www.example.org/");
-	ck_assert(strcmp(cdata, "$Version=1; name=\"value=foo\\\\bar\\\\\\\";\\\\baz=quux\"") == 0);
+	ck_assert(
+		strcmp(cdata,
+		       "$Version=1; name=\"value=foo\\\\bar\\\\\\\";\\\\baz=quux\"") ==
+		0);
 	free(cdata);
 
 	/* Test cookie with blank value */
-	ck_assert(test_urldb_set_cookie("a=\r\n", "http://www.example.net/", NULL));
+	ck_assert(test_urldb_set_cookie(
+		"a=\r\n", "http://www.example.net/", NULL));
 	cdata = test_urldb_get_cookie("http://www.example.net/");
 	ck_assert(strcmp(cdata, "a=") == 0);
 	free(cdata);
 
 	/* Test specification of multiple cookies in one header */
-	ck_assert(test_urldb_set_cookie("a=b, foo=bar; Path=/\r\n", "http://www.example.net/", NULL));
+	ck_assert(test_urldb_set_cookie(
+		"a=b, foo=bar; Path=/\r\n", "http://www.example.net/", NULL));
 	cdata = test_urldb_get_cookie("http://www.example.net/");
 	ck_assert(strcmp(cdata, "a=b; foo=bar") == 0);
 	free(cdata);
 
 	/* Test use of separators in unquoted cookie value */
-	ck_assert(test_urldb_set_cookie("foo=moo@foo:blah?moar\\ text\r\n", "http://example.com/", NULL));
+	ck_assert(test_urldb_set_cookie("foo=moo@foo:blah?moar\\ text\r\n",
+					"http://example.com/",
+					NULL));
 	cdata = test_urldb_get_cookie("http://example.com/");
-	ck_assert(strcmp(cdata, "foo=moo@foo:blah?moar\\ text; name=value") == 0);
+	ck_assert(strcmp(cdata, "foo=moo@foo:blah?moar\\ text; name=value") ==
+		  0);
 	free(cdata);
 
 	/* Test use of unnecessary quotes */
-	ck_assert(test_urldb_set_cookie("foo=\"hello\";Version=1,bar=bat\r\n", "http://example.com/", NULL));
+	ck_assert(test_urldb_set_cookie("foo=\"hello\";Version=1,bar=bat\r\n",
+					"http://example.com/",
+					NULL));
 	cdata = test_urldb_get_cookie("http://example.com/");
 	ck_assert(strcmp(cdata, "foo=\"hello\"; bar=bat; name=value") == 0);
 	free(cdata);
 
 	/* Test domain matching in unverifiable transactions */
-	ck_assert(test_urldb_set_cookie("foo=bar; domain=.example.tld\r\n", "http://www.foo.example.tld/", "http://bar.example.tld/"));
+	ck_assert(test_urldb_set_cookie("foo=bar; domain=.example.tld\r\n",
+					"http://www.foo.example.tld/",
+					"http://bar.example.tld/"));
 	cdata = test_urldb_get_cookie("http://www.foo.example.tld/");
 	ck_assert(strcmp(cdata, "foo=bar") == 0);
 	free(cdata);
 
 	/* Test expiry */
-	ck_assert(test_urldb_set_cookie("foo=bar", "http://expires.com/", NULL));
+	ck_assert(
+		test_urldb_set_cookie("foo=bar", "http://expires.com/", NULL));
 	cdata = test_urldb_get_cookie("http://expires.com/");
 	ck_assert(strcmp(cdata, "foo=bar") == 0);
 	free(cdata);
-	ck_assert(test_urldb_set_cookie("foo=bar; expires=Thu, 01-Jan-1970 00:00:01 GMT\r\n", "http://expires.com/", NULL));
+	ck_assert(test_urldb_set_cookie(
+		"foo=bar; expires=Thu, 01-Jan-1970 00:00:01 GMT\r\n",
+		"http://expires.com/",
+		NULL));
 	cdata = test_urldb_get_cookie("http://expires.com/");
 	ck_assert(cdata == NULL);
 
@@ -432,9 +502,7 @@ static TCase *urldb_original_case_create(void)
 	tc = tcase_create("Original_tests");
 
 	/* ensure corestrings are initialised and finalised for every test */
-	tcase_add_checked_fixture(tc,
-				  urldb_create,
-				  urldb_teardown);
+	tcase_add_checked_fixture(tc, urldb_create, urldb_teardown);
 
 	tcase_add_test(tc, urldb_original_test);
 
@@ -446,84 +514,46 @@ static TCase *urldb_original_case_create(void)
  * add set and get tests
  */
 static const struct test_urls add_set_get_tests[] = {
-	{
-		"http://intranet/",
-		"foo",
-		CONTENT_HTML,
-		false
-	}, /* from legacy tests */
-	{
-		"http:moodle.org",
-		"buggy",
-		CONTENT_HTML,
-		false
-	}, /* Mantis bug #993 */
-	{
-		"http://a_a/",
-		"buggsy",
-		CONTENT_HTML,
-		false
-	}, /* Mantis bug #993 */
-	{
-		"http://www2.2checkout.com/",
-		"foobar",
-		CONTENT_HTML,
-		false
-	}, /* Mantis bug #913 */
-	{
-		"http://2.bp.blogspot.com/_448y6kVhntg/TSekubcLJ7I/AAAAAAAAHJE/yZTsV5xT5t4/s1600/covers.jpg",
-		"a more complex title",
-		CONTENT_IMAGE,
-		true
-	}, /* Numeric subdomains */
-	{
-		"http://tree.example.com/this_url_has_a_ridiculously_long_path/made_up_from_a_number_of_inoranately_long_elments_some_of_well_over_forty/characters_in_length/the_whole_path_comes_out_well_in_excess_of_two_hundred_characters_in_length/this_is_intended_to_try_and_drive/the_serialisation_code_mad/foo.png",
-		NULL,
-		CONTENT_IMAGE,
-		false
-	},
-	{
-		"https://tree.example.com:8080/example.png",
-		"fishy port       ",
-		CONTENT_HTML,
-		false
-	},
-	{
-		"http://tree.example.com/bar.png",
-		"\t     ",
-		CONTENT_IMAGE,
-		false
-	}, /* silly title */
-	{
-		"http://[2001:db8:1f70::999:de8:7648:6e8]:100/",
-		"ipv6 with port",
-		CONTENT_TEXTPLAIN,
-		false
-	},
-	{
-		"file:///home/",
-		NULL,
-		CONTENT_HTML,
-		false
-	}, /* no title */
-	{
-		"http://foo@moose.com/",
-		NULL,
-		CONTENT_HTML,
-		false
-	}, /* Mantis bug #996 */
-	{
-		"http://a.xn--11b4c3d/a",
-		"a title",
-		CONTENT_HTML,
-		false
-	},
-	{
-		"https://smog.大众汽车/test",
-		"unicode title 大众汽车",
-		CONTENT_HTML,
-		false
-	},
+	{"http://intranet/",
+	 "foo",
+	 CONTENT_HTML,
+	 false}, /* from legacy tests */
+	{"http:moodle.org", "buggy", CONTENT_HTML, false}, /* Mantis bug #993 */
+	{"http://a_a/", "buggsy", CONTENT_HTML, false}, /* Mantis bug #993 */
+	{"http://www2.2checkout.com/",
+	 "foobar",
+	 CONTENT_HTML,
+	 false}, /* Mantis bug #913 */
+	{"http://2.bp.blogspot.com/_448y6kVhntg/TSekubcLJ7I/AAAAAAAAHJE/yZTsV5xT5t4/s1600/covers.jpg",
+	 "a more complex title",
+	 CONTENT_IMAGE,
+	 true}, /* Numeric subdomains */
+	{"http://tree.example.com/this_url_has_a_ridiculously_long_path/made_up_from_a_number_of_inoranately_long_elments_some_of_well_over_forty/characters_in_length/the_whole_path_comes_out_well_in_excess_of_two_hundred_characters_in_length/this_is_intended_to_try_and_drive/the_serialisation_code_mad/foo.png",
+	 NULL,
+	 CONTENT_IMAGE,
+	 false},
+	{"https://tree.example.com:8080/example.png",
+	 "fishy port       ",
+	 CONTENT_HTML,
+	 false},
+	{"http://tree.example.com/bar.png",
+	 "\t     ",
+	 CONTENT_IMAGE,
+	 false}, /* silly title */
+	{"http://[2001:db8:1f70::999:de8:7648:6e8]:100/",
+	 "ipv6 with port",
+	 CONTENT_TEXTPLAIN,
+	 false},
+	{"file:///home/", NULL, CONTENT_HTML, false}, /* no title */
+	{"http://foo@moose.com/",
+	 NULL,
+	 CONTENT_HTML,
+	 false}, /* Mantis bug #996 */
+	{"http://a.xn--11b4c3d/a", "a title", CONTENT_HTML, false},
+	{"https://smog.大众汽车/test",
+	 "unicode title 大众汽车",
+	 CONTENT_HTML,
+	 false},
 };
 
 
@@ -588,13 +618,10 @@ static TCase *urldb_add_get_case_create(void)
 	tc = tcase_create("Add Get tests");
 
 	/* ensure corestrings are initialised and finalised for every test */
-	tcase_add_checked_fixture(tc,
-				  urldb_create,
-				  urldb_teardown);
+	tcase_add_checked_fixture(tc, urldb_create, urldb_teardown);
 
-	tcase_add_loop_test(tc,
-			    urldb_add_set_get_test,
-			    0, NELEMS(add_set_get_tests));
+	tcase_add_loop_test(
+		tc, urldb_add_set_get_test, 0, NELEMS(add_set_get_tests));
 
 	return tc;
 }
@@ -645,7 +672,6 @@ START_TEST(urldb_session_test)
 	/* finalise options */
 	res = nsoption_finalise(NULL, NULL);
 	ck_assert_int_eq(res, NSERROR_OK);
-
 }
 END_TEST
 
@@ -714,7 +740,6 @@ START_TEST(urldb_session_add_test)
 	/* finalise options */
 	res = nsoption_finalise(NULL, NULL);
 	ck_assert_int_eq(res, NSERROR_OK);
-
 }
 END_TEST
 
@@ -730,9 +755,7 @@ static TCase *urldb_session_case_create(void)
 	tc = tcase_create("Full_session");
 
 	/* ensure corestrings are initialised and finalised for every test */
-	tcase_add_checked_fixture(tc,
-				  urldb_create,
-				  urldb_teardown);
+	tcase_add_checked_fixture(tc, urldb_create, urldb_teardown);
 
 	tcase_add_test(tc, urldb_session_test);
 	tcase_add_test(tc, urldb_session_add_test);
@@ -745,7 +768,8 @@ static int cb_count;
 static bool urldb_iterate_entries_cb(nsurl *url, const struct url_data *data)
 {
 	NSLOG(netsurf, INFO, "url: %s", nsurl_access(url));
-	/* fprintf(stderr, "url:%s\ntitle:%s\n\n",nsurl_access(url), data->title); */
+	/* fprintf(stderr, "url:%s\ntitle:%s\n\n",nsurl_access(url),
+	 * data->title); */
 	cb_count++;
 	return true;
 }
@@ -764,7 +788,6 @@ START_TEST(urldb_iterate_partial_www_test)
 	cb_count = 0;
 	urldb_iterate_partial("www", urldb_iterate_entries_cb);
 	ck_assert_int_eq(cb_count, 7);
-
 }
 END_TEST
 
@@ -776,7 +799,6 @@ START_TEST(urldb_iterate_partial_nomatch_test)
 	cb_count = 0;
 	urldb_iterate_partial("/", urldb_iterate_entries_cb);
 	ck_assert_int_eq(cb_count, 0);
-
 }
 END_TEST
 
@@ -808,7 +830,8 @@ START_TEST(urldb_iterate_partial_path_test)
 {
 
 	cb_count = 0;
-	urldb_iterate_partial("en.wikipedia.org/wiki", urldb_iterate_entries_cb);
+	urldb_iterate_partial("en.wikipedia.org/wiki",
+			      urldb_iterate_entries_cb);
 	ck_assert_int_eq(cb_count, 2);
 }
 END_TEST
@@ -877,7 +900,6 @@ START_TEST(urldb_iterate_partial_numeric_v6_test)
 	urldb_iterate_partial("[2001::1f70::999::7648:8]",
 			      urldb_iterate_entries_cb);
 	ck_assert_int_eq(cb_count, 0);
-
 }
 END_TEST
 
@@ -906,13 +928,15 @@ START_TEST(urldb_cert_permissions_test)
 
 	url = make_url(wikipedia_url);
 
-	urldb_set_cert_permissions(url, true); /* permit invalid certs for url */
+	urldb_set_cert_permissions(url,
+				   true); /* permit invalid certs for url */
 
 	permit = urldb_get_cert_permissions(url);
 
 	ck_assert(permit == true);
 
-	urldb_set_cert_permissions(url, false); /* do not permit invalid certs for url */
+	urldb_set_cert_permissions(
+		url, false); /* do not permit invalid certs for url */
 
 	permit = urldb_get_cert_permissions(url);
 
@@ -938,7 +962,8 @@ START_TEST(urldb_hsts_policy_test)
 	ck_assert(enabled == false);
 
 	/* Valid policy, but tainted transport */
-	urldb_set_cert_permissions(root, true); /* permit invalid certs for url */
+	urldb_set_cert_permissions(root,
+				   true); /* permit invalid certs for url */
 	urldb_set_hsts_policy(root, "max-age=1");
 	enabled = urldb_get_hsts_enabled(root);
 	ck_assert(enabled == false);
@@ -1024,9 +1049,7 @@ static TCase *urldb_case_create(void)
 	tc = tcase_create("General");
 
 	/* ensure corestrings are initialised and finalised for every test */
-	tcase_add_checked_fixture(tc,
-				  urldb_create_loaded,
-				  urldb_teardown);
+	tcase_add_checked_fixture(tc, urldb_create_loaded, urldb_teardown);
 
 	tcase_add_test(tc, urldb_iterate_entries_test);
 	tcase_add_test(tc, urldb_iterate_partial_www_test);
@@ -1049,7 +1072,8 @@ static TCase *urldb_case_create(void)
 static bool urldb_iterate_cookies_cb(const struct cookie_data *data)
 {
 	NSLOG(netsurf, INFO, "%p", data);
-	/* fprintf(stderr, "domain:%s\npath:%s\nname:%s\n\n",data->domain, data->path, data->name);*/
+	/* fprintf(stderr, "domain:%s\npath:%s\nname:%s\n\n",data->domain,
+	 * data->path, data->name);*/
 	return true;
 }
 
@@ -1066,7 +1090,8 @@ START_TEST(urldb_cookie_create_test)
 	const char *cookie = "$Version=1; name=value; $Path=\"/index.cgi\"";
 	char *cdata; /* cookie data */
 
-	ck_assert(test_urldb_set_cookie(cookie_hdr, "http://example.org/index.cgi", NULL));
+	ck_assert(test_urldb_set_cookie(
+		cookie_hdr, "http://example.org/index.cgi", NULL));
 	cdata = test_urldb_get_cookie("http://example.org/index.cgi");
 	ck_assert_str_eq(cdata, cookie);
 	free(cdata);
@@ -1080,7 +1105,8 @@ START_TEST(urldb_cookie_delete_test)
 	const char *cookie = "$Version=1; name=value; $Path=\"/index.cgi\"";
 	char *cdata; /* cookie data */
 
-	ck_assert(test_urldb_set_cookie(cookie_hdr, "http://example.org/index.cgi", NULL));
+	ck_assert(test_urldb_set_cookie(
+		cookie_hdr, "http://example.org/index.cgi", NULL));
 	cdata = test_urldb_get_cookie("http://example.org/index.cgi");
 	ck_assert_str_eq(cdata, cookie);
 	free(cdata);
@@ -1089,7 +1115,6 @@ START_TEST(urldb_cookie_delete_test)
 
 	cdata = test_urldb_get_cookie("http://example.org/index.cgi");
 	ck_assert(cdata == NULL);
-
 }
 END_TEST
 
@@ -1102,9 +1127,7 @@ static TCase *urldb_cookie_case_create(void)
 	tc = tcase_create("Cookies");
 
 	/* ensure corestrings are initialised and finalised for every test */
-	tcase_add_checked_fixture(tc,
-				  urldb_create_loaded,
-				  urldb_teardown);
+	tcase_add_checked_fixture(tc, urldb_create_loaded, urldb_teardown);
 
 	tcase_add_test(tc, urldb_cookie_create_test);
 	tcase_add_test(tc, urldb_iterate_cookies_test);
@@ -1185,9 +1208,7 @@ static TCase *urldb_api_case_create(void)
 	TCase *tc;
 	tc = tcase_create("API_checks");
 
-	tcase_add_test_raise_signal(tc,
-				    urldb_api_add_url_assert_test,
-				    6);
+	tcase_add_test_raise_signal(tc, urldb_api_add_url_assert_test, 6);
 
 	tcase_add_test(tc, urldb_api_url_find_test);
 

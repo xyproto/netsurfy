@@ -56,7 +56,7 @@ static char *ami_font_dfcache_name(const char *font, ULONG size)
 	uint32 hash = 0;
 	char *fontname = malloc(strlen(font) + 10);
 
-	snprintf(fontname, strlen(font)+10, "%s/%ld", font, size);
+	snprintf(fontname, strlen(font) + 10, "%s/%ld", font, size);
 
 #ifdef __amigaos4__
 	hash = XXH32(fontname, strlen(fontname), 0);
@@ -70,8 +70,10 @@ static char *ami_font_dfcache_name(const char *font, ULONG size)
 #ifdef __amigaos4__
 static LONG ami_font_dfcache_sort(struct Hook *hook, APTR key1, APTR key2)
 {
-	if(key1 == key2) return 0;
-	if(key1 < key2) return -1;
+	if (key1 == key2)
+		return 0;
+	if (key1 < key2)
+		return -1;
 	return 1;
 }
 #endif
@@ -84,26 +86,31 @@ static void ami_font_dfcache_cleanup(struct SkipList *skiplist)
 	struct TimeVal curtime;
 
 	node = (struct ami_font_dfcache_node *)GetFirstSkipNode(skiplist);
-	if(node == NULL) return;
+	if (node == NULL)
+		return;
 
 	do {
-		nnode = (struct ami_font_dfcache_node *)GetNextSkipNode(skiplist, (struct SkipNode *)node);
-		if(node == (struct ami_font_dfcache_node *)in_use_font) continue;
+		nnode = (struct ami_font_dfcache_node *)GetNextSkipNode(
+			skiplist, (struct SkipNode *)node);
+		if (node == (struct ami_font_dfcache_node *)in_use_font)
+			continue;
 		GetSysTime(&curtime);
 		SubTime(&curtime, &node->lastused);
-		if(curtime.Seconds > 300)
-		{
-			NSLOG(netsurf, INFO,
+		if (curtime.Seconds > 300) {
+			NSLOG(netsurf,
+			      INFO,
 			      "Freeing font %p not used for %ld seconds",
 			      node->skip_node.sn_Key,
 			      curtime.Seconds);
 			ami_font_diskfont_close(node);
 			RemoveSkipNode(skiplist, node->skip_node.sn_Key);
 		}
-	} while((node = nnode));
+	} while ((node = nnode));
 
 	/* reschedule to run in five minutes */
-	ami_schedule(300000, (void *)ami_font_dfcache_cleanup, ami_font_dfcache_list);
+	ami_schedule(300000,
+		     (void *)ami_font_dfcache_cleanup,
+		     ami_font_dfcache_list);
 }
 #else
 static void ami_font_dfcache_cleanup(struct MinList *ami_font_dfcache_list)
@@ -113,29 +120,32 @@ static void ami_font_dfcache_cleanup(struct MinList *ami_font_dfcache_list)
 	struct ami_font_dfcache_node *fnode;
 	struct TimeVal curtime;
 
-	if(IsMinListEmpty(ami_font_dfcache_list)) return;
+	if (IsMinListEmpty(ami_font_dfcache_list))
+		return;
 
 	node = (struct nsObject *)GetHead((struct List *)ami_font_dfcache_list);
 
-	do
-	{
-		nnode=(struct nsObject *)GetSucc((struct Node *)node);
-		if(node == (struct nsObject *)in_use_font) continue;
+	do {
+		nnode = (struct nsObject *)GetSucc((struct Node *)node);
+		if (node == (struct nsObject *)in_use_font)
+			continue;
 		fnode = node->objstruct;
 		GetSysTime(&curtime);
 		SubTime(&curtime, &fnode->lastused);
-		if(curtime.Seconds > 300)
-		{
-			NSLOG(netsurf, INFO,
+		if (curtime.Seconds > 300) {
+			NSLOG(netsurf,
+			      INFO,
 			      "Freeing %s not used for %d seconds",
 			      node->dtz_Node.ln_Name,
 			      curtime.Seconds);
 			DelObject(node);
 		}
-	} while((node=nnode));
+	} while ((node = nnode));
 
 	/* reschedule to run in five minutes */
-	ami_schedule(300000, (void *)ami_font_dfcache_cleanup, ami_font_dfcache_list);
+	ami_schedule(300000,
+		     (void *)ami_font_dfcache_cleanup,
+		     ami_font_dfcache_list);
 }
 #endif
 
@@ -146,36 +156,41 @@ static void ami_font_dfcache_del_skiplist(struct SkipList *skiplist)
 	struct SkipNode *nnode;
 
 	node = GetFirstSkipNode(skiplist);
-	if(node == NULL) return;
+	if (node == NULL)
+		return;
 
 	do {
 		nnode = GetNextSkipNode(skiplist, node);
 		ami_font_diskfont_close((struct ami_font_dfcache_node *)node);
-	} while((node = nnode));
+	} while ((node = nnode));
 
 	DeleteSkipList(skiplist);
 }
 #endif
 
 
-struct ami_font_dfcache_node *ami_font_dfcache_locate(const char *font, ULONG size)
+struct ami_font_dfcache_node *
+ami_font_dfcache_locate(const char *font, ULONG size)
 {
 	struct ami_font_dfcache_node *nodedata = NULL;
 	uint32 hash = 0;
 
 #ifdef __amigaos4__
 	hash = ami_font_dfcache_name(font, size);
-	nodedata = (struct ami_font_dfcache_node *)FindSkipNode(ami_font_dfcache_list, (APTR)hash);
+	nodedata = (struct ami_font_dfcache_node *)FindSkipNode(
+		ami_font_dfcache_list, (APTR)hash);
 #else
 	char *fontname = ami_font_dfcache_name(font, size);
-	if(fontname != NULL) {
-		struct nsObject *node = (struct nsObject *)FindIName((struct List *)ami_font_dfcache_list, fontname);
-		if(node) nodedata = node->objstruct;
+	if (fontname != NULL) {
+		struct nsObject *node = (struct nsObject *)FindIName(
+			(struct List *)ami_font_dfcache_list, fontname);
+		if (node)
+			nodedata = node->objstruct;
 		free(fontname);
 	}
 #endif
 
-	if(nodedata) {
+	if (nodedata) {
 		in_use_font = (void *)nodedata;
 		GetSysTime(&nodedata->lastused);
 		return nodedata;
@@ -185,13 +200,17 @@ struct ami_font_dfcache_node *ami_font_dfcache_locate(const char *font, ULONG si
 	return NULL;
 }
 
-struct ami_font_dfcache_node *ami_font_dfcache_alloc_entry(const char *font, ULONG size)
+struct ami_font_dfcache_node *
+ami_font_dfcache_alloc_entry(const char *font, ULONG size)
 {
 	struct ami_font_dfcache_node *nodedata;
 
 #ifdef __amigaos4__
 	uint32 hash = ami_font_dfcache_name(font, size);
-	nodedata = (struct ami_font_dfcache_node *)InsertSkipNode(ami_font_dfcache_list, (APTR)hash, sizeof(struct ami_font_dfcache_node));
+	nodedata = (struct ami_font_dfcache_node *)InsertSkipNode(
+		ami_font_dfcache_list,
+		(APTR)hash,
+		sizeof(struct ami_font_dfcache_node));
 #else
 	nodedata = malloc(sizeof(struct ami_font_dfcache_node));
 #endif
@@ -201,11 +220,13 @@ struct ami_font_dfcache_node *ami_font_dfcache_alloc_entry(const char *font, ULO
 	return nodedata;
 }
 
-void ami_font_dfcache_insert(struct ami_font_dfcache_node *nodedata, const char *font, ULONG size)
+void ami_font_dfcache_insert(struct ami_font_dfcache_node *nodedata,
+			     const char *font,
+			     ULONG size)
 {
 #ifndef __amigaos4__
 	struct nsObject *node = AddObject(ami_font_dfcache_list, AMINS_FONT);
-	if(node) {
+	if (node) {
 		ObjectCallback(node, ami_font_diskfont_close);
 		node->objstruct = nodedata;
 		node->dtz_Node.ln_Name = ami_font_dfcache_name(font, size);
@@ -216,7 +237,9 @@ void ami_font_dfcache_insert(struct ami_font_dfcache_node *nodedata, const char 
 void ami_font_dfcache_fini(void)
 {
 	NSLOG(netsurf, INFO, "Cleaning up font cache");
-	ami_schedule(-1, (void *)ami_font_dfcache_cleanup, ami_font_dfcache_list);
+	ami_schedule(-1,
+		     (void *)ami_font_dfcache_cleanup,
+		     ami_font_dfcache_list);
 #ifdef __amigaos4__
 	ami_font_dfcache_del_skiplist(ami_font_dfcache_list);
 #else
@@ -236,6 +259,7 @@ void ami_font_dfcache_init(void)
 #endif
 
 	/* run first cleanup in ten minutes */
-	ami_schedule(600000, (void *)ami_font_dfcache_cleanup, ami_font_dfcache_list);
+	ami_schedule(600000,
+		     (void *)ami_font_dfcache_cleanup,
+		     ami_font_dfcache_list);
 }
-

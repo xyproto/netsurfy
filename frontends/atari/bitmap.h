@@ -30,19 +30,19 @@
 #define NS_BMP_DEFAULT_BPP 4
 
 /* Flags for init_mfdb function: */
-#define MFDB_FLAG_STAND	  0x01
+#define MFDB_FLAG_STAND 0x01
 #define MFDB_FLAG_ZEROMEM 0x02
 #define MFDB_FLAG_NOALLOC 0x04
 
-#define BITMAP_SHRINK	  0
-#define BITMAP_GROW	  1024 /* Don't realloc when bitmap size shrinks */
-#define BITMAP_CLEAR	  2048 /* Zero bitmap memory                     */
+#define BITMAP_SHRINK 0
+#define BITMAP_GROW 1024 /* Don't realloc when bitmap size shrinks */
+#define BITMAP_CLEAR 2048 /* Zero bitmap memory                     */
 
 
 /**
  * Calculates MFDB compatible rowstride (in number of bits)
  */
-#define MFDB_STRIDE( w ) (((w & 15) != 0) ? (w | 15)+1 : w)
+#define MFDB_STRIDE(w) (((w & 15) != 0) ? (w | 15) + 1 : w)
 
 
 /**
@@ -51,8 +51,8 @@
  * \param bpp Bits per pixel.
  * \param stride Word aligned rowstride (width) as returned by MFDB_STRIDE,
  * \param h Height in pixels.
-*/
-#define MFDB_SIZE( bpp, stride, h ) ( ((stride >> 3) * h) * bpp )
+ */
+#define MFDB_SIZE(bpp, stride, h) (((stride >> 3) * h) * bpp)
 
 extern struct gui_bitmap_table *atari_bitmap_table;
 
@@ -61,13 +61,12 @@ struct bitmap {
 	int height;
 	uint8_t *pixdata;
 	bool opaque;
-	short bpp;				/* number of BYTES! per pixel */
+	short bpp; /* number of BYTES! per pixel */
 	size_t rowstride;
-	struct bitmap * resized;
+	struct bitmap *resized;
 	MFDB native;
 	bool converted;
 };
-
 
 
 /**
@@ -80,7 +79,7 @@ struct bitmap {
  *         otherwise it returns the size of the mfdb.fd_addr as number
  *         of bytes.
  */
-int init_mfdb(int bpp, int w, int h, uint32_t flags, MFDB * out );
+int init_mfdb(int bpp, int w, int h, uint32_t flags, MFDB *out);
 
 /**
  * Create a bitmap.
@@ -130,8 +129,17 @@ bool atari_bitmap_get_opaque(void *bitmap);
 
 size_t atari_bitmap_buffer_size(void *bitmap);
 
-bool atari_bitmap_resize(struct bitmap *img, HermesHandle hermes_h, HermesFormat *fmt, int nw, int nh);
+bool atari_bitmap_resize(struct bitmap *img,
+			 HermesHandle hermes_h,
+			 HermesFormat *fmt,
+			 int nw,
+			 int nh);
 
-void *atari_bitmap_realloc( int w, int h, short bpp, int rowstride, unsigned int state, void * bmp );
+void *atari_bitmap_realloc(int w,
+			   int h,
+			   short bpp,
+			   int rowstride,
+			   unsigned int state,
+			   void *bmp);
 
 #endif

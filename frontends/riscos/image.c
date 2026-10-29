@@ -47,15 +47,23 @@
  * \param tinct_options	    The base option set to use
  * \return true on success, false otherwise
  */
-static bool image_redraw_tinct(osspriteop_id header, int x, int y,
-		int req_width, int req_height, int width, int height,
-		colour background_colour, bool repeatx, bool repeaty,
-		bool alpha, unsigned int tinct_options)
+static bool image_redraw_tinct(osspriteop_id header,
+			       int x,
+			       int y,
+			       int req_width,
+			       int req_height,
+			       int width,
+			       int height,
+			       colour background_colour,
+			       bool repeatx,
+			       bool repeaty,
+			       bool alpha,
+			       unsigned int tinct_options)
 {
 	_kernel_oserror *error;
 
 	/*	Set up our flagword
-	*/
+	 */
 	tinct_options |= background_colour << tinct_BACKGROUND_SHIFT;
 	if (print_active)
 		tinct_options |= tinct_USE_OS_SPRITE_OP;
@@ -65,18 +73,32 @@ static bool image_redraw_tinct(osspriteop_id header, int x, int y,
 		tinct_options |= tinct_FILL_VERTICALLY;
 
 	if (alpha) {
-		error = _swix(Tinct_PlotScaledAlpha, _INR(2,7),
-				header, x, y,
-				req_width, req_height, tinct_options);
+		error = _swix(Tinct_PlotScaledAlpha,
+			      _INR(2, 7),
+			      header,
+			      x,
+			      y,
+			      req_width,
+			      req_height,
+			      tinct_options);
 	} else {
-		error = _swix(Tinct_PlotScaled, _INR(2,7),
-				header, x, y,
-				req_width, req_height, tinct_options);
+		error = _swix(Tinct_PlotScaled,
+			      _INR(2, 7),
+			      header,
+			      x,
+			      y,
+			      req_width,
+			      req_height,
+			      tinct_options);
 	}
 
 	if (error) {
-		NSLOG(netsurf, INFO, "xtinct_plotscaled%s: 0x%x: %s",
-		      (alpha ? "alpha" : ""), error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xtinct_plotscaled%s: 0x%x: %s",
+		      (alpha ? "alpha" : ""),
+		      error->errnum,
+		      error->errmess);
 		return false;
 	}
 
@@ -96,8 +118,14 @@ static bool image_redraw_tinct(osspriteop_id header, int x, int y,
  * \param tile       Whether to tile the sprite
  * \return true on success, false otherwise
  */
-static bool image_redraw_os(osspriteop_id header, int x, int y, int req_width,
-		int req_height, int width, int height, bool tile)
+static bool image_redraw_os(osspriteop_id header,
+			    int x,
+			    int y,
+			    int req_width,
+			    int req_height,
+			    int width,
+			    int height,
+			    bool tile)
 {
 	int size;
 	os_factors f;
@@ -105,12 +133,18 @@ static bool image_redraw_os(osspriteop_id header, int x, int y, int req_width,
 	os_error *error;
 
 	error = xcolourtrans_generate_table_for_sprite(
-			osspriteop_UNSPECIFIED, header,
-			os_CURRENT_MODE,
-			colourtrans_CURRENT_PALETTE,
-			0, colourtrans_GIVEN_SPRITE, 0, 0, &size);
+		osspriteop_UNSPECIFIED,
+		header,
+		os_CURRENT_MODE,
+		colourtrans_CURRENT_PALETTE,
+		0,
+		colourtrans_GIVEN_SPRITE,
+		0,
+		0,
+		&size);
 	if (error) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "xcolourtrans_generate_table_for_sprite: 0x%x: %s",
 		      error->errnum,
 		      error->errmess);
@@ -125,12 +159,18 @@ static bool image_redraw_os(osspriteop_id header, int x, int y, int req_width,
 	}
 
 	error = xcolourtrans_generate_table_for_sprite(
-			osspriteop_UNSPECIFIED, header,
-			os_CURRENT_MODE,
-			colourtrans_CURRENT_PALETTE,
-			table, colourtrans_GIVEN_SPRITE, 0, 0, 0);
+		osspriteop_UNSPECIFIED,
+		header,
+		os_CURRENT_MODE,
+		colourtrans_CURRENT_PALETTE,
+		table,
+		colourtrans_GIVEN_SPRITE,
+		0,
+		0,
+		0);
 	if (error) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "xcolourtrans_generate_table_for_sprite: 0x%x: %s",
 		      error->errnum,
 		      error->errmess);
@@ -145,15 +185,26 @@ static bool image_redraw_os(osspriteop_id header, int x, int y, int req_width,
 
 	if (tile) {
 		error = xosspriteop_plot_tiled_sprite(osspriteop_PTR,
-				osspriteop_UNSPECIFIED, header, x, y,
-				osspriteop_USE_MASK, &f, table);
+						      osspriteop_UNSPECIFIED,
+						      header,
+						      x,
+						      y,
+						      osspriteop_USE_MASK,
+						      &f,
+						      table);
 	} else {
 		error = xosspriteop_put_sprite_scaled(osspriteop_PTR,
-				osspriteop_UNSPECIFIED, header, x, y,
-				osspriteop_USE_MASK, &f, table);
+						      osspriteop_UNSPECIFIED,
+						      header,
+						      x,
+						      y,
+						      osspriteop_USE_MASK,
+						      &f,
+						      table);
 	}
 	if (error) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "xosspriteop_put_sprite_scaled: 0x%x: %s",
 		      error->errnum,
 		      error->errmess);
@@ -176,11 +227,10 @@ static bool image_redraw_os(osspriteop_id header, int x, int y, int req_width,
  * \param[in] old   Existing sprite mode to check for.
  * \param[in] new   Sprite mode to set if existing mode is expected.
  */
-static inline void image__override_sprite_mode(
-		osspriteop_area *area,
-		image_type type,
-		os_mode old,
-		os_mode new)
+static inline void image__override_sprite_mode(osspriteop_area *area,
+					       image_type type,
+					       os_mode old,
+					       os_mode new)
 {
 	osspriteop_header *sprite = (osspriteop_header *)(area + 1);
 
@@ -206,10 +256,18 @@ static inline void image__override_sprite_mode(
  * \param type              The plot method to use
  * \return true on success, false otherwise
  */
-bool image_redraw(osspriteop_area *area, int x, int y, int req_width,
-		int req_height, int width, int height,
-		colour background_colour,
-		bool repeatx, bool repeaty, bool background, image_type type)
+bool image_redraw(osspriteop_area *area,
+		  int x,
+		  int y,
+		  int req_width,
+		  int req_height,
+		  int width,
+		  int height,
+		  colour background_colour,
+		  bool repeatx,
+		  bool repeaty,
+		  bool background,
+		  image_type type)
 {
 	image_type used_type = type;
 	unsigned int tinct_options;
@@ -220,8 +278,7 @@ bool image_redraw(osspriteop_area *area, int x, int y, int req_width,
 	if (!area)
 		return false;
 
-	osspriteop_id header = (osspriteop_id)
-			((char*) area + area->first);
+	osspriteop_id header = (osspriteop_id)((char *)area + area->first);
 
 	req_width *= 2;
 	req_height *= 2;
@@ -229,8 +286,8 @@ bool image_redraw(osspriteop_area *area, int x, int y, int req_width,
 	height *= 2;
 	y -= req_height;
 
-	tinct_options = background ? nsoption_int(plot_bg_quality) :
-		nsoption_int(plot_fg_quality);
+	tinct_options = background ? nsoption_int(plot_bg_quality)
+				   : nsoption_int(plot_fg_quality);
 
 	if (os_alpha_sprite_supported) {
 		/* Ideally Tinct would be updated to understand that modern OS
@@ -248,51 +305,70 @@ bool image_redraw(osspriteop_area *area, int x, int y, int req_width,
 		int xeig;
 		int yeig;
 
-		if (ro_gui_wimp_read_eig_factors(os_CURRENT_MODE,
-				&xeig, &yeig)) {
+		if (ro_gui_wimp_read_eig_factors(
+			    os_CURRENT_MODE, &xeig, &yeig)) {
 
-			req_width  = (req_width  / 2) * (4 >> xeig);
+			req_width = (req_width / 2) * (4 >> xeig);
 			req_height = (req_height / 2) * (4 >> yeig);
 		}
 	}
 
 	switch (used_type) {
-		case IMAGE_PLOT_TINCT_ALPHA:
-			res = image_redraw_tinct(header, x, y,
-						req_width, req_height,
-						width, height,
-						background_colour,
-						repeatx, repeaty, true,
-						tinct_options);
-			break;
+	case IMAGE_PLOT_TINCT_ALPHA:
+		res = image_redraw_tinct(header,
+					 x,
+					 y,
+					 req_width,
+					 req_height,
+					 width,
+					 height,
+					 background_colour,
+					 repeatx,
+					 repeaty,
+					 true,
+					 tinct_options);
+		break;
 
-		case IMAGE_PLOT_TINCT_OPAQUE:
-			res = image_redraw_tinct(header, x, y,
-						req_width, req_height,
-						width, height,
-						background_colour,
-						repeatx, repeaty, false,
-						tinct_options);
-			break;
+	case IMAGE_PLOT_TINCT_OPAQUE:
+		res = image_redraw_tinct(header,
+					 x,
+					 y,
+					 req_width,
+					 req_height,
+					 width,
+					 height,
+					 background_colour,
+					 repeatx,
+					 repeaty,
+					 false,
+					 tinct_options);
+		break;
 
-		case IMAGE_PLOT_OS:
-			if (tinct_avoid) {
-				image__override_sprite_mode(area, type,
-						tinct_SPRITE_MODE,
-						alpha_SPRITE_MODE);
-			}
-			res = image_redraw_os(header, x, y, req_width,
-						req_height, width, height,
-						repeatx | repeaty);
-			if (tinct_avoid) {
-				image__override_sprite_mode(area, type,
-						alpha_SPRITE_MODE,
-						tinct_SPRITE_MODE);
-			}
-			break;
+	case IMAGE_PLOT_OS:
+		if (tinct_avoid) {
+			image__override_sprite_mode(area,
+						    type,
+						    tinct_SPRITE_MODE,
+						    alpha_SPRITE_MODE);
+		}
+		res = image_redraw_os(header,
+				      x,
+				      y,
+				      req_width,
+				      req_height,
+				      width,
+				      height,
+				      repeatx | repeaty);
+		if (tinct_avoid) {
+			image__override_sprite_mode(area,
+						    type,
+						    alpha_SPRITE_MODE,
+						    tinct_SPRITE_MODE);
+		}
+		break;
 
-		default:
-			break;
+	default:
+		break;
 	}
 
 	return res;

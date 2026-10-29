@@ -40,8 +40,7 @@
  * is performed here, once, rather than every time a resource is
  * searched for.
  */
-char **
-nsws_init_resource(const char *resource_path)
+char **nsws_init_resource(const char *resource_path)
 {
 	char **pathv; /* resource path string vector */
 	char **respath; /* resource paths vector */
@@ -53,12 +52,12 @@ nsws_init_resource(const char *resource_path)
 	pathv = filepath_path_to_strvec(resource_path);
 	if (pathv == NULL)
 		return NULL;
- 
+
 	winpath = malloc(MAX_PATH);
 	GetModuleFileName(NULL, winpath, MAX_PATH);
 	slsh = strrchr(winpath, '\\');
 	if (slsh != NULL)
-		*slsh=0;
+		*slsh = 0;
 	strncat(winpath, "\\windows\\res", MAX_PATH);
 
 	pathi = 0;
@@ -103,14 +102,14 @@ char *nsws_find_resource(char *buf, const char *filename, const char *def)
 		strcpy(t, cdir);
 		strcat(t, "/.netsurf/");
 		strcat(t, filename);
-		if ((realpath(t, buf) != NULL)  && (access(buf, R_OK) == 0))
+		if ((realpath(t, buf) != NULL) && (access(buf, R_OK) == 0))
 			return buf;
 	}
 
 	cdir = getenv("NETSURFRES");
 
 	if (cdir != NULL) {
-		if (realpath(cdir , buf) != NULL) {
+		if (realpath(cdir, buf) != NULL) {
 			strcat(buf, "/");
 			strcat(buf, filename);
 			if (access(buf, R_OK) == 0)
@@ -122,7 +121,7 @@ char *nsws_find_resource(char *buf, const char *filename, const char *def)
 	strcat(t, filename);
 	if ((realpath(t, buf) != NULL) && (access(buf, R_OK) == 0))
 		return buf;
-	
+
 	getcwd(t, PATH_MAX - SLEN("\\res\\") - strlen(filename));
 	strcat(t, "\\res\\");
 	strcat(t, filename);
@@ -150,4 +149,3 @@ char *nsws_find_resource(char *buf, const char *filename, const char *def)
  * c-basic-offset: 8
  * End:
  */
-

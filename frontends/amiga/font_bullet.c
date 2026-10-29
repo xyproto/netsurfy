@@ -64,38 +64,39 @@
 #define NSA_VALUE_SHEARSIN (1 << 14)
 #define NSA_VALUE_SHEARCOS (1 << 16)
 
-#define NSA_FONT_EMWIDTH(s) ((s / PLOT_STYLE_SCALE) * (ami_font_dpi_get_xdpi() / 72.0))
+#define NSA_FONT_EMWIDTH(s)                                                    \
+	((s / PLOT_STYLE_SCALE) * (ami_font_dpi_get_xdpi() / 72.0))
 
 static const uint16 sc_table[] = {
-		0x0061, 0x1D00, /* a */
-		0x0062, 0x0299, /* b */
-		0x0063, 0x1D04, /* c */
-		0x0064, 0x1D05, /* d */
-		0x0065, 0x1D07, /* e */
-		0x0066, 0xA730, /* f */
-		0x0067, 0x0262, /* g */
-		0x0068, 0x029C, /* h */
-		0x0069, 0x026A, /* i */
-		0x006A, 0x1D0A, /* j */
-		0x006B, 0x1D0B, /* k */
-		0x006C, 0x029F, /* l */
-		0x006D, 0x1D0D, /* m */
-		0x006E, 0x0274, /* n */
-		0x006F, 0x1D0F, /* o */
-		0x0070, 0x1D18, /* p */
-		0x0071, 0xA7AF, /* q */
-		0x0072, 0x0280, /* r */
-		0x0073, 0xA731, /* s */
-		0x0074, 0x1D1B, /* t */
-		0x0075, 0x1D1C, /* u */
-		0x0076, 0x1D20, /* v */
-		0x0077, 0x1D21, /* w */
-		0x0078, 0xA7EF, /* x (proposed) (Adobe codepoint 0xF778) */
-		0x0079, 0x028F, /* y */
-		0x007A, 0x1D22, /* z */
+	0x0061, 0x1D00, /* a */
+	0x0062, 0x0299, /* b */
+	0x0063, 0x1D04, /* c */
+	0x0064, 0x1D05, /* d */
+	0x0065, 0x1D07, /* e */
+	0x0066, 0xA730, /* f */
+	0x0067, 0x0262, /* g */
+	0x0068, 0x029C, /* h */
+	0x0069, 0x026A, /* i */
+	0x006A, 0x1D0A, /* j */
+	0x006B, 0x1D0B, /* k */
+	0x006C, 0x029F, /* l */
+	0x006D, 0x1D0D, /* m */
+	0x006E, 0x0274, /* n */
+	0x006F, 0x1D0F, /* o */
+	0x0070, 0x1D18, /* p */
+	0x0071, 0xA7AF, /* q */
+	0x0072, 0x0280, /* r */
+	0x0073, 0xA731, /* s */
+	0x0074, 0x1D1B, /* t */
+	0x0075, 0x1D1C, /* u */
+	0x0076, 0x1D20, /* v */
+	0x0077, 0x1D21, /* w */
+	0x0078, 0xA7EF, /* x (proposed) (Adobe codepoint 0xF778) */
+	0x0079, 0x028F, /* y */
+	0x007A, 0x1D22, /* z */
 
-		0x00E6, 0x1D01, /* ae */
-		0x0153, 0x0276, /* oe */
+	0x00E6, 0x1D01, /* ae */
+	0x0153, 0x0276, /* oe */
 
 #if 0
 /*
@@ -135,20 +136,32 @@ static const uint16 sc_table[] = {
 		0x0000, 0x1DB0, /* modifier n */
 		0x0000, 0x1DB8, /* modifier u */
 #endif
-		0, 0};
+	0,	0};
 
 static lwc_string *glypharray[0xffff + 1];
 
 static struct List ami_diskfontlib_list;
 
-static inline int32 ami_font_plot_glyph(struct OutlineFont *ofont, struct RastPort *rp,
-		uint16 *restrict char1, uint16 *restrict char2, uint32 x, uint32 y, uint32 emwidth, bool aa);
-static inline int32 ami_font_width_glyph(struct OutlineFont *ofont, 
-		const uint16 *restrict char1, const uint16 *restrict char2, uint32 emwidth);
-static struct OutlineFont *ami_open_outline_font(const plot_font_style_t *fstyle,
-		const uint16 *codepoint);
-static inline ULONG ami_font_unicode_width(const char *string, ULONG length,
-		const plot_font_style_t *fstyle, ULONG x, ULONG y, bool aa);
+static inline int32 ami_font_plot_glyph(struct OutlineFont *ofont,
+					struct RastPort *rp,
+					uint16 *restrict char1,
+					uint16 *restrict char2,
+					uint32 x,
+					uint32 y,
+					uint32 emwidth,
+					bool aa);
+static inline int32 ami_font_width_glyph(struct OutlineFont *ofont,
+					 const uint16 *restrict char1,
+					 const uint16 *restrict char2,
+					 uint32 emwidth);
+static struct OutlineFont *
+ami_open_outline_font(const plot_font_style_t *fstyle, const uint16 *codepoint);
+static inline ULONG ami_font_unicode_width(const char *string,
+					   ULONG length,
+					   const plot_font_style_t *fstyle,
+					   ULONG x,
+					   ULONG y,
+					   bool aa);
 
 static inline int amiga_nsfont_utf16_char_length(const uint16 *char1)
 {
@@ -161,8 +174,8 @@ static inline int amiga_nsfont_utf16_char_length(const uint16 *char1)
 
 static inline uint32 amiga_nsfont_decode_surrogate(const uint16 *char1)
 {
-	if(__builtin_expect((amiga_nsfont_utf16_char_length(char1) == 2), 0)) {
-		if((char1[1] >= 0xDC00) && (char1[1] <= 0xDFFF)) {
+	if (__builtin_expect((amiga_nsfont_utf16_char_length(char1) == 2), 0)) {
+		if ((char1[1] >= 0xDC00) && (char1[1] <= 0xDFFF)) {
 			return ((uint32)char1[0] << 10) + char1[1] - 0x35FDC00;
 		} else {
 			return (uint32)*char1;
@@ -173,17 +186,18 @@ static inline uint32 amiga_nsfont_decode_surrogate(const uint16 *char1)
 }
 
 static nserror amiga_nsfont_width(const plot_font_style_t *fstyle,
-		const char *string, size_t length,
-		int *width)
+				  const char *string,
+				  size_t length,
+				  int *width)
 {
-	if((length <= 0) || (string == NULL) || (string[0] == '\0')) {
+	if ((length <= 0) || (string == NULL) || (string[0] == '\0')) {
 		*width = 0;
 		return NSERROR_OK;
 	}
-	
+
 	*width = ami_font_unicode_width(string, length, fstyle, 0, 0, false);
 
-	if(*width <= 0) {
+	if (*width <= 0) {
 		*width = length; /* fudge */
 	}
 
@@ -203,15 +217,18 @@ static nserror amiga_nsfont_width(const plot_font_style_t *fstyle,
  */
 
 static nserror amiga_nsfont_position_in_string(const plot_font_style_t *fstyle,
-		const char *string, size_t length,
-		int x, size_t *char_offset, int *actual_x)
+					       const char *string,
+					       size_t length,
+					       int x,
+					       size_t *char_offset,
+					       int *actual_x)
 {
-	if((length <= 0) || (string == NULL) || (string[0] == '\0')) {
+	if ((length <= 0) || (string == NULL) || (string[0] == '\0')) {
 		*char_offset = length;
 		*actual_x = x;
 		return NSERROR_OK;
 	}
-	
+
 	uint16 *utf16 = NULL, *outf16 = NULL;
 	uint16 *utf16next = NULL;
 	struct OutlineFont *ofont, *ufont = NULL;
@@ -221,9 +238,11 @@ static nserror amiga_nsfont_position_in_string(const plot_font_style_t *fstyle,
 	ULONG emwidth = (ULONG)NSA_FONT_EMWIDTH(fstyle->size);
 	int32 tempx;
 
-	if(utf8_to_enc(string,"UTF-16",length,(char **)&utf16) != NSERROR_OK) return NSERROR_INVALID;
+	if (utf8_to_enc(string, "UTF-16", length, (char **)&utf16) !=
+	    NSERROR_OK)
+		return NSERROR_INVALID;
 	outf16 = utf16;
-	if(!(ofont = ami_open_outline_font(fstyle, 0))) {
+	if (!(ofont = ami_open_outline_font(fstyle, 0))) {
 		free(outf16);
 		return NSERROR_INVALID;
 	}
@@ -242,19 +261,19 @@ static nserror amiga_nsfont_position_in_string(const plot_font_style_t *fstyle,
 				ufont = ami_open_outline_font(fstyle, utf16);
 
 			if (ufont)
-				tempx = ami_font_width_glyph(ufont, utf16,
-						utf16next, emwidth);
+				tempx = ami_font_width_glyph(
+					ufont, utf16, utf16next, emwidth);
 		}
 
 		tx += tempx;
 		utf16 = utf16next;
 		utf8_pos = utf8_next(string, length, utf8_pos);
 
-		if(tx < x) {
+		if (tx < x) {
 			*actual_x = tx;
 			*char_offset = utf8_pos;
 		} else {
-			if((x - *actual_x) > (tx - x)) {
+			if ((x - *actual_x) > (tx - x)) {
 				*actual_x = tx;
 				*char_offset = utf8_pos;
 			}
@@ -295,15 +314,18 @@ static nserror amiga_nsfont_position_in_string(const plot_font_style_t *fstyle,
  */
 
 static nserror amiga_nsfont_split(const plot_font_style_t *fstyle,
-		const char *string, size_t length,
-		int x, size_t *char_offset, int *actual_x)
+				  const char *string,
+				  size_t length,
+				  int x,
+				  size_t *char_offset,
+				  int *actual_x)
 {
-	if((length <= 0) || (string == NULL) || (string[0] == '\0')) {
+	if ((length <= 0) || (string == NULL) || (string[0] == '\0')) {
 		*char_offset = length;
 		*actual_x = x;
 		return NSERROR_OK;
 	}
-	
+
 	uint16 *utf16_str = NULL;
 	const uint16 *utf16 = NULL;
 	const uint16 *utf16next = NULL;
@@ -315,7 +337,7 @@ static nserror amiga_nsfont_split(const plot_font_style_t *fstyle,
 
 	/* Get utf16 conversion of string for glyph measuring routines */
 	if (utf8_to_enc(string, "UTF-16", length, (char **)&utf16_str) !=
-			NSERROR_OK)
+	    NSERROR_OK)
 		return NSERROR_INVALID;
 
 	utf16 = utf16_str;
@@ -327,7 +349,8 @@ static nserror amiga_nsfont_split(const plot_font_style_t *fstyle,
 	*char_offset = 0;
 	*actual_x = 0;
 
-	if (*utf16 == 0xFEFF) utf16++;
+	if (*utf16 == 0xFEFF)
+		utf16++;
 
 	while (utf8_pos < length) {
 		if ((*utf16 < 0xD800) || (0xDBFF < *utf16))
@@ -342,8 +365,8 @@ static nserror amiga_nsfont_split(const plot_font_style_t *fstyle,
 				ufont = ami_open_outline_font(fstyle, utf16);
 
 			if (ufont)
-				tempx = ami_font_width_glyph(ufont, utf16,
-						utf16next, emwidth);
+				tempx = ami_font_width_glyph(
+					ufont, utf16, utf16next, emwidth);
 		}
 
 		/* Check whether we have a space */
@@ -378,55 +401,77 @@ static nserror amiga_nsfont_split(const plot_font_style_t *fstyle,
 /**
  * Search for a font in the list and load from disk if not present
  */
-static struct ami_font_cache_node *ami_font_open(const char *font, bool critical)
+static struct ami_font_cache_node *
+ami_font_open(const char *font, bool critical)
 {
-	if(font == NULL) {
+	if (font == NULL) {
 		NSLOG(netsurf, INFO, "Requested NULL font");
 		return NULL;
 	}
 
 	struct ami_font_cache_node *nodedata = ami_font_cache_locate(font);
-	if(nodedata) return nodedata;
+	if (nodedata)
+		return nodedata;
 
 	nodedata = ami_font_cache_alloc_entry(font);
 
-	if(nodedata == NULL) {
+	if (nodedata == NULL) {
 		amiga_warn_user("NoMemory", "");
 		return NULL;
 	}
 
 	nodedata->font = OpenOutlineFont(font, &ami_diskfontlib_list, OFF_OPEN);
-	
-	if(!nodedata->font)
-	{
+
+	if (!nodedata->font) {
 		NSLOG(netsurf, INFO, "Requested font not found: %s", font);
-		if(critical == true) amiga_warn_user("CompError", font);
+		if (critical == true)
+			amiga_warn_user("CompError", font);
 		free(nodedata);
 		return NULL;
 	}
 
-	nodedata->bold = (char *)GetTagData(OT_BName, 0, nodedata->font->olf_OTagList);
-	if(nodedata->bold)
-		NSLOG(netsurf, INFO, "Bold font defined for %s is %s", font,
+	nodedata->bold = (char *)GetTagData(OT_BName,
+					    0,
+					    nodedata->font->olf_OTagList);
+	if (nodedata->bold)
+		NSLOG(netsurf,
+		      INFO,
+		      "Bold font defined for %s is %s",
+		      font,
 		      nodedata->bold);
 	else
-		NSLOG(netsurf, INFO,
-		      "Warning: No designed bold font defined for %s", font);
+		NSLOG(netsurf,
+		      INFO,
+		      "Warning: No designed bold font defined for %s",
+		      font);
 
-	nodedata->italic = (char *)GetTagData(OT_IName, 0, nodedata->font->olf_OTagList);
-	if(nodedata->italic)
-		NSLOG(netsurf, INFO, "Italic font defined for %s is %s",
-		      font, nodedata->italic);
+	nodedata->italic = (char *)GetTagData(OT_IName,
+					      0,
+					      nodedata->font->olf_OTagList);
+	if (nodedata->italic)
+		NSLOG(netsurf,
+		      INFO,
+		      "Italic font defined for %s is %s",
+		      font,
+		      nodedata->italic);
 	else
-		NSLOG(netsurf, INFO,
-		      "Warning: No designed italic font defined for %s", font);
+		NSLOG(netsurf,
+		      INFO,
+		      "Warning: No designed italic font defined for %s",
+		      font);
 
-	nodedata->bolditalic = (char *)GetTagData(OT_BIName, 0, nodedata->font->olf_OTagList);
-	if(nodedata->bolditalic)
-		NSLOG(netsurf, INFO, "Bold-italic font defined for %s is %s",
-		      font, nodedata->bolditalic);
+	nodedata->bolditalic = (char *)GetTagData(OT_BIName,
+						  0,
+						  nodedata->font->olf_OTagList);
+	if (nodedata->bolditalic)
+		NSLOG(netsurf,
+		      INFO,
+		      "Bold-italic font defined for %s is %s",
+		      font,
+		      nodedata->bolditalic);
 	else
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "Warning: No designed bold-italic font defined for %s",
 		      font);
 
@@ -441,8 +486,8 @@ static struct ami_font_cache_node *ami_font_open(const char *font, bool critical
  * \param codepoint open a default font instead of the one specified by fstyle
  * \return outline font or NULL on error
  */
-static struct OutlineFont *ami_open_outline_font(const plot_font_style_t *fstyle,
-		const uint16 *codepoint)
+static struct OutlineFont *
+ami_open_outline_font(const plot_font_style_t *fstyle, const uint16 *codepoint)
 {
 	struct ami_font_cache_node *node;
 	struct ami_font_cache_node *designed_node = NULL;
@@ -456,40 +501,46 @@ static struct OutlineFont *ami_open_outline_font(const plot_font_style_t *fstyle
 	ULONG shearsin = 0;
 	ULONG shearcos = (1 << 16);
 
-	if(codepoint) fontfamily = NSA_UNICODE_FONT;
-		else fontfamily = fstyle->family;
+	if (codepoint)
+		fontfamily = NSA_UNICODE_FONT;
+	else
+		fontfamily = fstyle->family;
 
-	switch(fontfamily)
-	{
-		case PLOT_FONT_FAMILY_SANS_SERIF:
-			fontname = nsoption_charp(font_sans);
+	switch (fontfamily) {
+	case PLOT_FONT_FAMILY_SANS_SERIF:
+		fontname = nsoption_charp(font_sans);
 		break;
-		case PLOT_FONT_FAMILY_SERIF:
-			fontname = nsoption_charp(font_serif);
+	case PLOT_FONT_FAMILY_SERIF:
+		fontname = nsoption_charp(font_serif);
 		break;
-		case PLOT_FONT_FAMILY_MONOSPACE:
-			fontname = nsoption_charp(font_mono);
+	case PLOT_FONT_FAMILY_MONOSPACE:
+		fontname = nsoption_charp(font_mono);
 		break;
-		case PLOT_FONT_FAMILY_CURSIVE:
-			fontname = nsoption_charp(font_cursive);
+	case PLOT_FONT_FAMILY_CURSIVE:
+		fontname = nsoption_charp(font_cursive);
 		break;
-		case PLOT_FONT_FAMILY_FANTASY:
-			fontname = nsoption_charp(font_fantasy);
+	case PLOT_FONT_FAMILY_FANTASY:
+		fontname = nsoption_charp(font_fantasy);
 		break;
-		case NSA_UNICODE_FONT:
-		default:
-			if(__builtin_expect((amiga_nsfont_utf16_char_length(codepoint) == 2), 0)) {
-				/* Multi-byte character */
-				fontname = nsoption_charp(font_surrogate);
-			} else {
-				fontname = (char *)ami_font_scan_lookup(codepoint, glypharray);
-			}
-			if(fontname == NULL) return NULL;
+	case NSA_UNICODE_FONT:
+	default:
+		if (__builtin_expect(
+			    (amiga_nsfont_utf16_char_length(codepoint) == 2),
+			    0)) {
+			/* Multi-byte character */
+			fontname = nsoption_charp(font_surrogate);
+		} else {
+			fontname = (char *)ami_font_scan_lookup(codepoint,
+								glypharray);
+		}
+		if (fontname == NULL)
+			return NULL;
 		break;
 	}
 
 	node = ami_font_open(fontname, true);
-	if(!node) return NULL;
+	if (!node)
+		return NULL;
 
 	if (fstyle->flags & FONTF_OBLIQUE)
 		tstyle = NSA_OBLIQUE;
@@ -500,59 +551,62 @@ static struct OutlineFont *ami_open_outline_font(const plot_font_style_t *fstyle
 	if (fstyle->weight >= 700)
 		tstyle += NSA_BOLD;
 
-	switch(tstyle)
-	{
-		case NSA_ITALIC:
-			if(node->italic) designed_node = ami_font_open(node->italic, false);
+	switch (tstyle) {
+	case NSA_ITALIC:
+		if (node->italic)
+			designed_node = ami_font_open(node->italic, false);
 
-			if(designed_node == NULL) {
-				shearsin = NSA_VALUE_SHEARSIN;
-				shearcos = NSA_VALUE_SHEARCOS;
-			}
-		break;
-
-		case NSA_OBLIQUE:
+		if (designed_node == NULL) {
 			shearsin = NSA_VALUE_SHEARSIN;
 			shearcos = NSA_VALUE_SHEARCOS;
+		}
 		break;
 
-		case NSA_BOLD:
-			if(node->bold) designed_node = ami_font_open(node->bold, false);
-
-			if(designed_node == NULL) {
-				emboldenx = NSA_VALUE_BOLDX;
-				emboldeny = NSA_VALUE_BOLDY;
-			}
+	case NSA_OBLIQUE:
+		shearsin = NSA_VALUE_SHEARSIN;
+		shearcos = NSA_VALUE_SHEARCOS;
 		break;
 
-		case NSA_BOLDOBLIQUE:
+	case NSA_BOLD:
+		if (node->bold)
+			designed_node = ami_font_open(node->bold, false);
+
+		if (designed_node == NULL) {
+			emboldenx = NSA_VALUE_BOLDX;
+			emboldeny = NSA_VALUE_BOLDY;
+		}
+		break;
+
+	case NSA_BOLDOBLIQUE:
+		shearsin = NSA_VALUE_SHEARSIN;
+		shearcos = NSA_VALUE_SHEARCOS;
+
+		if (node->bold)
+			designed_node = ami_font_open(node->bold, false);
+
+		if (designed_node == NULL) {
+			emboldenx = NSA_VALUE_BOLDX;
+			emboldeny = NSA_VALUE_BOLDY;
+		}
+		break;
+
+	case NSA_BOLDITALIC:
+		if (node->bolditalic)
+			designed_node = ami_font_open(node->bolditalic, false);
+
+		if (designed_node == NULL) {
+			emboldenx = NSA_VALUE_BOLDX;
+			emboldeny = NSA_VALUE_BOLDY;
 			shearsin = NSA_VALUE_SHEARSIN;
 			shearcos = NSA_VALUE_SHEARCOS;
-
-			if(node->bold) designed_node = ami_font_open(node->bold, false);
-
-			if(designed_node == NULL) {
-				emboldenx = NSA_VALUE_BOLDX;
-				emboldeny = NSA_VALUE_BOLDY;
-			}
-		break;
-
-		case NSA_BOLDITALIC:
-			if(node->bolditalic) designed_node = ami_font_open(node->bolditalic, false);
-
-			if(designed_node == NULL) {
-				emboldenx = NSA_VALUE_BOLDX;
-				emboldeny = NSA_VALUE_BOLDY;
-				shearsin = NSA_VALUE_SHEARSIN;
-				shearcos = NSA_VALUE_SHEARCOS;
-			}
+		}
 		break;
 	}
 
 	/* Scale to 16.16 fixed point */
 	ysize = fstyle->size * ((1 << 16) / PLOT_STYLE_SCALE);
 
-	if(designed_node == NULL) {
+	if (designed_node == NULL) {
 		ofont = node->font;
 	} else {
 		ofont = designed_node->font;
@@ -562,22 +616,33 @@ static struct OutlineFont *ami_open_outline_font(const plot_font_style_t *fstyle
 	struct BulletBase *BulletBase = ofont->BulletBase;
 #endif
 
-	if(ESetInfo(AMI_OFONT_ENGINE,
-			OT_DeviceDPI,   ami_font_dpi_get_devicedpi(),
-			OT_PointHeight, ysize,
-			OT_EmboldenX,   emboldenx,
-			OT_EmboldenY,   emboldeny,
-			OT_ShearSin,    shearsin,
-			OT_ShearCos,    shearcos,
-			TAG_END) == OTERR_Success)
+	if (ESetInfo(AMI_OFONT_ENGINE,
+		     OT_DeviceDPI,
+		     ami_font_dpi_get_devicedpi(),
+		     OT_PointHeight,
+		     ysize,
+		     OT_EmboldenX,
+		     emboldenx,
+		     OT_EmboldenY,
+		     emboldeny,
+		     OT_ShearSin,
+		     shearsin,
+		     OT_ShearCos,
+		     shearcos,
+		     TAG_END) == OTERR_Success)
 		return ofont;
 
 	return NULL;
 }
 
-static inline int32 ami_font_plot_glyph(struct OutlineFont *ofont, struct RastPort *rp,
-		uint16 *restrict char1, uint16 *restrict char2, uint32 x, uint32 y,
-		uint32 emwidth, bool aa)
+static inline int32 ami_font_plot_glyph(struct OutlineFont *ofont,
+					struct RastPort *rp,
+					uint16 *restrict char1,
+					uint16 *restrict char2,
+					uint32 x,
+					uint32 y,
+					uint32 emwidth,
+					bool aa)
 {
 	struct GlyphMap *glyph;
 	UBYTE *glyphbm;
@@ -596,20 +661,22 @@ static inline int32 ami_font_plot_glyph(struct OutlineFont *ofont, struct RastPo
 		/* We don't support UTF-16 surrogates yet, so just return. */
 		return 0;
 	}
-	
+
 	if (__builtin_expect(((*char2 >= 0xD800) && (*char2 <= 0xDBFF)), 0)) {
 		/* Don't attempt to kern a UTF-16 surrogate */
 		skip_c2 = true;
 	}
 #endif
 
-	if (*char2 < 0x0020) skip_c2 = true;
+	if (*char2 < 0x0020)
+		skip_c2 = true;
 #ifndef __amigaos4__
-	if(*char1 == 0x0020) return (emwidth / 3);
+	if (*char1 == 0x0020)
+		return (emwidth / 3);
 #endif
 
 #ifdef __amigaos4__
-	if(__builtin_expect(aa == true, 1)) {
+	if (__builtin_expect(aa == true, 1)) {
 		glyphmaptag = OT_GlyphMap8Bit;
 		template_type = BLITT_ALPHATEMPLATE;
 	} else {
@@ -619,48 +686,77 @@ static inline int32 ami_font_plot_glyph(struct OutlineFont *ofont, struct RastPo
 		template_type = BLITT_TEMPLATE;
 	}
 #endif
- 
+
 	long_char_1 = amiga_nsfont_decode_surrogate(char1);
-	if(skip_c2 == false) long_char_2 = amiga_nsfont_decode_surrogate(char2);
+	if (skip_c2 == false)
+		long_char_2 = amiga_nsfont_decode_surrogate(char2);
 	/**\todo use OT_GlyphCode_32 so we get an error for old font engines */
 
-	if(ESetInfo(AMI_OFONT_ENGINE,
-			OT_GlyphCode, long_char_1,
-			OT_GlyphCode2, long_char_2,
-			TAG_END) == OTERR_Success)
-	{
-		if(EObtainInfo(AMI_OFONT_ENGINE,
-			glyphmaptag, &glyph,
-			TAG_END) == 0)
-		{
+	if (ESetInfo(AMI_OFONT_ENGINE,
+		     OT_GlyphCode,
+		     long_char_1,
+		     OT_GlyphCode2,
+		     long_char_2,
+		     TAG_END) == OTERR_Success) {
+		if (EObtainInfo(
+			    AMI_OFONT_ENGINE, glyphmaptag, &glyph, TAG_END) ==
+		    0) {
 			glyphbm = glyph->glm_BitMap;
-			
-			if(rp && glyphbm) {
+
+			if (rp && glyphbm) {
 #ifdef __amigaos4__
-				BltBitMapTags(BLITA_SrcX, glyph->glm_BlackLeft,
-					BLITA_SrcY, glyph->glm_BlackTop,
-					BLITA_DestX, x - glyph->glm_X0 + glyph->glm_BlackLeft,
-					BLITA_DestY, y - glyph->glm_Y0 + glyph->glm_BlackTop,
-					BLITA_Width, glyph->glm_BlackWidth,
-					BLITA_Height, glyph->glm_BlackHeight,
-					BLITA_Source, glyphbm,
-					BLITA_SrcType, template_type,
-					BLITA_Dest, rp,
-					BLITA_DestType, BLITT_RASTPORT,
-					BLITA_SrcBytesPerRow, glyph->glm_BMModulo,
-					TAG_DONE);
+				BltBitMapTags(BLITA_SrcX,
+					      glyph->glm_BlackLeft,
+					      BLITA_SrcY,
+					      glyph->glm_BlackTop,
+					      BLITA_DestX,
+					      x - glyph->glm_X0 +
+						      glyph->glm_BlackLeft,
+					      BLITA_DestY,
+					      y - glyph->glm_Y0 +
+						      glyph->glm_BlackTop,
+					      BLITA_Width,
+					      glyph->glm_BlackWidth,
+					      BLITA_Height,
+					      glyph->glm_BlackHeight,
+					      BLITA_Source,
+					      glyphbm,
+					      BLITA_SrcType,
+					      template_type,
+					      BLITA_Dest,
+					      rp,
+					      BLITA_DestType,
+					      BLITT_RASTPORT,
+					      BLITA_SrcBytesPerRow,
+					      glyph->glm_BMModulo,
+					      TAG_DONE);
 #else
 				/* On OS3 the glyph needs to be in chip RAM */
-				void *chip_glyph = ami_memory_chip_alloc(glyph->glm_BMModulo * glyph->glm_BMRows);
-				if(chip_glyph != NULL) {
-					CopyMem(glyphbm, chip_glyph, glyph->glm_BMModulo * glyph->glm_BMRows);
+				void *chip_glyph = ami_memory_chip_alloc(
+					glyph->glm_BMModulo *
+					glyph->glm_BMRows);
+				if (chip_glyph != NULL) {
+					CopyMem(glyphbm,
+						chip_glyph,
+						glyph->glm_BMModulo *
+							glyph->glm_BMRows);
 
-					BltTemplate(chip_glyph + (glyph->glm_BMModulo * glyph->glm_BlackTop) +
-						((glyph->glm_BlackLeft >> 4) << 1),
-						glyph->glm_BlackLeft & 0xF, glyph->glm_BMModulo, rp,
-						x - glyph->glm_X0 + glyph->glm_BlackLeft,
-						y - glyph->glm_Y0 + glyph->glm_BlackTop,
-						glyph->glm_BlackWidth, glyph->glm_BlackHeight);
+					BltTemplate(
+						chip_glyph +
+							(glyph->glm_BMModulo *
+							 glyph->glm_BlackTop) +
+							((glyph->glm_BlackLeft >>
+							  4)
+							 << 1),
+						glyph->glm_BlackLeft & 0xF,
+						glyph->glm_BMModulo,
+						rp,
+						x - glyph->glm_X0 +
+							glyph->glm_BlackLeft,
+						y - glyph->glm_Y0 +
+							glyph->glm_BlackTop,
+						glyph->glm_BlackWidth,
+						glyph->glm_BlackHeight);
 
 					ami_memory_chip_free(chip_glyph);
 				}
@@ -669,27 +765,35 @@ static inline int32 ami_font_plot_glyph(struct OutlineFont *ofont, struct RastPo
 
 			kern = 0;
 
-			if((*char2) && (!skip_c2)) EObtainInfo(AMI_OFONT_ENGINE,
-								OT_TextKernPair, &kern,
-								TAG_END);
+			if ((*char2) && (!skip_c2))
+				EObtainInfo(AMI_OFONT_ENGINE,
+					    OT_TextKernPair,
+					    &kern,
+					    TAG_END);
 
-			char_advance = (ULONG)((((glyph->glm_Width - kern) * emwidth) + 32768) / 65536);
+			char_advance = (ULONG)((((glyph->glm_Width - kern) *
+						 emwidth) +
+						32768) /
+					       65536);
 
-			EReleaseInfo(AMI_OFONT_ENGINE,
-				glyphmaptag, glyph,
-				TAG_END);
-				
-			if((*char2) && (!skip_c2)) EReleaseInfo(AMI_OFONT_ENGINE,
-				OT_TextKernPair, kern,
-				TAG_END);
+			EReleaseInfo(
+				AMI_OFONT_ENGINE, glyphmaptag, glyph, TAG_END);
+
+			if ((*char2) && (!skip_c2))
+				EReleaseInfo(AMI_OFONT_ENGINE,
+					     OT_TextKernPair,
+					     kern,
+					     TAG_END);
 		}
 	}
 
 	return char_advance;
 }
 
-static inline int32 ami_font_width_glyph(struct OutlineFont *ofont, 
-		const uint16 *restrict char1, const uint16 *restrict char2, uint32 emwidth)
+static inline int32 ami_font_width_glyph(struct OutlineFont *ofont,
+					 const uint16 *restrict char1,
+					 const uint16 *restrict char2,
+					 uint32 emwidth)
 {
 	int32 char_advance = 0;
 	FIXED kern = 0;
@@ -707,57 +811,69 @@ static inline int32 ami_font_width_glyph(struct OutlineFont *ofont,
 		/* We don't support UTF-16 surrogates yet, so just return. */
 		return 0;
 	}
-	
+
 	if (__builtin_expect(((*char2 >= 0xD800) && (*char2 <= 0xDBFF)), 0)) {
 		/* Don't attempt to kern a UTF-16 surrogate */
 		skip_c2 = true;
 	}
 #endif
 
-	if (*char2 < 0x0020) skip_c2 = true;
+	if (*char2 < 0x0020)
+		skip_c2 = true;
 #ifndef __amigaos4__
-	if(*char1 == 0x0020) return (emwidth / 3);
+	if (*char1 == 0x0020)
+		return (emwidth / 3);
 #endif
 
 	long_char_1 = amiga_nsfont_decode_surrogate(char1);
 	/**\todo use OT_GlyphCode_32 so we get an error for old font engines */
 
-	if(ESetInfo(AMI_OFONT_ENGINE,
-			OT_GlyphCode, long_char_1,
-			OT_GlyphCode2, long_char_1,
-			TAG_END) == OTERR_Success)
-	{
-		if(EObtainInfo(AMI_OFONT_ENGINE,
-			OT_WidthList, &gwlist,
-			TAG_END) == 0)
-		{
+	if (ESetInfo(AMI_OFONT_ENGINE,
+		     OT_GlyphCode,
+		     long_char_1,
+		     OT_GlyphCode2,
+		     long_char_1,
+		     TAG_END) == OTERR_Success) {
+		if (EObtainInfo(
+			    AMI_OFONT_ENGINE, OT_WidthList, &gwlist, TAG_END) ==
+		    0) {
 			FIXED char1w = 0;
-			gwnode = (struct GlyphWidthEntry *)GetHead((struct List *)gwlist);
-			if(gwnode) char1w = gwnode->gwe_Width;
+			gwnode = (struct GlyphWidthEntry *)GetHead(
+				(struct List *)gwlist);
+			if (gwnode)
+				char1w = gwnode->gwe_Width;
 
 			kern = 0;
 
-			if(!skip_c2) {
-				long_char_2 = amiga_nsfont_decode_surrogate(char2);
-				if(ESetInfo(AMI_OFONT_ENGINE,
-						OT_GlyphCode, long_char_1,
-						OT_GlyphCode2, long_char_2,
-						TAG_END) == OTERR_Success)
-				{
+			if (!skip_c2) {
+				long_char_2 = amiga_nsfont_decode_surrogate(
+					char2);
+				if (ESetInfo(AMI_OFONT_ENGINE,
+					     OT_GlyphCode,
+					     long_char_1,
+					     OT_GlyphCode2,
+					     long_char_2,
+					     TAG_END) == OTERR_Success) {
 					EObtainInfo(AMI_OFONT_ENGINE,
-								OT_TextKernPair, &kern,
-								TAG_END);
+						    OT_TextKernPair,
+						    &kern,
+						    TAG_END);
 				}
 			}
-			char_advance = (ULONG)((((char1w - kern) * emwidth) + 32768)/ 65536);
-			
-			if(!skip_c2) EReleaseInfo(AMI_OFONT_ENGINE,
-				OT_TextKernPair, kern,
-				TAG_END);
-				
+			char_advance = (ULONG)((((char1w - kern) * emwidth) +
+						32768) /
+					       65536);
+
+			if (!skip_c2)
+				EReleaseInfo(AMI_OFONT_ENGINE,
+					     OT_TextKernPair,
+					     kern,
+					     TAG_END);
+
 			EReleaseInfo(AMI_OFONT_ENGINE,
-				OT_WidthList, gwlist,
-				TAG_END);
+				     OT_WidthList,
+				     gwlist,
+				     TAG_END);
 		}
 	}
 
@@ -769,73 +885,100 @@ static const uint16 *ami_font_translate_smallcaps(uint16 *utf16char)
 	const uint16 *p;
 	p = &sc_table[0];
 
-	while (*p != 0)
-	{
-		if(*p == *utf16char) return &p[1];
-		p+=2;
+	while (*p != 0) {
+		if (*p == *utf16char)
+			return &p[1];
+		p += 2;
 	}
 
 	return utf16char;
 }
 
-static ULONG amiga_nsfont_text(struct RastPort *rp, const char *string, ULONG length,
-			const plot_font_style_t *fstyle, int dx, int dy, bool aa)
+static ULONG amiga_nsfont_text(struct RastPort *rp,
+			       const char *string,
+			       ULONG length,
+			       const plot_font_style_t *fstyle,
+			       int dx,
+			       int dy,
+			       bool aa)
 {
-	if((length <= 0) || (string == NULL) || (string[0] == '\0')) return 0;
+	if ((length <= 0) || (string == NULL) || (string[0] == '\0'))
+		return 0;
 
 	uint16 *utf16 = NULL, *outf16 = NULL;
 	uint16 *utf16charsc = 0, *utf16nextsc = 0;
 	uint16 *utf16next = 0;
 	int utf16charlen;
 	struct OutlineFont *restrict ofont, *restrict ufont = NULL;
-	uint32 x=0;
+	uint32 x = 0;
 	int32 tempx = 0;
 	ULONG emwidth = (ULONG)NSA_FONT_EMWIDTH(fstyle->size);
 	uint16 utf16_a = 0x41;
 
-	if(!string || string[0]=='\0') return 0;
-	if(!length) return 0;
-	if(rp == NULL) return 0;
+	if (!string || string[0] == '\0')
+		return 0;
+	if (!length)
+		return 0;
+	if (rp == NULL)
+		return 0;
 
-	if(utf8_to_enc(string,"UTF-16",length,(char **)&utf16) != NSERROR_OK) return 0;
+	if (utf8_to_enc(string, "UTF-16", length, (char **)&utf16) !=
+	    NSERROR_OK)
+		return 0;
 	outf16 = utf16;
-	if(!(ofont = ami_open_outline_font(fstyle, 0))) {
-		if(!(ofont = ami_open_outline_font(fstyle, &utf16_a))) {
+	if (!(ofont = ami_open_outline_font(fstyle, 0))) {
+		if (!(ofont = ami_open_outline_font(fstyle, &utf16_a))) {
 			free(outf16);
 			return 0;
 		}
 	}
 
-	while(*utf16 != 0)
-	{
+	while (*utf16 != 0) {
 		utf16charlen = amiga_nsfont_utf16_char_length(utf16);
 		utf16next = &utf16[utf16charlen];
 
-		if(fstyle->flags & FONTF_SMALLCAPS)
-		{
-			utf16charsc = (uint16 *)ami_font_translate_smallcaps(utf16);
-			utf16nextsc = (uint16 *)ami_font_translate_smallcaps(utf16next);
+		if (fstyle->flags & FONTF_SMALLCAPS) {
+			utf16charsc = (uint16 *)ami_font_translate_smallcaps(
+				utf16);
+			utf16nextsc = (uint16 *)ami_font_translate_smallcaps(
+				utf16next);
 
-			tempx = ami_font_plot_glyph(ofont, rp, utf16charsc, utf16nextsc,
-								dx + x, dy, emwidth, aa);
+			tempx = ami_font_plot_glyph(ofont,
+						    rp,
+						    utf16charsc,
+						    utf16nextsc,
+						    dx + x,
+						    dy,
+						    emwidth,
+						    aa);
+		} else
+			tempx = 0;
+
+		if (tempx == 0) {
+			tempx = ami_font_plot_glyph(ofont,
+						    rp,
+						    utf16,
+						    utf16next,
+						    dx + x,
+						    dy,
+						    emwidth,
+						    aa);
 		}
-		else tempx = 0;
 
-		if(tempx == 0) {
-			tempx = ami_font_plot_glyph(ofont, rp, utf16, utf16next,
-								dx + x, dy, emwidth, aa);
-		}
-
-		if(tempx == 0)
-		{
-			if(ufont == NULL)
-			{
+		if (tempx == 0) {
+			if (ufont == NULL) {
 				ufont = ami_open_outline_font(fstyle, utf16);
 			}
 
-			if(ufont) {
-				tempx = ami_font_plot_glyph(ufont, rp, utf16, utf16next,
-											dx + x, dy, emwidth, aa);
+			if (ufont) {
+				tempx = ami_font_plot_glyph(ufont,
+							    rp,
+							    utf16,
+							    utf16next,
+							    dx + x,
+							    dy,
+							    emwidth,
+							    aa);
 			}
 		}
 
@@ -848,59 +991,67 @@ static ULONG amiga_nsfont_text(struct RastPort *rp, const char *string, ULONG le
 	return x;
 }
 
-static inline ULONG ami_font_unicode_width(const char *string, ULONG length,
-			const plot_font_style_t *fstyle, ULONG dx, ULONG dy, bool aa)
+static inline ULONG ami_font_unicode_width(const char *string,
+					   ULONG length,
+					   const plot_font_style_t *fstyle,
+					   ULONG dx,
+					   ULONG dy,
+					   bool aa)
 {
 	uint16 *utf16 = NULL, *outf16 = NULL;
 	uint16 *utf16charsc = 0, *utf16nextsc = 0;
 	uint16 *utf16next = 0;
 	int utf16charlen;
 	struct OutlineFont *restrict ofont, *restrict ufont = NULL;
-	uint32 x=0;
+	uint32 x = 0;
 	int32 tempx = 0;
 	ULONG emwidth = (ULONG)NSA_FONT_EMWIDTH(fstyle->size);
 	uint16 utf16_a = 0x41;
 
-	if(!string || string[0]=='\0') return 0;
-	if(!length) return 0;
+	if (!string || string[0] == '\0')
+		return 0;
+	if (!length)
+		return 0;
 
-	if(utf8_to_enc(string,"UTF-16",length,(char **)&utf16) != NSERROR_OK) return 0;
+	if (utf8_to_enc(string, "UTF-16", length, (char **)&utf16) !=
+	    NSERROR_OK)
+		return 0;
 	outf16 = utf16;
-	if(!(ofont = ami_open_outline_font(fstyle, 0))) {
-		if(!(ofont = ami_open_outline_font(fstyle, &utf16_a)))  {
+	if (!(ofont = ami_open_outline_font(fstyle, 0))) {
+		if (!(ofont = ami_open_outline_font(fstyle, &utf16_a))) {
 			free(outf16);
 			return 0;
 		}
 	}
 
-	while(*utf16 != 0)
-	{
+	while (*utf16 != 0) {
 		utf16charlen = amiga_nsfont_utf16_char_length(utf16);
 		utf16next = &utf16[utf16charlen];
 
-		if(fstyle->flags & FONTF_SMALLCAPS)
-		{
-			utf16charsc = (uint16 *)ami_font_translate_smallcaps(utf16);
-			utf16nextsc = (uint16 *)ami_font_translate_smallcaps(utf16next);
+		if (fstyle->flags & FONTF_SMALLCAPS) {
+			utf16charsc = (uint16 *)ami_font_translate_smallcaps(
+				utf16);
+			utf16nextsc = (uint16 *)ami_font_translate_smallcaps(
+				utf16next);
 
-			tempx = ami_font_width_glyph(ofont, utf16charsc, utf16nextsc, emwidth);
+			tempx = ami_font_width_glyph(
+				ofont, utf16charsc, utf16nextsc, emwidth);
+		} else
+			tempx = 0;
+
+		if (tempx == 0) {
+			tempx = ami_font_width_glyph(
+				ofont, utf16, utf16next, emwidth);
 		}
-		else tempx = 0;
 
-		if(tempx == 0) {
-			tempx = ami_font_width_glyph(ofont, utf16, utf16next, emwidth);
-		}
-
-		if(tempx == 0)
-		{
-			if(ufont == NULL)
-			{
+		if (tempx == 0) {
+			if (ufont == NULL) {
 				ufont = ami_open_outline_font(fstyle, utf16);
 			}
 
-			if(ufont)
-			{
-				tempx = ami_font_width_glyph(ufont, utf16, utf16next, emwidth);
+			if (ufont) {
+				tempx = ami_font_width_glyph(
+					ufont, utf16, utf16next, emwidth);
 			}
 		}
 
@@ -923,8 +1074,7 @@ const struct ami_font_functions ami_font_bullet_table = {
 	amiga_nsfont_width,
 	amiga_nsfont_position_in_string,
 	amiga_nsfont_split,
-	amiga_nsfont_text
-};
+	amiga_nsfont_text};
 
 void ami_font_bullet_init(void)
 {
@@ -950,7 +1100,8 @@ void ami_font_bullet_fini(void)
 /* Font scanner */
 void ami_font_initscanner(bool force, bool save)
 {
-	ami_font_scan_init(nsoption_charp(font_unicode_file), force, save, glypharray);
+	ami_font_scan_init(
+		nsoption_charp(font_unicode_file), force, save, glypharray);
 }
 
 void ami_font_finiscanner(void)
@@ -962,4 +1113,3 @@ void ami_font_savescanner(void)
 {
 	ami_font_scan_save(nsoption_charp(font_unicode_file), glypharray);
 }
-

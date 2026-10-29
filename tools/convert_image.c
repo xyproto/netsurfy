@@ -37,36 +37,35 @@ static unsigned char *bitmap_data;
 static bool is_cursor = true;
 static int raw_hot_x, raw_hot_y;
 
-#define WIDTH (is_cursor?raw_width-1:raw_width)
-#define HEIGHT (is_cursor?raw_height-1:raw_height)
+#define WIDTH (is_cursor ? raw_width - 1 : raw_width)
+#define HEIGHT (is_cursor ? raw_height - 1 : raw_height)
 
-#define HOT_X (is_cursor?raw_hot_x-1:0)
-#define HOT_Y (is_cursor?raw_hot_y-1:0)
+#define HOT_X (is_cursor ? raw_hot_x - 1 : 0)
+#define HOT_Y (is_cursor ? raw_hot_y - 1 : 0)
 
-#define REAL(v) (is_cursor?v+1:v)
+#define REAL(v) (is_cursor ? v + 1 : v)
 
-#define PPIX_AT(x,y) ((bitmap_data + (rowstride * y)) + (x * 4))
+#define PPIX_AT(x, y) ((bitmap_data + (rowstride * y)) + (x * 4))
 
 #define R_OFF 2
 #define G_OFF 1
 #define B_OFF 0
 #define A_OFF 3
 
-#define R_AT(x,y) *(PPIX_AT(x,y) + R_OFF)
-#define G_AT(x,y) *(PPIX_AT(x,y) + G_OFF)
-#define B_AT(x,y) *(PPIX_AT(x,y) + B_OFF)
-#define A_AT(x,y) *(PPIX_AT(x,y) + A_OFF)
+#define R_AT(x, y) *(PPIX_AT(x, y) + R_OFF)
+#define G_AT(x, y) *(PPIX_AT(x, y) + G_OFF)
+#define B_AT(x, y) *(PPIX_AT(x, y) + B_OFF)
+#define A_AT(x, y) *(PPIX_AT(x, y) + A_OFF)
 
 
-static void
-usage(void)
+static void usage(void)
 {
-	fprintf(stderr, "usage: fb_convert_image input.png output.inc varname\n");
+	fprintf(stderr,
+		"usage: fb_convert_image input.png output.inc varname\n");
 }
 
 
-static void
-detect_hotspot(void)
+static void detect_hotspot(void)
 {
 	int i;
 	int greenpixels = 0;
@@ -111,20 +110,27 @@ detect_hotspot(void)
 		return;
 	}
 	printf("          Pointer detected. Adjusted hotspot at %d, %d (0-based)\n",
-	       raw_hot_x - 1, raw_hot_y - 1);
+	       raw_hot_x - 1,
+	       raw_hot_y - 1);
 }
 
 
-static void
-info_callback(png_structp png, png_infop info)
+static void info_callback(png_structp png, png_infop info)
 {
 	int bit_depth, color_type, interlace, intent;
 	double gamma;
 	png_uint_32 width, height;
 
 	/* Read the PNG details */
-	png_get_IHDR(png, info, &width, &height, &bit_depth,
-			&color_type, &interlace, 0, 0);
+	png_get_IHDR(png,
+		     info,
+		     &width,
+		     &height,
+		     &bit_depth,
+		     &color_type,
+		     &interlace,
+		     0,
+		     0);
 
 	/* Set up our transformations */
 	if (color_type == PNG_COLOR_TYPE_PALETTE)
@@ -136,7 +142,7 @@ info_callback(png_structp png, png_infop info)
 	if (bit_depth == 16)
 		png_set_strip_16(png);
 	if (color_type == PNG_COLOR_TYPE_GRAY ||
-			color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
+	    color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
 		png_set_gray_to_rgb(png);
 	if (!(color_type & PNG_COLOR_MASK_ALPHA))
 		png_set_filler(png, 0xff, PNG_FILLER_AFTER);
@@ -171,8 +177,7 @@ static unsigned int interlace_row_start[8] = {0, 0, 4, 0, 2, 0, 1};
 static unsigned int interlace_row_step[8] = {8, 8, 8, 4, 4, 2, 2};
 
 static void
-row_callback(png_structp png, png_bytep new_row,
-	     png_uint_32 row_num, int pass)
+row_callback(png_structp png, png_bytep new_row, png_uint_32 row_num, int pass)
 {
 	unsigned long i, j;
 	unsigned int start, step;
@@ -185,7 +190,7 @@ row_callback(png_structp png, png_bytep new_row,
 		start = interlace_start[pass];
 		step = interlace_step[pass];
 		row_num = interlace_row_start[pass] +
-			interlace_row_step[pass] * row_num;
+			  interlace_row_step[pass] * row_num;
 
 		/* Copy the data to our current row taking interlacing
 		 * into consideration */
@@ -201,14 +206,12 @@ row_callback(png_structp png, png_bytep new_row,
 	}
 }
 
-static void
-end_callback(png_structp png, png_infop info)
+static void end_callback(png_structp png, png_infop info)
 {
 }
 
 
-int
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
 	FILE *f;
 	unsigned char buffer[1024];
@@ -225,7 +228,8 @@ main(int argc, char **argv)
 	png = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
 	info = png_create_info_struct(png);
 
-	png_set_progressive_read_fn(png, NULL, info_callback, row_callback, end_callback);
+	png_set_progressive_read_fn(
+		png, NULL, info_callback, row_callback, end_callback);
 
 	f = fopen(argv[1], "rb");
 	if (f == NULL) {

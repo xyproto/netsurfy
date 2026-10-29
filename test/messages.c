@@ -35,7 +35,7 @@
 
 #include "test/message_data_inline.h"
 
-#define NELEMS(x)  (sizeof(x) / sizeof((x)[0]))
+#define NELEMS(x) (sizeof(x) / sizeof((x)[0]))
 
 const char *test_messages_path = "test/data/Messages";
 
@@ -45,25 +45,26 @@ struct message_test_vec_s {
 };
 
 struct message_test_vec_s message_errorcode_test_vec[] = {
-	{ NSERROR_OK, "OK" },
-	{ NSERROR_NOMEM, "NetSurf is running out of memory. Please free some memory and try again." },
-	{ NSERROR_NO_FETCH_HANDLER, "NoHandler" },
-	{ NSERROR_NOT_FOUND, "Not found" },
-	{ NSERROR_SAVE_FAILED, "SaveFailed" },
-	{ NSERROR_CLONE_FAILED, "CloneFailed" },
-	{ NSERROR_INIT_FAILED, "InitFailed" },
-	{ NSERROR_BAD_ENCODING, "BadEncoding" },
-	{ NSERROR_NEED_DATA, "NeedData" },
-	{ NSERROR_ENCODING_CHANGE, "EncodingChanged" },
-	{ NSERROR_BAD_PARAMETER, "BadParameter" },
-	{ NSERROR_INVALID, "Invalid" },
-	{ NSERROR_BOX_CONVERT, "BoxConvert" },
-	{ NSERROR_STOPPED, "Stopped" },
-	{ NSERROR_DOM, "Parsing the document failed." },
-	{ NSERROR_CSS, "Error processing CSS" },
-	{ NSERROR_CSS_BASE, "Base stylesheet failed to load" },
-	{ NSERROR_BAD_URL, "BadURL" },
-	{ NSERROR_UNKNOWN, "Unknown" },
+	{NSERROR_OK, "OK"},
+	{NSERROR_NOMEM,
+	 "NetSurf is running out of memory. Please free some memory and try again."},
+	{NSERROR_NO_FETCH_HANDLER, "NoHandler"},
+	{NSERROR_NOT_FOUND, "Not found"},
+	{NSERROR_SAVE_FAILED, "SaveFailed"},
+	{NSERROR_CLONE_FAILED, "CloneFailed"},
+	{NSERROR_INIT_FAILED, "InitFailed"},
+	{NSERROR_BAD_ENCODING, "BadEncoding"},
+	{NSERROR_NEED_DATA, "NeedData"},
+	{NSERROR_ENCODING_CHANGE, "EncodingChanged"},
+	{NSERROR_BAD_PARAMETER, "BadParameter"},
+	{NSERROR_INVALID, "Invalid"},
+	{NSERROR_BOX_CONVERT, "BoxConvert"},
+	{NSERROR_STOPPED, "Stopped"},
+	{NSERROR_DOM, "Parsing the document failed."},
+	{NSERROR_CSS, "Error processing CSS"},
+	{NSERROR_CSS_BASE, "Base stylesheet failed to load"},
+	{NSERROR_BAD_URL, "BadURL"},
+	{NSERROR_UNKNOWN, "Unknown"},
 };
 
 START_TEST(messages_errorcode_test)
@@ -121,7 +122,9 @@ START_TEST(message_get_buff_test)
 	ck_assert(buf == NULL);
 
 	buf = messages_get_buff("NoMemory");
-	ck_assert_str_eq(buf, "NetSurf is running out of memory. Please free some memory and try again.");
+	ck_assert_str_eq(
+		buf,
+		"NetSurf is running out of memory. Please free some memory and try again.");
 	free(buf);
 
 	/* cleanup */
@@ -137,8 +140,10 @@ static TCase *message_session_case_create(void)
 
 	tcase_add_test(tc, message_file_load_test);
 	tcase_add_test(tc, message_inline_load_test);
-	tcase_add_loop_test(tc, messages_errorcode_test,
-			    0, NELEMS(message_errorcode_test_vec));
+	tcase_add_loop_test(tc,
+			    messages_errorcode_test,
+			    0,
+			    NELEMS(message_errorcode_test_vec));
 	tcase_add_test(tc, message_get_buff_test);
 
 	return tc;

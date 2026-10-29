@@ -20,7 +20,8 @@
 #ifndef NS_ATARI_FINDFILE_H
 #define NS_ATARI_FINDFILE_H
 
-extern char *atari_find_resource(char *buf, const char *filename, const char *def);
+extern char *
+atari_find_resource(char *buf, const char *filename, const char *def);
 char *local_file_to_url(const char *filename);
 
 #endif /* NETSURF_ATARI_FINDFILE_H */

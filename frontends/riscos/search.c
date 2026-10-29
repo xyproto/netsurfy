@@ -50,20 +50,22 @@ struct search_static_data {
 	struct browser_window *search_window;
 };
 
-static struct search_static_data search_data =
-		{ { NULL }, false, NULL };
+static struct search_static_data search_data = {{NULL}, false, NULL};
 
 static wimp_MENU(RECENT_SEARCHES) menu_recent;
 wimp_menu *recent_search_menu = (wimp_menu *)&menu_recent;
-#define DEFAULT_FLAGS (wimp_ICON_TEXT | wimp_ICON_FILLED | \
-		(wimp_COLOUR_BLACK << wimp_ICON_FG_COLOUR_SHIFT) | \
-		(wimp_COLOUR_WHITE << wimp_ICON_BG_COLOUR_SHIFT))
+#define DEFAULT_FLAGS                                                          \
+	(wimp_ICON_TEXT | wimp_ICON_FILLED |                                   \
+	 (wimp_COLOUR_BLACK << wimp_ICON_FG_COLOUR_SHIFT) |                    \
+	 (wimp_COLOUR_WHITE << wimp_ICON_BG_COLOUR_SHIFT))
 
 
 static void ro_gui_search_end(wimp_w w);
 static bool ro_gui_search_next(wimp_w w);
-static bool ro_gui_search_menu_prepare(wimp_w w, wimp_i i, wimp_menu *menu,
-		wimp_pointer *pointer);
+static bool ro_gui_search_menu_prepare(wimp_w w,
+				       wimp_i i,
+				       wimp_menu *menu,
+				       wimp_pointer *pointer);
 static bool ro_gui_search_prepare_menu(void);
 static bool ro_gui_search_click(wimp_pointer *pointer);
 static bool ro_gui_search_keypress(wimp_key *key);
@@ -88,27 +90,29 @@ void ro_gui_search_init(void)
 {
 	dialog_search = ro_gui_dialog_create("search");
 	ro_gui_wimp_event_register_keypress(dialog_search,
-			ro_gui_search_keypress);
+					    ro_gui_search_keypress);
 	ro_gui_wimp_event_register_close_window(dialog_search,
-			ro_gui_search_end);
+						ro_gui_search_end);
 	ro_gui_wimp_event_register_menu_prepare(dialog_search,
-			ro_gui_search_menu_prepare);
+						ro_gui_search_menu_prepare);
 	ro_gui_wimp_event_register_menu_gright(dialog_search,
-			ICON_SEARCH_TEXT, ICON_SEARCH_MENU,
-			recent_search_menu);
+					       ICON_SEARCH_TEXT,
+					       ICON_SEARCH_MENU,
+					       recent_search_menu);
 	ro_gui_wimp_event_register_text_field(dialog_search,
-			ICON_SEARCH_STATUS);
+					      ICON_SEARCH_STATUS);
 	ro_gui_wimp_event_register_checkbox(dialog_search,
-			ICON_SEARCH_CASE_SENSITIVE);
+					    ICON_SEARCH_CASE_SENSITIVE);
 	ro_gui_wimp_event_register_mouse_click(dialog_search,
-			ro_gui_search_click);
-	ro_gui_wimp_event_register_ok(dialog_search, ICON_SEARCH_FIND_NEXT,
-			ro_gui_search_next);
+					       ro_gui_search_click);
+	ro_gui_wimp_event_register_ok(dialog_search,
+				      ICON_SEARCH_FIND_NEXT,
+				      ro_gui_search_next);
 	ro_gui_wimp_event_register_cancel(dialog_search, ICON_SEARCH_CANCEL);
 	ro_gui_wimp_event_set_help_prefix(dialog_search, "HelpSearch");
 
-	recent_search_menu->title_data.indirected_text.text =
-			(char*)messages_get("Search");
+	recent_search_menu->title_data.indirected_text.text = (char *)
+		messages_get("Search");
 	ro_gui_menu_init_structure(recent_search_menu, RECENT_SEARCHES);
 }
 
@@ -121,10 +125,12 @@ bool ro_gui_search_next(wimp_w w)
 {
 	search_data.search_insert = true;
 	search_flags_t flags = SEARCH_FLAG_FORWARDS |
-			ro_gui_search_update_flags();
-	browser_window_search(search_data.search_window, NULL, flags,
-			ro_gui_get_icon_string(dialog_search,
-					ICON_SEARCH_TEXT));
+			       ro_gui_search_update_flags();
+	browser_window_search(search_data.search_window,
+			      NULL,
+			      flags,
+			      ro_gui_get_icon_string(dialog_search,
+						     ICON_SEARCH_TEXT));
 	return false;
 }
 
@@ -141,8 +147,10 @@ bool ro_gui_search_next(wimp_w w)
  * \return		true if the event was handled; false if not.
  */
 
-bool ro_gui_search_menu_prepare(wimp_w w, wimp_i i, wimp_menu *menu,
-		wimp_pointer *pointer)
+bool ro_gui_search_menu_prepare(wimp_w w,
+				wimp_i i,
+				wimp_menu *menu,
+				wimp_pointer *pointer)
 {
 	if (menu != recent_search_menu || i != ICON_SEARCH_MENU)
 		return false;
@@ -158,34 +166,34 @@ bool ro_gui_search_click(wimp_pointer *pointer)
 {
 	search_flags_t flags;
 	switch (pointer->i) {
-		case ICON_SEARCH_FIND_PREV:
-			search_data.search_insert = true;
-			flags = ~SEARCH_FLAG_FORWARDS &
-					ro_gui_search_update_flags();
-			browser_window_search(search_data.search_window, NULL,
-					flags,
-					ro_gui_get_icon_string(dialog_search,
-							ICON_SEARCH_TEXT));
-			return true;
-		case ICON_SEARCH_CASE_SENSITIVE:
-			flags = SEARCH_FLAG_FORWARDS |
-					ro_gui_search_update_flags();
-			browser_window_search_clear(
-					search_data.search_window);
-			browser_window_search(search_data.search_window, NULL,
-					flags,
-					ro_gui_get_icon_string(dialog_search,
-							ICON_SEARCH_TEXT));
-			return true;
-		case ICON_SEARCH_SHOW_ALL:
-			flags = ro_gui_get_icon_selected_state(
-					pointer->w, pointer->i) ?
-					SEARCH_FLAG_SHOWALL : SEARCH_FLAG_NONE;
-			browser_window_search(search_data.search_window, NULL,
-					flags,
-					ro_gui_get_icon_string(dialog_search,
-							ICON_SEARCH_TEXT));
-			return true;
+	case ICON_SEARCH_FIND_PREV:
+		search_data.search_insert = true;
+		flags = ~SEARCH_FLAG_FORWARDS & ro_gui_search_update_flags();
+		browser_window_search(search_data.search_window,
+				      NULL,
+				      flags,
+				      ro_gui_get_icon_string(dialog_search,
+							     ICON_SEARCH_TEXT));
+		return true;
+	case ICON_SEARCH_CASE_SENSITIVE:
+		flags = SEARCH_FLAG_FORWARDS | ro_gui_search_update_flags();
+		browser_window_search_clear(search_data.search_window);
+		browser_window_search(search_data.search_window,
+				      NULL,
+				      flags,
+				      ro_gui_get_icon_string(dialog_search,
+							     ICON_SEARCH_TEXT));
+		return true;
+	case ICON_SEARCH_SHOW_ALL:
+		flags = ro_gui_get_icon_selected_state(pointer->w, pointer->i)
+				? SEARCH_FLAG_SHOWALL
+				: SEARCH_FLAG_NONE;
+		browser_window_search(search_data.search_window,
+				      NULL,
+				      flags,
+				      ro_gui_get_icon_string(dialog_search,
+							     ICON_SEARCH_TEXT));
+		return true;
 	}
 	return false;
 }
@@ -218,7 +226,7 @@ void ro_gui_search_add_recent(const char *search, void *p)
 	}
 
 	if ((search_data.recent_searches[0] != NULL) &&
-			(!strcmp(search_data.recent_searches[0], search)))
+	    (!strcmp(search_data.recent_searches[0], search)))
 		return;
 
 	tmp = strdup(search);
@@ -228,7 +236,8 @@ void ro_gui_search_add_recent(const char *search, void *p)
 	}
 	free(search_data.recent_searches[RECENT_SEARCHES - 1]);
 	for (i = RECENT_SEARCHES - 1; i > 0; i--)
-		search_data.recent_searches[i] = search_data.recent_searches[i - 1];
+		search_data.recent_searches[i] =
+			search_data.recent_searches[i - 1];
 	search_data.recent_searches[0] = tmp;
 	search_data.search_insert = false;
 
@@ -251,12 +260,12 @@ bool ro_gui_search_prepare_menu(void)
 	for (i = 0; i < suggestions; i++) {
 		recent_search_menu->entries[i].menu_flags &= ~wimp_MENU_LAST;
 		recent_search_menu->entries[i].data.indirected_text.text =
-				search_data.recent_searches[i];
+			search_data.recent_searches[i];
 		recent_search_menu->entries[i].data.indirected_text.size =
-				strlen(search_data.recent_searches[i]) + 1;
+			strlen(search_data.recent_searches[i]) + 1;
 	}
 	recent_search_menu->entries[suggestions - 1].menu_flags |=
-			wimp_MENU_LAST;
+		wimp_MENU_LAST;
 
 	return true;
 }
@@ -277,7 +286,7 @@ static bool ro_gui_search_bw_searchable(struct browser_window *bw)
 	/* only handle html/textplain contents */
 	/** \todo Should have content_is_searchable() api */
 	if ((!h) || (content_get_type(h) != CONTENT_HTML &&
-			content_get_type(h) != CONTENT_TEXTPLAIN))
+		     content_get_type(h) != CONTENT_TEXTPLAIN))
 		return false;
 
 	return true;
@@ -304,9 +313,11 @@ void ro_gui_search_prepare(struct browser_window *bw)
 
 	ro_gui_set_icon_string(dialog_search, ICON_SEARCH_TEXT, "", true);
 	ro_gui_set_icon_selected_state(dialog_search,
-				ICON_SEARCH_CASE_SENSITIVE, false);
+				       ICON_SEARCH_CASE_SENSITIVE,
+				       false);
 	ro_gui_set_icon_selected_state(dialog_search,
-				ICON_SEARCH_SHOW_ALL, false);
+				       ICON_SEARCH_SHOW_ALL,
+				       false);
 
 	ro_gui_search_set_status(true, NULL);
 
@@ -326,72 +337,71 @@ bool ro_gui_search_keypress(wimp_key *key)
 	search_flags_t flags;
 
 	switch (key->c) {
-		case 1: {
-			flags = ro_gui_search_update_flags()
-					^ SEARCH_FLAG_SHOWALL;
-			browser_window_search(search_data.search_window, NULL,
-					flags,
-					ro_gui_get_icon_string(dialog_search,
-							ICON_SEARCH_TEXT));
+	case 1: {
+		flags = ro_gui_search_update_flags() ^ SEARCH_FLAG_SHOWALL;
+		browser_window_search(search_data.search_window,
+				      NULL,
+				      flags,
+				      ro_gui_get_icon_string(dialog_search,
+							     ICON_SEARCH_TEXT));
+	} break;
+	case 9: /* ctrl i */
+		state = ro_gui_get_icon_selected_state(
+			dialog_search, ICON_SEARCH_CASE_SENSITIVE);
+		ro_gui_set_icon_selected_state(dialog_search,
+					       ICON_SEARCH_CASE_SENSITIVE,
+					       !state);
+		flags = SEARCH_FLAG_FORWARDS | ro_gui_search_update_flags();
+		browser_window_search(search_data.search_window,
+				      NULL,
+				      flags,
+				      ro_gui_get_icon_string(dialog_search,
+							     ICON_SEARCH_TEXT));
+		return true;
+	case IS_WIMP_KEY | wimp_KEY_UP:
+		search_data.search_insert = true;
+		flags = ~SEARCH_FLAG_FORWARDS & ro_gui_search_update_flags();
+		browser_window_search(search_data.search_window,
+				      NULL,
+				      flags,
+				      ro_gui_get_icon_string(dialog_search,
+							     ICON_SEARCH_TEXT));
+		return true;
+	case IS_WIMP_KEY | wimp_KEY_DOWN:
+		search_data.search_insert = true;
+		flags = SEARCH_FLAG_FORWARDS | ro_gui_search_update_flags();
+		browser_window_search(search_data.search_window,
+				      NULL,
+				      flags,
+				      ro_gui_get_icon_string(dialog_search,
+							     ICON_SEARCH_TEXT));
+		return true;
+
+	default:
+		if (key->c == 21) {
+			/* ctrl+u means the user's starting
+			 * a new search */
+			browser_window_search_clear(search_data.search_window);
+			search_data.search_insert = true;
+		}
+		if (key->c == 8 || /* backspace */
+		    key->c == 21 || /* ctrl u */
+		    (key->c >= 0x20 && key->c <= 0x7f)) {
+			flags = SEARCH_FLAG_FORWARDS |
+				ro_gui_search_update_flags();
+			ro_gui_search_set_forward_state(
+				true, search_data.search_window);
+			ro_gui_search_set_back_state(true,
+						     search_data.search_window);
+			browser_window_search(
+				search_data.search_window,
+				NULL,
+				flags,
+				ro_gui_get_icon_string(dialog_search,
+						       ICON_SEARCH_TEXT));
+			return true;
 		}
 		break;
-		case 9: /* ctrl i */
-			state = ro_gui_get_icon_selected_state(dialog_search,
-					ICON_SEARCH_CASE_SENSITIVE);
-			ro_gui_set_icon_selected_state(dialog_search,
-					ICON_SEARCH_CASE_SENSITIVE, !state);
-			flags = SEARCH_FLAG_FORWARDS |
-					ro_gui_search_update_flags();
-			browser_window_search(search_data.search_window, NULL,
-					flags,
-					ro_gui_get_icon_string(dialog_search,
-							ICON_SEARCH_TEXT));
-			return true;
-		case IS_WIMP_KEY | wimp_KEY_UP:
-			search_data.search_insert = true;
-			flags = ~SEARCH_FLAG_FORWARDS &
-					ro_gui_search_update_flags();
-			browser_window_search(search_data.search_window, NULL,
-					flags,
-					ro_gui_get_icon_string(dialog_search,
-							ICON_SEARCH_TEXT));
-			return true;
-		case IS_WIMP_KEY | wimp_KEY_DOWN:
-			search_data.search_insert = true;
-			flags = SEARCH_FLAG_FORWARDS |
-					ro_gui_search_update_flags();
-			browser_window_search(search_data.search_window, NULL,
-					flags,
-					ro_gui_get_icon_string(dialog_search,
-							ICON_SEARCH_TEXT));
-			return true;
-
-		default:
-			if (key->c == 21) {
-				/* ctrl+u means the user's starting
-				 * a new search */
-				browser_window_search_clear(
-						search_data.search_window);
-				search_data.search_insert = true;
-			}
-			if (key->c == 8  || /* backspace */
-			    key->c == 21 || /* ctrl u */
-			    (key->c >= 0x20 && key->c <= 0x7f)) {
-				flags = SEARCH_FLAG_FORWARDS |
-						ro_gui_search_update_flags();
-				ro_gui_search_set_forward_state(true,
-						search_data.search_window);
-				ro_gui_search_set_back_state(true,
-						search_data.search_window);
-				browser_window_search(search_data.search_window,
-						NULL,
-						flags,
-						ro_gui_get_icon_string(
-							dialog_search,
-							ICON_SEARCH_TEXT));
-				return true;
-			}
-			break;
 	}
 
 	return false;
@@ -407,22 +417,24 @@ void ro_gui_search_end(wimp_w w)
 }
 
 /**
-* Change the displayed search status.
-* \param found  search pattern matched in text
-* \param p the pointer sent to search_verify_new() / search_create_context()
-*/
+ * Change the displayed search status.
+ * \param found  search pattern matched in text
+ * \param p the pointer sent to search_verify_new() / search_create_context()
+ */
 
 void ro_gui_search_set_status(bool found, void *p)
 {
-	ro_gui_set_icon_string(dialog_search, ICON_SEARCH_STATUS, found ? "" :
-			messages_get("NotFound"), true);
+	ro_gui_set_icon_string(dialog_search,
+			       ICON_SEARCH_STATUS,
+			       found ? "" : messages_get("NotFound"),
+			       true);
 }
 
 /**
-* display hourglass while searching
-* \param active start/stop indicator
-* \param p the pointer sent to search_verify_new() / search_create_context()
-*/
+ * display hourglass while searching
+ * \param active start/stop indicator
+ * \param p the pointer sent to search_verify_new() / search_create_context()
+ */
 
 void ro_gui_search_set_hourglass(bool active, void *p)
 {
@@ -434,40 +446,45 @@ void ro_gui_search_set_hourglass(bool active, void *p)
 }
 
 /**
-* activate search forwards button in gui
-* \param active activate/inactivate
-* \param p the pointer sent to search_verify_new() / search_create_context()
-*/
+ * activate search forwards button in gui
+ * \param active activate/inactivate
+ * \param p the pointer sent to search_verify_new() / search_create_context()
+ */
 
 void ro_gui_search_set_forward_state(bool active, void *p)
 {
-	ro_gui_set_icon_shaded_state(dialog_search, ICON_SEARCH_FIND_NEXT,
-			!active);
+	ro_gui_set_icon_shaded_state(dialog_search,
+				     ICON_SEARCH_FIND_NEXT,
+				     !active);
 }
 
 /**
-* activate search forwards button in gui
-* \param active activate/inactivate
-* \param p the pointer sent to search_verify_new() / search_create_context()
-*/
+ * activate search forwards button in gui
+ * \param active activate/inactivate
+ * \param p the pointer sent to search_verify_new() / search_create_context()
+ */
 
 void ro_gui_search_set_back_state(bool active, void *p)
 {
-	ro_gui_set_icon_shaded_state(dialog_search, ICON_SEARCH_FIND_PREV,
-			!active);
+	ro_gui_set_icon_shaded_state(dialog_search,
+				     ICON_SEARCH_FIND_PREV,
+				     !active);
 }
 
 /**
-* retrieve state of 'case sensitive', 'show all' checks in gui
-*/
+ * retrieve state of 'case sensitive', 'show all' checks in gui
+ */
 search_flags_t ro_gui_search_update_flags(void)
 {
 	search_flags_t flags;
-	flags = 0 | (ro_gui_get_icon_selected_state(dialog_search,
-			ICON_SEARCH_CASE_SENSITIVE) ?
-			SEARCH_FLAG_CASE_SENSITIVE : 0) |
-			(ro_gui_get_icon_selected_state(dialog_search,
-			ICON_SEARCH_SHOW_ALL) ? SEARCH_FLAG_SHOWALL : 0);
+	flags = 0 |
+		(ro_gui_get_icon_selected_state(dialog_search,
+						ICON_SEARCH_CASE_SENSITIVE)
+			 ? SEARCH_FLAG_CASE_SENSITIVE
+			 : 0) |
+		(ro_gui_get_icon_selected_state(dialog_search,
+						ICON_SEARCH_SHOW_ALL)
+			 ? SEARCH_FLAG_SHOWALL
+			 : 0);
 	return flags;
 }
-

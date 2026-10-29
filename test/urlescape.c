@@ -40,18 +40,18 @@
 
 #include "utils/url.h"
 
-#define NELEMS(x)  (sizeof(x) / sizeof((x)[0]))
+#define NELEMS(x) (sizeof(x) / sizeof((x)[0]))
 #define SLEN(x) (sizeof((x)) - 1)
 
 struct test_pairs {
-	const char* test;
+	const char *test;
 	const size_t test_len;
-	const char* res;
+	const char *res;
 	const size_t res_len;
 };
 
 const char all_chars[] =
-	    "\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f"
+	"\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f"
 	"\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f"
 	"\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b\x2c\x2d\x2e\x2f"
 	"\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3a\x3b\x3c\x3d\x3e\x3f"
@@ -69,7 +69,7 @@ const char all_chars[] =
 	"\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff";
 
 const char most_escaped_upper[] =
-	   "%01%02%03%04%05%06%07%08%09%0A%0B%0C%0D%0E%0F"
+	"%01%02%03%04%05%06%07%08%09%0A%0B%0C%0D%0E%0F"
 	"%10%11%12%13%14%15%16%17%18%19%1A%1B%1C%1D%1E%1F"
 	"%20%21%22%23%24%25%26%27%28%29%2A%2B%2C-.%2F"
 	"0123456789%3A%3B%3C%3D%3E%3F"
@@ -87,7 +87,7 @@ const char most_escaped_upper[] =
 	"%F0%F1%F2%F3%F4%F5%F6%F7%F8%F9%FA%FB%FC%FD%FE%FF";
 
 const char all_escaped_lower[] =
-	   "%01%02%03%04%05%06%07%08%09%0A%0B%0C%0D%0E%0F"
+	"%01%02%03%04%05%06%07%08%09%0A%0B%0C%0D%0E%0F"
 	"%10%11%12%13%14%15%16%17%18%19%1a%1b%1c%1d%1e%1f"
 	"%20%21%22%23%24%25%26%27%28%29%2a%2b%2c%2d%2e%2f"
 	"%30%31%32%33%34%35%36%37%38%39%3a%3b%3c%3d%3e%3f"
@@ -108,10 +108,10 @@ const char all_escaped_lower[] =
 const char simple_string[] = "A.string.that.does.not.need.escaping";
 
 static const struct test_pairs url_escape_test_vec[] = {
-	{ "", 0, "" , 0 },
-	{ &simple_string[0], SLEN(simple_string), &simple_string[0], 0 },
-	{ " ", 1, "%20" , 0 },
-	{ &all_chars[0], SLEN(all_chars), &most_escaped_upper[0], 0 },
+	{"", 0, "", 0},
+	{&simple_string[0], SLEN(simple_string), &simple_string[0], 0},
+	{" ", 1, "%20", 0},
+	{&all_chars[0], SLEN(all_chars), &most_escaped_upper[0], 0},
 };
 
 
@@ -156,25 +156,35 @@ static TCase *url_escape_case_create(void)
 
 	tcase_add_test(tc, url_escape_api_nullparam_test);
 
-	tcase_add_loop_test(tc, url_escape_test,
-			    0, NELEMS(url_escape_test_vec));
+	tcase_add_loop_test(
+		tc, url_escape_test, 0, NELEMS(url_escape_test_vec));
 
 	return tc;
 }
 
 static const struct test_pairs url_unescape_test_vec[] = {
-	{ "", 0, "" , 0 }, /* empty string */
-	{ "%20", 3, " ", 1 }, /* single character properly escaped */
-	{ "%0G", 3, "%0G", 3 }, /* single character with bad hex value */
-	{ "%20%0G%20", 9, " %0G ", 5 }, /* three src chars with bad hex value */
-	{ "%20%00%20", 9, " ", 3 }, /* three src chars with null hex value */
-	{ "%@@%[[%__%||%//%::", 18, "%@@%[[%__%||%//%::", 18 }, /* four garbage encoded chars */
-	{ &simple_string[0], SLEN(simple_string),
-	  &simple_string[0], SLEN(simple_string) }, /* normal string with no percent encoded characters */
-	{ &most_escaped_upper[0], SLEN(most_escaped_upper),
-	  &all_chars[0], SLEN(all_chars) }, /* all characters that must be percent encoded */
-	{ &all_escaped_lower[0], SLEN(all_escaped_lower),
-	  &all_chars[0], SLEN(all_chars) }, /* all characters percent encoded */
+	{"", 0, "", 0}, /* empty string */
+	{"%20", 3, " ", 1}, /* single character properly escaped */
+	{"%0G", 3, "%0G", 3}, /* single character with bad hex value */
+	{"%20%0G%20", 9, " %0G ", 5}, /* three src chars with bad hex value */
+	{"%20%00%20", 9, " ", 3}, /* three src chars with null hex value */
+	{"%@@%[[%__%||%//%::",
+	 18,
+	 "%@@%[[%__%||%//%::",
+	 18}, /* four garbage encoded chars */
+	{&simple_string[0],
+	 SLEN(simple_string),
+	 &simple_string[0],
+	 SLEN(simple_string)}, /* normal string with no percent encoded
+				  characters */
+	{&most_escaped_upper[0],
+	 SLEN(most_escaped_upper),
+	 &all_chars[0],
+	 SLEN(all_chars)}, /* all characters that must be percent encoded */
+	{&all_escaped_lower[0],
+	 SLEN(all_escaped_lower),
+	 &all_chars[0],
+	 SLEN(all_chars)}, /* all characters percent encoded */
 };
 
 /**
@@ -191,7 +201,7 @@ START_TEST(url_unescape_simple_test)
 
 	const struct test_pairs *tst = &url_unescape_test_vec[_i];
 
-	err = url_unescape(tst->test, 0 , &unesc_length, &unesc_str);
+	err = url_unescape(tst->test, 0, &unesc_length, &unesc_str);
 	ck_assert(err == NSERROR_OK);
 
 	/* ensure length */
@@ -219,7 +229,7 @@ START_TEST(url_unescape_length_test)
 
 	const struct test_pairs *tst = &url_unescape_test_vec[_i];
 
-	err = url_unescape(tst->test, tst->test_len , &unesc_length, &unesc_str);
+	err = url_unescape(tst->test, tst->test_len, &unesc_length, &unesc_str);
 
 	ck_assert(err == NSERROR_OK);
 
@@ -280,11 +290,11 @@ static TCase *url_unescape_case_create(void)
 
 	tcase_add_test(tc, url_unescape_api_retlen_test);
 
-	tcase_add_loop_test(tc, url_unescape_simple_test,
-			    0, NELEMS(url_unescape_test_vec));
+	tcase_add_loop_test(
+		tc, url_unescape_simple_test, 0, NELEMS(url_unescape_test_vec));
 
-	tcase_add_loop_test(tc, url_unescape_length_test,
-			    0, NELEMS(url_unescape_test_vec));
+	tcase_add_loop_test(
+		tc, url_unescape_length_test, 0, NELEMS(url_unescape_test_vec));
 
 	return tc;
 }
@@ -302,14 +312,13 @@ static Suite *urlescape_suite_create(void)
 }
 
 
-
 int main(int argc, char **argv)
 {
 	int number_failed;
 	SRunner *sr;
 
 	sr = srunner_create(urlescape_suite_create());
-	//srunner_add_suite(sr, bar_suite_create());
+	// srunner_add_suite(sr, bar_suite_create());
 
 	srunner_run_all(sr, CK_ENV);
 

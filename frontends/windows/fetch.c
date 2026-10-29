@@ -79,17 +79,17 @@ static nsurl *nsw32_get_resource_url(const char *path)
 	char buf[PATH_MAX];
 	nsurl *url = NULL;
 
-	netsurf_path_to_nsurl(filepath_sfind(G_resource_pathv, buf, path), &url);
+	netsurf_path_to_nsurl(filepath_sfind(G_resource_pathv, buf, path),
+			      &url);
 
 	return url;
 }
 
 
 /* exported interface documented in windows/fetch.h */
-nserror
-nsw32_get_resource_data(const char *path,
-			const uint8_t **data_out,
-			size_t *data_len_out)
+nserror nsw32_get_resource_data(const char *path,
+				const uint8_t **data_out,
+				size_t *data_len_out)
 {
 	HRSRC reshandle;
 	HGLOBAL datahandle;

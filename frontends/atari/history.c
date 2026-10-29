@@ -35,11 +35,10 @@ struct atari_global_history_s atari_global_history;
 
 /* Setup Atari Treeview Callbacks: */
 
-static nserror
-atari_global_history_init_phase2(struct core_window *cw)
+static nserror atari_global_history_init_phase2(struct core_window *cw)
 {
 	NSLOG(netsurf, INFO, "cw %p", cw);
-	return(global_history_init(cw));
+	return (global_history_init(cw));
 }
 
 static void atari_global_history_finish(struct core_window *cw)
@@ -48,8 +47,10 @@ static void atari_global_history_finish(struct core_window *cw)
 	global_history_fini();
 }
 
-static void atari_global_history_draw(struct core_window *cw, int x,
-				      int y, struct rect *clip,
+static void atari_global_history_draw(struct core_window *cw,
+				      int x,
+				      int y,
+				      struct rect *clip,
 				      const struct redraw_context *ctx)
 {
 	global_history_redraw(x, y, clip, ctx);
@@ -57,14 +58,14 @@ static void atari_global_history_draw(struct core_window *cw, int x,
 
 static void atari_global_history_keypress(struct core_window *cw, uint32_t ucs4)
 {
-	NSLOG(netsurf, INFO, "ucs4: %"PRIu32, ucs4);
+	NSLOG(netsurf, INFO, "ucs4: %" PRIu32, ucs4);
 	global_history_keypress(ucs4);
 }
 
-static void
-atari_global_history_mouse_action(struct core_window *cw,
-				  browser_mouse_state mouse,
-				  int x, int y)
+static void atari_global_history_mouse_action(struct core_window *cw,
+					      browser_mouse_state mouse,
+					      int x,
+					      int y)
 {
 	NSLOG(netsurf, INFO, "x:  %d, y: %d\n", x, y);
 
@@ -90,50 +91,59 @@ static short handle_event(GUIWIN *win, EVMULT_OUT *ev_out, short msg[8])
 			retval = 1;
 			break;
 
-		default: break;
+		default:
+			break;
 		}
 	}
 
-	return(retval);
+	return (retval);
 }
 
-static struct atari_treeview_callbacks atari_global_history_treeview_callbacks = {
-	.init_phase2 = atari_global_history_init_phase2,
-	.finish = atari_global_history_finish,
-	.draw = atari_global_history_draw,
-	.keypress = atari_global_history_keypress,
-	.mouse_action = atari_global_history_mouse_action,
-	.gemtk_user_func = handle_event
-};
+static struct atari_treeview_callbacks atari_global_history_treeview_callbacks =
+	{.init_phase2 = atari_global_history_init_phase2,
+	 .finish = atari_global_history_finish,
+	 .draw = atari_global_history_draw,
+	 .keypress = atari_global_history_keypress,
+	 .mouse_action = atari_global_history_mouse_action,
+	 .gemtk_user_func = handle_event};
 
 void atari_global_history_init(void)
 {
 	if (atari_global_history.init == false) {
-		if( atari_global_history.window == NULL ) {
+		if (atari_global_history.window == NULL) {
 			int flags = ATARI_TREEVIEW_WIDGETS;
 			short handle = -1;
-			OBJECT * tree = gemtk_obj_get_tree(TOOLBAR_HISTORY);
-			assert( tree );
+			OBJECT *tree = gemtk_obj_get_tree(TOOLBAR_HISTORY);
+			assert(tree);
 
-			handle = wind_create(flags, 0, 0, desk_area.g_w, desk_area.g_h);
-			atari_global_history.window = gemtk_wm_add(handle, GEMTK_WM_FLAG_DEFAULTS, NULL);
-			if( atari_global_history.window == NULL ) {
-				gemtk_msg_box_show(GEMTK_MSG_BOX_ALERT,
-						   "Failed to allocate History");
+			handle = wind_create(
+				flags, 0, 0, desk_area.g_w, desk_area.g_h);
+			atari_global_history.window = gemtk_wm_add(
+				handle, GEMTK_WM_FLAG_DEFAULTS, NULL);
+			if (atari_global_history.window == NULL) {
+				gemtk_msg_box_show(
+					GEMTK_MSG_BOX_ALERT,
+					"Failed to allocate History");
 				return;
 			}
-			wind_set_str(handle, WF_NAME, (char*)messages_get("History"));
-			gemtk_wm_set_toolbar(atari_global_history.window, tree, 0, 0);
+			wind_set_str(handle,
+				     WF_NAME,
+				     (char *)messages_get("History"));
+			gemtk_wm_set_toolbar(
+				atari_global_history.window, tree, 0, 0);
 			gemtk_wm_unlink(atari_global_history.window);
 
 			atari_global_history.tv = atari_treeview_create(
 				atari_global_history.window,
 				&atari_global_history_treeview_callbacks,
-				NULL, flags);
+				NULL,
+				flags);
 
 			if (atari_global_history.tv == NULL) {
-				/* handle it properly, clean up previous allocs */
-				NSLOG(netsurf, INFO,
+				/* handle it properly, clean up previous allocs
+				 */
+				NSLOG(netsurf,
+				      INFO,
 				      "Failed to allocate treeview");
 				return;
 			}
@@ -160,7 +170,12 @@ void atari_global_history_open(void)
 
 		atari_treeview_open(atari_global_history.tv, &pos);
 	} else {
-		wind_set(gemtk_wm_get_handle(atari_global_history.window), WF_TOP, 1, 0, 0, 0);
+		wind_set(gemtk_wm_get_handle(atari_global_history.window),
+			 WF_TOP,
+			 1,
+			 0,
+			 0,
+			 0);
 	}
 }
 
@@ -168,11 +183,11 @@ void atari_global_history_open(void)
 void atari_global_history_destroy(void)
 {
 
-	if ( atari_global_history.init == false) {
+	if (atari_global_history.init == false) {
 		return;
 	}
 
-	if ( atari_global_history.window != NULL ) {
+	if (atari_global_history.window != NULL) {
 		if (atari_treeview_is_open(atari_global_history.tv))
 			atari_global_history_close();
 		wind_delete(gemtk_wm_get_handle(atari_global_history.window));

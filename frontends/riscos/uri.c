@@ -44,7 +44,7 @@ void ro_uri_message_received(wimp_message *msg)
 {
 	uri_full_message_process *uri_message = (uri_full_message_process *)msg;
 	uri_h uri_handle;
-	char* uri_requested;
+	char *uri_requested;
 	int uri_length;
 	nsurl *url;
 	nserror error;
@@ -65,8 +65,9 @@ void ro_uri_message_received(wimp_message *msg)
 	uri_message->your_ref = uri_message->my_ref;
 	uri_message->action = message_URI_PROCESS_ACK;
 
-	xwimp_send_message(wimp_USER_MESSAGE, (wimp_message*)uri_message,
-		uri_message->sender);
+	xwimp_send_message(wimp_USER_MESSAGE,
+			   (wimp_message *)uri_message,
+			   uri_message->sender);
 
 	xuri_request_uri(0, 0, 0, uri_handle, &uri_length);
 	uri_requested = calloc((unsigned int)uri_length, sizeof(char));
@@ -78,11 +79,8 @@ void ro_uri_message_received(wimp_message *msg)
 	error = nsurl_create(uri_requested, &url);
 	free(uri_requested);
 	if (error == NSERROR_OK) {
-		error = browser_window_create(BW_CREATE_HISTORY,
-					      url,
-					      NULL,
-					      NULL,
-					      NULL);
+		error = browser_window_create(
+			BW_CREATE_HISTORY, url, NULL, NULL, NULL);
 		nsurl_unref(url);
 	}
 	if (error != NSERROR_OK) {
@@ -97,8 +95,12 @@ bool ro_uri_launch(const char *uri)
 	uri_dispatch_flags returned;
 	os_error *e;
 
-	e = xuri_dispatch(uri_DISPATCH_INFORM_CALLER, uri, task_handle,
-			&returned, &handle_task, &uri_handle);
+	e = xuri_dispatch(uri_DISPATCH_INFORM_CALLER,
+			  uri,
+			  task_handle,
+			  &returned,
+			  &handle_task,
+			  &uri_handle);
 
 	if (e || returned & 1) {
 		return false;
@@ -120,7 +122,10 @@ void ro_uri_bounce(wimp_message *msg)
 	/* Get required buffer size */
 	e = xuri_request_uri(0, NULL, 0, message->handle, &size);
 	if (e) {
-		NSLOG(netsurf, INFO, "xuri_request_uri: %d: %s", e->errnum,
+		NSLOG(netsurf,
+		      INFO,
+		      "xuri_request_uri: %d: %s",
+		      e->errnum,
 		      e->errmess);
 		return;
 	}
@@ -132,7 +137,10 @@ void ro_uri_bounce(wimp_message *msg)
 	/* Get URI */
 	e = xuri_request_uri(0, uri_buf, size, message->handle, 0);
 	if (e) {
-		NSLOG(netsurf, INFO, "xuri_request_uri: %d: %s", e->errnum,
+		NSLOG(netsurf,
+		      INFO,
+		      "xuri_request_uri: %d: %s",
+		      e->errnum,
 		      e->errmess);
 		free(uri_buf);
 		return;

@@ -25,9 +25,7 @@
 struct s_toolbar;
 struct nsurl;
 
-enum toolbar_textarea {
-	URL_INPUT_TEXT_AREA = 1
-};
+enum toolbar_textarea { URL_INPUT_TEXT_AREA = 1 };
 
 struct s_url_widget {
 	struct textarea *textarea;
@@ -48,7 +46,7 @@ struct s_toolbar {
 	GRECT area;
 
 	/* size & location of buttons: */
-	struct s_tb_button * buttons;
+	struct s_tb_button *buttons;
 	int btcnt;
 	int style;
 	bool attached;
@@ -60,19 +58,20 @@ struct s_toolbar {
 
 void toolbar_init(void);
 struct s_toolbar *toolbar_create(struct s_gui_win_root *owner);
-void toolbar_destroy(struct s_toolbar * tb);
-void toolbar_exit( void );
+void toolbar_destroy(struct s_toolbar *tb);
+void toolbar_exit(void);
 bool toolbar_text_input(struct s_toolbar *tb, char *text);
 bool toolbar_key_input(struct s_toolbar *tb, short nkc);
 void toolbar_mouse_input(struct s_toolbar *tb, short obj, short mbut);
-void toolbar_update_buttons(struct s_toolbar *tb, struct browser_window *bw,
+void toolbar_update_buttons(struct s_toolbar *tb,
+			    struct browser_window *bw,
 			    short idx);
 void toolbar_get_grect(struct s_toolbar *tb, short which, GRECT *g);
 OBJECT *toolbar_get_form(struct s_toolbar *tb);
-struct textarea *toolbar_get_textarea(struct s_toolbar *tb,
-				      enum toolbar_textarea which);
+struct textarea *
+toolbar_get_textarea(struct s_toolbar *tb, enum toolbar_textarea which);
 char *toolbar_get_url(struct s_toolbar *tb);
-struct nsurl * toolbar_get_nsurl(struct s_toolbar * tb);
+struct nsurl *toolbar_get_nsurl(struct s_toolbar *tb);
 void toolbar_set_throbber_state(struct s_toolbar *tb, bool active);
 void toolbar_set_attached(struct s_toolbar *tb, bool attached);
 void toolbar_set_visible(struct s_toolbar *tb, short area, bool visible);

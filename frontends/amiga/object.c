@@ -43,8 +43,10 @@ bool ami_object_init(void)
 {
 	pool_nsobj = ami_memory_itempool_create(sizeof(struct nsObject));
 
-	if(pool_nsobj == NULL) return false;
-		else return true;
+	if (pool_nsobj == NULL)
+		return false;
+	else
+		return true;
 }
 
 void ami_object_fini(void)
@@ -55,15 +57,18 @@ void ami_object_fini(void)
 /* Slightly abstract MinList initialisation */
 static void ami_NewMinList(struct MinList *list)
 {
-	if(list == NULL) return;
+	if (list == NULL)
+		return;
 	NewnsList((struct nsList *)list);
 }
 
 /* Allocate and initialise a new MinList */
 struct MinList *ami_AllocMinList(void)
 {
-	struct MinList *objlist = (struct MinList *)malloc(sizeof(struct nsList));
-	if(objlist == NULL) return NULL;
+	struct MinList *objlist = (struct MinList *)malloc(
+		sizeof(struct nsList));
+	if (objlist == NULL)
+		return NULL;
 	ami_NewMinList(objlist);
 	return objlist;
 }
@@ -71,22 +76,24 @@ struct MinList *ami_AllocMinList(void)
 struct MinList *NewObjList(void)
 {
 	struct MinList *objlist = ami_AllocMinList();
-	return(objlist);
+	return (objlist);
 }
 
 struct nsObject *AddObject(struct MinList *objlist, ULONG otype)
 {
 	struct nsObject *dtzo;
 
-	dtzo = (struct nsObject *)ami_memory_itempool_alloc(pool_nsobj, sizeof(struct nsObject));
-	if(dtzo == NULL) return NULL;
+	dtzo = (struct nsObject *)ami_memory_itempool_alloc(
+		pool_nsobj, sizeof(struct nsObject));
+	if (dtzo == NULL)
+		return NULL;
 
 	memset(dtzo, 0, sizeof(struct nsObject));
-	AddTail((struct List *)objlist,(struct Node *)dtzo);
+	AddTail((struct List *)objlist, (struct Node *)dtzo);
 
 	dtzo->Type = otype;
 
-	return(dtzo);
+	return (dtzo);
 }
 
 void ObjectCallback(struct nsObject *dtzo, void (*callback)(void *nso))
@@ -97,9 +104,12 @@ void ObjectCallback(struct nsObject *dtzo, void (*callback)(void *nso))
 static void DelObjectInternal(struct nsObject *dtzo, BOOL free_obj)
 {
 	Remove((struct Node *)dtzo);
-	if(dtzo->callback != NULL) dtzo->callback(dtzo->objstruct);
-	if(dtzo->objstruct && free_obj) free(dtzo->objstruct);
-	if(dtzo->dtz_Node.ln_Name) free(dtzo->dtz_Node.ln_Name);
+	if (dtzo->callback != NULL)
+		dtzo->callback(dtzo->objstruct);
+	if (dtzo->objstruct && free_obj)
+		free(dtzo->objstruct);
+	if (dtzo->dtz_Node.ln_Name)
+		free(dtzo->dtz_Node.ln_Name);
 	ami_memory_itempool_free(pool_nsobj, dtzo, sizeof(struct nsObject));
 	dtzo = NULL;
 }
@@ -119,18 +129,17 @@ void FreeObjList(struct MinList *objlist)
 	struct nsObject *node;
 	struct nsObject *nnode;
 
-	if(IsMinListEmpty((struct MinList *)objlist) == FALSE) {
+	if (IsMinListEmpty((struct MinList *)objlist) == FALSE) {
 		node = (struct nsObject *)GetHead((struct List *)objlist);
 
 		do {
 			nnode = (struct nsObject *)GetSucc((struct Node *)node);
-			if(node->Type == AMINS_RECT) {
+			if (node->Type == AMINS_RECT) {
 				DelObjectNoFree(node);
 			} else {
 				DelObject(node);
 			}
-		} while((node = nnode));
+		} while ((node = nnode));
 	}
 	free(objlist);
 }
-

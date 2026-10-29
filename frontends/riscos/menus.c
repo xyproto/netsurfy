@@ -58,38 +58,44 @@
 #include "riscos/ucstables.h"
 
 struct menu_definition_entry {
-	menu_action action;			/**< menu action */
-	wimp_menu_entry *menu_entry;		/**< corresponding menu entry */
-	const char *entry_key;			/**< Messages key for entry text */
-	struct menu_definition_entry *next;	/**< next menu entry */
+	menu_action action; /**< menu action */
+	wimp_menu_entry *menu_entry; /**< corresponding menu entry */
+	const char *entry_key; /**< Messages key for entry text */
+	struct menu_definition_entry *next; /**< next menu entry */
 };
 
 struct menu_definition {
-	wimp_menu *menu;			/**< corresponding menu */
-	const char *title_key;			/**< Messages key for title text */
-	int current_encoding;			/**< Identifier for current text encoding of menu text (as per OS_Byte,71,127) */
-	struct menu_definition_entry *entries;	/**< menu entries */
-	struct menu_definition *next;		/**< next menu */
+	wimp_menu *menu; /**< corresponding menu */
+	const char *title_key; /**< Messages key for title text */
+	int current_encoding; /**< Identifier for current text encoding of menu
+				 text (as per OS_Byte,71,127) */
+	struct menu_definition_entry *entries; /**< menu entries */
+	struct menu_definition *next; /**< next menu */
 };
 
 static void ro_gui_menu_closed(void);
 static void ro_gui_menu_define_menu_add(struct menu_definition *definition,
-		const struct ns_menu *menu, int depth,
-		wimp_menu_entry *parent_entry,
-		int first, int last, const char *prefix, int prefix_length);
+					const struct ns_menu *menu,
+					int depth,
+					wimp_menu_entry *parent_entry,
+					int first,
+					int last,
+					const char *prefix,
+					int prefix_length);
 static struct menu_definition *ro_gui_menu_find_menu(wimp_menu *menu);
-static struct menu_definition_entry *ro_gui_menu_find_entry(wimp_menu *menu,
-		menu_action action);
-static menu_action ro_gui_menu_find_action(wimp_menu *menu,
-		wimp_menu_entry *menu_entry);
+static struct menu_definition_entry *
+ro_gui_menu_find_entry(wimp_menu *menu, menu_action action);
+static menu_action
+ro_gui_menu_find_action(wimp_menu *menu, wimp_menu_entry *menu_entry);
 static int ro_gui_menu_get_checksum(void);
 static bool ro_gui_menu_translate(struct menu_definition *menu);
 
 
 /* default menu item flags */
-#define DEFAULT_FLAGS (wimp_ICON_TEXT | wimp_ICON_FILLED | \
-		(wimp_COLOUR_BLACK << wimp_ICON_FG_COLOUR_SHIFT) | \
-		(wimp_COLOUR_WHITE << wimp_ICON_BG_COLOUR_SHIFT))
+#define DEFAULT_FLAGS                                                          \
+	(wimp_ICON_TEXT | wimp_ICON_FILLED |                                   \
+	 (wimp_COLOUR_BLACK << wimp_ICON_FG_COLOUR_SHIFT) |                    \
+	 (wimp_COLOUR_WHITE << wimp_ICON_BG_COLOUR_SHIFT))
 
 /** The currently defined menus to perform actions for */
 static struct menu_definition *ro_gui_menu_definitions;
@@ -102,7 +108,8 @@ wimp_w current_menu_window;
 /** Icon that owns the current menu (only valid for popup menus) */
 static wimp_i current_menu_icon;
 /** The available menus */
-wimp_menu *image_quality_menu, *proxy_type_menu, *languages_menu, *search_provider_menu;
+wimp_menu *image_quality_menu, *proxy_type_menu, *languages_menu,
+	*search_provider_menu;
 
 /* the values given in PRM 3-157 for how to check menus/windows are
  * incorrect so we use a hack of checking if the sub-menu has bit 0
@@ -122,50 +129,48 @@ wimp_menu *image_quality_menu, *proxy_type_menu, *languages_menu, *search_provid
 static wimp_menu *ro_gui_menu_init_search_provider(void)
 {
 	static struct ns_menu search_provider_definition = {
-		"SearchProvider", {
-			{ "searchprovider00", NO_ACTION, 0 },
-			{ "searchprovider01", NO_ACTION, 0 },
-			{ "searchprovider02", NO_ACTION, 0 },
-			{ "searchprovider03", NO_ACTION, 0 },
-			{ "searchprovider04", NO_ACTION, 0 },
-			{ "searchprovider05", NO_ACTION, 0 },
-			{ "searchprovider06", NO_ACTION, 0 },
-			{ "searchprovider07", NO_ACTION, 0 },
-			{ "searchprovider08", NO_ACTION, 0 },
-			{ "searchprovider09", NO_ACTION, 0 },
-			{ "searchprovider10", NO_ACTION, 0 },
-			{ "searchprovider11", NO_ACTION, 0 },
-			{ "searchprovider12", NO_ACTION, 0 },
-			{ "searchprovider13", NO_ACTION, 0 },
-			{ "searchprovider14", NO_ACTION, 0 },
-			{ "searchprovider15", NO_ACTION, 0 },
-			{ "searchprovider16", NO_ACTION, 0 },
-			{ "searchprovider17", NO_ACTION, 0 },
-			{ "searchprovider18", NO_ACTION, 0 },
-			{ "searchprovider19", NO_ACTION, 0 },
-			{ "searchprovider20", NO_ACTION, 0 },
-			{ "searchprovider21", NO_ACTION, 0 },
-			{ "searchprovider22", NO_ACTION, 0 },
-			{ "searchprovider23", NO_ACTION, 0 },
-			{ "searchprovider24", NO_ACTION, 0 },
-			{ "searchprovider25", NO_ACTION, 0 },
-			{ "searchprovider26", NO_ACTION, 0 },
-			{ "searchprovider27", NO_ACTION, 0 },
-			{ "searchprovider28", NO_ACTION, 0 },
-			{ "searchprovider29", NO_ACTION, 0 },
-			{ "searchprovider30", NO_ACTION, 0 },
-			{ "searchprovider31", NO_ACTION, 0 },
-			{ "searchprovider32", NO_ACTION, 0 },
-			{ "searchprovider33", NO_ACTION, 0 },
-			{ "searchprovider34", NO_ACTION, 0 },
-			{ "searchprovider35", NO_ACTION, 0 },
-			{ "searchprovider36", NO_ACTION, 0 },
-			{ "searchprovider37", NO_ACTION, 0 },
-			{ "searchprovider38", NO_ACTION, 0 },
-			{ "searchprovider39", NO_ACTION, 0 },
-			{ NULL, 0, 0 }
-		}
-	};
+		"SearchProvider",
+		{{"searchprovider00", NO_ACTION, 0},
+		 {"searchprovider01", NO_ACTION, 0},
+		 {"searchprovider02", NO_ACTION, 0},
+		 {"searchprovider03", NO_ACTION, 0},
+		 {"searchprovider04", NO_ACTION, 0},
+		 {"searchprovider05", NO_ACTION, 0},
+		 {"searchprovider06", NO_ACTION, 0},
+		 {"searchprovider07", NO_ACTION, 0},
+		 {"searchprovider08", NO_ACTION, 0},
+		 {"searchprovider09", NO_ACTION, 0},
+		 {"searchprovider10", NO_ACTION, 0},
+		 {"searchprovider11", NO_ACTION, 0},
+		 {"searchprovider12", NO_ACTION, 0},
+		 {"searchprovider13", NO_ACTION, 0},
+		 {"searchprovider14", NO_ACTION, 0},
+		 {"searchprovider15", NO_ACTION, 0},
+		 {"searchprovider16", NO_ACTION, 0},
+		 {"searchprovider17", NO_ACTION, 0},
+		 {"searchprovider18", NO_ACTION, 0},
+		 {"searchprovider19", NO_ACTION, 0},
+		 {"searchprovider20", NO_ACTION, 0},
+		 {"searchprovider21", NO_ACTION, 0},
+		 {"searchprovider22", NO_ACTION, 0},
+		 {"searchprovider23", NO_ACTION, 0},
+		 {"searchprovider24", NO_ACTION, 0},
+		 {"searchprovider25", NO_ACTION, 0},
+		 {"searchprovider26", NO_ACTION, 0},
+		 {"searchprovider27", NO_ACTION, 0},
+		 {"searchprovider28", NO_ACTION, 0},
+		 {"searchprovider29", NO_ACTION, 0},
+		 {"searchprovider30", NO_ACTION, 0},
+		 {"searchprovider31", NO_ACTION, 0},
+		 {"searchprovider32", NO_ACTION, 0},
+		 {"searchprovider33", NO_ACTION, 0},
+		 {"searchprovider34", NO_ACTION, 0},
+		 {"searchprovider35", NO_ACTION, 0},
+		 {"searchprovider36", NO_ACTION, 0},
+		 {"searchprovider37", NO_ACTION, 0},
+		 {"searchprovider38", NO_ACTION, 0},
+		 {"searchprovider39", NO_ACTION, 0},
+		 {NULL, 0, 0}}};
 	ssize_t iter = -1;
 	const char *name;
 	unsigned int provider = 0;
@@ -173,7 +178,9 @@ static wimp_menu *ro_gui_menu_init_search_provider(void)
 	iter = search_web_iterate_providers(iter, &name);
 	while ((iter != -1) &&
 	       (search_provider_definition.entries[provider].text != NULL)) {
-		messages_add_key_value(search_provider_definition.entries[provider].text, name);
+		messages_add_key_value(
+			search_provider_definition.entries[provider].text,
+			name);
 		provider++;
 		iter = search_web_iterate_providers(iter, &name);
 	}
@@ -186,26 +193,22 @@ void ro_gui_menu_init(void)
 {
 	/* image quality menu */
 	static const struct ns_menu images_definition = {
-		"Display", {
-			{ "ImgStyle0", NO_ACTION, 0 },
-			{ "ImgStyle1", NO_ACTION, 0 },
-			{ "ImgStyle2", NO_ACTION, 0 },
-			{ "ImgStyle3", NO_ACTION, 0 },
-			{NULL, 0, 0}
-		}
-	};
+		"Display",
+		{{"ImgStyle0", NO_ACTION, 0},
+		 {"ImgStyle1", NO_ACTION, 0},
+		 {"ImgStyle2", NO_ACTION, 0},
+		 {"ImgStyle3", NO_ACTION, 0},
+		 {NULL, 0, 0}}};
 	image_quality_menu = ro_gui_menu_define_menu(&images_definition);
 
 	/* proxy menu */
 	static const struct ns_menu proxy_type_definition = {
-		"ProxyType", {
-			{ "ProxyNone", NO_ACTION, 0 },
-			{ "ProxyNoAuth", NO_ACTION, 0 },
-			{ "ProxyBasic", NO_ACTION, 0 },
-			{ "ProxyNTLM", NO_ACTION, 0 },
-			{NULL, 0, 0}
-		}
-	};
+		"ProxyType",
+		{{"ProxyNone", NO_ACTION, 0},
+		 {"ProxyNoAuth", NO_ACTION, 0},
+		 {"ProxyBasic", NO_ACTION, 0},
+		 {"ProxyNTLM", NO_ACTION, 0},
+		 {NULL, 0, 0}}};
 	proxy_type_menu = ro_gui_menu_define_menu(&proxy_type_definition);
 
 	/* special case menus */
@@ -213,57 +216,31 @@ void ro_gui_menu_init(void)
 
 	/* Note: This table *must* be kept in sync with the LangNames file */
 	static const struct ns_menu lang_definition = {
-		"Languages", {
-			{ "lang_af", NO_ACTION, 0 },
-			{ "lang_bm", NO_ACTION, 0 },
-			{ "lang_ca", NO_ACTION, 0 },
-			{ "lang_cs", NO_ACTION, 0 },
-			{ "lang_cy", NO_ACTION, 0 },
-			{ "lang_da", NO_ACTION, 0 },
-			{ "lang_de", NO_ACTION, 0 },
-			{ "lang_en", NO_ACTION, 0 },
-			{ "lang_es", NO_ACTION, 0 },
-			{ "lang_et", NO_ACTION, 0 },
-			{ "lang_eu", NO_ACTION, 0 },
-			{ "lang_ff", NO_ACTION, 0 },
-			{ "lang_fi", NO_ACTION, 0 },
-			{ "lang_fr", NO_ACTION, 0 },
-			{ "lang_ga", NO_ACTION, 0 },
-			{ "lang_gl", NO_ACTION, 0 },
-			{ "lang_ha", NO_ACTION, 0 },
-			{ "lang_hr", NO_ACTION, 0 },
-			{ "lang_hu", NO_ACTION, 0 },
-			{ "lang_id", NO_ACTION, 0 },
-			{ "lang_is", NO_ACTION, 0 },
-			{ "lang_it", NO_ACTION, 0 },
-			{ "lang_lt", NO_ACTION, 0 },
-			{ "lang_lv", NO_ACTION, 0 },
-			{ "lang_ms", NO_ACTION, 0 },
-			{ "lang_mt", NO_ACTION, 0 },
-			{ "lang_nl", NO_ACTION, 0 },
-			{ "lang_no", NO_ACTION, 0 },
-			{ "lang_pl", NO_ACTION, 0 },
-			{ "lang_pt", NO_ACTION, 0 },
-			{ "lang_rn", NO_ACTION, 0 },
-			{ "lang_ro", NO_ACTION, 0 },
-			{ "lang_rw", NO_ACTION, 0 },
-			{ "lang_sk", NO_ACTION, 0 },
-			{ "lang_sl", NO_ACTION, 0 },
-			{ "lang_so", NO_ACTION, 0 },
-			{ "lang_sq", NO_ACTION, 0 },
-			{ "lang_sr", NO_ACTION, 0 },
-			{ "lang_sv", NO_ACTION, 0 },
-			{ "lang_sw", NO_ACTION, 0 },
-			{ "lang_tr", NO_ACTION, 0 },
-			{ "lang_uz", NO_ACTION, 0 },
-			{ "lang_vi", NO_ACTION, 0 },
-			{ "lang_wo", NO_ACTION, 0 },
-			{ "lang_xs", NO_ACTION, 0 },
-			{ "lang_yo", NO_ACTION, 0 },
-			{ "lang_zu", NO_ACTION, 0 },
-			{ NULL, 0, 0 }
-		}
-	};
+		"Languages",
+		{{"lang_af", NO_ACTION, 0}, {"lang_bm", NO_ACTION, 0},
+		 {"lang_ca", NO_ACTION, 0}, {"lang_cs", NO_ACTION, 0},
+		 {"lang_cy", NO_ACTION, 0}, {"lang_da", NO_ACTION, 0},
+		 {"lang_de", NO_ACTION, 0}, {"lang_en", NO_ACTION, 0},
+		 {"lang_es", NO_ACTION, 0}, {"lang_et", NO_ACTION, 0},
+		 {"lang_eu", NO_ACTION, 0}, {"lang_ff", NO_ACTION, 0},
+		 {"lang_fi", NO_ACTION, 0}, {"lang_fr", NO_ACTION, 0},
+		 {"lang_ga", NO_ACTION, 0}, {"lang_gl", NO_ACTION, 0},
+		 {"lang_ha", NO_ACTION, 0}, {"lang_hr", NO_ACTION, 0},
+		 {"lang_hu", NO_ACTION, 0}, {"lang_id", NO_ACTION, 0},
+		 {"lang_is", NO_ACTION, 0}, {"lang_it", NO_ACTION, 0},
+		 {"lang_lt", NO_ACTION, 0}, {"lang_lv", NO_ACTION, 0},
+		 {"lang_ms", NO_ACTION, 0}, {"lang_mt", NO_ACTION, 0},
+		 {"lang_nl", NO_ACTION, 0}, {"lang_no", NO_ACTION, 0},
+		 {"lang_pl", NO_ACTION, 0}, {"lang_pt", NO_ACTION, 0},
+		 {"lang_rn", NO_ACTION, 0}, {"lang_ro", NO_ACTION, 0},
+		 {"lang_rw", NO_ACTION, 0}, {"lang_sk", NO_ACTION, 0},
+		 {"lang_sl", NO_ACTION, 0}, {"lang_so", NO_ACTION, 0},
+		 {"lang_sq", NO_ACTION, 0}, {"lang_sr", NO_ACTION, 0},
+		 {"lang_sv", NO_ACTION, 0}, {"lang_sw", NO_ACTION, 0},
+		 {"lang_tr", NO_ACTION, 0}, {"lang_uz", NO_ACTION, 0},
+		 {"lang_vi", NO_ACTION, 0}, {"lang_wo", NO_ACTION, 0},
+		 {"lang_xs", NO_ACTION, 0}, {"lang_yo", NO_ACTION, 0},
+		 {"lang_zu", NO_ACTION, 0}, {NULL, 0, 0}}};
 	languages_menu = ro_gui_menu_define_menu(&lang_definition);
 
 	search_provider_menu = ro_gui_menu_init_search_provider();
@@ -303,8 +280,11 @@ void ro_gui_menu_create(wimp_menu *menu, int x, int y, wimp_w w)
 	current_menu_open = true;
 	error = xwimp_create_menu(menu, x - 64, y);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_create_menu: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_create_menu: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("MenuError", error->errmess);
 		ro_gui_menu_closed();
 	}
@@ -330,24 +310,31 @@ void ro_gui_popup_menu(wimp_menu *menu, wimp_w w, wimp_i i)
 	icon_state.i = i;
 	error = xwimp_get_window_state(&state);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_window_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_window_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("MenuError", error->errmess);
 		return;
 	}
 
 	error = xwimp_get_icon_state(&icon_state);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_icon_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_icon_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("MenuError", error->errmess);
 		return;
 	}
 
 	ro_gui_menu_create(menu,
-			state.visible.x0 + icon_state.icon.extent.x1 + 64,
-			state.visible.y1 + icon_state.icon.extent.y1 -
-			state.yscroll, w);
+			   state.visible.x0 + icon_state.icon.extent.x1 + 64,
+			   state.visible.y1 + icon_state.icon.extent.y1 -
+				   state.yscroll,
+			   w);
 	current_menu_icon = i;
 }
 
@@ -365,8 +352,11 @@ void ro_gui_menu_destroy(void)
 
 	error = xwimp_create_menu(wimp_CLOSE_MENU, 0, 0);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_create_menu: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_create_menu: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("MenuError", error->errmess);
 	}
 
@@ -396,12 +386,12 @@ void ro_gui_menu_window_changed(wimp_w from, wimp_w to)
 
 void ro_gui_menu_selection(wimp_selection *selection)
 {
-	int			i; //, j;
-	wimp_menu_entry		*menu_entry;
-	menu_action		action;
-	wimp_pointer		pointer;
-	os_error		*error;
-	int			previous_menu_icon = current_menu_icon;
+	int i; //, j;
+	wimp_menu_entry *menu_entry;
+	menu_action action;
+	wimp_pointer pointer;
+	os_error *error;
+	int previous_menu_icon = current_menu_icon;
 
 	/* if we are using gui_multitask then menu selection events
 	 * may be delivered after the menu has been closed. As such,
@@ -414,8 +404,8 @@ void ro_gui_menu_selection(wimp_selection *selection)
 	/* get the menu entry and associated action and definition */
 	menu_entry = &current_menu->entries[selection->items[0]];
 	for (i = 1; selection->items[i] != -1; i++)
-		menu_entry = &menu_entry->sub_menu->
-				entries[selection->items[i]];
+		menu_entry =
+			&menu_entry->sub_menu->entries[selection->items[i]];
 	action = ro_gui_menu_find_action(current_menu, menu_entry);
 
 	/* Deal with the menu action.  If this manages to re-prepare the
@@ -423,14 +413,20 @@ void ro_gui_menu_selection(wimp_selection *selection)
 	 */
 
 	if (!ro_gui_wimp_event_menu_selection(current_menu_window,
-			current_menu_icon, current_menu, selection, action))
+					      current_menu_icon,
+					      current_menu,
+					      selection,
+					      action))
 		return;
 
 	/* re-open the menu for Adjust clicks */
 	error = xwimp_get_pointer_info(&pointer);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_pointer_info: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_pointer_info: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		ro_gui_menu_closed();
 		return;
@@ -464,8 +460,8 @@ void ro_gui_menu_warning(wimp_message_menu_warning *warning)
 		return;
 	menu_entry = &current_menu->entries[warning->selection.items[0]];
 	for (i = 1; warning->selection.items[i] != -1; i++)
-		menu_entry = &menu_entry->sub_menu->
-				entries[warning->selection.items[i]];
+		menu_entry = &menu_entry->sub_menu
+				      ->entries[warning->selection.items[i]];
 	action = ro_gui_menu_find_action(current_menu, menu_entry);
 
 	/* Process the warning via Wimp_Event, then register the resulting
@@ -473,31 +469,37 @@ void ro_gui_menu_warning(wimp_message_menu_warning *warning)
 	 */
 
 	ro_gui_wimp_event_submenu_warning(current_menu_window,
-			current_menu_icon, current_menu, &(warning->selection),
-			action);
+					  current_menu_icon,
+					  current_menu,
+					  &(warning->selection),
+					  action);
 
 	if (IS_MENU(menu_entry->sub_menu)) {
-		ro_gui_wimp_event_register_submenu((wimp_w) 0);
+		ro_gui_wimp_event_register_submenu((wimp_w)0);
 	} else {
-		ro_gui_wimp_event_register_submenu((wimp_w)
-				menu_entry->sub_menu);
+		ro_gui_wimp_event_register_submenu(
+			(wimp_w)menu_entry->sub_menu);
 
 		/* If this is a dialogue box, remove the close and back icons.
 		 */
 
-		ro_gui_wimp_update_window_furniture((wimp_w)
-				menu_entry->sub_menu,
-				wimp_WINDOW_CLOSE_ICON | wimp_WINDOW_BACK_ICON,
-				0);
+		ro_gui_wimp_update_window_furniture(
+			(wimp_w)menu_entry->sub_menu,
+			wimp_WINDOW_CLOSE_ICON | wimp_WINDOW_BACK_ICON,
+			0);
 	}
 
 	/* open the sub-menu */
 
 	error = xwimp_create_sub_menu(menu_entry->sub_menu,
-			warning->pos.x, warning->pos.y);
+				      warning->pos.x,
+				      warning->pos.y);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_create_sub_menu: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_create_sub_menu: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("MenuError", error->errmess);
 	}
 }
@@ -519,13 +521,14 @@ void ro_gui_menu_message_deleted(wimp_message_menus_deleted *deleted)
 
 /**
  * Clean up after a menu has been closed, or forcibly close an open menu.
-  */
+ */
 
 static void ro_gui_menu_closed(void)
 {
 	if (current_menu != NULL)
 		ro_gui_wimp_event_menus_closed(current_menu_window,
-				current_menu_icon, current_menu);
+					       current_menu_icon,
+					       current_menu);
 
 	current_menu = NULL;
 	current_menu_window = NULL;
@@ -552,8 +555,8 @@ void ro_gui_menu_refresh(wimp_menu *menu)
 
 	checksum = ro_gui_menu_get_checksum();
 
-	if (!ro_gui_wimp_event_prepare_menu(current_menu_window,
-			current_menu_icon, current_menu))
+	if (!ro_gui_wimp_event_prepare_menu(
+		    current_menu_window, current_menu_icon, current_menu))
 		return;
 
 	/* \TODO -- Call the menu's event handler here. */
@@ -562,14 +565,15 @@ void ro_gui_menu_refresh(wimp_menu *menu)
 		os_error *error;
 		error = xwimp_create_menu(current_menu, 0, 0);
 		if (error) {
-			NSLOG(netsurf, INFO, "xwimp_create_menu: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_create_menu: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("MenuError", error->errmess);
 		}
 	}
 }
-
-
 
 
 /**
@@ -598,8 +602,8 @@ wimp_menu *ro_gui_menu_define_menu(const struct ns_menu *menu)
 		/* do nothing */;
 
 	/* create our definitions */
-	ro_gui_menu_define_menu_add(definition, menu, 0, NULL,
-			0, entry, NULL, 0);
+	ro_gui_menu_define_menu_add(
+		definition, menu, 0, NULL, 0, entry, NULL, 0);
 
 	/* and translate menu into current encoding */
 	if (!ro_gui_menu_translate(definition))
@@ -624,9 +628,13 @@ wimp_menu *ro_gui_menu_define_menu(const struct ns_menu *menu)
  * \param prefix_length  Length of prefix
  */
 void ro_gui_menu_define_menu_add(struct menu_definition *definition,
-		const struct ns_menu *menu, int depth,
-		wimp_menu_entry *parent_entry, int first, int last,
-		const char *prefix, int prefix_length)
+				 const struct ns_menu *menu,
+				 int depth,
+				 wimp_menu_entry *parent_entry,
+				 int first,
+				 int last,
+				 const char *prefix,
+				 int prefix_length)
 {
 	int entry;
 	int entries = 0;
@@ -697,7 +705,7 @@ void ro_gui_menu_define_menu_add(struct menu_definition *definition,
 		while (!isalnum(*text)) {
 			if (*text == '_')
 				new_menu->entries[entry].menu_flags |=
-							wimp_MENU_SEPARATE;
+					wimp_MENU_SEPARATE;
 			text++;
 		}
 
@@ -712,14 +720,13 @@ void ro_gui_menu_define_menu_add(struct menu_definition *definition,
 		/* fill in submenu data */
 		if (menu->entries[id].sub_window)
 			new_menu->entries[entry].sub_menu =
-				(wimp_menu *) (*menu->entries[id].sub_window);
+				(wimp_menu *)(*menu->entries[id].sub_window);
 
 		/* this is fixed up in ro_gui_menu_translate() */
 		new_menu->entries[entry].data.indirected_text.text = NULL;
 
 		/* create definition entry */
-		definition_entry =
-			malloc(sizeof(struct menu_definition_entry));
+		definition_entry = malloc(sizeof(struct menu_definition_entry));
 		if (!definition_entry)
 			die("Unable to create menu definition entry");
 		definition_entry->action = menu->entries[id].action;
@@ -730,16 +737,20 @@ void ro_gui_menu_define_menu_add(struct menu_definition *definition,
 
 		/* recurse */
 		if (new_menu->entries[entry].sub_menu == wimp_NO_SUB_MENU) {
-			ro_gui_menu_define_menu_add(definition, menu,
-					depth + 1, &new_menu->entries[entry],
-					matches[entry], matches[entry + 1],
-					text, strlen(text));
+			ro_gui_menu_define_menu_add(definition,
+						    menu,
+						    depth + 1,
+						    &new_menu->entries[entry],
+						    matches[entry],
+						    matches[entry + 1],
+						    text,
+						    strlen(text));
 		}
 
 		/* give menu warnings */
 		if (new_menu->entries[entry].sub_menu != wimp_NO_SUB_MENU)
 			new_menu->entries[entry].menu_flags |=
-						wimp_MENU_GIVE_WARNING;
+				wimp_MENU_GIVE_WARNING;
 	}
 	new_menu->entries[0].menu_flags |= wimp_MENU_TITLE_INDIRECTED;
 	new_menu->entries[entries - 1].menu_flags |= wimp_MENU_LAST;
@@ -752,7 +763,7 @@ void ro_gui_menu_define_menu_add(struct menu_definition *definition,
  */
 void ro_gui_menu_init_structure(wimp_menu *menu, int entries)
 {
-  	int i;
+	int i;
 
 	menu->title_fg = wimp_COLOUR_BLACK;
 	menu->title_bg = wimp_COLOUR_LIGHT_GREY;
@@ -765,10 +776,9 @@ void ro_gui_menu_init_structure(wimp_menu *menu, int entries)
 	for (i = 0; i < entries; i++) {
 		menu->entries[i].menu_flags = 0;
 		menu->entries[i].sub_menu = wimp_NO_SUB_MENU;
-		menu->entries[i].icon_flags =
-				DEFAULT_FLAGS | wimp_ICON_INDIRECTED;
-		menu->entries[i].data.indirected_text.validation =
-				(char *)-1;
+		menu->entries[i].icon_flags = DEFAULT_FLAGS |
+					      wimp_ICON_INDIRECTED;
+		menu->entries[i].data.indirected_text.validation = (char *)-1;
 	}
 	menu->entries[0].menu_flags |= wimp_MENU_TITLE_INDIRECTED;
 	menu->entries[i - 1].menu_flags |= wimp_MENU_LAST;
@@ -789,7 +799,7 @@ struct menu_definition *ro_gui_menu_find_menu(wimp_menu *menu)
 		return NULL;
 
 	for (definition = ro_gui_menu_definitions; definition;
-			definition = definition->next)
+	     definition = definition->next)
 		if (definition->menu == menu)
 			return definition;
 	return NULL;
@@ -803,8 +813,8 @@ struct menu_definition *ro_gui_menu_find_menu(wimp_menu *menu)
  * \param translated  the translated text
  * \return the original message key, or NULL if one could not be found
  */
-const char *ro_gui_menu_find_menu_entry_key(wimp_menu *menu,
-		const char *translated)
+const char *
+ro_gui_menu_find_menu_entry_key(wimp_menu *menu, const char *translated)
 {
 	struct menu_definition_entry *entry;
 	struct menu_definition *definition = ro_gui_menu_find_menu(menu);
@@ -813,7 +823,8 @@ const char *ro_gui_menu_find_menu_entry_key(wimp_menu *menu,
 		return NULL;
 
 	for (entry = definition->entries; entry; entry = entry->next)
-		if (!strcmp(entry->menu_entry->data.indirected_text.text, translated))
+		if (!strcmp(entry->menu_entry->data.indirected_text.text,
+			    translated))
 			return entry->entry_key;
 	return NULL;
 }
@@ -826,8 +837,8 @@ const char *ro_gui_menu_find_menu_entry_key(wimp_menu *menu,
  * \param action  the action to find
  * \return the associated menu entry, or NULL if one could not be found
  */
-struct menu_definition_entry *ro_gui_menu_find_entry(wimp_menu *menu,
-		menu_action action)
+struct menu_definition_entry *
+ro_gui_menu_find_entry(wimp_menu *menu, menu_action action)
 {
 	struct menu_definition_entry *entry;
 	struct menu_definition *definition = ro_gui_menu_find_menu(menu);
@@ -849,7 +860,8 @@ struct menu_definition_entry *ro_gui_menu_find_entry(wimp_menu *menu,
  * \param menu_entry  the menu_entry to find
  * \return the associated action, or 0 if one could not be found
  */
-menu_action ro_gui_menu_find_action(wimp_menu *menu, wimp_menu_entry *menu_entry)
+menu_action
+ro_gui_menu_find_action(wimp_menu *menu, wimp_menu_entry *menu_entry)
 {
 	struct menu_definition_entry *entry;
 	struct menu_definition *definition = ro_gui_menu_find_menu(menu);
@@ -872,8 +884,9 @@ menu_action ro_gui_menu_find_action(wimp_menu *menu, wimp_menu_entry *menu_entry
  * \param action  the action to tick/untick
  * \param shaded  whether to set the item as shaded
  */
-void ro_gui_menu_set_entry_shaded(wimp_menu *menu, menu_action action,
-		bool shaded)
+void ro_gui_menu_set_entry_shaded(wimp_menu *menu,
+				  menu_action action,
+				  bool shaded)
 {
 	struct menu_definition_entry *entry;
 	struct menu_definition *definition = ro_gui_menu_find_menu(menu);
@@ -885,9 +898,11 @@ void ro_gui_menu_set_entry_shaded(wimp_menu *menu, menu_action action,
 	for (entry = definition->entries; entry; entry = entry->next)
 		if (entry->action == action) {
 			if (shaded)
-				entry->menu_entry->icon_flags |= wimp_ICON_SHADED;
+				entry->menu_entry->icon_flags |=
+					wimp_ICON_SHADED;
 			else
-				entry->menu_entry->icon_flags &= ~wimp_ICON_SHADED;
+				entry->menu_entry->icon_flags &=
+					~wimp_ICON_SHADED;
 		}
 }
 
@@ -899,11 +914,12 @@ void ro_gui_menu_set_entry_shaded(wimp_menu *menu, menu_action action,
  * \param action  the action to tick/untick
  * \param ticked  whether to set the item as ticked
  */
-void ro_gui_menu_set_entry_ticked(wimp_menu *menu, menu_action action,
-		bool ticked)
+void ro_gui_menu_set_entry_ticked(wimp_menu *menu,
+				  menu_action action,
+				  bool ticked)
 {
-	struct menu_definition_entry *entry =
-			ro_gui_menu_find_entry(menu, action);
+	struct menu_definition_entry *entry = ro_gui_menu_find_entry(menu,
+								     action);
 	if (entry) {
 		if (ticked)
 			entry->menu_entry->menu_flags |= wimp_MENU_TICKED;
@@ -926,11 +942,14 @@ int ro_gui_menu_get_checksum(void)
 	if (!current_menu_open)
 		return 0;
 
-	error = xwimp_get_menu_state((wimp_menu_state_flags)0,
-			&menu_tree, 0, 0);
+	error = xwimp_get_menu_state(
+		(wimp_menu_state_flags)0, &menu_tree, 0, 0);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_menu_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_menu_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("MenuError", error->errmess);
 		return 0;
 	}
@@ -948,7 +967,8 @@ int ro_gui_menu_get_checksum(void)
 		j = menu_tree.items[i++];
 		if (j != -1) {
 			menu = menu->entries[j].sub_menu;
-			if ((!menu) || (menu == wimp_NO_SUB_MENU) || (!IS_MENU(menu)))
+			if ((!menu) || (menu == wimp_NO_SUB_MENU) ||
+			    (!IS_MENU(menu)))
 				break;
 		}
 	} while (j != -1);
@@ -973,8 +993,11 @@ bool ro_gui_menu_translate(struct menu_definition *menu)
 	/* read current alphabet */
 	error = xosbyte1(osbyte_ALPHABET_NUMBER, 127, 0, &alphabet);
 	if (error) {
-		NSLOG(netsurf, INFO, "failed reading alphabet: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "failed reading alphabet: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		/* assume Latin1 */
 		alphabet = territory_ALPHABET_LATIN1;
 	}
@@ -986,7 +1009,8 @@ bool ro_gui_menu_translate(struct menu_definition *menu)
 	/* translate root menu title text */
 	free(menu->menu->title_data.indirected_text.text);
 	err = utf8_to_local_encoding(messages_get(menu->title_key),
-			0, &translated);
+				     0,
+				     &translated);
 	if (err != NSERROR_OK) {
 		assert(err != NSERROR_BAD_ENCODING);
 		NSLOG(netsurf, INFO, "utf8_to_enc failed");
@@ -1003,7 +1027,8 @@ bool ro_gui_menu_translate(struct menu_definition *menu)
 		/* tranlate menu entry text */
 		free(entry->menu_entry->data.indirected_text.text);
 		err = utf8_to_local_encoding(messages_get(entry->entry_key),
-				0, &translated);
+					     0,
+					     &translated);
 		if (err != NSERROR_OK) {
 			assert(err != NSERROR_BAD_ENCODING);
 			NSLOG(netsurf, INFO, "utf8_to_enc failed");
@@ -1012,16 +1037,14 @@ bool ro_gui_menu_translate(struct menu_definition *menu)
 
 		/* fill in WIMP menu fields */
 		entry->menu_entry->data.indirected_text.text = translated;
-		entry->menu_entry->data.indirected_text.validation =
-				(char *) -1;
-		entry->menu_entry->data.indirected_text.size =
-				strlen(translated);
+		entry->menu_entry->data.indirected_text.validation = (char *)-1;
+		entry->menu_entry->data.indirected_text.size = strlen(
+			translated);
 
 		/* child menu title - this is the same as the text of
 		 * the parent menu entry, so just copy the pointer */
 		if (submenu != wimp_NO_SUB_MENU && IS_MENU(submenu)) {
-			submenu->title_data.indirected_text.text =
-					translated;
+			submenu->title_data.indirected_text.text = translated;
 		}
 	}
 
@@ -1030,4 +1053,3 @@ bool ro_gui_menu_translate(struct menu_definition *menu)
 
 	return true;
 }
-

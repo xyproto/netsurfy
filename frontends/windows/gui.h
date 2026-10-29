@@ -41,10 +41,10 @@ extern char **G_resource_pathv;
 
 /* bounding box */
 typedef struct bbox_s {
-        int x0;
-        int y0;
-        int x1;
-        int y1;
+	int x0;
+	int y0;
+	int x1;
+	int y1;
 } bbox_t;
 
 /**
@@ -88,4 +88,4 @@ nserror nsw32_add_dialog(HWND hwndDlg);
 nserror nsw32_del_dialog(HWND hwndDlg);
 
 
-#endif 
+#endif

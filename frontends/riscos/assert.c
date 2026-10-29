@@ -30,14 +30,18 @@
  * Report an assert() failure and exit.
  */
 
-void __assert2(const char *expr, const char *function, const char *file,
-		int line)
+void __assert2(const char *expr,
+	       const char *function,
+	       const char *file,
+	       int line)
 {
-	fprintf(stderr, "\n\"%s\", line %d: %s%sAssertion failed: %s\n",
-			file, line,
-			function ? function : "",
-			function ? ": " : "",
-			expr);
+	fprintf(stderr,
+		"\n\"%s\", line %d: %s%sAssertion failed: %s\n",
+		file,
+		line,
+		function ? function : "",
+		function ? ": " : "",
+		expr);
 	fflush(stderr);
 
 	abort();

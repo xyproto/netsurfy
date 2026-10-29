@@ -45,11 +45,11 @@ struct nsgtk_global_history_window {
 
 static struct nsgtk_global_history_window *global_history_window = NULL;
 
-#define MENUPROTO(x) static gboolean nsgtk_on_##x##_activate( \
-		GtkWidget *widget, gpointer g)
-#define MENUEVENT(x) { #x, G_CALLBACK(nsgtk_on_##x##_activate) }
-#define MENUHANDLER(x) gboolean nsgtk_on_##x##_activate(GtkWidget *widget, \
-		gpointer g)
+#define MENUPROTO(x)                                                           \
+	static gboolean nsgtk_on_##x##_activate(GtkWidget *widget, gpointer g)
+#define MENUEVENT(x) {#x, G_CALLBACK(nsgtk_on_##x##_activate)}
+#define MENUHANDLER(x)                                                         \
+	gboolean nsgtk_on_##x##_activate(GtkWidget *widget, gpointer g)
 
 struct menu_events {
 	const char *widget;
@@ -95,8 +95,7 @@ static struct menu_events menu_events[] = {
 	MENUEVENT(collapse_addresses),
 
 	MENUEVENT(launch),
-		  {NULL, NULL}
-};
+	{NULL, NULL}};
 
 /* edit menu */
 MENUHANDLER(delete_selected)
@@ -212,7 +211,8 @@ nsgtk_global_history_init_menu(struct nsgtk_global_history_window *ghwin)
 						 ghwin);
 		event++;
 	}
-	gtk_widget_insert_action_group(GTK_WIDGET(ghwin->wnd), "win",
+	gtk_widget_insert_action_group(GTK_WIDGET(ghwin->wnd),
+				       "win",
 				       G_ACTION_GROUP(group));
 	g_object_unref(group);
 }
@@ -227,10 +227,10 @@ nsgtk_global_history_init_menu(struct nsgtk_global_history_window *ghwin)
  * \param y location of event
  * \return NSERROR_OK on success otherwise apropriate error code
  */
-static nserror
-nsgtk_global_history_mouse(struct nsgtk_corewindow *nsgtk_cw,
-		    browser_mouse_state mouse_state,
-		    int x, int y)
+static nserror nsgtk_global_history_mouse(struct nsgtk_corewindow *nsgtk_cw,
+					  browser_mouse_state mouse_state,
+					  int x,
+					  int y)
 {
 	global_history_mouse_action(mouse_state, x, y);
 
@@ -265,11 +265,9 @@ nsgtk_global_history_key(struct nsgtk_corewindow *nsgtk_cw, uint32_t nskey)
 static nserror
 nsgtk_global_history_draw(struct nsgtk_corewindow *nsgtk_cw, struct rect *r)
 {
-	struct redraw_context ctx = {
-		.interactive = true,
-		.background_images = true,
-		.plot = &nsgtk_plotters
-	};
+	struct redraw_context ctx = {.interactive = true,
+				     .background_images = true,
+				     .plot = &nsgtk_plotters};
 
 	global_history_redraw(0, 0, r, &ctx);
 
@@ -303,16 +301,14 @@ static nserror nsgtk_global_history_init(void)
 	}
 
 
-	ncwin->wnd = GTK_WINDOW(gtk_builder_get_object(ncwin->builder,
-						       "wndHistory"));
+	ncwin->wnd = GTK_WINDOW(
+		gtk_builder_get_object(ncwin->builder, "wndHistory"));
 
-	ncwin->core.scrolled = GTK_SCROLLED_WINDOW(
-		gtk_builder_get_object(ncwin->builder,
-				       "globalHistoryScrolled"));
+	ncwin->core.scrolled = GTK_SCROLLED_WINDOW(gtk_builder_get_object(
+		ncwin->builder, "globalHistoryScrolled"));
 
-	ncwin->core.drawing_area = GTK_DRAWING_AREA(
-		gtk_builder_get_object(ncwin->builder,
-				       "globalHistoryDrawingArea"));
+	ncwin->core.drawing_area = GTK_DRAWING_AREA(gtk_builder_get_object(
+		ncwin->builder, "globalHistoryDrawingArea"));
 
 	/* make closing the window hide it */
 	gtk_window_set_hide_on_close(ncwin->wnd, TRUE);
@@ -376,8 +372,4 @@ nserror nsgtk_global_history_destroy(void)
 	}
 
 	return res;
-
 }
-
-
-

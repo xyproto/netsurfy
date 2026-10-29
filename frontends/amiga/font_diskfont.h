@@ -22,4 +22,3 @@ void ami_font_diskfont_init(void);
 void ami_font_diskfont_fini(void);
 void ami_font_diskfont_close(void *nso);
 #endif
-

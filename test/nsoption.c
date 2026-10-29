@@ -44,7 +44,10 @@ const char *test_choices_full_path = "test/data/Choices-full";
 const char *test_choices_missing_path = "test/data/Choices-missing";
 
 /* Stubs */
-nserror nslog_set_filter_by_options() { return NSERROR_OK; }
+nserror nslog_set_filter_by_options()
+{
+	return NSERROR_OK;
+}
 
 /**
  * generate test output filenames
@@ -54,8 +57,8 @@ static char *testnam(char *out)
 	static int count = 0;
 	static char name[64];
 	int pid;
-	pid=getpid();
-	snprintf(name, 64, TESTROOT"/nsoptiontest%d%d", pid, count);
+	pid = getpid();
+	snprintf(name, 64, TESTROOT "/nsoptiontest%d%d", pid, count);
 	count++;
 	return name;
 }
@@ -63,7 +66,8 @@ static char *testnam(char *out)
 static nserror gui_options_init_defaults(struct nsoption_s *defaults)
 {
 	/* Set defaults for absent option strings */
-	nsoption_setnull_charp(ca_bundle, strdup("NetSurf:Resources.ca-bundle"));
+	nsoption_setnull_charp(ca_bundle,
+			       strdup("NetSurf:Resources.ca-bundle"));
 	nsoption_setnull_charp(cookie_file, strdup("NetSurf:Cookies"));
 	nsoption_setnull_charp(cookie_jar, strdup("Cookies"));
 
@@ -156,7 +160,7 @@ START_TEST(nsoption_session_test)
 	int argc = 2;
 	char arg1[] = "nsoption";
 	char arg2[] = "--http_proxy_host=fooo";
-	char *argv[] = { arg1, arg2, NULL};
+	char *argv[] = {arg1, arg2, NULL};
 	char *outnam;
 
 	res = nsoption_init(gui_options_init_defaults, NULL, NULL);
@@ -192,7 +196,6 @@ START_TEST(nsoption_session_test)
 
 	res = nsoption_finalise(NULL, NULL);
 	ck_assert_int_eq(res, NSERROR_OK);
-
 }
 END_TEST
 
@@ -207,7 +210,6 @@ static TCase *nsoption_session_case_create(void)
 }
 
 
-
 struct format_test_vec_s {
 	int opt_idx;
 	const char *res_html;
@@ -215,41 +217,27 @@ struct format_test_vec_s {
 };
 
 struct format_test_vec_s format_test_vec[] = {
-	{
-		NSOPTION_http_proxy,
-		"<tr><th>http_proxy</th><td>boolean</td><td>default</td><td>false</td></tr>",
-		"http_proxy:0"
-	},
-	{
-		NSOPTION_enable_javascript,
-		"<tr><th>enable_javascript</th><td>boolean</td><td>user</td><td>true</td></tr>",
-		"enable_javascript:1"
-	},
-	{
-		NSOPTION_http_proxy_port,
-		"<tr><th>http_proxy_port</th><td>integer</td><td>default</td><td>8080</td></tr>",
-		"http_proxy_port:8080"
-	},
-	{
-		NSOPTION_http_proxy_host,
-		"<tr><th>http_proxy_host</th><td>string</td><td>default</td><td><span class=\"null-content\">NULL</span></td></tr>",
-		"http_proxy_host:"
-	},
-	{
-		NSOPTION_cookie_file,
-		"<tr><th>cookie_file</th><td>string</td><td>user</td><td>/home/vince/.netsurf/Cookies</td></tr>",
-		"cookie_file:/home/vince/.netsurf/Cookies"
-	},
-	{
-		NSOPTION_disc_cache_size,
-		"<tr><th>disc_cache_size</th><td>unsigned integer</td><td>default</td><td>1073741824</td></tr>",
-		"disc_cache_size:1073741824"
-	},
-	{
-		NSOPTION_sys_colour_Canvas,
-		"<tr><th>sys_colour_Canvas</th><td>colour</td><td>default</td><td><span style=\"font-family:Monospace;\">#F1F1F1</span> <span style=\"background-color: #f1f1f1; border: 1px solid #000000; display: inline-block; width: 1em; height: 1em;\"></span></td></tr>",
-		"sys_colour_Canvas:f1f1f1"
-	},
+	{NSOPTION_http_proxy,
+	 "<tr><th>http_proxy</th><td>boolean</td><td>default</td><td>false</td></tr>",
+	 "http_proxy:0"},
+	{NSOPTION_enable_javascript,
+	 "<tr><th>enable_javascript</th><td>boolean</td><td>user</td><td>true</td></tr>",
+	 "enable_javascript:1"},
+	{NSOPTION_http_proxy_port,
+	 "<tr><th>http_proxy_port</th><td>integer</td><td>default</td><td>8080</td></tr>",
+	 "http_proxy_port:8080"},
+	{NSOPTION_http_proxy_host,
+	 "<tr><th>http_proxy_host</th><td>string</td><td>default</td><td><span class=\"null-content\">NULL</span></td></tr>",
+	 "http_proxy_host:"},
+	{NSOPTION_cookie_file,
+	 "<tr><th>cookie_file</th><td>string</td><td>user</td><td>/home/vince/.netsurf/Cookies</td></tr>",
+	 "cookie_file:/home/vince/.netsurf/Cookies"},
+	{NSOPTION_disc_cache_size,
+	 "<tr><th>disc_cache_size</th><td>unsigned integer</td><td>default</td><td>1073741824</td></tr>",
+	 "disc_cache_size:1073741824"},
+	{NSOPTION_sys_colour_Canvas,
+	 "<tr><th>sys_colour_Canvas</th><td>colour</td><td>default</td><td><span style=\"font-family:Monospace;\">#F1F1F1</span> <span style=\"background-color: #f1f1f1; border: 1px solid #000000; display: inline-block; width: 1em; height: 1em;\"></span></td></tr>",
+	 "sys_colour_Canvas:f1f1f1"},
 };
 
 /**
@@ -261,7 +249,10 @@ START_TEST(nsoption_format_html_test)
 	char buffer[1024];
 	struct format_test_vec_s *tst = &format_test_vec[_i];
 
-	ret = nsoption_snoptionf(buffer, sizeof buffer, tst->opt_idx,
+	ret = nsoption_snoptionf(
+		buffer,
+		sizeof buffer,
+		tst->opt_idx,
 		"<tr><th>%k</th><td>%t</td><td>%p</td><td>%V</td></tr>");
 	ck_assert_int_gt(ret, 0);
 	ck_assert_str_eq(buffer, tst->res_html);
@@ -277,14 +268,13 @@ START_TEST(nsoption_format_text_test)
 	char buffer[1024];
 	struct format_test_vec_s *tst = &format_test_vec[_i];
 
-	ret = nsoption_snoptionf(buffer, sizeof buffer, tst->opt_idx,
-				 "%k:%v");
+	ret = nsoption_snoptionf(buffer, sizeof buffer, tst->opt_idx, "%k:%v");
 	ck_assert_int_gt(ret, 0);
 	ck_assert_str_eq(buffer, tst->res_text);
 }
 END_TEST
 
-#define NELEMS(x)  (sizeof(x) / sizeof((x)[0]))
+#define NELEMS(x) (sizeof(x) / sizeof((x)[0]))
 
 static TCase *nsoption_format_case_create(void)
 {
@@ -296,13 +286,11 @@ static TCase *nsoption_format_case_create(void)
 				    nsoption_format_create,
 				    nsoption_teardown);
 
-	tcase_add_loop_test(tc,
-			    nsoption_format_html_test,
-			    0, NELEMS(format_test_vec));
+	tcase_add_loop_test(
+		tc, nsoption_format_html_test, 0, NELEMS(format_test_vec));
 
-	tcase_add_loop_test(tc,
-			    nsoption_format_text_test,
-			    0, NELEMS(format_test_vec));
+	tcase_add_loop_test(
+		tc, nsoption_format_text_test, 0, NELEMS(format_test_vec));
 
 	return tc;
 }
@@ -393,7 +381,7 @@ START_TEST(nsoption_commandline_test)
 	char arg2[] = "--http_proxy_host=fooo";
 	char arg3[] = "--http_proxy_port";
 	char arg4[] = "not-option";
-	char *argv[] = { arg1, arg2, arg3, arg4, NULL};
+	char *argv[] = {arg1, arg2, arg3, arg4, NULL};
 
 	/* commandline */
 	res = nsoption_commandline(&argc, &argv[0], NULL);
@@ -410,9 +398,7 @@ static TCase *nsoption_case_create(void)
 	tc = tcase_create("File operations");
 
 	/* ensure options are initialised and finalised for every test */
-	tcase_add_unchecked_fixture(tc,
-				    nsoption_create,
-				    nsoption_teardown);
+	tcase_add_unchecked_fixture(tc, nsoption_create, nsoption_teardown);
 
 	tcase_add_test(tc, nsoption_commandline_test);
 	tcase_add_test(tc, nsoption_read_test);
@@ -486,7 +472,6 @@ START_TEST(nsoption_api_write_no_init_test)
 	/* write with path but no init */
 	res = nsoption_write(test_choices_path, NULL, NULL);
 	ck_assert_int_eq(res, NSERROR_BAD_PARAMETER);
-
 }
 END_TEST
 
@@ -531,7 +516,7 @@ START_TEST(nsoption_api_commandline_no_args_test)
 	int argc = 2;
 	char arg1[] = "nsoption";
 	char arg2[] = "--http_proxy_host=fooo";
-	char *argv[] = { arg1, arg2, NULL};
+	char *argv[] = {arg1, arg2, NULL};
 
 	/* commandline with no argument count or init */
 	res = nsoption_commandline(NULL, &argv[0], NULL);
@@ -552,7 +537,7 @@ START_TEST(nsoption_api_commandline_no_init_test)
 	int argc = 2;
 	char arg1[] = "nsoption";
 	char arg2[] = "--http_proxy_host=fooo";
-	char *argv[] = { arg1, arg2, NULL};
+	char *argv[] = {arg1, arg2, NULL};
 
 	/* write with path but no init */
 	res = nsoption_commandline(&argc, &argv[0], NULL);

@@ -38,17 +38,27 @@ GdkTexture *nsgtk_texture_new_for_pixbuf(GdkPixbuf *pixbuf)
 
 	/* the last row of a pixbuf may be shorter than the rowstride */
 	size = (gsize)(height - 1) * rowstride +
-		width * ((gdk_pixbuf_get_n_channels(pixbuf) * gdk_pixbuf_get_bits_per_sample(pixbuf) + 7) / 8);
-	bytes = g_bytes_new_with_free_func(gdk_pixbuf_read_pixels(pixbuf), size,
-					   g_object_unref, g_object_ref(pixbuf));
-	texture = gdk_memory_texture_new(width, height,
-					 alpha ? GDK_MEMORY_R8G8B8A8 : GDK_MEMORY_R8G8B8,
-					 bytes, rowstride);
+	       width * ((gdk_pixbuf_get_n_channels(pixbuf) *
+				 gdk_pixbuf_get_bits_per_sample(pixbuf) +
+			 7) /
+			8);
+	bytes = g_bytes_new_with_free_func(gdk_pixbuf_read_pixels(pixbuf),
+					   size,
+					   g_object_unref,
+					   g_object_ref(pixbuf));
+	texture = gdk_memory_texture_new(width,
+					 height,
+					 alpha ? GDK_MEMORY_R8G8B8A8
+					       : GDK_MEMORY_R8G8B8,
+					 bytes,
+					 rowstride);
 	g_bytes_unref(bytes);
 	return texture;
 }
 
-void nsgtk_widget_set_alignment(GtkWidget *widget, GtkAlign halign, GtkAlign valign)
+void nsgtk_widget_set_alignment(GtkWidget *widget,
+				GtkAlign halign,
+				GtkAlign valign)
 {
 	gtk_widget_set_halign(widget, halign);
 	gtk_widget_set_valign(widget, valign);
@@ -70,7 +80,11 @@ void nsgtk_widget_get_allocation(GtkWidget *widget, GtkAllocation *allocation)
 	allocation->height = gtk_widget_get_height(widget);
 }
 
-void nsgtk_widget_override_background_color(GtkWidget *widget, uint16_t a, uint16_t r, uint16_t g, uint16_t b)
+void nsgtk_widget_override_background_color(GtkWidget *widget,
+					    uint16_t a,
+					    uint16_t r,
+					    uint16_t g,
+					    uint16_t b)
 {
 	GtkCssProvider *provider;
 	gchar *css;
@@ -79,13 +93,21 @@ void nsgtk_widget_override_background_color(GtkWidget *widget, uint16_t a, uint1
 	if (provider == NULL) {
 		provider = gtk_css_provider_new();
 		gtk_widget_add_css_class(widget, "nsgtk-background");
-		gtk_style_context_add_provider_for_display(gtk_widget_get_display(widget),
-							   GTK_STYLE_PROVIDER(provider),
-							   GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-		g_object_set_data_full(G_OBJECT(widget), "nsgtk-background", provider, g_object_unref);
+		gtk_style_context_add_provider_for_display(
+			gtk_widget_get_display(widget),
+			GTK_STYLE_PROVIDER(provider),
+			GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+		g_object_set_data_full(G_OBJECT(widget),
+				       "nsgtk-background",
+				       provider,
+				       g_object_unref);
 	}
-	css = g_strdup_printf(".nsgtk-background { background-color: rgba(%d, %d, %d, %f); }",
-			      r >> 8, g >> 8, b >> 8, a / 65535.0);
+	css = g_strdup_printf(
+		".nsgtk-background { background-color: rgba(%d, %d, %d, %f); }",
+		r >> 8,
+		g >> 8,
+		b >> 8,
+		a / 65535.0);
 	gtk_css_provider_load_from_string(provider, css);
 	g_free(css);
 }
@@ -119,20 +141,29 @@ void nsgtk_image_set_from_pixbuf(GtkImage *image, GdkPixbuf *pixbuf)
 	g_object_unref(texture);
 }
 
-void nsgtk_entry_set_icon_from_pixbuf(GtkWidget *entry, GtkEntryIconPosition icon_pos, GdkPixbuf *pixbuf)
+void nsgtk_entry_set_icon_from_pixbuf(GtkWidget *entry,
+				      GtkEntryIconPosition icon_pos,
+				      GdkPixbuf *pixbuf)
 {
 	GdkTexture *texture;
 
 	if (pixbuf == NULL) {
-		gtk_entry_set_icon_from_paintable(GTK_ENTRY(entry), icon_pos, NULL);
+		gtk_entry_set_icon_from_paintable(GTK_ENTRY(entry),
+						  icon_pos,
+						  NULL);
 		return;
 	}
 	texture = nsgtk_texture_new_for_pixbuf(pixbuf);
-	gtk_entry_set_icon_from_paintable(GTK_ENTRY(entry), icon_pos, GDK_PAINTABLE(texture));
+	gtk_entry_set_icon_from_paintable(GTK_ENTRY(entry),
+					  icon_pos,
+					  GDK_PAINTABLE(texture));
 	g_object_unref(texture);
 }
 
-void nsgtk_button_set_style(GtkButton *button, const char *icon_name, const char *label, int button_type)
+void nsgtk_button_set_style(GtkButton *button,
+			    const char *icon_name,
+			    const char *label,
+			    int button_type)
 {
 	GtkWidget *box;
 	GtkWidget *image;
@@ -149,12 +180,14 @@ void nsgtk_button_set_style(GtkButton *button, const char *icon_name, const char
 		image = gtk_image_new_from_icon_name(icon_name);
 		gtk_image_set_icon_size(GTK_IMAGE(image), GTK_ICON_SIZE_LARGE);
 		gtk_box_append(GTK_BOX(box), image);
-		gtk_box_append(GTK_BOX(box), gtk_label_new_with_mnemonic(label));
+		gtk_box_append(GTK_BOX(box),
+			       gtk_label_new_with_mnemonic(label));
 		gtk_button_set_child(button, box);
 		break;
 
 	case 4: /* Text icons only */
-		gtk_button_set_child(button, gtk_label_new_with_mnemonic(label));
+		gtk_button_set_child(button,
+				     gtk_label_new_with_mnemonic(label));
 		break;
 
 	case 2: /* Large icons */
@@ -183,7 +216,9 @@ struct nsgtk_menu_action {
 	gpointer data;
 };
 
-static void nsgtk_menu_action_activate(GSimpleAction *action, GVariant *parameter, gpointer data)
+static void nsgtk_menu_action_activate(GSimpleAction *action,
+				       GVariant *parameter,
+				       gpointer data)
 {
 	struct nsgtk_menu_action *ma = data;
 
@@ -195,19 +230,26 @@ static void nsgtk_menu_action_free(gpointer data, GClosure *closure)
 	g_free(data);
 }
 
-void nsgtk_action_map_add_menu_action(GActionMap *map, const char *name, GCallback handler, gpointer data)
+void nsgtk_action_map_add_menu_action(GActionMap *map,
+				      const char *name,
+				      GCallback handler,
+				      gpointer data)
 {
 	GSimpleAction *action;
 	struct nsgtk_menu_action *ma;
 
 	ma = g_new(struct nsgtk_menu_action, 1);
-	ma->handler = (gboolean (*)(GtkWidget *, gpointer))(void (*)(void))handler;
+	ma->handler = (gboolean (*)(GtkWidget *, gpointer))(
+		void (*)(void))handler;
 	ma->data = data;
 
 	action = g_simple_action_new(name, NULL);
-	g_signal_connect_data(action, "activate",
-			      G_CALLBACK(nsgtk_menu_action_activate), ma,
-			      nsgtk_menu_action_free, 0);
+	g_signal_connect_data(action,
+			      "activate",
+			      G_CALLBACK(nsgtk_menu_action_activate),
+			      ma,
+			      nsgtk_menu_action_free,
+			      0);
 	g_action_map_add_action(map, G_ACTION(action));
 	g_object_unref(action);
 }
@@ -221,15 +263,20 @@ struct nsgtk_file_dialog {
 	bool save;
 };
 
-static void nsgtk_file_dialog_done(GObject *source, GAsyncResult *result, gpointer data)
+static void
+nsgtk_file_dialog_done(GObject *source, GAsyncResult *result, gpointer data)
 {
 	struct nsgtk_file_dialog *fd = data;
 	GFile *file;
 
 	if (fd->save) {
-		file = gtk_file_dialog_save_finish(GTK_FILE_DIALOG(source), result, NULL);
+		file = gtk_file_dialog_save_finish(GTK_FILE_DIALOG(source),
+						   result,
+						   NULL);
 	} else {
-		file = gtk_file_dialog_open_finish(GTK_FILE_DIALOG(source), result, NULL);
+		file = gtk_file_dialog_open_finish(GTK_FILE_DIALOG(source),
+						   result,
+						   NULL);
 	}
 	if (file != NULL) {
 		char *filename = g_file_get_path(file);
@@ -243,7 +290,8 @@ static void nsgtk_file_dialog_done(GObject *source, GAsyncResult *result, gpoint
 	g_free(fd);
 }
 
-static GtkFileDialog *nsgtk_file_dialog_new(const char *title, const char *folder)
+static GtkFileDialog *
+nsgtk_file_dialog_new(const char *title, const char *folder)
 {
 	GtkFileDialog *dialog;
 
@@ -257,7 +305,12 @@ static GtkFileDialog *nsgtk_file_dialog_new(const char *title, const char *folde
 	return dialog;
 }
 
-void nsgtk_save_file_dialog(GtkWindow *parent, const char *title, const char *folder, const char *name, void (*callback)(const char *filename, void *pw), void *pw)
+void nsgtk_save_file_dialog(GtkWindow *parent,
+			    const char *title,
+			    const char *folder,
+			    const char *name,
+			    void (*callback)(const char *filename, void *pw),
+			    void *pw)
 {
 	GtkFileDialog *dialog;
 	struct nsgtk_file_dialog *fd;
@@ -275,7 +328,11 @@ void nsgtk_save_file_dialog(GtkWindow *parent, const char *title, const char *fo
 	g_object_unref(dialog);
 }
 
-void nsgtk_open_file_dialog(GtkWindow *parent, const char *title, const char *folder, void (*callback)(const char *filename, void *pw), void *pw)
+void nsgtk_open_file_dialog(GtkWindow *parent,
+			    const char *title,
+			    const char *folder,
+			    void (*callback)(const char *filename, void *pw),
+			    void *pw)
 {
 	GtkFileDialog *dialog;
 	struct nsgtk_file_dialog *fd;
@@ -299,18 +356,26 @@ struct nsgtk_wait {
 	char *filename;
 };
 
-static void nsgtk_alert_done(GObject *source, GAsyncResult *result, gpointer data)
+static void
+nsgtk_alert_done(GObject *source, GAsyncResult *result, gpointer data)
 {
 	struct nsgtk_wait *wait = data;
 
-	wait->button = gtk_alert_dialog_choose_finish(GTK_ALERT_DIALOG(source), result, NULL);
+	wait->button = gtk_alert_dialog_choose_finish(GTK_ALERT_DIALOG(source),
+						      result,
+						      NULL);
 	wait->done = true;
 }
 
-int nsgtk_alert_choose(GtkWindow *parent, const char *message, const char *detail, const char *const *buttons, int cancel_button, int default_button)
+int nsgtk_alert_choose(GtkWindow *parent,
+		       const char *message,
+		       const char *detail,
+		       const char *const *buttons,
+		       int cancel_button,
+		       int default_button)
 {
 	GtkAlertDialog *dialog;
-	struct nsgtk_wait wait = { false, cancel_button, NULL };
+	struct nsgtk_wait wait = {false, cancel_button, NULL};
 
 	dialog = gtk_alert_dialog_new("%s", message);
 	if (detail != NULL) {
@@ -331,12 +396,15 @@ int nsgtk_alert_choose(GtkWindow *parent, const char *message, const char *detai
 	return wait.button;
 }
 
-static void nsgtk_save_done(GObject *source, GAsyncResult *result, gpointer data)
+static void
+nsgtk_save_done(GObject *source, GAsyncResult *result, gpointer data)
 {
 	struct nsgtk_wait *wait = data;
 	GFile *file;
 
-	file = gtk_file_dialog_save_finish(GTK_FILE_DIALOG(source), result, NULL);
+	file = gtk_file_dialog_save_finish(GTK_FILE_DIALOG(source),
+					   result,
+					   NULL);
 	if (file != NULL) {
 		wait->filename = g_file_get_path(file);
 		g_object_unref(file);
@@ -344,10 +412,13 @@ static void nsgtk_save_done(GObject *source, GAsyncResult *result, gpointer data
 	wait->done = true;
 }
 
-char *nsgtk_save_file_choose(GtkWindow *parent, const char *title, const char *folder, const char *name)
+char *nsgtk_save_file_choose(GtkWindow *parent,
+			     const char *title,
+			     const char *folder,
+			     const char *name)
 {
 	GtkFileDialog *dialog;
-	struct nsgtk_wait wait = { false, 0, NULL };
+	struct nsgtk_wait wait = {false, 0, NULL};
 
 	dialog = nsgtk_file_dialog_new(title, folder);
 	if (name != NULL) {
@@ -362,7 +433,9 @@ char *nsgtk_save_file_choose(GtkWindow *parent, const char *title, const char *f
 	return wait.filename;
 }
 
-guint nsgtk_builder_add_from_resource(GtkBuilder *builder, const gchar *resource_path, GError **error)
+guint nsgtk_builder_add_from_resource(GtkBuilder *builder,
+				      const gchar *resource_path,
+				      GError **error)
 {
 	return gtk_builder_add_from_resource(builder, resource_path, error);
 }

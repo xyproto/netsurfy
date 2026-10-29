@@ -44,25 +44,25 @@
 
 struct throbber {
 	/** The applied theme (or NULL to use the default) */
-	struct theme_descriptor	*theme;
+	struct theme_descriptor *theme;
 
 	/** The widget dimensions. */
-	int			x_min, y_min;
+	int x_min, y_min;
 
 	/** The window and icon details. */
-	wimp_w			window;
-	wimp_i			icon;
-	os_box			extent;
-	osspriteop_area		*sprites;
-	bool			hidden;
-	bool			shaded;
+	wimp_w window;
+	wimp_i icon;
+	os_box extent;
+	osspriteop_area *sprites;
+	bool hidden;
+	bool shaded;
 
 	/** The animation details. */
-	int			max_frame;
-	int			current_frame;
-	os_t			last_update;
-	char			sprite_name[THROBBER_SPRITE_NAME_LENGTH];
-	bool			force_redraw;
+	int max_frame;
+	int current_frame;
+	os_t last_update;
+	char sprite_name[THROBBER_SPRITE_NAME_LENGTH];
+	bool force_redraw;
 };
 
 /*
@@ -76,7 +76,7 @@ static bool ro_gui_throbber_icon_resize(struct throbber *throbber);
 
 struct throbber *ro_gui_throbber_create(struct theme_descriptor *theme)
 {
-	struct throbber		*throbber;
+	struct throbber *throbber;
 
 	/* Allocate memory. */
 
@@ -90,9 +90,12 @@ struct throbber *ro_gui_throbber_create(struct theme_descriptor *theme)
 	 * fails, we give up and return a failure.
 	 */
 
-	if (!ro_gui_theme_get_throbber_data(theme, &throbber->max_frame,
-			&throbber->x_min, &throbber->y_min, NULL,
-			&throbber->force_redraw)) {
+	if (!ro_gui_theme_get_throbber_data(theme,
+					    &throbber->max_frame,
+					    &throbber->x_min,
+					    &throbber->y_min,
+					    NULL,
+					    &throbber->force_redraw)) {
 		free(throbber);
 		return NULL;
 	}
@@ -122,8 +125,10 @@ struct throbber *ro_gui_throbber_create(struct theme_descriptor *theme)
 /* This is an exported interface documented in throbber.h */
 
 bool ro_gui_throbber_rebuild(struct throbber *throbber,
-		struct theme_descriptor *theme, theme_style style,
-		wimp_w window, bool shaded)
+			     struct theme_descriptor *theme,
+			     theme_style style,
+			     wimp_w window,
+			     bool shaded)
 {
 	if (throbber == NULL)
 		return false;
@@ -138,9 +143,12 @@ bool ro_gui_throbber_rebuild(struct throbber *throbber,
 
 	strcpy(throbber->sprite_name, "throbber0");
 
-	if (!ro_gui_theme_get_throbber_data(theme, &throbber->max_frame,
-			&throbber->x_min, &throbber->y_min, NULL,
-			&throbber->force_redraw)) {
+	if (!ro_gui_theme_get_throbber_data(theme,
+					    &throbber->max_frame,
+					    &throbber->x_min,
+					    &throbber->y_min,
+					    NULL,
+					    &throbber->force_redraw)) {
 		free(throbber);
 		return false;
 	}
@@ -163,7 +171,8 @@ void ro_gui_throbber_destroy(struct throbber *throbber)
 /* This is an exported interface documented in throbber.h */
 
 bool ro_gui_throbber_get_dims(struct throbber *throbber,
-		int *width, int *height)
+			      int *width,
+			      int *height)
 {
 	if (throbber == NULL)
 		return false;
@@ -184,7 +193,10 @@ bool ro_gui_throbber_get_dims(struct throbber *throbber,
 /* This is an exported interface documented in throbber.h */
 
 bool ro_gui_throbber_set_extent(struct throbber *throbber,
-		int x0, int y0, int x1, int y1)
+				int x0,
+				int y0,
+				int x1,
+				int y1)
 {
 	if (throbber == NULL)
 		return false;
@@ -193,16 +205,17 @@ bool ro_gui_throbber_set_extent(struct throbber *throbber,
 		return false;
 
 	if (throbber->extent.x0 == x0 && throbber->extent.y0 == y0 &&
-			throbber->extent.x1 == x1 &&
-			throbber->extent.y1 == y1)
+	    throbber->extent.x1 == x1 && throbber->extent.y1 == y1)
 		return true;
 
 	/* Redraw the relevant bits of the toolbar. */
 
 	if (throbber->window != NULL && throbber->icon != -1) {
 		xwimp_force_redraw(throbber->window,
-				throbber->extent.x0, throbber->extent.y0,
-				throbber->extent.x1, throbber->extent.y1);
+				   throbber->extent.x0,
+				   throbber->extent.y0,
+				   throbber->extent.x1,
+				   throbber->extent.y1);
 		xwimp_force_redraw(throbber->window, x0, y0, x1, y1);
 	}
 
@@ -227,8 +240,8 @@ bool ro_gui_throbber_set_extent(struct throbber *throbber,
 
 bool ro_gui_throbber_icon_update(struct throbber *throbber)
 {
-	wimp_icon_create	icon;
-	os_error		*error;
+	wimp_icon_create icon;
+	os_error *error;
 
 	if (throbber == NULL || throbber->window == NULL)
 		return false;
@@ -240,17 +253,20 @@ bool ro_gui_throbber_icon_update(struct throbber *throbber)
 		icon.icon.extent.x1 = throbber->extent.x1;
 		icon.icon.extent.y1 = throbber->extent.y1;
 		icon.icon.flags = wimp_ICON_SPRITE | wimp_ICON_INDIRECTED |
-				wimp_ICON_HCENTRED | wimp_ICON_VCENTRED;
+				  wimp_ICON_HCENTRED | wimp_ICON_VCENTRED;
 		icon.icon.data.indirected_sprite.id =
-				(osspriteop_id) throbber->sprite_name;
+			(osspriteop_id)throbber->sprite_name;
 		icon.icon.data.indirected_sprite.area = throbber->sprites;
 		icon.icon.data.indirected_sprite.size =
-				THROBBER_SPRITE_NAME_LENGTH;
+			THROBBER_SPRITE_NAME_LENGTH;
 
 		error = xwimp_create_icon(&icon, &throbber->icon);
 		if (error != NULL) {
-			NSLOG(netsurf, INFO, "xwimp_create_icon: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_create_icon: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 			throbber->icon = -1;
 			return false;
@@ -261,8 +277,11 @@ bool ro_gui_throbber_icon_update(struct throbber *throbber)
 	} else if (throbber->hidden && throbber->icon != -1) {
 		error = xwimp_delete_icon(throbber->window, throbber->icon);
 		if (error != NULL) {
-			NSLOG(netsurf, INFO, "xwimp_delete_icon: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_delete_icon: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 			return false;
 		}
@@ -272,7 +291,8 @@ bool ro_gui_throbber_icon_update(struct throbber *throbber)
 
 	if (throbber->icon != -1)
 		ro_gui_set_icon_shaded_state(throbber->window,
-				throbber->icon, throbber->shaded);
+					     throbber->icon,
+					     throbber->shaded);
 
 	return true;
 }
@@ -294,12 +314,18 @@ bool ro_gui_throbber_icon_resize(struct throbber *throbber)
 
 	if (throbber->icon != -1) {
 		os_error *error;
-		error = xwimp_resize_icon(throbber->window, throbber->icon,
-				throbber->extent.x0, throbber->extent.y0,
-				throbber->extent.x1, throbber->extent.y1);
+		error = xwimp_resize_icon(throbber->window,
+					  throbber->icon,
+					  throbber->extent.x0,
+					  throbber->extent.y0,
+					  throbber->extent.x1,
+					  throbber->extent.y1);
 		if (error != NULL) {
-			NSLOG(netsurf, INFO, "xwimp_resize_icon: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_resize_icon: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 			throbber->icon = -1;
 			return false;
@@ -325,11 +351,14 @@ bool ro_gui_throbber_hide(struct throbber *throbber, bool hide)
 
 /* This is an exported interface documented in throbber.h */
 
-bool ro_gui_throbber_help_suffix(struct throbber *throbber, wimp_i i,
-		os_coord *mouse, wimp_window_state *state,
-		wimp_mouse_state buttons, const char **suffix)
+bool ro_gui_throbber_help_suffix(struct throbber *throbber,
+				 wimp_i i,
+				 os_coord *mouse,
+				 wimp_window_state *state,
+				 wimp_mouse_state buttons,
+				 const char **suffix)
 {
-	os_coord			pos;
+	os_coord pos;
 
 	if (throbber == NULL || throbber->hidden)
 		return false;
@@ -340,8 +369,7 @@ bool ro_gui_throbber_help_suffix(struct throbber *throbber, wimp_i i,
 	pos.y = mouse->y - state->visible.y1 + state->yscroll;
 
 	if (pos.x < throbber->extent.x0 || pos.x > throbber->extent.x1 ||
-			pos.y < throbber->extent.y0 ||
-			pos.y > throbber->extent.y1)
+	    pos.y < throbber->extent.y0 || pos.y > throbber->extent.y1)
 		return false;
 
 	/* Return a hard-coded icon number that matches the one that was
@@ -362,8 +390,8 @@ bool ro_gui_throbber_help_suffix(struct throbber *throbber, wimp_i i,
 
 bool ro_gui_throbber_animate(struct throbber *throbber)
 {
-	os_t	t;
-	char	sprite_name[THROBBER_SPRITE_NAME_LENGTH];
+	os_t t;
+	char sprite_name[THROBBER_SPRITE_NAME_LENGTH];
 
 	if (throbber == NULL || throbber->hidden)
 		return (throbber == NULL) ? false : true;
@@ -376,7 +404,7 @@ bool ro_gui_throbber_animate(struct throbber *throbber)
 	 */
 
 	if ((t < (throbber->last_update + THROBBER_ANIMATE_INTERVAL)) &&
-			(throbber->current_frame > 0))
+	    (throbber->current_frame > 0))
 		return true;
 
 	throbber->last_update = t;
@@ -385,11 +413,12 @@ bool ro_gui_throbber_animate(struct throbber *throbber)
 	if (throbber->current_frame > throbber->max_frame)
 		throbber->current_frame = 1;
 
-	snprintf(sprite_name, THROBBER_SPRITE_NAME_LENGTH,
-			"throbber%i",
-			min(max(throbber->current_frame, 0), 999));
-	ro_gui_set_icon_string(throbber->window, throbber->icon,
-			sprite_name, true);
+	snprintf(sprite_name,
+		 THROBBER_SPRITE_NAME_LENGTH,
+		 "throbber%i",
+		 min(max(throbber->current_frame, 0), 999));
+	ro_gui_set_icon_string(
+		throbber->window, throbber->icon, sprite_name, true);
 
 	if (throbber->force_redraw)
 		ro_gui_force_redraw_icon(throbber->window, throbber->icon);
@@ -402,22 +431,21 @@ bool ro_gui_throbber_animate(struct throbber *throbber)
 
 bool ro_gui_throbber_stop(struct throbber *throbber)
 {
-	char	sprite_name[THROBBER_SPRITE_NAME_LENGTH];
+	char sprite_name[THROBBER_SPRITE_NAME_LENGTH];
 
 	if (throbber == NULL || throbber->hidden ||
-			throbber->current_frame == 0)
+	    throbber->current_frame == 0)
 		return (throbber == FALSE) ? false : true;
 
 	throbber->current_frame = 0;
 	throbber->last_update = 0;
 
 	strcpy(sprite_name, "throbber0");
-	ro_gui_set_icon_string(throbber->window, throbber->icon,
-			sprite_name, true);
+	ro_gui_set_icon_string(
+		throbber->window, throbber->icon, sprite_name, true);
 
 	if (throbber->force_redraw)
 		ro_gui_force_redraw_icon(throbber->window, throbber->icon);
 
 	return true;
 }
-

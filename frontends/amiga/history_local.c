@@ -82,7 +82,9 @@ ami_history_local_destroy(struct ami_history_local_window *history_local_win)
 	res = local_history_fini(history_local_win->session);
 	if (res == NSERROR_OK) {
 		ami_gui_set_history_window(history_local_win->gw, NULL);
-		res = ami_corewindow_fini(&history_local_win->core); /* closes the window for us */
+		res = ami_corewindow_fini(
+			&history_local_win
+				 ->core); /* closes the window for us */
 		history_local_window = NULL;
 	}
 	return res;
@@ -106,10 +108,10 @@ static void ami_history_local_destroy_cw(struct ami_corewindow *ami_cw)
  * \param y location of event
  * \return NSERROR_OK on success otherwise apropriate error code
  */
-static nserror
-ami_history_local_mouse(struct ami_corewindow *ami_cw,
-					browser_mouse_state mouse_state,
-					int x, int y)
+static nserror ami_history_local_mouse(struct ami_corewindow *ami_cw,
+				       browser_mouse_state mouse_state,
+				       int x,
+				       int y)
 {
 	struct ami_history_local_window *history_local_win;
 	/* technically degenerate container of */
@@ -117,7 +119,8 @@ ami_history_local_mouse(struct ami_corewindow *ami_cw,
 
 	nsurl *url;
 
-	if(local_history_get_url(history_local_win->session, x, y, &url) == NSERROR_OK) {
+	if (local_history_get_url(history_local_win->session, x, y, &url) ==
+	    NSERROR_OK) {
 		if (url == NULL) {
 			SetGadgetAttrs(
 				(struct Gadget *)ami_cw->objects[GID_CW_DRAW],
@@ -138,7 +141,8 @@ ami_history_local_mouse(struct ami_corewindow *ami_cw,
 		}
 	}
 
-	local_history_mouse_action(history_local_win->session, mouse_state, x, y);
+	local_history_mouse_action(
+		history_local_win->session, mouse_state, x, y);
 
 	return NSERROR_OK;
 }
@@ -159,7 +163,7 @@ ami_history_local_key(struct ami_corewindow *ami_cw, uint32_t nskey)
 	history_local_win = (struct ami_history_local_window *)ami_cw;
 
 	if (local_history_keypress(history_local_win->session, nskey)) {
-			return NSERROR_OK;
+		return NSERROR_OK;
 	}
 	return NSERROR_NOT_IMPLEMENTED;
 }
@@ -174,75 +178,61 @@ ami_history_local_key(struct ami_corewindow *ami_cw, uint32_t nskey)
  * \param ctx The drawing context
  * \return NSERROR_OK on success otherwise apropriate error code
  */
-static nserror
-ami_history_local_draw(struct ami_corewindow *ami_cw, int x, int y, struct rect *r, struct redraw_context *ctx)
+static nserror ami_history_local_draw(struct ami_corewindow *ami_cw,
+				      int x,
+				      int y,
+				      struct rect *r,
+				      struct redraw_context *ctx)
 {
 	struct ami_history_local_window *history_local_win;
 
 	/* technically degenerate container of */
 	history_local_win = (struct ami_history_local_window *)ami_cw;
 
-	//ctx->plot->clip(ctx, r); //??
+	// ctx->plot->clip(ctx, r); //??
 	local_history_redraw(history_local_win->session, x, y, r, ctx);
 
 	return NSERROR_OK;
 }
 
-static nserror
-ami_history_local_create_window(struct ami_history_local_window *history_local_win)
+static nserror ami_history_local_create_window(
+	struct ami_history_local_window *history_local_win)
 {
-	struct ami_corewindow *ami_cw = (struct ami_corewindow *)&history_local_win->core;
+	struct ami_corewindow *ami_cw =
+		(struct ami_corewindow *)&history_local_win->core;
 	ULONG refresh_mode = WA_SmartRefresh;
 
-	if(nsoption_bool(window_simple_refresh) == true) {
+	if (nsoption_bool(window_simple_refresh) == true) {
 		refresh_mode = WA_SimpleRefresh;
 	}
 
-	ami_cw->objects[GID_CW_WIN] = WindowObj,
-		WA_ScreenTitle, ami_gui_get_screen_title(),
-		WA_Title, ami_cw->wintitle,
-		WA_Activate, TRUE,
-		WA_DepthGadget, TRUE,
-		WA_DragBar, TRUE,
-		WA_CloseGadget, TRUE,
-		WA_SizeGadget, TRUE,
-		WA_SizeBRight, TRUE,
-		WA_Width, 100,
-		WA_Height, 100,
-		WA_PubScreen, ami_gui_get_screen(),
-		WA_ReportMouse, TRUE,
-		refresh_mode, TRUE,
-		WA_IDCMP, IDCMP_MOUSEMOVE | IDCMP_MOUSEBUTTONS | IDCMP_NEWSIZE |
-				IDCMP_RAWKEY | IDCMP_GADGETUP | IDCMP_IDCMPUPDATE |
-				IDCMP_EXTENDEDMOUSE | IDCMP_SIZEVERIFY | IDCMP_REFRESHWINDOW,
-		WINDOW_IDCMPHook, &ami_cw->idcmp_hook,
-		WINDOW_IDCMPHookBits, IDCMP_IDCMPUPDATE | IDCMP_EXTENDEDMOUSE |
-				IDCMP_SIZEVERIFY | IDCMP_REFRESHWINDOW,
-		WINDOW_SharedPort, ami_gui_get_shared_msgport(),
-		WINDOW_HorizProp, 1,
-		WINDOW_VertProp, 1,
-		WINDOW_UserData, history_local_win,
-//		WINDOW_MenuStrip, NULL,
-		WINDOW_MenuUserData, WGUD_HOOK,
-		WINDOW_IconifyGadget, FALSE,
+	ami_cw->objects[GID_CW_WIN] = WindowObj, WA_ScreenTitle,
+	ami_gui_get_screen_title(), WA_Title, ami_cw->wintitle, WA_Activate,
+	TRUE, WA_DepthGadget, TRUE, WA_DragBar, TRUE, WA_CloseGadget, TRUE,
+	WA_SizeGadget, TRUE, WA_SizeBRight, TRUE, WA_Width, 100, WA_Height, 100,
+	WA_PubScreen, ami_gui_get_screen(), WA_ReportMouse, TRUE, refresh_mode,
+	TRUE, WA_IDCMP,
+	IDCMP_MOUSEMOVE | IDCMP_MOUSEBUTTONS | IDCMP_NEWSIZE | IDCMP_RAWKEY |
+		IDCMP_GADGETUP | IDCMP_IDCMPUPDATE | IDCMP_EXTENDEDMOUSE |
+		IDCMP_SIZEVERIFY | IDCMP_REFRESHWINDOW,
+	WINDOW_IDCMPHook, &ami_cw->idcmp_hook, WINDOW_IDCMPHookBits,
+	IDCMP_IDCMPUPDATE | IDCMP_EXTENDEDMOUSE | IDCMP_SIZEVERIFY |
+		IDCMP_REFRESHWINDOW,
+	WINDOW_SharedPort, ami_gui_get_shared_msgport(), WINDOW_HorizProp, 1,
+	WINDOW_VertProp, 1, WINDOW_UserData, history_local_win,
+	//		WINDOW_MenuStrip, NULL,
+		WINDOW_MenuUserData, WGUD_HOOK, WINDOW_IconifyGadget, FALSE,
 #ifdef __amigaos4__
-		WINDOW_UniqueID, "NS_HISTORY_LOCAL_WIN",
-		WINDOW_PopupGadget, TRUE,
+	WINDOW_UniqueID, "NS_HISTORY_LOCAL_WIN", WINDOW_PopupGadget, TRUE,
 #endif
-		WINDOW_Position, WPOS_CENTERSCREEN,
-		WINDOW_ParentGroup, ami_cw->objects[GID_CW_MAIN] = LayoutVObj,
-			LAYOUT_AddChild, ami_cw->objects[GID_CW_DRAW] = SpaceObj,
-				GA_ID, GID_CW_DRAW,
-				SPACE_Transparent, TRUE,
-				SPACE_BevelStyle, BVS_DISPLAY,
-				SPACE_MinWidth, 50,
-				SPACE_MinHeight, 50,
-				GA_RelVerify, TRUE,
-   			SpaceEnd,
-		EndGroup,
+	WINDOW_Position, WPOS_CENTERSCREEN, WINDOW_ParentGroup,
+	ami_cw->objects[GID_CW_MAIN] = LayoutVObj, LAYOUT_AddChild,
+	ami_cw->objects[GID_CW_DRAW] = SpaceObj, GA_ID, GID_CW_DRAW,
+	SPACE_Transparent, TRUE, SPACE_BevelStyle, BVS_DISPLAY, SPACE_MinWidth,
+	50, SPACE_MinHeight, 50, GA_RelVerify, TRUE, SpaceEnd, EndGroup,
 	EndWindow;
 
-	if(ami_cw->objects[GID_CW_WIN] == NULL) {
+	if (ami_cw->objects[GID_CW_WIN] == NULL) {
 		return NSERROR_NOMEM;
 	}
 
@@ -256,11 +246,13 @@ nserror ami_history_local_present(struct gui_window *gw)
 	nserror res;
 	int width, height;
 
-	if(history_local_window != NULL) {
-		//windowtofront()
+	if (history_local_window != NULL) {
+		// windowtofront()
 
 		if (ami_gui_get_history_window(gw) != NULL) {
-			res = local_history_set(ami_gui_get_history_window(gw)->session, ami_gui_get_browser_window(gw));
+			res = local_history_set(
+				ami_gui_get_history_window(gw)->session,
+				ami_gui_get_browser_window(gw));
 			return res;
 		}
 
@@ -309,14 +301,14 @@ nserror ami_history_local_present(struct gui_window *gw)
 		return res;
 	}
 
-	res = local_history_get_size(ncwin->session,
-					     &width,
-					     &height);
+	res = local_history_get_size(ncwin->session, &width, &height);
 
 	SetAttrs(ncwin->core.objects[GID_CW_WIN],
-		WA_InnerWidth, width,
-		WA_InnerHeight, height,
-		TAG_DONE);
+		 WA_InnerWidth,
+		 width,
+		 WA_InnerHeight,
+		 height,
+		 TAG_DONE);
 
 	ncwin->gw = gw;
 	history_local_window = ncwin;
@@ -326,4 +318,3 @@ nserror ami_history_local_present(struct gui_window *gw)
 
 	return NSERROR_OK;
 }
-

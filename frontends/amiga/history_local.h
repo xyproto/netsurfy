@@ -24,6 +24,6 @@ struct ami_history_local_window;
 
 /** Open the global history viewer */
 nserror ami_history_local_present(struct gui_window *gw);
-nserror ami_history_local_destroy(struct ami_history_local_window *history_local_win);
+nserror
+ami_history_local_destroy(struct ami_history_local_window *history_local_win);
 #endif
-

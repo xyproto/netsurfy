@@ -33,7 +33,8 @@ struct browser_window;
  * \param bw The browser window to show the history of
  * \return NSERROR_OK on success else appropriate error code on faliure.
  */
-nserror nsgtk_local_history_present(GtkWidget *anchor, struct browser_window *bw);
+nserror
+nsgtk_local_history_present(GtkWidget *anchor, struct browser_window *bw);
 
 
 /**

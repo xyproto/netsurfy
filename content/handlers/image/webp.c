@@ -49,14 +49,13 @@
  *
  * create a content object for the webp
  */
-static nserror
-webp_create(const content_handler *handler,
-	      lwc_string *imime_type,
-	      const struct http_parameter *params,
-	      llcache_handle *llcache,
-	      const char *fallback_charset,
-	      bool quirks,
-	      struct content **c)
+static nserror webp_create(const content_handler *handler,
+			   lwc_string *imime_type,
+			   const struct http_parameter *params,
+			   llcache_handle *llcache,
+			   const char *fallback_charset,
+			   bool quirks,
+			   struct content **c)
 {
 	struct content *webp_c; /* webp content object */
 	nserror res;
@@ -86,8 +85,7 @@ webp_create(const content_handler *handler,
 /**
  * create a bitmap from webp content.
  */
-static struct bitmap *
-webp_cache_convert(struct content *c)
+static struct bitmap *webp_cache_convert(struct content *c)
 {
 	const uint8_t *source_data; /* webp source data */
 	size_t source_size; /* length of webp source data */
@@ -144,18 +142,27 @@ webp_cache_convert(struct content *c)
 		webp_fmt.layout = BITMAP_LAYOUT_R8G8B8A8;
 		fallthrough;
 	case BITMAP_LAYOUT_R8G8B8A8:
-		decoded = WebPDecodeRGBAInto(source_data, source_size, pixels,
-				rowstride * webpfeatures.height, rowstride);
+		decoded = WebPDecodeRGBAInto(source_data,
+					     source_size,
+					     pixels,
+					     rowstride * webpfeatures.height,
+					     rowstride);
 		break;
 
 	case BITMAP_LAYOUT_B8G8R8A8:
-		decoded = WebPDecodeBGRAInto(source_data, source_size, pixels,
-				rowstride * webpfeatures.height, rowstride);
+		decoded = WebPDecodeBGRAInto(source_data,
+					     source_size,
+					     pixels,
+					     rowstride * webpfeatures.height,
+					     rowstride);
 		break;
 
 	case BITMAP_LAYOUT_A8R8G8B8:
-		decoded = WebPDecodeARGBInto(source_data, source_size, pixels,
-				rowstride * webpfeatures.height, rowstride);
+		decoded = WebPDecodeARGBInto(source_data,
+					     source_size,
+					     pixels,
+					     rowstride * webpfeatures.height,
+					     rowstride);
 		break;
 	}
 	if (decoded == NULL) {
@@ -183,7 +190,7 @@ webp_cache_convert(struct content *c)
 static bool webp_convert(struct content *c)
 {
 	int res;
-	const uint8_t* data;
+	const uint8_t *data;
 	size_t data_size;
 	int width;
 	int height;
@@ -253,8 +260,6 @@ static const content_handler webp_content_handler = {
 	.no_share = false,
 };
 
-static const char *webp_types[] = {
-	"image/webp"
-};
+static const char *webp_types[] = {"image/webp"};
 
 CONTENT_FACTORY_REGISTER_TYPES(nswebp, webp_types, webp_content_handler);

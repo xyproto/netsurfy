@@ -54,37 +54,38 @@ static ULONG drag_icon_height;
 static BOOL drag_in_progress = FALSE;
 static bool ami_autoscroll = false;
 
-void gui_drag_save_object(struct gui_window *g, struct hlcache_handle *c,
-		gui_save_type type)
+void gui_drag_save_object(struct gui_window *g,
+			  struct hlcache_handle *c,
+			  gui_save_type type)
 {
 	const char *filetype = NULL;
 
 	/* Check we are running on Workbench */
-	if(nsoption_charp(pubscreen_name) == NULL) return;
-	if(strcmp(nsoption_charp(pubscreen_name), "Workbench")) return;
+	if (nsoption_charp(pubscreen_name) == NULL)
+		return;
+	if (strcmp(nsoption_charp(pubscreen_name), "Workbench"))
+		return;
 
-	switch(type) {
-		case GUI_SAVE_OBJECT_ORIG: // object
-		case GUI_SAVE_SOURCE:
-			filetype = ami_mime_content_to_filetype(c);
+	switch (type) {
+	case GUI_SAVE_OBJECT_ORIG: // object
+	case GUI_SAVE_SOURCE:
+		filetype = ami_mime_content_to_filetype(c);
 		break;
-		case GUI_SAVE_COMPLETE:
-			filetype = "drawer";
+	case GUI_SAVE_COMPLETE:
+		filetype = "drawer";
 		break;
-		case GUI_SAVE_OBJECT_NATIVE:
+	case GUI_SAVE_OBJECT_NATIVE:
 #ifdef WITH_NS_SVG
-			if(ami_mime_compare(c, "svg") == true)
-			{
-				filetype = "dr2d";
-			}
-			else
+		if (ami_mime_compare(c, "svg") == true) {
+			filetype = "dr2d";
+		} else
 #endif
-			{
-				filetype = "ilbm";
-			}
+		{
+			filetype = "ilbm";
+		}
 		break;
 
-		default:
+	default:
 		break;
 	}
 
@@ -115,34 +116,39 @@ void ami_drag_save(struct Window *win)
 	ami_drag_icon_close(NULL);
 	ami_autoscroll = true;
 
-	if(nsoption_charp(pubscreen_name) && (strcmp(nsoption_charp(pubscreen_name),"Workbench") == 0))
-	{
-		which = WhichWorkbenchObject(NULL,scrn->MouseX,scrn->MouseY,
-									WBOBJA_Type,&type,
-									WBOBJA_FullPath,&path,
-									WBOBJA_FullPathSize,1024,
-									WBOBJA_DrawerPath,&dpath,
-									WBOBJA_DrawerPathSize,1024,
-									TAG_DONE);
+	if (nsoption_charp(pubscreen_name) &&
+	    (strcmp(nsoption_charp(pubscreen_name), "Workbench") == 0)) {
+		which = WhichWorkbenchObject(NULL,
+					     scrn->MouseX,
+					     scrn->MouseY,
+					     WBOBJA_Type,
+					     &type,
+					     WBOBJA_FullPath,
+					     &path,
+					     WBOBJA_FullPathSize,
+					     1024,
+					     WBOBJA_DrawerPath,
+					     &dpath,
+					     WBOBJA_DrawerPathSize,
+					     1024,
+					     TAG_DONE);
 	}
 
-	if((which == WBO_DRAWER) || ((which == WBO_ICON) && (type > WBDRAWER)))
-	{
-		strcpy(path,dpath);
-	}
-	else if(which == WBO_NONE)
-	{
-		if(drag_save == GUI_SAVE_TEXT_SELECTION)
+	if ((which == WBO_DRAWER) ||
+	    ((which == WBO_ICON) && (type > WBDRAWER))) {
+		strcpy(path, dpath);
+	} else if (which == WBO_NONE) {
+		if (drag_save == GUI_SAVE_TEXT_SELECTION)
 			ami_drag_selection((struct gui_window *)drag_save_data);
-		else ami_gui_beep();
+		else
+			ami_gui_beep();
 
 		drag_save = 0;
 		drag_save_data = NULL;
 		return;
 	}
 
-	if(path[0] == '\0')
-	{
+	if (path[0] == '\0') {
 		ami_gui_beep();
 		drag_save = 0;
 		drag_save_data = NULL;
@@ -151,51 +157,56 @@ void ami_drag_save(struct Window *win)
 
 	ami_update_pointer(win, GUI_POINTER_WAIT);
 
-	switch(drag_save)
-	{
-		case GUI_SAVE_OBJECT_ORIG: // object
-		case GUI_SAVE_SOURCE:
-		{
-			struct hlcache_handle *c = drag_save_data;
+	switch (drag_save) {
+	case GUI_SAVE_OBJECT_ORIG: // object
+	case GUI_SAVE_SOURCE: {
+		struct hlcache_handle *c = drag_save_data;
 
-			AddPart(path, content_get_title(c), 1024);
-			ami_file_save(AMINS_SAVE_SOURCE, path, win, c, NULL, NULL);
-		}
+		AddPart(path, content_get_title(c), 1024);
+		ami_file_save(AMINS_SAVE_SOURCE, path, win, c, NULL, NULL);
+	} break;
+
+	case GUI_SAVE_TEXT_SELECTION: // selection
+		AddPart(path, "netsurf_text_selection", 1024);
+		struct gui_window *g = (struct gui_window *)drag_save_data;
+		ami_file_save(AMINS_SAVE_SELECTION,
+			      path,
+			      win,
+			      NULL,
+			      NULL,
+			      ami_gui_get_browser_window(g));
 		break;
 
-		case GUI_SAVE_TEXT_SELECTION: // selection
-			AddPart(path,"netsurf_text_selection",1024);
-			struct gui_window *g = (struct gui_window *) drag_save_data;
-			ami_file_save(AMINS_SAVE_SELECTION, path, win, NULL, NULL, ami_gui_get_browser_window(g));
-		break;
+	case GUI_SAVE_COMPLETE: {
+		struct hlcache_handle *c = drag_save_data;
 
-		case GUI_SAVE_COMPLETE:
-		{
-			struct hlcache_handle *c = drag_save_data;
+		AddPart(path, content_get_title(c), 1024);
+		ami_file_save(AMINS_SAVE_COMPLETE,
+			      path,
+			      win,
+			      c,
+			      ami_gui_get_favicon(drag_save_gui),
+			      NULL);
+	} break;
 
-			AddPart(path, content_get_title(c), 1024);
-			ami_file_save(AMINS_SAVE_COMPLETE, path, win, c, ami_gui_get_favicon(drag_save_gui), NULL);
-		}
-		break;
+	case GUI_SAVE_OBJECT_NATIVE: {
+		struct hlcache_handle *c = drag_save_data;
+		AddPart(path, content_get_title(c), 1024);
 
-		case GUI_SAVE_OBJECT_NATIVE:
-		{
-			struct hlcache_handle *c = drag_save_data;
-			AddPart(path, content_get_title(c), 1024);
+		ami_file_save(AMINS_SAVE_IFF, path, win, c, NULL, NULL);
+	} break;
 
-			ami_file_save(AMINS_SAVE_IFF, path, win, c, NULL, NULL);
-		}
-		break;
-
-		default:
-			NSLOG(netsurf, INFO,
-			      "Unsupported drag save operation %d", drag_save);
+	default:
+		NSLOG(netsurf,
+		      INFO,
+		      "Unsupported drag save operation %d",
+		      drag_save);
 		break;
 	}
 
 	drag_save = 0;
 	drag_save_data = NULL;
-	
+
 	ami_update_pointer(win, GUI_POINTER_DEFAULT);
 }
 
@@ -207,59 +218,82 @@ void ami_drag_icon_show(struct Window *win, const char *type)
 	struct Screen *scrn = ami_gui_get_screen();
 	drag_in_progress = TRUE;
 
-	if(nsoption_bool(drag_save_icons) == false)
-	{
+	if (nsoption_bool(drag_save_icons) == false) {
 		ami_update_pointer(win, AMI_GUI_POINTER_DRAG);
 		return;
-	}
-	else
-	{
+	} else {
 		ami_update_pointer(win, GUI_POINTER_DEFAULT);
 	}
 
-	if(!strcmp(type, "drawer")) deftype = WBDRAWER;
+	if (!strcmp(type, "drawer"))
+		deftype = WBDRAWER;
 
-	dobj = GetIconTags(NULL, ICONGETA_GetDefaultName, type,
-					    ICONGETA_GetDefaultType, deftype,
-					    TAG_DONE);
+	dobj = GetIconTags(NULL,
+			   ICONGETA_GetDefaultName,
+			   type,
+			   ICONGETA_GetDefaultType,
+			   deftype,
+			   TAG_DONE);
 
 	IconControl(dobj,
-                  ICONCTRLA_GetWidth,&width,
-                  ICONCTRLA_GetHeight,&height,
-                  TAG_DONE);
+		    ICONCTRLA_GetWidth,
+		    &width,
+		    ICONCTRLA_GetHeight,
+		    &height,
+		    TAG_DONE);
 
 	drag_icon_width = width;
 	drag_icon_height = height;
 
 	drag_icon = OpenWindowTags(NULL,
-				WA_Left, scrn->MouseX - (width/2),
-				WA_Top, scrn->MouseY - (height/2),
-				WA_Width, width,
-				WA_Height, height,
-				WA_PubScreen, scrn,
-				WA_Borderless, TRUE,
-				WA_ToolBox, TRUE,
-				WA_StayTop, TRUE,
-				WA_Opaqueness, 128,
-				WA_OverrideOpaqueness, TRUE,
-				TAG_DONE);
+				   WA_Left,
+				   scrn->MouseX - (width / 2),
+				   WA_Top,
+				   scrn->MouseY - (height / 2),
+				   WA_Width,
+				   width,
+				   WA_Height,
+				   height,
+				   WA_PubScreen,
+				   scrn,
+				   WA_Borderless,
+				   TRUE,
+				   WA_ToolBox,
+				   TRUE,
+				   WA_StayTop,
+				   TRUE,
+				   WA_Opaqueness,
+				   128,
+				   WA_OverrideOpaqueness,
+				   TRUE,
+				   TAG_DONE);
 
-/* probably need layouticon and drawinfo stuff too */
+	/* probably need layouticon and drawinfo stuff too */
 
-	DrawIconState(drag_icon->RPort, dobj, NULL, 0, 0, IDS_NORMAL,
-		ICONDRAWA_Frameless, TRUE,
-		ICONDRAWA_Borderless, TRUE,
-		TAG_DONE);
+	DrawIconState(drag_icon->RPort,
+		      dobj,
+		      NULL,
+		      0,
+		      0,
+		      IDS_NORMAL,
+		      ICONDRAWA_Frameless,
+		      TRUE,
+		      ICONDRAWA_Borderless,
+		      TRUE,
+		      TAG_DONE);
 }
 
 bool ami_drag_icon_move(void)
 {
-	if(drag_icon == NULL) return FALSE;
+	if (drag_icon == NULL)
+		return FALSE;
 	struct Screen *scrn = ami_gui_get_screen();
 
-	ChangeWindowBox(drag_icon, scrn->MouseX - (drag_icon_width / 2),
-		scrn->MouseY - (drag_icon_height / 2),
-		drag_icon_width, drag_icon_height);
+	ChangeWindowBox(drag_icon,
+			scrn->MouseX - (drag_icon_width / 2),
+			scrn->MouseY - (drag_icon_height / 2),
+			drag_icon_width,
+			drag_icon_height);
 
 	return ami_autoscroll;
 }
@@ -272,8 +306,10 @@ bool ami_drag_icon_move(void)
 
 void ami_drag_icon_close(struct Window *win)
 {
-	if(drag_icon) CloseWindow(drag_icon);
-	if(win) ami_update_pointer(win, GUI_POINTER_DEFAULT);
+	if (drag_icon)
+		CloseWindow(drag_icon);
+	if (win)
+		ami_update_pointer(win, GUI_POINTER_DEFAULT);
 	drag_icon = NULL;
 	drag_in_progress = FALSE;
 }
@@ -285,8 +321,10 @@ BOOL ami_drag_in_progress(void)
 
 bool ami_drag_has_data(void)
 {
-	if(drag_save_data != NULL) return true;
-		else return false;
+	if (drag_save_data != NULL)
+		return true;
+	else
+		return false;
 }
 
 #else
@@ -295,8 +333,9 @@ bool ami_drag_has_data(void)
 #include "utils/errors.h"
 #include "amiga/drag.h"
 
-void gui_drag_save_object(struct gui_window *g, struct hlcache_handle *c,
-		gui_save_type type)
+void gui_drag_save_object(struct gui_window *g,
+			  struct hlcache_handle *c,
+			  gui_save_type type)
 {
 }
 
@@ -331,4 +370,3 @@ bool ami_drag_has_data(void)
 	return false;
 }
 #endif
-

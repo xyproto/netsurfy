@@ -59,30 +59,28 @@ static void nsgtk_PDF_set_pass(GtkButton *w, gpointer data)
 	char *op, *op1;
 	char *up, *up1;
 
-	op = strdup(gtk_editable_get_text(
-			GTK_EDITABLE(gtk_builder_get_object(password_builder,
-					"entryPDFOwnerPassword"))));
-	op1 = strdup(gtk_editable_get_text(
-			GTK_EDITABLE(gtk_builder_get_object(password_builder,
-					"entryPDFOwnerPassword1"))));
-	up = strdup(gtk_editable_get_text(
-			GTK_EDITABLE(gtk_builder_get_object(password_builder,
-					"entryPDFUserPassword"))));
-	up1 = strdup(gtk_editable_get_text(
-			GTK_EDITABLE(gtk_builder_get_object(password_builder,
-					"entryPDFUserPassword1"))));
+	op = strdup(gtk_editable_get_text(GTK_EDITABLE(gtk_builder_get_object(
+		password_builder, "entryPDFOwnerPassword"))));
+	op1 = strdup(gtk_editable_get_text(GTK_EDITABLE(gtk_builder_get_object(
+		password_builder, "entryPDFOwnerPassword1"))));
+	up = strdup(gtk_editable_get_text(GTK_EDITABLE(gtk_builder_get_object(
+		password_builder, "entryPDFUserPassword"))));
+	up1 = strdup(gtk_editable_get_text(GTK_EDITABLE(gtk_builder_get_object(
+		password_builder, "entryPDFUserPassword1"))));
 
 
 	if (op[0] == '\0') {
-		gtk_label_set_text(GTK_LABEL(gtk_builder_get_object(password_builder,
-				"labelInfo")),
-				"Owner password must be at least 1 character long:");
+		gtk_label_set_text(
+			GTK_LABEL(gtk_builder_get_object(password_builder,
+							 "labelInfo")),
+			"Owner password must be at least 1 character long:");
 		free(op);
 		free(up);
 	} else if (!strcmp(op, up)) {
-		gtk_label_set_text(GTK_LABEL(gtk_builder_get_object(password_builder,
-				"labelInfo")),
-				"User and owner passwords must be different:");
+		gtk_label_set_text(
+			GTK_LABEL(gtk_builder_get_object(password_builder,
+							 "labelInfo")),
+			"User and owner passwords must be different:");
 		free(op);
 		free(up);
 	} else if (!strcmp(op, op1) && !strcmp(up, up1)) {
@@ -101,8 +99,9 @@ static void nsgtk_PDF_set_pass(GtkButton *w, gpointer data)
 
 		free(path);
 	} else {
-		gtk_label_set_text(GTK_LABEL(gtk_builder_get_object(password_builder,
-				"labelInfo")), "Passwords not confirmed:");
+		gtk_label_set_text(GTK_LABEL(gtk_builder_get_object(
+					   password_builder, "labelInfo")),
+				   "Passwords not confirmed:");
 		free(op);
 		free(up);
 	}
@@ -142,8 +141,8 @@ static void nsgtk_pdf_password(char **owner_pass, char **user_pass, char *path)
 	}
 
 
-	wnd = GTK_WINDOW(gtk_builder_get_object(password_builder,
-						"wndPDFPassword"));
+	wnd = GTK_WINDOW(
+		gtk_builder_get_object(password_builder, "wndPDFPassword"));
 
 	data = malloc(5 * sizeof(void *));
 
@@ -161,10 +160,14 @@ static void nsgtk_pdf_password(char **owner_pass, char **user_pass, char *path)
 	no = GTK_BUTTON(gtk_builder_get_object(password_builder,
 					       "buttonPDFNoPassword"));
 
-	g_signal_connect(G_OBJECT(ok), "clicked",
-			 G_CALLBACK(nsgtk_PDF_set_pass), (gpointer)data);
-	g_signal_connect(G_OBJECT(no), "clicked",
-			 G_CALLBACK(nsgtk_PDF_no_pass), (gpointer)data);
+	g_signal_connect(G_OBJECT(ok),
+			 "clicked",
+			 G_CALLBACK(nsgtk_PDF_set_pass),
+			 (gpointer)data);
+	g_signal_connect(G_OBJECT(no),
+			 "clicked",
+			 G_CALLBACK(nsgtk_PDF_no_pass),
+			 (gpointer)data);
 
 	gtk_widget_set_visible(GTK_WIDGET(wnd), TRUE);
 }

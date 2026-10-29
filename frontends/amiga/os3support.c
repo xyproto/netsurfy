@@ -45,51 +45,42 @@ BOOL __check_abort_enabled = FALSE; /* Disable clib2's Ctrl-C handler */
 
 #define SUCCESS (TRUE)
 #define FAILURE (FALSE)
-#define NO      !
+#define NO !
 
 /* Utility */
-struct FormatContext
-{
-	STRPTR	Index;
-	LONG	Size;
-	BOOL	Overflow;
+struct FormatContext {
+	STRPTR Index;
+	LONG Size;
+	BOOL Overflow;
 };
 
-STATIC VOID ASM
-StuffChar(
-	REG(a3, struct FormatContext *	Context),
-	REG(d0, UBYTE Char))
+STATIC VOID ASM StuffChar(REG(a3, struct FormatContext *Context),
+			  REG(d0, UBYTE Char))
 {
 	/* Is there still room? */
-	if(Context->Size > 0)
-	{
+	if (Context->Size > 0) {
 		(*Context->Index) = Char;
 
 		Context->Index++;
 		Context->Size--;
 
 		/* Is there only a single character left? */
-		if(Context->Size == 1)
-		{
+		if (Context->Size == 1) {
 			/* Provide null-termination. */
 			(*Context->Index) = '\0';
 
 			/* Don't store any further characters. */
 			Context->Size = 0;
 		}
-	}
-	else
-	{
+	} else {
 		Context->Overflow = TRUE;
 	}
 }
 
-BOOL
-VSPrintfN(
-	LONG			MaxLen,
-	STRPTR			Buffer,
-	const STRPTR	FormatString,
-	const va_list	VarArgs)
+BOOL VSPrintfN(LONG MaxLen,
+	       STRPTR Buffer,
+	       const STRPTR FormatString,
+	       const va_list VarArgs)
 {
 	BOOL result = FAILURE;
 
@@ -98,61 +89,59 @@ VSPrintfN(
 	 * the terminating NUL)
 	 */
 
-	if (Buffer == NULL || FormatString == NULL) return(result);
+	if (Buffer == NULL || FormatString == NULL)
+		return (result);
 
-	if(MaxLen > 1)
-	{
+	if (MaxLen > 1) {
 		struct FormatContext Context;
 
-		Context.Index		= Buffer;
-		Context.Size		= MaxLen;
-		Context.Overflow	= FALSE;
+		Context.Index = Buffer;
+		Context.Size = MaxLen;
+		Context.Overflow = FALSE;
 
-		RawDoFmt(FormatString,(APTR)VarArgs,(VOID (*)())StuffChar,(APTR)&Context);
+		RawDoFmt(FormatString,
+			 (APTR)VarArgs,
+			 (VOID (*)())StuffChar,
+			 (APTR)&Context);
 
-		if(NO Context.Overflow)
+		if (NO Context.Overflow)
 			result = SUCCESS;
 	}
 
-	return(result);
+	return (result);
 }
 
-BOOL
-SPrintfN(
-	LONG			MaxLen,
-	STRPTR			Buffer,
-	const STRPTR	FormatString,
-					...)
+BOOL SPrintfN(LONG MaxLen, STRPTR Buffer, const STRPTR FormatString, ...)
 {
 	va_list VarArgs;
 	BOOL result = FAILURE;
 
 	/* format a text, varargs version */
 
-	if (Buffer == NULL && FormatString == NULL) return result;
+	if (Buffer == NULL && FormatString == NULL)
+		return result;
 
-	va_start(VarArgs,FormatString);
-	result = VSPrintfN(MaxLen,Buffer,FormatString,VarArgs);
+	va_start(VarArgs, FormatString);
+	result = VSPrintfN(MaxLen, Buffer, FormatString, VarArgs);
 	va_end(VarArgs);
 
-	return(result);
+	return (result);
 }
 
 char *ASPrintf(const char *fmt, ...)
 {
-  int r;
-  va_list ap;
-  static char buffer[2048];
-  char *rbuf;
-  
-  va_start(ap, fmt);
-  r = VSPrintfN(2048, buffer, (const STRPTR)fmt, ap);
-  va_end(ap);
+	int r;
+	va_list ap;
+	static char buffer[2048];
+	char *rbuf;
+
+	va_start(ap, fmt);
+	r = VSPrintfN(2048, buffer, (const STRPTR)fmt, ap);
+	va_end(ap);
 
 	r = strlen(buffer);
-	rbuf = AllocVec(r+1, MEMF_CLEAR);
-	if (rbuf != NULL)
-	{
+	rbuf = AllocVec(r + 1, MEMF_CLEAR);
+	if (rbuf != NULL) {
 		strncpy(rbuf, buffer, r);
 	}
 	return rbuf;
@@ -161,13 +150,13 @@ char *ASPrintf(const char *fmt, ...)
 /* C */
 char *strlwr(char *str)
 {
-  size_t i;
-  size_t len = strlen(str);
+	size_t i;
+	size_t len = strlen(str);
 
-  for(i=0; i<len; i++)
-  str[i] = tolower((unsigned char)str[i]);
+	for (i = 0; i < len; i++)
+		str[i] = tolower((unsigned char)str[i]);
 
-  return str;
+	return str;
 }
 
 char *strsep(char **s1, const char *s2)
@@ -189,9 +178,10 @@ int alphasort(const struct dirent **d1, const struct dirent **d2)
 	return 0;
 }
 
-int scandir(const char *dir, struct dirent ***namelist,
-  int (*filter)(const struct dirent *),
-  int (*compar)(const struct dirent **, const struct dirent **))
+int scandir(const char *dir,
+	    struct dirent ***namelist,
+	    int (*filter)(const struct dirent *),
+	    int (*compar)(const struct dirent **, const struct dirent **))
 {
 	/*\todo stub function, needs writing, preferably into clib2 */
 	return 0;
@@ -203,7 +193,8 @@ long long int strtoll(const char *nptr, char **endptr, int base)
 }
 
 /* Diskfont */
-struct OutlineFont *OpenOutlineFont(STRPTR fileName, struct List *list, ULONG flags)
+struct OutlineFont *
+OpenOutlineFont(STRPTR fileName, struct List *list, ULONG flags)
 {
 	BPTR fh = 0;
 	int64 size = 0;
@@ -216,19 +207,20 @@ struct OutlineFont *OpenOutlineFont(STRPTR fileName, struct List *list, ULONG fl
 	char *p = 0;
 	struct FontContentsHeader fch;
 
-	if((p = strrchr(fileName, '.')))
+	if ((p = strrchr(fileName, '.')))
 		*p = '\0';
 
 	fontpath = (STRPTR)ASPrintf("FONTS:%s.font", fileName);
 	fh = Open(fontpath, MODE_OLDFILE);
 
-	if(fh == 0) {
+	if (fh == 0) {
 		NSLOG(netsurf, INFO, "Unable to open FONT %s", fontpath);
 		FreeVec(fontpath);
 		return NULL;
 	}
 
-	if(Read(fh, &fch, sizeof(struct FontContentsHeader)) != sizeof(struct FontContentsHeader)) {
+	if (Read(fh, &fch, sizeof(struct FontContentsHeader)) !=
+	    sizeof(struct FontContentsHeader)) {
 		NSLOG(netsurf, INFO, "Unable to read FONT %s", fontpath);
 		FreeVec(fontpath);
 		Close(fh);
@@ -237,7 +229,7 @@ struct OutlineFont *OpenOutlineFont(STRPTR fileName, struct List *list, ULONG fl
 
 	Close(fh);
 
-	if(fch.fch_FileID != OFCH_ID) {
+	if (fch.fch_FileID != OFCH_ID) {
 		NSLOG(netsurf, INFO, "%s is not an outline font!", fontpath);
 		FreeVec(fontpath);
 		return NULL;
@@ -246,29 +238,31 @@ struct OutlineFont *OpenOutlineFont(STRPTR fileName, struct List *list, ULONG fl
 	otagpath = (STRPTR)ASPrintf("FONTS:%s.otag", fileName);
 	fh = Open(otagpath, MODE_OLDFILE);
 
-	if(p) *p = '.';
+	if (p)
+		*p = '.';
 
-	if(fh == 0) {
+	if (fh == 0) {
 		NSLOG(netsurf, INFO, "Unable to open OTAG %s", otagpath);
 		FreeVec(otagpath);
 		return NULL;
 	}
-	
+
 	size = GetFileSize(fh);
 	buffer = (UBYTE *)malloc(size);
-	if(buffer == NULL) {
+	if (buffer == NULL) {
 		NSLOG(netsurf, INFO, "Unable to allocate memory");
 		Close(fh);
 		FreeVec(otagpath);
 		return NULL;
 	}
-	
+
 	Read(fh, buffer, size);
 	Close(fh);
 
-	/* The first tag is supposed to be OT_FileIdent and should equal 'size' */
+	/* The first tag is supposed to be OT_FileIdent and should equal 'size'
+	 */
 	struct TagItem *tag = (struct TagItem *)buffer;
-	if((tag->ti_Tag != OT_FileIdent) || (tag->ti_Data != (ULONG)size)) {
+	if ((tag->ti_Tag != OT_FileIdent) || (tag->ti_Data != (ULONG)size)) {
 		NSLOG(netsurf, INFO, "Invalid OTAG file");
 		free(buffer);
 		FreeVec(otagpath);
@@ -276,14 +270,14 @@ struct OutlineFont *OpenOutlineFont(STRPTR fileName, struct List *list, ULONG fl
 	}
 
 	/* Relocate all the OT_Indirect tags */
-	while((ti = NextTagItem(&tag))) {
-		if(ti->ti_Tag & OT_Indirect) {
+	while ((ti = NextTagItem(&tag))) {
+		if (ti->ti_Tag & OT_Indirect) {
 			ti->ti_Data += (ULONG)buffer;
 		}
 	}
 
 	/* Find OT_Engine and open the font engine */
-	if(ti = FindTagItem(OT_Engine, buffer)) {
+	if (ti = FindTagItem(OT_Engine, buffer)) {
 		NSLOG(netsurf, INFO, "Using font engine %s", ti->ti_Data);
 		fname = ASPrintf("%s.library", ti->ti_Data);
 	} else {
@@ -295,7 +289,7 @@ struct OutlineFont *OpenOutlineFont(STRPTR fileName, struct List *list, ULONG fl
 
 	BulletBase = (struct BulletBase *)OpenLibrary(fname, 0L);
 
-	if(BulletBase == NULL) {
+	if (BulletBase == NULL) {
 		NSLOG(netsurf, INFO, "Unable to open font engine %s", fname);
 		free(buffer);
 		FreeVec(fname);
@@ -305,14 +299,17 @@ struct OutlineFont *OpenOutlineFont(STRPTR fileName, struct List *list, ULONG fl
 	FreeVec(fname);
 
 	gengine = OpenEngine();
-	
+
 	SetInfo(gengine,
-		OT_OTagPath, (ULONG)otagpath,
-		OT_OTagList, (ULONG)buffer,
+		OT_OTagPath,
+		(ULONG)otagpath,
+		OT_OTagList,
+		(ULONG)buffer,
 		TAG_DONE);
-	
+
 	of = calloc(1, sizeof(struct OutlineFont));
-	if(of == NULL) return NULL;
+	if (of == NULL)
+		return NULL;
 
 	of->BulletBase = BulletBase;
 	of->GEngine = gengine;
@@ -325,10 +322,10 @@ struct OutlineFont *OpenOutlineFont(STRPTR fileName, struct List *list, ULONG fl
 void CloseOutlineFont(struct OutlineFont *of, struct List *list)
 {
 	struct BulletBase *BulletBase = of->BulletBase;
-	
+
 	CloseEngine(of->GEngine);
 	CloseLibrary((struct Library *)BulletBase);
-	
+
 	FreeVec(of->OTagPath);
 	free(of->olf_OTagList);
 	free(of);
@@ -340,7 +337,8 @@ int64 GetFileSize(BPTR fh)
 {
 	int32 size = 0;
 	struct FileInfoBlock *fib = AllocDosObject(DOS_FIB, NULL);
-	if(fib == NULL) return 0;
+	if (fib == NULL)
+		return 0;
 
 	ExamineFH(fh, fib);
 	size = fib->fib_Size;
@@ -351,12 +349,12 @@ int64 GetFileSize(BPTR fh)
 
 void FreeSysObject(ULONG type, APTR obj)
 {
-	switch(type) {
-		case ASOT_PORT:
-			DeleteMsgPort(obj);
+	switch (type) {
+	case ASOT_PORT:
+		DeleteMsgPort(obj);
 		break;
-		case ASOT_IOREQUEST:
-			DeleteIORequest(obj);
+	case ASOT_IOREQUEST:
+		DeleteIORequest(obj);
 		break;
 	}
 }
@@ -367,8 +365,7 @@ struct Node *GetHead(struct List *list)
 {
 	struct Node *res = NULL;
 
-	if ((NULL != list) && (NULL != list->lh_Head->ln_Succ))
-	{
+	if ((NULL != list) && (NULL != list->lh_Head->ln_Succ)) {
 		res = list->lh_Head;
 	}
 	return res;
@@ -376,13 +373,15 @@ struct Node *GetHead(struct List *list)
 
 struct Node *GetPred(struct Node *node)
 {
-	if (node->ln_Pred->ln_Pred == NULL) return NULL;
+	if (node->ln_Pred->ln_Pred == NULL)
+		return NULL;
 	return node->ln_Pred;
 }
 
 struct Node *GetSucc(struct Node *node)
 {
-	if (node->ln_Succ->ln_Succ == NULL) return NULL;
+	if (node->ln_Succ->ln_Succ == NULL)
+		return NULL;
 	return node->ln_Succ;
 }
 
@@ -397,7 +396,7 @@ uint32 GetAttrs(Object *obj, Tag tag1, ...)
 
 	va_start(ap, tag1);
 
-	while(tag != TAG_DONE) {
+	while (tag != TAG_DONE) {
 		data = va_arg(ap, ULONG);
 		i += GetAttr(tag, obj, (void *)data);
 		tag = va_arg(ap, Tag);
@@ -407,7 +406,10 @@ uint32 GetAttrs(Object *obj, Tag tag1, ...)
 	return i;
 }
 
-ULONG RefreshSetGadgetAttrsA(struct Gadget *g, struct Window *w, struct Requester *r, struct TagItem *tags)
+ULONG RefreshSetGadgetAttrsA(struct Gadget *g,
+			     struct Window *w,
+			     struct Requester *r,
+			     struct TagItem *tags)
 {
 	ULONG retval;
 	BOOL changedisabled = FALSE;
@@ -415,27 +417,35 @@ ULONG RefreshSetGadgetAttrsA(struct Gadget *g, struct Window *w, struct Requeste
 	struct TagItem *ti;
 
 	if (w) {
-		if ((ti = FindTagItem(GA_Disabled,tags)) && (ti->ti_Data != FALSE)) {
+		if ((ti = FindTagItem(GA_Disabled, tags)) &&
+		    (ti->ti_Data != FALSE)) {
 			changedisabled = TRUE;
- 			disabled = g->Flags & GFLG_DISABLED;
- 		}
- 	}
-	retval = SetGadgetAttrsA(g,w,r,tags);
-	if (w && (retval || (changedisabled && disabled != (g->Flags & GFLG_DISABLED)))) {
-		RefreshGList(g,w,r,1);
+			disabled = g->Flags & GFLG_DISABLED;
+		}
+	}
+	retval = SetGadgetAttrsA(g, w, r, tags);
+	if (w && (retval ||
+		  (changedisabled && disabled != (g->Flags & GFLG_DISABLED)))) {
+		RefreshGList(g, w, r, 1);
 		retval = 1;
 	}
 	return retval;
 }
 
-ULONG RefreshSetGadgetAttrs(struct Gadget *g, struct Window *w, struct Requester *r, Tag tag1, ...)
+ULONG RefreshSetGadgetAttrs(struct Gadget *g,
+			    struct Window *w,
+			    struct Requester *r,
+			    Tag tag1,
+			    ...)
 {
-	return RefreshSetGadgetAttrsA(g,w,r,(struct TagItem *) &tag1);
+	return RefreshSetGadgetAttrsA(g, w, r, (struct TagItem *)&tag1);
 }
 
-APTR NewObject(struct IClass * classPtr, CONST_STRPTR classID, ULONG tagList, ...)
+APTR NewObject(struct IClass *classPtr,
+	       CONST_STRPTR classID,
+	       ULONG tagList,
+	       ...)
 {
-	return NewObjectA(classPtr, classID, (const struct TagItem *) &tagList);
+	return NewObjectA(classPtr, classID, (const struct TagItem *)&tagList);
 }
 #endif
-

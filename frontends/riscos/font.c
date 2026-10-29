@@ -57,28 +57,37 @@ static void nsfont_check_fonts(void)
 	font_f font;
 	os_error *error;
 
-	error = xfont_find_font("Homerton.Medium\\ELatin1",
-			160, 160, 0, 0, &font, 0, 0);
+	error = xfont_find_font(
+		"Homerton.Medium\\ELatin1", 160, 160, 0, 0, &font, 0, 0);
 	if (error) {
 		if (error->errnum == error_FILE_NOT_FOUND) {
 			xwimp_start_task("TaskWindow -wimpslot 200K -quit "
-					"<NetSurf$Dir>.FixFonts", 0);
+					 "<NetSurf$Dir>.FixFonts",
+					 0);
 			die("FontBadInst");
 		} else {
-			NSLOG(netsurf, INFO, "xfont_find_font: 0x%x: %s",
-			      error->errnum, error->errmess);
-			snprintf(s, sizeof s, messages_get("FontError"),
-					error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xfont_find_font: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
+			snprintf(s,
+				 sizeof s,
+				 messages_get("FontError"),
+				 error->errmess);
 			die(s);
 		}
 	}
 
 	error = xfont_lose_font(font);
 	if (error) {
-		NSLOG(netsurf, INFO, "xfont_lose_font: 0x%x: %s",
-		      error->errnum, error->errmess);
-		snprintf(s, sizeof s, messages_get("FontError"),
-				error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xfont_lose_font: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
+		snprintf(
+			s, sizeof s, messages_get("FontError"), error->errmess);
 		die(s);
 	}
 }
@@ -92,8 +101,8 @@ static void nsfont_check_fonts(void)
  *                   family is not available
  * \param  fallback  font family to use if family is not available either
  */
-static void nsfont_check_option(char **option, const char *family,
-		const char *fallback)
+static void
+nsfont_check_option(char **option, const char *family, const char *fallback)
 {
 	if (*option && !nsfont_exists(*option)) {
 		free(*option);
@@ -124,36 +133,39 @@ void nsfont_init(void)
 	code = rufl_init();
 	if (code != rufl_OK) {
 		if (code == rufl_FONT_MANAGER_ERROR)
-			NSLOG(netsurf, INFO,
-                              "rufl_init: rufl_FONT_MANAGER_ERROR: 0x%x: %s",
-                              rufl_fm_error->errnum,
-                              rufl_fm_error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "rufl_init: rufl_FONT_MANAGER_ERROR: 0x%x: %s",
+			      rufl_fm_error->errnum,
+			      rufl_fm_error->errmess);
 		else
 			NSLOG(netsurf, INFO, "rufl_init: 0x%x", code);
 		die("The Unicode font library could not be initialized. "
-				"Please report this to the developers.");
+		    "Please report this to the developers.");
 	}
 	NSLOG(netsurf, INFO, "RUfl initialised");
 
 	if (rufl_family_list_entries == 0)
 		die("No fonts could be found. At least one font must be "
-				"installed.");
+		    "installed.");
 
 	fallback = nsfont_fallback_font();
 
 	nsfont_check_option(&nsoption_charp(font_sans), "Homerton", fallback);
 	nsfont_check_option(&nsoption_charp(font_serif), "Trinity", fallback);
 	nsfont_check_option(&nsoption_charp(font_mono), "Corpus", fallback);
-	nsfont_check_option(&nsoption_charp(font_cursive), "Churchill", fallback);
+	nsfont_check_option(&nsoption_charp(font_cursive),
+			    "Churchill",
+			    fallback);
 	nsfont_check_option(&nsoption_charp(font_fantasy), "Sassoon", fallback);
 
 	if (nsoption_int(font_default) != PLOT_FONT_FAMILY_SANS_SERIF &&
-            nsoption_int(font_default) != PLOT_FONT_FAMILY_SERIF &&
-            nsoption_int(font_default) != PLOT_FONT_FAMILY_MONOSPACE &&
-            nsoption_int(font_default) != PLOT_FONT_FAMILY_CURSIVE &&
-            nsoption_int(font_default) != PLOT_FONT_FAMILY_FANTASY) {
-            nsoption_set_int(font_default, PLOT_FONT_FAMILY_SANS_SERIF);
-        }
+	    nsoption_int(font_default) != PLOT_FONT_FAMILY_SERIF &&
+	    nsoption_int(font_default) != PLOT_FONT_FAMILY_MONOSPACE &&
+	    nsoption_int(font_default) != PLOT_FONT_FAMILY_CURSIVE &&
+	    nsoption_int(font_default) != PLOT_FONT_FAMILY_FANTASY) {
+		nsoption_set_int(font_default, PLOT_FONT_FAMILY_SANS_SERIF);
+	}
 }
 
 
@@ -167,7 +179,8 @@ const char *nsfont_fallback_font(void)
 	const char *fallback = "Homerton";
 
 	if (!nsfont_exists(fallback)) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "Homerton not found, dumping RUfl family list");
 		for (unsigned int i = 0; i < rufl_family_list_entries; i++) {
 			NSLOG(netsurf, INFO, "'%s'", rufl_family_list[i]);
@@ -185,7 +198,7 @@ const char *nsfont_fallback_font(void)
 static int nsfont_list_cmp(const void *keyval, const void *datum)
 {
 	const char *key = keyval;
-	const char * const *entry = datum;
+	const char *const *entry = datum;
 	return strcasecmp(key, *entry);
 }
 
@@ -198,9 +211,11 @@ static int nsfont_list_cmp(const void *keyval, const void *datum)
  */
 bool nsfont_exists(const char *font_family)
 {
-	if (bsearch(font_family, rufl_family_list,
-			rufl_family_list_entries, sizeof rufl_family_list[0],
-			nsfont_list_cmp))
+	if (bsearch(font_family,
+		    rufl_family_list,
+		    rufl_family_list_entries,
+		    sizeof rufl_family_list[0],
+		    nsfont_list_cmp))
 		return true;
 	return false;
 }
@@ -215,10 +230,10 @@ bool nsfont_exists(const char *font_family)
  * \param  width   updated to width of string[0..length)
  * \return  true on success, false on error and error reported
  */
-static nserror
-ro_font_width(const plot_font_style_t *fstyle,
-		const char *string, size_t length,
-		int *width)
+static nserror ro_font_width(const plot_font_style_t *fstyle,
+			     const char *string,
+			     size_t length,
+			     int *width)
 {
 	const char *font_family;
 	unsigned int font_size;
@@ -231,18 +246,18 @@ ro_font_width(const plot_font_style_t *fstyle,
 		return NSERROR_OK;
 	}
 
-	code = rufl_width(font_family, font_style, font_size,
-			string, length,
-			width);
+	code = rufl_width(
+		font_family, font_style, font_size, string, length, width);
 	if (code != rufl_OK) {
 		if (code == rufl_FONT_MANAGER_ERROR)
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "rufl_width: rufl_FONT_MANAGER_ERROR: 0x%x: %s",
 			      rufl_fm_error->errnum,
 			      rufl_fm_error->errmess);
 		else
 			NSLOG(netsurf, INFO, "rufl_width: 0x%x", code);
-/* 		ro_warn_user("MiscError", "font error"); */
+		/* 		ro_warn_user("MiscError", "font error"); */
 		*width = 0;
 		return NSERROR_INVALID;
 	}
@@ -263,10 +278,12 @@ ro_font_width(const plot_font_style_t *fstyle,
  * \param  actual_x     updated to x coordinate of character closest to x
  * \return  true on success, false on error and error reported
  */
-static nserror
-ro_font_position(const plot_font_style_t *fstyle,
-		const char *string, size_t length,
-		int x, size_t *char_offset, int *actual_x)
+static nserror ro_font_position(const plot_font_style_t *fstyle,
+				const char *string,
+				size_t length,
+				int x,
+				size_t *char_offset,
+				int *actual_x)
 {
 	const char *font_family;
 	unsigned int font_size;
@@ -280,18 +297,25 @@ ro_font_position(const plot_font_style_t *fstyle,
 		return NSERROR_OK;
 	}
 
-	code = rufl_x_to_offset(font_family, font_style, font_size,
-			string, length,
-			x * 2, char_offset, actual_x);
+	code = rufl_x_to_offset(font_family,
+				font_style,
+				font_size,
+				string,
+				length,
+				x * 2,
+				char_offset,
+				actual_x);
 	if (code != rufl_OK) {
 		if (code == rufl_FONT_MANAGER_ERROR)
-			NSLOG(netsurf, INFO,
-			      "rufl_x_to_offset: rufl_FONT_MANAGER_ERROR: ""0x%x: %s",
+			NSLOG(netsurf,
+			      INFO,
+			      "rufl_x_to_offset: rufl_FONT_MANAGER_ERROR: "
+			      "0x%x: %s",
 			      rufl_fm_error->errnum,
 			      rufl_fm_error->errmess);
 		else
 			NSLOG(netsurf, INFO, "rufl_x_to_offset: 0x%x", code);
-/* 		ro_warn_user("MiscError", "font error"); */
+		/* 		ro_warn_user("MiscError", "font error"); */
 		*char_offset = 0;
 		*actual_x = 0;
 		return NSERROR_INVALID;
@@ -325,10 +349,12 @@ ro_font_position(const plot_font_style_t *fstyle,
  *
  * Returning char_offset == length means no split possible
  */
-static nserror
-ro_font_split(const plot_font_style_t *fstyle,
-		const char *string, size_t length,
-		int x, size_t *char_offset, int *actual_x)
+static nserror ro_font_split(const plot_font_style_t *fstyle,
+			     const char *string,
+			     size_t length,
+			     int x,
+			     size_t *char_offset,
+			     int *actual_x)
 {
 	const char *font_family;
 	unsigned int font_size;
@@ -342,19 +368,26 @@ ro_font_split(const plot_font_style_t *fstyle,
 		return NSERROR_OK;
 	}
 
-	code = rufl_split(font_family, font_style, font_size,
-			string, length,
-			x * 2, char_offset, actual_x);
+	code = rufl_split(font_family,
+			  font_style,
+			  font_size,
+			  string,
+			  length,
+			  x * 2,
+			  char_offset,
+			  actual_x);
 	if (code != rufl_OK) {
 		if (code == rufl_FONT_MANAGER_ERROR) {
-			NSLOG(netsurf, INFO,
-			      "rufl_split: rufl_FONT_MANAGER_ERROR: ""0x%x: %s",
+			NSLOG(netsurf,
+			      INFO,
+			      "rufl_split: rufl_FONT_MANAGER_ERROR: "
+			      "0x%x: %s",
 			      rufl_fm_error->errnum,
 			      rufl_fm_error->errmess);
 		} else {
 			NSLOG(netsurf, INFO, "rufl_split: 0x%x", code);
 		}
-/* 		ro_warn_user("MiscError", "font error"); */
+		/* 		ro_warn_user("MiscError", "font error"); */
 		*char_offset = 0;
 		*actual_x = 0;
 		return NSERROR_INVALID;
@@ -379,19 +412,23 @@ ro_font_split(const plot_font_style_t *fstyle,
 		}
 	}
 
-	code = rufl_width(font_family, font_style, font_size,
-			string, *char_offset,
-			actual_x);
+	code = rufl_width(font_family,
+			  font_style,
+			  font_size,
+			  string,
+			  *char_offset,
+			  actual_x);
 	if (code != rufl_OK) {
 		if (code == rufl_FONT_MANAGER_ERROR) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "rufl_width: rufl_FONT_MANAGER_ERROR: 0x%x: %s",
 			      rufl_fm_error->errnum,
 			      rufl_fm_error->errmess);
 		} else {
 			NSLOG(netsurf, INFO, "rufl_width: 0x%x", code);
 		}
-/* 		ro_warn_user("MiscError", "font error"); */
+		/* 		ro_warn_user("MiscError", "font error"); */
 		*char_offset = 0;
 		*actual_x = 0;
 		return NSERROR_INVALID;
@@ -412,8 +449,11 @@ ro_font_split(const plot_font_style_t *fstyle,
  * \param  y       y coordinate
  * \return  true on success, false on error and error reported
  */
-bool nsfont_paint(const plot_font_style_t *fstyle, const char *string,
-		size_t length, int x, int y)
+bool nsfont_paint(const plot_font_style_t *fstyle,
+		  const char *string,
+		  size_t length,
+		  int x,
+		  int y)
 {
 	const char *font_family;
 	unsigned int font_size;
@@ -428,11 +468,18 @@ bool nsfont_paint(const plot_font_style_t *fstyle, const char *string,
 	if (no_font_blending || print_active)
 		flags = 0;
 
-	code = rufl_paint(font_family, font_style, font_size,
-			string, length, x, y, flags);
+	code = rufl_paint(font_family,
+			  font_style,
+			  font_size,
+			  string,
+			  length,
+			  x,
+			  y,
+			  flags);
 	if (code != rufl_OK) {
 		if (code == rufl_FONT_MANAGER_ERROR) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "rufl_paint: rufl_FONT_MANAGER_ERROR: 0x%x: %s",
 			      rufl_fm_error->errnum,
 			      rufl_fm_error->errmess);
@@ -454,20 +501,19 @@ bool nsfont_paint(const plot_font_style_t *fstyle, const char *string,
  * \param  font_style   updated to font style
  */
 void nsfont_read_style(const plot_font_style_t *fstyle,
-		const char **font_family, unsigned int *font_size,
-		rufl_style *font_style)
+		       const char **font_family,
+		       unsigned int *font_size,
+		       rufl_style *font_style)
 {
-	static const rufl_style weight_table[] = {
-		rufl_WEIGHT_100,
-		rufl_WEIGHT_200,
-		rufl_WEIGHT_300,
-		rufl_WEIGHT_400,
-		rufl_WEIGHT_500,
-		rufl_WEIGHT_600,
-		rufl_WEIGHT_700,
-		rufl_WEIGHT_800,
-		rufl_WEIGHT_900
-	};
+	static const rufl_style weight_table[] = {rufl_WEIGHT_100,
+						  rufl_WEIGHT_200,
+						  rufl_WEIGHT_300,
+						  rufl_WEIGHT_400,
+						  rufl_WEIGHT_500,
+						  rufl_WEIGHT_600,
+						  rufl_WEIGHT_700,
+						  rufl_WEIGHT_800,
+						  rufl_WEIGHT_900};
 
 	*font_size = (fstyle->size * 16) / PLOT_STYLE_SCALE;
 	if (1600 < *font_size)
@@ -475,22 +521,22 @@ void nsfont_read_style(const plot_font_style_t *fstyle,
 
 	switch (fstyle->family) {
 	case PLOT_FONT_FAMILY_SANS_SERIF:
-            *font_family = nsoption_charp(font_sans);
+		*font_family = nsoption_charp(font_sans);
 		break;
 	case PLOT_FONT_FAMILY_SERIF:
-            *font_family = nsoption_charp(font_serif);
+		*font_family = nsoption_charp(font_serif);
 		break;
 	case PLOT_FONT_FAMILY_MONOSPACE:
-            *font_family = nsoption_charp(font_mono);
+		*font_family = nsoption_charp(font_mono);
 		break;
 	case PLOT_FONT_FAMILY_CURSIVE:
-            *font_family = nsoption_charp(font_cursive);
+		*font_family = nsoption_charp(font_cursive);
 		break;
 	case PLOT_FONT_FAMILY_FANTASY:
-            *font_family = nsoption_charp(font_fantasy);
+		*font_family = nsoption_charp(font_fantasy);
 		break;
 	default:
-            *font_family = nsoption_charp(font_sans);
+		*font_family = nsoption_charp(font_sans);
 		break;
 	}
 
@@ -513,11 +559,10 @@ void nsfont_read_style(const plot_font_style_t *fstyle,
  * \param  psize	receives the font size in 1/16 points
  * \param  pstyle	receives the style settings to be passed to rufl
  */
-static void
-ro_gui_wimp_desktop_font(char *family,
-			 size_t family_size,
-			 int *psize,
-			 rufl_style *pstyle)
+static void ro_gui_wimp_desktop_font(char *family,
+				     size_t family_size,
+				     int *psize,
+				     rufl_style *pstyle)
 {
 	rufl_style style = rufl_WEIGHT_400;
 	os_error *error;
@@ -532,8 +577,11 @@ ro_gui_wimp_desktop_font(char *family,
 
 	error = xwimpreadsysinfo_font(&font_handle, NULL);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimpreadsysinfo_font: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimpreadsysinfo_font: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		goto failsafe;
 	}
@@ -545,27 +593,39 @@ ro_gui_wimp_desktop_font(char *family,
 
 	error = xfont_read_identifier(font_handle, NULL, &used);
 	if (error) {
-		NSLOG(netsurf, INFO, "xfont_read_identifier: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xfont_read_identifier: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("MiscError", error->errmess);
 		goto failsafe;
 	}
 
-	if (family_size < (size_t) used + 1) {
+	if (family_size < (size_t)used + 1) {
 		NSLOG(netsurf, INFO, "desktop font name too long");
 		goto failsafe;
 	}
 
-	error = xfont_read_defn(font_handle, (byte *) family,
-			&ptx, &pty, NULL, NULL, NULL, NULL);
+	error = xfont_read_defn(font_handle,
+				(byte *)family,
+				&ptx,
+				&pty,
+				NULL,
+				NULL,
+				NULL,
+				NULL);
 	if (error) {
-		NSLOG(netsurf, INFO, "xfont_read_defn: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xfont_read_defn: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("MiscError", error->errmess);
 		goto failsafe;
 	}
 
-	for (size_t i = 0; i != (size_t) used; i++) {
+	for (size_t i = 0; i != (size_t)used; i++) {
 		if (family[i] < ' ') {
 			family[i] = 0;
 			break;
@@ -588,14 +648,18 @@ ro_gui_wimp_desktop_font(char *family,
 	*psize = max(ptx, pty);
 	*pstyle = style;
 
-	NSLOG(netsurf, INFO, "family \"%s\", size %i, style %i", family,
-	      *psize, style);
+	NSLOG(netsurf,
+	      INFO,
+	      "family \"%s\", size %i, style %i",
+	      family,
+	      *psize,
+	      style);
 
 	return;
 
 failsafe:
 	strcpy(family, "Homerton");
-	*psize = 12*16;
+	*psize = 12 * 16;
 	*pstyle = rufl_WEIGHT_400;
 }
 
@@ -607,9 +671,9 @@ failsafe:
 void ro_gui_wimp_get_desktop_font(void)
 {
 	ro_gui_wimp_desktop_font(ro_gui_desktop_font_family,
-		sizeof(ro_gui_desktop_font_family),
-		&ro_gui_desktop_font_size,
-		&ro_gui_desktop_font_style);
+				 sizeof(ro_gui_desktop_font_family),
+				 &ro_gui_desktop_font_size,
+				 &ro_gui_desktop_font_style);
 }
 
 

@@ -50,13 +50,19 @@
 
 static bool ro_gui_iconbar_click(wimp_pointer *pointer);
 
-static bool ro_gui_iconbar_menu_select(wimp_w w, wimp_i i, wimp_menu *menu,
-		wimp_selection *selection, menu_action action);
-static void ro_gui_iconbar_menu_warning(wimp_w w, wimp_i i, wimp_menu *menu,
-		wimp_selection *selection, menu_action action);
+static bool ro_gui_iconbar_menu_select(wimp_w w,
+				       wimp_i i,
+				       wimp_menu *menu,
+				       wimp_selection *selection,
+				       menu_action action);
+static void ro_gui_iconbar_menu_warning(wimp_w w,
+					wimp_i i,
+					wimp_menu *menu,
+					wimp_selection *selection,
+					menu_action action);
 
 
-static wimp_menu *ro_gui_iconbar_menu = NULL;	/**< Iconbar menu handle */
+static wimp_menu *ro_gui_iconbar_menu = NULL; /**< Iconbar menu handle */
 
 /**
  * Initialise the iconbar menus, create an icon and register the necessary
@@ -70,47 +76,48 @@ void ro_gui_iconbar_initialise(void)
 	/* Build the iconbar menu */
 
 	static const struct ns_menu iconbar_definition = {
-		"NetSurf", {
-			{ "Info", NO_ACTION, &dialog_info },
-			{ "AppHelpNoShortcut", HELP_OPEN_CONTENTS, 0 },
-			{ "Open", BROWSER_NAVIGATE_URL, 0 },
-			{ "Open.OpenURL", BROWSER_NAVIGATE_URL, &dialog_openurl },
-			{ "Open.HotlistShowNoShortcut", HOTLIST_SHOW, 0 },
-			{ "Open.HistGlobalNoShortcut", HISTORY_SHOW_GLOBAL, 0 },
-			{ "Open.ShowCookies", COOKIES_SHOW, 0 },
-			{ "Choices", CHOICES_SHOW, 0 },
-			{ "Quit", APPLICATION_QUIT, 0 },
-			{NULL, 0, 0}
-		}
-	};
+		"NetSurf",
+		{{"Info", NO_ACTION, &dialog_info},
+		 {"AppHelpNoShortcut", HELP_OPEN_CONTENTS, 0},
+		 {"Open", BROWSER_NAVIGATE_URL, 0},
+		 {"Open.OpenURL", BROWSER_NAVIGATE_URL, &dialog_openurl},
+		 {"Open.HotlistShowNoShortcut", HOTLIST_SHOW, 0},
+		 {"Open.HistGlobalNoShortcut", HISTORY_SHOW_GLOBAL, 0},
+		 {"Open.ShowCookies", COOKIES_SHOW, 0},
+		 {"Choices", CHOICES_SHOW, 0},
+		 {"Quit", APPLICATION_QUIT, 0},
+		 {NULL, 0, 0}}};
 	ro_gui_iconbar_menu = ro_gui_menu_define_menu(&iconbar_definition);
 
 	/* Create an iconbar icon. */
 
 	wimp_icon_create icon = {
 		wimp_ICON_BAR_RIGHT,
-		{ { 0, 0, 68, 68 },
-		wimp_ICON_SPRITE | wimp_ICON_HCENTRED | wimp_ICON_VCENTRED |
-				(wimp_BUTTON_CLICK << wimp_ICON_BUTTON_TYPE_SHIFT),
-		{ "!netsurf" } } };
+		{{0, 0, 68, 68},
+		 wimp_ICON_SPRITE | wimp_ICON_HCENTRED | wimp_ICON_VCENTRED |
+			 (wimp_BUTTON_CLICK << wimp_ICON_BUTTON_TYPE_SHIFT),
+		 {"!netsurf"}}};
 	error = xwimp_create_icon(&icon, 0);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_create_icon: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_create_icon: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		die(error->errmess);
 	}
 
 	/* Register handlers to look after clicks and menu actions. */
 
 	ro_gui_wimp_event_register_mouse_click(wimp_ICON_BAR,
-			ro_gui_iconbar_click);
+					       ro_gui_iconbar_click);
 
-	ro_gui_wimp_event_register_menu(wimp_ICON_BAR, ro_gui_iconbar_menu,
-			true, true);
+	ro_gui_wimp_event_register_menu(
+		wimp_ICON_BAR, ro_gui_iconbar_menu, true, true);
 	ro_gui_wimp_event_register_menu_selection(wimp_ICON_BAR,
-			ro_gui_iconbar_menu_select);
+						  ro_gui_iconbar_menu_select);
 	ro_gui_wimp_event_register_menu_warning(wimp_ICON_BAR,
-			ro_gui_iconbar_menu_warning);
+						ro_gui_iconbar_menu_warning);
 }
 
 
@@ -130,18 +137,16 @@ bool ro_gui_iconbar_click(wimp_pointer *pointer)
 	switch (pointer->buttons) {
 	case wimp_CLICK_SELECT:
 		if (nsoption_charp(homepage_url) != NULL) {
-			error = nsurl_create(nsoption_charp(homepage_url), &url);
+			error = nsurl_create(nsoption_charp(homepage_url),
+					     &url);
 		} else {
 			error = nsurl_create(NETSURF_HOMEPAGE, &url);
 		}
 
 		/* create an initial browser window */
 		if (error == NSERROR_OK) {
-			error = browser_window_create(BW_CREATE_HISTORY,
-					url,
-					NULL,
-					NULL,
-					NULL);
+			error = browser_window_create(
+				BW_CREATE_HISTORY, url, NULL, NULL, NULL);
 			nsurl_unref(url);
 		}
 		if (error != NSERROR_OK) {
@@ -170,8 +175,11 @@ bool ro_gui_iconbar_click(wimp_pointer *pointer)
  * \param  action		The selected menu action.
  */
 
-void ro_gui_iconbar_menu_warning(wimp_w w, wimp_i i, wimp_menu *menu,
-		wimp_selection *selection, menu_action action)
+void ro_gui_iconbar_menu_warning(wimp_w w,
+				 wimp_i i,
+				 wimp_menu *menu,
+				 wimp_selection *selection,
+				 menu_action action)
 {
 	if (w != wimp_ICON_BAR || i != wimp_ICON_WINDOW)
 		return;
@@ -196,8 +204,11 @@ void ro_gui_iconbar_menu_warning(wimp_w w, wimp_i i, wimp_menu *menu,
  * \return true if action accepted; else false.
  */
 
-bool ro_gui_iconbar_menu_select(wimp_w w, wimp_i i, wimp_menu *menu,
-		wimp_selection *selection, menu_action action)
+bool ro_gui_iconbar_menu_select(wimp_w w,
+				wimp_i i,
+				wimp_menu *menu,
+				wimp_selection *selection,
+				menu_action action)
 {
 	nsurl *url;
 	nserror error;
@@ -207,20 +218,18 @@ bool ro_gui_iconbar_menu_select(wimp_w w, wimp_i i, wimp_menu *menu,
 
 	switch (action) {
 	case HELP_OPEN_CONTENTS:
-		error = nsurl_create("https://www.netsurf-browser.org/documentation/", &url);
+		error = nsurl_create(
+			"https://www.netsurf-browser.org/documentation/", &url);
 		if (error == NSERROR_OK) {
-			error = browser_window_create(BW_CREATE_HISTORY,
-					url,
-					NULL,
-					NULL,
-					NULL);
+			error = browser_window_create(
+				BW_CREATE_HISTORY, url, NULL, NULL, NULL);
 			nsurl_unref(url);
 		}
 		if (error != NSERROR_OK) {
 			ro_warn_user(messages_get_errorcode(error), 0);
 		}
 		return true;
-	
+
 	case BROWSER_NAVIGATE_URL:
 		ro_gui_dialog_prepare_open_url();
 		ro_gui_dialog_open_persistent(NULL, dialog_openurl, true);
@@ -239,7 +248,8 @@ bool ro_gui_iconbar_menu_select(wimp_w w, wimp_i i, wimp_menu *menu,
 		return true;
 	case APPLICATION_QUIT:
 		if (ro_gui_prequit()) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "QUIT in response to user request");
 			riscos_done = true;
 		}
@@ -262,4 +272,3 @@ bool ro_gui_iconbar_check_menu(wimp_menu *menu)
 {
 	return (ro_gui_iconbar_menu == menu) ? true : false;
 }
-

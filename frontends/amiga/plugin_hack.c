@@ -18,7 +18,7 @@
 
 /** \file
  * Plugin=>external program handler (implementation)
-*/
+ */
 
 #include "amiga/os3support.h"
 
@@ -44,19 +44,27 @@ typedef struct amiga_plugin_hack_content {
 } amiga_plugin_hack_content;
 
 static nserror amiga_plugin_hack_create(const content_handler *handler,
-		lwc_string *imime_type, const struct http_parameter *params,
-		llcache_handle *llcache, const char *fallback_charset,
-		bool quirks, struct content **c);
+					lwc_string *imime_type,
+					const struct http_parameter *params,
+					llcache_handle *llcache,
+					const char *fallback_charset,
+					bool quirks,
+					struct content **c);
 static bool amiga_plugin_hack_convert(struct content *c);
-static void amiga_plugin_hack_reformat(struct content *c, int width, int height);
+static void
+amiga_plugin_hack_reformat(struct content *c, int width, int height);
 static void amiga_plugin_hack_destroy(struct content *c);
 static bool amiga_plugin_hack_redraw(struct content *c,
-		struct content_redraw_data *data, const struct rect *clip,
-		const struct redraw_context *ctx);
-static nserror amiga_plugin_hack_open(struct content *c, struct browser_window *bw,
-		struct content *page, struct object_params *params);
+				     struct content_redraw_data *data,
+				     const struct rect *clip,
+				     const struct redraw_context *ctx);
+static nserror amiga_plugin_hack_open(struct content *c,
+				      struct browser_window *bw,
+				      struct content *page,
+				      struct object_params *params);
 static nserror amiga_plugin_hack_close(struct content *c);
-static nserror amiga_plugin_hack_clone(const struct content *old, struct content **newc);
+static nserror
+amiga_plugin_hack_clone(const struct content *old, struct content **newc);
 static content_type amiga_plugin_hack_content_type(void);
 
 static const content_handler amiga_plugin_hack_content_handler = {
@@ -81,28 +89,32 @@ nserror amiga_plugin_hack_init(void)
 	do {
 		node = ami_mime_has_cmd(&type, node);
 
-		if(node)
-		{
-			NSLOG(netsurf, INFO, "plugin_hack registered %s",
+		if (node) {
+			NSLOG(netsurf,
+			      INFO,
+			      "plugin_hack registered %s",
 			      lwc_string_data(type));
 
 			error = content_factory_register_handler(
-				lwc_string_data(type), 
+				lwc_string_data(type),
 				&amiga_plugin_hack_content_handler);
 
 			if (error != NSERROR_OK)
 				return error;
 		}
 
-	}while (node != NULL);
+	} while (node != NULL);
 
 	return NSERROR_OK;
 }
 
 nserror amiga_plugin_hack_create(const content_handler *handler,
-		lwc_string *imime_type, const struct http_parameter *params,
-		llcache_handle *llcache, const char *fallback_charset,
-		bool quirks, struct content **c)
+				 lwc_string *imime_type,
+				 const struct http_parameter *params,
+				 llcache_handle *llcache,
+				 const char *fallback_charset,
+				 bool quirks,
+				 struct content **c)
 {
 	amiga_plugin_hack_content *plugin;
 	nserror error;
@@ -111,14 +123,19 @@ nserror amiga_plugin_hack_create(const content_handler *handler,
 	if (plugin == NULL)
 		return NSERROR_NOMEM;
 
-	error = content__init(&plugin->base, handler, imime_type, params,
-			llcache, fallback_charset, quirks);
+	error = content__init(&plugin->base,
+			      handler,
+			      imime_type,
+			      params,
+			      llcache,
+			      fallback_charset,
+			      quirks);
 	if (error != NSERROR_OK) {
 		free(plugin);
 		return error;
 	}
 
-	*c = (struct content *) plugin;
+	*c = (struct content *)plugin;
 
 	return NSERROR_OK;
 }
@@ -137,7 +154,7 @@ bool amiga_plugin_hack_convert(struct content *c)
 
 void amiga_plugin_hack_destroy(struct content *c)
 {
-	amiga_plugin_hack_content *plugin = (amiga_plugin_hack_content *) c;
+	amiga_plugin_hack_content *plugin = (amiga_plugin_hack_content *)c;
 
 	NSLOG(netsurf, INFO, "amiga_plugin_hack_destroy %p", plugin);
 
@@ -145,8 +162,9 @@ void amiga_plugin_hack_destroy(struct content *c)
 }
 
 bool amiga_plugin_hack_redraw(struct content *c,
-		struct content_redraw_data *data, const struct rect *clip,
-		const struct redraw_context *ctx)
+			      struct content_redraw_data *data,
+			      const struct rect *clip,
+			      const struct redraw_context *ctx)
 {
 	plot_style_t pstyle = {
 		.fill_type = PLOT_OP_TYPE_SOLID,
@@ -168,7 +186,8 @@ bool amiga_plugin_hack_redraw(struct content *c,
 
 	res = ctx->plot->text(ctx,
 			      plot_style_font,
-			      data->x, data->y+20,
+			      data->x,
+			      data->y + 20,
 			      lwc_string_data(content__get_mime_type(c)),
 			      lwc_string_length(content__get_mime_type(c)));
 	if (res != NSERROR_OK) {
@@ -186,15 +205,19 @@ bool amiga_plugin_hack_redraw(struct content *c,
  *                 object within a page
  * \param  params  object parameters, or 0 if not an object
  */
-nserror amiga_plugin_hack_open(struct content *c, struct browser_window *bw,
-	struct content *page, struct object_params *params)
+nserror amiga_plugin_hack_open(struct content *c,
+			       struct browser_window *bw,
+			       struct content *page,
+			       struct object_params *params)
 {
-	NSLOG(netsurf, INFO, "amiga_plugin_hack_open %s",
+	NSLOG(netsurf,
+	      INFO,
+	      "amiga_plugin_hack_open %s",
 	      nsurl_access(content_get_url(c)));
 
-	if(c)
-	{
-		/* Width/height will be set via reformat(); do not force 0x0 here. */
+	if (c) {
+		/* Width/height will be set via reformat(); do not force 0x0
+		 * here. */
 	}
 
 	return NSERROR_OK;
@@ -216,7 +239,8 @@ void amiga_plugin_hack_reformat(struct content *c, int width, int height)
 	return;
 }
 
-nserror amiga_plugin_hack_clone(const struct content *old, struct content **newc)
+nserror
+amiga_plugin_hack_clone(const struct content *old, struct content **newc)
 {
 	amiga_plugin_hack_content *plugin;
 	nserror error;
@@ -234,15 +258,15 @@ nserror amiga_plugin_hack_clone(const struct content *old, struct content **newc
 	}
 
 	/* We "clone" the old content by replaying conversion */
-	if (old->status == CONTENT_STATUS_READY || 
-			old->status == CONTENT_STATUS_DONE) {
+	if (old->status == CONTENT_STATUS_READY ||
+	    old->status == CONTENT_STATUS_DONE) {
 		if (amiga_plugin_hack_convert(&plugin->base) == false) {
 			content_destroy(&plugin->base);
 			return NSERROR_CLONE_FAILED;
 		}
 	}
 
-	*newc = (struct content *) plugin;
+	*newc = (struct content *)plugin;
 
 	return NSERROR_OK;
 }
@@ -258,15 +282,18 @@ void amiga_plugin_hack_execute(struct hlcache_handle *c)
 	char *full_cmd;
 	BPTR in, out;
 
-	if(c == NULL) return;
+	if (c == NULL)
+		return;
 
 	plugincmd = ami_mime_content_to_cmd(c);
-	if(plugincmd == NULL) return;
+	if (plugincmd == NULL)
+		return;
 
-	full_cmd = ASPrintf("%s %s", lwc_string_data(plugincmd), nsurl_access(hlcache_handle_get_url(c)));
+	full_cmd = ASPrintf("%s %s",
+			    lwc_string_data(plugincmd),
+			    nsurl_access(hlcache_handle_get_url(c)));
 
-	if(full_cmd)
-	{
+	if (full_cmd) {
 #ifdef __amigaos4__
 		NSLOG(netsurf, INFO, "Attempting to execute %s", full_cmd);
 
@@ -274,12 +301,17 @@ void amiga_plugin_hack_execute(struct hlcache_handle *c)
 		out = Open("NIL:", MODE_NEWFILE);
 
 		SystemTags(full_cmd,
-				SYS_Input, in,
-				SYS_Output, out,
-				SYS_Error, out,
-				SYS_Asynch, TRUE,
-				NP_Name, "NetSurf External Process",
-				TAG_DONE);
+			   SYS_Input,
+			   in,
+			   SYS_Output,
+			   out,
+			   SYS_Error,
+			   out,
+			   SYS_Asynch,
+			   TRUE,
+			   NP_Name,
+			   "NetSurf External Process",
+			   TAG_DONE);
 
 		FreeVec(full_cmd);
 #endif

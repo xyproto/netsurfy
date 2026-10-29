@@ -49,11 +49,11 @@ struct nsgtk_hotlist_window {
 
 static struct nsgtk_hotlist_window *hotlist_window = NULL;
 
-#define MENUPROTO(x) static gboolean nsgtk_on_##x##_activate( \
-		GtkWidget *widget, gpointer g)
-#define MENUEVENT(x) { #x, G_CALLBACK(nsgtk_on_##x##_activate) }
-#define MENUHANDLER(x) gboolean nsgtk_on_##x##_activate(GtkWidget *widget, \
-		gpointer g)
+#define MENUPROTO(x)                                                           \
+	static gboolean nsgtk_on_##x##_activate(GtkWidget *widget, gpointer g)
+#define MENUEVENT(x) {#x, G_CALLBACK(nsgtk_on_##x##_activate)}
+#define MENUHANDLER(x)                                                         \
+	gboolean nsgtk_on_##x##_activate(GtkWidget *widget, gpointer g)
 
 struct menu_events {
 	const char *widget;
@@ -105,8 +105,7 @@ static struct menu_events menu_events[] = {
 
 	MENUEVENT(launch),
 
-	{NULL, NULL}
-};
+	{NULL, NULL}};
 
 
 /* file menu*/
@@ -230,7 +229,8 @@ static void nsgtk_hotlist_init_menu(struct nsgtk_hotlist_window *hlwin)
 						 hlwin);
 		event++;
 	}
-	gtk_widget_insert_action_group(GTK_WIDGET(hlwin->wnd), "win",
+	gtk_widget_insert_action_group(GTK_WIDGET(hlwin->wnd),
+				       "win",
 				       G_ACTION_GROUP(group));
 	g_object_unref(group);
 }
@@ -245,10 +245,10 @@ static void nsgtk_hotlist_init_menu(struct nsgtk_hotlist_window *hlwin)
  * \param y location of event
  * \return NSERROR_OK on success otherwise apropriate error code
  */
-static nserror
-nsgtk_hotlist_mouse(struct nsgtk_corewindow *nsgtk_cw,
-		    browser_mouse_state mouse_state,
-		    int x, int y)
+static nserror nsgtk_hotlist_mouse(struct nsgtk_corewindow *nsgtk_cw,
+				   browser_mouse_state mouse_state,
+				   int x,
+				   int y)
 {
 	hotlist_mouse_action(mouse_state, x, y);
 
@@ -281,11 +281,9 @@ nsgtk_hotlist_key(struct nsgtk_corewindow *nsgtk_cw, uint32_t nskey)
 static nserror
 nsgtk_hotlist_draw(struct nsgtk_corewindow *nsgtk_cw, struct rect *r)
 {
-	struct redraw_context ctx = {
-		.interactive = true,
-		.background_images = true,
-		.plot = &nsgtk_plotters
-	};
+	struct redraw_context ctx = {.interactive = true,
+				     .background_images = true,
+				     .plot = &nsgtk_plotters};
 
 	hotlist_redraw(0, 0, r, &ctx);
 
@@ -319,8 +317,8 @@ static nserror nsgtk_hotlist_init(void)
 	}
 
 
-	ncwin->wnd = GTK_WINDOW(gtk_builder_get_object(ncwin->builder,
-						       "wndHotlist"));
+	ncwin->wnd = GTK_WINDOW(
+		gtk_builder_get_object(ncwin->builder, "wndHotlist"));
 
 	ncwin->core.scrolled = GTK_SCROLLED_WINDOW(
 		gtk_builder_get_object(ncwin->builder, "hotlistScrolled"));

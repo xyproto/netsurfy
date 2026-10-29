@@ -137,7 +137,6 @@ static void die(const char *error)
 }
 
 
-
 /**
  * Ensures output logging stream is available
  */
@@ -176,18 +175,14 @@ static nserror set_defaults(struct nsoption_s *defaults)
 	char dldir[] = "Downloads";
 
 	buf = malloc(buf_bytes_size);
-	if (buf== NULL) {
+	if (buf == NULL) {
 		return NSERROR_NOMEM;
 	}
 	buf[0] = '\0';
 
 	/* locate certificate bundle */
-	res_len = SearchPathA(NULL,
-			      "ca-bundle.crt",
-			      NULL,
-			      buf_tchar_size,
-			      buf,
-			      &ptr);
+	res_len = SearchPathA(
+		NULL, "ca-bundle.crt", NULL, buf_tchar_size, buf, &ptr);
 	if (res_len > 0) {
 		nsoption_setnull_charp(ca_bundle, strdup(buf));
 	} else {
@@ -215,7 +210,6 @@ static nserror set_defaults(struct nsoption_s *defaults)
 		if (PathAppend(buf, dldir)) {
 			nsoption_setnull_charp(downloads_directory,
 					       strdup(buf));
-
 		}
 	}
 
@@ -260,7 +254,7 @@ static nserror set_defaults(struct nsoption_s *defaults)
  * Initialise user options location and contents
  */
 static nserror
-nsw32_option_init(int *pargc, char** argv, char **respaths, char *config_path)
+nsw32_option_init(int *pargc, char **argv, char **respaths, char *config_path)
 {
 	nserror ret;
 	char *choices = NULL;
@@ -377,8 +371,10 @@ static struct gui_misc_table win32_misc_table = {
 /**
  * Entry point from windows
  **/
-int WINAPI
-WinMain(HINSTANCE hInstance, HINSTANCE hLastInstance, LPSTR lpcli, int ncmd)
+int WINAPI WinMain(HINSTANCE hInstance,
+		   HINSTANCE hLastInstance,
+		   LPSTR lpcli,
+		   int ncmd)
 {
 	int argc;
 	char **argv;
@@ -422,19 +418,23 @@ WinMain(HINSTANCE hInstance, HINSTANCE hLastInstance, LPSTR lpcli, int ncmd)
 	nslog_init(nslog_ensure, &argc, argv);
 
 	/* build resource path string vector */
-	respaths = nsws_init_resource("${APPDATA}\\NetSurf:${PROGRAMFILES}\\NetSurf\\NetSurf\\:"NETSURF_WINDOWS_RESPATH);
+	respaths = nsws_init_resource(
+		"${APPDATA}\\NetSurf:${PROGRAMFILES}\\NetSurf\\NetSurf\\:" NETSURF_WINDOWS_RESPATH);
 
 	/* Locate the correct user configuration directory path */
 	ret = get_config_home(&nsw32_config_home);
 	if (ret != NSERROR_OK) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "Unable to locate a configuration directory.");
 	}
 
 	/* Initialise user options */
 	ret = nsw32_option_init(&argc, argv, respaths, nsw32_config_home);
 	if (ret != NSERROR_OK) {
-		NSLOG(netsurf, ERROR, "Options failed to initialise (%s)\n",
+		NSLOG(netsurf,
+		      ERROR,
+		      "Options failed to initialise (%s)\n",
 		      messages_get_errorcode(ret));
 		return 1;
 	}
@@ -442,7 +442,8 @@ WinMain(HINSTANCE hInstance, HINSTANCE hLastInstance, LPSTR lpcli, int ncmd)
 	/* Initialise translated messages */
 	ret = nsw32_messages_init(respaths);
 	if (ret != NSERROR_OK) {
-		fprintf(stderr, "Unable to load translated messages (%s)\n",
+		fprintf(stderr,
+			"Unable to load translated messages (%s)\n",
 			messages_get_errorcode(ret));
 		NSLOG(netsurf, INFO, "Unable to load translated messages");
 		/** \todo decide if message load faliure should be fatal */
@@ -460,7 +461,7 @@ WinMain(HINSTANCE hInstance, HINSTANCE hLastInstance, LPSTR lpcli, int ncmd)
 	urldb_load(nsoption_charp(url_file));
 	urldb_load_cookies(nsoption_charp(cookie_file));
 	hotlist_init(nsoption_charp(hotlist_path),
-			nsoption_charp(hotlist_path));
+		     nsoption_charp(hotlist_path));
 
 	ret = nsws_create_main_class(hInstance);
 	ret = nsws_create_drawable_class(hInstance);
@@ -483,13 +484,9 @@ WinMain(HINSTANCE hInstance, HINSTANCE hLastInstance, LPSTR lpcli, int ncmd)
 
 	ret = nsurl_create(addr, &url);
 	if (ret == NSERROR_OK) {
-		ret = browser_window_create(BW_CREATE_HISTORY,
-					      url,
-					      NULL,
-					      NULL,
-					      NULL);
+		ret = browser_window_create(
+			BW_CREATE_HISTORY, url, NULL, NULL, NULL);
 		nsurl_unref(url);
-
 	}
 	if (ret != NSERROR_OK) {
 		win32_warning(messages_get_errorcode(ret), 0);

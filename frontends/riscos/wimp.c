@@ -103,7 +103,8 @@ void ro_gui_wimp_cache_furniture_sizes(wimp_w w)
 	furniture_sizes.border_widths.x1 = 40;
 	error = xwimpextend_get_furniture_sizes(&furniture_sizes);
 	if (error) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "xwimpextend_get_furniture_sizes: 0x%x: %s",
 		      error->errnum,
 		      error->errmess);
@@ -118,7 +119,7 @@ void ro_gui_wimp_cache_furniture_sizes(wimp_w w)
  * \param[in] mode  mode to read EIG factors for, or -1 for current
  * \param[out] xeig  The x eig value
  * \param[out] yeig  The y eig value
- * \return true on success else false. 
+ * \return true on success else false.
  */
 bool ro_gui_wimp_read_eig_factors(os_mode mode, int *xeig, int *yeig)
 {
@@ -126,15 +127,21 @@ bool ro_gui_wimp_read_eig_factors(os_mode mode, int *xeig, int *yeig)
 
 	error = xos_read_mode_variable(mode, os_MODEVAR_XEIG_FACTOR, xeig, 0);
 	if (error) {
-		NSLOG(netsurf, INFO, "xos_read_mode_variable: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xos_read_mode_variable: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("MiscError", error->errmess);
 		return false;
 	}
 	error = xos_read_mode_variable(mode, os_MODEVAR_YEIG_FACTOR, yeig, 0);
 	if (error) {
-		NSLOG(netsurf, INFO, "xos_read_mode_variable: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xos_read_mode_variable: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("MiscError", error->errmess);
 		return false;
 	}
@@ -196,21 +203,30 @@ void ro_gui_force_redraw_icon(wimp_w w, wimp_i i)
 	os_error *error;
 
 	/*	Get the icon data
-	*/
+	 */
 	ic.w = w;
 	ic.i = i;
 	error = xwimp_get_icon_state(&ic);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_icon_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_icon_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
-	error = xwimp_force_redraw(w, ic.icon.extent.x0, ic.icon.extent.y0,
-			ic.icon.extent.x1, ic.icon.extent.y1);
+	error = xwimp_force_redraw(w,
+				   ic.icon.extent.x0,
+				   ic.icon.extent.y0,
+				   ic.icon.extent.x1,
+				   ic.icon.extent.y1);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_force_redraw: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_force_redraw: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 	}
 }
@@ -242,13 +258,17 @@ const char *ro_gui_get_icon_string(wimp_w w, wimp_i i)
 	ic.i = i;
 	error = xwimp_get_icon_state(&ic);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_icon_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_icon_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return NULL;
 	}
 	itext = (ic.icon.flags & wimp_ICON_INDIRECTED)
-			? ic.icon.data.indirected_text.text : ic.icon.data.text;
+			? ic.icon.data.indirected_text.text
+			: ic.icon.data.text;
 	/* Guarantee NUL termination.  */
 	itext[ro_gui_strlen(itext)] = '\0';
 
@@ -290,8 +310,7 @@ void ro_gui_set_icon_string(wimp_w w, wimp_i i, const char *text, bool is_utf8)
 			local_text = NULL;
 		}
 		text_for_icon = local_text ? local_text : text;
-	}
-	else
+	} else
 		text_for_icon = text;
 	new_len = strlen(text_for_icon);
 
@@ -300,8 +319,11 @@ void ro_gui_set_icon_string(wimp_w w, wimp_i i, const char *text, bool is_utf8)
 	ic.i = i;
 	error = xwimp_get_icon_state(&ic);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_icon_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_icon_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		goto exit;
 	}
@@ -309,8 +331,7 @@ void ro_gui_set_icon_string(wimp_w w, wimp_i i, const char *text, bool is_utf8)
 	if (ic.icon.flags & wimp_ICON_INDIRECTED) {
 		dst_text = ic.icon.data.indirected_text.text;
 		dst_max_len = ic.icon.data.indirected_text.size;
-	}
-	else {
+	} else {
 		dst_text = ic.icon.data.text;
 		dst_max_len = sizeof(ic.icon.data.text);
 	}
@@ -328,13 +349,14 @@ void ro_gui_set_icon_string(wimp_w w, wimp_i i, const char *text, bool is_utf8)
 		dst_text[dst_max_len - 1] = '\0';
 
 		/* handle the caret being in the icon */
-		button_type = (ic.icon.flags & wimp_ICON_BUTTON_TYPE)
-				>> wimp_ICON_BUTTON_TYPE_SHIFT;
+		button_type = (ic.icon.flags & wimp_ICON_BUTTON_TYPE) >>
+			      wimp_ICON_BUTTON_TYPE_SHIFT;
 		if ((button_type == wimp_BUTTON_WRITABLE) ||
-				(button_type == wimp_BUTTON_WRITE_CLICK_DRAG)) {
+		    (button_type == wimp_BUTTON_WRITE_CLICK_DRAG)) {
 			error = xwimp_get_caret_position(&caret);
 			if (error) {
-				NSLOG(netsurf, INFO,
+				NSLOG(netsurf,
+				      INFO,
 				      "xwimp_get_caret_position: 0x%x: %s",
 				      error->errnum,
 				      error->errmess);
@@ -342,17 +364,23 @@ void ro_gui_set_icon_string(wimp_w w, wimp_i i, const char *text, bool is_utf8)
 				goto exit;
 			}
 			if ((caret.w == w) && (caret.i == i)) {
-				if ((size_t)caret.index > new_len
-						|| (size_t)caret.index == old_len)
+				if ((size_t)caret.index > new_len ||
+				    (size_t)caret.index == old_len)
 					caret.index = new_len;
-				error = xwimp_set_caret_position(w, i, caret.pos.x,
-						caret.pos.y, -1, caret.index);
+				error = xwimp_set_caret_position(w,
+								 i,
+								 caret.pos.x,
+								 caret.pos.y,
+								 -1,
+								 caret.index);
 				if (error) {
-					NSLOG(netsurf, INFO,
+					NSLOG(netsurf,
+					      INFO,
 					      "xwimp_set_caret_position: 0x%x: %s",
 					      error->errnum,
 					      error->errmess);
-					ro_warn_user("WimpError", error->errmess);
+					ro_warn_user("WimpError",
+						     error->errmess);
 				}
 			}
 		}
@@ -394,18 +422,18 @@ void ro_gui_set_icon_decimal(wimp_w w, wimp_i i, int value, int decimal_places)
 	char buffer[20]; // Big enough for 64-bit int
 
 	switch (decimal_places) {
-		case 0:
-			sprintf(buffer, "%d", value);
-			break;
-		case 1:
-			sprintf(buffer, "%.1f", (float)value / 10);
-			break;
-		case 2:
-			sprintf(buffer, "%.2f", (float)value / 100);
-			break;
-		default:
-			assert(!"Unsupported decimal format");
-			break;
+	case 0:
+		sprintf(buffer, "%d", value);
+		break;
+	case 1:
+		sprintf(buffer, "%.1f", (float)value / 10);
+		break;
+	case 2:
+		sprintf(buffer, "%.2f", (float)value / 100);
+		break;
+	default:
+		assert(!"Unsupported decimal format");
+		break;
 	}
 
 	ro_gui_set_icon_string(w, i, buffer, true);
@@ -444,12 +472,16 @@ int ro_gui_get_icon_decimal(wimp_w w, wimp_i i, int decimal_places)
 void ro_gui_set_icon_selected_state(wimp_w w, wimp_i i, bool state)
 {
 	os_error *error;
-	if (ro_gui_get_icon_selected_state(w, i) == state) return;
-	error = xwimp_set_icon_state(w, i,
-			(state ? wimp_ICON_SELECTED : 0), wimp_ICON_SELECTED);
+	if (ro_gui_get_icon_selected_state(w, i) == state)
+		return;
+	error = xwimp_set_icon_state(
+		w, i, (state ? wimp_ICON_SELECTED : 0), wimp_ICON_SELECTED);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_set_icon_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_set_icon_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 	}
 }
@@ -468,8 +500,11 @@ bool ro_gui_get_icon_selected_state(wimp_w w, wimp_i i)
 	ic.i = i;
 	error = xwimp_get_icon_state(&ic);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_icon_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_icon_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return false;
 	}
@@ -492,11 +527,14 @@ void ro_gui_set_icon_shaded_state(wimp_w w, wimp_i i, bool state)
 	/* update the state */
 	if (ro_gui_get_icon_shaded_state(w, i) == state)
 		return;
-	error = xwimp_set_icon_state(w, i,
-			(state ? wimp_ICON_SHADED : 0), wimp_ICON_SHADED);
+	error = xwimp_set_icon_state(
+		w, i, (state ? wimp_ICON_SHADED : 0), wimp_ICON_SHADED);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_icon_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_icon_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 	}
 	if (!state)
@@ -505,8 +543,11 @@ void ro_gui_set_icon_shaded_state(wimp_w w, wimp_i i, bool state)
 	/* ensure the caret is not in a shaded icon */
 	error = xwimp_get_caret_position(&caret);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_caret_position: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_caret_position: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
@@ -516,10 +557,14 @@ void ro_gui_set_icon_shaded_state(wimp_w w, wimp_i i, bool state)
 	if (ro_gui_set_caret_first(w))
 		return;
 	/* lose the caret */
-	error = xwimp_set_caret_position((wimp_w)-1, (wimp_i)-1, -1, -1, -1, -1);
+	error = xwimp_set_caret_position(
+		(wimp_w)-1, (wimp_i)-1, -1, -1, -1, -1);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_set_caret_position: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_set_caret_position: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
@@ -557,11 +602,14 @@ void ro_gui_set_icon_deleted_state(wimp_w w, wimp_i i, bool state)
 	/* update the state */
 	if (ro_gui_get_icon_deleted_state(w, i) == state)
 		return;
-	error = xwimp_set_icon_state(w, i,
-			(state ? wimp_ICON_DELETED : 0), wimp_ICON_DELETED);
+	error = xwimp_set_icon_state(
+		w, i, (state ? wimp_ICON_DELETED : 0), wimp_ICON_DELETED);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_icon_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_icon_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 	}
 	if (!state)
@@ -570,8 +618,11 @@ void ro_gui_set_icon_deleted_state(wimp_w w, wimp_i i, bool state)
 	/* ensure the caret is not in a shaded icon */
 	error = xwimp_get_caret_position(&caret);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_caret_position: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_caret_position: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
@@ -581,10 +632,14 @@ void ro_gui_set_icon_deleted_state(wimp_w w, wimp_i i, bool state)
 	if (ro_gui_set_caret_first(w))
 		return;
 	/* lose the caret */
-	error = xwimp_set_caret_position((wimp_w)-1, (wimp_i)-1, -1, -1, -1, -1);
+	error = xwimp_set_caret_position(
+		(wimp_w)-1, (wimp_i)-1, -1, -1, -1, -1);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_set_caret_position: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_set_caret_position: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
@@ -617,11 +672,16 @@ bool ro_gui_get_icon_deleted_state(wimp_w w, wimp_i i)
 void ro_gui_set_icon_button_type(wimp_w w, wimp_i i, int type)
 {
 	os_error *error;
-	error = xwimp_set_icon_state(w, i, wimp_ICON_BUTTON_TYPE,
-			(type << wimp_ICON_BUTTON_TYPE_SHIFT));
+	error = xwimp_set_icon_state(w,
+				     i,
+				     wimp_ICON_BUTTON_TYPE,
+				     (type << wimp_ICON_BUTTON_TYPE_SHIFT));
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_set_icon_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_set_icon_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 	}
 }
@@ -635,8 +695,10 @@ void ro_gui_set_icon_button_type(wimp_w w, wimp_i i, int type)
  * \param  area sprite area containing sprite
  * \param  name name of sprite in area (in local encoding)
  */
-void ro_gui_set_icon_sprite(wimp_w w, wimp_i i, osspriteop_area *area,
-		const char *name)
+void ro_gui_set_icon_sprite(wimp_w w,
+			    wimp_i i,
+			    osspriteop_area *area,
+			    const char *name)
 {
 	wimp_icon_state ic;
 	os_error *error;
@@ -646,18 +708,22 @@ void ro_gui_set_icon_sprite(wimp_w w, wimp_i i, osspriteop_area *area,
 	ic.i = i;
 	error = xwimp_get_icon_state(&ic);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_icon_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_icon_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
 
 	/* copy the name across */
 	if (ic.icon.data.indirected_text.size) {
-		strncpy(ic.icon.data.indirected_text.text, name,
+		strncpy(ic.icon.data.indirected_text.text,
+			name,
 			(unsigned int)ic.icon.data.indirected_text.size - 1);
-		ic.icon.data.indirected_text.text[
-				ic.icon.data.indirected_text.size - 1] = '\0';
+		ic.icon.data.indirected_text
+			.text[ic.icon.data.indirected_text.size - 1] = '\0';
 	}
 
 	ic.icon.data.indirected_sprite.area = area;
@@ -680,12 +746,15 @@ void ro_gui_set_window_title(wimp_w w, const char *text)
 	nserror err;
 
 	/*	Get the window details
-	*/
+	 */
 	window.w = w;
 	error = xwimp_get_window_info_header_only((wimp_window_info *)&window);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_window_info: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_window_info: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
@@ -701,19 +770,22 @@ void ro_gui_set_window_title(wimp_w w, const char *text)
 	}
 
 	/*	Set the title string
-	*/
-	strncpy(window.title_data.indirected_text.text, title_local_enc,
-			(unsigned int)window.title_data.indirected_text.size
-					- 1);
-	window.title_data.indirected_text.text[
-			window.title_data.indirected_text.size - 1] = '\0';
+	 */
+	strncpy(window.title_data.indirected_text.text,
+		title_local_enc,
+		(unsigned int)window.title_data.indirected_text.size - 1);
+	window.title_data.indirected_text
+		.text[window.title_data.indirected_text.size - 1] = '\0';
 
 	/*	Redraw accordingly
-	*/
+	 */
 	error = xwimp_force_redraw_title(w);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_force_redraw_title: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_force_redraw_title: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
@@ -740,8 +812,11 @@ bool ro_gui_set_caret_first(wimp_w w)
 	win_state.w = w;
 	error = xwimp_get_window_state(&win_state);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_window_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_window_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return false;
 	}
@@ -752,8 +827,11 @@ bool ro_gui_set_caret_first(wimp_w w)
 	window.w = w;
 	error = xwimp_get_window_info_header_only((wimp_window_info *)&window);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_window_info: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_window_info: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return false;
 	}
@@ -764,7 +842,8 @@ bool ro_gui_set_caret_first(wimp_w w)
 		state.i = icon;
 		error = xwimp_get_icon_state(&state);
 		if (error) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xwimp_get_icon_state: 0x%x: %s",
 			      error->errnum,
 			      error->errmess);
@@ -777,14 +856,20 @@ bool ro_gui_set_caret_first(wimp_w w)
 			continue;
 		b = (state.icon.flags >> wimp_ICON_BUTTON_TYPE_SHIFT) & 0xf;
 		if ((b != wimp_BUTTON_WRITE_CLICK_DRAG) &&
-				(b != wimp_BUTTON_WRITABLE))
+		    (b != wimp_BUTTON_WRITABLE))
 			continue;
 
 		/* move the caret */
-		error = xwimp_set_caret_position(w, icon, 0, 0, -1,
-				strlen(state.icon.data.indirected_text.text));
+		error = xwimp_set_caret_position(
+			w,
+			icon,
+			0,
+			0,
+			-1,
+			strlen(state.icon.data.indirected_text.text));
 		if (error) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xwimp_set_caret_position: 0x%x: %s",
 			      error->errnum,
 			      error->errmess);
@@ -810,10 +895,11 @@ osspriteop_area *ro_gui_load_sprite_file(const char *pathname)
 	osspriteop_area *area;
 	os_error *error;
 
-	error = xosfile_read_stamped_no_path(pathname,
-			&obj_type, 0, 0, &len, 0, 0);
+	error = xosfile_read_stamped_no_path(
+		pathname, &obj_type, 0, 0, &len, 0, 0);
 	if (error) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "xosfile_read_stamped_no_path: 0x%x: %s",
 		      error->errnum,
 		      error->errmess);
@@ -837,9 +923,11 @@ osspriteop_area *ro_gui_load_sprite_file(const char *pathname)
 	area->used = 16;
 
 	error = xosspriteop_load_sprite_file(osspriteop_USER_AREA,
-			area, pathname);
+					     area,
+					     pathname);
 	if (error) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "xosspriteop_load_sprite_file: 0x%x: %s",
 		      error->errnum,
 		      error->errmess);
@@ -872,7 +960,8 @@ bool ro_gui_wimp_sprite_exists(const char *sprite)
 	error = xwimpspriteop_select_sprite(sprite, 0);
 	if (error) {
 		if (error->errnum != error_SPRITE_OP_DOESNT_EXIST) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xwimpspriteop_select_sprite: 0x%x: %s",
 			      error->errnum,
 			      error->errmess);
@@ -880,7 +969,7 @@ bool ro_gui_wimp_sprite_exists(const char *sprite)
 		}
 		return false;
 	}
-  	snprintf(last_sprite_found, sizeof(last_sprite_found), sprite);
+	snprintf(last_sprite_found, sizeof(last_sprite_found), sprite);
 	return true;
 }
 
@@ -899,14 +988,17 @@ os_error *ro_gui_wimp_get_sprite(const char *name, osspriteop_header **sprite)
 	os_error *error;
 
 	error = xwimp_base_of_sprites(&rom_base, &ram_base);
-	if (error) return error;
+	if (error)
+		return error;
 
-	error = xosspriteop_select_sprite(osspriteop_USER_AREA,
-			ram_base, (osspriteop_id)name, sprite);
+	error = xosspriteop_select_sprite(
+		osspriteop_USER_AREA, ram_base, (osspriteop_id)name, sprite);
 
 	if (error && error->errnum == error_SPRITE_OP_DOESNT_EXIST)
 		error = xosspriteop_select_sprite(osspriteop_USER_AREA,
-				rom_base, (osspriteop_id)name, sprite);
+						  rom_base,
+						  (osspriteop_id)name,
+						  sprite);
 
 	return error;
 }
@@ -922,24 +1014,30 @@ os_error *ro_gui_wimp_get_sprite(const char *name, osspriteop_header **sprite)
  * \return			true if successful; else false.
  */
 
-bool ro_gui_wimp_get_sprite_dimensions(osspriteop_area *area, char *sprite,
-		int *width, int *height)
+bool ro_gui_wimp_get_sprite_dimensions(osspriteop_area *area,
+				       char *sprite,
+				       int *width,
+				       int *height)
 {
-	os_error			*error = NULL;
-	os_mode				mode;
-	os_coord			dimensions;
+	os_error *error = NULL;
+	os_mode mode;
+	os_coord dimensions;
 
 	dimensions.x = 0;
 	dimensions.y = 0;
 
-	if (area != (osspriteop_area *) -1)
+	if (area != (osspriteop_area *)-1)
 		error = xosspriteop_read_sprite_info(osspriteop_USER_AREA,
-				area, (osspriteop_id) sprite,
-				&dimensions.x, &dimensions.y, 0, &mode);
+						     area,
+						     (osspriteop_id)sprite,
+						     &dimensions.x,
+						     &dimensions.y,
+						     0,
+						     &mode);
 
-	if (error != NULL || area == (osspriteop_area *) -1)
-		error = xwimpspriteop_read_sprite_info(sprite,
-				&dimensions.x, &dimensions.y, 0, &mode);
+	if (error != NULL || area == (osspriteop_area *)-1)
+		error = xwimpspriteop_read_sprite_info(
+			sprite, &dimensions.x, &dimensions.y, 0, &mode);
 
 	if (error == NULL) {
 		ro_convert_pixels_to_os_units(&dimensions, mode);
@@ -948,7 +1046,8 @@ bool ro_gui_wimp_get_sprite_dimensions(osspriteop_area *area, char *sprite,
 		if (height != NULL)
 			*height = dimensions.y;
 	} else if (error->errnum != error_SPRITE_OP_DOESNT_EXIST) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "xosspriteop_read_sprite_info: 0x%x: %s",
 		      error->errnum,
 		      error->errmess);
@@ -963,31 +1062,38 @@ bool ro_gui_wimp_get_sprite_dimensions(osspriteop_area *area, char *sprite,
 /**
  * Performs simple user redraw for a window.
  *
- * \param redraw  wimp draw 
+ * \param redraw  wimp draw
  * \param user_fill  whether to fill the redraw area
  * \param user_colour  the colour to use when filling
  */
 
-void ro_gui_user_redraw(wimp_draw *redraw, bool user_fill,
-		os_colour user_colour)
+void ro_gui_user_redraw(wimp_draw *redraw,
+			bool user_fill,
+			os_colour user_colour)
 {
 	os_error *error;
 	osbool more;
 
 	error = xwimp_redraw_window(redraw, &more);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_redraw_window: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_redraw_window: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
 	while (more) {
 		if (user_fill) {
 			error = xcolourtrans_set_gcol(user_colour,
-					colourtrans_SET_BG_GCOL,
-					os_ACTION_OVERWRITE, 0, 0);
+						      colourtrans_SET_BG_GCOL,
+						      os_ACTION_OVERWRITE,
+						      0,
+						      0);
 			if (error) {
-				NSLOG(netsurf, INFO,
+				NSLOG(netsurf,
+				      INFO,
 				      "xcolourtrans_set_gcol: 0x%x: %s",
 				      error->errnum,
 				      error->errmess);
@@ -997,8 +1103,11 @@ void ro_gui_user_redraw(wimp_draw *redraw, bool user_fill,
 		}
 		error = xwimp_get_rectangle(redraw, &more);
 		if (error) {
-			NSLOG(netsurf, INFO, "xwimp_get_rectangle: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_get_rectangle: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 			return;
 		}
@@ -1013,8 +1122,9 @@ void ro_gui_user_redraw(wimp_draw *redraw, bool user_fill,
  * \param  bic_mask  the furniture flags to clear
  * \param  xor_mask  the furniture flags to toggle
  */
-void ro_gui_wimp_update_window_furniture(wimp_w w, wimp_window_flags bic_mask,
-		wimp_window_flags xor_mask)
+void ro_gui_wimp_update_window_furniture(wimp_w w,
+					 wimp_window_flags bic_mask,
+					 wimp_window_flags xor_mask)
 {
 	wimp_window_state state;
 	wimp_w parent;
@@ -1025,8 +1135,11 @@ void ro_gui_wimp_update_window_furniture(wimp_w w, wimp_window_flags bic_mask,
 	state.w = w;
 	error = xwimp_get_window_state_and_nesting(&state, &parent, &linkage);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_window_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_window_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
@@ -1039,8 +1152,11 @@ void ro_gui_wimp_update_window_furniture(wimp_w w, wimp_window_flags bic_mask,
 		state.next = wimp_HIDDEN;
 	error = xwimp_open_window_nested_with_flags(&state, parent, linkage);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_open_window: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_open_window: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
@@ -1048,8 +1164,11 @@ void ro_gui_wimp_update_window_furniture(wimp_w w, wimp_window_flags bic_mask,
 	if (!open) {
 		error = xwimp_close_window(w);
 		if (error) {
-			NSLOG(netsurf, INFO, "xwimp_close_window: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_close_window: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 			return;
 		}
@@ -1071,8 +1190,11 @@ bool ro_gui_wimp_check_window_furniture(wimp_w w, wimp_window_flags mask)
 	state.w = w;
 	error = xwimp_get_window_state(&state);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_window_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_window_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return false;
 	}
@@ -1130,9 +1252,9 @@ int ro_gui_strncmp(const char *s1, const char *s2, size_t len)
 
 void ro_gui_scroll(wimp_scroll *scroll)
 {
-	os_error	*error;
-	int		x = scroll->visible.x1 - scroll->visible.x0 - 32;
-	int		y = scroll->visible.y1 - scroll->visible.y0 - 32;
+	os_error *error;
+	int x = scroll->visible.x1 - scroll->visible.x0 - 32;
+	int y = scroll->visible.y1 - scroll->visible.y0 - 32;
 
 	switch (scroll->xmin) {
 	case wimp_SCROLL_PAGE_LEFT:
@@ -1148,7 +1270,7 @@ void ro_gui_scroll(wimp_scroll *scroll)
 		scroll->xscroll += x;
 		break;
 	default:
-		scroll->xscroll += (x * (scroll->xmin>>2)) >> 2;
+		scroll->xscroll += (x * (scroll->xmin >> 2)) >> 2;
 		break;
 	}
 
@@ -1166,14 +1288,16 @@ void ro_gui_scroll(wimp_scroll *scroll)
 		scroll->yscroll -= y;
 		break;
 	default:
-		scroll->yscroll += (y * (scroll->ymin>>2)) >> 2;
+		scroll->yscroll += (y * (scroll->ymin >> 2)) >> 2;
 		break;
 	}
 
-	error = xwimp_open_window((wimp_open *) scroll);
+	error = xwimp_open_window((wimp_open *)scroll);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_open_window: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_open_window: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 	}
 }
-

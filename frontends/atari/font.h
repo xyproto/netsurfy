@@ -22,4 +22,3 @@
 extern struct gui_layout_table *atari_layout_table;
 
 #endif /* NETSURF_FB_FONT_H */
-

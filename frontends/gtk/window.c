@@ -80,7 +80,7 @@ struct gui_window {
 	struct nsgtk_scaffolding *scaffold;
 
 	/** The 'content' window that is rendered in the gui_window */
-	struct browser_window	*bw;
+	struct browser_window *bw;
 
 	/** mouse state and events. */
 	struct {
@@ -153,22 +153,22 @@ struct gui_window *window_list = NULL;
 static void
 nsgtk_select_menu_clicked(GtkCheckButton *button, gpointer user_data)
 {
-	form_select_process_selection(select_menu_control,
-				      (intptr_t)user_data);
+	form_select_process_selection(select_menu_control, (intptr_t)user_data);
 	gtk_popover_popdown(GTK_POPOVER(select_menu));
 }
 
-static void
-nsgtk_window_draw(GtkDrawingArea *area, cairo_t *cr, int width, int height, gpointer data)
+static void nsgtk_window_draw(GtkDrawingArea *area,
+			      cairo_t *cr,
+			      int width,
+			      int height,
+			      gpointer data)
 {
 	struct gui_window *gw = data;
 	struct gui_window *z;
 	struct rect clip;
-	struct redraw_context ctx = {
-		.interactive = true,
-		.background_images = true,
-		.plot = &nsgtk_plotters
-	};
+	struct redraw_context ctx = {.interactive = true,
+				     .background_images = true,
+				     .plot = &nsgtk_plotters};
 
 	double x1;
 	double y1;
@@ -203,9 +203,10 @@ nsgtk_window_draw(GtkDrawingArea *area, cairo_t *cr, int width, int height, gpoi
 			      &ctx);
 
 	if (gw->careth != 0) {
-		nsgtk_plot_caret(gw->caretx - gtk_adjustment_get_value(gw->hadj),
-				 gw->carety - gtk_adjustment_get_value(gw->vadj),
-				 gw->careth);
+		nsgtk_plot_caret(
+			gw->caretx - gtk_adjustment_get_value(gw->hadj),
+			gw->carety - gtk_adjustment_get_value(gw->vadj),
+			gw->careth);
 	}
 }
 
@@ -242,18 +243,18 @@ nsgtk_window_adjustment_changed(GtkAdjustment *adjustment, gpointer data)
 	gtk_widget_queue_draw(g->layout);
 }
 
-static void
-nsgtk_window_motion(GtkEventControllerMotion *controller,
-		    gdouble x,
-		    gdouble y,
-		    gpointer data)
+static void nsgtk_window_motion(GtkEventControllerMotion *controller,
+				gdouble x,
+				gdouble y,
+				gpointer data)
 {
 	struct gui_window *g = data;
 	GdkModifierType state;
 	bool shift;
 	bool ctrl;
 
-	state = gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(controller));
+	state = gtk_event_controller_get_current_event_state(
+		GTK_EVENT_CONTROLLER(controller));
 	shift = state & GDK_SHIFT_MASK;
 	ctrl = state & GDK_CONTROL_MASK;
 
@@ -262,8 +263,7 @@ nsgtk_window_motion(GtkEventControllerMotion *controller,
 	x += gtk_adjustment_get_value(g->hadj);
 	y += gtk_adjustment_get_value(g->vadj);
 
-	if ((fabs(x - g->last_x) < 5.0) &&
-	    (fabs(y - g->last_y) < 5.0)) {
+	if ((fabs(x - g->last_x) < 5.0) && (fabs(y - g->last_y) < 5.0)) {
 		/* Mouse hasn't moved far enough from press coordinate
 		 * for this to be considered a drag.
 		 */
@@ -278,21 +278,25 @@ nsgtk_window_motion(GtkEventControllerMotion *controller,
 
 	if (g->mouse.state & BROWSER_MOUSE_PRESS_1) {
 		/* Start button 1 drag */
-		browser_window_mouse_click(g->bw, BROWSER_MOUSE_DRAG_1,
-				g->mouse.pressed_x, g->mouse.pressed_y);
+		browser_window_mouse_click(g->bw,
+					   BROWSER_MOUSE_DRAG_1,
+					   g->mouse.pressed_x,
+					   g->mouse.pressed_y);
 
 		/* Replace PRESS with HOLDING and declare drag in progress */
 		g->mouse.state ^= (BROWSER_MOUSE_PRESS_1 |
-				BROWSER_MOUSE_HOLDING_1);
+				   BROWSER_MOUSE_HOLDING_1);
 		g->mouse.state |= BROWSER_MOUSE_DRAG_ON;
 	} else if (g->mouse.state & BROWSER_MOUSE_PRESS_2) {
 		/* Start button 2 drag */
-		browser_window_mouse_click(g->bw, BROWSER_MOUSE_DRAG_2,
-				g->mouse.pressed_x, g->mouse.pressed_y);
+		browser_window_mouse_click(g->bw,
+					   BROWSER_MOUSE_DRAG_2,
+					   g->mouse.pressed_x,
+					   g->mouse.pressed_y);
 
 		/* Replace PRESS with HOLDING and declare drag in progress */
 		g->mouse.state ^= (BROWSER_MOUSE_PRESS_2 |
-				BROWSER_MOUSE_HOLDING_2);
+				   BROWSER_MOUSE_HOLDING_2);
 		g->mouse.state |= BROWSER_MOUSE_DRAG_ON;
 	}
 
@@ -330,19 +334,20 @@ nsgtk_window_focus_enter(GtkEventControllerFocus *controller, gpointer data)
 /**
  * GTK signal handler for a mouse button press on the layout
  */
-static void
-nsgtk_window_button_pressed(GtkGestureClick *gesture,
-			    gint n_press,
-			    gdouble x,
-			    gdouble y,
-			    gpointer data)
+static void nsgtk_window_button_pressed(GtkGestureClick *gesture,
+					gint n_press,
+					gdouble x,
+					gdouble y,
+					gpointer data)
 {
 	struct gui_window *g = data;
 	GdkModifierType state;
 	guint button;
 
-	button = gtk_gesture_single_get_current_button(GTK_GESTURE_SINGLE(gesture));
-	state = gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture));
+	button = gtk_gesture_single_get_current_button(
+		GTK_GESTURE_SINGLE(gesture));
+	state = gtk_event_controller_get_current_event_state(
+		GTK_EVENT_CONTROLLER(gesture));
 
 	gtk_im_context_reset(g->input_method);
 	gtk_widget_grab_focus(g->layout);
@@ -354,15 +359,15 @@ nsgtk_window_button_pressed(GtkGestureClick *gesture,
 	g->mouse.pressed_y = y + gtk_adjustment_get_value(g->vadj);
 
 	switch (button) {
-	case 1:	/* Left button, usually. Pass to core as BUTTON 1. */
+	case 1: /* Left button, usually. Pass to core as BUTTON 1. */
 		g->mouse.state = BROWSER_MOUSE_PRESS_1;
 		break;
 
-	case 2:	/* Middle button, usually. Pass to core as BUTTON 2 */
+	case 2: /* Middle button, usually. Pass to core as BUTTON 2 */
 		g->mouse.state = BROWSER_MOUSE_PRESS_2;
 		break;
 
-	case 3:	/* Right button, usually. Action button, context menu. */
+	case 3: /* Right button, usually. Action button, context menu. */
 		/** \todo determine if hiding the caret here is necessary */
 		browser_window_remove_caret(g->bw, true);
 		nsgtk_scaffolding_context_menu(g->scaffold,
@@ -371,7 +376,8 @@ nsgtk_window_button_pressed(GtkGestureClick *gesture,
 					       y,
 					       g->mouse.pressed_x,
 					       g->mouse.pressed_y);
-		gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+		gtk_gesture_set_state(GTK_GESTURE(gesture),
+				      GTK_EVENT_SEQUENCE_CLAIMED);
 		return;
 
 	case 8: /* Back button */
@@ -405,61 +411,60 @@ nsgtk_window_button_pressed(GtkGestureClick *gesture,
 	g->last_x = g->mouse.pressed_x;
 	g->last_y = g->mouse.pressed_y;
 
-	browser_window_mouse_click(g->bw,
-				   g->mouse.state,
-				   g->mouse.pressed_x,
-				   g->mouse.pressed_y);
+	browser_window_mouse_click(
+		g->bw, g->mouse.state, g->mouse.pressed_x, g->mouse.pressed_y);
 
 	gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
 }
 
 
-static void
-nsgtk_window_button_released(GtkGestureClick *gesture,
-			     gint n_press,
-			     gdouble x,
-			     gdouble y,
-			     gpointer data)
+static void nsgtk_window_button_released(GtkGestureClick *gesture,
+					 gint n_press,
+					 gdouble x,
+					 gdouble y,
+					 gpointer data)
 {
 	struct gui_window *g = data;
 	GdkModifierType state;
 
-	state = gtk_event_controller_get_current_event_state(GTK_EVENT_CONTROLLER(gesture));
+	state = gtk_event_controller_get_current_event_state(
+		GTK_EVENT_CONTROLLER(gesture));
 	x += gtk_adjustment_get_value(g->hadj);
 	y += gtk_adjustment_get_value(g->vadj);
 
 	/* If the mouse state is PRESS then we are waiting for a release to emit
 	 * a click event, otherwise just reset the state to nothing */
 	if (g->mouse.state & BROWSER_MOUSE_PRESS_1) {
-		g->mouse.state ^= (BROWSER_MOUSE_PRESS_1 | BROWSER_MOUSE_CLICK_1);
+		g->mouse.state ^= (BROWSER_MOUSE_PRESS_1 |
+				   BROWSER_MOUSE_CLICK_1);
 	} else if (g->mouse.state & BROWSER_MOUSE_PRESS_2) {
-		g->mouse.state ^= (BROWSER_MOUSE_PRESS_2 | BROWSER_MOUSE_CLICK_2);
+		g->mouse.state ^= (BROWSER_MOUSE_PRESS_2 |
+				   BROWSER_MOUSE_CLICK_2);
 	} else if (g->mouse.state & BROWSER_MOUSE_PRESS_3) {
-		g->mouse.state ^= (BROWSER_MOUSE_PRESS_3 | BROWSER_MOUSE_CLICK_3);
+		g->mouse.state ^= (BROWSER_MOUSE_PRESS_3 |
+				   BROWSER_MOUSE_CLICK_3);
 	} else if (g->mouse.state & BROWSER_MOUSE_PRESS_4) {
-		g->mouse.state ^= (BROWSER_MOUSE_PRESS_4 | BROWSER_MOUSE_CLICK_4);
+		g->mouse.state ^= (BROWSER_MOUSE_PRESS_4 |
+				   BROWSER_MOUSE_CLICK_4);
 	} else if (g->mouse.state & BROWSER_MOUSE_PRESS_5) {
-		g->mouse.state ^= (BROWSER_MOUSE_PRESS_5 | BROWSER_MOUSE_CLICK_5);
+		g->mouse.state ^= (BROWSER_MOUSE_PRESS_5 |
+				   BROWSER_MOUSE_CLICK_5);
 	}
 
 	/* Handle modifiers being removed */
-	if (g->mouse.state & BROWSER_MOUSE_MOD_1 &&
-	    !(state & GDK_SHIFT_MASK)) {
+	if (g->mouse.state & BROWSER_MOUSE_MOD_1 && !(state & GDK_SHIFT_MASK)) {
 		g->mouse.state ^= BROWSER_MOUSE_MOD_1;
 	}
 	if (g->mouse.state & BROWSER_MOUSE_MOD_2 &&
 	    !(state & GDK_CONTROL_MASK)) {
 		g->mouse.state ^= BROWSER_MOUSE_MOD_2;
 	}
-	if (g->mouse.state & BROWSER_MOUSE_MOD_3 &&
-	    !(state & GDK_ALT_MASK)) {
+	if (g->mouse.state & BROWSER_MOUSE_MOD_3 && !(state & GDK_ALT_MASK)) {
 		g->mouse.state ^= BROWSER_MOUSE_MOD_3;
 	}
 
-	if (g->mouse.state & (BROWSER_MOUSE_CLICK_1 |
-			      BROWSER_MOUSE_CLICK_2 |
-			      BROWSER_MOUSE_CLICK_3 |
-			      BROWSER_MOUSE_CLICK_4 |
+	if (g->mouse.state & (BROWSER_MOUSE_CLICK_1 | BROWSER_MOUSE_CLICK_2 |
+			      BROWSER_MOUSE_CLICK_3 | BROWSER_MOUSE_CLICK_4 |
 			      BROWSER_MOUSE_CLICK_5)) {
 		browser_window_mouse_click(g->bw, g->mouse.state, x, y);
 	} else {
@@ -476,7 +481,8 @@ nsgtk_window_button_released(GtkGestureClick *gesture,
 static void nsgtk_adjustment_scroll(GtkAdjustment *adj, double delta)
 {
 	double value = gtk_adjustment_get_value(adj) + delta;
-	double upper = gtk_adjustment_get_upper(adj) - gtk_adjustment_get_page_size(adj);
+	double upper = gtk_adjustment_get_upper(adj) -
+		       gtk_adjustment_get_page_size(adj);
 
 	if (value > upper) {
 		value = upper;
@@ -488,23 +494,25 @@ static void nsgtk_adjustment_scroll(GtkAdjustment *adj, double delta)
 }
 
 
-static gboolean
-nsgtk_window_scroll(GtkEventControllerScroll *controller,
-		    gdouble deltax,
-		    gdouble deltay,
-		    gpointer data)
+static gboolean nsgtk_window_scroll(GtkEventControllerScroll *controller,
+				    gdouble deltax,
+				    gdouble deltay,
+				    gpointer data)
 {
 	struct gui_window *g = data;
 
-	if (gtk_event_controller_scroll_get_unit(controller) == GDK_SCROLL_UNIT_WHEEL) {
+	if (gtk_event_controller_scroll_get_unit(controller) ==
+	    GDK_SCROLL_UNIT_WHEEL) {
 		deltax *= gtk_adjustment_get_step_increment(g->hadj);
 		deltay *= gtk_adjustment_get_step_increment(g->vadj);
 	}
 
-	if (browser_window_scroll_at_point(g->bw,
-					   g->pointer_x + gtk_adjustment_get_value(g->hadj),
-					   g->pointer_y + gtk_adjustment_get_value(g->vadj),
-					   deltax, deltay) != true) {
+	if (browser_window_scroll_at_point(
+		    g->bw,
+		    g->pointer_x + gtk_adjustment_get_value(g->hadj),
+		    g->pointer_y + gtk_adjustment_get_value(g->vadj),
+		    deltax,
+		    deltay) != true) {
 
 		/* core did not handle event so change adjustments */
 		if (deltax != 0) {
@@ -519,12 +527,11 @@ nsgtk_window_scroll(GtkEventControllerScroll *controller,
 }
 
 
-static gboolean
-nsgtk_window_key_pressed(GtkEventControllerKey *controller,
-			 guint keyval,
-			 guint keycode,
-			 GdkModifierType state,
-			 gpointer data)
+static gboolean nsgtk_window_key_pressed(GtkEventControllerKey *controller,
+					 guint keyval,
+					 guint keycode,
+					 GdkModifierType state,
+					 gpointer data)
 {
 	struct gui_window *g = data;
 	uint32_t nskey;
@@ -542,7 +549,8 @@ nsgtk_window_key_pressed(GtkEventControllerKey *controller,
 
 	case GDK_KEY(Home):
 	case GDK_KEY(KP_Home):
-		gtk_adjustment_set_value(g->vadj, gtk_adjustment_get_lower(g->vadj));
+		gtk_adjustment_set_value(g->vadj,
+					 gtk_adjustment_get_lower(g->vadj));
 		break;
 
 	case GDK_KEY(End):
@@ -556,38 +564,38 @@ nsgtk_window_key_pressed(GtkEventControllerKey *controller,
 
 	case GDK_KEY(Left):
 	case GDK_KEY(KP_Left):
-		nsgtk_adjustment_scroll(g->hadj,
-			-gtk_adjustment_get_step_increment(g->hadj));
+		nsgtk_adjustment_scroll(
+			g->hadj, -gtk_adjustment_get_step_increment(g->hadj));
 		break;
 
 	case GDK_KEY(Up):
 	case GDK_KEY(KP_Up):
-		nsgtk_adjustment_scroll(g->vadj,
-			-gtk_adjustment_get_step_increment(g->vadj));
+		nsgtk_adjustment_scroll(
+			g->vadj, -gtk_adjustment_get_step_increment(g->vadj));
 		break;
 
 	case GDK_KEY(Right):
 	case GDK_KEY(KP_Right):
-		nsgtk_adjustment_scroll(g->hadj,
-			gtk_adjustment_get_step_increment(g->hadj));
+		nsgtk_adjustment_scroll(
+			g->hadj, gtk_adjustment_get_step_increment(g->hadj));
 		break;
 
 	case GDK_KEY(Down):
 	case GDK_KEY(KP_Down):
-		nsgtk_adjustment_scroll(g->vadj,
-			gtk_adjustment_get_step_increment(g->vadj));
+		nsgtk_adjustment_scroll(
+			g->vadj, gtk_adjustment_get_step_increment(g->vadj));
 		break;
 
 	case GDK_KEY(Page_Up):
 	case GDK_KEY(KP_Page_Up):
-		nsgtk_adjustment_scroll(g->vadj,
-			-gtk_adjustment_get_page_increment(g->vadj));
+		nsgtk_adjustment_scroll(
+			g->vadj, -gtk_adjustment_get_page_increment(g->vadj));
 		break;
 
 	case GDK_KEY(Page_Down):
 	case GDK_KEY(KP_Page_Down):
-		nsgtk_adjustment_scroll(g->vadj,
-			gtk_adjustment_get_page_increment(g->vadj));
+		nsgtk_adjustment_scroll(
+			g->vadj, gtk_adjustment_get_page_increment(g->vadj));
 		break;
 
 	default:
@@ -598,10 +606,9 @@ nsgtk_window_key_pressed(GtkEventControllerKey *controller,
 }
 
 
-static void
-nsgtk_window_input_method_commit(GtkIMContext *ctx,
-				 const gchar *str,
-				 gpointer data)
+static void nsgtk_window_input_method_commit(GtkIMContext *ctx,
+					     const gchar *str,
+					     gpointer data)
 {
 	struct gui_window *g = data;
 	size_t len = strlen(str), offset = 0;
@@ -616,8 +623,10 @@ nsgtk_window_input_method_commit(GtkIMContext *ctx,
 }
 
 
-static void
-nsgtk_window_resize(GtkDrawingArea *area, gint width, gint height, gpointer data)
+static void nsgtk_window_resize(GtkDrawingArea *area,
+				gint width,
+				gint height,
+				gpointer data)
 {
 	struct gui_window *g = data;
 
@@ -644,7 +653,8 @@ nsgtk_paned_notify__position(GObject *gobject, GParamSpec *pspec, gpointer data)
 	}
 
 	nsoption_set_int(toolbar_status_size,
-	 ((gtk_paned_get_position(g->paned) * 10000) / max_position));
+			 ((gtk_paned_get_position(g->paned) * 10000) /
+			  max_position));
 }
 
 
@@ -652,15 +662,17 @@ nsgtk_paned_notify__position(GObject *gobject, GParamSpec *pspec, gpointer data)
  * Set status bar / scroll bar proportion according to user option
  *   when pane is resized.
  */
-static void
-nsgtk_paned_notify__max_position(GObject *gobject, GParamSpec *pspec, gpointer data)
+static void nsgtk_paned_notify__max_position(GObject *gobject,
+					     GParamSpec *pspec,
+					     gpointer data)
 {
 	struct gui_window *g = data;
 	int max_position;
 
 	g_object_get(g->paned, "max-position", &max_position, NULL);
-	gtk_paned_set_position(g->paned,
-	       (nsoption_int(toolbar_status_size) * max_position) / 10000);
+	gtk_paned_set_position(
+		g->paned,
+		(nsoption_int(toolbar_status_size) * max_position) / 10000);
 }
 
 
@@ -754,14 +766,13 @@ static void next_throbber_frame(void *p)
  * Front end's gui_window must include a reference to the
  * browser window passed in the bw param.
  */
-static struct gui_window *
-gui_window_create(struct browser_window *bw,
-		  struct gui_window *existing,
-		  gui_window_create_flags flags)
+static struct gui_window *gui_window_create(struct browser_window *bw,
+					    struct gui_window *existing,
+					    gui_window_create_flags flags)
 {
 	struct gui_window *g; /* what is being created to return */
 	bool open_in_background = !(flags & GW_CREATE_FOREGROUND);
-	GtkBuilder* tab_builder;
+	GtkBuilder *tab_builder;
 	GtkEventController *controller;
 	GtkGesture *gesture;
 	nserror res;
@@ -779,8 +790,11 @@ gui_window_create(struct browser_window *bw,
 		return NULL;
 	}
 
-	NSLOG(netsurf, INFO, "Creating gui window %p for browser window %p",
-	      g, bw);
+	NSLOG(netsurf,
+	      INFO,
+	      "Creating gui window %p for browser window %p",
+	      g,
+	      bw);
 
 	g->bw = bw;
 	g->mouse.state = 0;
@@ -806,18 +820,25 @@ gui_window_create(struct browser_window *bw,
 	}
 
 	/* Construct our primary elements */
-	g->container = GTK_WIDGET(gtk_builder_get_object(tab_builder, "tabBox"));
+	g->container = GTK_WIDGET(
+		gtk_builder_get_object(tab_builder, "tabBox"));
 	g->layout = GTK_WIDGET(gtk_builder_get_object(tab_builder, "layout"));
-	g->grid = GTK_WIDGET(gtk_builder_get_object(tab_builder, "tabContents"));
-	g->status_bar = GTK_LABEL(gtk_builder_get_object(tab_builder, "status_bar"));
+	g->grid = GTK_WIDGET(
+		gtk_builder_get_object(tab_builder, "tabContents"));
+	g->status_bar = GTK_LABEL(
+		gtk_builder_get_object(tab_builder, "status_bar"));
 	g->paned = GTK_PANED(gtk_builder_get_object(tab_builder, "hpaned1"));
-	g->hadj = g_object_ref(GTK_ADJUSTMENT(gtk_builder_get_object(tab_builder, "layouthadjustment")));
-	g->vadj = g_object_ref(GTK_ADJUSTMENT(gtk_builder_get_object(tab_builder, "layoutvadjustment")));
+	g->hadj = g_object_ref(GTK_ADJUSTMENT(
+		gtk_builder_get_object(tab_builder, "layouthadjustment")));
+	g->vadj = g_object_ref(GTK_ADJUSTMENT(
+		gtk_builder_get_object(tab_builder, "layoutvadjustment")));
 	g->input_method = gtk_im_multicontext_new();
 
 
 	/* create toolbar */
-	res = nsgtk_toolbar_create(tab_builder, bw_from_gw, g,
+	res = nsgtk_toolbar_create(tab_builder,
+				   bw_from_gw,
+				   g,
 				   !!(flags & GW_CREATE_FOCUS_LOCATION),
 				   &g->toolbar);
 	if (res != NSERROR_OK) {
@@ -846,11 +867,11 @@ gui_window_create(struct browser_window *bw,
 	g->prev = NULL;
 	window_list = g;
 
-	gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(g->layout),
-				       nsgtk_window_draw, g, NULL);
+	gtk_drawing_area_set_draw_func(
+		GTK_DRAWING_AREA(g->layout), nsgtk_window_draw, g, NULL);
 
 	/* helper macro to conect signals to callbacks */
-#define CONNECT(obj, sig, callback, ptr)				\
+#define CONNECT(obj, sig, callback, ptr)                                       \
 	g_signal_connect(G_OBJECT(obj), (sig), G_CALLBACK(callback), (ptr))
 
 	/* layout input */
@@ -864,13 +885,14 @@ gui_window_create(struct browser_window *bw,
 	CONNECT(gesture, "released", nsgtk_window_button_released, g);
 	gtk_widget_add_controller(g->layout, GTK_EVENT_CONTROLLER(gesture));
 
-	controller = gtk_event_controller_scroll_new(GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
+	controller = gtk_event_controller_scroll_new(
+		GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
 	CONNECT(controller, "scroll", nsgtk_window_scroll, g);
 	gtk_widget_add_controller(g->layout, controller);
 
 	controller = gtk_event_controller_key_new();
-	gtk_event_controller_key_set_im_context(GTK_EVENT_CONTROLLER_KEY(controller),
-						g->input_method);
+	gtk_event_controller_key_set_im_context(
+		GTK_EVENT_CONTROLLER_KEY(controller), g->input_method);
 	CONNECT(controller, "key-pressed", nsgtk_window_key_pressed, g);
 	gtk_widget_add_controller(g->layout, controller);
 
@@ -886,11 +908,12 @@ gui_window_create(struct browser_window *bw,
 	CONNECT(g->vadj, "value-changed", nsgtk_window_adjustment_changed, g);
 
 	/* status pane signals */
-	CONNECT(g->paned, "notify::max-position",
-		nsgtk_paned_notify__max_position, g);
+	CONNECT(g->paned,
+		"notify::max-position",
+		nsgtk_paned_notify__max_position,
+		g);
 
-	CONNECT(g->paned, "notify::position",
-		nsgtk_paned_notify__position, g);
+	CONNECT(g->paned, "notify::position", nsgtk_paned_notify__position, g);
 
 	/* gtk container destructor */
 	CONNECT(g->container, "destroy", window_destroy, g);
@@ -900,13 +923,14 @@ gui_window_create(struct browser_window *bw,
 	gtk_im_context_set_use_preedit(g->input_method, FALSE);
 
 	/* input method signals */
-	CONNECT(g->input_method, "commit",
-		nsgtk_window_input_method_commit, g);
+	CONNECT(g->input_method, "commit", nsgtk_window_input_method_commit, g);
 
 	/* add the tab container to the scaffold notebook */
-	nsgtk_tab_add(g, g->container,
+	nsgtk_tab_add(g,
+		      g->container,
 		      open_in_background,
-		      messages_get("NewTab"), g->icon);
+		      messages_get("NewTab"),
+		      g->icon);
 
 	/* initialy should not be visible */
 	nsgtk_search_toggle_visibility(g->search);
@@ -921,8 +945,11 @@ gui_window_create(struct browser_window *bw,
 
 	/* Finally we need to focus the location bar if requested */
 	if (flags & GW_CREATE_FOCUS_LOCATION) {
-		if (nsgtk_window_item_activate(g, OPENLOCATION_BUTTON) != NSERROR_OK) {
-			NSLOG(netsurf, WARNING, "Unable to focus location input");
+		if (nsgtk_window_item_activate(g, OPENLOCATION_BUTTON) !=
+		    NSERROR_OK) {
+			NSLOG(netsurf,
+			      WARNING,
+			      "Unable to focus location input");
 		}
 	}
 
@@ -976,7 +1003,8 @@ gui_window_set_icon(struct gui_window *gw, struct hlcache_handle *icon)
 		icon_bitmap = content_get_bitmap(icon);
 		if (icon_bitmap != NULL) {
 			NSLOG(netsurf, INFO, "Using %p bitmap", icon_bitmap);
-			gw->icon = nsgdk_pixbuf_get_from_surface(icon_bitmap->surface, 16, 16);
+			gw->icon = nsgdk_pixbuf_get_from_surface(
+				icon_bitmap->surface, 16, 16);
 		}
 	}
 
@@ -1073,8 +1101,22 @@ gui_window_set_scroll(struct gui_window *g, const struct rect *rect)
 	assert(vadj);
 	assert(hadj);
 
-	g_object_get(vadj, "page-size", &vpage, "lower", &vlower, "upper", &vupper, NULL);
-	g_object_get(hadj, "page-size", &hpage, "lower", &hlower, "upper", &hupper, NULL);
+	g_object_get(vadj,
+		     "page-size",
+		     &vpage,
+		     "lower",
+		     &vlower,
+		     "upper",
+		     &vupper,
+		     NULL);
+	g_object_get(hadj,
+		     "page-size",
+		     &hpage,
+		     "lower",
+		     &hlower,
+		     "upper",
+		     &hupper,
+		     NULL);
 
 	if (x < hlower) {
 		x = hlower;
@@ -1190,10 +1232,11 @@ gui_window_set_pointer(struct gui_window *g, gui_pointer_shape shape)
 }
 
 
-static void
-gui_window_place_caret(struct gui_window *g,
-		       int x, int y, int height,
-		       const struct rect *clip)
+static void gui_window_place_caret(struct gui_window *g,
+				   int x,
+				   int y,
+				   int height,
+				   const struct rect *clip)
 {
 	nsgtk_redraw_caret(g);
 
@@ -1244,9 +1287,8 @@ static void gui_window_start_selection(struct gui_window *g)
 }
 
 
-static void
-gui_window_create_form_select_menu(struct gui_window *g,
-				   struct form_control *control)
+static void gui_window_create_form_select_menu(struct gui_window *g,
+					       struct form_control *control)
 {
 	intptr_t item;
 	struct form_option *option;
@@ -1272,11 +1314,16 @@ gui_window_create_form_select_menu(struct gui_window *g,
 	item = 0;
 	option = form_select_get_option(control, item);
 	while (option != NULL) {
-		NSLOG(netsurf, INFO, "Item %"PRIdPTR" option %p text %s",
-		      item, option, option->text);
+		NSLOG(netsurf,
+		      INFO,
+		      "Item %" PRIdPTR " option %p text %s",
+		      item,
+		      option,
+		      option->text);
 		check = gtk_check_button_new_with_label(option->text);
 		if (option->selected) {
-			gtk_check_button_set_active(GTK_CHECK_BUTTON(check), TRUE);
+			gtk_check_button_set_active(GTK_CHECK_BUTTON(check),
+						    TRUE);
 		}
 
 		/*
@@ -1285,8 +1332,10 @@ gui_window_create_form_select_menu(struct gui_window *g,
 		 * parameter to be passed avoiding allocating memory
 		 * for a context with a single integer in it.
 		 */
-		g_signal_connect(check, "toggled",
-			G_CALLBACK(nsgtk_select_menu_clicked), (gpointer)item);
+		g_signal_connect(check,
+				 "toggled",
+				 G_CALLBACK(nsgtk_select_menu_clicked),
+				 (gpointer)item);
 
 		gtk_box_append(GTK_BOX(box), check);
 
@@ -1296,9 +1345,12 @@ gui_window_create_form_select_menu(struct gui_window *g,
 
 	scrolled = gtk_scrolled_window_new();
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),
-				       GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-	gtk_scrolled_window_set_propagate_natural_height(GTK_SCROLLED_WINDOW(scrolled), TRUE);
-	gtk_scrolled_window_set_max_content_height(GTK_SCROLLED_WINDOW(scrolled), 400);
+				       GTK_POLICY_NEVER,
+				       GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_propagate_natural_height(
+		GTK_SCROLLED_WINDOW(scrolled), TRUE);
+	gtk_scrolled_window_set_max_content_height(
+		GTK_SCROLLED_WINDOW(scrolled), 400);
 	gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), box);
 	gtk_popover_set_child(GTK_POPOVER(select_menu), scrolled);
 
@@ -1321,23 +1373,29 @@ struct nsgtk_file_gadget {
 	struct form_control *gadget;
 };
 
-static void
-gui_window_file_gadget_chosen(GObject *source, GAsyncResult *result, gpointer data)
+static void gui_window_file_gadget_chosen(GObject *source,
+					  GAsyncResult *result,
+					  gpointer data)
 {
 	struct nsgtk_file_gadget *fg = data;
 	GFile *file;
 
-	file = gtk_file_dialog_open_finish(GTK_FILE_DIALOG(source), result, NULL);
+	file = gtk_file_dialog_open_finish(GTK_FILE_DIALOG(source),
+					   result,
+					   NULL);
 	if (file != NULL) {
 		char *filename = g_file_get_path(file);
 		struct gui_window *gw;
 
 		/* the window may have been closed while the dialog was open */
-		for (gw = window_list; gw != NULL && gw != fg->g; gw = gw->next) {
+		for (gw = window_list; gw != NULL && gw != fg->g;
+		     gw = gw->next) {
 			continue;
 		}
 		if (gw != NULL && filename != NULL) {
-			browser_window_set_gadget_filename(gw->bw, fg->gadget, filename);
+			browser_window_set_gadget_filename(gw->bw,
+							   fg->gadget,
+							   filename);
 		}
 
 		g_free(filename);
@@ -1351,10 +1409,9 @@ gui_window_file_gadget_chosen(GObject *source, GAsyncResult *result, gpointer da
  *
  * \param g The gui window on which the gadget has been requested
  */
-static void
-gui_window_file_gadget_open(struct gui_window *g,
-			    struct hlcache_handle *hl,
-			    struct form_control *gadget)
+static void gui_window_file_gadget_open(struct gui_window *g,
+					struct hlcache_handle *hl,
+					struct form_control *gadget)
 {
 	GtkFileDialog *dialog;
 	struct nsgtk_file_gadget *fg;
@@ -1563,8 +1620,7 @@ GtkWidget *nsgtk_window_get_layout(struct gui_window *g)
 
 
 /* exported interface documented in window.h */
-nserror
-nsgtk_window_search_toggle(struct gui_window *gw)
+nserror nsgtk_window_search_toggle(struct gui_window *gw)
 {
 	return nsgtk_search_toggle_visibility(gw->search);
 }
@@ -1584,7 +1640,8 @@ void nsgtk_window_destroy_browser(struct gui_window *gw)
 	GtkNotebook *notebook = nsgtk_scaffolding_notebook(gw->scaffold);
 
 	/* remove tab */
-	gtk_notebook_remove_page(notebook, gtk_notebook_page_num(notebook, gw->container));
+	gtk_notebook_remove_page(
+		notebook, gtk_notebook_page_num(notebook, gw->container));
 }
 
 
@@ -1593,7 +1650,8 @@ nserror nsgtk_window_update_all(void)
 {
 	struct gui_window *gw;
 	for (gw = window_list; gw != NULL; gw = gw->next) {
-		nsgtk_tab_options_changed(nsgtk_scaffolding_notebook(gw->scaffold));
+		nsgtk_tab_options_changed(
+			nsgtk_scaffolding_notebook(gw->scaffold));
 		nsgtk_toolbar_restyle(gw->toolbar);
 		nsgtk_search_restyle(gw->search);
 		browser_window_schedule_reformat(gw->bw);
@@ -1627,5 +1685,3 @@ nserror nsgtk_window_toolbar_update(void)
 	}
 	return NSERROR_OK;
 }
-
-

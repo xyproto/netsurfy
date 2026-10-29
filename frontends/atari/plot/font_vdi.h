@@ -20,7 +20,7 @@
 #ifndef FONT_PLOTTER_VDI
 #define FONT_PLOTTER_VDI
 
-int ctor_font_plotter_vdi( FONT_PLOTTER self );
+int ctor_font_plotter_vdi(FONT_PLOTTER self);
 
 #endif
 #endif

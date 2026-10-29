@@ -24,15 +24,14 @@
 extern "C" {
 #endif
 
-void          URLHistory_Init( void );
-void          URLHistory_Free( void );
-struct List * URLHistory_GetList( void );
-void          URLHistory_ClearList( void );
-struct Node * URLHistory_FindPage( const char *urlString );
-void          URLHistory_AddPage( const char * urlString );
+void URLHistory_Init(void);
+void URLHistory_Free(void);
+struct List *URLHistory_GetList(void);
+void URLHistory_ClearList(void);
+struct Node *URLHistory_FindPage(const char *urlString);
+void URLHistory_AddPage(const char *urlString);
 
 #ifdef __cplusplus
 }
 #endif
 #endif
-

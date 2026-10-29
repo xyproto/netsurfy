@@ -46,26 +46,36 @@ extern FONT_PLOTTER fplotter;
  * \param[in] x coordinate to search for
  * \param[out] char_offset updated to offset in string of actual_x, [0..length]
  * \param[out] actual_x updated to x coordinate of character closest to x
- * \return NSERROR_OK and char_offset and actual_x updated or appropriate error code on faliure
+ * \return NSERROR_OK and char_offset and actual_x updated or appropriate error
+ * code on faliure
  */
-static nserror
-atari_font_position(const plot_font_style_t *fstyle,
-		    const char *string,
-		    size_t length,
-		    int x,
-		    size_t *char_offset,
-		    int *actual_x)
+static nserror atari_font_position(const plot_font_style_t *fstyle,
+				   const char *string,
+				   size_t length,
+				   int x,
+				   size_t *char_offset,
+				   int *actual_x)
 {
 	float scale = plot_get_scale();
 
 	if (scale != 1.0) {
 		plot_font_style_t newstyle = *fstyle;
-		newstyle.size = (int)((float)fstyle->size*scale);
-		fplotter->pixel_pos(fplotter, &newstyle, string, length, x,
-				    char_offset, actual_x);
+		newstyle.size = (int)((float)fstyle->size * scale);
+		fplotter->pixel_pos(fplotter,
+				    &newstyle,
+				    string,
+				    length,
+				    x,
+				    char_offset,
+				    actual_x);
 	} else {
-		fplotter->pixel_pos(fplotter, fstyle, string, length, x,
-				    char_offset, actual_x);
+		fplotter->pixel_pos(fplotter,
+				    fstyle,
+				    string,
+				    length,
+				    x,
+				    char_offset,
+				    actual_x);
 	}
 
 	return NSERROR_OK;
@@ -94,24 +104,33 @@ atari_font_position(const plot_font_style_t *fstyle,
  *
  * Returning char_offset == length means no split possible
  */
-static nserror
-atari_font_split(const plot_font_style_t *fstyle,
-		 const char *string,
-		 size_t length,
-		 int x,
-		 size_t *char_offset,
-		 int *actual_x)
+static nserror atari_font_split(const plot_font_style_t *fstyle,
+				const char *string,
+				size_t length,
+				int x,
+				size_t *char_offset,
+				int *actual_x)
 {
 	float scale = plot_get_scale();
 
 	if (scale != 1.0) {
 		plot_font_style_t newstyle = *fstyle;
-		newstyle.size = (int)((float)fstyle->size*scale);
-		fplotter->str_split(fplotter, &newstyle, string, length, x,
-				    char_offset, actual_x);
+		newstyle.size = (int)((float)fstyle->size * scale);
+		fplotter->str_split(fplotter,
+				    &newstyle,
+				    string,
+				    length,
+				    x,
+				    char_offset,
+				    actual_x);
 	} else {
-		fplotter->str_split(fplotter, fstyle, string, length, x,
-				    char_offset, actual_x);
+		fplotter->str_split(fplotter,
+				    fstyle,
+				    string,
+				    length,
+				    x,
+				    char_offset,
+				    actual_x);
 	}
 
 	return NSERROR_OK;
@@ -127,17 +146,16 @@ atari_font_split(const plot_font_style_t *fstyle,
  * \param[out] width updated to width of string[0..length)
  * \return NSERROR_OK and width updated or appropriate error code on faliure
  */
-static nserror
-atari_font_width(const plot_font_style_t *fstyle,
-		 const char *str,
-		 size_t length,
-		 int *width)
+static nserror atari_font_width(const plot_font_style_t *fstyle,
+				const char *str,
+				size_t length,
+				int *width)
 {
 	float scale = plot_get_scale();
 
 	if (scale != 1.0) {
 		plot_font_style_t newstyle = *fstyle;
-		newstyle.size = (int)((float)fstyle->size*scale);
+		newstyle.size = (int)((float)fstyle->size * scale);
 		fplotter->str_width(fplotter, &newstyle, str, length, width);
 	} else {
 		fplotter->str_width(fplotter, fstyle, str, length, width);

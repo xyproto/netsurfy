@@ -18,7 +18,7 @@
 
 /** \file
  * DataTypes picture handler (implementation)
-*/
+ */
 
 #ifdef WITH_AMIGA_DATATYPES
 #include "amiga/os3support.h"
@@ -48,11 +48,15 @@
 
 
 static nserror amiga_dt_picture_create(const content_handler *handler,
-		lwc_string *imime_type, const struct http_parameter *params,
-		llcache_handle *llcache, const char *fallback_charset,
-		bool quirks, struct content **c);
+				       lwc_string *imime_type,
+				       const struct http_parameter *params,
+				       llcache_handle *llcache,
+				       const char *fallback_charset,
+				       bool quirks,
+				       struct content **c);
 static bool amiga_dt_picture_convert(struct content *c);
-static nserror amiga_dt_picture_clone(const struct content *old, struct content **newc);
+static nserror
+amiga_dt_picture_clone(const struct content *old, struct content **newc);
 static void amiga_dt_picture_destroy(struct content *c);
 
 static const content_handler amiga_dt_picture_content_handler = {
@@ -78,29 +82,31 @@ nserror amiga_dt_picture_init(void)
 	nserror error;
 	struct Node *node = NULL;
 
-	while((dt = ObtainDataType(DTST_RAM, NULL,
-			DTA_DataType, prevdt,
-			DTA_GroupID, GID_PICTURE, // we only support images for now
-			TAG_DONE)) != NULL)
-	{
-		if(prevdt) ReleaseDataType(prevdt);
+	while ((dt = ObtainDataType(
+			DTST_RAM,
+			NULL,
+			DTA_DataType,
+			prevdt,
+			DTA_GroupID,
+			GID_PICTURE, // we only support images for now
+			TAG_DONE)) != NULL) {
+		if (prevdt)
+			ReleaseDataType(prevdt);
 		prevdt = dt;
 
 		do {
 			node = ami_mime_from_datatype(dt, &type, node);
 
-			if(node)
-			{
+			if (node) {
 				error = content_factory_register_handler(
-					lwc_string_data(type), 
+					lwc_string_data(type),
 					&amiga_dt_picture_content_handler);
 
 				if (error != NSERROR_OK)
 					return error;
 			}
 
-		}while (node != NULL);
-
+		} while (node != NULL);
 	}
 
 	ReleaseDataType(prevdt);
@@ -109,9 +115,12 @@ nserror amiga_dt_picture_init(void)
 }
 
 nserror amiga_dt_picture_create(const content_handler *handler,
-		lwc_string *imime_type, const struct http_parameter *params,
-		llcache_handle *llcache, const char *fallback_charset,
-		bool quirks, struct content **c)
+				lwc_string *imime_type,
+				const struct http_parameter *params,
+				llcache_handle *llcache,
+				const char *fallback_charset,
+				bool quirks,
+				struct content **c)
 {
 	struct amiga_dt_picture_content *adt;
 	nserror error;
@@ -120,8 +129,13 @@ nserror amiga_dt_picture_create(const content_handler *handler,
 	if (adt == NULL)
 		return NSERROR_NOMEM;
 
-	error = content__init((struct content *)adt, handler, imime_type, params,
-			llcache, fallback_charset, quirks);
+	error = content__init((struct content *)adt,
+			      handler,
+			      imime_type,
+			      params,
+			      llcache,
+			      fallback_charset,
+			      quirks);
 	if (error != NSERROR_OK) {
 		free(adt);
 		return error;
@@ -132,22 +146,29 @@ nserror amiga_dt_picture_create(const content_handler *handler,
 	return NSERROR_OK;
 }
 
-static Object *amiga_dt_picture_newdtobject(struct amiga_dt_picture_content *adt)
+static Object *
+amiga_dt_picture_newdtobject(struct amiga_dt_picture_content *adt)
 {
 	const uint8_t *data;
 	size_t size;
 
-	if(adt->dto == NULL) {
+	if (adt->dto == NULL) {
 		data = content__get_source_data((struct content *)adt, &size);
 
 		adt->dto = NewDTObject(NULL,
-					DTA_SourceType, DTST_MEMORY,
-					DTA_SourceAddress, data,
-					DTA_SourceSize, size,
-					DTA_GroupID, GID_PICTURE,
-					PDTA_DestMode, PMODE_V43,
-					PDTA_PromoteMask, TRUE,
-					TAG_DONE);
+				       DTA_SourceType,
+				       DTST_MEMORY,
+				       DTA_SourceAddress,
+				       data,
+				       DTA_SourceSize,
+				       size,
+				       DTA_GroupID,
+				       GID_PICTURE,
+				       PDTA_DestMode,
+				       PMODE_V43,
+				       PDTA_PromoteMask,
+				       TRUE,
+				       TAG_DONE);
 	}
 
 	return adt->dto;
@@ -159,19 +180,24 @@ static char *amiga_dt_picture_datatype(struct content *c)
 	size_t size;
 	struct DataType *dt;
 	char *filetype = NULL;
-	
+
 	data = content__get_source_data(c, &size);
 
-	if((dt = ObtainDataType(DTST_MEMORY, NULL,
-					DTA_SourceAddress, data,
-					DTA_SourceSize, size,
-					DTA_GroupID, GID_PICTURE,
-					TAG_DONE))) {
+	if ((dt = ObtainDataType(DTST_MEMORY,
+				 NULL,
+				 DTA_SourceAddress,
+				 data,
+				 DTA_SourceSize,
+				 size,
+				 DTA_GroupID,
+				 GID_PICTURE,
+				 TAG_DONE))) {
 		filetype = strdup(dt->dtn_Header->dth_Name);
 		ReleaseDataType(dt);
 	}
-	
-	if(filetype == NULL) filetype = strdup("DataTypes");
+
+	if (filetype == NULL)
+		filetype = strdup("DataTypes");
 	return filetype;
 }
 
@@ -183,10 +209,10 @@ static struct bitmap *amiga_dt_picture_cache_convert(struct content *c)
 	UBYTE *bm_buffer;
 	Object *dto;
 	struct bitmap *bitmap;
-	struct amiga_dt_picture_content *adt = (struct amiga_dt_picture_content *)c;
+	struct amiga_dt_picture_content *adt =
+		(struct amiga_dt_picture_content *)c;
 
-	if((dto = amiga_dt_picture_newdtobject(adt)))
-	{
+	if ((dto = amiga_dt_picture_newdtobject(adt))) {
 		bitmap = amiga_bitmap_create(c->width, c->height, BITMAP_NONE);
 		if (!bitmap) {
 			msg_data.errordata.errorcode = NSERROR_NOMEM;
@@ -197,17 +223,22 @@ static struct bitmap *amiga_dt_picture_cache_convert(struct content *c)
 
 		bm_buffer = amiga_bitmap_get_buffer(bitmap);
 
-		IDoMethod(dto, PDTM_READPIXELARRAY,
-			bm_buffer, PBPAFMT_RGBA,
-			amiga_bitmap_get_rowstride(bitmap),
-			0, 0, c->width, c->height);
+		IDoMethod(dto,
+			  PDTM_READPIXELARRAY,
+			  bm_buffer,
+			  PBPAFMT_RGBA,
+			  amiga_bitmap_get_rowstride(bitmap),
+			  0,
+			  0,
+			  c->width,
+			  c->height);
 
 		amiga_bitmap_set_opaque(bitmap, bitmap_test_opaque(bitmap));
-		
+
 		DisposeDTObject(dto);
 		adt->dto = NULL;
-	}
-	else return NULL;
+	} else
+		return NULL;
 
 	return bitmap;
 }
@@ -222,31 +253,35 @@ bool amiga_dt_picture_convert(struct content *c)
 	struct BitMapHeader *bmh;
 	char *filetype;
 
-	if((dto = amiga_dt_picture_newdtobject((struct amiga_dt_picture_content *)c))) {
-		if(GetDTAttrs(dto, PDTA_BitMapHeader, &bmh, TAG_DONE)) {
+	if ((dto = amiga_dt_picture_newdtobject(
+		     (struct amiga_dt_picture_content *)c))) {
+		if (GetDTAttrs(dto, PDTA_BitMapHeader, &bmh, TAG_DONE)) {
 			width = (int)bmh->bmh_Width;
 			height = (int)bmh->bmh_Height;
-		}
-		else return false;
-	}
-	else return false;
+		} else
+			return false;
+	} else
+		return false;
 
 	c->width = width;
 	c->height = height;
 	c->size = width * height * 4;
 
 	/* set title text */
-	if((filetype = amiga_dt_picture_datatype(c))) {
-		title = messages_get_buff("DataTypesTitle",
+	if ((filetype = amiga_dt_picture_datatype(c))) {
+		title = messages_get_buff(
+			"DataTypesTitle",
 			nsurl_access_leaf(llcache_handle_get_url(c->llcache)),
-			filetype, c->width, c->height);
+			filetype,
+			c->width,
+			c->height);
 		if (title != NULL) {
 			content__set_title(c, title);
 			free(title);
 		}
 		free(filetype);
 	}
-	
+
 	image_cache_add(c, NULL, amiga_dt_picture_cache_convert);
 
 	content_set_ready(c);
@@ -273,7 +308,7 @@ nserror amiga_dt_picture_clone(const struct content *old, struct content **newc)
 	}
 
 	/* We "clone" the old content by replaying conversion */
-	if ((old->status == CONTENT_STATUS_READY) || 
+	if ((old->status == CONTENT_STATUS_READY) ||
 	    (old->status == CONTENT_STATUS_DONE)) {
 		if (amiga_dt_picture_convert(adt) == false) {
 			content_destroy(adt);
@@ -288,11 +323,12 @@ nserror amiga_dt_picture_clone(const struct content *old, struct content **newc)
 
 static void amiga_dt_picture_destroy(struct content *c)
 {
-	struct amiga_dt_picture_content *adt = (struct amiga_dt_picture_content *)c;
+	struct amiga_dt_picture_content *adt =
+		(struct amiga_dt_picture_content *)c;
 
 	DisposeDTObject(adt->dto);
 	adt->dto = NULL;
-	
+
 	image_cache_destroy(c);
 }
 

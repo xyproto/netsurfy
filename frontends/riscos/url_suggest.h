@@ -35,4 +35,3 @@ bool ro_gui_url_suggest_prepare_menu(void);
 const char *ro_gui_url_suggest_get_selection(wimp_selection *selection);
 
 #endif
-

@@ -54,7 +54,7 @@ void ro_url_message_received(wimp_message *message)
 	char *url;
 	int i;
 	inetsuite_message_open_url *url_message =
-			(inetsuite_message_open_url*) &message->data;
+		(inetsuite_message_open_url *)&message->data;
 	os_error *error;
 	nsurl *nsurl;
 	nserror errorns;
@@ -79,14 +79,16 @@ void ro_url_message_received(wimp_message *message)
 			return;
 		}
 		if (28 < message->size &&
-				url_message->indirect.body_file.offset) {
-			NSLOG(netsurf, INFO,
+		    url_message->indirect.body_file.offset) {
+			NSLOG(netsurf,
+			      INFO,
 			      "POST for URL message not implemented");
 			return;
 		}
 		if (url_message->indirect.url.offset < 28 ||
-				236 <= url_message->indirect.url.offset) {
-			NSLOG(netsurf, INFO,
+		    236 <= url_message->indirect.url.offset) {
+			NSLOG(netsurf,
+			      INFO,
 			      "external pointers in URL message unimplemented");
 			/* these messages have never been seen in the wild,
 			 * and there is the problem of invalid addresses which
@@ -94,9 +96,9 @@ void ro_url_message_received(wimp_message *message)
 			return;
 		}
 
-		url = strndup((char *) url_message +
-				url_message->indirect.url.offset,
-				236 - url_message->indirect.url.offset);
+		url = strndup((char *)url_message +
+				      url_message->indirect.url.offset,
+			      236 - url_message->indirect.url.offset);
 		if (!url) {
 			ro_warn_user("NoMemory", 0);
 			return;
@@ -121,20 +123,21 @@ void ro_url_message_received(wimp_message *message)
 
 	/* send ack */
 	message->your_ref = message->my_ref;
-	error = xwimp_send_message(wimp_USER_MESSAGE_ACKNOWLEDGE, message,
-			message->sender);
+	error = xwimp_send_message(wimp_USER_MESSAGE_ACKNOWLEDGE,
+				   message,
+				   message->sender);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_send_message: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_send_message: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 	}
 
 	/* create new browser window */
-	errorns = browser_window_create(BW_CREATE_HISTORY,
-				      nsurl,
-				      NULL,
-				      NULL,
-				      NULL);
+	errorns = browser_window_create(
+		BW_CREATE_HISTORY, nsurl, NULL, NULL, NULL);
 
 
 	nsurl_unref(nsurl);
@@ -160,16 +163,20 @@ void ro_url_broadcast(const char *url)
 		return;
 	}
 
-	message.size = ((20+len+3) & ~3);
+	message.size = ((20 + len + 3) & ~3);
 	message.your_ref = 0;
 	message.action = message_INET_SUITE_OPEN_URL;
 	strncpy(message.url, url, 235);
 	message.url[235] = 0;
 	error = xwimp_send_message(wimp_USER_MESSAGE_RECORDED,
-			(wimp_message *) &message, 0);
+				   (wimp_message *)&message,
+				   0);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_send_message: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_send_message: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 	}
 }
@@ -198,18 +205,21 @@ void ro_url_load(const char *url)
 		return;
 	}
 
-	sprintf(command, "Alias$URLOpen_%.*s", (int) (colon - url), url);
+	sprintf(command, "Alias$URLOpen_%.*s", (int)(colon - url), url);
 	if (!getenv(command)) {
 		free(command);
 		return;
 	}
 
-	sprintf(command, "URLOpen_%.*s %s", (int) (colon - url), url, url);
+	sprintf(command, "URLOpen_%.*s %s", (int)(colon - url), url, url);
 
 	error = xwimp_start_task(command, 0);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_start_task: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_start_task: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 	}
 
@@ -224,9 +234,8 @@ void ro_url_load(const char *url)
 void ro_url_bounce(wimp_message *message)
 {
 	inetsuite_message_open_url *url_message =
-			(inetsuite_message_open_url*) &message->data;
+		(inetsuite_message_open_url *)&message->data;
 
 	/* ant broadcast bounced -> try uri broadcast / load */
 	ro_uri_launch(url_message->url);
 }
-

@@ -51,11 +51,12 @@
 typedef struct nspng_content {
 	struct content base; /**< base content type */
 
-	bool no_process_data; /**< Do not continue to process data as it arrives */
+	bool no_process_data; /**< Do not continue to process data as it arrives
+			       */
 	png_structp png;
 	png_infop info;
 	int interlace;
-	struct bitmap *bitmap;	/**< Created NetSurf bitmap */
+	struct bitmap *bitmap; /**< Created NetSurf bitmap */
 	size_t rowstride, bpp; /**< Bitmap rowstride and bpp */
 	size_t rowbytes; /**< Number of bytes per row */
 } nspng_content;
@@ -70,7 +71,7 @@ enum nspng_cberr {
 	CBERR_NONE = 0, /* no error */
 	CBERR_LIBPNG, /* error from png library */
 	CBERR_NOPRE, /* no pre-conversion performed */
-}; 
+};
 
 /**
  * nspng_warning -- callback for libpng warnings
@@ -207,12 +208,18 @@ static void info_callback(png_structp png_s, png_infop info)
 	png_c->rowbytes = png_get_rowbytes(png_s, info);
 	png_c->interlace = (interlace == PNG_INTERLACE_ADAM7);
 
-	NSLOG(netsurf, INFO, "size %li * %li, rowbytes %"PRIsizet,
-	      (unsigned long)width, (unsigned long)height, png_c->rowbytes);
+	NSLOG(netsurf,
+	      INFO,
+	      "size %li * %li, rowbytes %" PRIsizet,
+	      (unsigned long)width,
+	      (unsigned long)height,
+	      png_c->rowbytes);
 }
 
-static void row_callback(png_structp png_s, png_bytep new_row,
-			 png_uint_32 row_num, int pass)
+static void row_callback(png_structp png_s,
+			 png_bytep new_row,
+			 png_uint_32 row_num,
+			 int pass)
 {
 	nspng_content *png_c = png_get_progressive_ptr(png_s);
 	unsigned long rowbytes = png_c->rowbytes;
@@ -245,7 +252,7 @@ static void row_callback(png_structp png_s, png_bytep new_row,
 		start = interlace_start[pass];
 		step = interlace_step[pass];
 		row_num = interlace_row_start[pass] +
-			interlace_row_step[pass] * row_num;
+			  interlace_row_step[pass] * row_num;
 
 		/* Copy the data to our current row taking interlacing
 		 * into consideration */
@@ -298,20 +305,19 @@ static nserror nspng_create_png_data(nspng_content *png_c)
 		return NSERROR_NOMEM;
 	}
 
-	png_set_progressive_read_fn(png_c->png, png_c,
-			info_callback, row_callback, end_callback);
+	png_set_progressive_read_fn(
+		png_c->png, png_c, info_callback, row_callback, end_callback);
 
 	return NSERROR_OK;
 }
 
-static nserror
-nspng_create(const content_handler *handler,
-	     lwc_string *imime_type,
-	     const struct http_parameter *params,
-	     struct llcache_handle *llcache,
-	     const char *fallback_charset,
-	     bool quirks,
-	     struct content **c)
+static nserror nspng_create(const content_handler *handler,
+			    lwc_string *imime_type,
+			    const struct http_parameter *params,
+			    struct llcache_handle *llcache,
+			    const char *fallback_charset,
+			    bool quirks,
+			    struct content **c)
 {
 	nspng_content *png_c;
 	nserror error;
@@ -320,12 +326,12 @@ nspng_create(const content_handler *handler,
 	if (png_c == NULL)
 		return NSERROR_NOMEM;
 
-	error = content__init(&png_c->base, 
-			      handler, 
-			      imime_type, 
+	error = content__init(&png_c->base,
+			      handler,
+			      imime_type,
 			      params,
-			      llcache, 
-			      fallback_charset, 
+			      llcache,
+			      fallback_charset,
 			      quirks);
 	if (error != NSERROR_OK) {
 		free(png_c);
@@ -344,8 +350,8 @@ nspng_create(const content_handler *handler,
 }
 
 
-static bool nspng_process_data(struct content *c, const char *data,
-			       unsigned int size)
+static bool
+nspng_process_data(struct content *c, const char *data, unsigned int size)
 {
 	nspng_content *png_c = (nspng_content *)c;
 	volatile bool ret = true;
@@ -355,8 +361,9 @@ static bool nspng_process_data(struct content *c, const char *data,
 	}
 
 	switch (setjmp(png_jmpbuf(png_c->png))) {
-	case CBERR_NONE: /* direct return */	
-		png_process_data(png_c->png, png_c->info, (uint8_t *)data, size);
+	case CBERR_NONE: /* direct return */
+		png_process_data(
+			png_c->png, png_c->info, (uint8_t *)data, size);
 		break;
 
 	case CBERR_NOPRE: /* not going to progressive convert */
@@ -367,7 +374,7 @@ static bool nspng_process_data(struct content *c, const char *data,
 		if (png_c->bitmap != NULL) {
 			/* A bitmap managed to get created so
 			 * operation is past header and possibly some
-			 * conversion happened before faliure. 
+			 * conversion happened before faliure.
 			 *
 			 * In this case keep the partial
 			 * conversion. This is usually seen if a png
@@ -378,9 +385,10 @@ static bool nspng_process_data(struct content *c, const char *data,
 		} else {
 			/* not managed to progress past header, clean
 			 * up png conversion and signal the content
-			 * error 
+			 * error
 			 */
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "Fatal PNG error during header, error content");
 
 			png_destroy_read_struct(&png_c->png, &png_c->info, 0);
@@ -390,7 +398,6 @@ static bool nspng_process_data(struct content *c, const char *data,
 			content_broadcast_error(c, NSERROR_PNG_ERROR, NULL);
 
 			ret = false;
-
 		}
 		break;
 	}
@@ -403,9 +410,9 @@ struct png_cache_read_data_s {
 	size_t size;
 };
 
-/** PNG library read fucntion to read data from a memory array 
+/** PNG library read fucntion to read data from a memory array
  */
-static void 
+static void
 png_cache_read_fn(png_structp png_ptr, png_bytep data, png_size_t length)
 {
 	struct png_cache_read_data_s *png_cache_read_data;
@@ -430,7 +437,7 @@ png_cache_read_fn(png_structp png_ptr, png_bytep data, png_size_t length)
 static png_bytep *calc_row_pointers(struct bitmap *bitmap)
 {
 	int height = guit->bitmap->get_height(bitmap);
-	unsigned char *buffer= guit->bitmap->get_buffer(bitmap);
+	unsigned char *buffer = guit->bitmap->get_buffer(bitmap);
 	size_t rowstride = guit->bitmap->get_rowstride(bitmap);
 	png_bytep *row_ptrs;
 	int hloop;
@@ -457,27 +464,26 @@ static png_bytep *calc_row_pointers(struct bitmap *bitmap)
  *
  * This routine generates a bitmap object from a PNG image content
  */
-static struct bitmap *
-png_cache_convert(struct content *c)
+static struct bitmap *png_cache_convert(struct content *c)
 {
 	png_structp png_ptr;
 	png_infop info_ptr;
 	png_infop end_info_ptr;
-	volatile struct bitmap * volatile bitmap = NULL;
+	volatile struct bitmap *volatile bitmap = NULL;
 	struct png_cache_read_data_s png_cache_read_data;
 	png_uint_32 width, height;
-	volatile png_bytep * volatile row_pointers = NULL;
+	volatile png_bytep *volatile row_pointers = NULL;
 
-	png_cache_read_data.data = 
-		content__get_source_data(c, &png_cache_read_data.size);
+	png_cache_read_data.data = content__get_source_data(
+		c, &png_cache_read_data.size);
 
-	if ((png_cache_read_data.data == NULL) || 
+	if ((png_cache_read_data.data == NULL) ||
 	    (png_cache_read_data.size <= 8)) {
 		return NULL;
 	}
 
-	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL,
-			nspng_error, nspng_warning);
+	png_ptr = png_create_read_struct(
+		PNG_LIBPNG_VER_STRING, NULL, nspng_error, nspng_warning);
 	if (png_ptr == NULL) {
 		return NULL;
 	}
@@ -519,10 +525,10 @@ png_cache_convert(struct content *c)
 		goto png_cache_convert_error;
 	}
 
-	row_pointers = calc_row_pointers((struct bitmap *) bitmap);
+	row_pointers = calc_row_pointers((struct bitmap *)bitmap);
 
 	if (row_pointers != NULL) {
-		png_read_image(png_ptr, (png_bytep *) row_pointers);
+		png_read_image(png_ptr, (png_bytep *)row_pointers);
 	} else {
 		guit->bitmap->destroy((struct bitmap *)bitmap);
 		bitmap = NULL;
@@ -534,16 +540,18 @@ png_cache_convert_error:
 	png_destroy_read_struct(&png_ptr, &info_ptr, &end_info_ptr);
 
 	if (row_pointers != NULL) {
-		free((png_bytep *) row_pointers);
+		free((png_bytep *)row_pointers);
 	}
 
 	if (bitmap != NULL) {
 		bool opaque = bitmap_test_opaque((void *)bitmap);
 		guit->bitmap->set_opaque((void *)bitmap, opaque);
-		bitmap_format_to_client((void *)bitmap, &(bitmap_fmt_t) {
-			.layout = bitmap_fmt.layout,
-			.pma = opaque ? bitmap_fmt.pma : false,
-		});
+		bitmap_format_to_client((void *)bitmap,
+					&(bitmap_fmt_t){
+						.layout = bitmap_fmt.layout,
+						.pma = opaque ? bitmap_fmt.pma
+							      : false,
+					});
 		guit->bitmap->modified((void *)bitmap);
 	}
 
@@ -552,7 +560,7 @@ png_cache_convert_error:
 
 static bool nspng_convert(struct content *c)
 {
-	nspng_content *png_c = (nspng_content *) c;
+	nspng_content *png_c = (nspng_content *)c;
 	char *title;
 
 	assert(png_c->png != NULL);
@@ -563,8 +571,10 @@ static bool nspng_convert(struct content *c)
 
 	/* set title text */
 	title = messages_get_buff("PNGTitle",
-			nsurl_access_leaf(llcache_handle_get_url(c->llcache)),
-			c->width, c->height);
+				  nsurl_access_leaf(
+					  llcache_handle_get_url(c->llcache)),
+				  c->width,
+				  c->height);
 	if (title != NULL) {
 		content__set_title(c, title);
 		free(title);
@@ -573,10 +583,12 @@ static bool nspng_convert(struct content *c)
 	if (png_c->bitmap != NULL) {
 		bool opaque = bitmap_test_opaque(png_c->bitmap);
 		guit->bitmap->set_opaque(png_c->bitmap, opaque);
-		bitmap_format_to_client(png_c->bitmap, &(bitmap_fmt_t) {
-			.layout = bitmap_fmt.layout,
-			.pma = opaque ? bitmap_fmt.pma : false,
-		});
+		bitmap_format_to_client(png_c->bitmap,
+					&(bitmap_fmt_t){
+						.layout = bitmap_fmt.layout,
+						.pma = opaque ? bitmap_fmt.pma
+							      : false,
+					});
 		guit->bitmap->modified(png_c->bitmap);
 	}
 
@@ -616,7 +628,9 @@ static nserror nspng_clone(const struct content *old_c, struct content **new_c)
 
 	data = content__get_source_data(&clone_png_c->base, &size);
 	if (size > 0) {
-		if (nspng_process_data(&clone_png_c->base, (const char *)data, size) == false) {
+		if (nspng_process_data(&clone_png_c->base,
+				       (const char *)data,
+				       size) == false) {
 			content_destroy(&clone_png_c->base);
 			return NSERROR_NOMEM;
 		}
@@ -648,9 +662,6 @@ static const content_handler nspng_content_handler = {
 	.no_share = false,
 };
 
-static const char *nspng_types[] = {
-	"image/png",
-	"image/x-png"
-};
+static const char *nspng_types[] = {"image/png", "image/x-png"};
 
 CONTENT_FACTORY_REGISTER_TYPES(nspng, nspng_types, nspng_content_handler);

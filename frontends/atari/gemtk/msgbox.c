@@ -23,7 +23,7 @@
 #include "gemtk.h"
 
 #ifndef min
-# define min(x,y) ((x<y) ? x : y )
+#define min(x, y) ((x < y) ? x : y)
 #endif
 
 /***
@@ -34,10 +34,10 @@
  * \return 0 on "No"
  *
  */
-short gemtk_msg_box_show(short type, const char * msg)
+short gemtk_msg_box_show(short type, const char *msg)
 {
-	#define GEMTK_MSG_BOX_STR_SIZE 256
-	short retval=0, i=0, z=0, l=0;
+#define GEMTK_MSG_BOX_STR_SIZE 256
+	short retval = 0, i = 0, z = 0, l = 0;
 	char c;
 	int len_msg = strlen(msg);
 
@@ -55,15 +55,15 @@ short gemtk_msg_box_show(short type, const char * msg)
 
 	dst = msg_box_str + strlen(msg_box_str);
 
-	for (i=0; i<min(len_msg,40*5); i++) {
+	for (i = 0; i < min(len_msg, 40 * 5); i++) {
 
 		c = msg[i];
 
-		if(c==0)
+		if (c == 0)
 			break;
 
-		if (z==40) {
-			if(l==4){
+		if (z == 40) {
+			if (l == 4) {
 				break;
 			}
 			z = 0;
@@ -72,16 +72,15 @@ short gemtk_msg_box_show(short type, const char * msg)
 			dst++;
 		}
 
-		if ((c=='\r' || c=='\n') && *dst != '|') {
-			if(l==4){
+		if ((c == '\r' || c == '\n') && *dst != '|') {
+			if (l == 4) {
 				break;
 			}
 			z = 0;
 			l++;
 			*dst = '|';
 			dst++;
-		}
-		else {
+		} else {
 			z++;
 			*dst = c;
 			dst++;
@@ -89,7 +88,7 @@ short gemtk_msg_box_show(short type, const char * msg)
 	}
 	strncat(msg_box_str, "][", GEMTK_MSG_BOX_STR_SIZE);
 
-	if(type == GEMTK_MSG_BOX_CONFIRM){
+	if (type == GEMTK_MSG_BOX_CONFIRM) {
 		strncat(msg_box_str, str_yes, GEMTK_MSG_BOX_STR_SIZE);
 		strncat(msg_box_str, "|", GEMTK_MSG_BOX_STR_SIZE);
 		strncat(msg_box_str, str_no, GEMTK_MSG_BOX_STR_SIZE);
@@ -99,12 +98,12 @@ short gemtk_msg_box_show(short type, const char * msg)
 	strncat(msg_box_str, "]", GEMTK_MSG_BOX_STR_SIZE);
 
 	retval = form_alert(type, msg_box_str);
-	if(type == GEMTK_MSG_BOX_CONFIRM){
-		if(retval != 1){
+	if (type == GEMTK_MSG_BOX_CONFIRM) {
+		if (retval != 1) {
 			retval = 0;
 		}
 	}
-	return(retval);
+	return (retval);
 
-	#undef GEMTK_MSG_BOX_STR_SIZE
+#undef GEMTK_MSG_BOX_STR_SIZE
 }

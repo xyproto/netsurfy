@@ -43,7 +43,7 @@ nserror ami_nsoption_set_location(const char *current_user_dir)
 	ami_nsoption_free();
 
 	current_user_options = ASPrintf("%s/Choices", current_user_dir);
-	if(current_user_options == NULL)
+	if (current_user_options == NULL)
 		err = NSERROR_NOMEM;
 
 	return err;
@@ -51,9 +51,8 @@ nserror ami_nsoption_set_location(const char *current_user_dir)
 
 void ami_nsoption_free(void)
 {
-	if(current_user_options != NULL)
+	if (current_user_options != NULL)
 		FreeVec(current_user_options);
 
 	current_user_options = NULL;
 }
-

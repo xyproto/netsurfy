@@ -49,13 +49,17 @@ static LONG ami_misc_req(const char *message, uint32 type)
 
 	NSLOG(netsurf, INFO, "%s", message);
 #ifdef __amigaos4__
-	ret = TimedDosRequesterTags(
-		TDR_TitleString,  messages_get("NetSurf"),
-		TDR_FormatString, message,
-		TDR_GadgetString, messages_get("OK"),
-		TDR_ImageType, type,
-		TDR_Window, cur_gw ? ami_gui_get_window(cur_gw) : NULL,
-		TAG_DONE);
+	ret = TimedDosRequesterTags(TDR_TitleString,
+				    messages_get("NetSurf"),
+				    TDR_FormatString,
+				    message,
+				    TDR_GadgetString,
+				    messages_get("OK"),
+				    TDR_ImageType,
+				    type,
+				    TDR_Window,
+				    cur_gw ? ami_gui_get_window(cur_gw) : NULL,
+				    TAG_DONE);
 #else
 	struct EasyStruct easyreq = {
 		sizeof(struct EasyStruct),
@@ -65,7 +69,9 @@ static LONG ami_misc_req(const char *message, uint32 type)
 		messages_get("OK"),
 	};
 
-	ret = EasyRequest(cur_gw ? ami_gui_get_window(cur_gw) : NULL, &easyreq, NULL);
+	ret = EasyRequest(cur_gw ? ami_gui_get_window(cur_gw) : NULL,
+			  &easyreq,
+			  NULL);
 #endif
 	return ret;
 }
@@ -80,17 +86,23 @@ nserror amiga_warn_user(const char *warning, const char *detail)
 {
 	char *utf8warning = ami_utf8_easy(messages_get(warning));
 	STRPTR bodytext = ASPrintf("\33b%s\33n\n%s",
-		utf8warning != NULL ? utf8warning : warning, detail);
+				   utf8warning != NULL ? utf8warning : warning,
+				   detail);
 
 	ami_misc_req(bodytext, TDRIMAGE_WARNING);
 
-	if(bodytext) FreeVec(bodytext);
-	if(utf8warning) free(utf8warning);
+	if (bodytext)
+		FreeVec(bodytext);
+	if (utf8warning)
+		free(utf8warning);
 
 	return NSERROR_OK;
 }
 
-int32 amiga_warn_user_multi(const char *body, const char *opt1, const char *opt2, struct Window *win)
+int32 amiga_warn_user_multi(const char *body,
+			    const char *opt1,
+			    const char *opt2,
+			    struct Window *win)
 {
 	int res = 0;
 
@@ -102,12 +114,17 @@ int32 amiga_warn_user_multi(const char *body, const char *opt1, const char *opt2
 	free(utf8gadget2);
 
 #ifdef __amigaos4__
-	res = TimedDosRequesterTags(TDR_ImageType, TDRIMAGE_WARNING,
-		TDR_TitleString, messages_get("NetSurf"),
-		TDR_FormatString, utf8text,
-		TDR_GadgetString, utf8gadgets,
-		TDR_Window, win,
-		TAG_DONE);
+	res = TimedDosRequesterTags(TDR_ImageType,
+				    TDRIMAGE_WARNING,
+				    TDR_TitleString,
+				    messages_get("NetSurf"),
+				    TDR_FormatString,
+				    utf8text,
+				    TDR_GadgetString,
+				    utf8gadgets,
+				    TDR_Window,
+				    win,
+				    TAG_DONE);
 #else
 	struct EasyStruct easyreq = {
 		sizeof(struct EasyStruct),
@@ -120,8 +137,10 @@ int32 amiga_warn_user_multi(const char *body, const char *opt1, const char *opt2
 	res = EasyRequest(win, &easyreq, NULL);
 #endif
 
-	if(utf8text) free(utf8text);
-	if(utf8gadgets) FreeVec(utf8gadgets);
+	if (utf8text)
+		free(utf8text);
+	if (utf8gadgets)
+		FreeVec(utf8gadgets);
 
 	return res;
 }
@@ -152,9 +171,8 @@ static nserror amiga_nsurl_to_path(struct nsurl *url, char **path_out)
 
 	scheme = nsurl_get_component(url, NSURL_SCHEME);
 
-	if (lwc_string_caseless_isequal(scheme, corestring_lwc_file,
-					&match) != lwc_error_ok)
-	{
+	if (lwc_string_caseless_isequal(scheme, corestring_lwc_file, &match) !=
+	    lwc_error_ok) {
 		return NSERROR_BAD_PARAMETER;
 	}
 	lwc_string_unref(scheme);
@@ -174,13 +192,14 @@ static nserror amiga_nsurl_to_path(struct nsurl *url, char **path_out)
 	}
 
 	colon = strchr(path, ':');
-	if(colon == NULL) {
+	if (colon == NULL) {
 		slash = strchr(path, '/');
-		if(slash) {
+		if (slash) {
 			*slash = ':';
 		} else {
 			char *tmp_path = malloc(path_len + 2);
-			if(tmp_path == NULL) return NSERROR_NOMEM;
+			if (tmp_path == NULL)
+				return NSERROR_NOMEM;
 
 			strncpy(tmp_path, path, path_len);
 			free(path);
@@ -215,18 +234,19 @@ static nserror amiga_path_to_nsurl(const char *path, struct nsurl **url_out)
 	BPTR lock = 0;
 	nserror ret;
 
-	if((lock = Lock(path, SHARED_LOCK))) {
+	if ((lock = Lock(path, SHARED_LOCK))) {
 		DevNameFromLock(lock, newpath, sizeof newpath, DN_FULLPATH);
 		UnLock(lock);
-	}
-	else strlcpy(newpath, path, sizeof newpath);
+	} else
+		strlcpy(newpath, path, sizeof newpath);
 
 	r = malloc(strlen(newpath) + SLEN("file:///") + 1);
 	if (r == NULL) {
 		return NSERROR_NOMEM;
 	}
 
-	if((colon = strchr(newpath, ':'))) *colon = '/';
+	if ((colon = strchr(newpath, ':')))
+		*colon = '/';
 
 	strcpy(r, "file:///");
 	strcat(r, newpath);
@@ -255,8 +275,7 @@ char *translate_escape_chars(const char *s)
 	for (i = 0, ii = 0; i < len; i++) {
 		if (s[i] != '\\') {
 			ret[ii++] = s[i];
-		}
-		else if (s[i+1] == 'n') {
+		} else if (s[i + 1] == 'n') {
 			ret[ii++] = '\n';
 			i++;
 		}
@@ -295,7 +314,7 @@ static nserror amiga_vmkpath(char **str, size_t *size, size_t nelm, va_list ap)
 	if ((nelm == 0) || (nelm > 16)) {
 		return NSERROR_BAD_PARAMETER;
 	}
-	
+
 	if ((*str != NULL) && (size == NULL)) {
 		/* if the caller is providing the buffer they must say
 		 * how much space is available.
@@ -337,7 +356,8 @@ static nserror amiga_vmkpath(char **str, size_t *size, size_t nelm, va_list ap)
 	/* add the remaining elements */
 	for (elm_idx = 1; elm_idx < nelm; elm_idx++) {
 		if (!AddPart(fname, elm[elm_idx], fname_len)) {
-			if((*str == NULL) && (fname != NULL)) free(fname);
+			if ((*str == NULL) && (fname != NULL))
+				free(fname);
 			return NSERROR_NOSPACE;
 		}
 	}
@@ -436,7 +456,7 @@ static nserror amiga_mkdir_all(const char *fname)
 				return NSERROR_NOT_FOUND;
 			}
 		} else {
-			if (! S_ISDIR(sb.st_mode)) {
+			if (!S_ISDIR(sb.st_mode)) {
 				/* path element not a directory */
 				free(dname);
 				return NSERROR_NOT_DIRECTORY;

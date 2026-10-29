@@ -16,14 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- #ifndef NS_ATARI_COOKIE_MANAGER_H
- #define NS_ATARI_COOKIE_MANAGER_H
+#ifndef NS_ATARI_COOKIE_MANAGER_H
+#define NS_ATARI_COOKIE_MANAGER_H
 
 struct core_window;
 
 struct atari_cookie_manager_s {
-	GUIWIN * window;
-	//struct atari_treeview_window * tv;/*< The hotlist treeview handle.  */
+	GUIWIN *window;
+	// struct atari_treeview_window * tv;/*< The hotlist treeview handle. */
 	struct core_window *tv;
 	bool init;
 };

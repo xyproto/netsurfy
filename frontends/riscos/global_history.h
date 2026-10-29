@@ -55,4 +55,3 @@ bool ro_gui_global_history_check_window(wimp_w window);
 bool ro_gui_global_history_check_menu(wimp_menu *menu);
 
 #endif
-

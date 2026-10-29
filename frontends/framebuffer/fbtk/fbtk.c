@@ -46,8 +46,7 @@
 #ifdef FBTK_LOGGING
 
 /* tree dump debug, also example of depth first tree walk */
-static void
-dump_tk_tree(fbtk_widget_t *widget)
+static void dump_tk_tree(fbtk_widget_t *widget)
 {
 	widget = fbtk_get_root_widget(widget);
 	int indent = 0;
@@ -75,11 +74,10 @@ dump_tk_tree(fbtk_widget_t *widget)
 	}
 }
 
-#endif 
+#endif
 
 /* exported function documented in fbtk.h */
-void
-fbtk_request_redraw(fbtk_widget_t *widget)
+void fbtk_request_redraw(fbtk_widget_t *widget)
 {
 	fbtk_widget_t *cwidget;
 	fbtk_widget_t *pwidget;
@@ -100,7 +98,8 @@ fbtk_request_redraw(fbtk_widget_t *widget)
 	widget->redraw.width = widget->width;
 	widget->redraw.height = widget->height;
 
-	NSLOG(fbtk, DEBUG,
+	NSLOG(fbtk,
+	      DEBUG,
 	      "redrawing %p %d,%d %d,%d",
 	      widget,
 	      widget->redraw.x,
@@ -121,10 +120,8 @@ fbtk_request_redraw(fbtk_widget_t *widget)
 }
 
 
-
 /* exported function documented in fbtk.h */
-int
-fbtk_set_mapping(fbtk_widget_t *widget, bool map)
+int fbtk_set_mapping(fbtk_widget_t *widget, bool map)
 {
 	NSLOG(netsurf, INFO, "setting mapping on %p to %d", widget, map);
 	widget->mapped = map;
@@ -142,8 +139,7 @@ fbtk_set_mapping(fbtk_widget_t *widget, bool map)
  *
  * \param lw The widget to swap
  */
-static void
-swap_siblings(fbtk_widget_t *lw)
+static void swap_siblings(fbtk_widget_t *lw)
 {
 	fbtk_widget_t *rw = lw->next; /* the widget to swap lw with */
 	fbtk_widget_t *before;
@@ -175,10 +171,8 @@ swap_siblings(fbtk_widget_t *lw)
 }
 
 
-
 /* exported function documented in fbtk.h */
-int
-fbtk_set_zorder(fbtk_widget_t *widget, int z)
+int fbtk_set_zorder(fbtk_widget_t *widget, int z)
 {
 	while (z != 0) {
 		if (z < 0) {
@@ -205,10 +199,11 @@ fbtk_set_zorder(fbtk_widget_t *widget, int z)
 
 
 /* exported function documented in fbtk.h */
-bool
-fbtk_set_pos_and_size(fbtk_widget_t *widget,
-		      int x, int y,
-		      int width, int height)
+bool fbtk_set_pos_and_size(fbtk_widget_t *widget,
+			   int x,
+			   int y,
+			   int width,
+			   int height)
 {
 	if (widget->parent != NULL) {
 		fbtk_widget_t *parent = widget->parent;
@@ -233,9 +228,7 @@ fbtk_set_pos_and_size(fbtk_widget_t *widget,
 		}
 	}
 
-	if ((widget->x != x) ||
-	    (widget->y != y) ||
-	    (widget->width != width) ||
+	if ((widget->x != x) || (widget->y != y) || (widget->width != width) ||
 	    (widget->height != height)) {
 		widget->x = x;
 		widget->y = y;
@@ -248,10 +241,12 @@ fbtk_set_pos_and_size(fbtk_widget_t *widget,
 
 
 /* exported function docuemnted in fbtk.h */
-void
-fbtk_set_caret(fbtk_widget_t *widget, bool set,
-		int x, int y, int height,
-		void (*remove_caret)(fbtk_widget_t *widget))
+void fbtk_set_caret(fbtk_widget_t *widget,
+		    bool set,
+		    int x,
+		    int y,
+		    int height,
+		    void (*remove_caret)(fbtk_widget_t *widget))
 {
 	fbtk_widget_t *root;
 
@@ -259,7 +254,7 @@ fbtk_set_caret(fbtk_widget_t *widget, bool set,
 	root = fbtk_get_root_widget(widget);
 
 	if (root->u.root.caret.owner != NULL &&
-			root->u.root.caret.remove_cb != NULL)
+	    root->u.root.caret.remove_cb != NULL)
 		root->u.root.caret.remove_cb(widget);
 
 	if (set) {
@@ -278,8 +273,7 @@ fbtk_set_caret(fbtk_widget_t *widget, bool set,
 }
 
 /* exported function documented in fbtk.h */
-int
-fbtk_destroy_widget(fbtk_widget_t *widget)
+int fbtk_destroy_widget(fbtk_widget_t *widget)
 {
 	fbtk_widget_t *parent;
 	int ret = 0;
@@ -322,30 +316,45 @@ enum {
 };
 
 /* Computes where a point lies in respect to an area. */
-#define REGION(x,y,cx1,cx2,cy1,cy2)			\
-	(( (y) > (cy2) ? POINT_BELOW_REGION : 0) |	\
-	 ( (y) < (cy1) ? POINT_ABOVE_REGION : 0) |	\
-	 ( (x) > (cx2) ? POINT_RIGHTOF_REGION : 0) |	\
-	 ( (x) < (cx1) ? POINT_LEFTOF_REGION : 0) )
+#define REGION(x, y, cx1, cx2, cy1, cy2)                                       \
+	(((y) > (cy2) ? POINT_BELOW_REGION : 0) |                              \
+	 ((y) < (cy1) ? POINT_ABOVE_REGION : 0) |                              \
+	 ((x) > (cx2) ? POINT_RIGHTOF_REGION : 0) |                            \
+	 ((x) < (cx1) ? POINT_LEFTOF_REGION : 0))
 
 /* swap two integers */
-#define SWAP(a, b) do { int t; t=(a); (a)=(b); (b)=t;  } while(0)
+#define SWAP(a, b)                                                             \
+	do {                                                                   \
+		int t;                                                         \
+		t = (a);                                                       \
+		(a) = (b);                                                     \
+		(b) = t;                                                       \
+	} while (0)
 
 /* exported function documented in fbtk.h */
-bool
-fbtk_clip_rect(const bbox_t * restrict clip, bbox_t * restrict box)
+bool fbtk_clip_rect(const bbox_t *restrict clip, bbox_t *restrict box)
 {
 	uint8_t region1;
 	uint8_t region2;
 
 	/* ensure co-ordinates are in ascending order */
-	if (box->x1 < box->x0) 
+	if (box->x1 < box->x0)
 		SWAP(box->x0, box->x1);
-	if (box->y1 < box->y0) 
+	if (box->y1 < box->y0)
 		SWAP(box->y0, box->y1);
 
-	region1 = REGION(box->x0, box->y0, clip->x0, clip->x1 - 1, clip->y0, clip->y1 - 1);
-	region2 = REGION(box->x1, box->y1, clip->x0, clip->x1 - 1, clip->y0, clip->y1 - 1);
+	region1 = REGION(box->x0,
+			 box->y0,
+			 clip->x0,
+			 clip->x1 - 1,
+			 clip->y0,
+			 clip->y1 - 1);
+	region2 = REGION(box->x1,
+			 box->y1,
+			 clip->x0,
+			 clip->x1 - 1,
+			 clip->y0,
+			 clip->y1 - 1);
 
 	/* area lies entirely outside the clipping rectangle */
 	if ((region1 | region2) && (region1 & region2))
@@ -375,8 +384,7 @@ fbtk_clip_rect(const bbox_t * restrict clip, bbox_t * restrict box)
 }
 
 /* exported function documented in fbtk.h */
-bool
-fbtk_clip_to_widget(fbtk_widget_t *widget, bbox_t * restrict box)
+bool fbtk_clip_to_widget(fbtk_widget_t *widget, bbox_t *restrict box)
 {
 	bbox_t wbox;
 	wbox.x0 = 0;
@@ -387,10 +395,8 @@ fbtk_clip_to_widget(fbtk_widget_t *widget, bbox_t * restrict box)
 }
 
 
-
 /* internally exported function documented in widget.h */
-int
-fbtk_set_ptr(fbtk_widget_t *widget, fbtk_callback_info *cbi)
+int fbtk_set_ptr(fbtk_widget_t *widget, fbtk_callback_info *cbi)
 {
 	fbtk_widget_t *root = fbtk_get_root_widget(widget);
 	struct fbtk_bitmap *bm = cbi->context;
@@ -408,15 +414,15 @@ fbtk_set_ptr(fbtk_widget_t *widget, fbtk_callback_info *cbi)
 
 
 /* internally exported function documented in widget.h */
-fbtk_widget_t *
-fbtk_get_root_widget(fbtk_widget_t *widget)
+fbtk_widget_t *fbtk_get_root_widget(fbtk_widget_t *widget)
 {
 	while (widget->parent != NULL)
 		widget = widget->parent;
 
 	/* check root widget was found */
 	if (widget->type != FB_WIDGET_TYPE_ROOT) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "Widget with null parent that is not the root widget!");
 		return NULL;
 	}
@@ -426,8 +432,7 @@ fbtk_get_root_widget(fbtk_widget_t *widget)
 
 
 /* exported function documented in fbtk.h */
-int
-fbtk_get_absx(fbtk_widget_t *widget)
+int fbtk_get_absx(fbtk_widget_t *widget)
 {
 	int x = widget->x;
 
@@ -441,8 +446,7 @@ fbtk_get_absx(fbtk_widget_t *widget)
 
 
 /* exported function documented in fbtk.h */
-int
-fbtk_get_absy(fbtk_widget_t *widget)
+int fbtk_get_absy(fbtk_widget_t *widget)
 {
 	int y = widget->y;
 
@@ -456,22 +460,19 @@ fbtk_get_absy(fbtk_widget_t *widget)
 
 
 /* exported function documented in fbtk.h */
-int
-fbtk_get_height(fbtk_widget_t *widget)
+int fbtk_get_height(fbtk_widget_t *widget)
 {
 	return widget->height;
 }
 
 /* exported function documented in fbtk.h */
-int
-fbtk_get_width(fbtk_widget_t *widget)
+int fbtk_get_width(fbtk_widget_t *widget)
 {
 	return widget->width;
 }
 
 /* exported function documented in fbtk.h */
-bool
-fbtk_get_bbox(fbtk_widget_t *widget, nsfb_bbox_t *bbox)
+bool fbtk_get_bbox(fbtk_widget_t *widget, nsfb_bbox_t *bbox)
 {
 	bbox->x0 = widget->x;
 	bbox->y0 = widget->y;
@@ -490,8 +491,7 @@ fbtk_get_bbox(fbtk_widget_t *widget, nsfb_bbox_t *bbox)
 	return true;
 }
 
-bool
-fbtk_get_caret(fbtk_widget_t *widget, int *x, int *y, int *height)
+bool fbtk_get_caret(fbtk_widget_t *widget, int *x, int *y, int *height)
 {
 	fbtk_widget_t *root = fbtk_get_root_widget(widget);
 
@@ -512,8 +512,7 @@ fbtk_get_caret(fbtk_widget_t *widget, int *x, int *y, int *height)
 }
 
 /* exported function documented in fbtk.h */
-fbtk_widget_t *
-fbtk_get_widget_at(fbtk_widget_t *nwid, int x, int y)
+fbtk_widget_t *fbtk_get_widget_at(fbtk_widget_t *nwid, int x, int y)
 {
 	fbtk_widget_t *widget = NULL; /* found widget */
 
@@ -521,9 +520,7 @@ fbtk_get_widget_at(fbtk_widget_t *nwid, int x, int y)
 	nwid = fbtk_get_root_widget(nwid);
 
 	while (nwid != NULL) {
-		if ((nwid->mapped) &&
-		    (x >= nwid->x) &&
-		    (y >= nwid->y) &&
+		if ((nwid->mapped) && (x >= nwid->x) && (y >= nwid->y) &&
 		    (x < (nwid->x + nwid->width)) &&
 		    (y < (nwid->y + nwid->height))) {
 			widget = nwid;
@@ -539,16 +536,13 @@ fbtk_get_widget_at(fbtk_widget_t *nwid, int x, int y)
 }
 
 
-
-
 /* internally exported function documented in widget.h */
-fbtk_widget_t *
-fbtk_widget_new(fbtk_widget_t *parent,
-		enum fbtk_widgettype_e type,
-		int x,
-		int y,
-		int width,
-		int height)
+fbtk_widget_t *fbtk_widget_new(fbtk_widget_t *parent,
+			       enum fbtk_widgettype_e type,
+			       int x,
+			       int y,
+			       int width,
+			       int height)
 {
 	fbtk_widget_t *neww; /* new widget */
 
@@ -559,7 +553,14 @@ fbtk_widget_new(fbtk_widget_t *parent,
 	if (neww == NULL)
 		return NULL;
 
-	NSLOG(fbtk, DEBUG, "creating %p %d,%d %d,%d", neww, x, y, width, height);
+	NSLOG(fbtk,
+	      DEBUG,
+	      "creating %p %d,%d %d,%d",
+	      neww,
+	      x,
+	      y,
+	      width,
+	      height);
 
 	/* make new window fit inside parent */
 	if (width == 0) {
@@ -607,8 +608,7 @@ fbtk_widget_new(fbtk_widget_t *parent,
 }
 
 /* exported function documented in fbtk.h */
-bool
-fbtk_get_redraw_pending(fbtk_widget_t *widget)
+bool fbtk_get_redraw_pending(fbtk_widget_t *widget)
 {
 	fbtk_widget_t *root;
 
@@ -618,7 +618,8 @@ fbtk_get_redraw_pending(fbtk_widget_t *widget)
 	return root->redraw.needed | root->redraw.child;
 }
 
-/** Perform a depth-first tree-walk, calling the redraw callback of the widgets in turn.
+/** Perform a depth-first tree-walk, calling the redraw callback of the widgets
+ * in turn.
  *
  * This function makes no decisions of its own and simply walks the
  * widget tree depth first calling widgets redraw callbacks if flagged
@@ -626,8 +627,7 @@ fbtk_get_redraw_pending(fbtk_widget_t *widget)
  * The tree search is optimised with a flag to indicate wether the
  * children of a node should be considered.
  */
-static int
-do_redraw(nsfb_t *nsfb, fbtk_widget_t *widget)
+static int do_redraw(nsfb_t *nsfb, fbtk_widget_t *widget)
 {
 	nsfb_bbox_t plot_ctx;
 	fbtk_widget_t *cwidget; /* child widget */
@@ -639,11 +639,14 @@ do_redraw(nsfb_t *nsfb, fbtk_widget_t *widget)
 		plot_ctx.x1 = plot_ctx.x0 + widget->redraw.width;
 		plot_ctx.y1 = plot_ctx.y0 + widget->redraw.height;
 
-		NSLOG(fbtk, DEBUG,
+		NSLOG(fbtk,
+		      DEBUG,
 		      "clipping %p %d,%d %d,%d",
 		      widget,
-		      plot_ctx.x0, plot_ctx.y0,
-		      plot_ctx.x1, plot_ctx.y1);
+		      plot_ctx.x0,
+		      plot_ctx.y0,
+		      plot_ctx.x1,
+		      plot_ctx.y1);
 
 		if (nsfb_plot_set_clip(nsfb, &plot_ctx) == true) {
 			fbtk_post_callback(widget, FBTK_CBT_REDRAW);
@@ -665,8 +668,7 @@ do_redraw(nsfb_t *nsfb, fbtk_widget_t *widget)
 }
 
 /* exported function documented in fbtk.h */
-int
-fbtk_redraw(fbtk_widget_t *widget)
+int fbtk_redraw(fbtk_widget_t *widget)
 {
 	fbtk_widget_t *root;
 
@@ -677,8 +679,7 @@ fbtk_redraw(fbtk_widget_t *widget)
 }
 
 /* exported function documented in fbtk.h */
-fbtk_callback
-fbtk_get_handler(fbtk_widget_t *widget, fbtk_callback_type cbt)
+fbtk_callback fbtk_get_handler(fbtk_widget_t *widget, fbtk_callback_type cbt)
 {
 	if ((cbt <= FBTK_CBT_START) || (cbt >= FBTK_CBT_END)) {
 		/* type out of range, no way to report error so return NULL */
@@ -689,11 +690,10 @@ fbtk_get_handler(fbtk_widget_t *widget, fbtk_callback_type cbt)
 }
 
 /* exported function documented in fbtk.h */
-fbtk_callback
-fbtk_set_handler(fbtk_widget_t *widget,
-		 fbtk_callback_type cbt,
-		 fbtk_callback cb,
-		 void *context)
+fbtk_callback fbtk_set_handler(fbtk_widget_t *widget,
+			       fbtk_callback_type cbt,
+			       fbtk_callback cb,
+			       void *context)
 {
 	fbtk_callback prevcb;
 
@@ -711,8 +711,7 @@ fbtk_set_handler(fbtk_widget_t *widget,
 }
 
 /* exported function docuemnted in fbtk.h */
-int
-fbtk_post_callback(fbtk_widget_t *widget, fbtk_callback_type cbt, ...)
+int fbtk_post_callback(fbtk_widget_t *widget, fbtk_callback_type cbt, ...)
 {
 	fbtk_callback_info cbi;
 	int ret = 0;
@@ -734,11 +733,11 @@ fbtk_post_callback(fbtk_widget_t *widget, fbtk_callback_type cbt, ...)
 
 		switch (cbt) {
 		case FBTK_CBT_SCROLLX:
-			cbi.x = va_arg(ap,int);
+			cbi.x = va_arg(ap, int);
 			break;
 
 		case FBTK_CBT_SCROLLY:
-			cbi.y = va_arg(ap,int);
+			cbi.y = va_arg(ap, int);
 			break;
 
 		case FBTK_CBT_CLICK:
@@ -777,16 +776,14 @@ fbtk_post_callback(fbtk_widget_t *widget, fbtk_callback_type cbt, ...)
 }
 
 /* exported function docuemnted in fbtk.h */
-void
-fbtk_set_focus(fbtk_widget_t *widget)
+void fbtk_set_focus(fbtk_widget_t *widget)
 {
 	fbtk_widget_t *root;
 
 	/* ensure we have the root widget */
 	root = fbtk_get_root_widget(widget);
 
-	if (root->u.root.input != NULL &&
-			root->u.root.input != widget) {
+	if (root->u.root.input != NULL && root->u.root.input != widget) {
 		/* inform previous holder of focus that it's being stripped
 		 * of focus */
 		fbtk_post_callback(root->u.root.input, FBTK_CBT_STRIP_FOCUS);
@@ -796,10 +793,8 @@ fbtk_set_focus(fbtk_widget_t *widget)
 }
 
 
-
 /* exported function docuemnted in fbtk.h */
-nsfb_t *
-fbtk_get_nsfb(fbtk_widget_t *widget)
+nsfb_t *fbtk_get_nsfb(fbtk_widget_t *widget)
 {
 	fbtk_widget_t *root;
 
@@ -810,8 +805,7 @@ fbtk_get_nsfb(fbtk_widget_t *widget)
 }
 
 /* exported function docuemnted in fbtk.h */
-fbtk_widget_t *
-fbtk_init(nsfb_t *fb)
+fbtk_widget_t *fbtk_init(nsfb_t *fb)
 {
 	fbtk_widget_t *root;
 

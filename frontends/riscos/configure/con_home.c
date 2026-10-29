@@ -40,37 +40,45 @@
 
 static void ro_gui_options_home_default(wimp_pointer *pointer);
 static bool ro_gui_options_home_ok(wimp_w w);
-static bool ro_gui_options_home_menu_prepare(wimp_w w, wimp_i i,
-		wimp_menu *menu, wimp_pointer *pointer);
+static bool ro_gui_options_home_menu_prepare(wimp_w w,
+					     wimp_i i,
+					     wimp_menu *menu,
+					     wimp_pointer *pointer);
 
 bool ro_gui_options_home_initialise(wimp_w w)
 {
 	/* set the current values */
-	ro_gui_set_icon_string(w, HOME_URL_FIELD,
-                               nsoption_charp(homepage_url) ? 
-                               nsoption_charp(homepage_url) : "", true);
+	ro_gui_set_icon_string(w,
+			       HOME_URL_FIELD,
+			       nsoption_charp(homepage_url)
+				       ? nsoption_charp(homepage_url)
+				       : "",
+			       true);
 
-	ro_gui_set_icon_selected_state(w, HOME_OPEN_STARTUP,
-                                       nsoption_bool(open_browser_at_startup));
+	ro_gui_set_icon_selected_state(w,
+				       HOME_OPEN_STARTUP,
+				       nsoption_bool(open_browser_at_startup));
 
 	ro_gui_set_icon_shaded_state(w,
-			HOME_URL_GRIGHT, !ro_gui_url_suggest_prepare_menu());
+				     HOME_URL_GRIGHT,
+				     !ro_gui_url_suggest_prepare_menu());
 
 	/* initialise all functions for a newly created window */
-	ro_gui_wimp_event_register_menu_gright(w, HOME_URL_FIELD,
-			HOME_URL_GRIGHT, ro_gui_url_suggest_menu);
+	ro_gui_wimp_event_register_menu_gright(
+		w, HOME_URL_FIELD, HOME_URL_GRIGHT, ro_gui_url_suggest_menu);
 	ro_gui_wimp_event_register_checkbox(w, HOME_OPEN_STARTUP);
-	ro_gui_wimp_event_register_button(w, HOME_DEFAULT_BUTTON,
-			ro_gui_options_home_default);
+	ro_gui_wimp_event_register_button(w,
+					  HOME_DEFAULT_BUTTON,
+					  ro_gui_options_home_default);
 	ro_gui_wimp_event_register_cancel(w, HOME_CANCEL_BUTTON);
-	ro_gui_wimp_event_register_ok(w, HOME_OK_BUTTON,
-			ro_gui_options_home_ok);
-	ro_gui_wimp_event_register_menu_prepare(w,
-			ro_gui_options_home_menu_prepare);
+	ro_gui_wimp_event_register_ok(w,
+				      HOME_OK_BUTTON,
+				      ro_gui_options_home_ok);
+	ro_gui_wimp_event_register_menu_prepare(
+		w, ro_gui_options_home_menu_prepare);
 	ro_gui_wimp_event_set_help_prefix(w, "HelpHomeConfig");
 	ro_gui_wimp_event_memorise(w);
 	return true;
-
 }
 
 void ro_gui_options_home_default(wimp_pointer *pointer)
@@ -83,13 +91,13 @@ void ro_gui_options_home_default(wimp_pointer *pointer)
 bool ro_gui_options_home_ok(wimp_w w)
 {
 	nsoption_set_charp(homepage_url,
-		       strdup(ro_gui_get_icon_string(w, HOME_URL_FIELD)));
+			   strdup(ro_gui_get_icon_string(w, HOME_URL_FIELD)));
 
 	nsoption_set_bool(open_browser_at_startup,
 			  ro_gui_get_icon_selected_state(w, HOME_OPEN_STARTUP));
 
 	ro_gui_save_options();
-  	return true;
+	return true;
 }
 
 
@@ -105,8 +113,10 @@ bool ro_gui_options_home_ok(wimp_w w)
  * \return		true if the event was handled; false if not.
  */
 
-bool ro_gui_options_home_menu_prepare(wimp_w w, wimp_i i, wimp_menu *menu,
-		wimp_pointer *pointer)
+bool ro_gui_options_home_menu_prepare(wimp_w w,
+				      wimp_i i,
+				      wimp_menu *menu,
+				      wimp_pointer *pointer)
 {
 	if (menu != ro_gui_url_suggest_menu || i != HOME_URL_GRIGHT)
 		return false;

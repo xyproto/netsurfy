@@ -59,10 +59,10 @@ static struct fb_local_history_window *local_history_window = NULL;
  * \param y location of event
  * \return NSERROR_OK on success otherwise apropriate error code
  */
-static nserror
-fb_local_history_mouse(struct fb_corewindow *fb_cw,
-		    browser_mouse_state mouse_state,
-		    int x, int y)
+static nserror fb_local_history_mouse(struct fb_corewindow *fb_cw,
+				      browser_mouse_state mouse_state,
+				      int x,
+				      int y)
 {
 	struct fb_local_history_window *lhw;
 	/* technically degenerate container of */
@@ -85,8 +85,7 @@ fb_local_history_mouse(struct fb_corewindow *fb_cw,
  * \param nskey The netsurf key code
  * \return NSERROR_OK on success otherwise apropriate error code
  */
-static nserror
-fb_local_history_key(struct fb_corewindow *fb_cw, uint32_t nskey)
+static nserror fb_local_history_key(struct fb_corewindow *fb_cw, uint32_t nskey)
 {
 	struct fb_local_history_window *lhw;
 	/* technically degenerate container of */
@@ -109,11 +108,9 @@ fb_local_history_key(struct fb_corewindow *fb_cw, uint32_t nskey)
 static nserror
 fb_local_history_draw(struct fb_corewindow *fb_cw, struct rect *r)
 {
-	struct redraw_context ctx = {
-		.interactive = true,
-		.background_images = true,
-		.plot = &fb_plotters
-	};
+	struct redraw_context ctx = {.interactive = true,
+				     .background_images = true,
+				     .plot = &fb_plotters};
 	struct fb_local_history_window *lhw;
 
 	/* technically degenerate container of */
@@ -129,10 +126,9 @@ fb_local_history_draw(struct fb_corewindow *fb_cw, struct rect *r)
  *
  * \return NSERROR_OK on success else appropriate error code on faliure.
  */
-static nserror
-fb_local_history_init(fbtk_widget_t *parent,
-		      struct browser_window *bw,
-		      struct fb_local_history_window **win_out)
+static nserror fb_local_history_init(fbtk_widget_t *parent,
+				     struct browser_window *bw,
+				     struct fb_local_history_window **win_out)
 {
 	struct fb_local_history_window *ncwin;
 	nserror res;
@@ -175,8 +171,8 @@ fb_local_history_init(fbtk_widget_t *parent,
 
 
 /* exported function documented gtk/history.h */
-nserror fb_local_history_present(fbtk_widget_t *parent,
-				 struct browser_window *bw)
+nserror
+fb_local_history_present(fbtk_widget_t *parent, struct browser_window *bw)
 {
 	nserror res;
 	int prnt_width, prnt_height;
@@ -185,8 +181,8 @@ nserror fb_local_history_present(fbtk_widget_t *parent,
 	res = fb_local_history_init(parent, bw, &local_history_window);
 	if (res == NSERROR_OK) {
 
-		 prnt_width = fbtk_get_width(parent);
-		 prnt_height = fbtk_get_height(parent);
+		prnt_width = fbtk_get_width(parent);
+		prnt_height = fbtk_get_height(parent);
 
 		/* resize history widget ensureing the drawing area is
 		 * no larger than parent window
@@ -238,11 +234,10 @@ nserror fb_local_history_destroy(void)
 	res = local_history_fini(local_history_window->session);
 	if (res == NSERROR_OK) {
 		res = fb_corewindow_fini(&local_history_window->core);
-		//gtk_widget_destroy(GTK_WIDGET(local_history_window->wnd));
+		// gtk_widget_destroy(GTK_WIDGET(local_history_window->wnd));
 		free(local_history_window);
 		local_history_window = NULL;
 	}
 
 	return res;
-
 }

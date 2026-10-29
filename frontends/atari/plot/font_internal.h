@@ -23,13 +23,13 @@
 
 #include "atari/plot/plot.h"
 
-int ctor_font_plotter_internal( FONT_PLOTTER self );
+int ctor_font_plotter_internal(FONT_PLOTTER self);
 
 struct fb_font_desc {
-    const char *name;
-    int width, height;
-    const char *encoding;
-    const uint32_t *data;
+	const char *name;
+	int width, height;
+	const char *encoding;
+	const uint32_t *data;
 };
 
 

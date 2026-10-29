@@ -29,4 +29,3 @@ void ami_font_initscanner(bool force, bool save);
 void ami_font_finiscanner(void);
 void ami_font_savescanner(void);
 #endif
-

@@ -49,22 +49,22 @@
 enum {
 	/* Project menu */
 	AMI_COOKIE_M_PROJECT = 0,
-	 AMI_COOKIE_M_EXPAND,
-	  AMI_COOKIE_M_EXPAND_ALL,
-	  AMI_COOKIE_M_EXPAND_DOMAINS,
-	  AMI_COOKIE_M_EXPAND_COOKIES,
-	 AMI_COOKIE_M_COLLAPSE,
-	  AMI_COOKIE_M_COLLAPSE_ALL,
-	  AMI_COOKIE_M_COLLAPSE_DOMAINS,
-	  AMI_COOKIE_M_COLLAPSE_COOKIES,
-	 AMI_COOKIE_M_BAR_P1,
-	 AMI_COOKIE_M_CLOSE,
+	AMI_COOKIE_M_EXPAND,
+	AMI_COOKIE_M_EXPAND_ALL,
+	AMI_COOKIE_M_EXPAND_DOMAINS,
+	AMI_COOKIE_M_EXPAND_COOKIES,
+	AMI_COOKIE_M_COLLAPSE,
+	AMI_COOKIE_M_COLLAPSE_ALL,
+	AMI_COOKIE_M_COLLAPSE_DOMAINS,
+	AMI_COOKIE_M_COLLAPSE_COOKIES,
+	AMI_COOKIE_M_BAR_P1,
+	AMI_COOKIE_M_CLOSE,
 	/* Edit menu */
 	AMI_COOKIE_M_EDIT,
-	 AMI_COOKIE_M_SELECTALL,
-	 AMI_COOKIE_M_CLEAR,
-	 AMI_COOKIE_M_BAR_E1,
-	 AMI_COOKIE_M_DELETE,
+	AMI_COOKIE_M_SELECTALL,
+	AMI_COOKIE_M_CLEAR,
+	AMI_COOKIE_M_BAR_E1,
+	AMI_COOKIE_M_DELETE,
 	AMI_COOKIE_M_LAST
 };
 
@@ -82,31 +82,34 @@ struct ami_cookie_window {
 static struct ami_cookie_window *cookie_window = NULL;
 
 
-static void
-ami_cookies_menu_free(struct ami_cookie_window *cookie_win)
+static void ami_cookies_menu_free(struct ami_cookie_window *cookie_win)
 {
 	SetAttrs(cookie_win->core.objects[GID_CW_WIN],
-		WINDOW_MenuStrip, NULL,
-	TAG_DONE);
-	
-	ami_menu_free_menu(cookie_win->menu_data, AMI_COOKIE_M_LAST, cookie_win->imenu);
+		 WINDOW_MenuStrip,
+		 NULL,
+		 TAG_DONE);
+
+	ami_menu_free_menu(cookie_win->menu_data,
+			   AMI_COOKIE_M_LAST,
+			   cookie_win->imenu);
 }
 
 /**
  * destroy a previously created cookie view
  */
-static void
-ami_cookies_destroy(struct ami_corewindow *ami_cw)
+static void ami_cookies_destroy(struct ami_corewindow *ami_cw)
 {
 	nserror res;
 
-	if(cookie_window == NULL)
+	if (cookie_window == NULL)
 		return;
 
 	res = cookie_manager_fini();
 	if (res == NSERROR_OK) {
 		ami_cookies_menu_free(cookie_window);
-		res = ami_corewindow_fini(&cookie_window->core); /* closes the window for us, frees cookie_win */
+		res = ami_corewindow_fini(
+			&cookie_window->core); /* closes the window for us,
+						  frees cookie_win */
 		cookie_window = NULL;
 	}
 }
@@ -121,10 +124,10 @@ ami_cookies_destroy(struct ami_corewindow *ami_cw)
  * \param y location of event
  * \return NSERROR_OK on success otherwise apropriate error code
  */
-static nserror
-ami_cookies_mouse(struct ami_corewindow *ami_cw,
-					browser_mouse_state mouse_state,
-					int x, int y)
+static nserror ami_cookies_mouse(struct ami_corewindow *ami_cw,
+				 browser_mouse_state mouse_state,
+				 int x,
+				 int y)
 {
 	cookie_manager_mouse_action(mouse_state, x, y);
 
@@ -138,11 +141,10 @@ ami_cookies_mouse(struct ami_corewindow *ami_cw,
  * \param nskey The netsurf key code
  * \return NSERROR_OK on success otherwise apropriate error code
  */
-static nserror
-ami_cookies_key(struct ami_corewindow *ami_cw, uint32_t nskey)
+static nserror ami_cookies_key(struct ami_corewindow *ami_cw, uint32_t nskey)
 {
 	if (cookie_manager_keypress(nskey)) {
-			return NSERROR_OK;
+		return NSERROR_OK;
 	}
 	return NSERROR_NOT_IMPLEMENTED;
 }
@@ -157,8 +159,11 @@ ami_cookies_key(struct ami_corewindow *ami_cw, uint32_t nskey)
  * \param ctx The drawing context
  * \return NSERROR_OK on success otherwise apropriate error code
  */
-static nserror
-ami_cookies_draw(struct ami_corewindow *ami_cw, int x, int y, struct rect *r, struct redraw_context *ctx)
+static nserror ami_cookies_draw(struct ami_corewindow *ami_cw,
+				int x,
+				int y,
+				struct rect *r,
+				struct redraw_context *ctx)
 {
 	cookie_manager_redraw(x, y, r, ctx);
 
@@ -169,57 +174,97 @@ ami_cookies_draw(struct ami_corewindow *ami_cw, int x, int y, struct rect *r, st
  * menu stuff
  */
 
- /* menu hook functions */
- 
-HOOKF(void, ami_cookies_menu_item_project_expand_all, APTR, window, struct IntuiMessage *)
+/* menu hook functions */
+
+HOOKF(void,
+      ami_cookies_menu_item_project_expand_all,
+      APTR,
+      window,
+      struct IntuiMessage *)
 {
 	cookie_manager_expand(false);
 }
- 
-HOOKF(void, ami_cookies_menu_item_project_expand_domains, APTR, window, struct IntuiMessage *)
+
+HOOKF(void,
+      ami_cookies_menu_item_project_expand_domains,
+      APTR,
+      window,
+      struct IntuiMessage *)
 {
 	cookie_manager_expand(true);
 }
 
-HOOKF(void, ami_cookies_menu_item_project_expand_cookies, APTR, window, struct IntuiMessage *)
+HOOKF(void,
+      ami_cookies_menu_item_project_expand_cookies,
+      APTR,
+      window,
+      struct IntuiMessage *)
 {
 	cookie_manager_expand(false);
 }
 
-HOOKF(void, ami_cookies_menu_item_project_collapse_all, APTR, window, struct IntuiMessage *)
-{
-	cookie_manager_contract(true);
-}
- 
-HOOKF(void, ami_cookies_menu_item_project_collapse_domains, APTR, window, struct IntuiMessage *)
+HOOKF(void,
+      ami_cookies_menu_item_project_collapse_all,
+      APTR,
+      window,
+      struct IntuiMessage *)
 {
 	cookie_manager_contract(true);
 }
 
-HOOKF(void, ami_cookies_menu_item_project_collapse_cookies, APTR, window, struct IntuiMessage *)
+HOOKF(void,
+      ami_cookies_menu_item_project_collapse_domains,
+      APTR,
+      window,
+      struct IntuiMessage *)
+{
+	cookie_manager_contract(true);
+}
+
+HOOKF(void,
+      ami_cookies_menu_item_project_collapse_cookies,
+      APTR,
+      window,
+      struct IntuiMessage *)
 {
 	cookie_manager_contract(false);
 }
 
-HOOKF(void, ami_cookies_menu_item_project_close, APTR, window, struct IntuiMessage *)
+HOOKF(void,
+      ami_cookies_menu_item_project_close,
+      APTR,
+      window,
+      struct IntuiMessage *)
 {
 	struct ami_corewindow *ami_cw;
 	GetAttr(WINDOW_UserData, (Object *)window, (ULONG *)&ami_cw);
-	
+
 	ami_cw->close_window = true;
 }
 
-HOOKF(void, ami_cookies_menu_item_edit_select_all, APTR, window, struct IntuiMessage *)
+HOOKF(void,
+      ami_cookies_menu_item_edit_select_all,
+      APTR,
+      window,
+      struct IntuiMessage *)
 {
 	cookie_manager_keypress(NS_KEY_SELECT_ALL);
 }
 
-HOOKF(void, ami_cookies_menu_item_edit_clear, APTR, window, struct IntuiMessage *)
+HOOKF(void,
+      ami_cookies_menu_item_edit_clear,
+      APTR,
+      window,
+      struct IntuiMessage *)
 {
 	cookie_manager_keypress(NS_KEY_CLEAR_SELECTION);
 }
 
-HOOKF(void, ami_cookies_menu_item_edit_delete, APTR, window, struct IntuiMessage *)
+HOOKF(void,
+      ami_cookies_menu_item_edit_delete,
+      APTR,
+      window,
+      struct IntuiMessage *)
 {
 	cookie_manager_keypress(NS_KEY_DELETE_LEFT);
 }
@@ -229,103 +274,206 @@ HOOKF(void, ami_cookies_menu_item_edit_delete, APTR, window, struct IntuiMessage
 
 static void ami_cookies_menulabs(struct ami_menu_data **md)
 {
-	ami_menu_alloc_item(md, AMI_COOKIE_M_PROJECT, NM_TITLE, "Tree", NULL, NULL, NULL, NULL, 0);
-	ami_menu_alloc_item(md, AMI_COOKIE_M_EXPAND,   NM_ITEM, "Expand", NULL, "TBImages:list_folderunfold", NULL, NULL, 0);
-	ami_menu_alloc_item(md, AMI_COOKIE_M_EXPAND_ALL,   NM_SUB, "All", "+", NULL,
-		ami_cookies_menu_item_project_expand_all, NULL, 0);
-	ami_menu_alloc_item(md, AMI_COOKIE_M_EXPAND_DOMAINS,   NM_SUB, "Domains", NULL, NULL,
-		ami_cookies_menu_item_project_expand_domains, NULL, 0);
-	ami_menu_alloc_item(md, AMI_COOKIE_M_EXPAND_COOKIES,   NM_SUB, "Cookies", NULL, NULL,
-		ami_cookies_menu_item_project_expand_cookies, NULL, 0);
-	ami_menu_alloc_item(md, AMI_COOKIE_M_COLLAPSE,   NM_ITEM, "Collapse", NULL, "TBImages:list_folderfold", NULL, NULL, 0);
-	ami_menu_alloc_item(md, AMI_COOKIE_M_COLLAPSE_ALL,   NM_SUB, "All", "-", NULL,
-		ami_cookies_menu_item_project_collapse_all, NULL, 0);
-	ami_menu_alloc_item(md, AMI_COOKIE_M_COLLAPSE_DOMAINS,   NM_SUB, "Domains", NULL, NULL,
-		ami_cookies_menu_item_project_collapse_domains, NULL, 0);
-	ami_menu_alloc_item(md, AMI_COOKIE_M_COLLAPSE_COOKIES,   NM_SUB, "Cookies", NULL, NULL,
-		ami_cookies_menu_item_project_collapse_cookies, NULL, 0);
-	ami_menu_alloc_item(md, AMI_COOKIE_M_BAR_P1, NM_ITEM, NM_BARLABEL, NULL, NULL, NULL, NULL, 0);
-	ami_menu_alloc_item(md, AMI_COOKIE_M_CLOSE,   NM_ITEM, "CloseWindow", "K", "TBImages:list_cancel",
-		ami_cookies_menu_item_project_close, NULL, 0);
+	ami_menu_alloc_item(md,
+			    AMI_COOKIE_M_PROJECT,
+			    NM_TITLE,
+			    "Tree",
+			    NULL,
+			    NULL,
+			    NULL,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_COOKIE_M_EXPAND,
+			    NM_ITEM,
+			    "Expand",
+			    NULL,
+			    "TBImages:list_folderunfold",
+			    NULL,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_COOKIE_M_EXPAND_ALL,
+			    NM_SUB,
+			    "All",
+			    "+",
+			    NULL,
+			    ami_cookies_menu_item_project_expand_all,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_COOKIE_M_EXPAND_DOMAINS,
+			    NM_SUB,
+			    "Domains",
+			    NULL,
+			    NULL,
+			    ami_cookies_menu_item_project_expand_domains,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_COOKIE_M_EXPAND_COOKIES,
+			    NM_SUB,
+			    "Cookies",
+			    NULL,
+			    NULL,
+			    ami_cookies_menu_item_project_expand_cookies,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_COOKIE_M_COLLAPSE,
+			    NM_ITEM,
+			    "Collapse",
+			    NULL,
+			    "TBImages:list_folderfold",
+			    NULL,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_COOKIE_M_COLLAPSE_ALL,
+			    NM_SUB,
+			    "All",
+			    "-",
+			    NULL,
+			    ami_cookies_menu_item_project_collapse_all,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_COOKIE_M_COLLAPSE_DOMAINS,
+			    NM_SUB,
+			    "Domains",
+			    NULL,
+			    NULL,
+			    ami_cookies_menu_item_project_collapse_domains,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_COOKIE_M_COLLAPSE_COOKIES,
+			    NM_SUB,
+			    "Cookies",
+			    NULL,
+			    NULL,
+			    ami_cookies_menu_item_project_collapse_cookies,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_COOKIE_M_BAR_P1,
+			    NM_ITEM,
+			    NM_BARLABEL,
+			    NULL,
+			    NULL,
+			    NULL,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_COOKIE_M_CLOSE,
+			    NM_ITEM,
+			    "CloseWindow",
+			    "K",
+			    "TBImages:list_cancel",
+			    ami_cookies_menu_item_project_close,
+			    NULL,
+			    0);
 
-	ami_menu_alloc_item(md, AMI_COOKIE_M_EDIT, NM_TITLE, "Edit", NULL, NULL, NULL, NULL, 0);
-	ami_menu_alloc_item(md, AMI_COOKIE_M_SELECTALL,   NM_ITEM, "SelectAllNS", "A", NSA_SPACE,
-		ami_cookies_menu_item_edit_select_all, NULL, 0);
-	ami_menu_alloc_item(md, AMI_COOKIE_M_CLEAR,   NM_ITEM, "ClearNS", NULL, NSA_SPACE,
-		ami_cookies_menu_item_edit_clear, NULL, 0);
-	ami_menu_alloc_item(md, AMI_COOKIE_M_BAR_E1, NM_ITEM, NM_BARLABEL, NULL, NULL, NULL, NULL, 0);
-	ami_menu_alloc_item(md, AMI_COOKIE_M_DELETE,   NM_ITEM, "TreeDelete", "Del", "TBImages:list_delete",
-		ami_cookies_menu_item_edit_delete, NULL, 0);
+	ami_menu_alloc_item(md,
+			    AMI_COOKIE_M_EDIT,
+			    NM_TITLE,
+			    "Edit",
+			    NULL,
+			    NULL,
+			    NULL,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_COOKIE_M_SELECTALL,
+			    NM_ITEM,
+			    "SelectAllNS",
+			    "A",
+			    NSA_SPACE,
+			    ami_cookies_menu_item_edit_select_all,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_COOKIE_M_CLEAR,
+			    NM_ITEM,
+			    "ClearNS",
+			    NULL,
+			    NSA_SPACE,
+			    ami_cookies_menu_item_edit_clear,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_COOKIE_M_BAR_E1,
+			    NM_ITEM,
+			    NM_BARLABEL,
+			    NULL,
+			    NULL,
+			    NULL,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_COOKIE_M_DELETE,
+			    NM_ITEM,
+			    "TreeDelete",
+			    "Del",
+			    "TBImages:list_delete",
+			    ami_cookies_menu_item_edit_delete,
+			    NULL,
+			    0);
 
-	ami_menu_alloc_item(md, AMI_COOKIE_M_LAST,   NM_END, NULL, NULL, NULL, NULL, NULL, 0);
+	ami_menu_alloc_item(
+		md, AMI_COOKIE_M_LAST, NM_END, NULL, NULL, NULL, NULL, NULL, 0);
 }
 
 static struct Menu *
 ami_cookies_menu_create(struct ami_cookie_window *cookie_win)
 {
 	ami_cookies_menulabs(cookie_win->menu_data);
-	cookie_win->imenu = ami_menu_layout(cookie_win->menu_data, AMI_COOKIE_M_LAST);
-	if(cookie_win->imenu == NULL) return NULL;
+	cookie_win->imenu = ami_menu_layout(cookie_win->menu_data,
+					    AMI_COOKIE_M_LAST);
+	if (cookie_win->imenu == NULL)
+		return NULL;
 
 	return cookie_win->imenu;
 }
 
 
-static nserror
-ami_cookies_create_window(struct ami_cookie_window *cookie_win)
+static nserror ami_cookies_create_window(struct ami_cookie_window *cookie_win)
 {
-	struct ami_corewindow *ami_cw = (struct ami_corewindow *)&cookie_win->core;
+	struct ami_corewindow *ami_cw =
+		(struct ami_corewindow *)&cookie_win->core;
 	ULONG refresh_mode = WA_SmartRefresh;
 
-	if(nsoption_bool(window_simple_refresh) == true) {
+	if (nsoption_bool(window_simple_refresh) == true) {
 		refresh_mode = WA_SimpleRefresh;
 	}
 
-	ami_cw->objects[GID_CW_WIN] = WindowObj,
-		WA_ScreenTitle, ami_gui_get_screen_title(),
-		WA_Title, ami_cw->wintitle,
-		WA_Activate, TRUE,
-		WA_DepthGadget, TRUE,
-		WA_DragBar, TRUE,
-		WA_CloseGadget, TRUE,
-		WA_SizeGadget, TRUE,
-		WA_SizeBRight, TRUE,
-		WA_PubScreen, ami_gui_get_screen(),
-		WA_ReportMouse, TRUE,
-		WA_Width, 150,
-		WA_Height, 200,
-		refresh_mode, TRUE,
-		WA_IDCMP, IDCMP_MOUSEMOVE | IDCMP_MOUSEBUTTONS | IDCMP_NEWSIZE |
-				IDCMP_RAWKEY | IDCMP_GADGETUP | IDCMP_IDCMPUPDATE |
-				IDCMP_EXTENDEDMOUSE | IDCMP_SIZEVERIFY | IDCMP_REFRESHWINDOW,
-		WINDOW_IDCMPHook, &ami_cw->idcmp_hook,
-		WINDOW_IDCMPHookBits, IDCMP_IDCMPUPDATE | IDCMP_EXTENDEDMOUSE |
-				IDCMP_SIZEVERIFY | IDCMP_REFRESHWINDOW,
-		WINDOW_SharedPort, ami_gui_get_shared_msgport(),
-		WINDOW_HorizProp, 1,
-		WINDOW_VertProp, 1,
-		WINDOW_UserData, cookie_win,
-		WINDOW_MenuStrip, ami_cookies_menu_create(cookie_win),
-		WINDOW_MenuUserData, WGUD_HOOK,
-		WINDOW_IconifyGadget, FALSE,
+	ami_cw->objects[GID_CW_WIN] = WindowObj, WA_ScreenTitle,
+	ami_gui_get_screen_title(), WA_Title, ami_cw->wintitle, WA_Activate,
+	TRUE, WA_DepthGadget, TRUE, WA_DragBar, TRUE, WA_CloseGadget, TRUE,
+	WA_SizeGadget, TRUE, WA_SizeBRight, TRUE, WA_PubScreen,
+	ami_gui_get_screen(), WA_ReportMouse, TRUE, WA_Width, 150, WA_Height,
+	200, refresh_mode, TRUE, WA_IDCMP,
+	IDCMP_MOUSEMOVE | IDCMP_MOUSEBUTTONS | IDCMP_NEWSIZE | IDCMP_RAWKEY |
+		IDCMP_GADGETUP | IDCMP_IDCMPUPDATE | IDCMP_EXTENDEDMOUSE |
+		IDCMP_SIZEVERIFY | IDCMP_REFRESHWINDOW,
+	WINDOW_IDCMPHook, &ami_cw->idcmp_hook, WINDOW_IDCMPHookBits,
+	IDCMP_IDCMPUPDATE | IDCMP_EXTENDEDMOUSE | IDCMP_SIZEVERIFY |
+		IDCMP_REFRESHWINDOW,
+	WINDOW_SharedPort, ami_gui_get_shared_msgport(), WINDOW_HorizProp, 1,
+	WINDOW_VertProp, 1, WINDOW_UserData, cookie_win, WINDOW_MenuStrip,
+	ami_cookies_menu_create(cookie_win), WINDOW_MenuUserData, WGUD_HOOK,
+	WINDOW_IconifyGadget, FALSE,
 #ifdef __amigaos4__
-		WINDOW_UniqueID, "NS_COOKIE_WIN",
-		WINDOW_PopupGadget, TRUE,
+	WINDOW_UniqueID, "NS_COOKIE_WIN", WINDOW_PopupGadget, TRUE,
 #endif
-		WINDOW_Position, WPOS_CENTERSCREEN,
-		WINDOW_ParentGroup, ami_cw->objects[GID_CW_MAIN] = LayoutVObj,
-			LAYOUT_AddChild, ami_cw->objects[GID_CW_DRAW] = SpaceObj,
-				GA_ID, GID_CW_DRAW,
-				SPACE_Transparent, TRUE,
-				SPACE_BevelStyle, BVS_DISPLAY,
-				SPACE_MinWidth, 50,
-				SPACE_MinHeight, 16,
-				GA_RelVerify, TRUE,
-   			SpaceEnd,
-		EndGroup,
+	WINDOW_Position, WPOS_CENTERSCREEN, WINDOW_ParentGroup,
+	ami_cw->objects[GID_CW_MAIN] = LayoutVObj, LAYOUT_AddChild,
+	ami_cw->objects[GID_CW_DRAW] = SpaceObj, GA_ID, GID_CW_DRAW,
+	SPACE_Transparent, TRUE, SPACE_BevelStyle, BVS_DISPLAY, SPACE_MinWidth,
+	50, SPACE_MinHeight, 16, GA_RelVerify, TRUE, SpaceEnd, EndGroup,
 	EndWindow;
 
-	if(ami_cw->objects[GID_CW_WIN] == NULL) {
+	if (ami_cw->objects[GID_CW_WIN] == NULL) {
 		return NSERROR_NOMEM;
 	}
 
@@ -338,8 +486,8 @@ nserror ami_cookies_present(const char *search_term)
 	struct ami_cookie_window *ncwin;
 	nserror res;
 
-	if(cookie_window != NULL) {
-		//windowtofront()
+	if (cookie_window != NULL) {
+		// windowtofront()
 		return NSERROR_OK;
 	}
 
@@ -389,4 +537,3 @@ nserror ami_cookies_present(const char *search_term)
 
 	return res;
 }
-

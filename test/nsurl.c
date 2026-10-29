@@ -33,22 +33,22 @@
 #include "utils/corestrings.h"
 #include "utils/nsurl.h"
 
-#define NELEMS(x)  (sizeof(x) / sizeof((x)[0]))
+#define NELEMS(x) (sizeof(x) / sizeof((x)[0]))
 
 struct test_pairs {
-	const char* test;
-	const char* res;
+	const char *test;
+	const char *res;
 };
 
 struct test_triplets {
-	const char* test1;
-	const char* test2;
-	const char* res;
+	const char *test1;
+	const char *test2;
+	const char *res;
 };
 
 struct test_compare {
-	const char* test1;
-	const char* test2;
+	const char *test1;
+	const char *test2;
 	nsurl_component parts;
 	bool res;
 };
@@ -84,103 +84,93 @@ static void corestring_teardown(void)
 static const char *base_str = "http://a/b/c/d;p?q";
 
 static const struct test_pairs create_tests[] = {
-	{ "",			NULL },
-	{ "http:",		NULL },
-	{ "http:/",		NULL },
-	{ "http://",		NULL },
-	{ "http:a",		"http://a/" },
-	{ "http:a/",		"http://a/" },
-	{ "http:a/b",		"http://a/b" },
-	{ "http:/a",		"http://a/" },
-	{ "http:/a/b",		"http://a/b" },
-	{ "http://a",		"http://a/" },
-	{ "http://a/b",		"http://a/b" },
-	{ "www.example.org",	"http://www.example.org/" },
-	{ "www.example.org/x",	"http://www.example.org/x" },
-	{ "about:",		"about:" },
-	{ "about:blank",	"about:blank" },
+	{"", NULL},
+	{"http:", NULL},
+	{"http:/", NULL},
+	{"http://", NULL},
+	{"http:a", "http://a/"},
+	{"http:a/", "http://a/"},
+	{"http:a/b", "http://a/b"},
+	{"http:/a", "http://a/"},
+	{"http:/a/b", "http://a/b"},
+	{"http://a", "http://a/"},
+	{"http://a/b", "http://a/b"},
+	{"www.example.org", "http://www.example.org/"},
+	{"www.example.org/x", "http://www.example.org/x"},
+	{"about:", "about:"},
+	{"about:blank", "about:blank"},
 
-	{ "http://www.ns-b.org:8080/",
-	  "http://www.ns-b.org:8080/" },
-	{ "http://user@www.ns-b.org:8080/hello",
-	  "http://user@www.ns-b.org:8080/hello" },
-	{ "http://user:pass@www.ns-b.org:8080/hello",
-	  "http://user:pass@www.ns-b.org:8080/hello" },
+	{"http://www.ns-b.org:8080/", "http://www.ns-b.org:8080/"},
+	{"http://user@www.ns-b.org:8080/hello",
+	 "http://user@www.ns-b.org:8080/hello"},
+	{"http://user:pass@www.ns-b.org:8080/hello",
+	 "http://user:pass@www.ns-b.org:8080/hello"},
 
-	{ "http://www.ns-b.org:80/",
-	  "http://www.ns-b.org/" },
-	{ "http://user@www.ns-b.org:80/hello",
-	  "http://user@www.ns-b.org/hello" },
-	{ "http://user:pass@www.ns-b.org:80/hello",
-	  "http://user:pass@www.ns-b.org/hello" },
+	{"http://www.ns-b.org:80/", "http://www.ns-b.org/"},
+	{"http://user@www.ns-b.org:80/hello", "http://user@www.ns-b.org/hello"},
+	{"http://user:pass@www.ns-b.org:80/hello",
+	 "http://user:pass@www.ns-b.org/hello"},
 
-	{ "https://www.ns-b.org:443/",
-	  "https://www.ns-b.org/" },
-	{ "https://user@www.ns-b.org:443/hello",
-	  "https://user@www.ns-b.org/hello" },
-	{ "https://user:pass@www.ns-b.org:443/hello",
-	  "https://user:pass@www.ns-b.org/hello" },
+	{"https://www.ns-b.org:443/", "https://www.ns-b.org/"},
+	{"https://user@www.ns-b.org:443/hello",
+	 "https://user@www.ns-b.org/hello"},
+	{"https://user:pass@www.ns-b.org:443/hello",
+	 "https://user:pass@www.ns-b.org/hello"},
 
-	{ "http://www.ns-b.org:/",
-	  "http://www.ns-b.org/" },
-	{ "http://///////////www.ns-b.org:/",
-	  "http://www.ns-b.org/" },
-	{ "http://u@www.ns-b.org:/hello",
-	  "http://u@www.ns-b.org/hello" },
-	{ "http://u:p@www.ns-b.org:/hello",
-	  "http://u:p@www.ns-b.org/hello" },
+	{"http://www.ns-b.org:/", "http://www.ns-b.org/"},
+	{"http://///////////www.ns-b.org:/", "http://www.ns-b.org/"},
+	{"http://u@www.ns-b.org:/hello", "http://u@www.ns-b.org/hello"},
+	{"http://u:p@www.ns-b.org:/hello", "http://u:p@www.ns-b.org/hello"},
 
-	{ "http:a/",		"http://a/" },
-	{ "http:/a/",		"http://a/" },
-	{ "http://u@a",		"http://u@a/" },
-	{ "http://@a",		"http://a/" },
+	{"http:a/", "http://a/"},
+	{"http:/a/", "http://a/"},
+	{"http://u@a", "http://u@a/"},
+	{"http://@a", "http://a/"},
 
-	{ "mailto:u@a",		"mailto:u@a" },
-	{ "mailto:@a",		"mailto:a" },
+	{"mailto:u@a", "mailto:u@a"},
+	{"mailto:@a", "mailto:a"},
 
-	{ "file:///",		"file:///" },
-	{ "file://",		"file:///" },
-	{ "file:/",		"file:///" },
-	{ "file:",		"file:///" },
-	{ "file:////",		"file:////" },
-	{ "file://///",		"file://///" },
+	{"file:///", "file:///"},
+	{"file://", "file:///"},
+	{"file:/", "file:///"},
+	{"file:", "file:///"},
+	{"file:////", "file:////"},
+	{"file://///", "file://///"},
 
-	{ "file://localhost/",	"file:///" },
-	{ "file://foobar/",	"file:///" },
-	{ "file://foobar",	"file:///" },
-	{ "file:///foobar",	"file:///foobar" },
-	{ "file://tlsa@foo/",	"file:///" },
+	{"file://localhost/", "file:///"},
+	{"file://foobar/", "file:///"},
+	{"file://foobar", "file:///"},
+	{"file:///foobar", "file:///foobar"},
+	{"file://tlsa@foo/", "file:///"},
 
 	/* test case insensitivity */
-	{ "HTTP://a/b",		"http://a/b" },
-	{ "HTTPS://a/b",	"https://a/b" },
-	{ "ftp://a/b",		"ftp://a/b" },
-	{ "FTP://a/b",		"ftp://a/b" },
-	{ "MAILTO:foo@bar",	"mailto:foo@bar" },
-	{ "FILE:///",		"file:///" },
-	{ "http://HOST/",	"http://host/" },
+	{"HTTP://a/b", "http://a/b"},
+	{"HTTPS://a/b", "https://a/b"},
+	{"ftp://a/b", "ftp://a/b"},
+	{"FTP://a/b", "ftp://a/b"},
+	{"MAILTO:foo@bar", "mailto:foo@bar"},
+	{"FILE:///", "file:///"},
+	{"http://HOST/", "http://host/"},
 
 	/* punycode */
-	{ "http://a.कॉम/a", "http://a.xn--11b4c3d/a" },
-	{ "https://smog.大众汽车/test", "https://smog.xn--3oq18vl8pn36a/test"},
+	{"http://a.कॉम/a", "http://a.xn--11b4c3d/a"},
+	{"https://smog.大众汽车/test", "https://smog.xn--3oq18vl8pn36a/test"},
 
 	/* unnecessary escape */
-	{ "http://%7a%7A/", "http://zz/" },
+	{"http://%7a%7A/", "http://zz/"},
 
 	/* bad escape */
-	{ "http://%1g%G0/", NULL },
+	{"http://%1g%G0/", NULL},
 
-	{ "    http://www.ns-b.org/",		"http://www.ns-b.org/" },
-	{ "http://www.ns-b.org/    ",		"http://www.ns-b.org/" },
-	{ "http://www.ns-b.org    ",		"http://www.ns-b.org/" },
-	{ "http://www.ns-b.org/?q   ",		"http://www.ns-b.org/?q" },
-	{ "http://www.ns-b.org/#f    ",		"http://www.ns-b.org/#f" },
+	{"    http://www.ns-b.org/", "http://www.ns-b.org/"},
+	{"http://www.ns-b.org/    ", "http://www.ns-b.org/"},
+	{"http://www.ns-b.org    ", "http://www.ns-b.org/"},
+	{"http://www.ns-b.org/?q   ", "http://www.ns-b.org/?q"},
+	{"http://www.ns-b.org/#f    ", "http://www.ns-b.org/#f"},
 
 	/* Regression check from security report */
-	{ "http://AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAfff",
-	  "http://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafff/"
-	}
-};
+	{"http://AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAfff",
+	 "http://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafff/"}};
 
 /**
  * url creation test
@@ -208,17 +198,15 @@ START_TEST(nsurl_create_test)
 END_TEST
 
 static const struct test_triplets access_tests[] = {
-	{ "http://www.netsurf-browser.org/a/big/tree",
-	  "http://www.netsurf-browser.org/a/big/tree",
-	  "tree" },
+	{"http://www.netsurf-browser.org/a/big/tree",
+	 "http://www.netsurf-browser.org/a/big/tree",
+	 "tree"},
 
-	{ "HTTP://ci.netsurf-browser.org/jenkins/view/Unit Tests/job/coverage-netsurf/11/cobertura/utils/nsurl_c/",
-	  "http://ci.netsurf-browser.org/jenkins/view/Unit%20Tests/job/coverage-netsurf/11/cobertura/utils/nsurl_c/",
-	  "" },
+	{"HTTP://ci.netsurf-browser.org/jenkins/view/Unit Tests/job/coverage-netsurf/11/cobertura/utils/nsurl_c/",
+	 "http://ci.netsurf-browser.org/jenkins/view/Unit%20Tests/job/coverage-netsurf/11/cobertura/utils/nsurl_c/",
+	 ""},
 
-	{ "FILE:///",
-	  "file:///",
-	  "/" },
+	{"FILE:///", "file:///", "/"},
 };
 
 /**
@@ -257,7 +245,6 @@ START_TEST(nsurl_access_leaf_test)
 	ck_assert_str_eq(nsurl_access_leaf(res_url), tst->res);
 
 	nsurl_unref(res_url);
-
 }
 END_TEST
 
@@ -279,22 +266,21 @@ START_TEST(nsurl_length_test)
 	ck_assert_int_eq(nsurl_length(res_url), strlen(tst->test2));
 
 	nsurl_unref(res_url);
-
 }
 END_TEST
 
 
 static const struct test_pairs nice_tests[] = {
-	{ "about:",			NULL },
-	{ "www.foo.org",		"www_foo_org" },
-	{ "www.foo.org/index.html",	"www_foo_org" },
-	{ "www.foo.org/default.en",	"www_foo_org" },
-	{ "www.foo.org/about",		"about" },
-	{ "www.foo.org/about.jpg",	"about.jpg" },
-	{ "www.foo.org/moose/index.en",	"moose" },
-	{ "www.foo.org/a//index.en",	"www_foo_org" },
-	{ "www.foo.org/a//index.en",	"www_foo_org" },
-	{ "http://www.f.org//index.en",	"www_f_org" },
+	{"about:", NULL},
+	{"www.foo.org", "www_foo_org"},
+	{"www.foo.org/index.html", "www_foo_org"},
+	{"www.foo.org/default.en", "www_foo_org"},
+	{"www.foo.org/about", "about"},
+	{"www.foo.org/about.jpg", "about.jpg"},
+	{"www.foo.org/moose/index.en", "moose"},
+	{"www.foo.org/a//index.en", "www_foo_org"},
+	{"www.foo.org/a//index.en", "www_foo_org"},
+	{"http://www.f.org//index.en", "www_f_org"},
 };
 
 /**
@@ -324,22 +310,21 @@ START_TEST(nsurl_nice_nostrip_test)
 		free(res_str);
 	}
 	nsurl_unref(res_url);
-
 }
 END_TEST
 
 
 static const struct test_pairs nice_strip_tests[] = {
-	{ "about:",			NULL },
-	{ "www.foo.org",		"www_foo_org" },
-	{ "www.foo.org/index.html",	"www_foo_org" },
-	{ "www.foo.org/default.en",	"www_foo_org" },
-	{ "www.foo.org/about",		"about" },
-	{ "www.foo.org/about.jpg",	"about" },
-	{ "www.foo.org/moose/index.en",	"moose" },
-	{ "www.foo.org/a//index.en",	"www_foo_org" },
-	{ "www.foo.org/a//index.en",	"www_foo_org" },
-	{ "http://www.f.org//index.en",	"www_f_org" },
+	{"about:", NULL},
+	{"www.foo.org", "www_foo_org"},
+	{"www.foo.org/index.html", "www_foo_org"},
+	{"www.foo.org/default.en", "www_foo_org"},
+	{"www.foo.org/about", "about"},
+	{"www.foo.org/about.jpg", "about"},
+	{"www.foo.org/moose/index.en", "moose"},
+	{"www.foo.org/a//index.en", "www_foo_org"},
+	{"www.foo.org/a//index.en", "www_foo_org"},
+	{"http://www.f.org//index.en", "www_f_org"},
 };
 
 /**
@@ -369,7 +354,6 @@ START_TEST(nsurl_nice_strip_test)
 		free(res_str);
 	}
 	nsurl_unref(res_url);
-
 }
 END_TEST
 
@@ -379,73 +363,73 @@ END_TEST
  */
 static const struct test_pairs join_tests[] = {
 	/* Normal Examples rfc3986 5.4.1 */
-	{ "g:h",		"g:h" },
-	{ "g",			"http://a/b/c/g" },
-	{ "./g",		"http://a/b/c/g" },
-	{ "g/",			"http://a/b/c/g/" },
-	{ "/g",			"http://a/g" },
-	{ "//g",		"http://g" /* [1] */ "/" },
-	{ "?y",			"http://a/b/c/d;p?y" },
-	{ "g?y",		"http://a/b/c/g?y" },
-	{ "#s",			"http://a/b/c/d;p?q#s" },
-	{ "g#s",		"http://a/b/c/g#s" },
-	{ "g?y#s",		"http://a/b/c/g?y#s" },
-	{ ";x",			"http://a/b/c/;x" },
-	{ "g;x",		"http://a/b/c/g;x" },
-	{ "g;x?y#s",		"http://a/b/c/g;x?y#s" },
-	{ "",			"http://a/b/c/d;p?q" },
-	{ ".",			"http://a/b/c/" },
-	{ "./",			"http://a/b/c/" },
-	{ "..",			"http://a/b/" },
-	{ "../",		"http://a/b/" },
-	{ "../g",		"http://a/b/g" },
-	{ "../..",		"http://a/" },
-	{ "../../",		"http://a/" },
-	{ "../../g",		"http://a/g" },
+	{"g:h", "g:h"},
+	{"g", "http://a/b/c/g"},
+	{"./g", "http://a/b/c/g"},
+	{"g/", "http://a/b/c/g/"},
+	{"/g", "http://a/g"},
+	{"//g", "http://g" /* [1] */ "/"},
+	{"?y", "http://a/b/c/d;p?y"},
+	{"g?y", "http://a/b/c/g?y"},
+	{"#s", "http://a/b/c/d;p?q#s"},
+	{"g#s", "http://a/b/c/g#s"},
+	{"g?y#s", "http://a/b/c/g?y#s"},
+	{";x", "http://a/b/c/;x"},
+	{"g;x", "http://a/b/c/g;x"},
+	{"g;x?y#s", "http://a/b/c/g;x?y#s"},
+	{"", "http://a/b/c/d;p?q"},
+	{".", "http://a/b/c/"},
+	{"./", "http://a/b/c/"},
+	{"..", "http://a/b/"},
+	{"../", "http://a/b/"},
+	{"../g", "http://a/b/g"},
+	{"../..", "http://a/"},
+	{"../../", "http://a/"},
+	{"../../g", "http://a/g"},
 
 	/* Abnormal Examples rfc3986 5.4.2 */
-	{ "../../../g",		"http://a/g" },
-	{ "../../../../g",	"http://a/g" },
+	{"../../../g", "http://a/g"},
+	{"../../../../g", "http://a/g"},
 
-	{ "/./g",		"http://a/g" },
-	{ "/../g",		"http://a/g" },
-	{ "g.",			"http://a/b/c/g." },
-	{ ".g",			"http://a/b/c/.g" },
-	{ "g..",		"http://a/b/c/g.." },
-	{ "..g",		"http://a/b/c/..g" },
+	{"/./g", "http://a/g"},
+	{"/../g", "http://a/g"},
+	{"g.", "http://a/b/c/g."},
+	{".g", "http://a/b/c/.g"},
+	{"g..", "http://a/b/c/g.."},
+	{"..g", "http://a/b/c/..g"},
 
-	{ "./../g",		"http://a/b/g" },
-	{ "./g/.",		"http://a/b/c/g/" },
-	{ "g/./h",		"http://a/b/c/g/h" },
-	{ "g/../h",		"http://a/b/c/h" },
-	{ "g;x=1/./y",		"http://a/b/c/g;x=1/y" },
-	{ "g;x=1/../y",		"http://a/b/c/y" },
+	{"./../g", "http://a/b/g"},
+	{"./g/.", "http://a/b/c/g/"},
+	{"g/./h", "http://a/b/c/g/h"},
+	{"g/../h", "http://a/b/c/h"},
+	{"g;x=1/./y", "http://a/b/c/g;x=1/y"},
+	{"g;x=1/../y", "http://a/b/c/y"},
 
-	{ "g?y/./x",		"http://a/b/c/g?y/./x" },
-	{ "g?y/../x",		"http://a/b/c/g?y/../x" },
-	{ "g#s/./x",		"http://a/b/c/g#s/./x" },
-	{ "g#s/../x",		"http://a/b/c/g#s/../x" },
+	{"g?y/./x", "http://a/b/c/g?y/./x"},
+	{"g?y/../x", "http://a/b/c/g?y/../x"},
+	{"g#s/./x", "http://a/b/c/g#s/./x"},
+	{"g#s/../x", "http://a/b/c/g#s/../x"},
 
-	{ "http:g",		"http:g" /* [2] */ },
+	{"http:g", "http:g" /* [2] */},
 
 	/* Extra tests */
-	{ " g",			"http://a/b/c/g" },
-	{ "g ",			"http://a/b/c/g" },
-	{ " g ",		"http://a/b/c/g" },
-	{ "http:/b/c",		"http://b/c" },
-	{ "http://",		"http:" },
-	{ "http:/",		"http:" },
-	{ "http:",		"http:" },
-	{ " ",			"http://a/b/c/d;p?q" },
-	{ "  ",			"http://a/b/c/d;p?q" },
-	{ "/",			"http://a/" },
-	{ "  /  ",		"http://a/" },
-	{ "  ?  ",		"http://a/b/c/d;p" },
-	{ "  h  ",		"http://a/b/c/h" },
-	{ "//foo?",		"http://foo/" },
-	{ "//foo#bar",		"http://foo/#bar" },
-	{ "//foo/",		"http://foo/" },
-	{ "http://<!--#echo var=", "http://<!--/#echo%20var="},
+	{" g", "http://a/b/c/g"},
+	{"g ", "http://a/b/c/g"},
+	{" g ", "http://a/b/c/g"},
+	{"http:/b/c", "http://b/c"},
+	{"http://", "http:"},
+	{"http:/", "http:"},
+	{"http:", "http:"},
+	{" ", "http://a/b/c/d;p?q"},
+	{"  ", "http://a/b/c/d;p?q"},
+	{"/", "http://a/"},
+	{"  /  ", "http://a/"},
+	{"  ?  ", "http://a/b/c/d;p"},
+	{"  h  ", "http://a/b/c/h"},
+	{"//foo?", "http://foo/"},
+	{"//foo#bar", "http://foo/#bar"},
+	{"//foo/", "http://foo/"},
+	{"http://<!--#echo var=", "http://<!--/#echo%20var="},
 	/* [1] Extra slash beyond rfc3986 5.4.1 example, since we're
 	 *     testing normalisation in addition to joining */
 	/* [2] Using the strict parsers option */
@@ -485,7 +469,6 @@ START_TEST(nsurl_join_test)
 		nsurl_unref(joined);
 	}
 	nsurl_unref(base_url);
-
 }
 END_TEST
 
@@ -495,9 +478,9 @@ END_TEST
  */
 static const struct test_triplets join_complex_tests[] = {
 	/* problematic real world urls for regression */
-	{ "http://www.bridgetmckenna.com/blog/self-editing-for-everyone-part-1-the-most-hated-writing-advice-ever",
-	  "http://The%20Old%20Organ%20Trail%20http://www.amazon.com/gp/product/B007B57MCQ/ref=as_li_tf_tl?ie=UTF8&camp=1789&creative=9325&creativeASIN=B007B57MCQ&linkCode=as2&tag=brimck0f-20",
-	  "http://the old organ trail http:" },
+	{"http://www.bridgetmckenna.com/blog/self-editing-for-everyone-part-1-the-most-hated-writing-advice-ever",
+	 "http://The%20Old%20Organ%20Trail%20http://www.amazon.com/gp/product/B007B57MCQ/ref=as_li_tf_tl?ie=UTF8&camp=1789&creative=9325&creativeASIN=B007B57MCQ&linkCode=as2&tag=brimck0f-20",
+	 "http://the old organ trail http:"},
 };
 
 /**
@@ -533,7 +516,6 @@ START_TEST(nsurl_join_complex_test)
 		nsurl_unref(joined);
 	}
 	nsurl_unref(base_url);
-
 }
 END_TEST
 
@@ -542,25 +524,25 @@ END_TEST
  * query replacement tests
  */
 static const struct test_triplets replace_query_tests[] = {
-	{ "http://netsurf-browser.org/?magical=true",
-	  "magical=true&result=win",
-	  "http://netsurf-browser.org/?magical=true&result=win"},
+	{"http://netsurf-browser.org/?magical=true",
+	 "magical=true&result=win",
+	 "http://netsurf-browser.org/?magical=true&result=win"},
 
-	{ "http://netsurf-browser.org/?magical=true#fragment",
-	  "magical=true&result=win",
-	  "http://netsurf-browser.org/?magical=true&result=win#fragment"},
+	{"http://netsurf-browser.org/?magical=true#fragment",
+	 "magical=true&result=win",
+	 "http://netsurf-browser.org/?magical=true&result=win#fragment"},
 
-	{ "http://netsurf-browser.org/#fragment",
-	  "magical=true&result=win",
-	  "http://netsurf-browser.org/?magical=true&result=win#fragment"},
+	{"http://netsurf-browser.org/#fragment",
+	 "magical=true&result=win",
+	 "http://netsurf-browser.org/?magical=true&result=win#fragment"},
 
-	{ "http://netsurf-browser.org/path",
-	  "magical=true",
-	  "http://netsurf-browser.org/path?magical=true"},
+	{"http://netsurf-browser.org/path",
+	 "magical=true",
+	 "http://netsurf-browser.org/path?magical=true"},
 
-	{ "http://netsurf-browser.org/path?magical=true",
-	  "",
-	  "http://netsurf-browser.org/path"},
+	{"http://netsurf-browser.org/path?magical=true",
+	 "",
+	 "http://netsurf-browser.org/path"},
 
 };
 
@@ -591,7 +573,6 @@ START_TEST(nsurl_replace_query_test)
 		nsurl_unref(joined);
 	}
 	nsurl_unref(res_url);
-
 }
 END_TEST
 
@@ -600,30 +581,15 @@ END_TEST
  * url comparison tests
  */
 static const struct test_compare compare_tests[] = {
-	{ "http://a/b/c/d;p?q",
-	  "http://a/b/c/d;p?q",
-	  NSURL_WITH_FRAGMENT,
-	  true },
+	{"http://a/b/c/d;p?q", "http://a/b/c/d;p?q", NSURL_WITH_FRAGMENT, true},
 
-	{ "http://a.b.c/d?a",
-	  "http://a.b.c/e?a",
-	  NSURL_WITH_FRAGMENT,
-	  false },
+	{"http://a.b.c/d?a", "http://a.b.c/e?a", NSURL_WITH_FRAGMENT, false},
 
-	{ "http://a.b.c/",
-	  "http://g.h.i/",
-	  NSURL_WITH_FRAGMENT,
-	  false },
+	{"http://a.b.c/", "http://g.h.i/", NSURL_WITH_FRAGMENT, false},
 
-	{ "http://a.b.c/d?a",
-	  "http://a.b.c/d?b",
-	  NSURL_WITH_FRAGMENT,
-	  false },
+	{"http://a.b.c/d?a", "http://a.b.c/d?b", NSURL_WITH_FRAGMENT, false},
 
-	{ "http://a.b.c/d?a",
-	  "https://a.b.c/d?a",
-	  NSURL_WITH_FRAGMENT,
-	  false },
+	{"http://a.b.c/d?a", "https://a.b.c/d?a", NSURL_WITH_FRAGMENT, false},
 };
 
 /**
@@ -650,7 +616,6 @@ START_TEST(nsurl_compare_test)
 
 	nsurl_unref(url1);
 	nsurl_unref(url2);
-
 }
 END_TEST
 
@@ -665,28 +630,28 @@ END_TEST
  * result is checked against test1 and res as approprite.
  */
 static const struct test_compare component_tests[] = {
-	{ "http://u:p@a:66/b/c/d;p?q#f", "http", NSURL_SCHEME, true },
-	{ "http://u:p@a:66/b/c/d;p?q#f", "u", NSURL_USERNAME, true },
-	{ "http://u:p@a:66/b/c/d;p?q#f", "p", NSURL_PASSWORD, true },
-	{ "http://u:p@a:66/b/c/d;p?q#f", "a", NSURL_HOST, true },
-	{ "http://u:p@a:66/b/c/d;p?q#f", "66", NSURL_PORT, true },
-	{ "http://u:p@a:66/b/c/d;p?q#f", "/b/c/d;p", NSURL_PATH, true },
-	{ "http://u:p@a:66/b/c/d;p?q#f", "q", NSURL_QUERY, true },
-	{ "http://u:p@a:66/b/c/d;p?q#f", "f", NSURL_FRAGMENT, true },
+	{"http://u:p@a:66/b/c/d;p?q#f", "http", NSURL_SCHEME, true},
+	{"http://u:p@a:66/b/c/d;p?q#f", "u", NSURL_USERNAME, true},
+	{"http://u:p@a:66/b/c/d;p?q#f", "p", NSURL_PASSWORD, true},
+	{"http://u:p@a:66/b/c/d;p?q#f", "a", NSURL_HOST, true},
+	{"http://u:p@a:66/b/c/d;p?q#f", "66", NSURL_PORT, true},
+	{"http://u:p@a:66/b/c/d;p?q#f", "/b/c/d;p", NSURL_PATH, true},
+	{"http://u:p@a:66/b/c/d;p?q#f", "q", NSURL_QUERY, true},
+	{"http://u:p@a:66/b/c/d;p?q#f", "f", NSURL_FRAGMENT, true},
 
-	{ "file:", "file", NSURL_SCHEME, true },
-	{ "file:", NULL, NSURL_USERNAME, false },
-	{ "file:", NULL, NSURL_PASSWORD, false },
-	{ "file:", NULL, NSURL_HOST, false },
-	{ "file:", NULL, NSURL_PORT, false },
-	{ "file:", "/", NSURL_PATH, true },
-	{ "file:", NULL, NSURL_QUERY, false },
-	{ "file:", NULL, NSURL_FRAGMENT, false },
+	{"file:", "file", NSURL_SCHEME, true},
+	{"file:", NULL, NSURL_USERNAME, false},
+	{"file:", NULL, NSURL_PASSWORD, false},
+	{"file:", NULL, NSURL_HOST, false},
+	{"file:", NULL, NSURL_PORT, false},
+	{"file:", "/", NSURL_PATH, true},
+	{"file:", NULL, NSURL_QUERY, false},
+	{"file:", NULL, NSURL_FRAGMENT, false},
 
-	{ "http://u:p@a:66/b/c/d;p?q=v#f", "q=v", NSURL_QUERY, true },
-	{ "http://u:p@a:66/b/c/d;p?q=v", "q=v", NSURL_QUERY, true },
-	{ "http://u:p@a:66/b/c/d;p?q=v&q1=v1#f", "q=v&q1=v1", NSURL_QUERY, true },
-	{ "http://u:p@a:66/b/c/d;p?q=v&q1=v1", "q=v&q1=v1", NSURL_QUERY, true },
+	{"http://u:p@a:66/b/c/d;p?q=v#f", "q=v", NSURL_QUERY, true},
+	{"http://u:p@a:66/b/c/d;p?q=v", "q=v", NSURL_QUERY, true},
+	{"http://u:p@a:66/b/c/d;p?q=v&q1=v1#f", "q=v&q1=v1", NSURL_QUERY, true},
+	{"http://u:p@a:66/b/c/d;p?q=v&q1=v1", "q=v&q1=v1", NSURL_QUERY, true},
 
 };
 
@@ -748,23 +713,19 @@ static TCase *nsurl_component_case_create(void)
 	TCase *tc;
 	tc = tcase_create("Component");
 
-	tcase_add_unchecked_fixture(tc,
-				    corestring_create,
-				    corestring_teardown);
+	tcase_add_unchecked_fixture(tc, corestring_create, corestring_teardown);
 
-	tcase_add_loop_test(tc,
-			    nsurl_get_component_test,
-			    0, NELEMS(component_tests));
-	tcase_add_loop_test(tc,
-			    nsurl_has_component_test,
-			    0, NELEMS(component_tests));
+	tcase_add_loop_test(
+		tc, nsurl_get_component_test, 0, NELEMS(component_tests));
+	tcase_add_loop_test(
+		tc, nsurl_has_component_test, 0, NELEMS(component_tests));
 
 	return tc;
 }
 
 
 static const struct test_pairs fragment_tests[] = {
-	{ "http://www.f.org/a/b/c#def", "http://www.f.org/a/b/c" },
+	{"http://www.f.org/a/b/c#def", "http://www.f.org/a/b/c"},
 };
 
 /**
@@ -794,7 +755,6 @@ START_TEST(nsurl_defragment_test)
 		nsurl_unref(res_url);
 	}
 	nsurl_unref(url);
-
 }
 END_TEST
 
@@ -840,7 +800,6 @@ START_TEST(nsurl_refragment_test)
 	nsurl_unref(url);
 }
 END_TEST
-
 
 
 /**
@@ -1229,15 +1188,15 @@ START_TEST(nsurl_api_assert_parent_test)
 END_TEST
 
 
-
-
 /* parent test case */
 
 static const struct test_pairs parent_tests[] = {
-	{ "http://www.f.org/a/b/c", "http://www.f.org/a/b/" },
-	{ "https://www.moo.org/", "https://www.moo.org/" },
-	{ "https://www.moo.org/asinglepathelementthatsquitelong/", "https://www.moo.org/" },
-	{ "https://user:pw@www.moo.org/a/b#x?a=b", "https://user:pw@www.moo.org/a/" },
+	{"http://www.f.org/a/b/c", "http://www.f.org/a/b/"},
+	{"https://www.moo.org/", "https://www.moo.org/"},
+	{"https://www.moo.org/asinglepathelementthatsquitelong/",
+	 "https://www.moo.org/"},
+	{"https://user:pw@www.moo.org/a/b#x?a=b",
+	 "https://user:pw@www.moo.org/a/"},
 };
 
 /**
@@ -1267,7 +1226,6 @@ START_TEST(nsurl_parent_test)
 		nsurl_unref(res_url);
 	}
 	nsurl_unref(url);
-
 }
 END_TEST
 
@@ -1280,13 +1238,9 @@ static TCase *nsurl_parent_case_create(void)
 	TCase *tc;
 	tc = tcase_create("Parent");
 
-	tcase_add_unchecked_fixture(tc,
-				    corestring_create,
-				    corestring_teardown);
+	tcase_add_unchecked_fixture(tc, corestring_create, corestring_teardown);
 
-	tcase_add_loop_test(tc,
-			    nsurl_parent_test,
-			    0, NELEMS(parent_tests));
+	tcase_add_loop_test(tc, nsurl_parent_test, 0, NELEMS(parent_tests));
 
 	return tc;
 }
@@ -1298,15 +1252,13 @@ static TCase *nsurl_parent_case_create(void)
  * utf8 tests
  */
 static const struct test_pairs utf8_tests[] = {
-	{ "http://a.xn--11b4c3d/a", "http://a.कॉम/a"  },
-	{ "https://smog.xn--3oq18vl8pn36a/test", "https://smog.大众汽车/test"},
+	{"http://a.xn--11b4c3d/a", "http://a.कॉम/a"},
+	{"https://smog.xn--3oq18vl8pn36a/test", "https://smog.大众汽车/test"},
 
 
 	/* Regression check from security report */
-	{ "http://AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAfff",
-	  "http://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafff/"
-	}
-};
+	{"http://AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAfff",
+	 "http://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafff/"}};
 
 
 /**
@@ -1350,13 +1302,9 @@ static TCase *nsurl_utf8_case_create(void)
 	TCase *tc;
 	tc = tcase_create("UTF-8 output");
 
-	tcase_add_unchecked_fixture(tc,
-				    corestring_create,
-				    corestring_teardown);
+	tcase_add_unchecked_fixture(tc, corestring_create, corestring_teardown);
 
-	tcase_add_loop_test(tc,
-			    nsurl_get_utf8_test,
-			    0, NELEMS(utf8_tests));
+	tcase_add_loop_test(tc, nsurl_get_utf8_test, 0, NELEMS(utf8_tests));
 
 	return tc;
 }
@@ -1390,53 +1338,77 @@ static Suite *nsurl_suite(void)
 				    corestring_teardown);
 
 	tcase_add_test_raise_signal(tc_api_assert,
-				    nsurl_api_assert_create_test, 6);
+				    nsurl_api_assert_create_test,
+				    6);
 	tcase_add_test_raise_signal(tc_api_assert,
-				    nsurl_api_assert_ref_test, 6);
+				    nsurl_api_assert_ref_test,
+				    6);
 	tcase_add_test_raise_signal(tc_api_assert,
-				    nsurl_api_assert_unref_test, 6);
+				    nsurl_api_assert_unref_test,
+				    6);
 	tcase_add_test_raise_signal(tc_api_assert,
-				    nsurl_api_assert_compare1_test, 6);
+				    nsurl_api_assert_compare1_test,
+				    6);
 	tcase_add_test_raise_signal(tc_api_assert,
-				    nsurl_api_assert_compare2_test, 6);
+				    nsurl_api_assert_compare2_test,
+				    6);
 	tcase_add_test_raise_signal(tc_api_assert,
-				    nsurl_api_assert_get_test, 6);
+				    nsurl_api_assert_get_test,
+				    6);
 	tcase_add_test_raise_signal(tc_api_assert,
-				    nsurl_api_assert_get_component1_test, 6);
+				    nsurl_api_assert_get_component1_test,
+				    6);
 	tcase_add_test_raise_signal(tc_api_assert,
-				    nsurl_api_assert_get_component2_test, 6);
+				    nsurl_api_assert_get_component2_test,
+				    6);
 	tcase_add_test_raise_signal(tc_api_assert,
-				    nsurl_api_assert_has_component1_test, 6);
+				    nsurl_api_assert_has_component1_test,
+				    6);
 	tcase_add_test_raise_signal(tc_api_assert,
-				    nsurl_api_assert_has_component2_test, 6);
+				    nsurl_api_assert_has_component2_test,
+				    6);
 	tcase_add_test_raise_signal(tc_api_assert,
-				    nsurl_api_assert_access_test, 6);
+				    nsurl_api_assert_access_test,
+				    6);
 	tcase_add_test_raise_signal(tc_api_assert,
-				    nsurl_api_assert_access_leaf_test, 6);
+				    nsurl_api_assert_access_leaf_test,
+				    6);
 	tcase_add_test_raise_signal(tc_api_assert,
-				    nsurl_api_assert_length_test, 6);
+				    nsurl_api_assert_length_test,
+				    6);
 	tcase_add_test_raise_signal(tc_api_assert,
-				    nsurl_api_assert_hash_test, 6);
+				    nsurl_api_assert_hash_test,
+				    6);
 	tcase_add_test_raise_signal(tc_api_assert,
-				    nsurl_api_assert_join1_test, 6);
+				    nsurl_api_assert_join1_test,
+				    6);
 	tcase_add_test_raise_signal(tc_api_assert,
-				    nsurl_api_assert_join2_test, 6);
+				    nsurl_api_assert_join2_test,
+				    6);
 	tcase_add_test_raise_signal(tc_api_assert,
-				    nsurl_api_assert_defragment_test, 6);
+				    nsurl_api_assert_defragment_test,
+				    6);
 	tcase_add_test_raise_signal(tc_api_assert,
-				    nsurl_api_assert_refragment1_test, 6);
+				    nsurl_api_assert_refragment1_test,
+				    6);
 	tcase_add_test_raise_signal(tc_api_assert,
-				    nsurl_api_assert_refragment2_test, 6);
+				    nsurl_api_assert_refragment2_test,
+				    6);
 	tcase_add_test_raise_signal(tc_api_assert,
-				    nsurl_api_assert_replace_query1_test, 6);
+				    nsurl_api_assert_replace_query1_test,
+				    6);
 	tcase_add_test_raise_signal(tc_api_assert,
-				    nsurl_api_assert_replace_query2_test, 6);
+				    nsurl_api_assert_replace_query2_test,
+				    6);
 	tcase_add_test_raise_signal(tc_api_assert,
-				    nsurl_api_assert_replace_query3_test, 6);
+				    nsurl_api_assert_replace_query3_test,
+				    6);
 	tcase_add_test_raise_signal(tc_api_assert,
-				    nsurl_api_assert_nice_test, 6);
+				    nsurl_api_assert_nice_test,
+				    6);
 	tcase_add_test_raise_signal(tc_api_assert,
-				    nsurl_api_assert_parent_test, 6);
+				    nsurl_api_assert_parent_test,
+				    6);
 
 	suite_add_tcase(s, tc_api_assert);
 
@@ -1447,9 +1419,8 @@ static Suite *nsurl_suite(void)
 				    corestring_create,
 				    corestring_teardown);
 
-	tcase_add_loop_test(tc_create,
-			    nsurl_create_test,
-			    0, NELEMS(create_tests));
+	tcase_add_loop_test(
+		tc_create, nsurl_create_test, 0, NELEMS(create_tests));
 	tcase_add_test(tc_create, nsurl_ref_test);
 	suite_add_tcase(s, tc_create);
 
@@ -1459,15 +1430,12 @@ static Suite *nsurl_suite(void)
 	tcase_add_unchecked_fixture(tc_access,
 				    corestring_create,
 				    corestring_teardown);
-	tcase_add_loop_test(tc_access,
-			    nsurl_access_test,
-			    0, NELEMS(access_tests));
-	tcase_add_loop_test(tc_access,
-			    nsurl_access_leaf_test,
-			    0, NELEMS(access_tests));
-	tcase_add_loop_test(tc_access,
-			    nsurl_length_test,
-			    0, NELEMS(access_tests));
+	tcase_add_loop_test(
+		tc_access, nsurl_access_test, 0, NELEMS(access_tests));
+	tcase_add_loop_test(
+		tc_access, nsurl_access_leaf_test, 0, NELEMS(access_tests));
+	tcase_add_loop_test(
+		tc_access, nsurl_length_test, 0, NELEMS(access_tests));
 	suite_add_tcase(s, tc_access);
 
 	/* nice filename without strip */
@@ -1479,7 +1447,8 @@ static Suite *nsurl_suite(void)
 
 	tcase_add_loop_test(tc_nice_nostrip,
 			    nsurl_nice_nostrip_test,
-			    0, NELEMS(nice_tests));
+			    0,
+			    NELEMS(nice_tests));
 	suite_add_tcase(s, tc_nice_nostrip);
 
 
@@ -1492,7 +1461,8 @@ static Suite *nsurl_suite(void)
 
 	tcase_add_loop_test(tc_nice_strip,
 			    nsurl_nice_strip_test,
-			    0, NELEMS(nice_strip_tests));
+			    0,
+			    NELEMS(nice_strip_tests));
 	suite_add_tcase(s, tc_nice_strip);
 
 
@@ -1505,7 +1475,8 @@ static Suite *nsurl_suite(void)
 
 	tcase_add_loop_test(tc_replace_query,
 			    nsurl_replace_query_test,
-			    0, NELEMS(replace_query_tests));
+			    0,
+			    NELEMS(replace_query_tests));
 	suite_add_tcase(s, tc_replace_query);
 
 	/* url join */
@@ -1515,12 +1486,11 @@ static Suite *nsurl_suite(void)
 				    corestring_create,
 				    corestring_teardown);
 
-	tcase_add_loop_test(tc_join,
-			    nsurl_join_test,
-			    0, NELEMS(join_tests));
+	tcase_add_loop_test(tc_join, nsurl_join_test, 0, NELEMS(join_tests));
 	tcase_add_loop_test(tc_join,
 			    nsurl_join_complex_test,
-			    0, NELEMS(join_complex_tests));
+			    0,
+			    NELEMS(join_complex_tests));
 
 	suite_add_tcase(s, tc_join);
 
@@ -1532,9 +1502,8 @@ static Suite *nsurl_suite(void)
 				    corestring_create,
 				    corestring_teardown);
 
-	tcase_add_loop_test(tc_compare,
-			    nsurl_compare_test,
-			    0, NELEMS(compare_tests));
+	tcase_add_loop_test(
+		tc_compare, nsurl_compare_test, 0, NELEMS(compare_tests));
 
 	suite_add_tcase(s, tc_compare);
 
@@ -1545,12 +1514,10 @@ static Suite *nsurl_suite(void)
 				    corestring_create,
 				    corestring_teardown);
 
-	tcase_add_loop_test(tc_fragment,
-			    nsurl_defragment_test,
-			    0, NELEMS(fragment_tests));
-	tcase_add_loop_test(tc_fragment,
-			    nsurl_refragment_test,
-			    0, NELEMS(fragment_tests));
+	tcase_add_loop_test(
+		tc_fragment, nsurl_defragment_test, 0, NELEMS(fragment_tests));
+	tcase_add_loop_test(
+		tc_fragment, nsurl_refragment_test, 0, NELEMS(fragment_tests));
 
 	suite_add_tcase(s, tc_fragment);
 

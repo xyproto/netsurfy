@@ -126,9 +126,8 @@ static nserror windows_nsurl_to_path(struct nsurl *url, char **path_out)
 
 	scheme = nsurl_get_component(url, NSURL_SCHEME);
 
-	if (lwc_string_caseless_isequal(scheme, corestring_lwc_file,
-					&match) != lwc_error_ok)
-	{
+	if (lwc_string_caseless_isequal(scheme, corestring_lwc_file, &match) !=
+	    lwc_error_ok) {
 		return NSERROR_BAD_PARAMETER;
 	}
 	lwc_string_unref(scheme);
@@ -151,7 +150,7 @@ static nserror windows_nsurl_to_path(struct nsurl *url, char **path_out)
 	}
 
 	/* if there is a drive: prefix treat path as DOS filename */
-	if ((path[2] == ':') ||  (path[2] == '|')) {
+	if ((path[2] == ':') || (path[2] == '|')) {
 		char *sidx; /* slash index */
 
 		/* move the string down to remove leading / note the
@@ -276,7 +275,7 @@ static nserror windows_mkdir_all(const char *fname)
 				return NSERROR_NOT_FOUND;
 			}
 		} else {
-			if (! S_ISDIR(sb.st_mode)) {
+			if (!S_ISDIR(sb.st_mode)) {
 				/* path element not a directory */
 				free(dname);
 				return NSERROR_NOT_DIRECTORY;

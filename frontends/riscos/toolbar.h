@@ -52,8 +52,8 @@ typedef enum {
  */
 
 union toolbar_action {
-	button_bar_action	button;
-	url_bar_action		url;
+	button_bar_action button;
+	url_bar_action url;
 };
 
 struct toolbar;
@@ -79,18 +79,17 @@ struct toolbar_callbacks {
 };
 
 
-#define ro_toolbar_menu_option_shade(toolbar) \
-		(((toolbar) == NULL) || ro_toolbar_get_editing(toolbar))
+#define ro_toolbar_menu_option_shade(toolbar)                                  \
+	(((toolbar) == NULL) || ro_toolbar_get_editing(toolbar))
 
-#define ro_toolbar_menu_buttons_tick(toolbar)  \
-		(ro_toolbar_get_display_buttons(toolbar) || \
-		ro_toolbar_get_editing(toolbar))
+#define ro_toolbar_menu_buttons_tick(toolbar)                                  \
+	(ro_toolbar_get_display_buttons(toolbar) ||                            \
+	 ro_toolbar_get_editing(toolbar))
 
-#define ro_toolbar_menu_url_tick(toolbar)  \
-		(ro_toolbar_get_display_url(toolbar))
+#define ro_toolbar_menu_url_tick(toolbar) (ro_toolbar_get_display_url(toolbar))
 
-#define ro_toolbar_menu_throbber_tick(toolbar)  \
-		(ro_toolbar_get_display_throbber(toolbar))
+#define ro_toolbar_menu_throbber_tick(toolbar)                                 \
+	(ro_toolbar_get_display_throbber(toolbar))
 
 #define ro_toolbar_menu_edit_shade(toolbar) ((toolbar) == NULL)
 
@@ -124,9 +123,12 @@ void ro_toolbar_init(void);
  */
 
 struct toolbar *ro_toolbar_create(struct theme_descriptor *descriptor,
-		wimp_w parent, theme_style style, toolbar_flags bar_flags,
-		const struct toolbar_callbacks *callbacks, void *client_data,
-		const char *help);
+				  wimp_w parent,
+				  theme_style style,
+				  toolbar_flags bar_flags,
+				  const struct toolbar_callbacks *callbacks,
+				  void *client_data,
+				  const char *help);
 
 
 /**
@@ -139,7 +141,8 @@ struct toolbar *ro_toolbar_create(struct theme_descriptor *descriptor,
  */
 
 bool ro_toolbar_add_buttons(struct toolbar *toolbar,
-		const struct button_bar_buttons buttons[], char *button_order);
+			    const struct button_bar_buttons buttons[],
+			    char *button_order);
 
 
 /**
@@ -345,7 +348,8 @@ bool ro_toolbar_set_button_order(struct toolbar *toolbar, char order[]);
  */
 
 void ro_toolbar_set_button_shaded_state(struct toolbar *toolbar,
-		button_bar_action action, bool shaded);
+					button_bar_action action,
+					bool shaded);
 
 /**
  * Give a toolbar input focus, placing the caret into the URL bar if one is
@@ -369,8 +373,10 @@ bool ro_toolbar_take_caret(struct toolbar *toolbar);
  *				else false.
  */
 
-void ro_toolbar_set_url(struct toolbar *toolbar, const char *url,
-		bool is_utf8, bool set_caret);
+void ro_toolbar_set_url(struct toolbar *toolbar,
+			const char *url,
+			bool is_utf8,
+			bool set_caret);
 
 
 /**
@@ -422,7 +428,7 @@ bool ro_toolbar_get_url_field_extent(struct toolbar *toolbar, os_box *extent);
  */
 
 void ro_toolbar_set_site_favicon(struct toolbar *toolbar,
-		struct hlcache_handle *h);
+				 struct hlcache_handle *h);
 
 
 /**
@@ -435,7 +441,7 @@ void ro_toolbar_set_site_favicon(struct toolbar *toolbar,
  */
 
 void ro_toolbar_set_content_favicon(struct toolbar *toolbar,
-		struct gui_window *g);
+				    struct gui_window *g);
 
 
 /**
@@ -547,4 +553,3 @@ void ro_toolbar_page_info_change(struct toolbar *toolbar);
 
 
 #endif
-

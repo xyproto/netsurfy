@@ -50,7 +50,7 @@ NSOPTION_BOOL(fb_font_monochrome, false)
 NSOPTION_INTEGER(fb_font_cachesize, 2048)
 
 /* Font face paths. These are treated as absolute paths if they start
- * with a / otherwise the compile time resource path is searched. 
+ * with a / otherwise the compile time resource path is searched.
  */
 NSOPTION_STRING(fb_face_sans_serif, NULL)
 NSOPTION_STRING(fb_face_sans_serif_bold, NULL)

@@ -23,11 +23,11 @@
 /* This structure is for the IFF CSET chunk, registered by Martin Taillefer */
 
 struct CSet {
-	LONG	CodeSet;	/* 0=ECMA Latin 1 (std Amiga charset) */
+	LONG CodeSet; /* 0=ECMA Latin 1 (std Amiga charset) */
 	/* CBM will define additional values  */
-	LONG	Reserved[7];
-	};
+	LONG Reserved[7];
+};
 
-#define ID_CSET  MAKE_ID('C','S','E','T')
+#define ID_CSET MAKE_ID('C', 'S', 'E', 'T')
 
 #endif

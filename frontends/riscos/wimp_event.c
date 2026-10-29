@@ -98,32 +98,40 @@ struct event_window {
 	void (*redraw_window)(wimp_draw *redraw);
 	void (*scroll_window)(wimp_scroll *scroll);
 	void (*entering_window)(wimp_entering *entering);
-	bool (*menu_prepare)(wimp_w w, wimp_i i, wimp_menu *m,
-			wimp_pointer *p);
-	bool (*menu_selection)(wimp_w w, wimp_i i, wimp_menu *m,
-			wimp_selection *s, menu_action a);
-	void (*menu_warning)(wimp_w w, wimp_i i, wimp_menu *m,
-			wimp_selection *s, menu_action a);
+	bool (*menu_prepare)(wimp_w w, wimp_i i, wimp_menu *m, wimp_pointer *p);
+	bool (*menu_selection)(wimp_w w,
+			       wimp_i i,
+			       wimp_menu *m,
+			       wimp_selection *s,
+			       menu_action a);
+	void (*menu_warning)(wimp_w w,
+			     wimp_i i,
+			     wimp_menu *m,
+			     wimp_selection *s,
+			     menu_action a);
 	void (*menu_close)(wimp_w w, wimp_i i, wimp_menu *m);
 	wimp_menu *window_menu;
 	bool window_menu_auto;
 	bool window_menu_iconbar;
 	const char *help_prefix;
-	const char *(*get_help_suffix)(wimp_w w, wimp_i i, os_coord *pos,
-			wimp_mouse_state buttons);
+	const char *(*get_help_suffix)(wimp_w w,
+				       wimp_i i,
+				       os_coord *pos,
+				       wimp_mouse_state buttons);
 	void *user_data;
 	struct icon_event *first;
 	struct event_window *next;
 	int max_radio_group;
 };
 
-static void ro_gui_wimp_event_ok_click(struct event_window *window,
-		wimp_mouse_state state);
+static void
+ro_gui_wimp_event_ok_click(struct event_window *window, wimp_mouse_state state);
 static struct event_window *ro_gui_wimp_event_get_window(wimp_w w);
 static struct event_window *ro_gui_wimp_event_find_window(wimp_w w);
-static struct icon_event *ro_gui_wimp_event_get_event(wimp_w w, wimp_i i,
-		event_type type);
-static void ro_gui_wimp_event_prepare_gright_menu(wimp_w w, struct icon_event *event);
+static struct icon_event *
+ro_gui_wimp_event_get_event(wimp_w w, wimp_i i, event_type type);
+static void
+ro_gui_wimp_event_prepare_gright_menu(wimp_w w, struct icon_event *event);
 static struct event_window *ro_gui_wimp_event_remove_window(wimp_w w);
 
 static struct event_window *ro_gui_wimp_event_windows[WIN_HASH_SIZE];
@@ -148,37 +156,40 @@ bool ro_gui_wimp_event_memorise(wimp_w w)
 
 	for (event = window->first; event; event = event->next) {
 		switch (event->type) {
-			case EVENT_NUMERIC_FIELD:
-			case EVENT_TEXT_FIELD:
-				if (event->previous_value.textual)
-					free(event->previous_value.textual);
-				event->previous_value.textual = strdup(
-					ro_gui_get_icon_string(window->w, event->i));
-				if (!event->previous_value.textual) {
-					error = true;
-					NSLOG(netsurf, INFO,
-					      "Unable to store state for icon %i",
-					      event->i);
-				}
-				break;
-			case EVENT_CHECKBOX:
-			case EVENT_RADIO:
-				event->previous_value.boolean =
-					ro_gui_get_icon_selected_state(window->w, event->i);
-				break;
-			default:
-				break;
+		case EVENT_NUMERIC_FIELD:
+		case EVENT_TEXT_FIELD:
+			if (event->previous_value.textual)
+				free(event->previous_value.textual);
+			event->previous_value.textual = strdup(
+				ro_gui_get_icon_string(window->w, event->i));
+			if (!event->previous_value.textual) {
+				error = true;
+				NSLOG(netsurf,
+				      INFO,
+				      "Unable to store state for icon %i",
+				      event->i);
+			}
+			break;
+		case EVENT_CHECKBOX:
+		case EVENT_RADIO:
+			event->previous_value.boolean =
+				ro_gui_get_icon_selected_state(window->w,
+							       event->i);
+			break;
+		default:
+			break;
 		}
 		if (event->type != EVENT_MENU_GRIGHT)
-			event->previous_shaded = ro_gui_get_icon_shaded_state(window->w,
-					event->i);
+			event->previous_shaded = ro_gui_get_icon_shaded_state(
+				window->w, event->i);
 	}
 	return !error;
 }
 
 
 /**
- * Restore the state of any registered components in a window to their memorised state.
+ * Restore the state of any registered components in a window to their memorised
+ * state.
  *
  * \param w	the window to restore
  * \return true on success, false for an unknown window
@@ -194,23 +205,29 @@ bool ro_gui_wimp_event_restore(wimp_w w)
 
 	for (event = window->first; event; event = event->next) {
 		switch (event->type) {
-			case EVENT_NUMERIC_FIELD:
-			case EVENT_TEXT_FIELD:
-				if (event->previous_value.textual)
-					ro_gui_set_icon_string(window->w, event->i,
-						event->previous_value.textual, true);
-				break;
-			case EVENT_CHECKBOX:
-			case EVENT_RADIO:
-				ro_gui_set_icon_selected_state(window->w, event->i,
-					event->previous_value.boolean);
-				break;
-			default:
-				break;
+		case EVENT_NUMERIC_FIELD:
+		case EVENT_TEXT_FIELD:
+			if (event->previous_value.textual)
+				ro_gui_set_icon_string(
+					window->w,
+					event->i,
+					event->previous_value.textual,
+					true);
+			break;
+		case EVENT_CHECKBOX:
+		case EVENT_RADIO:
+			ro_gui_set_icon_selected_state(
+				window->w,
+				event->i,
+				event->previous_value.boolean);
+			break;
+		default:
+			break;
 		}
 		if (event->type != EVENT_MENU_GRIGHT)
-			ro_gui_set_icon_shaded_state(window->w, event->i,
-					event->previous_shaded);
+			ro_gui_set_icon_shaded_state(window->w,
+						     event->i,
+						     event->previous_shaded);
 	}
 	return true;
 }
@@ -234,18 +251,23 @@ bool ro_gui_wimp_event_validate(wimp_w w)
 
 	for (event = window->first; event; event = event->next) {
 		switch (event->type) {
-			case EVENT_NUMERIC_FIELD:
-				value = ro_gui_get_icon_decimal(window->w, event->i,
-						event->data.numeric_field.decimal_places);
-				if (value < event->data.numeric_field.min)
-					value = event->data.numeric_field.min;
-				else if (value > event->data.numeric_field.max)
-					value = event->data.numeric_field.max;
-				ro_gui_set_icon_decimal(window->w, event->i, value,
-						event->data.numeric_field.decimal_places);
-				break;
-			default:
-				break;
+		case EVENT_NUMERIC_FIELD:
+			value = ro_gui_get_icon_decimal(
+				window->w,
+				event->i,
+				event->data.numeric_field.decimal_places);
+			if (value < event->data.numeric_field.min)
+				value = event->data.numeric_field.min;
+			else if (value > event->data.numeric_field.max)
+				value = event->data.numeric_field.max;
+			ro_gui_set_icon_decimal(
+				window->w,
+				event->i,
+				value,
+				event->data.numeric_field.decimal_places);
+			break;
+		default:
+			break;
 		}
 	}
 	return true;
@@ -266,10 +288,11 @@ bool ro_gui_wimp_event_validate(wimp_w w)
 
 bool ro_gui_wimp_event_transfer(wimp_w from, wimp_w to)
 {
-	struct event_window	*window;
-	int			h;
+	struct event_window *window;
+	int h;
 
-	NSLOG(netsurf, INFO,
+	NSLOG(netsurf,
+	      INFO,
 	      "Transferring all events from window 0x%x to window 0x%x",
 	      (unsigned int)from,
 	      (unsigned int)to);
@@ -298,7 +321,9 @@ void ro_gui_wimp_event_finalise(wimp_w w)
 	struct event_window *window;
 	struct icon_event *event;
 
-	NSLOG(netsurf, INFO, "Removing all events for window 0x%x",
+	NSLOG(netsurf,
+	      INFO,
+	      "Removing all events for window 0x%x",
 	      (unsigned int)w);
 	window = ro_gui_wimp_event_remove_window(w);
 	if (!window)
@@ -308,14 +333,14 @@ void ro_gui_wimp_event_finalise(wimp_w w)
 		event = window->first;
 		window->first = event->next;
 		switch (event->type) {
-			case EVENT_NUMERIC_FIELD:
-			case EVENT_TEXT_FIELD:
-				if (event->previous_value.textual)
-					free(event->previous_value.textual);
-				event->previous_value.textual = NULL;
-				break;
-			default:
-				break;
+		case EVENT_NUMERIC_FIELD:
+		case EVENT_TEXT_FIELD:
+			if (event->previous_value.textual)
+				free(event->previous_value.textual);
+			event->previous_value.textual = NULL;
+			break;
+		default:
+			break;
 		}
 		free(event);
 	}
@@ -333,11 +358,14 @@ void ro_gui_wimp_event_finalise(wimp_w w)
 
 void ro_gui_wimp_event_deregister(wimp_w w, wimp_i i)
 {
-	struct event_window	*window;
-	struct icon_event	*event, *parent, *child;
+	struct event_window *window;
+	struct icon_event *event, *parent, *child;
 
-	NSLOG(netsurf, INFO, "Removing all events for window 0x%x, icon %d",
-	      (unsigned int)w, (int)i);
+	NSLOG(netsurf,
+	      INFO,
+	      "Removing all events for window 0x%x, icon %d",
+	      (unsigned int)w,
+	      (int)i);
 	window = ro_gui_wimp_event_get_window(w);
 	if (!window)
 		return;
@@ -351,7 +379,9 @@ void ro_gui_wimp_event_deregister(wimp_w w, wimp_i i)
 		child = event->next;
 
 		if (event->i == i) {
-			NSLOG(netsurf, INFO, "Removing event 0x%x",
+			NSLOG(netsurf,
+			      INFO,
+			      "Removing event 0x%x",
 			      (unsigned int)event);
 
 			if (parent == NULL)
@@ -421,9 +451,12 @@ const char *ro_gui_wimp_event_get_help_prefix(wimp_w w)
  *
  */
 
-bool ro_gui_wimp_event_register_help_suffix(wimp_w w,
-		const char *(*get_help_suffix)(wimp_w w, wimp_i i,
-			os_coord *pos, wimp_mouse_state buttons))
+bool ro_gui_wimp_event_register_help_suffix(
+	wimp_w w,
+	const char *(*get_help_suffix)(wimp_w w,
+				       wimp_i i,
+				       os_coord *pos,
+				       wimp_mouse_state buttons))
 {
 	struct event_window *window;
 
@@ -445,8 +478,10 @@ bool ro_gui_wimp_event_register_help_suffix(wimp_w w,
  * \return The associated prefix, or NULL
  */
 
-const char *ro_gui_wimp_event_get_help_suffix(wimp_w w, wimp_i i,
-		os_coord *pos, wimp_mouse_state buttons)
+const char *ro_gui_wimp_event_get_help_suffix(wimp_w w,
+					      wimp_i i,
+					      os_coord *pos,
+					      wimp_mouse_state buttons)
 {
 	struct event_window *window;
 
@@ -473,7 +508,6 @@ bool ro_gui_wimp_event_set_user_data(wimp_w w, void *user)
 		return false;
 	window->user_data = user;
 	return true;
-
 }
 
 
@@ -517,8 +551,11 @@ void *ro_gui_wimp_event_get_user_data(wimp_w w)
  * \return		true if the menu is OK for an Adjust re-open;
  *			else false.
  */
-bool ro_gui_wimp_event_menu_selection(wimp_w w, wimp_i i, wimp_menu *menu,
-		wimp_selection *selection, menu_action action)
+bool ro_gui_wimp_event_menu_selection(wimp_w w,
+				      wimp_i i,
+				      wimp_menu *menu,
+				      wimp_selection *selection,
+				      menu_action action)
 {
 	struct event_window *window;
 	struct icon_event *event;
@@ -545,13 +582,16 @@ bool ro_gui_wimp_event_menu_selection(wimp_w w, wimp_i i, wimp_menu *menu,
 			break;
 	if (!event) {
 		if (window->menu_selection)
-			window->menu_selection(window->w, wimp_ICON_WINDOW,
-					menu, selection, action);
+			window->menu_selection(window->w,
+					       wimp_ICON_WINDOW,
+					       menu,
+					       selection,
+					       action);
 
 		/* Prepare the menu pending a possible Adjust click. */
 		if (window->menu_prepare)
-			if (!window->menu_prepare(window->w, wimp_ICON_WINDOW,
-					menu, NULL))
+			if (!window->menu_prepare(
+				    window->w, wimp_ICON_WINDOW, menu, NULL))
 				return false;
 
 		return true;
@@ -559,22 +599,24 @@ bool ro_gui_wimp_event_menu_selection(wimp_w w, wimp_i i, wimp_menu *menu,
 
 	menu_entry = &menu->entries[selection->items[0]];
 	for (i = 1; selection->items[i] != -1; i++)
-		menu_entry = &menu_entry->sub_menu->
-				entries[selection->items[i]];
+		menu_entry =
+			&menu_entry->sub_menu->entries[selection->items[i]];
 
 	/* if the entry is already ticked then we do nothing */
 	if (menu_entry->menu_flags & wimp_MENU_TICKED)
 		return true;
 
-	ro_gui_set_icon_string(window->w, event->data.menu_gright.field,
-			menu_entry->data.indirected_text.text, false);
+	ro_gui_set_icon_string(window->w,
+			       event->data.menu_gright.field,
+			       menu_entry->data.indirected_text.text,
+			       false);
 	if (window->menu_selection)
-		window->menu_selection(window->w, event->i, menu,
-				selection, action);
+		window->menu_selection(
+			window->w, event->i, menu, selection, action);
 	prepared = true;
 	if (window->menu_prepare)
-		prepared = window->menu_prepare(window->w, event->i,
-				menu, NULL);
+		prepared = window->menu_prepare(
+			window->w, event->i, menu, NULL);
 	if (prepared)
 		ro_gui_wimp_event_prepare_gright_menu(window->w, event);
 
@@ -584,27 +626,41 @@ bool ro_gui_wimp_event_menu_selection(wimp_w w, wimp_i i, wimp_menu *menu,
 	ic.i = event->data.menu_gright.field;
 	error = xwimp_get_icon_state(&ic);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_icon_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_icon_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return false;
 	}
-	button_type = (ic.icon.flags & wimp_ICON_BUTTON_TYPE) >> wimp_ICON_BUTTON_TYPE_SHIFT;
+	button_type = (ic.icon.flags & wimp_ICON_BUTTON_TYPE) >>
+		      wimp_ICON_BUTTON_TYPE_SHIFT;
 	if ((button_type != wimp_BUTTON_WRITABLE) &&
-			(button_type != wimp_BUTTON_WRITE_CLICK_DRAG))
+	    (button_type != wimp_BUTTON_WRITE_CLICK_DRAG))
 		return prepared;
 	error = xwimp_get_caret_position(&caret);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_caret_position: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_caret_position: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return false;
 	}
-	if ((caret.w != window->w) || (caret.i != event->data.menu_gright.field)) {
-		error = xwimp_set_caret_position(window->w, event->data.menu_gright.field,
-				-1, -1, -1, strlen(menu_entry->data.indirected_text.text));
+	if ((caret.w != window->w) ||
+	    (caret.i != event->data.menu_gright.field)) {
+		error = xwimp_set_caret_position(
+			window->w,
+			event->data.menu_gright.field,
+			-1,
+			-1,
+			-1,
+			strlen(menu_entry->data.indirected_text.text));
 		if (error) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xwimp_set_caret_position: 0x%x: %s",
 			      error->errnum,
 			      error->errmess);
@@ -613,7 +669,7 @@ bool ro_gui_wimp_event_menu_selection(wimp_w w, wimp_i i, wimp_menu *menu,
 	}
 	if (window->keypress) {
 		key.w = window->w;
-		key.c = 21;	// ctrl+u
+		key.c = 21; // ctrl+u
 		window->keypress(&key);
 	}
 	return prepared;
@@ -627,11 +683,13 @@ bool ro_gui_wimp_event_menu_selection(wimp_w w, wimp_i i, wimp_menu *menu,
  *
  *  1. If a menu click, and the window has an automatic window menu, this is
  *     processed immediately.
- *  2. Any registered mouse_click routine (see ro_gui_wimp_register_mouse_click())
- *  3. If the current icon is not registered with a type then it is assumed that no
- *     action is necessary, and the click is deemed to have been handled.
- *  4. If the registered mouse_click routine returned false, or there was no registered
- *     routine then the automated action for the registered icon type is performed
+ *  2. Any registered mouse_click routine (see
+ * ro_gui_wimp_register_mouse_click())
+ *  3. If the current icon is not registered with a type then it is assumed that
+ * no action is necessary, and the click is deemed to have been handled.
+ *  4. If the registered mouse_click routine returned false, or there was no
+ * registered routine then the automated action for the registered icon type is
+ * performed
  *
  * \param pointer	the current pointer state
  * \return true if the event was handled, false otherwise
@@ -654,8 +712,7 @@ bool ro_gui_wimp_event_mouse_click(wimp_pointer *pointer)
 
 	/* Menu clicks take priority if there is an auto menu defined. */
 	if ((pointer->buttons == wimp_CLICK_MENU) &&
-			(window->window_menu != NULL) &&
-			(window->window_menu_auto)) {
+	    (window->window_menu != NULL) && (window->window_menu_auto)) {
 		ro_gui_wimp_event_process_window_menu_click(pointer);
 		return true;
 	}
@@ -671,130 +728,149 @@ bool ro_gui_wimp_event_mouse_click(wimp_pointer *pointer)
 		return true;
 
 	switch (event->type) {
-		case EVENT_NUMERIC_FIELD:
-		case EVENT_TEXT_FIELD:
-			break;
-		case EVENT_UP_ARROW:
-		case EVENT_DOWN_ARROW:
-			for (search = window->first; search; search = search->next)
-				if (search->i == event->data.linked_icon) break;
-			if (!search) {
-				NSLOG(netsurf, INFO, "Incorrect reference.");
+	case EVENT_NUMERIC_FIELD:
+	case EVENT_TEXT_FIELD:
+		break;
+	case EVENT_UP_ARROW:
+	case EVENT_DOWN_ARROW:
+		for (search = window->first; search; search = search->next)
+			if (search->i == event->data.linked_icon)
+				break;
+		if (!search) {
+			NSLOG(netsurf, INFO, "Incorrect reference.");
+			return false;
+		}
+		stepping = search->data.numeric_field.stepping;
+		min = search->data.numeric_field.min;
+		max = search->data.numeric_field.max;
+		decimal_places = search->data.numeric_field.decimal_places;
+
+		if (pointer->buttons & wimp_CLICK_ADJUST)
+			step = -stepping;
+		else if (pointer->buttons & wimp_CLICK_SELECT)
+			step = stepping;
+		else
+			return true;
+		if (event->type == EVENT_DOWN_ARROW)
+			step = -step;
+
+		current = ro_gui_get_icon_decimal(pointer->w,
+						  event->data.linked_icon,
+						  decimal_places);
+		current += step;
+		if (current < min)
+			current = min;
+		if (current > max)
+			current = max;
+		ro_gui_set_icon_decimal(pointer->w,
+					event->data.linked_icon,
+					current,
+					decimal_places);
+		break;
+	case EVENT_MENU_GRIGHT:
+		/* if there's already a menu open then we assume that we are
+		 * part of it. to follow the standard RISC OS behaviour we add a
+		 * 'send to the back' button, then close the menu (which closes
+		 * us) and then finally re-open ourselves. ugh! */
+		if (current_menu != NULL) {
+			os_error *error;
+			open.w = pointer->w;
+			error = xwimp_get_window_state(&open);
+			if (error) {
+				NSLOG(netsurf,
+				      INFO,
+				      "xwimp_get_window_state: 0x%x: %s",
+				      error->errnum,
+				      error->errmess);
+				ro_warn_user("WimpError", error->errmess);
 				return false;
 			}
-			stepping = search->data.numeric_field.stepping;
-			min = search->data.numeric_field.min;
-			max = search->data.numeric_field.max;
-			decimal_places = search->data.numeric_field.decimal_places;
-
-			if (pointer->buttons & wimp_CLICK_ADJUST)
-				step = -stepping;
-			else if (pointer->buttons & wimp_CLICK_SELECT)
-				step = stepping;
-			else
-				return true;
-			if (event->type == EVENT_DOWN_ARROW)
-				step = -step;
-
-			current = ro_gui_get_icon_decimal(pointer->w, event->data.linked_icon,
-					decimal_places);
-			current += step;
-			if (current < min)
-				current = min;
-			if (current > max)
-				current = max;
-			ro_gui_set_icon_decimal(pointer->w, event->data.linked_icon, current,
-					decimal_places);
-			break;
-		case EVENT_MENU_GRIGHT:
-			/* if there's already a menu open then we assume that we are part of it.
-			 * to follow the standard RISC OS behaviour we add a 'send to the back'
-			 * button, then close the menu (which closes us) and then finally
-			 * re-open ourselves. ugh! */
-			if (current_menu != NULL) {
-				os_error *error;
-				open.w = pointer->w;
-				error = xwimp_get_window_state(&open);
+			error = xwimp_get_caret_position(&caret);
+			if (error) {
+				NSLOG(netsurf,
+				      INFO,
+				      "xwimp_get_caret_position: 0x%x: %s",
+				      error->errnum,
+				      error->errmess);
+				ro_warn_user("WimpError", error->errmess);
+				return false;
+			}
+			ro_gui_dialog_add_persistent(current_menu_window,
+						     pointer->w);
+			ro_gui_menu_destroy();
+			error = xwimp_open_window(PTR_WIMP_OPEN(&open));
+			if (error) {
+				NSLOG(netsurf,
+				      INFO,
+				      "xwimp_open_window: 0x%x: %s",
+				      error->errnum,
+				      error->errmess);
+				ro_warn_user("WimpError", error->errmess);
+				return false;
+			}
+			if (caret.w == pointer->w) {
+				error = xwimp_set_caret_position(caret.w,
+								 caret.i,
+								 caret.pos.x,
+								 caret.pos.y,
+								 -1,
+								 caret.index);
 				if (error) {
-					NSLOG(netsurf, INFO,
-					      "xwimp_get_window_state: 0x%x: %s",
+					NSLOG(netsurf,
+					      INFO,
+					      "xwimp_set_caret_position: 0x%x: %s",
 					      error->errnum,
 					      error->errmess);
-					ro_warn_user("WimpError", error->errmess);
-					return false;
-				}
-				error = xwimp_get_caret_position(&caret);
-				if (error) {
-					NSLOG(netsurf, INFO,
-					      "xwimp_get_caret_position: 0x%x: %s",
-					      error->errnum,
-					      error->errmess);
-					ro_warn_user("WimpError", error->errmess);
-					return false;
-				}
-				ro_gui_dialog_add_persistent(current_menu_window,
-						pointer->w);
-				ro_gui_menu_destroy();
-				error = xwimp_open_window(PTR_WIMP_OPEN(&open));
-				if (error) {
-					NSLOG(netsurf, INFO,
-					      "xwimp_open_window: 0x%x: %s",
-					      error->errnum,
-					      error->errmess);
-					ro_warn_user("WimpError", error->errmess);
-					return false;
-				}
-				if (caret.w == pointer->w) {
-					error = xwimp_set_caret_position(caret.w,
-							caret.i,
-							caret.pos.x, caret.pos.y,
-							-1, caret.index);
-					if (error) {
-						NSLOG(netsurf, INFO,
-						      "xwimp_set_caret_position: 0x%x: %s",
-						      error->errnum,
-						      error->errmess);
-						ro_warn_user("WimpError", error->errmess);
-					}
+					ro_warn_user("WimpError",
+						     error->errmess);
 				}
 			}
-			/* display the menu */
+		}
+		/* display the menu */
 
-			prepared = true;
-			if (window->menu_prepare != NULL)
-				prepared = window->menu_prepare(pointer->w, pointer->i,
-						event->data.menu_gright.menu, pointer);
-			if (prepared) {
-				ro_gui_wimp_event_prepare_gright_menu(pointer->w, event);
-				ro_gui_popup_menu(event->data.menu_gright.menu, pointer->w, pointer->i);
-			}
-			break;
-		case EVENT_CHECKBOX:
-			break;
-		case EVENT_RADIO:
-			for (search = window->first; search; search = search->next)
-				if ((search->type == EVENT_RADIO) &&
-						(search->data.radio_group ==
-							event->data.radio_group))
-					ro_gui_set_icon_selected_state(pointer->w,
-							search->i, (search == event));
-			break;
-		case EVENT_BUTTON:
-			if (event->data.callback)
-				event->data.callback(pointer);
-			break;
-		case EVENT_CANCEL:
-			if (pointer->buttons & wimp_CLICK_SELECT) {
-				ro_gui_dialog_close(pointer->w);
-				ro_gui_wimp_event_close_window(pointer->w);
-				ro_gui_menu_destroy();
-			} else {
-				ro_gui_wimp_event_restore(pointer->w);
-			}
-			break;
-		case EVENT_OK:
-			ro_gui_wimp_event_ok_click(window, pointer->buttons);
-			break;
+		prepared = true;
+		if (window->menu_prepare != NULL)
+			prepared = window->menu_prepare(
+				pointer->w,
+				pointer->i,
+				event->data.menu_gright.menu,
+				pointer);
+		if (prepared) {
+			ro_gui_wimp_event_prepare_gright_menu(pointer->w,
+							      event);
+			ro_gui_popup_menu(event->data.menu_gright.menu,
+					  pointer->w,
+					  pointer->i);
+		}
+		break;
+	case EVENT_CHECKBOX:
+		break;
+	case EVENT_RADIO:
+		for (search = window->first; search; search = search->next)
+			if ((search->type == EVENT_RADIO) &&
+			    (search->data.radio_group ==
+			     event->data.radio_group))
+				ro_gui_set_icon_selected_state(pointer->w,
+							       search->i,
+							       (search ==
+								event));
+		break;
+	case EVENT_BUTTON:
+		if (event->data.callback)
+			event->data.callback(pointer);
+		break;
+	case EVENT_CANCEL:
+		if (pointer->buttons & wimp_CLICK_SELECT) {
+			ro_gui_dialog_close(pointer->w);
+			ro_gui_wimp_event_close_window(pointer->w);
+			ro_gui_menu_destroy();
+		} else {
+			ro_gui_wimp_event_restore(pointer->w);
+		}
+		break;
+	case EVENT_OK:
+		ro_gui_wimp_event_ok_click(window, pointer->buttons);
+		break;
 	}
 	return true;
 }
@@ -821,15 +897,18 @@ void ro_gui_wimp_event_prepare_gright_menu(wimp_w w, struct icon_event *event)
 	ic.i = event->data.menu_gright.field;
 	error = xwimp_get_icon_state(&ic);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_icon_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_icon_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
-	button_type = (ic.icon.flags & wimp_ICON_BUTTON_TYPE)
-			>> wimp_ICON_BUTTON_TYPE_SHIFT;
+	button_type = (ic.icon.flags & wimp_ICON_BUTTON_TYPE) >>
+		      wimp_ICON_BUTTON_TYPE_SHIFT;
 	if ((button_type == wimp_BUTTON_WRITABLE) ||
-			(button_type == wimp_BUTTON_WRITE_CLICK_DRAG))
+	    (button_type == wimp_BUTTON_WRITE_CLICK_DRAG))
 		return;
 	text = ro_gui_get_icon_string(w, event->data.menu_gright.field);
 	menu = event->data.menu_gright.menu;
@@ -850,7 +929,7 @@ void ro_gui_wimp_event_prepare_gright_menu(wimp_w w, struct icon_event *event)
  * /param state		the mouse button state
  */
 void ro_gui_wimp_event_ok_click(struct event_window *window,
-		wimp_mouse_state state)
+				wimp_mouse_state state)
 {
 	struct icon_event *search;
 
@@ -886,13 +965,13 @@ bool ro_gui_wimp_event_keypress(wimp_key *key)
 {
 	static const int *ucstable = NULL;
 	static int alphabet = 0;
-	static uint32_t wc = 0;	/* buffer for UTF8 alphabet */
+	static uint32_t wc = 0; /* buffer for UTF8 alphabet */
 	static int shift = 0;
 	struct event_window *window;
 	struct icon_event *event;
 	wimp_pointer pointer;
 	wimp_key k;
-	uint32_t c = (uint32_t) key->c;
+	uint32_t c = (uint32_t)key->c;
 	int t_alphabet;
 	os_error *error;
 
@@ -929,8 +1008,11 @@ bool ro_gui_wimp_event_keypress(wimp_key *key)
 	 */
 	error = xosbyte1(osbyte_ALPHABET_NUMBER, 127, 0, &t_alphabet);
 	if (error) {
-		NSLOG(netsurf, INFO, "failed reading alphabet: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "failed reading alphabet: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		/* prevent any corruption of ucstable */
 		t_alphabet = alphabet;
 	}
@@ -942,9 +1024,10 @@ bool ro_gui_wimp_event_keypress(wimp_key *key)
 		alphabet = t_alphabet;
 
 		error = xserviceinternational_get_ucs_conversion_table(
-						alphabet, &unclaimed, &ostable);
+			alphabet, &unclaimed, &ostable);
 		if (error != NULL) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "failed reading UCS conversion table: 0x%x: %s",
 			      error->errnum,
 			      error->errmess);
@@ -967,21 +1050,18 @@ bool ro_gui_wimp_event_keypress(wimp_key *key)
 
 			/* read UCS4 value out of table */
 			k.c = ucstable[c];
-		}
-		else if (alphabet == 111 /* UTF8 */) {
+		} else if (alphabet == 111 /* UTF8 */) {
 			if ((c & 0x80) == 0x00 || (c & 0xC0) == 0xC0) {
 				/* UTF8 start sequence */
 				if ((c & 0xE0) == 0xC0) {
 					wc = ((c & 0x1F) << 6);
 					shift = 1;
 					return true;
-				}
-				else if ((c & 0xF0) == 0xE0) {
+				} else if ((c & 0xF0) == 0xE0) {
 					wc = ((c & 0x0F) << 12);
 					shift = 2;
 					return true;
-				}
-				else if ((c & 0xF8) == 0xF0) {
+				} else if ((c & 0xF8) == 0xF0) {
 					wc = ((c & 0x07) << 18);
 					shift = 3;
 					return true;
@@ -995,30 +1075,31 @@ bool ro_gui_wimp_event_keypress(wimp_key *key)
 				else if ((c & 0xFC) == 0xF8) {
 					wc = ((c & 0x03) << 24);
 					shift = 4;
-				}
-				else if ((c & 0xFE) == 0xFC) {
+				} else if ((c & 0xFE) == 0xFC) {
 					wc = ((c & 0x01) << 30);
 					shift = 5;
-				}
-				else if (c >= 0x80) {
+				} else if (c >= 0x80) {
 					/* If this ever happens,
 					 * RISC OS' UTF8 keyboard
 					 * drivers are broken */
-					NSLOG(netsurf, INFO,
-					      "unexpected UTF8 start"" byte %x (ignoring)",
+					NSLOG(netsurf,
+					      INFO,
+					      "unexpected UTF8 start"
+					      " byte %x (ignoring)",
 					      c);
 					return true;
 				}
 				/* Anything else is ASCII, so just
 				 * handle it directly. */
-			}
-			else {
+			} else {
 				if ((c & 0xC0) != 0x80) {
 					/* If this ever happens,
 					 * RISC OS' UTF8 keyboard
 					 * drivers are broken */
-					NSLOG(netsurf, INFO,
-					      "unexpected keycode: ""%x (ignoring)",
+					NSLOG(netsurf,
+					      INFO,
+					      "unexpected keycode: "
+					      "%x (ignoring)",
 					      c);
 					return true;
 				}
@@ -1045,37 +1126,37 @@ bool ro_gui_wimp_event_keypress(wimp_key *key)
 			return true;
 
 	switch (key->c) {
-		/* Escape performs the CANCEL action (simulated click) */
-		case wimp_KEY_ESCAPE:
-			for (event = window->first; event; event = event->next) {
-				switch (event->type) {
-					case EVENT_CANCEL:
-						pointer.w = key->w;
-						pointer.i = event->i;
-						pointer.buttons = wimp_CLICK_SELECT;
-						ro_gui_wimp_event_mouse_click(&pointer);
-						return true;
-					default:
-						break;
-				}
+	/* Escape performs the CANCEL action (simulated click) */
+	case wimp_KEY_ESCAPE:
+		for (event = window->first; event; event = event->next) {
+			switch (event->type) {
+			case EVENT_CANCEL:
+				pointer.w = key->w;
+				pointer.i = event->i;
+				pointer.buttons = wimp_CLICK_SELECT;
+				ro_gui_wimp_event_mouse_click(&pointer);
+				return true;
+			default:
+				break;
 			}
+		}
+		return false;
+	/* CTRL+F2 closes a window with a close icon */
+	case wimp_KEY_CONTROL + wimp_KEY_F2:
+		if (!ro_gui_wimp_check_window_furniture(key->w,
+							wimp_WINDOW_CLOSE_ICON))
 			return false;
-		/* CTRL+F2 closes a window with a close icon */
-		case wimp_KEY_CONTROL + wimp_KEY_F2:
-			if (!ro_gui_wimp_check_window_furniture(key->w,
-					wimp_WINDOW_CLOSE_ICON))
-				return false;
-			ro_gui_dialog_close(key->w);
-			ro_gui_wimp_event_close_window(key->w);
-			ro_gui_menu_destroy();
-			return true;
-		/* Return performs the OK action */
-		case wimp_KEY_RETURN:
-			if (!window->ok_click)
-				return false;
-			/* todo: check we aren't greyed out */
-			ro_gui_wimp_event_ok_click(window, wimp_CLICK_SELECT);
-			return true;
+		ro_gui_dialog_close(key->w);
+		ro_gui_wimp_event_close_window(key->w);
+		ro_gui_menu_destroy();
+		return true;
+	/* Return performs the OK action */
+	case wimp_KEY_RETURN:
+		if (!window->ok_click)
+			return false;
+		/* todo: check we aren't greyed out */
+		ro_gui_wimp_event_ok_click(window, wimp_CLICK_SELECT);
+		return true;
 	}
 	return false;
 }
@@ -1108,7 +1189,9 @@ bool ro_gui_wimp_event_close_window(wimp_w w)
 {
 	struct event_window *window;
 
-	NSLOG(netsurf, INFO, "Close event received for window 0x%x",
+	NSLOG(netsurf,
+	      INFO,
+	      "Close event received for window 0x%x",
 	      (unsigned int)w);
 	if (w == ro_gui_wimp_event_submenu)
 		ro_gui_wimp_event_submenu = 0;
@@ -1185,35 +1268,37 @@ bool ro_gui_wimp_event_pointer_entering_window(wimp_entering *entering)
 
 bool ro_gui_wimp_event_process_window_menu_click(wimp_pointer *pointer)
 {
-	struct event_window	*window;
+	struct event_window *window;
 
 	window = ro_gui_wimp_event_find_window(pointer->w);
-	if ((window) && (window->window_menu)
-			&& (pointer->buttons == wimp_CLICK_MENU)) {
+	if ((window) && (window->window_menu) &&
+	    (pointer->buttons == wimp_CLICK_MENU)) {
 		int xpos, ypos;
 
 		if (window->menu_prepare)
-			if (!window->menu_prepare(window->w, wimp_ICON_WINDOW,
-					window->window_menu, pointer))
+			if (!window->menu_prepare(window->w,
+						  wimp_ICON_WINDOW,
+						  window->window_menu,
+						  pointer))
 				return false;
 
 		if (window->window_menu_iconbar) {
 			int entry = 0;
 			int line_height = window->window_menu->height +
-					window->window_menu->gap;
+					  window->window_menu->gap;
 			int gap_height = 24; /* The fixed dotted line height */
 
 			xpos = pointer->pos.x;
 			ypos = 96;
 			do {
 				ypos += line_height;
-				if ((window->window_menu->
-						entries[entry].menu_flags &
-						wimp_MENU_SEPARATE) != 0)
+				if ((window->window_menu->entries[entry]
+					     .menu_flags &
+				     wimp_MENU_SEPARATE) != 0)
 					ypos += gap_height;
-			} while ((window->window_menu->
-					entries[entry++].menu_flags &
-					wimp_MENU_LAST) == 0);
+			} while ((window->window_menu->entries[entry++]
+					  .menu_flags &
+				  wimp_MENU_LAST) == 0);
 		} else {
 			xpos = pointer->pos.x;
 			ypos = pointer->pos.y;
@@ -1238,7 +1323,7 @@ bool ro_gui_wimp_event_process_window_menu_click(wimp_pointer *pointer)
 
 bool ro_gui_wimp_event_prepare_menu(wimp_w w, wimp_i i, wimp_menu *menu)
 {
-	struct event_window	*window;
+	struct event_window *window;
 
 	window = ro_gui_wimp_event_find_window(w);
 	if (window == NULL)
@@ -1267,8 +1352,10 @@ bool ro_gui_wimp_event_prepare_menu(wimp_w w, wimp_i i, wimp_menu *menu)
  * \return true if the menu was registed ok; else false.
  */
 
-bool ro_gui_wimp_event_register_menu(wimp_w w, wimp_menu *m,
-		bool menu_auto, bool position_ibar)
+bool ro_gui_wimp_event_register_menu(wimp_w w,
+				     wimp_menu *m,
+				     bool menu_auto,
+				     bool position_ibar)
 {
 	struct event_window *window;
 
@@ -1284,9 +1371,14 @@ bool ro_gui_wimp_event_register_menu(wimp_w w, wimp_menu *m,
 /**
  * Register a numeric field to be automatically handled
  */
-bool ro_gui_wimp_event_register_numeric_field(wimp_w w, wimp_i i,
-		wimp_i up, wimp_i down,
-		int min, int max, int stepping, int decimal_places)
+bool ro_gui_wimp_event_register_numeric_field(wimp_w w,
+					      wimp_i i,
+					      wimp_i up,
+					      wimp_i down,
+					      int min,
+					      int max,
+					      int stepping,
+					      int decimal_places)
 {
 	struct icon_event *event;
 
@@ -1315,7 +1407,8 @@ bool ro_gui_wimp_event_register_numeric_field(wimp_w w, wimp_i i,
 /**
  * Register a text field to be automatically handled
  */
-bool ro_gui_wimp_event_register_text_field(wimp_w w, wimp_i i) {
+bool ro_gui_wimp_event_register_text_field(wimp_w w, wimp_i i)
+{
 	struct icon_event *event;
 
 	event = ro_gui_wimp_event_get_event(w, i, EVENT_TEXT_FIELD);
@@ -1328,8 +1421,10 @@ bool ro_gui_wimp_event_register_text_field(wimp_w w, wimp_i i) {
 /**
  * Register an icon menu to be automatically handled
  */
-bool ro_gui_wimp_event_register_menu_gright(wimp_w w, wimp_i i,
-		wimp_i gright, wimp_menu *menu)
+bool ro_gui_wimp_event_register_menu_gright(wimp_w w,
+					    wimp_i i,
+					    wimp_i gright,
+					    wimp_menu *menu)
 {
 	struct icon_event *event;
 
@@ -1370,8 +1465,8 @@ bool ro_gui_wimp_event_register_radio(wimp_w w, wimp_i *i)
 	window->max_radio_group++;
 
 	while (*i != -1) {
-		struct icon_event *event = ro_gui_wimp_event_get_event(w, *i,
-				EVENT_RADIO);
+		struct icon_event *event = ro_gui_wimp_event_get_event(
+			w, *i, EVENT_RADIO);
 		if (!event)
 			return false;
 		event->data.radio_group = window->max_radio_group;
@@ -1384,8 +1479,9 @@ bool ro_gui_wimp_event_register_radio(wimp_w w, wimp_i *i)
 /**
  * Register a function to be called when a particular button is pressed.
  */
-bool ro_gui_wimp_event_register_button(wimp_w w, wimp_i i,
-		void (*callback)(wimp_pointer *pointer))
+bool ro_gui_wimp_event_register_button(wimp_w w,
+				       wimp_i i,
+				       void (*callback)(wimp_pointer *pointer))
 {
 	struct icon_event *event;
 
@@ -1414,8 +1510,9 @@ bool ro_gui_wimp_event_register_cancel(wimp_w w, wimp_i i)
 /**
  * Register a function to be called for the OK action on a window.
  */
-bool ro_gui_wimp_event_register_ok(wimp_w w, wimp_i i,
-		bool (*callback)(wimp_w w))
+bool ro_gui_wimp_event_register_ok(wimp_w w,
+				   wimp_i i,
+				   bool (*callback)(wimp_w w))
 {
 	struct event_window *window;
 	struct icon_event *event;
@@ -1436,8 +1533,9 @@ bool ro_gui_wimp_event_register_ok(wimp_w w, wimp_i i,
  * Register a function to be called for all mouse-clicks to icons
  * in a window that don't have registered actions.
  */
-bool ro_gui_wimp_event_register_mouse_click(wimp_w w,
-		bool (*callback)(wimp_pointer *pointer))
+bool ro_gui_wimp_event_register_mouse_click(
+	wimp_w w,
+	bool (*callback)(wimp_pointer *pointer))
 {
 	struct event_window *window;
 
@@ -1459,7 +1557,7 @@ bool ro_gui_wimp_event_register_mouse_click(wimp_w w,
  *
  */
 bool ro_gui_wimp_event_register_keypress(wimp_w w,
-		bool (*callback)(wimp_key *key))
+					 bool (*callback)(wimp_key *key))
 {
 	struct event_window *window;
 
@@ -1475,7 +1573,7 @@ bool ro_gui_wimp_event_register_keypress(wimp_w w,
  * Register a function to be called for all window opening requests.
  */
 bool ro_gui_wimp_event_register_open_window(wimp_w w,
-		void (*callback)(wimp_open *open))
+					    void (*callback)(wimp_open *open))
 {
 	struct event_window *window;
 
@@ -1490,7 +1588,7 @@ bool ro_gui_wimp_event_register_open_window(wimp_w w,
  * Register a function to be called after the window has been closed.
  */
 bool ro_gui_wimp_event_register_close_window(wimp_w w,
-		void (*callback)(wimp_w w))
+					     void (*callback)(wimp_w w))
 {
 	struct event_window *window;
 
@@ -1504,8 +1602,9 @@ bool ro_gui_wimp_event_register_close_window(wimp_w w,
 /**
  * Register a function to be called for all window redraw operations.
  */
-bool ro_gui_wimp_event_register_redraw_window(wimp_w w,
-		void (*callback)(wimp_draw *redraw))
+bool ro_gui_wimp_event_register_redraw_window(
+	wimp_w w,
+	void (*callback)(wimp_draw *redraw))
 {
 	struct event_window *window;
 
@@ -1520,8 +1619,9 @@ bool ro_gui_wimp_event_register_redraw_window(wimp_w w,
  * Register a function to be called for all window scroll requests.
  */
 
-bool ro_gui_wimp_event_register_scroll_window(wimp_w w,
-		void (*callback)(wimp_scroll *scroll))
+bool ro_gui_wimp_event_register_scroll_window(
+	wimp_w w,
+	void (*callback)(wimp_scroll *scroll))
 {
 	struct event_window *window;
 
@@ -1536,8 +1636,9 @@ bool ro_gui_wimp_event_register_scroll_window(wimp_w w,
  * Register a function to be called for all pointer entering window requests.
  */
 
-bool ro_gui_wimp_event_register_pointer_entering_window(wimp_w w,
-		void (*callback)(wimp_entering *entering))
+bool ro_gui_wimp_event_register_pointer_entering_window(
+	wimp_w w,
+	void (*callback)(wimp_entering *entering))
 {
 	struct event_window *window;
 
@@ -1556,9 +1657,9 @@ bool ro_gui_wimp_event_register_pointer_entering_window(wimp_w w,
  *				(re-)opened.
  * \return			true if the menu was registed ok; else false.
  */
-bool ro_gui_wimp_event_register_menu_prepare(wimp_w w,
-		bool (*callback)(wimp_w w, wimp_i i, wimp_menu *m,
-			wimp_pointer *p))
+bool ro_gui_wimp_event_register_menu_prepare(
+	wimp_w w,
+	bool (*callback)(wimp_w w, wimp_i i, wimp_menu *m, wimp_pointer *p))
 {
 	struct event_window *window;
 
@@ -1578,9 +1679,13 @@ bool ro_gui_wimp_event_register_menu_prepare(wimp_w w,
  *				made.
  * \return			true if the menu was registed ok; else false.
  */
-bool ro_gui_wimp_event_register_menu_selection(wimp_w w,
-		bool (*callback)(wimp_w w, wimp_i i, wimp_menu *m,
-			wimp_selection *s, menu_action a))
+bool ro_gui_wimp_event_register_menu_selection(
+	wimp_w w,
+	bool (*callback)(wimp_w w,
+			 wimp_i i,
+			 wimp_menu *m,
+			 wimp_selection *s,
+			 menu_action a))
 {
 	struct event_window *window;
 
@@ -1601,8 +1706,11 @@ bool ro_gui_wimp_event_register_menu_selection(wimp_w w,
  * \return			true if the menu was registed ok; else false.
  */
 bool ro_gui_wimp_event_register_menu_warning(wimp_w w,
-		void (*callback)(wimp_w w, wimp_i i, wimp_menu *m,
-			wimp_selection *s, menu_action a))
+					     void (*callback)(wimp_w w,
+							      wimp_i i,
+							      wimp_menu *m,
+							      wimp_selection *s,
+							      menu_action a))
 {
 	struct event_window *window;
 
@@ -1622,7 +1730,9 @@ bool ro_gui_wimp_event_register_menu_warning(wimp_w w,
  * \return			true if the menu was registed ok; else false.
  */
 bool ro_gui_wimp_event_register_menu_close(wimp_w w,
-		void (*callback)(wimp_w w, wimp_i i, wimp_menu *m))
+					   void (*callback)(wimp_w w,
+							    wimp_i i,
+							    wimp_menu *m))
 {
 	struct event_window *window;
 
@@ -1650,7 +1760,9 @@ struct event_window *ro_gui_wimp_event_get_window(wimp_w w)
 	if (window)
 		return window;
 
-	NSLOG(netsurf, INFO, "Creating structure for window 0x%x",
+	NSLOG(netsurf,
+	      INFO,
+	      "Creating structure for window 0x%x",
 	      (unsigned int)w);
 	window = calloc(1, sizeof(struct event_window));
 	if (!window)
@@ -1705,15 +1817,16 @@ struct event_window *ro_gui_wimp_event_find_window(wimp_w w)
 	int h = WIN_HASH(w);
 
 	/* search hash chain for window */
-	for (window = ro_gui_wimp_event_windows[h]; window; window = window->next) {
+	for (window = ro_gui_wimp_event_windows[h]; window;
+	     window = window->next) {
 		if (window->w == w)
 			return window;
 	}
 	return NULL;
 }
 
-struct icon_event *ro_gui_wimp_event_get_event(wimp_w w, wimp_i i,
-		event_type type)
+struct icon_event *
+ro_gui_wimp_event_get_event(wimp_w w, wimp_i i, event_type type)
 {
 	struct event_window *window;
 	struct icon_event *event;
@@ -1751,8 +1864,11 @@ struct icon_event *ro_gui_wimp_event_get_event(wimp_w w, wimp_i i,
  * \return		true if the event was handled, false otherwise
  */
 
-bool ro_gui_wimp_event_submenu_warning(wimp_w w, wimp_i i, wimp_menu *menu,
-		wimp_selection *selection, menu_action action)
+bool ro_gui_wimp_event_submenu_warning(wimp_w w,
+				       wimp_i i,
+				       wimp_menu *menu,
+				       wimp_selection *selection,
+				       menu_action action)
 {
 	struct event_window *window;
 	struct icon_event *event;
@@ -1773,8 +1889,8 @@ bool ro_gui_wimp_event_submenu_warning(wimp_w w, wimp_i i, wimp_menu *menu,
 			break;
 	if (event) {
 		if (window->menu_close != NULL &&
-				event->type == EVENT_MENU_GRIGHT &&
-				event->data.menu_gright.menu == menu) {
+		    event->type == EVENT_MENU_GRIGHT &&
+		    event->data.menu_gright.menu == menu) {
 			window->menu_close(w, i, menu);
 			return true;
 		}
@@ -1786,8 +1902,8 @@ bool ro_gui_wimp_event_submenu_warning(wimp_w w, wimp_i i, wimp_menu *menu,
 
 	if ((window->window_menu) && (window->window_menu == menu)) {
 		if (window->menu_warning) {
-			window->menu_warning(w, wimp_ICON_WINDOW, menu,
-					selection, action);
+			window->menu_warning(
+				w, wimp_ICON_WINDOW, menu, selection, action);
 			return true;
 		}
 	}
@@ -1825,8 +1941,8 @@ void ro_gui_wimp_event_menus_closed(wimp_w w, wimp_i i, wimp_menu *menu)
 			break;
 	if (event) {
 		if (window->menu_close != NULL &&
-				event->type == EVENT_MENU_GRIGHT &&
-				event->data.menu_gright.menu == menu)
+		    event->type == EVENT_MENU_GRIGHT &&
+		    event->data.menu_gright.menu == menu)
 			window->menu_close(w, i, menu);
 		return;
 	}
@@ -1834,7 +1950,7 @@ void ro_gui_wimp_event_menus_closed(wimp_w w, wimp_i i, wimp_menu *menu)
 	/* If the close is for a window menu, then pass the event on to it. */
 
 	if ((window->window_menu) && (window->window_menu == menu) &&
-			(window->menu_close))
+	    (window->menu_close))
 		window->menu_close(w, wimp_ICON_WINDOW, menu);
 }
 
@@ -1847,4 +1963,3 @@ void ro_gui_wimp_event_register_submenu(wimp_w w)
 		ro_gui_wimp_event_close_window(ro_gui_wimp_event_submenu);
 	ro_gui_wimp_event_submenu = w;
 }
-

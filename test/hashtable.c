@@ -37,11 +37,11 @@
 /* Limit for hash table tests which use /usr/share/dict/words */
 #define DICT_TEST_WORD_COUNT 100000
 
-#define NELEMS(x)  (sizeof(x) / sizeof((x)[0]))
+#define NELEMS(x) (sizeof(x) / sizeof((x)[0]))
 
 struct test_pairs {
-	const char* test;
-	const char* res;
+	const char *test;
+	const char *res;
 };
 
 static struct hash_table *match_hash_a;
@@ -50,11 +50,11 @@ static struct hash_table *match_hash_b;
 static struct hash_table *dict_hash;
 
 static const struct test_pairs match_tests[] = {
-	{ "cow", "moo" },
-	{ "pig", "oink" },
-	{ "chicken", "cluck" },
-	{ "dog", "woof" },
-	{ "sheep", "baaa" },
+	{"cow", "moo"},
+	{"pig", "oink"},
+	{"chicken", "cluck"},
+	{"dog", "woof"},
+	{"sheep", "baaa"},
 };
 
 /* Fixtures */
@@ -108,7 +108,8 @@ static void dict_hashtable_create(int dict_hash_size)
 		fscanf(dictf, "%s", keybuf);
 		fscanf(dictf, "%s", valbuf);
 		hash_add(dict_hash, keybuf, valbuf);
-		if (counter++ > DICT_TEST_WORD_COUNT) break;
+		if (counter++ > DICT_TEST_WORD_COUNT)
+			break;
 	}
 
 	fclose(dictf);
@@ -246,7 +247,8 @@ START_TEST(hashtable_dict_test)
 		res = hash_get(dict_hash, keybuf);
 		ck_assert(res != NULL);
 		ck_assert_str_eq(res, valbuf);
-		if (counter++ > DICT_TEST_WORD_COUNT) break;
+		if (counter++ > DICT_TEST_WORD_COUNT)
+			break;
 	}
 
 	fclose(dictf);
@@ -281,12 +283,10 @@ static Suite *hashtable_suite(void)
 				  match_hashtable_create,
 				  match_hashtable_teardown);
 
-	tcase_add_loop_test(tc_match,
-			    hashtable_matcha_test,
-			    0, NELEMS(match_tests));
-	tcase_add_loop_test(tc_match,
-			    hashtable_matchb_test,
-			    0, NELEMS(match_tests));
+	tcase_add_loop_test(
+		tc_match, hashtable_matcha_test, 0, NELEMS(match_tests));
+	tcase_add_loop_test(
+		tc_match, hashtable_matchb_test, 0, NELEMS(match_tests));
 
 	suite_add_tcase(s, tc_match);
 

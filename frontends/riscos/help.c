@@ -76,8 +76,8 @@
 */
 
 
-static void ro_gui_interactive_help_broadcast(wimp_message *message,
-		char *token);
+static void
+ro_gui_interactive_help_broadcast(wimp_message *message, char *token);
 static os_t help_time = 0;
 
 
@@ -88,18 +88,18 @@ static os_t help_time = 0;
  */
 void ro_gui_interactive_help_request(wimp_message *message)
 {
-	char				message_token[32];
-	char				menu_buffer[4];
-	wimp_selection			menu_tree;
-	help_full_message_request	*message_data;
-	wimp_w				window;
-	wimp_i				icon;
-	unsigned int			index;
-	bool				greyed = false;
-	wimp_menu			*test_menu;
-	os_error			*error;
-	const char			*auto_text;
-	int				i;
+	char message_token[32];
+	char menu_buffer[4];
+	wimp_selection menu_tree;
+	help_full_message_request *message_data;
+	wimp_w window;
+	wimp_i icon;
+	unsigned int index;
+	bool greyed = false;
+	wimp_menu *test_menu;
+	os_error *error;
+	const char *auto_text;
+	int i;
 
 	/* check we aren't turned off */
 	if (!nsoption_bool(interactive_help))
@@ -122,8 +122,10 @@ void ro_gui_interactive_help_request(wimp_message *message)
 	auto_text = ro_gui_wimp_event_get_help_prefix(window);
 	if (auto_text != NULL) {
 		const char *auto_suffix = ro_gui_wimp_event_get_help_suffix(
-				window, icon, &message_data->pos,
-				message_data->buttons);
+			window,
+			icon,
+			&message_data->pos,
+			message_data->buttons);
 
 		if (auto_suffix == NULL)
 			sprintf(message_token, "%s%i", auto_text, (int)icon);
@@ -134,26 +136,28 @@ void ro_gui_interactive_help_request(wimp_message *message)
 	else if (ro_gui_hotlist_check_window(message->data.data_xfer.w)) {
 		i = -1;
 		sprintf(message_token,
-				(i >= 0) ? "HelpTree%i" :"HelpHotlist%i", i);
+			(i >= 0) ? "HelpTree%i" : "HelpHotlist%i",
+			i);
 	} else if (ro_gui_global_history_check_window(
-			message->data.data_xfer.w)) {
+			   message->data.data_xfer.w)) {
 		i = -1;
 		sprintf(message_token,
-				(i >= 0) ? "HelpTree%i" :"HelpGHistory%i", i);
+			(i >= 0) ? "HelpTree%i" : "HelpGHistory%i",
+			i);
 	} else if (ro_gui_cookies_check_window(message->data.data_xfer.w)) {
 		i = -1;
 		sprintf(message_token,
-				(i >= 0) ? "HelpTree%i" :"HelpCookies%i", i);
+			(i >= 0) ? "HelpTree%i" : "HelpCookies%i",
+			i);
 	} else if (ro_gui_window_lookup(window) != NULL)
 		sprintf(message_token, "HelpBrowser%i", (int)icon);
 
 	/* if we've managed to find something so far then we broadcast it */
 	if (message_token[0]) {
-		if ((icon >= 0) &&
-				(ro_gui_get_icon_shaded_state(window, icon)))
+		if ((icon >= 0) && (ro_gui_get_icon_shaded_state(window, icon)))
 			strcat(message_token, "g");
 		ro_gui_interactive_help_broadcast(message,
-				(char *)message_token);
+						  (char *)message_token);
 		return;
 	}
 
@@ -163,11 +167,14 @@ void ro_gui_interactive_help_request(wimp_message *message)
 		return;
 
 	/* get the current menu tree */
-	error = xwimp_get_menu_state(wimp_GIVEN_WINDOW_AND_ICON,
-				&menu_tree, window, icon);
+	error = xwimp_get_menu_state(
+		wimp_GIVEN_WINDOW_AND_ICON, &menu_tree, window, icon);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_menu_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_menu_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
@@ -192,8 +199,9 @@ void ro_gui_interactive_help_request(wimp_message *message)
 	index = 0;
 	test_menu = current_menu;
 	while (menu_tree.items[index] != -1) {
-		greyed |= test_menu->entries[menu_tree.items[index]].icon_flags
-				& wimp_ICON_SHADED;
+		greyed |=
+			test_menu->entries[menu_tree.items[index]].icon_flags &
+			wimp_ICON_SHADED;
 		test_menu = test_menu->entries[menu_tree.items[index]].sub_menu;
 		if (index == 0)
 			sprintf(menu_buffer, "%i", menu_tree.items[index]);
@@ -214,8 +222,8 @@ void ro_gui_interactive_help_request(wimp_message *message)
  * \param  message the original request message
  * \param  token the token to look up
  */
-static void ro_gui_interactive_help_broadcast(wimp_message *message,
-		char *token)
+static void
+ro_gui_interactive_help_broadcast(wimp_message *message, char *token)
 {
 	const char *translated_token;
 	help_full_message_reply *reply;
@@ -235,8 +243,8 @@ static void ro_gui_interactive_help_broadcast(wimp_message *message,
 			char *base_token = token;
 			while (base_token[0] != 0x00) {
 				if ((base_token[0] == '-') ||
-						((base_token[0] >= '0') &&
-						(base_token[0] <= '9')))
+				    ((base_token[0] >= '0') &&
+				     (base_token[0] <= '9')))
 					base_token[0] = 0x00;
 				else
 					++base_token;
@@ -248,15 +256,15 @@ static void ro_gui_interactive_help_broadcast(wimp_message *message,
 	/* copy our message string */
 	if (translated_token != token) {
 		/* convert to local encoding */
-		nserror err = utf8_to_local_encoding(translated_token, 0,
-				&local_token);
+		nserror err = utf8_to_local_encoding(translated_token,
+						     0,
+						     &local_token);
 		if (err != NSERROR_OK) {
 			/* badenc should never happen */
 			assert(err != NSERROR_BAD_ENCODING);
 			/* simply use UTF-8 string */
 			strncpy(reply->reply, translated_token, 235);
-		}
-		else {
+		} else {
 			strncpy(reply->reply, local_token, 235);
 			free(local_token);
 		}
@@ -267,11 +275,15 @@ static void ro_gui_interactive_help_broadcast(wimp_message *message,
 	reply->size = 256;
 	reply->action = message_HELP_REPLY;
 	reply->your_ref = reply->my_ref;
-	error = xwimp_send_message(wimp_USER_MESSAGE, (wimp_message *)reply,
-			reply->sender);
+	error = xwimp_send_message(wimp_USER_MESSAGE,
+				   (wimp_message *)reply,
+				   reply->sender);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_send_message: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_send_message: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 	}
 }
@@ -296,10 +308,11 @@ bool ro_gui_interactive_help_available(void)
 	/* special cases: check known application names */
 	do {
 		os_error *error;
-		error = xtaskmanager_enumerate_tasks(context, &task,
-				sizeof(taskmanager_task), &context, 0);
+		error = xtaskmanager_enumerate_tasks(
+			context, &task, sizeof(taskmanager_task), &context, 0);
 		if (error) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xtaskmanager_enumerate_tasks: 0x%x: %s",
 			      error->errnum,
 			      error->errmess);
@@ -307,14 +320,13 @@ bool ro_gui_interactive_help_available(void)
 		}
 
 		/* we can't just use strcmp due to string termination issues */
-		if (!strncmp(task.name, "Help", 4) &&
-				(task.name[4] < 32))
+		if (!strncmp(task.name, "Help", 4) && (task.name[4] < 32))
 			return true;
 		else if (!strncmp(task.name, "Bubble Help", 11) &&
-				(task.name[11] < 32))
+			 (task.name[11] < 32))
 			return true;
 		else if (!strncmp(task.name, "Floating Help", 13) &&
-				(task.name[13] < 32))
+			 (task.name[13] < 32))
 			return true;
 	} while (context >= 0);
 	return false;
@@ -339,8 +351,11 @@ void ro_gui_interactive_help_start(void)
 	if ((help_start) && (help_start[0])) {
 		error = xwimp_start_task("<Help$Start>", &task);
 		if (error) {
-			NSLOG(netsurf, INFO, "xwimp_start_tast: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_start_tast: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 			return;
 		}
@@ -350,8 +365,11 @@ void ro_gui_interactive_help_start(void)
 	if (!task) {
 		error = xwimp_start_task("Resources:$.Apps.!Help", &task);
 		if (error) {
-			NSLOG(netsurf, INFO, "xwimp_start_tast: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_start_tast: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 			return;
 		}
@@ -361,7 +379,8 @@ void ro_gui_interactive_help_start(void)
 	if (task) {
 		error = xos_read_monotonic_time(&help_time);
 		if (error) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xwimp_read_monotonic_time: 0x%x: %s",
 			      error->errnum,
 			      error->errmess);

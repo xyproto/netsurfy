@@ -24,21 +24,21 @@ struct gui_window;
 
 void ro_gui_dialog_init(void);
 wimp_w ro_gui_dialog_create(const char *template_name);
-wimp_window * ro_gui_dialog_load_template(const char *template_name);
+wimp_window *ro_gui_dialog_load_template(const char *template_name);
 
 void ro_gui_dialog_open(wimp_w w);
 void ro_gui_dialog_close(wimp_w close);
 
-bool ro_gui_dialog_open_top(wimp_w w, struct toolbar *toolbar,
-		int width, int height);
+bool ro_gui_dialog_open_top(wimp_w w,
+			    struct toolbar *toolbar,
+			    int width,
+			    int height);
 void ro_gui_dialog_open_at_pointer(wimp_w w);
 void ro_gui_dialog_open_xy(wimp_w, int x, int y);
 
 void ro_gui_dialog_open_persistent(wimp_w parent, wimp_w w, bool pointer);
 void ro_gui_dialog_add_persistent(wimp_w parent, wimp_w w);
 void ro_gui_dialog_close_persistent(wimp_w parent);
-
-
 
 
 void ro_gui_dialog_click(wimp_pointer *pointer);

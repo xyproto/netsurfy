@@ -64,9 +64,11 @@ nserror ro_gui_window_set_url(struct gui_window *g, struct nsurl *url);
  *  multiple invalidation requests to be agregated.
  *
  * \param g The window to update
- * \param rect The area of the window to update or NULL to redraw entire contents.
+ * \param rect The area of the window to update or NULL to redraw entire
+ * contents.
  */
-nserror ro_gui_window_invalidate_area(struct gui_window *g, const struct rect *rect);
+nserror
+ro_gui_window_invalidate_area(struct gui_window *g, const struct rect *rect);
 
 
 /**
@@ -106,7 +108,8 @@ void ro_gui_window_mouse_at(wimp_pointer *pointer, void *data);
  * \param g the gui window being iconised
  * \param wi the WindowInfo message from the iconiser
  */
-void ro_gui_window_iconise(struct gui_window *g, wimp_full_message_window_info *wi);
+void ro_gui_window_iconise(struct gui_window *g,
+			   wimp_full_message_window_info *wi);
 
 
 /**
@@ -144,7 +147,7 @@ void ro_gui_window_quit(void);
  * Close all browser windows
  *
  * no need for a separate fn same operation as quit
-*/
+ */
 #define ro_gui_window_close_all ro_gui_window_quit
 
 
@@ -188,7 +191,10 @@ struct gui_window *ro_gui_toolbar_lookup(wimp_w window);
  * \param pos receives position in window co-ordinatates
  * \return true iff conversion successful
  */
-bool ro_gui_window_to_window_pos(struct gui_window *g, int x, int y, os_coord *pos);
+bool ro_gui_window_to_window_pos(struct gui_window *g,
+				 int x,
+				 int y,
+				 os_coord *pos);
 
 
 /**
@@ -200,7 +206,8 @@ bool ro_gui_window_to_window_pos(struct gui_window *g, int x, int y, os_coord *p
  * \param  type			Wimp work-area/icon type for decoding.
  * \return			NetSurf core button state.
  */
-enum browser_mouse_state ro_gui_mouse_click_state(wimp_mouse_state buttons, wimp_icon_flags type);
+enum browser_mouse_state
+ro_gui_mouse_click_state(wimp_mouse_state buttons, wimp_icon_flags type);
 
 
 /**
@@ -212,7 +219,8 @@ enum browser_mouse_state ro_gui_mouse_click_state(wimp_mouse_state buttons, wimp
  * \param type Wimp work-area/icon type for decoding.
  * \return NetSurf core button state.
  */
-enum browser_mouse_state ro_gui_mouse_drag_state(wimp_mouse_state buttons, wimp_icon_flags type);
+enum browser_mouse_state
+ro_gui_mouse_drag_state(wimp_mouse_state buttons, wimp_icon_flags type);
 
 
 /**
@@ -239,4 +247,3 @@ bool ro_gui_alt_pressed(void);
 void gui_window_set_pointer(struct gui_window *g, enum gui_pointer_shape shape);
 
 #endif
-

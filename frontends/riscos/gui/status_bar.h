@@ -37,9 +37,9 @@ void ro_gui_status_bar_set_visible(struct status_bar *pb, bool visible);
 bool ro_gui_status_bar_get_visible(struct status_bar *sb);
 void ro_gui_status_bar_set_text(struct status_bar *sb, const char *text);
 void ro_gui_status_bar_set_progress_value(struct status_bar *sb,
-		unsigned int value);
+					  unsigned int value);
 void ro_gui_status_bar_set_progress_range(struct status_bar *sb,
-		unsigned int range);
+					  unsigned int range);
 void ro_gui_status_bar_set_progress_icon(struct status_bar *sb,
-		const char *icon);
+					 const char *icon);
 #endif

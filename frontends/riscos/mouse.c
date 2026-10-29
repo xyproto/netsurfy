@@ -45,10 +45,10 @@
 
 /* Data for the wimp drag handler. */
 
-static void (*ro_mouse_drag_end_callback)(wimp_dragged *dragged, void *data)
-		= NULL;
-static void (*ro_mouse_drag_track_callback)(wimp_pointer *pointer, void *data)
-		= NULL;
+static void (*ro_mouse_drag_end_callback)(wimp_dragged *dragged,
+					  void *data) = NULL;
+static void (*ro_mouse_drag_track_callback)(wimp_pointer *pointer,
+					    void *data) = NULL;
 static void (*ro_mouse_drag_cancel_callback)(void *data) = NULL;
 static void *ro_mouse_drag_data = NULL;
 
@@ -56,10 +56,10 @@ static bool ro_mouse_ignore_leaving_event = false;
 
 /* Data for the wimp poll handler. */
 
-static void (*ro_mouse_poll_end_callback)(wimp_leaving *leaving, void *data)
-		= NULL;
-static void (*ro_mouse_poll_track_callback)(wimp_pointer *pointer, void *data)
-		= NULL;
+static void (*ro_mouse_poll_end_callback)(wimp_leaving *leaving,
+					  void *data) = NULL;
+static void (*ro_mouse_poll_track_callback)(wimp_pointer *pointer,
+					    void *data) = NULL;
 static void *ro_mouse_poll_data = NULL;
 
 
@@ -70,19 +70,22 @@ static void *ro_mouse_poll_data = NULL;
 
 void ro_mouse_poll(void)
 {
-	wimp_pointer	pointer;
-	os_error	*error;
+	wimp_pointer pointer;
+	os_error *error;
 
 	/* If no trackers are active, just exit. */
 
 	if (ro_mouse_drag_track_callback == NULL &&
-			ro_mouse_poll_track_callback == NULL)
+	    ro_mouse_poll_track_callback == NULL)
 		return;
 
 	error = xwimp_get_pointer_info(&pointer);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_pointer_info: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_pointer_info: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
@@ -111,17 +114,18 @@ void ro_mouse_poll(void)
  *			can't be cancelled.
  * \param *data		Data to be passed to the callback functions, or NULL.
  */
- 
+
 void ro_mouse_drag_start(void (*drag_end)(wimp_dragged *dragged, void *data),
-		void (*drag_track)(wimp_pointer *pointer, void *data),
-		void (*drag_cancel)(void *data), void *data)
+			 void (*drag_track)(wimp_pointer *pointer, void *data),
+			 void (*drag_cancel)(void *data),
+			 void *data)
 {
 	/* A drag should never be started when one is already in progress. */
 
 	assert(ro_mouse_drag_end_callback == NULL &&
-			ro_mouse_drag_track_callback == NULL &&
-			ro_mouse_drag_cancel_callback == NULL &&
-			ro_mouse_drag_data == NULL);
+	       ro_mouse_drag_track_callback == NULL &&
+	       ro_mouse_drag_cancel_callback == NULL &&
+	       ro_mouse_drag_data == NULL);
 
 	ro_mouse_drag_end_callback = drag_end;
 	ro_mouse_drag_track_callback = drag_track;
@@ -175,8 +179,8 @@ void ro_mouse_drag_end(wimp_dragged *dragged)
  */
 
 void ro_mouse_track_start(void (*poll_end)(wimp_leaving *leaving, void *data),
-		void (*poll_track)(wimp_pointer *pointer, void *data),
-		void *data)
+			  void (*poll_track)(wimp_pointer *pointer, void *data),
+			  void *data)
 {
 	/* It should never be possible for the mouse to be in two windows
 	 * at the same time! However, some third-party extensions to RISC OS
@@ -189,10 +193,10 @@ void ro_mouse_track_start(void (*poll_end)(wimp_leaving *leaving, void *data),
 	 */
 
 	if (ro_mouse_poll_end_callback != NULL ||
-			ro_mouse_poll_track_callback != NULL ||
-			ro_mouse_poll_data != NULL) {
+	    ro_mouse_poll_track_callback != NULL ||
+	    ro_mouse_poll_data != NULL) {
 		if (ro_mouse_poll_end_callback != NULL &&
-				ro_mouse_ignore_leaving_event == false)
+		    ro_mouse_ignore_leaving_event == false)
 			ro_mouse_poll_end_callback(NULL, ro_mouse_poll_data);
 
 		NSLOG(netsurf, INFO, "Unexpected mouse track termination.");
@@ -224,7 +228,7 @@ void ro_mouse_track_start(void (*poll_end)(wimp_leaving *leaving, void *data),
 void ro_mouse_pointer_leaving_window(wimp_leaving *leaving)
 {
 	if (ro_mouse_poll_end_callback != NULL &&
-			ro_mouse_ignore_leaving_event == false)
+	    ro_mouse_ignore_leaving_event == false)
 		ro_mouse_poll_end_callback(leaving, ro_mouse_poll_data);
 
 	ro_mouse_ignore_leaving_event = false;
@@ -278,6 +282,4 @@ os_t ro_mouse_poll_interval(void)
 		return 10;
 
 	return 0;
-
 }
-

@@ -40,8 +40,7 @@ struct OpenURLIFace *IOpenURL = NULL;
 
 static struct MinList *ami_unsupportedprotocols;
 
-struct ami_protocol
-{
+struct ami_protocol {
 	struct MinNode node;
 	lwc_string *protocol;
 };
@@ -49,8 +48,8 @@ struct ami_protocol
 static struct ami_protocol *ami_openurl_add_protocol(const char *url)
 {
 	nsurl *ns_url;
-	struct ami_protocol *ami_p =
-		(struct ami_protocol *)malloc(sizeof(struct ami_protocol));
+	struct ami_protocol *ami_p = (struct ami_protocol *)malloc(
+		sizeof(struct ami_protocol));
 
 	if (nsurl_create(url, &ns_url) != NSERROR_OK) {
 		free(ami_p);
@@ -59,8 +58,7 @@ static struct ami_protocol *ami_openurl_add_protocol(const char *url)
 
 	ami_p->protocol = nsurl_get_component(ns_url, NSURL_SCHEME);
 	nsurl_unref(ns_url);
-	if (ami_p->protocol == NULL)
-	{
+	if (ami_p->protocol == NULL) {
 		free(ami_p);
 		return NULL;
 	}
@@ -74,18 +72,18 @@ static void ami_openurl_free_list(struct MinList *list)
 	struct ami_protocol *node;
 	struct ami_protocol *nnode;
 
-	if(!IsMinListEmpty(list)) {
+	if (!IsMinListEmpty(list)) {
 		node = (struct ami_protocol *)GetHead((struct List *)list);
 
-		do
-		{
-			nnode=(struct ami_protocol *)GetSucc((struct Node *)node);
+		do {
+			nnode = (struct ami_protocol *)GetSucc(
+				(struct Node *)node);
 
 			Remove((struct Node *)node);
 			lwc_string_unref(node->protocol);
 			free(node);
 			node = NULL;
-		}while((node=nnode));
+		} while ((node = nnode));
 	}
 	free(list);
 }
@@ -97,22 +95,23 @@ static BOOL ami_openurl_check_list(struct MinList *list, nsurl *url)
 	lwc_string *url_scheme;
 	bool match;
 
-	if(IsMinListEmpty(list)) return FALSE;
+	if (IsMinListEmpty(list))
+		return FALSE;
 
 	url_scheme = nsurl_get_component(url, NSURL_SCHEME);
 
 	node = (struct ami_protocol *)GetHead((struct List *)list);
 
-	do
-	{
-		nnode=(struct ami_protocol *)GetSucc((struct Node *)node);
+	do {
+		nnode = (struct ami_protocol *)GetSucc((struct Node *)node);
 
-		if ((lwc_string_isequal(url_scheme, node->protocol,
-				&match) == lwc_error_ok) && (match == true)) {
+		if ((lwc_string_isequal(url_scheme, node->protocol, &match) ==
+		     lwc_error_ok) &&
+		    (match == true)) {
 			lwc_string_unref(url_scheme);
 			return TRUE;
 		}
-	}while((node=nnode));
+	} while ((node = nnode));
 
 	lwc_string_unref(url_scheme);
 	return FALSE;
@@ -126,10 +125,11 @@ static BOOL ami_openurl_check_list(struct MinList *list, nsurl *url)
 
 void ami_openurl_open(void)
 {
-	if(nsoption_bool(use_openurl_lib)) {
-		if((OpenURLBase = OpenLibrary("openurl.library",0))) {
+	if (nsoption_bool(use_openurl_lib)) {
+		if ((OpenURLBase = OpenLibrary("openurl.library", 0))) {
 #ifdef __amigaos4__
-			IOpenURL = (struct OpenURLIFace *)GetInterface(OpenURLBase,"main",1,NULL);
+			IOpenURL = (struct OpenURLIFace *)GetInterface(
+				OpenURLBase, "main", 1, NULL);
 #endif
 		}
 	}
@@ -140,9 +140,11 @@ void ami_openurl_open(void)
 void ami_openurl_close(void)
 {
 #ifdef __amigaos4__
-	if(IOpenURL) DropInterface((struct Interface *)IOpenURL);
+	if (IOpenURL)
+		DropInterface((struct Interface *)IOpenURL);
 #endif
-	if(OpenURLBase) CloseLibrary(OpenURLBase);
+	if (OpenURLBase)
+		CloseLibrary(OpenURLBase);
 
 	ami_openurl_free_list(ami_unsupportedprotocols);
 }
@@ -154,19 +156,18 @@ nserror gui_launch_url(struct nsurl *url)
 #endif
 	char *launchurl = NULL;
 
-	if(ami_openurl_check_list(ami_unsupportedprotocols, url) == FALSE)
-	{
-		if(IOpenURL)
-		{
-			URL_OpenA((STRPTR)url,NULL);
+	if (ami_openurl_check_list(ami_unsupportedprotocols, url) == FALSE) {
+		if (IOpenURL) {
+			URL_OpenA((STRPTR)url, NULL);
 		} else {
-			if((launchurl = ASPrintf("URL:%s", nsurl_access(url)))) {
-				BPTR fptr = Open(launchurl,MODE_OLDFILE);
-				if(fptr)
-				{
+			if ((launchurl = ASPrintf("URL:%s",
+						  nsurl_access(url)))) {
+				BPTR fptr = Open(launchurl, MODE_OLDFILE);
+				if (fptr) {
 					Close(fptr);
 				} else {
-					ami_openurl_add_protocol(nsurl_access(url));
+					ami_openurl_add_protocol(
+						nsurl_access(url));
 				}
 				FreeVec(launchurl);
 			}

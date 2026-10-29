@@ -46,99 +46,116 @@ static bool ro_gui_options_interface_ok(wimp_w w);
 bool ro_gui_options_interface_initialise(wimp_w w)
 {
 	/* set the current values */
-	ro_gui_set_icon_selected_state(w, INTERFACE_STRIP_EXTNS_OPTION,
-                                       nsoption_bool(strip_extensions));
-	ro_gui_set_icon_selected_state(w, INTERFACE_CONFIRM_OVWR_OPTION,
-                                       nsoption_bool(confirm_overwrite));
-	ro_gui_set_icon_selected_state(w, INTERFACE_URL_COMPLETE_OPTION,
-                                       nsoption_bool(url_suggestion));
-	ro_gui_set_icon_selected_state(w, INTERFACE_HISTORY_TOOLTIP_OPTION,
-                                       nsoption_bool(history_tooltip));
-	ro_gui_set_icon_selected_state(w, INTERFACE_THUMBNAIL_ICONISE_OPTION,
-                                       nsoption_bool(thumbnail_iconise));
-	ro_gui_set_icon_selected_state(w, INTERFACE_USE_EXTERNAL_HOTLIST,
-                                       nsoption_bool(external_hotlists));
-	ro_gui_set_icon_string(w, INTERFACE_EXTERNAL_HOTLIST_APP,
-                               (nsoption_charp(external_hotlist_app)) ?
-                               nsoption_charp(external_hotlist_app) : "", false);
+	ro_gui_set_icon_selected_state(w,
+				       INTERFACE_STRIP_EXTNS_OPTION,
+				       nsoption_bool(strip_extensions));
+	ro_gui_set_icon_selected_state(w,
+				       INTERFACE_CONFIRM_OVWR_OPTION,
+				       nsoption_bool(confirm_overwrite));
+	ro_gui_set_icon_selected_state(w,
+				       INTERFACE_URL_COMPLETE_OPTION,
+				       nsoption_bool(url_suggestion));
+	ro_gui_set_icon_selected_state(w,
+				       INTERFACE_HISTORY_TOOLTIP_OPTION,
+				       nsoption_bool(history_tooltip));
+	ro_gui_set_icon_selected_state(w,
+				       INTERFACE_THUMBNAIL_ICONISE_OPTION,
+				       nsoption_bool(thumbnail_iconise));
+	ro_gui_set_icon_selected_state(w,
+				       INTERFACE_USE_EXTERNAL_HOTLIST,
+				       nsoption_bool(external_hotlists));
+	ro_gui_set_icon_string(w,
+			       INTERFACE_EXTERNAL_HOTLIST_APP,
+			       (nsoption_charp(external_hotlist_app))
+				       ? nsoption_charp(external_hotlist_app)
+				       : "",
+			       false);
 
-	ro_gui_set_icon_shaded_state(w, INTERFACE_EXTERNAL_HOTLIST_APP,
-                                     !nsoption_bool(external_hotlists));
+	ro_gui_set_icon_shaded_state(w,
+				     INTERFACE_EXTERNAL_HOTLIST_APP,
+				     !nsoption_bool(external_hotlists));
 
 	/* initialise all functions for a newly created window */
 	ro_gui_wimp_event_register_mouse_click(w,
-			ro_gui_options_interface_click);
-	ro_gui_wimp_event_register_button(w, INTERFACE_DEFAULT_BUTTON,
-			ro_gui_options_interface_default);
+					       ro_gui_options_interface_click);
+	ro_gui_wimp_event_register_button(w,
+					  INTERFACE_DEFAULT_BUTTON,
+					  ro_gui_options_interface_default);
 	ro_gui_wimp_event_register_cancel(w, INTERFACE_CANCEL_BUTTON);
-	ro_gui_wimp_event_register_ok(w, INTERFACE_OK_BUTTON,
-			ro_gui_options_interface_ok);
+	ro_gui_wimp_event_register_ok(w,
+				      INTERFACE_OK_BUTTON,
+				      ro_gui_options_interface_ok);
 	ro_gui_wimp_event_set_help_prefix(w, "HelpInterfaceConfig");
 	ro_gui_wimp_event_memorise(w);
 	return true;
-
 }
 
 
 bool ro_gui_options_interface_click(wimp_pointer *pointer)
 {
-	bool	shaded;
+	bool shaded;
 
 	switch (pointer->i) {
-		case INTERFACE_USE_EXTERNAL_HOTLIST:
-			shaded = !ro_gui_get_icon_selected_state(pointer->w,
-					INTERFACE_USE_EXTERNAL_HOTLIST);
-			ro_gui_set_icon_shaded_state(pointer->w,
-					INTERFACE_EXTERNAL_HOTLIST_APP, shaded);
-			return false;
-			break;
+	case INTERFACE_USE_EXTERNAL_HOTLIST:
+		shaded = !ro_gui_get_icon_selected_state(
+			pointer->w, INTERFACE_USE_EXTERNAL_HOTLIST);
+		ro_gui_set_icon_shaded_state(pointer->w,
+					     INTERFACE_EXTERNAL_HOTLIST_APP,
+					     shaded);
+		return false;
+		break;
 	}
 	return false;
 }
 
 
-
 void ro_gui_options_interface_default(wimp_pointer *pointer)
 {
 	ro_gui_set_icon_selected_state(pointer->w,
-			INTERFACE_STRIP_EXTNS_OPTION, true);
+				       INTERFACE_STRIP_EXTNS_OPTION,
+				       true);
 	ro_gui_set_icon_selected_state(pointer->w,
-			INTERFACE_CONFIRM_OVWR_OPTION, true);
+				       INTERFACE_CONFIRM_OVWR_OPTION,
+				       true);
 	ro_gui_set_icon_selected_state(pointer->w,
-			INTERFACE_URL_COMPLETE_OPTION, true);
+				       INTERFACE_URL_COMPLETE_OPTION,
+				       true);
 	ro_gui_set_icon_selected_state(pointer->w,
-			INTERFACE_HISTORY_TOOLTIP_OPTION, true);
+				       INTERFACE_HISTORY_TOOLTIP_OPTION,
+				       true);
 	ro_gui_set_icon_selected_state(pointer->w,
-			INTERFACE_THUMBNAIL_ICONISE_OPTION, true);
+				       INTERFACE_THUMBNAIL_ICONISE_OPTION,
+				       true);
 	ro_gui_set_icon_selected_state(pointer->w,
-			INTERFACE_USE_EXTERNAL_HOTLIST, false);
-	ro_gui_set_icon_string(pointer->w, INTERFACE_EXTERNAL_HOTLIST_APP,
-			"", false);
+				       INTERFACE_USE_EXTERNAL_HOTLIST,
+				       false);
+	ro_gui_set_icon_string(
+		pointer->w, INTERFACE_EXTERNAL_HOTLIST_APP, "", false);
 }
 
 bool ro_gui_options_interface_ok(wimp_w w)
 {
-	nsoption_set_bool(strip_extensions, 
-			ro_gui_get_icon_selected_state(w, 
-					INTERFACE_STRIP_EXTNS_OPTION));
-	nsoption_set_bool(confirm_overwrite, 
-                          ro_gui_get_icon_selected_state(w,
-                                        INTERFACE_CONFIRM_OVWR_OPTION));
-	nsoption_set_bool(url_suggestion, 
-                          ro_gui_get_icon_selected_state(w,
-                                        INTERFACE_URL_COMPLETE_OPTION));
-	nsoption_set_bool(history_tooltip, 
-                          ro_gui_get_icon_selected_state(w,
-                                        INTERFACE_HISTORY_TOOLTIP_OPTION));
-	nsoption_set_bool(thumbnail_iconise, 
-                          ro_gui_get_icon_selected_state(w,
-                                        INTERFACE_THUMBNAIL_ICONISE_OPTION));
-	nsoption_set_bool(external_hotlists, 
-                          ro_gui_get_icon_selected_state(w,
-                                        INTERFACE_USE_EXTERNAL_HOTLIST));
+	nsoption_set_bool(strip_extensions,
+			  ro_gui_get_icon_selected_state(
+				  w, INTERFACE_STRIP_EXTNS_OPTION));
+	nsoption_set_bool(confirm_overwrite,
+			  ro_gui_get_icon_selected_state(
+				  w, INTERFACE_CONFIRM_OVWR_OPTION));
+	nsoption_set_bool(url_suggestion,
+			  ro_gui_get_icon_selected_state(
+				  w, INTERFACE_URL_COMPLETE_OPTION));
+	nsoption_set_bool(history_tooltip,
+			  ro_gui_get_icon_selected_state(
+				  w, INTERFACE_HISTORY_TOOLTIP_OPTION));
+	nsoption_set_bool(thumbnail_iconise,
+			  ro_gui_get_icon_selected_state(
+				  w, INTERFACE_THUMBNAIL_ICONISE_OPTION));
+	nsoption_set_bool(external_hotlists,
+			  ro_gui_get_icon_selected_state(
+				  w, INTERFACE_USE_EXTERNAL_HOTLIST));
 	nsoption_set_charp(external_hotlist_app,
-                           strdup(ro_gui_get_icon_string(w,
-                                        INTERFACE_EXTERNAL_HOTLIST_APP)));
+			   strdup(ro_gui_get_icon_string(
+				   w, INTERFACE_EXTERNAL_HOTLIST_APP)));
 
 	ro_gui_save_options();
 	return true;

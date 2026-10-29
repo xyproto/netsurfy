@@ -35,10 +35,16 @@ struct bitmap;
 struct nsurl;
 struct gui_globals;
 
-struct BitMap *ami_bitmap_get_native(struct bitmap *bitmap, int width, int height,
-				bool palette_mapped, struct BitMap *friendbm, colour bg);
-PLANEPTR ami_bitmap_get_mask(struct bitmap *bitmap, int width,
-				int height, struct BitMap *n_bm);
+struct BitMap *ami_bitmap_get_native(struct bitmap *bitmap,
+				     int width,
+				     int height,
+				     bool palette_mapped,
+				     struct BitMap *friendbm,
+				     colour bg);
+PLANEPTR ami_bitmap_get_mask(struct bitmap *bitmap,
+			     int width,
+			     int height,
+			     struct BitMap *n_bm);
 
 Object *ami_datatype_object_from_bitmap(struct bitmap *bitmap);
 struct bitmap *ami_bitmap_from_datatype(char *filename);

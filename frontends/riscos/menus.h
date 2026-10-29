@@ -19,7 +19,8 @@
 #ifndef _NETSURF_RISCOS_MENUS_H_
 #define _NETSURF_RISCOS_MENUS_H_
 
-extern wimp_menu *image_quality_menu, *proxy_type_menu, *languages_menu, *search_provider_menu;
+extern wimp_menu *image_quality_menu, *proxy_type_menu, *languages_menu,
+	*search_provider_menu;
 
 extern wimp_menu *current_menu;
 
@@ -151,9 +152,9 @@ typedef enum {
 /* Menu entry structures for use when defining menus. */
 
 struct ns_menu_entry {
-	const char *text;		/**< menu text (from messages) */
-	menu_action action;		/**< associated action */
-	wimp_w *sub_window;		/**< sub-window if any */
+	const char *text; /**< menu text (from messages) */
+	menu_action action; /**< associated action */
+	wimp_w *sub_window; /**< sub-window if any */
 };
 
 struct ns_menu {
@@ -163,21 +164,23 @@ struct ns_menu {
 
 
 void ro_gui_menu_init(void);
-void ro_gui_menu_create(wimp_menu* menu, int x, int y, wimp_w w);
+void ro_gui_menu_create(wimp_menu *menu, int x, int y, wimp_w w);
 void ro_gui_menu_destroy(void);
 void ro_gui_popup_menu(wimp_menu *menu, wimp_w w, wimp_i i);
 void ro_gui_menu_window_changed(wimp_w from, wimp_w to);
-void ro_gui_menu_selection(wimp_selection* selection);
+void ro_gui_menu_selection(wimp_selection *selection);
 void ro_gui_menu_warning(wimp_message_menu_warning *warning);
 void ro_gui_menu_message_deleted(wimp_message_menus_deleted *deleted);
 void ro_gui_menu_refresh(wimp_menu *menu);
 void ro_gui_menu_init_structure(wimp_menu *menu, int entries);
-const char *ro_gui_menu_find_menu_entry_key(wimp_menu *menu,
-		const char *translated);
+const char *
+ro_gui_menu_find_menu_entry_key(wimp_menu *menu, const char *translated);
 wimp_menu *ro_gui_menu_define_menu(const struct ns_menu *menu);
-void ro_gui_menu_set_entry_shaded(wimp_menu *menu, menu_action action,
-		bool shaded);
-void ro_gui_menu_set_entry_ticked(wimp_menu *menu, menu_action action,
-		bool ticked);
+void ro_gui_menu_set_entry_shaded(wimp_menu *menu,
+				  menu_action action,
+				  bool shaded);
+void ro_gui_menu_set_entry_ticked(wimp_menu *menu,
+				  menu_action action,
+				  bool ticked);
 
 #endif

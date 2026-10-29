@@ -48,39 +48,42 @@ struct fb_corewindow {
 	int scrollx, scrolly; /**< scroll offsets. */
 
 
-        /** drag status set by core */
-        core_window_drag_status drag_status;
+	/** drag status set by core */
+	core_window_drag_status drag_status;
 
-        /**
-         * callback to draw on drawable area of fb core window
-         *
-         * \param fb_cw The fb core window structure.
-         * \param r The rectangle of the window that needs updating.
-         * \return NSERROR_OK on success otherwise apropriate error code
-         */
-        nserror (*draw)(struct fb_corewindow *fb_cw, struct rect *r);
+	/**
+	 * callback to draw on drawable area of fb core window
+	 *
+	 * \param fb_cw The fb core window structure.
+	 * \param r The rectangle of the window that needs updating.
+	 * \return NSERROR_OK on success otherwise apropriate error code
+	 */
+	nserror (*draw)(struct fb_corewindow *fb_cw, struct rect *r);
 
-        /**
-         * callback for keypress on fb core window
-         *
-         * \param fb_cw The fb core window structure.
-         * \param nskey The netsurf key code.
-         * \return NSERROR_OK if key processed,
-         *         NSERROR_NOT_IMPLEMENTED if key not processed
-         *         otherwise apropriate error code
-         */
-        nserror (*key)(struct fb_corewindow *fb_cw, uint32_t nskey);
+	/**
+	 * callback for keypress on fb core window
+	 *
+	 * \param fb_cw The fb core window structure.
+	 * \param nskey The netsurf key code.
+	 * \return NSERROR_OK if key processed,
+	 *         NSERROR_NOT_IMPLEMENTED if key not processed
+	 *         otherwise apropriate error code
+	 */
+	nserror (*key)(struct fb_corewindow *fb_cw, uint32_t nskey);
 
-        /**
-         * callback for mouse event on fb core window
-         *
-         * \param fb_cw The fb core window structure.
-         * \param mouse_state mouse state
-         * \param x location of event
-         * \param y location of event
-         * \return NSERROR_OK on sucess otherwise apropriate error code.
-         */
-        nserror (*mouse)(struct fb_corewindow *fb_cw, browser_mouse_state mouse_state, int x, int y);
+	/**
+	 * callback for mouse event on fb core window
+	 *
+	 * \param fb_cw The fb core window structure.
+	 * \param mouse_state mouse state
+	 * \param x location of event
+	 * \param y location of event
+	 * \return NSERROR_OK on sucess otherwise apropriate error code.
+	 */
+	nserror (*mouse)(struct fb_corewindow *fb_cw,
+			 browser_mouse_state mouse_state,
+			 int x,
+			 int y);
 };
 
 

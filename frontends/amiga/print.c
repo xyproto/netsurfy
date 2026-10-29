@@ -73,8 +73,7 @@ bool ami_print_dump(void);
 void ami_print_progress(void);
 void ami_print_close_device(void);
 
-enum
-{
+enum {
 	POID_MAIN = 0,
 	POID_LAST,
 	PGID_MAIN,
@@ -94,8 +93,7 @@ const struct printer amiprinter = {
 	ami_print_end,
 };
 
-struct ami_printer_info
-{
+struct ami_printer_info {
 	struct gui_globals *gg;
 	struct IODRPTagsReq *PReq;
 	struct PrinterData *PD;
@@ -119,10 +117,11 @@ struct ami_print_window {
 };
 
 #define IFFPrefChunkCnt 2
-static LONG IFFPrefChunks[] =
-{
-	ID_PREF, ID_PRHD,
-	ID_PREF, ID_PDEV,
+static LONG IFFPrefChunks[] = {
+	ID_PREF,
+	ID_PRHD,
+	ID_PREF,
+	ID_PDEV,
 };
 
 static struct ami_printer_info ami_print_info;
@@ -134,33 +133,43 @@ static BOOL ami_print_event(void *w);
 
 static const struct ami_win_event_table ami_print_table = {
 	ami_print_event,
-	NULL, /* we don't explicitly close the print window on quit (or at all???) */
+	NULL, /* we don't explicitly close the print window on quit (or at
+		 all???) */
 };
 
 static void ami_print_ui_setup(void)
 {
-	gadlab[PGID_PRINTER] = (char *)ami_utf8_easy((char *)messages_get("Printer"));
-	gadlab[PGID_SCALE] = (char *)ami_utf8_easy((char *)messages_get("Scale"));
-	gadlab[PGID_COPIES] = (char *)ami_utf8_easy((char *)messages_get("Copies"));
-	gadlab[PGID_PRINT] = (char *)ami_utf8_easy((char *)messages_get("ObjPrint"));
-	gadlab[PGID_CANCEL] = (char *)ami_utf8_easy((char *)messages_get("Cancel"));
+	gadlab[PGID_PRINTER] = (char *)ami_utf8_easy(
+		(char *)messages_get("Printer"));
+	gadlab[PGID_SCALE] = (char *)ami_utf8_easy(
+		(char *)messages_get("Scale"));
+	gadlab[PGID_COPIES] = (char *)ami_utf8_easy(
+		(char *)messages_get("Copies"));
+	gadlab[PGID_PRINT] = (char *)ami_utf8_easy(
+		(char *)messages_get("ObjPrint"));
+	gadlab[PGID_CANCEL] = (char *)ami_utf8_easy(
+		(char *)messages_get("Cancel"));
 }
 
 static void ami_print_ui_free(void)
 {
 	int i;
 
-	for(i = 0; i < PGID_LAST; i++) {
-		if(gadlab[i]) free((APTR)gadlab[i]);
+	for (i = 0; i < PGID_LAST; i++) {
+		if (gadlab[i])
+			free((APTR)gadlab[i]);
 	}
 
-	for(i = 0; i < 10; i++) {
-		if(printers[i]) free(printers[i]);
+	for (i = 0; i < 10; i++) {
+		if (printers[i])
+			free(printers[i]);
 	}
 }
 
-static BOOL ami_print_readunit(CONST_STRPTR filename, char name[],
-	uint32 namesize, int unitnum)
+static BOOL ami_print_readunit(CONST_STRPTR filename,
+			       char name[],
+			       uint32 namesize,
+			       int unitnum)
 {
 	/* This is a modified version of a function from the OS4 SDK.
 	 * The README says "You can use it in your application",
@@ -173,57 +182,67 @@ static BOOL ami_print_readunit(CONST_STRPTR filename, char name[],
 	struct PrefHeader phead;
 	struct PrinterDeviceUnitPrefs pdev;
 
-	SNPrintf(name,namesize,"Unit %ld",unitnum);
+	SNPrintf(name, namesize, "Unit %ld", unitnum);
 	fp = Open(filename, MODE_OLDFILE);
-	if (fp)
-	{
+	if (fp) {
 		iff = AllocIFF();
-		if (iff)
-		{
+		if (iff) {
 			iff->iff_Stream = fp;
 			InitIFFasDOS(iff);
 
-			if (!OpenIFF(iff, IFFF_READ))
-			{
-				if (!ParseIFF(iff, IFFPARSE_STEP))
-				{
+			if (!OpenIFF(iff, IFFF_READ)) {
+				if (!ParseIFF(iff, IFFPARSE_STEP)) {
 					cn = CurrentChunk(iff);
-					if (cn->cn_ID == ID_FORM && cn->cn_Type == ID_PREF)
-					{
-						if (!StopChunks(iff, IFFPrefChunks, IFFPrefChunkCnt))
-						{
+					if (cn->cn_ID == ID_FORM &&
+					    cn->cn_Type == ID_PREF) {
+						if (!StopChunks(
+							    iff,
+							    IFFPrefChunks,
+							    IFFPrefChunkCnt)) {
 							ok = TRUE;
-							while (ok)
-							{
-								if (ParseIFF(iff, IFFPARSE_SCAN))
+							while (ok) {
+								if (ParseIFF(
+									    iff,
+									    IFFPARSE_SCAN))
 									break;
-								cn = CurrentChunk(iff);
-								if (cn->cn_Type == ID_PREF)
-								{
-									switch (cn->cn_ID)
-									{
-										case ID_PRHD:
-											if (ReadChunkBytes(iff, &phead, sizeof(struct PrefHeader)) != sizeof(struct PrefHeader))
-											{
-												ok = FALSE;
-												break;
-											}
-											if (phead.ph_Version != 0)
-											{
-												ok = FALSE;
-												break;
-											}
+								cn = CurrentChunk(
+									iff);
+								if (cn->cn_Type ==
+								    ID_PREF) {
+									switch (cn->cn_ID) {
+									case ID_PRHD:
+										if (ReadChunkBytes(
+											    iff,
+											    &phead,
+											    sizeof(struct
+												   PrefHeader)) !=
+										    sizeof(struct
+											   PrefHeader)) {
+											ok = FALSE;
 											break;
-										case ID_PDEV:
-											if (ReadChunkBytes(iff, &pdev, sizeof(pdev)) == sizeof(pdev))
-											{
-												if (pdev.pd_UnitName[0]) {
-													strlcpy(name, pdev.pd_UnitName, namesize);
-												}
+										}
+										if (phead.ph_Version !=
+										    0) {
+											ok = FALSE;
+											break;
+										}
+										break;
+									case ID_PDEV:
+										if (ReadChunkBytes(
+											    iff,
+											    &pdev,
+											    sizeof(pdev)) ==
+										    sizeof(pdev)) {
+											if (pdev.pd_UnitName
+												    [0]) {
+												strlcpy(name,
+													pdev.pd_UnitName,
+													namesize);
 											}
-											break;
-										default:
-											break;
+										}
+										break;
+									default:
+										break;
 									}
 								}
 							}
@@ -235,8 +254,8 @@ static BOOL ami_print_readunit(CONST_STRPTR filename, char name[],
 			FreeIFF(iff);
 		}
 		Close(fp);
-	}
-	else return FALSE;
+	} else
+		return FALSE;
 
 	return TRUE;
 }
@@ -246,102 +265,55 @@ void ami_print_ui(struct hlcache_handle *c)
 	char filename[30];
 	int i;
 
-	struct ami_print_window *pw = calloc(1, sizeof(struct ami_print_window));
+	struct ami_print_window *pw = calloc(1,
+					     sizeof(struct ami_print_window));
 
 	pw->c = c;
 
 	printers[0] = calloc(1, 50);
 	ami_print_readunit("ENV:Sys/printer.prefs", printers[0], 50, 0);
 
-	strcpy(filename,"ENV:Sys/printerN.prefs");
-	for (i = 1; i < 10; i++)
-	{
+	strcpy(filename, "ENV:Sys/printerN.prefs");
+	for (i = 1; i < 10; i++) {
 		filename[15] = '0' + i;
 		printers[i] = malloc(50);
-		if(!ami_print_readunit(filename, printers[i], 50, i))
-		{
+		if (!ami_print_readunit(filename, printers[i], 50, i)) {
 			free(printers[i]);
 			printers[i] = NULL;
 			break;
 		}
-
 	}
 
 	ami_print_ui_setup();
 
-	pw->objects[POID_MAIN] = WindowObj,
-      	    WA_ScreenTitle, ami_gui_get_screen_title(),
-           	WA_Title, gadlab[PGID_PRINT],
-           	WA_Activate, TRUE,
-           	WA_DepthGadget, TRUE,
-           	WA_DragBar, TRUE,
-           	WA_CloseGadget, TRUE,
-           	WA_SizeGadget, FALSE,
-			WA_PubScreen, ami_gui_get_screen(),
-			WINDOW_SharedPort, ami_gui_get_shared_msgport(),
-			WINDOW_UserData, pw,
-			WINDOW_IconifyGadget, FALSE,
-         	WINDOW_Position, WPOS_CENTERSCREEN,
-           	WINDOW_ParentGroup, pw->gadgets[PGID_MAIN] = LayoutVObj,
-				LAYOUT_AddChild, ChooserObject,
-					GA_ID, PGID_PRINTER,
-					GA_RelVerify, TRUE,
-					GA_TabCycle, TRUE,
-					CHOOSER_LabelArray, printers,
-					CHOOSER_Selected, nsoption_int(printer_unit),
-				ChooserEnd,
-				CHILD_Label, LabelObject,
-					LABEL_Text, gadlab[PGID_PRINTER],
-				LabelEnd,
-				LAYOUT_AddChild, IntegerObject,
-					GA_ID, PGID_COPIES,
-					GA_RelVerify, TRUE,
-					GA_TabCycle, TRUE,
-					INTEGER_Number, 1,
-					INTEGER_Minimum, 1,
-					INTEGER_Maximum, 100,
-					INTEGER_Arrows, TRUE,
-				IntegerEnd,
-				CHILD_Label, LabelObject,
-					LABEL_Text, gadlab[PGID_COPIES],
-				LabelEnd,
-				LAYOUT_AddChild, HGroupObject,
-					LAYOUT_LabelColumn, PLACETEXT_RIGHT,
-					LAYOUT_AddChild, pw->gadgets[PGID_SCALE] = IntegerObj,
-						GA_ID, PGID_SCALE,
-						GA_RelVerify, TRUE,
-						GA_TabCycle, TRUE,
-						INTEGER_Number, nsoption_int(print_scale),
-						INTEGER_Minimum, 0,
-						INTEGER_Maximum, 100,
-						INTEGER_Arrows, TRUE,
-					IntegerEnd,
-					CHILD_WeightedWidth, 0,
-					CHILD_Label, LabelObject,
-						LABEL_Text, "%",
-					LabelEnd,
-				LayoutEnd,
-				CHILD_Label, LabelObject,
-					LABEL_Text, gadlab[PGID_SCALE],
-				LabelEnd,
-				LAYOUT_AddChild, HGroupObject,
-					LAYOUT_AddChild, pw->gadgets[PGID_PRINT] = ButtonObj,
-						GA_ID, PGID_PRINT,
-						GA_RelVerify,TRUE,
-						GA_Text, gadlab[PGID_PRINT],
-						GA_TabCycle,TRUE,
-					ButtonEnd,
-					CHILD_WeightedHeight,0,
-					LAYOUT_AddChild, pw->gadgets[PGID_CANCEL] = ButtonObj,
-						GA_ID, PGID_CANCEL,
-						GA_RelVerify, TRUE,
-						GA_Text, gadlab[PGID_CANCEL],
-						GA_TabCycle,TRUE,
-					ButtonEnd,
-				LayoutEnd,
-				CHILD_WeightedHeight,0,
-			EndGroup,
-		EndWindow;
+	pw->objects[POID_MAIN] = WindowObj, WA_ScreenTitle,
+	ami_gui_get_screen_title(), WA_Title, gadlab[PGID_PRINT], WA_Activate,
+	TRUE, WA_DepthGadget, TRUE, WA_DragBar, TRUE, WA_CloseGadget, TRUE,
+	WA_SizeGadget, FALSE, WA_PubScreen, ami_gui_get_screen(),
+	WINDOW_SharedPort, ami_gui_get_shared_msgport(), WINDOW_UserData, pw,
+	WINDOW_IconifyGadget, FALSE, WINDOW_Position, WPOS_CENTERSCREEN,
+	WINDOW_ParentGroup, pw->gadgets[PGID_MAIN] = LayoutVObj,
+	LAYOUT_AddChild, ChooserObject, GA_ID, PGID_PRINTER, GA_RelVerify, TRUE,
+	GA_TabCycle, TRUE, CHOOSER_LabelArray, printers, CHOOSER_Selected,
+	nsoption_int(printer_unit), ChooserEnd, CHILD_Label, LabelObject,
+	LABEL_Text, gadlab[PGID_PRINTER], LabelEnd, LAYOUT_AddChild,
+	IntegerObject, GA_ID, PGID_COPIES, GA_RelVerify, TRUE, GA_TabCycle,
+	TRUE, INTEGER_Number, 1, INTEGER_Minimum, 1, INTEGER_Maximum, 100,
+	INTEGER_Arrows, TRUE, IntegerEnd, CHILD_Label, LabelObject, LABEL_Text,
+	gadlab[PGID_COPIES], LabelEnd, LAYOUT_AddChild, HGroupObject,
+	LAYOUT_LabelColumn, PLACETEXT_RIGHT, LAYOUT_AddChild,
+	pw->gadgets[PGID_SCALE] = IntegerObj, GA_ID, PGID_SCALE, GA_RelVerify,
+	TRUE, GA_TabCycle, TRUE, INTEGER_Number, nsoption_int(print_scale),
+	INTEGER_Minimum, 0, INTEGER_Maximum, 100, INTEGER_Arrows, TRUE,
+	IntegerEnd, CHILD_WeightedWidth, 0, CHILD_Label, LabelObject,
+	LABEL_Text, "%", LabelEnd, LayoutEnd, CHILD_Label, LabelObject,
+	LABEL_Text, gadlab[PGID_SCALE], LabelEnd, LAYOUT_AddChild, HGroupObject,
+	LAYOUT_AddChild, pw->gadgets[PGID_PRINT] = ButtonObj, GA_ID, PGID_PRINT,
+	GA_RelVerify, TRUE, GA_Text, gadlab[PGID_PRINT], GA_TabCycle, TRUE,
+	ButtonEnd, CHILD_WeightedHeight, 0, LAYOUT_AddChild,
+	pw->gadgets[PGID_CANCEL] = ButtonObj, GA_ID, PGID_CANCEL, GA_RelVerify,
+	TRUE, GA_Text, gadlab[PGID_CANCEL], GA_TabCycle, TRUE, ButtonEnd,
+	LayoutEnd, CHILD_WeightedHeight, 0, EndGroup, EndWindow;
 
 	pw->win = (struct Window *)RA_OpenWindow(pw->objects[POID_MAIN]);
 	ami_gui_win_list_add(pw, AMINS_PRINTWINDOW, &ami_print_table);
@@ -366,40 +338,42 @@ static BOOL ami_print_event(void *w)
 	int print_scale;
 	int printer_unit;
 
-	while((result = RA_HandleInput(pw->objects[POID_MAIN],&code)) != WMHI_LASTMSG)
-	{
-       	switch(result & WMHI_CLASSMASK) // class
-   		{
-			case WMHI_GADGETUP:
-				switch(result & WMHI_GADGETMASK)
-				{
-					case PGID_PRINT:
-						GetAttr(INTEGER_Number, pw->gadgets[PGID_SCALE],
-							(ULONG *)&print_scale);
-						GetAttr(INTEGER_Number, pw->gadgets[PGID_COPIES],
-							(ULONG *)&copies);
-						GetAttr(CHOOSER_Selected, pw->gadgets[PGID_PRINTER],
-							(ULONG *)&printer_unit);
+	while ((result = RA_HandleInput(pw->objects[POID_MAIN], &code)) !=
+	       WMHI_LASTMSG) {
+		switch (result & WMHI_CLASSMASK) // class
+		{
+		case WMHI_GADGETUP:
+			switch (result & WMHI_GADGETMASK) {
+			case PGID_PRINT:
+				GetAttr(INTEGER_Number,
+					pw->gadgets[PGID_SCALE],
+					(ULONG *)&print_scale);
+				GetAttr(INTEGER_Number,
+					pw->gadgets[PGID_COPIES],
+					(ULONG *)&copies);
+				GetAttr(CHOOSER_Selected,
+					pw->gadgets[PGID_PRINTER],
+					(ULONG *)&printer_unit);
 
-						nsoption_set_int(print_scale, print_scale);
-						nsoption_set_int(printer_unit, printer_unit);
+				nsoption_set_int(print_scale, print_scale);
+				nsoption_set_int(printer_unit, printer_unit);
 
-						c = pw->c;
-						ami_print_close(pw);
-						ami_print(c, copies);
-						return TRUE;
-					break;
+				c = pw->c;
+				ami_print_close(pw);
+				ami_print(c, copies);
+				return TRUE;
+				break;
 
-					case PGID_CANCEL:
-						ami_print_close(pw);
-						return TRUE;
-					break;
-				}
-			break;
-
-			case WMHI_CLOSEWINDOW:
+			case PGID_CANCEL:
 				ami_print_close(pw);
 				return TRUE;
+				break;
+			}
+			break;
+
+		case WMHI_CLOSEWINDOW:
+			ami_print_close(pw);
+			return TRUE;
 			break;
 		}
 	}
@@ -411,40 +385,48 @@ void ami_print(struct hlcache_handle *c, int copies)
 	double height;
 	float scale = nsoption_int(print_scale) / 100.0;
 
-	if(ami_print_info.msgport == NULL)
+	if (ami_print_info.msgport == NULL)
 		ami_print_init();
 #ifdef __amigaos4__
-	if(!(ami_print_info.PReq =
-			(struct IODRPTagsReq *)AllocSysObjectTags(ASOT_IOREQUEST,
-				ASOIOR_Size, sizeof(struct IODRPTagsReq),
-				ASOIOR_ReplyPort, ami_print_info.msgport,
-				ASO_NoTrack, FALSE,
-				TAG_DONE))) return;
+	if (!(ami_print_info.PReq = (struct IODRPTagsReq *)AllocSysObjectTags(
+		      ASOT_IOREQUEST,
+		      ASOIOR_Size,
+		      sizeof(struct IODRPTagsReq),
+		      ASOIOR_ReplyPort,
+		      ami_print_info.msgport,
+		      ASO_NoTrack,
+		      FALSE,
+		      TAG_DONE)))
+		return;
 #else
-	if(!(ami_print_info.PReq =
-			(struct IODRPTagsReq *)CreateIORequest(ami_print_info.msgport,
-				sizeof(struct IODRPTagsReq)))) return;
+	if (!(ami_print_info.PReq = (struct IODRPTagsReq *)CreateIORequest(
+		      ami_print_info.msgport, sizeof(struct IODRPTagsReq))))
+		return;
 #endif
 
-	if(OpenDevice("printer.device", nsoption_int(printer_unit),
-			(struct IORequest *)ami_print_info.PReq, 0))
-	{
-		amiga_warn_user("CompError","printer.device");
+	if (OpenDevice("printer.device",
+		       nsoption_int(printer_unit),
+		       (struct IORequest *)ami_print_info.PReq,
+		       0)) {
+		amiga_warn_user("CompError", "printer.device");
 		return;
 	}
 
-	ami_print_info.PD = (struct PrinterData *)ami_print_info.PReq->io_Device;
+	ami_print_info.PD = (struct PrinterData *)
+				    ami_print_info.PReq->io_Device;
 	ami_print_info.PED = &ami_print_info.PD->pd_SegmentData->ps_PED;
 
-	ami_print_info.ps = print_make_settings(PRINT_DEFAULT, nsurl_access(hlcache_handle_get_url(c)), ami_layout_table);
+	ami_print_info.ps = print_make_settings(
+		PRINT_DEFAULT,
+		nsurl_access(hlcache_handle_get_url(c)),
+		ami_layout_table);
 	ami_print_info.ps->page_width = ami_print_info.PED->ped_MaxXDots;
 	ami_print_info.ps->page_height = ami_print_info.PED->ped_MaxYDots;
 	ami_print_info.ps->scale = scale;
 	ami_print_info.ps->priv = ami_print_info.gg;
 
-	if(!print_set_up(c, &amiprinter, ami_print_info.ps, &height))
-	{
-		amiga_warn_user("PrintError","print_set_up() returned false");
+	if (!print_set_up(c, &amiprinter, ami_print_info.ps, &height)) {
+		amiga_warn_user("PrintError", "print_set_up() returned false");
 		ami_print_close_device();
 		return;
 	}
@@ -455,21 +437,19 @@ void ami_print(struct hlcache_handle *c, int copies)
 
 	ami_print_progress();
 
-	while(ami_print_cont()); /* remove while() for async printing */
+	while (ami_print_cont())
+		; /* remove while() for async printing */
 }
 
 bool ami_print_cont(void)
 {
 	bool ret = false;
 
-	if(ami_print_info.page <= ami_print_info.pages)
-	{
+	if (ami_print_info.page <= ami_print_info.pages) {
 		print_draw_next_page(&amiprinter, ami_print_info.ps);
 		ami_print_dump();
 		ret = true;
-	}
-	else 
-	{
+	} else {
 		print_cleanup(ami_print_info.c, &amiprinter, ami_print_info.ps);
 		ret = false;
 	}
@@ -479,9 +459,8 @@ bool ami_print_cont(void)
 
 struct MsgPort *ami_print_init(void)
 {
-	ami_print_info.msgport = AllocSysObjectTags(ASOT_PORT,
-				ASO_NoTrack,FALSE,
-				TAG_DONE);
+	ami_print_info.msgport = AllocSysObjectTags(
+		ASOT_PORT, ASO_NoTrack, FALSE, TAG_DONE);
 
 	return ami_print_info.msgport;
 }
@@ -500,9 +479,11 @@ struct MsgPort *ami_print_get_msgport(void)
 bool ami_print_begin(struct print_settings *ps)
 {
 	ami_print_info.gg = ami_plot_ra_alloc(ami_print_info.PED->ped_MaxXDots,
-				ami_print_info.PED->ped_MaxYDots,
-				true, false);
-	if(!ami_print_info.gg) return false;
+					      ami_print_info.PED->ped_MaxYDots,
+					      true,
+					      false);
+	if (!ami_print_info.gg)
+		return false;
 
 	ami_print_info.page = 0;
 
@@ -513,10 +494,13 @@ bool ami_print_next_page(void)
 {
 	ami_print_info.page++;
 
-	RefreshSetGadgetAttrs((struct Gadget *)ami_print_info.gadgets[PGID_STATUS],
-				ami_print_info.win, NULL,
-				FUELGAUGE_Level, ami_print_info.page,
-				TAG_DONE);
+	RefreshSetGadgetAttrs(
+		(struct Gadget *)ami_print_info.gadgets[PGID_STATUS],
+		ami_print_info.win,
+		NULL,
+		FUELGAUGE_Level,
+		ami_print_info.page,
+		TAG_DONE);
 	return true;
 }
 
@@ -532,7 +516,7 @@ void ami_print_end(void)
 void ami_print_close_device(void)
 {
 	CloseDevice((struct IORequest *)ami_print_info.PReq);
-	FreeSysObject(ASOT_IOREQUEST,ami_print_info.PReq);
+	FreeSysObject(ASOT_IOREQUEST, ami_print_info.PReq);
 }
 
 bool ami_print_dump(void)
@@ -540,7 +524,8 @@ bool ami_print_dump(void)
 	ami_print_info.PReq->io_Command = PRD_DUMPRPORT;
 	ami_print_info.PReq->io_Flags = 0;
 	ami_print_info.PReq->io_Error = 0;
-	ami_print_info.PReq->io_RastPort = ami_plot_ra_get_rastport(ami_print_info.gg);
+	ami_print_info.PReq->io_RastPort = ami_plot_ra_get_rastport(
+		ami_print_info.gg);
 	ami_print_info.PReq->io_ColorMap = NULL;
 	ami_print_info.PReq->io_Modes = 0;
 	ami_print_info.PReq->io_SrcX = 0;
@@ -551,52 +536,40 @@ bool ami_print_dump(void)
 	ami_print_info.PReq->io_DestRows = ami_print_info.PED->ped_MaxYDots;
 	ami_print_info.PReq->io_Special = 0;
 
-	DoIO((struct IORequest *)ami_print_info.PReq); /* SendIO for async printing */
+	DoIO((struct IORequest *)
+		     ami_print_info.PReq); /* SendIO for async printing */
 
 	return true;
 }
 
 void ami_print_progress(void)
 {
-	ami_print_info.objects[POID_MAIN] = WindowObj,
-      	    WA_ScreenTitle, ami_gui_get_screen_title(),
-           	WA_Title, messages_get("Printing"),
-           	WA_Activate, TRUE,
-           	WA_DepthGadget, TRUE,
-           	WA_DragBar, TRUE,
-           	WA_CloseGadget, FALSE,
-           	WA_SizeGadget, TRUE,
-			WA_PubScreen, ami_gui_get_screen(),
-			//WINDOW_SharedPort,sport,
-			WINDOW_UserData, &ami_print_info,
-			WINDOW_IconifyGadget, FALSE,
-			WINDOW_LockHeight,TRUE,
-         	WINDOW_Position, WPOS_CENTERSCREEN,
-           	WINDOW_ParentGroup, ami_print_info.gadgets[PGID_MAIN] = LayoutVObj,
-				LAYOUT_AddChild, ami_print_info.gadgets[PGID_STATUS] = FuelGaugeObj,
-					GA_ID,PGID_STATUS,
-					FUELGAUGE_Min,0,
-					FUELGAUGE_Max,ami_print_info.pages,
-					FUELGAUGE_Level,0,
-					FUELGAUGE_Ticks,11,
-					FUELGAUGE_ShortTicks,TRUE,
-					FUELGAUGE_Percent,TRUE,
-					FUELGAUGE_Justification,FGJ_CENTER,
-				FuelGaugeEnd,
-				CHILD_NominalSize,TRUE,
-				CHILD_WeightedHeight,0,
-/*
-				LAYOUT_AddChild, ami_print_info.gadgets[PGID_CANCEL] = ButtonObj,
-					GA_ID,PGID_CANCEL,
-					GA_Disabled,TRUE,
-					GA_RelVerify,TRUE,
-					GA_Text,messages_get("Abort"),
-					GA_TabCycle,TRUE,
-				ButtonEnd,
-*/
-			EndGroup,
-		EndWindow;
+	ami_print_info.objects[POID_MAIN] = WindowObj, WA_ScreenTitle,
+	ami_gui_get_screen_title(), WA_Title, messages_get("Printing"),
+	WA_Activate, TRUE, WA_DepthGadget, TRUE, WA_DragBar, TRUE,
+	WA_CloseGadget, FALSE, WA_SizeGadget, TRUE, WA_PubScreen,
+	ami_gui_get_screen(),
+	// WINDOW_SharedPort,sport,
+		WINDOW_UserData, &ami_print_info, WINDOW_IconifyGadget, FALSE,
+	WINDOW_LockHeight, TRUE, WINDOW_Position, WPOS_CENTERSCREEN,
+	WINDOW_ParentGroup, ami_print_info.gadgets[PGID_MAIN] = LayoutVObj,
+	LAYOUT_AddChild, ami_print_info.gadgets[PGID_STATUS] = FuelGaugeObj,
+	GA_ID, PGID_STATUS, FUELGAUGE_Min, 0, FUELGAUGE_Max,
+	ami_print_info.pages, FUELGAUGE_Level, 0, FUELGAUGE_Ticks, 11,
+	FUELGAUGE_ShortTicks, TRUE, FUELGAUGE_Percent, TRUE,
+	FUELGAUGE_Justification, FGJ_CENTER, FuelGaugeEnd, CHILD_NominalSize,
+	TRUE, CHILD_WeightedHeight, 0,
+	/*
+					LAYOUT_AddChild,
+	   ami_print_info.gadgets[PGID_CANCEL] = ButtonObj, GA_ID,PGID_CANCEL,
+						GA_Disabled,TRUE,
+						GA_RelVerify,TRUE,
+						GA_Text,messages_get("Abort"),
+						GA_TabCycle,TRUE,
+					ButtonEnd,
+	*/
+		EndGroup, EndWindow;
 
-	ami_print_info.win = (struct Window *)RA_OpenWindow(ami_print_info.objects[POID_MAIN]);
+	ami_print_info.win = (struct Window *)RA_OpenWindow(
+		ami_print_info.objects[POID_MAIN]);
 }
-

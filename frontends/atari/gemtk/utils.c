@@ -27,59 +27,61 @@
 /* -------------------------------------------------------------------------- */
 
 unsigned short _systype_v;
-unsigned short _systype (void)
+unsigned short _systype(void)
 {
-    int32_t * cptr = NULL;
-    _systype_v = SYS_TOS;
+	int32_t *cptr = NULL;
+	_systype_v = SYS_TOS;
 
-    cptr = (int32_t *)Setexc(0x0168, -1L);
-    if (cptr == NULL ) {
-        return _systype_v;   /* stone old TOS without any cookie support */
-    }
-    while (*cptr) {
-        if (*cptr == C_MgMc || *cptr == C_MgMx ) {
-            _systype_v = (_systype_v & ~0xF) | SYS_MAGIC;
-        } else if (*cptr == C_MiNT ) {
-            _systype_v = (_systype_v & ~0xF) | SYS_MINT;
-        } else if (*cptr == C_Gnva /* Gnva */ ) {
-            _systype_v |= SYS_GENEVA;
-        } else if (*cptr == C_nAES /* nAES */ ) {
-            _systype_v |= SYS_NAES;
-        }
-        cptr += 2;
-    }
-    if (_systype_v & SYS_MINT) { /* check for XaAES */
-        short out = 0, u;
-        if (wind_get (0, (((short)'X') <<8)|'A', &out, &u,&u,&u) && out) {
-            _systype_v |= SYS_XAAES;
-        }
-    }
-    return _systype_v;
+	cptr = (int32_t *)Setexc(0x0168, -1L);
+	if (cptr == NULL) {
+		return _systype_v; /* stone old TOS without any cookie support
+				    */
+	}
+	while (*cptr) {
+		if (*cptr == C_MgMc || *cptr == C_MgMx) {
+			_systype_v = (_systype_v & ~0xF) | SYS_MAGIC;
+		} else if (*cptr == C_MiNT) {
+			_systype_v = (_systype_v & ~0xF) | SYS_MINT;
+		} else if (*cptr == C_Gnva /* Gnva */) {
+			_systype_v |= SYS_GENEVA;
+		} else if (*cptr == C_nAES /* nAES */) {
+			_systype_v |= SYS_NAES;
+		}
+		cptr += 2;
+	}
+	if (_systype_v & SYS_MINT) { /* check for XaAES */
+		short out = 0, u;
+		if (wind_get(0, (((short)'X') << 8) | 'A', &out, &u, &u, &u) &&
+		    out) {
+			_systype_v |= SYS_XAAES;
+		}
+	}
+	return _systype_v;
 }
 
 bool gemtk_rc_intersect_ro(GRECT *a, GRECT *b)
 {
-    GRECT r1, r2;
+	GRECT r1, r2;
 
-    r1 = *a;
-    r2 = *b;
+	r1 = *a;
+	r2 = *b;
 
-    return((bool)rc_intersect(&r1, &r2));
+	return ((bool)rc_intersect(&r1, &r2));
 }
 
 
 typedef struct {
-    char *unshift;
-    char *shift;
-    char *capslock;
+	char *unshift;
+	char *shift;
+	char *capslock;
 } KEYTAB;
 
-int gemtk_keybd2ascii( int keybd, int shift)
+int gemtk_keybd2ascii(int keybd, int shift)
 {
 
-    KEYTAB *key;
-    key = (KEYTAB *)Keytbl( (char*)-1, (char*)-1, (char*)-1);
-    return (shift)?key->shift[keybd>>8]:key->unshift[keybd>>8];
+	KEYTAB *key;
+	key = (KEYTAB *)Keytbl((char *)-1, (char *)-1, (char *)-1);
+	return (shift) ? key->shift[keybd >> 8] : key->unshift[keybd >> 8];
 }
 
 
@@ -96,37 +98,42 @@ void gemtk_clip_grect(VdiHdl vh, GRECT *rect)
 }
 
 /** Send an Message to a GUIWIN using AES message pipe
-* \param win the GUIWIN which shall receive the message
-* \param msg_type the WM_ message definition
-* \param a the 4th parameter to appl_write
-* \param b the 5th parameter to appl_write
-* \param c the 6th parameter to appl_write
-* \param d the 7th parameter to appl_write
-*/
-void gemtk_send_msg(short msg_type, short data2, short data3, short data4,
-                     short data5, short data6, short data7)
+ * \param win the GUIWIN which shall receive the message
+ * \param msg_type the WM_ message definition
+ * \param a the 4th parameter to appl_write
+ * \param b the 5th parameter to appl_write
+ * \param c the 6th parameter to appl_write
+ * \param d the 7th parameter to appl_write
+ */
+void gemtk_send_msg(short msg_type,
+		    short data2,
+		    short data3,
+		    short data4,
+		    short data5,
+		    short data6,
+		    short data7)
 {
-    short msg[8];
+	short msg[8];
 
-    msg[0] = msg_type;
-    msg[1] = gl_apid;
-    msg[2] = data2;
-    msg[3] = data3;
-    msg[4] = data4;
-    msg[5] = data5;
-    msg[6] = data6;
-    msg[7] = data7;
+	msg[0] = msg_type;
+	msg[1] = gl_apid;
+	msg[2] = data2;
+	msg[3] = data3;
+	msg[4] = data4;
+	msg[5] = data5;
+	msg[6] = data6;
+	msg[7] = data7;
 
-    appl_write(gl_apid, 16, &msg);
+	appl_write(gl_apid, 16, &msg);
 }
 
 
 void gemtk_wind_get_str(short aes_handle, short mode, char *str, int len)
 {
 
-    // TODO: remove or implement function
+	// TODO: remove or implement function
 
-	if(len>255) {
+	if (len > 255) {
 		len = 255;
 	}
 
@@ -140,5 +147,3 @@ void gemtk_wind_get_str(short aes_handle, short mode, char *str, int len)
 	strncpy(str, tmp_str, len);
 	*/
 }
-
-

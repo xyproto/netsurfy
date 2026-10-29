@@ -72,10 +72,17 @@ typedef enum {
 	HTTP_RESPONSE_HTTP_VERSION_NOT_SUPPORTED = 505
 } http_response_code;
 
-#define HTTP_RESPONSE_IS_1XX(code) ((code >= HTTP_RESPONSE_CONTINUE) && (code < HTTP_RESPONSE_OK))
-#define HTTP_RESPONSE_IS_2XX(code) ((code >= HTTP_RESPONSE_OK) && (code < HTTP_RESPONSE_MULTIPLE_CHOICES))
-#define HTTP_RESPONSE_IS_3XX(code) ((code >= HTTP_RESPONSE_MULTIPLE_CHOICES) && (code < HTTP_RESPONSE_BAD_REQUEST))
-#define HTTP_RESPONSE_IS_4XX(code) ((code >= HTTP_RESPONSE_BAD_REQUEST) && (code < HTTP_RESPONSE_INTERNAL_SERVER_ERROR))
-#define HTTP_RESPONSE_IS_5XX(code) ((code >= HTTP_RESPONSE_INTERNAL_SERVER_ERROR) && (code < 600))
+#define HTTP_RESPONSE_IS_1XX(code)                                             \
+	((code >= HTTP_RESPONSE_CONTINUE) && (code < HTTP_RESPONSE_OK))
+#define HTTP_RESPONSE_IS_2XX(code)                                             \
+	((code >= HTTP_RESPONSE_OK) && (code < HTTP_RESPONSE_MULTIPLE_CHOICES))
+#define HTTP_RESPONSE_IS_3XX(code)                                             \
+	((code >= HTTP_RESPONSE_MULTIPLE_CHOICES) &&                           \
+	 (code < HTTP_RESPONSE_BAD_REQUEST))
+#define HTTP_RESPONSE_IS_4XX(code)                                             \
+	((code >= HTTP_RESPONSE_BAD_REQUEST) &&                                \
+	 (code < HTTP_RESPONSE_INTERNAL_SERVER_ERROR))
+#define HTTP_RESPONSE_IS_5XX(code)                                             \
+	((code >= HTTP_RESPONSE_INTERNAL_SERVER_ERROR) && (code < 600))
 
 #endif

@@ -74,52 +74,53 @@ static void ro_gui_configure_open_window(wimp_open *open);
 static void ro_gui_configure_close(wimp_w w);
 static bool ro_gui_configure_translate(void);
 static void ro_gui_configure_register(const char *window,
-		bool (*initialise)(wimp_w w), void (*finalise)(wimp_w w));
+				      bool (*initialise)(wimp_w w),
+				      void (*finalise)(wimp_w w));
 
 void ro_gui_configure_initialise(void)
 {
 	/* create our window */
 	configure_window = ro_gui_dialog_create("configure");
 	ro_gui_wimp_event_register_open_window(configure_window,
-			ro_gui_configure_open_window);
+					       ro_gui_configure_open_window);
 	ro_gui_wimp_event_register_mouse_click(configure_window,
-			ro_gui_configure_click);
+					       ro_gui_configure_click);
 	ro_gui_wimp_event_set_help_prefix(configure_window, "HelpConfigure");
 
 	/* add in our option windows */
 	ro_gui_configure_register("con_cache",
-			ro_gui_options_cache_initialise,
-			ro_gui_wimp_event_finalise);
+				  ro_gui_options_cache_initialise,
+				  ro_gui_wimp_event_finalise);
 	ro_gui_configure_register("con_connect",
-			ro_gui_options_connection_initialise,
-			ro_gui_wimp_event_finalise);
+				  ro_gui_options_connection_initialise,
+				  ro_gui_wimp_event_finalise);
 	ro_gui_configure_register("con_content",
-			ro_gui_options_content_initialise,
-			ro_gui_wimp_event_finalise);
+				  ro_gui_options_content_initialise,
+				  ro_gui_wimp_event_finalise);
 	ro_gui_configure_register("con_fonts",
-			ro_gui_options_fonts_initialise,
-			ro_gui_wimp_event_finalise);
+				  ro_gui_options_fonts_initialise,
+				  ro_gui_wimp_event_finalise);
 	ro_gui_configure_register("con_home",
-			ro_gui_options_home_initialise,
-			ro_gui_wimp_event_finalise);
+				  ro_gui_options_home_initialise,
+				  ro_gui_wimp_event_finalise);
 	ro_gui_configure_register("con_image",
-			ro_gui_options_image_initialise,
-			ro_gui_options_image_finalise);
+				  ro_gui_options_image_initialise,
+				  ro_gui_options_image_finalise);
 	ro_gui_configure_register("con_inter",
-			ro_gui_options_interface_initialise,
-			ro_gui_wimp_event_finalise);
+				  ro_gui_options_interface_initialise,
+				  ro_gui_wimp_event_finalise);
 	ro_gui_configure_register("con_lang",
-			ro_gui_options_language_initialise,
-			ro_gui_wimp_event_finalise);
+				  ro_gui_options_language_initialise,
+				  ro_gui_wimp_event_finalise);
 	ro_gui_configure_register("con_theme",
-			ro_gui_options_theme_initialise,
-			ro_gui_options_theme_finalise);
+				  ro_gui_options_theme_initialise,
+				  ro_gui_options_theme_finalise);
 	ro_gui_configure_register("con_secure",
-			ro_gui_options_security_initialise,
-			ro_gui_wimp_event_finalise);
+				  ro_gui_options_security_initialise,
+				  ro_gui_wimp_event_finalise);
 	ro_gui_configure_register("con_search",
-			ro_gui_options_search_initialise,
-			ro_gui_wimp_event_finalise);
+				  ro_gui_options_search_initialise,
+				  ro_gui_wimp_event_finalise);
 
 	/* translate the icons */
 	if (!ro_gui_configure_translate())
@@ -148,12 +149,11 @@ bool ro_gui_configure_click(wimp_pointer *pointer)
 				tool->open = true;
 				if (!tool->initialise(tool->w))
 					return false;
-				ro_gui_dialog_open_persistent(
-						configure_window,
-						tool->w, true);
+				ro_gui_dialog_open_persistent(configure_window,
+							      tool->w,
+							      true);
 				ro_gui_wimp_event_register_close_window(
-						tool->w,
-						ro_gui_configure_close);
+					tool->w, ro_gui_configure_close);
 			} else {
 				ro_gui_dialog_open_top(tool->w, NULL, 0, 0);
 			}
@@ -184,7 +184,7 @@ void ro_gui_configure_open_window(wimp_open *open)
 	int height, width;
 	int icons_per_line, icon_lines;
 	int max_height;
-	os_box extent = { 0, 0, 0, 0 };
+	os_box extent = {0, 0, 0, 0};
 	struct configure_tool *tool;
 
 	if (!ro_gui_configure_translate()) {
@@ -206,16 +206,18 @@ void ro_gui_configure_open_window(wimp_open *open)
 		y = -configure_icon_height + (CONFIGURE_ICON_PADDING_V / 2);
 		l = 0;
 		for (tool = configure_tools; tool; tool = tool->next) {
-			error = xwimp_resize_icon(configure_window,
+			error = xwimp_resize_icon(
+				configure_window,
 				tool->i,
 				x,
 				y,
 				x + configure_icon_width -
-						CONFIGURE_ICON_PADDING_H,
+					CONFIGURE_ICON_PADDING_H,
 				y + configure_icon_height -
-						CONFIGURE_ICON_PADDING_V);
+					CONFIGURE_ICON_PADDING_V);
 			if (error) {
-				NSLOG(netsurf, INFO,
+				NSLOG(netsurf,
+				      INFO,
 				      "xwimp_resize_icon: 0x%x: %s",
 				      error->errnum,
 				      error->errmess);
@@ -226,20 +228,22 @@ void ro_gui_configure_open_window(wimp_open *open)
 				x = CONFIGURE_ICON_PADDING_H / 2;
 				l = 0;
 				y -= configure_icon_height;
-                        }
+			}
 		}
-		error = xwimp_force_redraw(configure_window,
-				0, -16384, 16384, 0);
+		error = xwimp_force_redraw(
+			configure_window, 0, -16384, 16384, 0);
 		if (error) {
-			NSLOG(netsurf, INFO, "xwimp_force_redraw: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_force_redraw: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 		}
 	}
 
 	/* restrict our height */
-	icon_lines = (configure_icons + icons_per_line - 1) /
-			icons_per_line;
+	icon_lines = (configure_icons + icons_per_line - 1) / icons_per_line;
 	max_height = (icon_lines * configure_icon_height);
 	if (height > max_height)
 		open->visible.y0 = open->visible.y1 - max_height;
@@ -255,8 +259,11 @@ void ro_gui_configure_open_window(wimp_open *open)
 		extent.y0 = -max_height;
 		error = xwimp_set_extent(open->w, &extent);
 		if (error) {
-			NSLOG(netsurf, INFO, "xwimp_set_extent: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_set_extent: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 			return;
 		}
@@ -267,15 +274,19 @@ void ro_gui_configure_open_window(wimp_open *open)
 	/* open the window */
 	error = xwimp_open_window(open);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_open_window: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_open_window: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
 }
 
 void ro_gui_configure_register(const char *window,
-		bool (*initialise)(wimp_w w), void (*finalise)(wimp_w w))
+			       bool (*initialise)(wimp_w w),
+			       void (*finalise)(wimp_w w))
 {
 	wimp_icon_create new_icon;
 	struct configure_tool *tool;
@@ -308,38 +319,41 @@ void ro_gui_configure_register(const char *window,
 	new_icon.icon.extent.y1 = 0;
 	new_icon.icon.extent.y0 = -configure_icon_height;
 	new_icon.icon.flags = wimp_ICON_TEXT | wimp_ICON_SPRITE |
-			wimp_ICON_INDIRECTED | wimp_ICON_HCENTRED |
-			(wimp_COLOUR_VERY_LIGHT_GREY << wimp_ICON_BG_COLOUR_SHIFT) |
-			(wimp_COLOUR_BLACK << wimp_ICON_FG_COLOUR_SHIFT) |
-			(wimp_BUTTON_CLICK << wimp_ICON_BUTTON_TYPE_SHIFT);
-	new_icon.icon.data.indirected_text_and_sprite.text =
-			tool->translated;
+			      wimp_ICON_INDIRECTED | wimp_ICON_HCENTRED |
+			      (wimp_COLOUR_VERY_LIGHT_GREY
+			       << wimp_ICON_BG_COLOUR_SHIFT) |
+			      (wimp_COLOUR_BLACK << wimp_ICON_FG_COLOUR_SHIFT) |
+			      (wimp_BUTTON_CLICK
+			       << wimp_ICON_BUTTON_TYPE_SHIFT);
+	new_icon.icon.data.indirected_text_and_sprite.text = tool->translated;
 	new_icon.icon.data.indirected_text_and_sprite.validation =
-			tool->validation;
+		tool->validation;
 	new_icon.icon.data.indirected_text_and_sprite.size =
-			CONFIGURE_TOOL_TRANSLATED_SIZE;
+		CONFIGURE_TOOL_TRANSLATED_SIZE;
 	error = xwimp_create_icon(&new_icon, &tool->i);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_create_icon: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_create_icon: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		die(error->errmess);
 	}
 
 	/* Set the icon's text in current local encoding */
-	ro_gui_set_icon_string(configure_window, tool->i,
-			messages_get(tool->name), true);
+	ro_gui_set_icon_string(
+		configure_window, tool->i, messages_get(tool->name), true);
 
 	/* link into our list alphabetically */
 	if ((!configure_tools) ||
-			(strcmp(configure_tools->translated,
-					tool->translated) > 0)) {
+	    (strcmp(configure_tools->translated, tool->translated) > 0)) {
 		tool->next = configure_tools;
 		configure_tools = tool;
 	} else {
 		for (link = configure_tools; link; link = link->next) {
 			if (link->next) {
 				if (strcmp(link->next->translated,
-						tool->translated) > 0) {
+					   tool->translated) > 0) {
 					tool->next = link->next;
 					link->next = tool;
 					break;
@@ -367,11 +381,13 @@ bool ro_gui_configure_translate(void)
 	os_error *error;
 
 	/* read current alphabet */
-	error = xosbyte1(osbyte_ALPHABET_NUMBER, 127, 0,
-			&alphabet);
+	error = xosbyte1(osbyte_ALPHABET_NUMBER, 127, 0, &alphabet);
 	if (error) {
-		NSLOG(netsurf, INFO, "failed reading alphabet: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "failed reading alphabet: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		/* assume Latin1 */
 		alphabet = territory_ALPHABET_LATIN1;
 	}
@@ -385,14 +401,18 @@ bool ro_gui_configure_translate(void)
 
 	for (tool = configure_tools; tool; tool = tool->next) {
 		/* re-translate the text */
-		ro_gui_set_icon_string(configure_window, tool->i,
-				messages_get(tool->name), true);
+		ro_gui_set_icon_string(configure_window,
+				       tool->i,
+				       messages_get(tool->name),
+				       true);
 
 		/* update the width */
 		error = xwimptextop_string_width(tool->translated,
-				strlen(tool->translated), &icon_width);
+						 strlen(tool->translated),
+						 &icon_width);
 		if (error) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xwimptextop_string_width: 0x%x: %s",
 			      error->errnum,
 			      error->errmess);
@@ -403,14 +423,17 @@ bool ro_gui_configure_translate(void)
 			configure_icon_width = icon_width;
 
 		error = xwimp_resize_icon(configure_window,
-				tool->i,
-				0,
-				-configure_icon_height,
-				configure_icon_width,
-				0);
+					  tool->i,
+					  0,
+					  -configure_icon_height,
+					  configure_icon_width,
+					  0);
 		if (error) {
-			NSLOG(netsurf, INFO, "xwimp_resize_icon: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_resize_icon: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 		}
 	}
 

@@ -53,13 +53,18 @@ typedef struct sprite_content {
 } sprite_content;
 
 static nserror sprite_create(const content_handler *handler,
-		lwc_string *imime_type, const struct http_parameter *params,
-		llcache_handle *llcache, const char *fallback_charset,
-		bool quirks, struct content **c);
+			     lwc_string *imime_type,
+			     const struct http_parameter *params,
+			     llcache_handle *llcache,
+			     const char *fallback_charset,
+			     bool quirks,
+			     struct content **c);
 static bool sprite_convert(struct content *c);
 static void sprite_destroy(struct content *c);
-static bool sprite_redraw(struct content *c, struct content_redraw_data *data,
-		const struct rect *clip, const struct redraw_context *ctx);
+static bool sprite_redraw(struct content *c,
+			  struct content_redraw_data *data,
+			  const struct rect *clip,
+			  const struct redraw_context *ctx);
 static nserror sprite_clone(const struct content *old, struct content **newc);
 static content_type sprite_content_type(void);
 
@@ -73,16 +78,17 @@ static const content_handler sprite_content_handler = {
 	.no_share = false,
 };
 
-static const char *sprite_types[] = {
-	"image/x-riscos-sprite"
-};
+static const char *sprite_types[] = {"image/x-riscos-sprite"};
 
 CONTENT_FACTORY_REGISTER_TYPES(sprite, sprite_types, sprite_content_handler)
 
 nserror sprite_create(const content_handler *handler,
-		lwc_string *imime_type, const struct http_parameter *params,
-		llcache_handle *llcache, const char *fallback_charset,
-		bool quirks, struct content **c)
+		      lwc_string *imime_type,
+		      const struct http_parameter *params,
+		      llcache_handle *llcache,
+		      const char *fallback_charset,
+		      bool quirks,
+		      struct content **c)
 {
 	sprite_content *sprite;
 	nserror error;
@@ -91,14 +97,19 @@ nserror sprite_create(const content_handler *handler,
 	if (sprite == NULL)
 		return NSERROR_NOMEM;
 
-	error = content__init(&sprite->base, handler, imime_type, params,
-			llcache, fallback_charset, quirks);
+	error = content__init(&sprite->base,
+			      handler,
+			      imime_type,
+			      params,
+			      llcache,
+			      fallback_charset,
+			      quirks);
 	if (error != NSERROR_OK) {
 		free(sprite);
 		return error;
 	}
 
-	*c = (struct content *) sprite;
+	*c = (struct content *)sprite;
 
 	return NSERROR_OK;
 }
@@ -111,7 +122,7 @@ nserror sprite_create(const content_handler *handler,
 
 bool sprite_convert(struct content *c)
 {
-	sprite_content *sprite = (sprite_content *) c;
+	sprite_content *sprite = (sprite_content *)c;
 	os_error *error;
 	int w, h;
 	union content_msg_data msg_data;
@@ -123,7 +134,7 @@ bool sprite_convert(struct content *c)
 	source_data = content__get_source_data(c, &source_size);
 
 	sprite_data = source_data - 4;
-	osspriteop_area *area = (osspriteop_area*) sprite_data;
+	osspriteop_area *area = (osspriteop_area *)sprite_data;
 	sprite->data = area;
 
 	/* check for bad data */
@@ -135,11 +146,16 @@ bool sprite_convert(struct content *c)
 	}
 
 	error = xosspriteop_read_sprite_info(osspriteop_PTR,
-			(osspriteop_area *)0x100,
-			(osspriteop_id) ((char *) area + area->first),
-			&w, &h, NULL, NULL);
+					     (osspriteop_area *)0x100,
+					     (osspriteop_id)((char *)area +
+							     area->first),
+					     &w,
+					     &h,
+					     NULL,
+					     NULL);
 	if (error) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "xosspriteop_read_sprite_info: 0x%x: %s",
 		      error->errnum,
 		      error->errmess);
@@ -154,8 +170,10 @@ bool sprite_convert(struct content *c)
 
 	/* set title text */
 	title = messages_get_buff("SpriteTitle",
-			nsurl_access_leaf(llcache_handle_get_url(c->llcache)),
-			c->width, c->height);
+				  nsurl_access_leaf(
+					  llcache_handle_get_url(c->llcache)),
+				  c->width,
+				  c->height);
 	if (title != NULL) {
 		content__set_title(c, title);
 		free(title);
@@ -183,23 +201,28 @@ void sprite_destroy(struct content *c)
  * Redraw a CONTENT_SPRITE.
  */
 
-bool sprite_redraw(struct content *c, struct content_redraw_data *data,
-		const struct rect *clip, const struct redraw_context *ctx)
+bool sprite_redraw(struct content *c,
+		   struct content_redraw_data *data,
+		   const struct rect *clip,
+		   const struct redraw_context *ctx)
 {
-	sprite_content *sprite = (sprite_content *) c;
+	sprite_content *sprite = (sprite_content *)c;
 
 	if (ctx->plot->flush && (ctx->plot->flush(ctx) != NSERROR_OK))
 		return false;
 
 	return image_redraw(sprite->data,
-			ro_plot_origin_x + data->x * 2,
-			ro_plot_origin_y - data->y * 2,
-			data->width, data->height,
-			c->width,
-			c->height,
-			data->background_colour,
-			false, false, false,
-			IMAGE_PLOT_OS);
+			    ro_plot_origin_x + data->x * 2,
+			    ro_plot_origin_y - data->y * 2,
+			    data->width,
+			    data->height,
+			    c->width,
+			    c->height,
+			    data->background_colour,
+			    false,
+			    false,
+			    false,
+			    IMAGE_PLOT_OS);
 }
 
 nserror sprite_clone(const struct content *old, struct content **newc)
@@ -219,14 +242,14 @@ nserror sprite_clone(const struct content *old, struct content **newc)
 
 	/* Simply rerun convert */
 	if (old->status == CONTENT_STATUS_READY ||
-			old->status == CONTENT_STATUS_DONE) {
+	    old->status == CONTENT_STATUS_DONE) {
 		if (sprite_convert(&sprite->base) == false) {
 			content_destroy(&sprite->base);
 			return NSERROR_CLONE_FAILED;
 		}
 	}
 
-	*newc = (struct content *) sprite;
+	*newc = (struct content *)sprite;
 
 	return NSERROR_OK;
 }
@@ -248,29 +271,41 @@ content_type sprite_content_type(void)
 
 byte sprite_bpp(const osspriteop_header *s)
 {
-	/* bit 31 indicates the presence of a full alpha channel 
+	/* bit 31 indicates the presence of a full alpha channel
 	 * rather than a binary mask */
 	int type = ((unsigned)s->mode >> osspriteop_TYPE_SHIFT) & 15;
 	byte bpp = 0;
 
 	switch (type) {
-		case osspriteop_TYPE_OLD:
-		{
-			bits psr;
-			int val;
-			if (!xos_read_mode_variable(s->mode, 
-					os_MODEVAR_LOG2_BPP, &val, &psr) &&
-					!(psr & _C))
-				bpp = 1 << val;
-		}
+	case osspriteop_TYPE_OLD: {
+		bits psr;
+		int val;
+		if (!xos_read_mode_variable(
+			    s->mode, os_MODEVAR_LOG2_BPP, &val, &psr) &&
+		    !(psr & _C))
+			bpp = 1 << val;
+	} break;
+	case osspriteop_TYPE1BPP:
+		bpp = 1;
 		break;
-		case osspriteop_TYPE1BPP:  bpp = 1; break;
-		case osspriteop_TYPE2BPP:  bpp = 2; break;
-		case osspriteop_TYPE4BPP:  bpp = 4; break;
-		case osspriteop_TYPE8BPP:  bpp = 8; break;
-		case osspriteop_TYPE16BPP: bpp = 16; break;
-		case osspriteop_TYPE32BPP: bpp = 32; break;
-		case osspriteop_TYPE_CMYK: bpp = 32; break;
+	case osspriteop_TYPE2BPP:
+		bpp = 2;
+		break;
+	case osspriteop_TYPE4BPP:
+		bpp = 4;
+		break;
+	case osspriteop_TYPE8BPP:
+		bpp = 8;
+		break;
+	case osspriteop_TYPE16BPP:
+		bpp = 16;
+		break;
+	case osspriteop_TYPE32BPP:
+		bpp = 32;
+		break;
+	case osspriteop_TYPE_CMYK:
+		bpp = 32;
+		break;
 	}
 	return bpp;
 }

@@ -18,7 +18,7 @@
 
 /** \file
  * DataTypes animation handler (implementation)
-*/
+ */
 
 #ifdef WITH_AMIGA_DATATYPES
 #include "amiga/os3support.h"
@@ -53,7 +53,7 @@
 typedef struct amiga_dt_anim_content {
 	struct content base;
 
-	struct bitmap *bitmap;	/**< Created NetSurf bitmap */
+	struct bitmap *bitmap; /**< Created NetSurf bitmap */
 
 	Object *dto;
 	int x;
@@ -65,19 +65,26 @@ typedef struct amiga_dt_anim_content {
 static APTR ami_colormap_to_clut(struct ColorMap *cmap);
 
 static nserror amiga_dt_anim_create(const content_handler *handler,
-		lwc_string *imime_type, const struct http_parameter *params,
-		llcache_handle *llcache, const char *fallback_charset,
-		bool quirks, struct content **c);
+				    lwc_string *imime_type,
+				    const struct http_parameter *params,
+				    llcache_handle *llcache,
+				    const char *fallback_charset,
+				    bool quirks,
+				    struct content **c);
 static bool amiga_dt_anim_convert(struct content *c);
 static void amiga_dt_anim_reformat(struct content *c, int width, int height);
 static void amiga_dt_anim_destroy(struct content *c);
 static bool amiga_dt_anim_redraw(struct content *c,
-		struct content_redraw_data *data, const struct rect *clip,
-		const struct redraw_context *ctx);
-static nserror amiga_dt_anim_open(struct content *c, struct browser_window *bw,
-		struct content *page, struct object_params *params);
+				 struct content_redraw_data *data,
+				 const struct rect *clip,
+				 const struct redraw_context *ctx);
+static nserror amiga_dt_anim_open(struct content *c,
+				  struct browser_window *bw,
+				  struct content *page,
+				  struct object_params *params);
 static nserror amiga_dt_anim_close(struct content *c);
-static nserror amiga_dt_anim_clone(const struct content *old, struct content **newc);
+static nserror
+amiga_dt_anim_clone(const struct content *old, struct content **newc);
 static content_type amiga_dt_anim_content_type(void);
 
 static void *amiga_dt_anim_get_internal(const struct content *c, void *context)
@@ -108,29 +115,29 @@ nserror amiga_dt_anim_init(void)
 	nserror error;
 	struct Node *node = NULL;
 
-	while((dt = ObtainDataType(DTST_RAM, NULL,
-			DTA_DataType, prevdt,
-			DTA_GroupID, GID_ANIMATION,
-			TAG_DONE)) != NULL)
-	{
+	while ((dt = ObtainDataType(DTST_RAM,
+				    NULL,
+				    DTA_DataType,
+				    prevdt,
+				    DTA_GroupID,
+				    GID_ANIMATION,
+				    TAG_DONE)) != NULL) {
 		ReleaseDataType(prevdt);
 		prevdt = dt;
 
 		do {
 			node = ami_mime_from_datatype(dt, &type, node);
 
-			if(node)
-			{
+			if (node) {
 				error = content_factory_register_handler(
-					lwc_string_data(type), 
+					lwc_string_data(type),
 					&amiga_dt_anim_content_handler);
 
 				if (error != NSERROR_OK)
 					return error;
 			}
 
-		}while (node != NULL);
-
+		} while (node != NULL);
 	}
 
 	ReleaseDataType(prevdt);
@@ -139,9 +146,12 @@ nserror amiga_dt_anim_init(void)
 }
 
 nserror amiga_dt_anim_create(const content_handler *handler,
-		lwc_string *imime_type, const struct http_parameter *params,
-		llcache_handle *llcache, const char *fallback_charset,
-		bool quirks, struct content **c)
+			     lwc_string *imime_type,
+			     const struct http_parameter *params,
+			     llcache_handle *llcache,
+			     const char *fallback_charset,
+			     bool quirks,
+			     struct content **c)
 {
 	amiga_dt_anim_content *plugin;
 	nserror error;
@@ -150,14 +160,19 @@ nserror amiga_dt_anim_create(const content_handler *handler,
 	if (plugin == NULL)
 		return NSERROR_NOMEM;
 
-	error = content__init(&plugin->base, handler, imime_type, params,
-			llcache, fallback_charset, quirks);
+	error = content__init(&plugin->base,
+			      handler,
+			      imime_type,
+			      params,
+			      llcache,
+			      fallback_charset,
+			      quirks);
 	if (error != NSERROR_OK) {
 		free(plugin);
 		return error;
 	}
 
-	*c = (struct content *) plugin;
+	*c = (struct content *)plugin;
 
 	return NSERROR_OK;
 }
@@ -166,7 +181,7 @@ bool amiga_dt_anim_convert(struct content *c)
 {
 	NSLOG(netsurf, INFO, "amiga_dt_anim_convert");
 
-	amiga_dt_anim_content *plugin = (amiga_dt_anim_content *) c;
+	amiga_dt_anim_content *plugin = (amiga_dt_anim_content *)c;
 	union content_msg_data msg_data;
 	int width, height;
 	const uint8_t *data;
@@ -179,21 +194,31 @@ bool amiga_dt_anim_convert(struct content *c)
 
 	data = content__get_source_data(c, &size);
 
-	if((plugin->dto = NewDTObject(NULL,
-					DTA_SourceType, DTST_MEMORY,
-					DTA_SourceAddress, data,
-					DTA_SourceSize, size,
-					DTA_GroupID, GID_ANIMATION,
-					TAG_DONE))) {
-		if(GetDTAttrs(plugin->dto, PDTA_BitMapHeader, &bmh, TAG_DONE)) {
+	if ((plugin->dto = NewDTObject(NULL,
+				       DTA_SourceType,
+				       DTST_MEMORY,
+				       DTA_SourceAddress,
+				       data,
+				       DTA_SourceSize,
+				       size,
+				       DTA_GroupID,
+				       GID_ANIMATION,
+				       TAG_DONE))) {
+		if (GetDTAttrs(
+			    plugin->dto, PDTA_BitMapHeader, &bmh, TAG_DONE)) {
 			width = (int)bmh->bmh_Width;
 			height = (int)bmh->bmh_Height;
 
-			plugin->bitmap = amiga_bitmap_create(width, height, bm_flags);
+			plugin->bitmap = amiga_bitmap_create(width,
+							     height,
+							     bm_flags);
 			if (!plugin->bitmap) {
 				msg_data.errordata.errorcode = NSERROR_NOMEM;
-				msg_data.errordata.errormsg = messages_get("NoMemory");
-				content_broadcast(c, CONTENT_MSG_ERROR, &msg_data);
+				msg_data.errordata.errormsg = messages_get(
+					"NoMemory");
+				content_broadcast(c,
+						  CONTENT_MSG_ERROR,
+						  &msg_data);
 				return false;
 			}
 
@@ -205,36 +230,43 @@ bool amiga_dt_anim_convert(struct content *c)
 
 			clut = ami_colormap_to_clut(adt_frame.alf_CMap);
 #ifdef __amigaos4__
-			BltBitMapTags(
-				BLITA_Width, width,
-				BLITA_Height, height,
-				BLITA_Source, adt_frame.alf_BitMap,
-				BLITA_SrcType, BLITT_BITMAP,
-				BLITA_Dest, bm_buffer,
-				BLITA_DestType, BLITT_RGB24,
-				BLITA_DestBytesPerRow, width,
-				BLITA_CLUT, clut,
-				TAG_DONE);
+			BltBitMapTags(BLITA_Width,
+				      width,
+				      BLITA_Height,
+				      height,
+				      BLITA_Source,
+				      adt_frame.alf_BitMap,
+				      BLITA_SrcType,
+				      BLITT_BITMAP,
+				      BLITA_Dest,
+				      bm_buffer,
+				      BLITA_DestType,
+				      BLITT_RGB24,
+				      BLITA_DestBytesPerRow,
+				      width,
+				      BLITA_CLUT,
+				      clut,
+				      TAG_DONE);
 #else
 #warning FIXME: Need to use a different blitter function for OS3!
 #endif
-				free(clut);
+			free(clut);
 
-				adt_frame.MethodID = ADTM_UNLOADFRAME;
-				IDoMethodA(plugin->dto, (Msg)&adt_frame);
-		}
-		else return false;
-	}
-	else return false;
+			adt_frame.MethodID = ADTM_UNLOADFRAME;
+			IDoMethodA(plugin->dto, (Msg)&adt_frame);
+		} else
+			return false;
+	} else
+		return false;
 
 	c->width = width;
 	c->height = height;
 
-/*
-	snprintf(title, sizeof(title), "image (%lux%lu, %lu bytes)",
-		width, height, size);
-	content__set_title(c, title);
-*/
+	/*
+		snprintf(title, sizeof(title), "image (%lux%lu, %lu bytes)",
+			width, height, size);
+		content__set_title(c, title);
+	*/
 
 	amiga_bitmap_modified(plugin->bitmap);
 
@@ -247,7 +279,7 @@ bool amiga_dt_anim_convert(struct content *c)
 
 void amiga_dt_anim_destroy(struct content *c)
 {
-	amiga_dt_anim_content *plugin = (amiga_dt_anim_content *) c;
+	amiga_dt_anim_content *plugin = (amiga_dt_anim_content *)c;
 
 	NSLOG(netsurf, INFO, "amiga_dt_anim_destroy");
 
@@ -260,10 +292,11 @@ void amiga_dt_anim_destroy(struct content *c)
 }
 
 bool amiga_dt_anim_redraw(struct content *c,
-		struct content_redraw_data *data, const struct rect *clip,
-		const struct redraw_context *ctx)
+			  struct content_redraw_data *data,
+			  const struct rect *clip,
+			  const struct redraw_context *ctx)
 {
-	amiga_dt_anim_content *plugin = (amiga_dt_anim_content *) c;
+	amiga_dt_anim_content *plugin = (amiga_dt_anim_content *)c;
 	bitmap_flags_t flags = BITMAPF_NONE;
 
 	NSLOG(netsurf, INFO, "amiga_dt_anim_redraw");
@@ -273,9 +306,12 @@ bool amiga_dt_anim_redraw(struct content *c,
 	if (data->repeat_y)
 		flags |= BITMAPF_REPEAT_Y;
 
-	return (ctx->plot->bitmap(ctx, plugin->bitmap,
-				  data->x, data->y,
-				  data->width, data->height,
+	return (ctx->plot->bitmap(ctx,
+				  plugin->bitmap,
+				  data->x,
+				  data->y,
+				  data->width,
+				  data->height,
 				  data->background_colour,
 				  flags) == NSERROR_OK);
 }
@@ -290,8 +326,10 @@ bool amiga_dt_anim_redraw(struct content *c,
  * \param  box     box containing c, or 0 if not an object
  * \param  params  object parameters, or 0 if not an object
  */
-nserror amiga_dt_anim_open(struct content *c, struct browser_window *bw,
-	struct content *page, struct object_params *params)
+nserror amiga_dt_anim_open(struct content *c,
+			   struct browser_window *bw,
+			   struct content *page,
+			   struct object_params *params)
 {
 	NSLOG(netsurf, INFO, "amiga_dt_anim_open");
 
@@ -328,15 +366,15 @@ nserror amiga_dt_anim_clone(const struct content *old, struct content **newc)
 	}
 
 	/* We "clone" the old content by replaying conversion */
-	if (old->status == CONTENT_STATUS_READY || 
-			old->status == CONTENT_STATUS_DONE) {
+	if (old->status == CONTENT_STATUS_READY ||
+	    old->status == CONTENT_STATUS_DONE) {
 		if (amiga_dt_anim_convert(&plugin->base) == false) {
 			content_destroy(&plugin->base);
 			return NSERROR_CLONE_FAILED;
 		}
 	}
 
-	*newc = (struct content *) plugin;
+	*newc = (struct content *)plugin;
 
 	return NSERROR_OK;
 }
@@ -352,18 +390,17 @@ static APTR ami_colormap_to_clut(struct ColorMap *cmap)
 	UBYTE *clut = calloc(1, 256 * 4);
 	ULONG colr[256 * 4];
 
-	if(!clut) return NULL;
+	if (!clut)
+		return NULL;
 
 	/* Get the palette from the ColorMap */
 	GetRGB32(cmap, 0, 256, (ULONG *)&colr);
 
 	/* convert it to a table of ARGB values */
-	for(i = 0; i < 1024; i += 4)
-	{
-		clut[i] = (0xff << 24) |
-				((colr[i] & 0xff000000) >> 8) |
-				((colr[i + 1] & 0xff000000) >> 16) |
-				((colr[i + 2] & 0xff000000) >> 24);
+	for (i = 0; i < 1024; i += 4) {
+		clut[i] = (0xff << 24) | ((colr[i] & 0xff000000) >> 8) |
+			  ((colr[i + 1] & 0xff000000) >> 16) |
+			  ((colr[i + 2] & 0xff000000) >> 24);
 	}
 
 	return clut;

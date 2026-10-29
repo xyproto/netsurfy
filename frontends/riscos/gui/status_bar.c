@@ -46,13 +46,13 @@
 #define PROGRESS_WIDTH 160
 
 struct status_bar {
-	wimp_w w;			/**< status bar window handle */
-	wimp_w parent;			/**< parent window handle */
-	const char *text;		/**< status bar text */
-	struct progress_bar *pb;	/**< progress bar */
-	unsigned int scale;		/**< current status bar scale */
-	int width;			/**< current status bar width */
-	bool visible;			/**< status bar is visible? */
+	wimp_w w; /**< status bar window handle */
+	wimp_w parent; /**< parent window handle */
+	const char *text; /**< status bar text */
+	struct progress_bar *pb; /**< progress bar */
+	unsigned int scale; /**< current status bar scale */
+	int width; /**< current status bar width */
+	bool visible; /**< status bar is visible? */
 };
 
 static char status_widget_text[] = "";
@@ -64,8 +64,7 @@ wimp_WINDOW(1) status_bar_definition = {
 	0,
 	wimp_TOP,
 	wimp_WINDOW_NEW_FORMAT | wimp_WINDOW_MOVEABLE |
-			wimp_WINDOW_FURNITURE_WINDOW |
-			wimp_WINDOW_IGNORE_XEXTENT,
+		wimp_WINDOW_FURNITURE_WINDOW | wimp_WINDOW_IGNORE_XEXTENT,
 	wimp_COLOUR_BLACK,
 	wimp_COLOUR_LIGHT_GREY,
 	wimp_COLOUR_LIGHT_GREY,
@@ -82,25 +81,14 @@ wimp_WINDOW(1) status_bar_definition = {
 	1,
 	{""},
 	1,
-	{
-	  	{
-			{0, 0, 1, 1},
-			wimp_ICON_TEXT | wimp_ICON_INDIRECTED |
-					wimp_ICON_BORDER | wimp_ICON_FILLED |
-					(wimp_COLOUR_LIGHT_GREY <<
-						wimp_ICON_BG_COLOUR_SHIFT) |
-					(wimp_BUTTON_CLICK_DRAG <<
-						wimp_ICON_BUTTON_TYPE_SHIFT),
-			{
-				.indirected_text = {
-						status_widget_text,
-				  		status_widget_validation,
-			  			1
-			  	}
-			}
-		}
-	}
-};
+	{{{0, 0, 1, 1},
+	  wimp_ICON_TEXT | wimp_ICON_INDIRECTED | wimp_ICON_BORDER |
+		  wimp_ICON_FILLED |
+		  (wimp_COLOUR_LIGHT_GREY << wimp_ICON_BG_COLOUR_SHIFT) |
+		  (wimp_BUTTON_CLICK_DRAG << wimp_ICON_BUTTON_TYPE_SHIFT),
+	  {.indirected_text = {status_widget_text,
+			       status_widget_validation,
+			       1}}}}};
 
 static void ro_gui_status_bar_open(wimp_open *open);
 static bool ro_gui_status_bar_click(wimp_pointer *pointer);
@@ -129,10 +117,13 @@ struct status_bar *ro_gui_status_bar_create(wimp_w parent, unsigned int width)
 		return NULL;
 
 	error = xwimp_create_window((wimp_window *)&status_bar_definition,
-				&sb->w);
+				    &sb->w);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_create_window: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_create_window: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		free(sb);
 		return NULL;
 	}
@@ -141,12 +132,10 @@ struct status_bar *ro_gui_status_bar_create(wimp_w parent, unsigned int width)
 	sb->visible = true;
 
 	ro_gui_wimp_event_set_user_data(sb->w, sb);
-	ro_gui_wimp_event_register_open_window(sb->w,
-			ro_gui_status_bar_open);
-	ro_gui_wimp_event_register_mouse_click(sb->w,
-			ro_gui_status_bar_click);
+	ro_gui_wimp_event_register_open_window(sb->w, ro_gui_status_bar_open);
+	ro_gui_wimp_event_register_mouse_click(sb->w, ro_gui_status_bar_click);
 	ro_gui_wimp_event_register_redraw_window(sb->w,
-			ro_gui_status_bar_redraw);
+						 ro_gui_status_bar_redraw);
 	ro_gui_wimp_event_set_help_prefix(sb->w, "HelpStatus");
 	ro_gui_status_bar_resize(sb);
 	return sb;
@@ -166,14 +155,17 @@ void ro_gui_status_bar_destroy(struct status_bar *sb)
 	ro_gui_wimp_event_finalise(sb->w);
 	error = xwimp_delete_window(sb->w);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_delete_window: 0x%x:%s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_delete_window: 0x%x:%s",
+		      error->errnum,
+		      error->errmess);
 	}
 
 	ro_gui_progress_bar_destroy(sb->pb);
 
 	/* Remove any scheduled redraw callbacks */
-	riscos_schedule(-1, ro_gui_status_bar_redraw_callback, (void *) sb);
+	riscos_schedule(-1, ro_gui_status_bar_redraw_callback, (void *)sb);
 
 	free(sb);
 }
@@ -224,8 +216,11 @@ void ro_gui_status_bar_set_visible(struct status_bar *sb, bool visible)
 	} else {
 		os_error *error = xwimp_close_window(sb->w);
 		if (error) {
-			NSLOG(netsurf, INFO, "xwimp_close_window: 0x%x:%s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_close_window: 0x%x:%s",
+			      error->errnum,
+			      error->errmess);
 		}
 	}
 }
@@ -252,12 +247,12 @@ bool ro_gui_status_bar_get_visible(struct status_bar *sb)
  * \param  value  the value to use
  */
 void ro_gui_status_bar_set_progress_value(struct status_bar *sb,
-		unsigned int value)
+					  unsigned int value)
 {
 	assert(sb);
 
-	ro_gui_status_bar_set_progress_range(sb,
-			max(value, ro_gui_progress_bar_get_range(sb->pb)));
+	ro_gui_status_bar_set_progress_range(
+		sb, max(value, ro_gui_progress_bar_get_range(sb->pb)));
 	ro_gui_progress_bar_set_value(sb->pb, value);
 }
 
@@ -269,7 +264,7 @@ void ro_gui_status_bar_set_progress_value(struct status_bar *sb,
  * \param  range  the range of the progress bar
  */
 void ro_gui_status_bar_set_progress_range(struct status_bar *sb,
-		unsigned int range)
+					  unsigned int range)
 {
 	unsigned int old_range;
 
@@ -283,10 +278,13 @@ void ro_gui_status_bar_set_progress_range(struct status_bar *sb,
 		ro_gui_status_position_progress_bar(sb);
 	} else if ((old_range != 0) && (range == 0)) {
 		os_error *error = xwimp_close_window(
-				ro_gui_progress_bar_get_window(sb->pb));
+			ro_gui_progress_bar_get_window(sb->pb));
 		if (error) {
-			NSLOG(netsurf, INFO, "xwimp_close_window: 0x%x:%s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_close_window: 0x%x:%s",
+			      error->errnum,
+			      error->errmess);
 		}
 	}
 }
@@ -299,7 +297,7 @@ void ro_gui_status_bar_set_progress_range(struct status_bar *sb,
  * \param  icon  the icon to use, or NULL for no icon
  */
 void ro_gui_status_bar_set_progress_icon(struct status_bar *sb,
-		const char *icon)
+					 const char *icon)
 {
 	assert(sb);
 
@@ -320,15 +318,15 @@ void ro_gui_status_bar_set_text(struct status_bar *sb, const char *text)
 	sb->text = text;
 
 	/* Schedule a window redraw for 1cs' time.
-	 * 
+	 *
 	 * We do this to ensure that redraws as a result of text changes
 	 * do not prevent other applications obtaining CPU time.
 	 *
-	 * The scheduled callback will be run when we receive the first 
+	 * The scheduled callback will be run when we receive the first
 	 * null poll after 1cs has elapsed. It may then issue a redraw
 	 * request to the Wimp.
 	 *
-	 * The scheduler ensures that only one instance of the 
+	 * The scheduler ensures that only one instance of the
 	 * { callback, handle } pair is registered at once.
 	 */
 	if (sb->visible && text != NULL) {
@@ -358,8 +356,11 @@ void ro_gui_status_bar_resize(struct status_bar *sb)
 	state.w = sb->parent;
 	error = xwimp_get_window_state(&state);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_window_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_window_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		return;
 	}
 	window_width = state.visible.x1 - state.visible.x0;
@@ -382,8 +383,11 @@ void ro_gui_status_bar_resize(struct status_bar *sb)
 		extent.y1 = status_height - 4;
 		error = xwimp_set_extent(sb->w, &extent);
 		if (error) {
-			NSLOG(netsurf, INFO, "xwimp_set_extent: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_set_extent: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			return;
 		}
 
@@ -396,41 +400,49 @@ void ro_gui_status_bar_resize(struct status_bar *sb)
 		state.visible.y1 = state.visible.y0 - 2;
 		state.visible.x1 = state.visible.x0 + status_width;
 		state.visible.y0 = state.visible.y1 - status_height + 4;
-		error = xwimp_open_window_nested(PTR_WIMP_OPEN(&state),
-				sb->parent,
+		error = xwimp_open_window_nested(
+			PTR_WIMP_OPEN(&state),
+			sb->parent,
+			wimp_CHILD_LINKS_PARENT_VISIBLE_BOTTOM_OR_LEFT
+					<< wimp_CHILD_XORIGIN_SHIFT |
 				wimp_CHILD_LINKS_PARENT_VISIBLE_BOTTOM_OR_LEFT
-						<< wimp_CHILD_XORIGIN_SHIFT |
+					<< wimp_CHILD_YORIGIN_SHIFT |
 				wimp_CHILD_LINKS_PARENT_VISIBLE_BOTTOM_OR_LEFT
-						<< wimp_CHILD_YORIGIN_SHIFT |
+					<< wimp_CHILD_LS_EDGE_SHIFT |
 				wimp_CHILD_LINKS_PARENT_VISIBLE_BOTTOM_OR_LEFT
-						<< wimp_CHILD_LS_EDGE_SHIFT |
+					<< wimp_CHILD_BS_EDGE_SHIFT |
 				wimp_CHILD_LINKS_PARENT_VISIBLE_BOTTOM_OR_LEFT
-						<< wimp_CHILD_BS_EDGE_SHIFT |
+					<< wimp_CHILD_RS_EDGE_SHIFT |
 				wimp_CHILD_LINKS_PARENT_VISIBLE_BOTTOM_OR_LEFT
-						<< wimp_CHILD_RS_EDGE_SHIFT |
-				wimp_CHILD_LINKS_PARENT_VISIBLE_BOTTOM_OR_LEFT
-						<< wimp_CHILD_TS_EDGE_SHIFT);
+					<< wimp_CHILD_TS_EDGE_SHIFT);
 		if (error) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xwimp_open_window_nested: 0x%x: %s",
 			      error->errnum,
 			      error->errmess);
 			return;
 		}
 		ro_gui_status_position_progress_bar(sb);
-		error = xwimp_resize_icon(sb->w, ICON_WIDGET,
-				status_width - WIDGET_WIDTH, 0,
-				status_width, status_height - 4);
+		error = xwimp_resize_icon(sb->w,
+					  ICON_WIDGET,
+					  status_width - WIDGET_WIDTH,
+					  0,
+					  status_width,
+					  status_height - 4);
 		if (error) {
-			NSLOG(netsurf, INFO, "xwimp_resize_icon: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_resize_icon: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			return;
 		}
 
 		redraw_left = min(status_width, sb->width) - WIDGET_WIDTH - 2;
 		redraw_right = max(status_width, sb->width);
-		xwimp_force_redraw(sb->w, redraw_left, 0,
-				redraw_right, status_height);
+		xwimp_force_redraw(
+			sb->w, redraw_left, 0, redraw_right, status_height);
 		sb->width = status_width;
 	}
 }
@@ -447,11 +459,9 @@ void ro_gui_status_bar_redraw(wimp_draw *redraw)
 	os_error *error;
 	osbool more;
 	rufl_code code;
-	struct redraw_context ctx = {
-		.interactive = true,
-		.background_images = true,
-		.plot = &ro_plotters
-	};
+	struct redraw_context ctx = {.interactive = true,
+				     .background_images = true,
+				     .plot = &ro_plotters};
 	struct rect rect;
 
 	sb = (struct status_bar *)ro_gui_wimp_event_get_user_data(redraw->w);
@@ -464,37 +474,51 @@ void ro_gui_status_bar_redraw(wimp_draw *redraw)
 	/* redraw the window */
 	error = xwimp_redraw_window(redraw, &more);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_redraw_window: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_redraw_window: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		return;
 	}
 	while (more) {
 		/* redraw the status text */
 		if (sb->text) {
 			error = xcolourtrans_set_font_colours(font_CURRENT,
-					0xeeeeee00, 0x00000000, 14, 0, 0, 0);
+							      0xeeeeee00,
+							      0x00000000,
+							      14,
+							      0,
+							      0,
+							      0);
 			if (error) {
-				NSLOG(netsurf, INFO,
+				NSLOG(netsurf,
+				      INFO,
 				      "xcolourtrans_set_font_colours: 0x%x: %s",
 				      error->errnum,
 				      error->errmess);
 				return;
 			}
 			code = rufl_paint(ro_gui_desktop_font_family,
-					ro_gui_desktop_font_style,
-					ro_gui_desktop_font_size,
-					sb->text, strlen(sb->text),
-					redraw->box.x0 + 6, redraw->box.y0 + 8,
-					rufl_BLEND_FONT);
+					  ro_gui_desktop_font_style,
+					  ro_gui_desktop_font_size,
+					  sb->text,
+					  strlen(sb->text),
+					  redraw->box.x0 + 6,
+					  redraw->box.y0 + 8,
+					  rufl_BLEND_FONT);
 			if (code != rufl_OK) {
 				if (code == rufl_FONT_MANAGER_ERROR)
-					NSLOG(netsurf, INFO,
+					NSLOG(netsurf,
+					      INFO,
 					      "rufl_FONT_MANAGER_ERROR: 0x%x: %s",
 					      rufl_fm_error->errnum,
 					      rufl_fm_error->errmess);
 				else
-					NSLOG(netsurf, INFO,
-					      "rufl_paint: 0x%x", code);
+					NSLOG(netsurf,
+					      INFO,
+					      "rufl_paint: 0x%x",
+					      code);
 			}
 		}
 
@@ -504,14 +528,15 @@ void ro_gui_status_bar_redraw(wimp_draw *redraw)
 		rect.y1 = -redraw->box.y1 >> 1;
 
 		/* separate the widget from the text with a line */
-		ctx.plot->rectangle(&ctx,
-				    plot_style_fill_black,
-				    &rect);
+		ctx.plot->rectangle(&ctx, plot_style_fill_black, &rect);
 
 		error = xwimp_get_rectangle(redraw, &more);
 		if (error) {
-			NSLOG(netsurf, INFO, "xwimp_get_rectangle: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_get_rectangle: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			return;
 		}
 	}
@@ -541,21 +566,22 @@ bool ro_gui_status_bar_click(wimp_pointer *pointer)
 	os_error *error;
 
 	switch (pointer->i) {
-		case ICON_WIDGET:
-			drag.w = pointer->w;
-			drag.type = wimp_DRAG_SYSTEM_SIZE;
-			drag.initial.x0 = pointer->pos.x;
-			drag.initial.x1 = pointer->pos.x;
-			drag.initial.y0 = pointer->pos.y;
-			drag.initial.y1 = pointer->pos.y;
-			error = xwimp_drag_box(&drag);
-			if (error) {
-				NSLOG(netsurf, INFO,
-				      "xwimp_drag_box: 0x%x: %s",
-				      error->errnum,
-				      error->errmess);
-			}
-			break;
+	case ICON_WIDGET:
+		drag.w = pointer->w;
+		drag.type = wimp_DRAG_SYSTEM_SIZE;
+		drag.initial.x0 = pointer->pos.x;
+		drag.initial.x1 = pointer->pos.x;
+		drag.initial.y0 = pointer->pos.y;
+		drag.initial.y1 = pointer->pos.y;
+		error = xwimp_drag_box(&drag);
+		if (error) {
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_drag_box: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
+		}
+		break;
 	}
 	return true;
 }
@@ -578,8 +604,11 @@ void ro_gui_status_bar_open(wimp_open *open)
 	state.w = sb->parent;
 	error = xwimp_get_window_state(&state);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_window_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_window_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		return;
 	}
 	window_width = state.visible.x1 - state.visible.x0;
@@ -618,8 +647,11 @@ void ro_gui_status_position_progress_bar(struct status_bar *sb)
 	state.w = sb->w;
 	error = xwimp_get_window_state(&state);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_window_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_window_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		return;
 	}
 
@@ -634,27 +666,32 @@ void ro_gui_status_position_progress_bar(struct status_bar *sb)
 	state.next = wimp_TOP;
 	state.visible.x0 = left;
 	state.visible.x1 = right;
-	error = xwimp_open_window_nested(PTR_WIMP_OPEN(&state),
-			sb->w,
+	error = xwimp_open_window_nested(
+		PTR_WIMP_OPEN(&state),
+		sb->w,
+		wimp_CHILD_LINKS_PARENT_VISIBLE_BOTTOM_OR_LEFT
+				<< wimp_CHILD_XORIGIN_SHIFT |
 			wimp_CHILD_LINKS_PARENT_VISIBLE_BOTTOM_OR_LEFT
-					<< wimp_CHILD_XORIGIN_SHIFT |
+				<< wimp_CHILD_YORIGIN_SHIFT |
 			wimp_CHILD_LINKS_PARENT_VISIBLE_BOTTOM_OR_LEFT
-					<< wimp_CHILD_YORIGIN_SHIFT |
+				<< wimp_CHILD_LS_EDGE_SHIFT |
 			wimp_CHILD_LINKS_PARENT_VISIBLE_BOTTOM_OR_LEFT
-					<< wimp_CHILD_LS_EDGE_SHIFT |
+				<< wimp_CHILD_BS_EDGE_SHIFT |
 			wimp_CHILD_LINKS_PARENT_VISIBLE_BOTTOM_OR_LEFT
-					<< wimp_CHILD_BS_EDGE_SHIFT |
+				<< wimp_CHILD_RS_EDGE_SHIFT |
 			wimp_CHILD_LINKS_PARENT_VISIBLE_BOTTOM_OR_LEFT
-					<< wimp_CHILD_RS_EDGE_SHIFT |
-			wimp_CHILD_LINKS_PARENT_VISIBLE_BOTTOM_OR_LEFT
-					<< wimp_CHILD_TS_EDGE_SHIFT);
+				<< wimp_CHILD_TS_EDGE_SHIFT);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_open_window: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_open_window: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 	}
 
 	/* update the progress bar display on non-standard width */
 	if ((right - left) != PROGRESS_WIDTH)
-		ro_gui_progress_bar_update(sb->pb, right - left,
-				state.visible.y1 - state.visible.y0);
+		ro_gui_progress_bar_update(sb->pb,
+					   right - left,
+					   state.visible.y1 - state.visible.y0);
 }

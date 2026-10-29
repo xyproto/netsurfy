@@ -35,4 +35,3 @@ void ami_help_new_screen(struct Screen *screen);
 ULONG ami_help_signal(void);
 void ami_help_process(void);
 #endif
-

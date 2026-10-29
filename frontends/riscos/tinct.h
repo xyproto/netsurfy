@@ -35,7 +35,7 @@
  *	R3	X coordinate
  *	R4	Y coordinate
  *	R7	Flag word
-*/
+ */
 #define Tinct_PlotAlpha 0x57240
 
 
@@ -81,8 +81,8 @@
  * Converts a paletted sprite into its 32bpp equivalent. Sufficient memory must
  * have previously been allocated for the sprite (44 + width * height * 4).
  * As sprites with 16bpp or 32bpp do not have palettes, conversion cannot be
- * performed on these variants. All sprites must be supplied with a full palette,
- * eg 8bpp must have 256 palette entries.
+ * performed on these variants. All sprites must be supplied with a full
+ * palette, eg 8bpp must have 256 palette entries.
  *
  * ->	R2	Source sprite pointer
  *	R3	Destination sprite pointer
@@ -117,8 +117,9 @@
 
 /**
  * Decompresses an image previously compressed. Sufficient memory must have been
- * previously allocated for the decompressed data (44 + width * height * 4) where
- * width and height are available at +0 and +4 of the compressed data respectively.
+ * previously allocated for the decompressed data (44 + width * height * 4)
+ * where width and height are available at +0 and +4 of the compressed data
+ * respectively.
  *
  * ->	R0	Input data buffer
  *	R2	Output data buffer
@@ -129,35 +130,39 @@
 
 
 /*	Plotting flags
-*/
-#define tinct_READ_SCREEN_BASE	  0x01	/** <-- Use when hardware scrolling */
-#define tinct_BILINEAR_FILTER	  0x02	/** <-- Perform bi-linear filtering */
-#define tinct_DITHER		  0x04	/** <-- Perform dithering */
-#define tinct_ERROR_DIFFUSE	  0x08	/** <-- Perform error diffusion */
-#define tinct_DITHER_INVERTED	  0x0C	/** <-- Perform dithering with inverted pattern */
-#define tinct_FILL_HORIZONTALLY	  0x10	/** <-- Horizontally fill clipping region with image */
-#define tinct_FILL_VERTICALLY	  0x20	/** <-- Vertically fill clipping region with image */
-#define tinct_FORCE_PALETTE_READ  0x40	/** <-- Use after a palette change when out of the desktop */
-#define tinct_USE_OS_SPRITE_OP	  0x80	/** <-- Use when printing */
+ */
+#define tinct_READ_SCREEN_BASE 0x01 /** <-- Use when hardware scrolling */
+#define tinct_BILINEAR_FILTER 0x02 /** <-- Perform bi-linear filtering */
+#define tinct_DITHER 0x04 /** <-- Perform dithering */
+#define tinct_ERROR_DIFFUSE 0x08 /** <-- Perform error diffusion */
+#define tinct_DITHER_INVERTED                                                  \
+	0x0C /** <-- Perform dithering with inverted pattern */
+#define tinct_FILL_HORIZONTALLY                                                \
+	0x10 /** <-- Horizontally fill clipping region with image */
+#define tinct_FILL_VERTICALLY                                                  \
+	0x20 /** <-- Vertically fill clipping region with image */
+#define tinct_FORCE_PALETTE_READ                                               \
+	0x40 /** <-- Use after a palette change when out of the desktop */
+#define tinct_USE_OS_SPRITE_OP 0x80 /** <-- Use when printing */
 
 /*	Compression flags
-*/
-#define tinct_OPAQUE_IMAGE	  0x01	/** <-- Image is opaque, compress further */
+ */
+#define tinct_OPAQUE_IMAGE 0x01 /** <-- Image is opaque, compress further */
 
 /*	Shifts
-*/
-#define tinct_BACKGROUND_SHIFT	  0x08
+ */
+#define tinct_BACKGROUND_SHIFT 0x08
 
 /*      Sprite mode tinct
  *
  * Mode is: 32bpp 8:8:8:8 XXBBGGRR mode (a RISC OS 3.5+ type)
  * We put alpha in the unused XX channel and Tinct treats it as alpha.
  */
-#define tinct_SPRITE_MODE	  (os_mode)0x301680b5
+#define tinct_SPRITE_MODE (os_mode)0x301680b5
 
 /*      Sprite mode alpha
  *
  * Mode is: 32bpp 8:8:8:8 AABBGGRR mode (a RISC OS 5 type)
  */
-#define alpha_SPRITE_MODE	  (os_mode)0x78608051
+#define alpha_SPRITE_MODE (os_mode)0x78608051
 #endif

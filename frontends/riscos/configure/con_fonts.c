@@ -60,13 +60,11 @@
  * probably be released at some point */
 static wimp_menu *default_menu;
 
-static const char *font_names[PLOT_FONT_FAMILY_COUNT] = {
-	"Sans-serif",
-	"Serif",
-	"Monospace",
-	"Cursive",
-	"Fantasy"
-};
+static const char *font_names[PLOT_FONT_FAMILY_COUNT] = {"Sans-serif",
+							 "Serif",
+							 "Monospace",
+							 "Cursive",
+							 "Fantasy"};
 
 static void ro_gui_options_fonts_default(wimp_pointer *pointer);
 static bool ro_gui_options_fonts_ok(wimp_w w);
@@ -75,45 +73,67 @@ static bool ro_gui_options_fonts_init_menu(void);
 bool ro_gui_options_fonts_initialise(wimp_w w)
 {
 	/* set the current values */
-	ro_gui_set_icon_decimal(w, FONT_DEFAULT_SIZE, nsoption_int(font_size), 1);
-	ro_gui_set_icon_decimal(w, FONT_MINIMUM_SIZE, nsoption_int(font_min_size), 1);
-	ro_gui_set_icon_string(w, FONT_SANS_FIELD, nsoption_charp(font_sans), true);
-	ro_gui_set_icon_string(w, FONT_SERIF_FIELD, nsoption_charp(font_serif), true);
-	ro_gui_set_icon_string(w, FONT_MONOSPACE_FIELD, nsoption_charp(font_mono), true);
-	ro_gui_set_icon_string(w, FONT_CURSIVE_FIELD, nsoption_charp(font_cursive), true);
-	ro_gui_set_icon_string(w, FONT_FANTASY_FIELD, nsoption_charp(font_fantasy), true);
-	ro_gui_set_icon_string(w, FONT_DEFAULT_FIELD,
-			       font_names[nsoption_int(font_default)], true);
+	ro_gui_set_icon_decimal(
+		w, FONT_DEFAULT_SIZE, nsoption_int(font_size), 1);
+	ro_gui_set_icon_decimal(
+		w, FONT_MINIMUM_SIZE, nsoption_int(font_min_size), 1);
+	ro_gui_set_icon_string(
+		w, FONT_SANS_FIELD, nsoption_charp(font_sans), true);
+	ro_gui_set_icon_string(
+		w, FONT_SERIF_FIELD, nsoption_charp(font_serif), true);
+	ro_gui_set_icon_string(
+		w, FONT_MONOSPACE_FIELD, nsoption_charp(font_mono), true);
+	ro_gui_set_icon_string(
+		w, FONT_CURSIVE_FIELD, nsoption_charp(font_cursive), true);
+	ro_gui_set_icon_string(
+		w, FONT_FANTASY_FIELD, nsoption_charp(font_fantasy), true);
+	ro_gui_set_icon_string(w,
+			       FONT_DEFAULT_FIELD,
+			       font_names[nsoption_int(font_default)],
+			       true);
 
 	if (!ro_gui_options_fonts_init_menu())
 		return false;
 
 	/* initialise all functions for a newly created window */
-	ro_gui_wimp_event_register_menu_gright(w, FONT_SANS_FIELD,
-			FONT_SANS_MENU, rufl_family_menu);
-	ro_gui_wimp_event_register_menu_gright(w, FONT_SERIF_FIELD,
-			FONT_SERIF_MENU, rufl_family_menu);
-	ro_gui_wimp_event_register_menu_gright(w, FONT_MONOSPACE_FIELD,
-			FONT_MONOSPACE_MENU, rufl_family_menu);
-	ro_gui_wimp_event_register_menu_gright(w, FONT_CURSIVE_FIELD,
-			FONT_CURSIVE_MENU, rufl_family_menu);
-	ro_gui_wimp_event_register_menu_gright(w, FONT_FANTASY_FIELD,
-			FONT_FANTASY_MENU, rufl_family_menu);
-	ro_gui_wimp_event_register_menu_gright(w, FONT_DEFAULT_FIELD,
-			FONT_DEFAULT_MENU, default_menu);
-	ro_gui_wimp_event_register_numeric_field(w, FONT_DEFAULT_SIZE,
-			FONT_DEFAULT_INC, FONT_DEFAULT_DEC, 50, 1000, 1, 1);
-	ro_gui_wimp_event_register_numeric_field(w, FONT_MINIMUM_SIZE,
-			FONT_MINIMUM_INC, FONT_MINIMUM_DEC, 10, 500, 1, 1);
-	ro_gui_wimp_event_register_button(w, FONT_DEFAULT_BUTTON,
-			ro_gui_options_fonts_default);
+	ro_gui_wimp_event_register_menu_gright(
+		w, FONT_SANS_FIELD, FONT_SANS_MENU, rufl_family_menu);
+	ro_gui_wimp_event_register_menu_gright(
+		w, FONT_SERIF_FIELD, FONT_SERIF_MENU, rufl_family_menu);
+	ro_gui_wimp_event_register_menu_gright(
+		w, FONT_MONOSPACE_FIELD, FONT_MONOSPACE_MENU, rufl_family_menu);
+	ro_gui_wimp_event_register_menu_gright(
+		w, FONT_CURSIVE_FIELD, FONT_CURSIVE_MENU, rufl_family_menu);
+	ro_gui_wimp_event_register_menu_gright(
+		w, FONT_FANTASY_FIELD, FONT_FANTASY_MENU, rufl_family_menu);
+	ro_gui_wimp_event_register_menu_gright(
+		w, FONT_DEFAULT_FIELD, FONT_DEFAULT_MENU, default_menu);
+	ro_gui_wimp_event_register_numeric_field(w,
+						 FONT_DEFAULT_SIZE,
+						 FONT_DEFAULT_INC,
+						 FONT_DEFAULT_DEC,
+						 50,
+						 1000,
+						 1,
+						 1);
+	ro_gui_wimp_event_register_numeric_field(w,
+						 FONT_MINIMUM_SIZE,
+						 FONT_MINIMUM_INC,
+						 FONT_MINIMUM_DEC,
+						 10,
+						 500,
+						 1,
+						 1);
+	ro_gui_wimp_event_register_button(w,
+					  FONT_DEFAULT_BUTTON,
+					  ro_gui_options_fonts_default);
 	ro_gui_wimp_event_register_cancel(w, FONT_CANCEL_BUTTON);
-	ro_gui_wimp_event_register_ok(w, FONT_OK_BUTTON,
-			ro_gui_options_fonts_ok);
+	ro_gui_wimp_event_register_ok(w,
+				      FONT_OK_BUTTON,
+				      ro_gui_options_fonts_ok);
 	ro_gui_wimp_event_set_help_prefix(w, "HelpFontConfig");
 	ro_gui_wimp_event_memorise(w);
 	return true;
-
 }
 
 void ro_gui_options_fonts_default(wimp_pointer *pointer)
@@ -123,18 +143,30 @@ void ro_gui_options_fonts_default(wimp_pointer *pointer)
 	/* set the default values */
 	ro_gui_set_icon_decimal(pointer->w, FONT_DEFAULT_SIZE, 128, 1);
 	ro_gui_set_icon_decimal(pointer->w, FONT_MINIMUM_SIZE, 85, 1);
-	ro_gui_set_icon_string(pointer->w, FONT_SANS_FIELD,
-			nsfont_exists("Homerton") ? "Homerton" : fallback, true);
-	ro_gui_set_icon_string(pointer->w, FONT_SERIF_FIELD,
-			nsfont_exists("Trinity") ? "Trinity" : fallback, true);
-	ro_gui_set_icon_string(pointer->w, FONT_MONOSPACE_FIELD,
-			nsfont_exists("Corpus") ? "Corpus" : fallback, true);
-	ro_gui_set_icon_string(pointer->w, FONT_CURSIVE_FIELD,
-			nsfont_exists("Churchill") ? "Churchill" : fallback, true);
-	ro_gui_set_icon_string(pointer->w, FONT_FANTASY_FIELD,
-			nsfont_exists("Sassoon") ? "Sassoon" : fallback, true);
-	ro_gui_set_icon_string(pointer->w, FONT_DEFAULT_FIELD,
-			font_names[0], true);
+	ro_gui_set_icon_string(pointer->w,
+			       FONT_SANS_FIELD,
+			       nsfont_exists("Homerton") ? "Homerton"
+							 : fallback,
+			       true);
+	ro_gui_set_icon_string(pointer->w,
+			       FONT_SERIF_FIELD,
+			       nsfont_exists("Trinity") ? "Trinity" : fallback,
+			       true);
+	ro_gui_set_icon_string(pointer->w,
+			       FONT_MONOSPACE_FIELD,
+			       nsfont_exists("Corpus") ? "Corpus" : fallback,
+			       true);
+	ro_gui_set_icon_string(pointer->w,
+			       FONT_CURSIVE_FIELD,
+			       nsfont_exists("Churchill") ? "Churchill"
+							  : fallback,
+			       true);
+	ro_gui_set_icon_string(pointer->w,
+			       FONT_FANTASY_FIELD,
+			       nsfont_exists("Sassoon") ? "Sassoon" : fallback,
+			       true);
+	ro_gui_set_icon_string(
+		pointer->w, FONT_DEFAULT_FIELD, font_names[0], true);
 }
 
 bool ro_gui_options_fonts_ok(wimp_w w)
@@ -149,9 +181,9 @@ bool ro_gui_options_fonts_ok(wimp_w w)
 
 	if (nsoption_int(font_size) < nsoption_int(font_min_size)) {
 		nsoption_set_int(font_size, nsoption_int(font_min_size));
-		ro_gui_set_icon_decimal(w, FONT_DEFAULT_SIZE, nsoption_int(font_size), 1);
-	
-}
+		ro_gui_set_icon_decimal(
+			w, FONT_DEFAULT_SIZE, nsoption_int(font_size), 1);
+	}
 
 	nsoption_set_charp(font_sans,
 			   strdup(ro_gui_get_icon_string(w, FONT_SANS_FIELD)));
@@ -159,18 +191,21 @@ bool ro_gui_options_fonts_ok(wimp_w w)
 	nsoption_set_charp(font_serif,
 			   strdup(ro_gui_get_icon_string(w, FONT_SERIF_FIELD)));
 
-	nsoption_set_charp(font_mono,
-			   strdup(ro_gui_get_icon_string(w, FONT_MONOSPACE_FIELD)));
+	nsoption_set_charp(
+		font_mono,
+		strdup(ro_gui_get_icon_string(w, FONT_MONOSPACE_FIELD)));
 
 	nsoption_set_charp(font_cursive,
-			   strdup(ro_gui_get_icon_string(w, FONT_CURSIVE_FIELD)));
+			   strdup(ro_gui_get_icon_string(w,
+							 FONT_CURSIVE_FIELD)));
 
 	nsoption_set_charp(font_fantasy,
-			   strdup(ro_gui_get_icon_string(w, FONT_FANTASY_FIELD)));
+			   strdup(ro_gui_get_icon_string(w,
+							 FONT_FANTASY_FIELD)));
 
 	for (i = 0; i != 5; i++) {
-		if (!strcmp(font_names[i], ro_gui_get_icon_string(w,
-				FONT_DEFAULT_FIELD)))
+		if (!strcmp(font_names[i],
+			    ro_gui_get_icon_string(w, FONT_DEFAULT_FIELD)))
 			break;
 	}
 	if (i == 5)
@@ -196,14 +231,14 @@ bool ro_gui_options_fonts_init_menu(void)
 		ro_warn_user("NoMemory", 0);
 		return false;
 	}
-	default_menu->title_data.indirected_text.text =
-			(char *) messages_get("DefaultFonts");
+	default_menu->title_data.indirected_text.text = (char *)messages_get(
+		"DefaultFonts");
 	ro_gui_menu_init_structure(default_menu, 5);
 	for (i = 0; i < 5; i++) {
-		default_menu->entries[i].data.indirected_text.text =
-				(char *) font_names[i];
-		default_menu->entries[i].data.indirected_text.size =
-				strlen(font_names[i]);
+		default_menu->entries[i].data.indirected_text.text = (char *)
+			font_names[i];
+		default_menu->entries[i].data.indirected_text.size = strlen(
+			font_names[i]);
 	}
 	return true;
 }

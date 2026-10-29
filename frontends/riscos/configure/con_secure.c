@@ -42,25 +42,33 @@ static bool ro_gui_options_security_ok(wimp_w w);
 bool ro_gui_options_security_initialise(wimp_w w)
 {
 	/* set the current values */
-	ro_gui_set_icon_selected_state(w, SECURITY_REFERRER,
-                                       nsoption_bool(send_referer));
-	ro_gui_set_icon_integer(w, SECURITY_DURATION_FIELD,
-                                nsoption_int(expire_url));
+	ro_gui_set_icon_selected_state(w,
+				       SECURITY_REFERRER,
+				       nsoption_bool(send_referer));
+	ro_gui_set_icon_integer(w,
+				SECURITY_DURATION_FIELD,
+				nsoption_int(expire_url));
 
 	/* initialise all functions for a newly created window */
 	ro_gui_wimp_event_register_checkbox(w, SECURITY_REFERRER);
-	ro_gui_wimp_event_register_numeric_field(w, SECURITY_DURATION_FIELD,
-			SECURITY_DURATION_DEC, SECURITY_DURATION_INC,
-			0, 365, 1, 0);
-	ro_gui_wimp_event_register_button(w, SECURITY_DEFAULT_BUTTON,
-			ro_gui_options_security_default);
+	ro_gui_wimp_event_register_numeric_field(w,
+						 SECURITY_DURATION_FIELD,
+						 SECURITY_DURATION_DEC,
+						 SECURITY_DURATION_INC,
+						 0,
+						 365,
+						 1,
+						 0);
+	ro_gui_wimp_event_register_button(w,
+					  SECURITY_DEFAULT_BUTTON,
+					  ro_gui_options_security_default);
 	ro_gui_wimp_event_register_cancel(w, SECURITY_CANCEL_BUTTON);
-	ro_gui_wimp_event_register_ok(w, SECURITY_OK_BUTTON,
-			ro_gui_options_security_ok);
+	ro_gui_wimp_event_register_ok(w,
+				      SECURITY_OK_BUTTON,
+				      ro_gui_options_security_ok);
 	ro_gui_wimp_event_set_help_prefix(w, "HelpSecurityConfig");
 	ro_gui_wimp_event_memorise(w);
 	return true;
-
 }
 
 void ro_gui_options_security_default(wimp_pointer *pointer)
@@ -75,9 +83,10 @@ bool ro_gui_options_security_ok(wimp_w w)
 	nsoption_set_bool(send_referer,
 			  ro_gui_get_icon_selected_state(w, SECURITY_REFERRER));
 
-	nsoption_set_int(expire_url,
-			 ro_gui_get_icon_decimal(w,SECURITY_DURATION_FIELD, 0));
+	nsoption_set_int(
+		expire_url,
+		ro_gui_get_icon_decimal(w, SECURITY_DURATION_FIELD, 0));
 
 	ro_gui_save_options();
-  	return true;
+	return true;
 }

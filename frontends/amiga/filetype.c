@@ -40,16 +40,14 @@
 
 static struct MinList *ami_mime_list = NULL;
 
-struct ami_mime_entry
-{
+struct ami_mime_entry {
 	lwc_string *mimetype;
 	lwc_string *datatype;
 	lwc_string *filetype;
 	lwc_string *plugincmd;
 };
 
-enum
-{
+enum {
 	AMI_MIME_MIMETYPE,
 	AMI_MIME_DATATYPE,
 	AMI_MIME_FILETYPE,
@@ -74,27 +72,30 @@ const char *fetch_filetype(const char *unix_path)
 	struct DataType *dtn;
 	BOOL found = FALSE;
 	lwc_string *lwc_mimetype;
-  size_t plen = strlen(unix_path);
+	size_t plen = strlen(unix_path);
 
 	/* First, check if we appear to have an icon.
 	   We'll just do a filename check here for quickness, although the
 	   first word ought to be checked against WB_DISKMAGIC really. */
 
-	if((plen >= 5) && (strcmp(unix_path + plen - 5, ".info") == 0)) {
+	if ((plen >= 5) && (strcmp(unix_path + plen - 5, ".info") == 0)) {
 		strlcpy(mimetype, "image/x-amiga-icon", sizeof(mimetype));
 		found = TRUE;
 	}
 
 
-	/* Secondly try getting a tooltype "MIMETYPE" and use that as the MIME type.
-	    Will fail over to default icons if the file doesn't have a real icon. */
+	/* Secondly try getting a tooltype "MIMETYPE" and use that as the MIME
+	   type. Will fail over to default icons if the file doesn't have a real
+	   icon. */
 
-	if(!found) {
-		if((dobj = GetIconTags(unix_path,ICONGETA_FailIfUnavailable,FALSE,
-						TAG_DONE))) {
+	if (!found) {
+		if ((dobj = GetIconTags(unix_path,
+					ICONGETA_FailIfUnavailable,
+					FALSE,
+					TAG_DONE))) {
 			STRPTR ttype = NULL;
 			ttype = FindToolType(dobj->do_ToolTypes, "MIMETYPE");
-			if(ttype) {
+			if (ttype) {
 				strlcpy(mimetype, ttype, sizeof(mimetype));
 				found = TRUE;
 			}
@@ -104,12 +105,16 @@ const char *fetch_filetype(const char *unix_path)
 
 	/* If that didn't work, use the MIME file and DataTypes */
 
-	if(!found) {
+	if (!found) {
 		BPTR lock;
 		if ((lock = Lock(unix_path, ACCESS_READ))) {
-			if ((dtn = ObtainDataTypeA (DTST_FILE, (APTR)lock, NULL))) {
-				if(ami_mime_from_datatype(dtn, &lwc_mimetype, NULL)) {
-					strlcpy(mimetype, lwc_string_data(lwc_mimetype), sizeof(mimetype));
+			if ((dtn = ObtainDataTypeA(
+				     DTST_FILE, (APTR)lock, NULL))) {
+				if (ami_mime_from_datatype(
+					    dtn, &lwc_mimetype, NULL)) {
+					strlcpy(mimetype,
+						lwc_string_data(lwc_mimetype),
+						sizeof(mimetype));
 					found = TRUE;
 					ReleaseDataType(dtn);
 				}
@@ -124,55 +129,56 @@ const char *fetch_filetype(const char *unix_path)
 	 * MIME type from the icon (step two, above).
 	 */
 
-	if((!found) || (strcmp("text/plain", mimetype) == 0))
-	{
-		if(ami_ends_with(unix_path, plen, ".css") ||
-      ami_ends_with(unix_path, plen, ",f79"))
-    {
-      strlcpy(mimetype, "text/css", sizeof(mimetype));
-      found = TRUE;
-    }
+	if ((!found) || (strcmp("text/plain", mimetype) == 0)) {
+		if (ami_ends_with(unix_path, plen, ".css") ||
+		    ami_ends_with(unix_path, plen, ",f79")) {
+			strlcpy(mimetype, "text/css", sizeof(mimetype));
+			found = TRUE;
+		}
 
-		if(ami_ends_with(unix_path, plen, ".htm") ||
-      ami_ends_with(unix_path, plen, ".html") ||
-      ami_ends_with(unix_path, plen, ",faf"))
-    {
-      strlcpy(mimetype, "text/html", sizeof(mimetype));
-      found = TRUE;
-    }
-		if(ami_ends_with(unix_path, plen, ".js")) {
-      strlcpy(mimetype, "application/javascript", sizeof(mimetype));
-      found = TRUE;
-    }
+		if (ami_ends_with(unix_path, plen, ".htm") ||
+		    ami_ends_with(unix_path, plen, ".html") ||
+		    ami_ends_with(unix_path, plen, ",faf")) {
+			strlcpy(mimetype, "text/html", sizeof(mimetype));
+			found = TRUE;
+		}
+		if (ami_ends_with(unix_path, plen, ".js")) {
+			strlcpy(mimetype,
+				"application/javascript",
+				sizeof(mimetype));
+			found = TRUE;
+		}
 	}
 
-	if(!found) strlcpy(mimetype, "text/plain", sizeof(mimetype)); /* If all else fails */
+	if (!found)
+		strlcpy(mimetype,
+			"text/plain",
+			sizeof(mimetype)); /* If all else fails */
 
 	return mimetype;
 }
 
 const char *ami_content_type_to_file_type(content_type type)
 {
-	switch(type)
-	{
-		case CONTENT_HTML:
-			return "html";
+	switch (type) {
+	case CONTENT_HTML:
+		return "html";
 		break;
 
-		case CONTENT_TEXTPLAIN:
-			return "ascii";
+	case CONTENT_TEXTPLAIN:
+		return "ascii";
 		break;
 
-		case CONTENT_CSS:
-			return "css";
+	case CONTENT_CSS:
+		return "css";
 		break;
 
-		case CONTENT_IMAGE:
-			return "picture";
+	case CONTENT_IMAGE:
+		return "picture";
 		break;
 
-		default:
-			return "project";	
+	default:
+		return "project";
 		break;
 	}
 }
@@ -193,23 +199,23 @@ nserror ami_mime_init(const char *mimefile)
 	char buffer[256];
 	BPTR fh = 0;
 	struct RDArgs *rargs = NULL;
-	CONST_STRPTR template = "MIMETYPE/A,DT=DATATYPE/K,TYPE=DEFICON/K,CMD=PLUGINCMD/K";
-	long rarray[] = {0,0,0,0};
+	CONST_STRPTR template =
+		"MIMETYPE/A,DT=DATATYPE/K,TYPE=DEFICON/K,CMD=PLUGINCMD/K";
+	long rarray[] = {0, 0, 0, 0};
 	struct nsObject *node;
 	struct ami_mime_entry *mimeentry;
 
 	NSLOG(netsurf, INFO, "mimetypes file: %s", mimefile);
 
-	if(ami_mime_list == NULL)
+	if (ami_mime_list == NULL)
 		ami_mime_list = NewObjList();
 
-	rargs = AllocDosObjectTags(DOS_RDARGS,TAG_DONE);
-	if(rargs == NULL) return NSERROR_NOMEM;
+	rargs = AllocDosObjectTags(DOS_RDARGS, TAG_DONE);
+	if (rargs == NULL)
+		return NSERROR_NOMEM;
 
-	if((fh = FOpen(mimefile, MODE_OLDFILE, 0)))
-	{
-		while((FGets(fh, (STRPTR)&buffer, 256) != 0))
-		{
+	if ((fh = FOpen(mimefile, MODE_OLDFILE, 0))) {
+		while ((FGets(fh, (STRPTR)&buffer, 256) != 0)) {
 			rargs->RDA_Source.CS_Buffer = (char *)&buffer;
 			rargs->RDA_Source.CS_Length = 256;
 			rargs->RDA_Source.CS_CurChr = 0;
@@ -225,41 +231,56 @@ nserror ami_mime_init(const char *mimefile)
 			rarray[AMI_MIME_FILETYPE] = 0;
 			rarray[AMI_MIME_PLUGINCMD] = 0;
 
-			if(ReadArgs(template, rarray, rargs))
-			{
-				if ((node = AddObject(ami_mime_list, AMINS_MIME))) {
-					ObjectCallback(node, ami_mime_entry_free);
-					mimeentry = calloc(1, sizeof(struct ami_mime_entry));
+			if (ReadArgs(template, rarray, rargs)) {
+				if ((node = AddObject(ami_mime_list,
+						      AMINS_MIME))) {
+					ObjectCallback(node,
+						       ami_mime_entry_free);
+					mimeentry = calloc(
+						1,
+						sizeof(struct ami_mime_entry));
 					node->objstruct = mimeentry;
 
-					if(rarray[AMI_MIME_MIMETYPE])
-					{
-						lerror = lwc_intern_string((char *)rarray[AMI_MIME_MIMETYPE],
-									strlen((char *)rarray[AMI_MIME_MIMETYPE]), &mimeentry->mimetype);
+					if (rarray[AMI_MIME_MIMETYPE]) {
+						lerror = lwc_intern_string(
+							(char *)rarray
+								[AMI_MIME_MIMETYPE],
+							strlen((char *)rarray
+								       [AMI_MIME_MIMETYPE]),
+							&mimeentry->mimetype);
 						if (lerror != lwc_error_ok)
 							return NSERROR_NOMEM;
 					}
 
-					if(rarray[AMI_MIME_DATATYPE])
-					{
-						lerror = lwc_intern_string((char *)rarray[AMI_MIME_DATATYPE],
-									strlen((char *)rarray[AMI_MIME_DATATYPE]), &mimeentry->datatype);
+					if (rarray[AMI_MIME_DATATYPE]) {
+						lerror = lwc_intern_string(
+							(char *)rarray
+								[AMI_MIME_DATATYPE],
+							strlen((char *)rarray
+								       [AMI_MIME_DATATYPE]),
+							&mimeentry->datatype);
 						if (lerror != lwc_error_ok)
 							return NSERROR_NOMEM;
 					}
 
-					if(rarray[AMI_MIME_FILETYPE])
-					{
-						lerror = lwc_intern_string((char *)rarray[AMI_MIME_FILETYPE],
-									strlen((char *)rarray[AMI_MIME_FILETYPE]), &mimeentry->filetype);
+					if (rarray[AMI_MIME_FILETYPE]) {
+						lerror = lwc_intern_string(
+							(char *)rarray
+								[AMI_MIME_FILETYPE],
+							strlen((char *)rarray
+								       [AMI_MIME_FILETYPE]),
+							&mimeentry->filetype);
 						if (lerror != lwc_error_ok)
 							return NSERROR_NOMEM;
 					}
 
-					if(rarray[AMI_MIME_PLUGINCMD])
-					{
-						lerror = lwc_intern_string((char *)rarray[AMI_MIME_PLUGINCMD],
-									strlen((char *)rarray[AMI_MIME_PLUGINCMD]), &mimeentry->plugincmd);
+					if (rarray[AMI_MIME_PLUGINCMD]) {
+						lerror = lwc_intern_string(
+							(char *)rarray
+								[AMI_MIME_PLUGINCMD],
+							strlen((char *)rarray
+								       [AMI_MIME_PLUGINCMD]),
+							&mimeentry->plugincmd);
 						if (lerror != lwc_error_ok)
 							return NSERROR_NOMEM;
 					}
@@ -289,8 +310,8 @@ void ami_mime_free(void)
  * \return entry or NULL if no match
  */
 
-static struct ami_mime_entry *ami_mime_entry_locate(lwc_string *search,
-		int type, struct Node **start_node)
+static struct ami_mime_entry *
+ami_mime_entry_locate(lwc_string *search, int type, struct Node **start_node)
 {
 	struct nsObject *node;
 	struct nsObject *nnode;
@@ -298,69 +319,76 @@ static struct ami_mime_entry *ami_mime_entry_locate(lwc_string *search,
 	lwc_error lerror;
 	bool ret = false;
 
-	if(IsMinListEmpty(ami_mime_list)) return NULL;
+	if (IsMinListEmpty(ami_mime_list))
+		return NULL;
 
-	if(*start_node)
-	{
+	if (*start_node) {
 		node = (struct nsObject *)GetSucc(*start_node);
-		if(node == NULL) return NULL;
-	}
-	else
-	{
+		if (node == NULL)
+			return NULL;
+	} else {
 		node = (struct nsObject *)GetHead((struct List *)ami_mime_list);
 	}
 
-	do
-	{
-		nnode=(struct nsObject *)GetSucc((struct Node *)node);
+	do {
+		nnode = (struct nsObject *)GetSucc((struct Node *)node);
 		mimeentry = node->objstruct;
 
 		lerror = lwc_error_ok;
 
-		switch(type)
-		{
-			case AMI_MIME_MIMETYPE:
-				if(search != NULL)
-					lerror = lwc_string_isequal(mimeentry->mimetype, search, &ret);
-				else if(mimeentry->mimetype != NULL)
-					ret = true;
+		switch (type) {
+		case AMI_MIME_MIMETYPE:
+			if (search != NULL)
+				lerror = lwc_string_isequal(mimeentry->mimetype,
+							    search,
+							    &ret);
+			else if (mimeentry->mimetype != NULL)
+				ret = true;
 			break;
 
-			case AMI_MIME_DATATYPE:
-				if(search != NULL)
-					lerror = lwc_string_isequal(mimeentry->datatype, search, &ret);
-				else if(mimeentry->datatype != NULL)
-					ret = true;
+		case AMI_MIME_DATATYPE:
+			if (search != NULL)
+				lerror = lwc_string_isequal(mimeentry->datatype,
+							    search,
+							    &ret);
+			else if (mimeentry->datatype != NULL)
+				ret = true;
 			break;
 
-			case AMI_MIME_FILETYPE:
-				if(search != NULL)
-					lerror = lwc_string_isequal(mimeentry->filetype, search, &ret);
-				else if(mimeentry->filetype != NULL)
-					ret = true;
+		case AMI_MIME_FILETYPE:
+			if (search != NULL)
+				lerror = lwc_string_isequal(mimeentry->filetype,
+							    search,
+							    &ret);
+			else if (mimeentry->filetype != NULL)
+				ret = true;
 			break;
 
-			case AMI_MIME_PLUGINCMD:
-				if(search != NULL)
-					lerror = lwc_string_isequal(mimeentry->plugincmd, search, &ret);
-				else if(mimeentry->plugincmd != NULL)
-					ret = true;
+		case AMI_MIME_PLUGINCMD:
+			if (search != NULL)
+				lerror = lwc_string_isequal(
+					mimeentry->plugincmd, search, &ret);
+			else if (mimeentry->plugincmd != NULL)
+				ret = true;
 			break;
 		}
 
-		if((lerror == lwc_error_ok) && (ret == true))
+		if ((lerror == lwc_error_ok) && (ret == true))
 			break;
 
-	} while((node=nnode));
+	} while ((node = nnode));
 
 	*start_node = (struct Node *)node;
 
-	if(ret == true) return mimeentry;
-		else return NULL;
+	if (ret == true)
+		return mimeentry;
+	else
+		return NULL;
 }
 
 
-static APTR ami_mime_guess_add_datatype(struct DataType *dt, lwc_string **lwc_mimetype)
+static APTR
+ami_mime_guess_add_datatype(struct DataType *dt, lwc_string **lwc_mimetype)
 {
 	struct nsObject *node;
 	char mimetype[100];
@@ -371,84 +399,99 @@ static APTR ami_mime_guess_add_datatype(struct DataType *dt, lwc_string **lwc_mi
 	char *p;
 
 	node = AddObject(ami_mime_list, AMINS_MIME);
-	if(node == NULL) return NULL;
+	if (node == NULL)
+		return NULL;
 
 	mimeentry = calloc(1, sizeof(struct ami_mime_entry));
-	if(mimeentry == NULL) return NULL;
+	if (mimeentry == NULL)
+		return NULL;
 
 	node->objstruct = mimeentry;
 	ObjectCallback(node, ami_mime_entry_free);
 
-	lerror = lwc_intern_string(dth->dth_Name, strlen(dth->dth_Name), &mimeentry->datatype);
+	lerror = lwc_intern_string(dth->dth_Name,
+				   strlen(dth->dth_Name),
+				   &mimeentry->datatype);
 	if (lerror != lwc_error_ok)
 		return NULL;
 
 	dt_name_lwr = strdup(dth->dth_Name);
-	if(dt_name_lwr == NULL) return NULL;
+	if (dt_name_lwr == NULL)
+		return NULL;
 
 	strlwr(dt_name_lwr);
 	p = dt_name_lwr;
 
-	while(*p != '\0')
-	{
-		if(*p == ' ') *p = '-';
-		if(*p == '/') *p = '-';
+	while (*p != '\0') {
+		if (*p == ' ')
+			*p = '-';
+		if (*p == '/')
+			*p = '-';
 		p++;
 	}
 
-	switch(dth->dth_GroupID)
-	{
-		case GID_TEXT:
-		case GID_DOCUMENT:
-			if(strcmp("ascii", dt_name_lwr)==0)
-			{
-				strlcpy(mimetype, "text/plain", sizeof(mimetype));
-			}
-			else
-			{
-				snprintf(mimetype, sizeof(mimetype), "text/%s", dt_name_lwr);
-			}
+	switch (dth->dth_GroupID) {
+	case GID_TEXT:
+	case GID_DOCUMENT:
+		if (strcmp("ascii", dt_name_lwr) == 0) {
+			strlcpy(mimetype, "text/plain", sizeof(mimetype));
+		} else {
+			snprintf(mimetype,
+				 sizeof(mimetype),
+				 "text/%s",
+				 dt_name_lwr);
+		}
 		break;
-		case GID_SOUND:
-		case GID_INSTRUMENT:
-		case GID_MUSIC:
-			snprintf(mimetype, sizeof(mimetype), "audio/%s", dt_name_lwr);
+	case GID_SOUND:
+	case GID_INSTRUMENT:
+	case GID_MUSIC:
+		snprintf(mimetype, sizeof(mimetype), "audio/%s", dt_name_lwr);
 		break;
-		case GID_PICTURE:
-			if(strcmp("sprite", dt_name_lwr)==0)
-			{
-				strlcpy(mimetype, "image/x-riscos-sprite", sizeof(mimetype));
-			}
-			else
-			{
-				snprintf(mimetype, sizeof(mimetype), "image/%s", dt_name_lwr);
-			}
+	case GID_PICTURE:
+		if (strcmp("sprite", dt_name_lwr) == 0) {
+			strlcpy(mimetype,
+				"image/x-riscos-sprite",
+				sizeof(mimetype));
+		} else {
+			snprintf(mimetype,
+				 sizeof(mimetype),
+				 "image/%s",
+				 dt_name_lwr);
+		}
 		break;
-		case GID_ANIMATION:
-		case GID_MOVIE:
-			snprintf(mimetype, sizeof(mimetype), "video/%s", dt_name_lwr);
+	case GID_ANIMATION:
+	case GID_MOVIE:
+		snprintf(mimetype, sizeof(mimetype), "video/%s", dt_name_lwr);
 		break;
-		case GID_SYSTEM:
-		default:
-			if(strcmp("directory", dt_name_lwr)==0)
-			{
-				strlcpy(mimetype, "application/x-netsurf-directory", sizeof(mimetype));
-			}
-			else if(strcmp("binary", dt_name_lwr)==0)
-			{
-				strlcpy(mimetype, "application/octet-stream", sizeof(mimetype));
-			}
-			else snprintf(mimetype, sizeof(mimetype), "application/%s", dt_name_lwr);
+	case GID_SYSTEM:
+	default:
+		if (strcmp("directory", dt_name_lwr) == 0) {
+			strlcpy(mimetype,
+				"application/x-netsurf-directory",
+				sizeof(mimetype));
+		} else if (strcmp("binary", dt_name_lwr) == 0) {
+			strlcpy(mimetype,
+				"application/octet-stream",
+				sizeof(mimetype));
+		} else
+			snprintf(mimetype,
+				 sizeof(mimetype),
+				 "application/%s",
+				 dt_name_lwr);
 		break;
 	}
 
-	lerror = lwc_intern_string(mimetype, strlen(mimetype), &mimeentry->mimetype);
+	lerror = lwc_intern_string(mimetype,
+				   strlen(mimetype),
+				   &mimeentry->mimetype);
 	if (lerror != lwc_error_ok)
 		return NULL;
 
 	*lwc_mimetype = mimeentry->mimetype;
 
-	lerror = lwc_intern_string(dt_name_lwr, strlen(dt_name_lwr), &mimeentry->filetype);
+	lerror = lwc_intern_string(dt_name_lwr,
+				   strlen(dt_name_lwr),
+				   &mimeentry->filetype);
 	if (lerror != lwc_error_ok)
 		return NULL;
 
@@ -466,7 +509,8 @@ static APTR ami_mime_guess_add_datatype(struct DataType *dt, lwc_string **lwc_mi
  */
 
 struct Node *ami_mime_from_datatype(struct DataType *dt,
-		lwc_string **mimetype, struct Node *start_node)
+				    lwc_string **mimetype,
+				    struct Node *start_node)
 {
 	struct DataTypeHeader *dth;
 	struct Node *node;
@@ -474,10 +518,13 @@ struct Node *ami_mime_from_datatype(struct DataType *dt,
 	lwc_string *dt_name;
 	lwc_error lerror;
 
-	if(dt == NULL) return NULL;
+	if (dt == NULL)
+		return NULL;
 
 	dth = dt->dtn_Header;
-	lerror = lwc_intern_string(dth->dth_Name, strlen(dth->dth_Name), &dt_name);
+	lerror = lwc_intern_string(dth->dth_Name,
+				   strlen(dth->dth_Name),
+				   &dt_name);
 	if (lerror != lwc_error_ok)
 		return NULL;
 
@@ -485,20 +532,15 @@ struct Node *ami_mime_from_datatype(struct DataType *dt,
 	mimeentry = ami_mime_entry_locate(dt_name, AMI_MIME_DATATYPE, &node);
 	lwc_string_unref(dt_name);
 
-	if(mimeentry != NULL)
-	{
+	if (mimeentry != NULL) {
 		*mimetype = mimeentry->mimetype;
 		return (struct Node *)node;
-	}
-	else
-	{
-		if(start_node == NULL)
-		{
-			/* If there are no matching entries in the file, guess */
+	} else {
+		if (start_node == NULL) {
+			/* If there are no matching entries in the file, guess
+			 */
 			return ami_mime_guess_add_datatype(dt, mimetype);
-		}
-		else
-		{
+		} else {
 			return NULL;
 		}
 	}
@@ -514,7 +556,8 @@ struct Node *ami_mime_from_datatype(struct DataType *dt,
  */
 
 struct Node *ami_mime_to_filetype(lwc_string *mimetype,
-		lwc_string **filetype, struct Node *start_node)
+				  lwc_string **filetype,
+				  struct Node *start_node)
 {
 	struct Node *node;
 	struct ami_mime_entry *mimeentry;
@@ -522,13 +565,10 @@ struct Node *ami_mime_to_filetype(lwc_string *mimetype,
 	node = start_node;
 	mimeentry = ami_mime_entry_locate(mimetype, AMI_MIME_MIMETYPE, &node);
 
-	if(mimeentry != NULL)
-	{
+	if (mimeentry != NULL) {
 		*filetype = mimeentry->filetype;
 		return (struct Node *)node;
-	}
-	else
-	{
+	} else {
 		return NULL;
 	}
 }
@@ -543,7 +583,7 @@ const char *ami_mime_content_to_filetype(struct hlcache_handle *c)
 
 	node = ami_mime_to_filetype(mimetype, &filetype, NULL);
 
-	if(node && (filetype != NULL))
+	if (node && (filetype != NULL))
 		return lwc_string_data(filetype);
 	else
 		return ami_content_type_to_file_type(content_get_type(c));
@@ -565,13 +605,10 @@ struct Node *ami_mime_has_cmd(lwc_string **mimetype, struct Node *start_node)
 	node = start_node;
 	mimeentry = ami_mime_entry_locate(NULL, AMI_MIME_PLUGINCMD, &node);
 
-	if(mimeentry != NULL)
-	{
+	if (mimeentry != NULL) {
 		*mimetype = mimeentry->mimetype;
 		return (struct Node *)node;
-	}
-	else
-	{
+	} else {
 		return NULL;
 	}
 }
@@ -586,7 +623,8 @@ struct Node *ami_mime_has_cmd(lwc_string **mimetype, struct Node *start_node)
  */
 
 static struct Node *ami_mime_to_plugincmd(lwc_string *mimetype,
-		lwc_string **plugincmd, struct Node *start_node)
+					  lwc_string **plugincmd,
+					  struct Node *start_node)
 {
 	struct Node *node;
 	struct ami_mime_entry *mimeentry;
@@ -594,13 +632,10 @@ static struct Node *ami_mime_to_plugincmd(lwc_string *mimetype,
 	node = start_node;
 	mimeentry = ami_mime_entry_locate(mimetype, AMI_MIME_MIMETYPE, &node);
 
-	if(mimeentry != NULL)
-	{
+	if (mimeentry != NULL) {
 		*plugincmd = mimeentry->plugincmd;
 		return (struct Node *)node;
-	}
-	else
-	{
+	} else {
 		return NULL;
 	}
 }
@@ -613,11 +648,12 @@ lwc_string *ami_mime_content_to_cmd(struct hlcache_handle *c)
 
 	mimetype = content_get_mime_type(c);
 
-	node = ami_mime_to_plugincmd(mimetype,
-		&plugincmd, NULL);
+	node = ami_mime_to_plugincmd(mimetype, &plugincmd, NULL);
 
-	if(node && (plugincmd != NULL)) return plugincmd;
-		else return NULL;
+	if (node && (plugincmd != NULL))
+		return plugincmd;
+	else
+		return NULL;
 }
 
 /**
@@ -632,7 +668,7 @@ bool ami_mime_compare(struct hlcache_handle *c, const char *type)
 	lwc_string *mime_filetype;
 	lwc_string *mime = content_get_mime_type(c);
 
-	if(ami_mime_to_filetype(mime, &mime_filetype, NULL) == NULL)
+	if (ami_mime_to_filetype(mime, &mime_filetype, NULL) == NULL)
 		return false;
 
 	lerror = lwc_intern_string(type, strlen(type), &filetype);
@@ -654,11 +690,19 @@ void ami_mime_dump(void)
 	struct Node *node = NULL;
 	struct ami_mime_entry *mimeentry;
 
-	while((mimeentry = ami_mime_entry_locate(NULL, AMI_MIME_MIMETYPE, &node))) {
-		NSLOG(netsurf, INFO, "%s DT=\"%s\" TYPE=\"%s\" CMD=\"%s\"",
-		      mimeentry->mimetype ? lwc_string_data(mimeentry->mimetype) : "",
-		      mimeentry->datatype ? lwc_string_data(mimeentry->datatype) : "",
-		      mimeentry->filetype ? lwc_string_data(mimeentry->filetype) : "",
-		      mimeentry->plugincmd ? lwc_string_data(mimeentry->plugincmd) : "");
+	while ((mimeentry = ami_mime_entry_locate(
+			NULL, AMI_MIME_MIMETYPE, &node))) {
+		NSLOG(netsurf,
+		      INFO,
+		      "%s DT=\"%s\" TYPE=\"%s\" CMD=\"%s\"",
+		      mimeentry->mimetype ? lwc_string_data(mimeentry->mimetype)
+					  : "",
+		      mimeentry->datatype ? lwc_string_data(mimeentry->datatype)
+					  : "",
+		      mimeentry->filetype ? lwc_string_data(mimeentry->filetype)
+					  : "",
+		      mimeentry->plugincmd
+			      ? lwc_string_data(mimeentry->plugincmd)
+			      : "");
 	};
 }

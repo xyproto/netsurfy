@@ -44,7 +44,7 @@ struct sched_entry {
 };
 
 /** Queue of scheduled callbacks (sentinel at head). */
-static struct sched_entry sched_queue = { 0, 0, 0, 0 };
+static struct sched_entry sched_queue = {0, 0, 0, 0};
 
 /** Items have been scheduled. */
 bool sched_active = false;
@@ -116,9 +116,8 @@ nserror riscos_schedule(int t, void (*callback)(void *p), void *p)
 	entry->callback = callback;
 	entry->p = p;
 
-	for (queue = &sched_queue;
-			queue->next && queue->next->time <= time;
-			queue = queue->next)
+	for (queue = &sched_queue; queue->next && queue->next->time <= time;
+	     queue = queue->next)
 		;
 	entry->next = queue->next;
 	queue->next = entry;
@@ -159,5 +158,5 @@ bool schedule_run(void)
 	} else
 		sched_active = false;
 
-        return sched_active;
+	return sched_active;
 }

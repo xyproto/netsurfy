@@ -21,8 +21,7 @@
 
 #include <exec/lists.h>
 
-enum
-{
+enum {
 	AMINS_UNKNOWN,
 	AMINS_CALLBACK,
 	AMINS_WINDOW,
@@ -39,8 +38,7 @@ enum
 	AMINS_RECT
 };
 
-struct nsObject
-{
+struct nsObject {
 	struct Node dtz_Node;
 	ULONG Type;
 	void *objstruct;
@@ -63,4 +61,3 @@ struct MinList *ami_AllocMinList(void);
 bool ami_object_init(void);
 void ami_object_fini(void);
 #endif
-

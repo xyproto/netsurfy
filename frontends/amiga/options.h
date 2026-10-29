@@ -24,7 +24,6 @@
 #endif
 
 
-
 NSOPTION_STRING(url_file, NULL)
 NSOPTION_STRING(hotlist_file, NULL)
 NSOPTION_STRING(pubscreen_name, NULL)
@@ -39,7 +38,8 @@ NSOPTION_BOOL(os_mouse_pointers, true)
 NSOPTION_BOOL(use_openurl_lib, false)
 NSOPTION_BOOL(tab_close_warn, true)
 NSOPTION_BOOL(tab_always_show, false)
-NSOPTION_BOOL(tab_new_session, false) /* When NetSurf is already running, open new tab */
+NSOPTION_BOOL(tab_new_session,
+	      false) /* When NetSurf is already running, open new tab */
 NSOPTION_BOOL(kiosk_mode, false)
 NSOPTION_STRING(search_engines_file, "PROGDIR:Resources/SearchEngines")
 NSOPTION_STRING(arexx_dir, "PROGDIR:Rexx")
@@ -102,4 +102,3 @@ NSOPTION_BOOL(friend_bitmap, false)
 NSOPTION_BOOL(invert_alpha, true)
 
 #endif
-

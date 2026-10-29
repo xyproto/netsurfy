@@ -44,7 +44,12 @@ bool fb_font_finalise(void);
  * \return NSERROR_OK and char_offset and actual_x updated or
  *          appropriate error code on faliure
  */
-nserror fb_font_position(const struct plot_font_style *fstyle, const char *string, size_t length, int x, size_t *char_offset, int *actual_x);
+nserror fb_font_position(const struct plot_font_style *fstyle,
+			 const char *string,
+			 size_t length,
+			 int x,
+			 size_t *char_offset,
+			 int *actual_x);
 
 /**
  * Measure the width of a string.
@@ -55,7 +60,10 @@ nserror fb_font_position(const struct plot_font_style *fstyle, const char *strin
  * \param[out] width updated to width of string[0..length)
  * \return NSERROR_OK and width updated or appropriate error code on faliure
  */
-nserror fb_font_width(const struct plot_font_style *fstyle, const char *string, size_t length, int *width);
+nserror fb_font_width(const struct plot_font_style *fstyle,
+		      const char *string,
+		      size_t length,
+		      int *width);
 
 
 #ifdef FB_USE_FREETYPE
@@ -65,4 +73,3 @@ nserror fb_font_width(const struct plot_font_style *fstyle, const char *string, 
 #endif
 
 #endif /* NETSURF_FB_FONT_H */
-

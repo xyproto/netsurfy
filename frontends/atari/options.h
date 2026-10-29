@@ -44,5 +44,3 @@ NSOPTION_STRING(downloads_path, "downloads")
 NSOPTION_STRING(url_file, "url.db")
 NSOPTION_STRING(hotlist_file, "hotlist")
 NSOPTION_STRING(tree_icons_path, "./res/icons")
-
-

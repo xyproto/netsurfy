@@ -54,8 +54,10 @@ struct throbber *ro_gui_throbber_create(struct theme_descriptor *theme);
  */
 
 bool ro_gui_throbber_rebuild(struct throbber *throbber,
-		struct theme_descriptor *theme, theme_style style,
-		wimp_w window, bool shaded);
+			     struct theme_descriptor *theme,
+			     theme_style style,
+			     wimp_w window,
+			     bool shaded);
 
 
 /**
@@ -78,7 +80,8 @@ void ro_gui_throbber_destroy(struct throbber *throbber);
  */
 
 bool ro_gui_throbber_get_dims(struct throbber *throbber,
-		int *width, int *height);
+			      int *width,
+			      int *height);
 
 
 /**
@@ -96,7 +99,10 @@ bool ro_gui_throbber_get_dims(struct throbber *throbber,
  */
 
 bool ro_gui_throbber_set_extent(struct throbber *throbber,
-		int x0, int y0, int x1, int y1);
+				int x0,
+				int y0,
+				int x1,
+				int y1);
 
 
 /**
@@ -122,9 +128,12 @@ bool ro_gui_throbber_hide(struct throbber *throbber, bool hide);
  * \return true if handled exclusively; else false.
  */
 
-bool ro_gui_throbber_help_suffix(struct throbber *throbber, wimp_i i,
-		os_coord *screenpos, wimp_window_state *state,
-		wimp_mouse_state buttons, const char **suffix);
+bool ro_gui_throbber_help_suffix(struct throbber *throbber,
+				 wimp_i i,
+				 os_coord *screenpos,
+				 wimp_window_state *state,
+				 wimp_mouse_state buttons,
+				 const char **suffix);
 
 /**
  * Start or update the amimation of a throbber.
@@ -144,4 +153,3 @@ bool ro_gui_throbber_animate(struct throbber *throbber);
 bool ro_gui_throbber_stop(struct throbber *throbber);
 
 #endif
-

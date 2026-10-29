@@ -157,9 +157,7 @@ static TCase *bloom_match_case_create(void)
 
 	tc = tcase_create("Match");
 
-	tcase_add_checked_fixture(tc,
-				  dict_bloom_create,
-				  dict_bloom_teardown);
+	tcase_add_checked_fixture(tc, dict_bloom_create, dict_bloom_teardown);
 
 	tcase_add_test(tc, bloom_match_test);
 
@@ -191,8 +189,8 @@ START_TEST(bloom_falsepositive_test)
 	fclose(dictf);
 
 	printf("false positive rate %d%%/%d%%\n",
-	       (false_positives * 100)/BLOOM_SIZE,
-		FALSE_POSITIVE_RATE);
+	       (false_positives * 100) / BLOOM_SIZE,
+	       FALSE_POSITIVE_RATE);
 	ck_assert(false_positives < ((BLOOM_SIZE * FALSE_POSITIVE_RATE) / 100));
 }
 END_TEST
@@ -207,9 +205,7 @@ static TCase *bloom_rate_case_create(void)
 
 	tc = tcase_create("False positive rate");
 
-	tcase_add_checked_fixture(tc,
-				  dict_bloom_create,
-				  dict_bloom_teardown);
+	tcase_add_checked_fixture(tc, dict_bloom_create, dict_bloom_teardown);
 
 	tcase_add_test(tc, bloom_falsepositive_test);
 

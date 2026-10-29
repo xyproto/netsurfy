@@ -39,7 +39,7 @@
 #include "atari/gemtk/gemtk.h"
 #include "atari/res/netsurf.rsh"
 
-extern struct gui_window * input_window;
+extern struct gui_window *input_window;
 
 
 static void nsatari_search_set_status(bool found, void *p);
@@ -57,7 +57,6 @@ static struct gui_search_table search_table = {
 };
 
 struct gui_search_table *atari_search_table = &search_table;
-
 
 
 /**
@@ -160,26 +159,25 @@ void nsatari_search_set_back_state(bool active, void *p)
 
 static int apply_form(OBJECT *obj, struct s_search_form_state *s)
 {
-	char * cstr;
+	char *cstr;
 
 	assert(s != NULL);
 
 	s->flags = 0;
 
-	if ((obj[TOOLBAR_CB_CASESENSE].ob_state & OS_SELECTED) != 0 ) {
+	if ((obj[TOOLBAR_CB_CASESENSE].ob_state & OS_SELECTED) != 0) {
 		s->flags |= SEARCH_FLAG_CASE_SENSITIVE;
 	}
-	if ((obj[TOOLBAR_CB_SHOWALL].ob_state & OS_SELECTED) != 0 ) {
+	if ((obj[TOOLBAR_CB_SHOWALL].ob_state & OS_SELECTED) != 0) {
 		s->flags |= SEARCH_FLAG_SHOWALL;
 	}
 
 	cstr = gemtk_obj_get_text(obj, TOOLBAR_TB_SRCH);
 	snprintf(s->text, 32, "%s", cstr);
-	return ( 0 );
-
+	return (0);
 }
 
-static void set_text(OBJECT *obj, short idx, char * text, int len)
+static void set_text(OBJECT *obj, short idx, char *text, int len)
 {
 	char spare[255];
 
@@ -196,7 +194,7 @@ static void set_text(OBJECT *obj, short idx, char * text, int len)
 }
 
 
-void nsatari_search_restore_form( struct s_search_form_session *s, OBJECT *obj)
+void nsatari_search_restore_form(struct s_search_form_session *s, OBJECT *obj)
 {
 	if ((s->state.flags & SEARCH_FLAG_SHOWALL) != 0) {
 		obj[TOOLBAR_CB_SHOWALL].ob_state |= OS_SELECTED;
@@ -243,26 +241,27 @@ static bool search_session_compare(struct s_search_form_session *s, OBJECT *obj)
 	flags_old = s->state.flags;
 
 	apply_form(obj, &cur);
-	if ((cur.flags&flags_mask) != (flags_old&flags_mask)) {
-		return( true );
+	if ((cur.flags & flags_mask) != (flags_old & flags_mask)) {
+		return (true);
 	}
 
-	char * cstr;
+	char *cstr;
 	cstr = gemtk_obj_get_text(obj, TOOLBAR_TB_SRCH);
 	if (cstr != NULL) {
-		if (strcmp(cstr, (char*)&s->state.text) != 0) {
+		if (strcmp(cstr, (char *)&s->state.text) != 0) {
 			return (true);
 		}
 	}
 
-	return( false );
+	return (false);
 }
 
 
-void nsatari_search_perform(struct s_search_form_session *s, OBJECT *obj,
+void nsatari_search_perform(struct s_search_form_session *s,
+			    OBJECT *obj,
 			    search_flags_t f)
 {
-	assert(s!=null);
+	assert(s != null);
 	assert(input_window->browser->bw == s->g->browser->bw);
 
 	if (search_session_compare(s, obj)) {
@@ -271,20 +270,21 @@ void nsatari_search_perform(struct s_search_form_session *s, OBJECT *obj,
 	}
 
 	/* get search direction manually: */
-	if ( (f&SEARCH_FLAG_FORWARDS) != 0 ) {
+	if ((f & SEARCH_FLAG_FORWARDS) != 0) {
 		s->state.flags |= SEARCH_FLAG_FORWARDS;
 	} else {
 		s->state.flags &= (~SEARCH_FLAG_FORWARDS);
 	}
 
-	browser_window_search(s->g->browser->bw, s,
+	browser_window_search(s->g->browser->bw,
+			      s,
 			      s->state.flags,
 			      gemtk_obj_get_text(obj, TOOLBAR_TB_SRCH));
 }
 
 
-struct s_search_form_session * nsatari_search_session_create(OBJECT * obj,
-							     struct gui_window *gw)
+struct s_search_form_session *
+nsatari_search_session_create(OBJECT *obj, struct gui_window *gw)
 {
 	struct s_search_form_session *sfs;
 
@@ -299,5 +299,5 @@ struct s_search_form_session * nsatari_search_session_create(OBJECT * obj,
 
 	browser_window_search_clear(gw->browser->bw);
 
-	return(sfs);
+	return (sfs);
 }

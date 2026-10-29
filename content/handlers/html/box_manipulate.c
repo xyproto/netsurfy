@@ -86,15 +86,14 @@ static int box_talloc_destructor(struct box *b)
 
 
 /* Exported function documented in html/box.h */
-struct box *
-box_create(css_select_results *styles,
-	   css_computed_style *style,
-	   bool style_owned,
-	   nsurl *href,
-	   const char *target,
-	   const char *title,
-	   lwc_string *id,
-	   void *context)
+struct box *box_create(css_select_results *styles,
+		       css_computed_style *style,
+		       bool style_owned,
+		       nsurl *href,
+		       const char *target,
+		       const char *title,
+		       lwc_string *id,
+		       void *context)
 {
 	unsigned int i;
 	struct box *box;
@@ -163,10 +162,10 @@ void box_add_child(struct box *parent, struct box *child)
 	assert(parent);
 	assert(child);
 
-	if (parent->children != 0) {	/* has children already */
+	if (parent->children != 0) { /* has children already */
 		parent->last->next = child;
 		child->prev = parent->last;
-	} else {			/* this is the first child */
+	} else { /* this is the first child */
 		parent->children = child;
 		child->prev = 0;
 	}
@@ -248,11 +247,10 @@ void box_free_box(struct box *box)
 
 
 /* exported interface documented in html/box.h */
-nserror
-box_handle_scrollbars(struct content *c,
-		      struct box *box,
-		      bool bottom,
-		      bool right)
+nserror box_handle_scrollbars(struct content *c,
+			      struct box *box,
+			      bool bottom,
+			      bool right)
 {
 	struct html_scrollbar_data *data;
 	int visible_width, visible_height;
@@ -281,13 +279,13 @@ box_handle_scrollbars(struct content *c,
 	visible_height = box->height + box->padding[TOP] + box->padding[BOTTOM];
 
 	full_width = ((box->descendant_x1 - box->border[RIGHT].width) >
-			visible_width) ?
-			box->descendant_x1 + box->padding[RIGHT] :
-			visible_width;
+		      visible_width)
+			     ? box->descendant_x1 + box->padding[RIGHT]
+			     : visible_width;
 	full_height = ((box->descendant_y1 - box->border[BOTTOM].width) >
-			visible_height) ?
-			box->descendant_y1 + box->padding[BOTTOM] :
-			visible_height;
+		       visible_height)
+			      ? box->descendant_y1 + box->padding[BOTTOM]
+			      : visible_height;
 
 	if (right) {
 		if (box->scroll_y == NULL) {
@@ -307,7 +305,7 @@ box_handle_scrollbars(struct content *c,
 			if (res != NSERROR_OK) {
 				return res;
 			}
-		} else  {
+		} else {
 			scrollbar_set_extents(box->scroll_y,
 					      visible_height,
 					      visible_height,
@@ -322,21 +320,23 @@ box_handle_scrollbars(struct content *c,
 			}
 			data->c = c;
 			data->box = box;
-			res = scrollbar_create(true,
-					       visible_width - (right ? SCROLLBAR_WIDTH : 0),
-					       full_width,
-					       visible_width,
-					       data,
-					       html_overflow_scroll_callback,
-					       &box->scroll_x);
+			res = scrollbar_create(
+				true,
+				visible_width - (right ? SCROLLBAR_WIDTH : 0),
+				full_width,
+				visible_width,
+				data,
+				html_overflow_scroll_callback,
+				&box->scroll_x);
 			if (res != NSERROR_OK) {
 				return res;
 			}
 		} else {
-			scrollbar_set_extents(box->scroll_x,
-					visible_width -
-					(right ? SCROLLBAR_WIDTH : 0),
-					visible_width, full_width);
+			scrollbar_set_extents(
+				box->scroll_x,
+				visible_width - (right ? SCROLLBAR_WIDTH : 0),
+				visible_width,
+				full_width);
 		}
 	}
 
@@ -346,5 +346,3 @@ box_handle_scrollbars(struct content *c,
 
 	return NSERROR_OK;
 }
-
-

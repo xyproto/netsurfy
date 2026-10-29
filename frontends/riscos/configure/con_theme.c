@@ -75,8 +75,7 @@ static wimp_window theme_pane_definition = {
 	1,
 	{""},
 	0,
-	{}
-};
+	{}};
 
 
 static wimp_w theme_pane;
@@ -104,53 +103,70 @@ bool ro_gui_options_theme_initialise(wimp_w w)
 		return false;
 	error = xwimp_create_window(&theme_pane_definition, &theme_pane);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_create_window: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_create_window: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		return false;
 	}
 	state.w = w;
 	error = xwimp_get_window_state(&state);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_window_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_window_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		return false;
 	}
 	icon_state.w = w;
 	icon_state.i = THEME_PANE_AREA;
 	error = xwimp_get_icon_state(&icon_state);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_icon_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_icon_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		return false;
 	}
 	state.w = theme_pane;
 	state.visible.x1 = state.visible.x0 + icon_state.icon.extent.x1 - 16 -
-			ro_get_vscroll_width(theme_pane);
+			   ro_get_vscroll_width(theme_pane);
 	state.visible.x0 += icon_state.icon.extent.x0 + 16;
 	state.visible.y0 = state.visible.y1 + icon_state.icon.extent.y0 + 16;
 	state.visible.y1 += icon_state.icon.extent.y1 - 28;
-	NSLOG(netsurf, INFO, "Y0 = %i, y1 = %i", icon_state.icon.extent.y0,
+	NSLOG(netsurf,
+	      INFO,
+	      "Y0 = %i, y1 = %i",
+	      icon_state.icon.extent.y0,
 	      icon_state.icon.extent.y1);
-	error = xwimp_open_window_nested(PTR_WIMP_OPEN(&state), w,
+	error = xwimp_open_window_nested(
+		PTR_WIMP_OPEN(&state),
+		w,
+		wimp_CHILD_LINKS_PARENT_VISIBLE_BOTTOM_OR_LEFT
+				<< wimp_CHILD_XORIGIN_SHIFT |
+			wimp_CHILD_LINKS_PARENT_VISIBLE_TOP_OR_RIGHT
+				<< wimp_CHILD_YORIGIN_SHIFT |
 			wimp_CHILD_LINKS_PARENT_VISIBLE_BOTTOM_OR_LEFT
-					<< wimp_CHILD_XORIGIN_SHIFT |
+				<< wimp_CHILD_LS_EDGE_SHIFT |
 			wimp_CHILD_LINKS_PARENT_VISIBLE_TOP_OR_RIGHT
-					<< wimp_CHILD_YORIGIN_SHIFT |
-			wimp_CHILD_LINKS_PARENT_VISIBLE_BOTTOM_OR_LEFT
-					<< wimp_CHILD_LS_EDGE_SHIFT |
+				<< wimp_CHILD_BS_EDGE_SHIFT |
 			wimp_CHILD_LINKS_PARENT_VISIBLE_TOP_OR_RIGHT
-					<< wimp_CHILD_BS_EDGE_SHIFT |
+				<< wimp_CHILD_RS_EDGE_SHIFT |
 			wimp_CHILD_LINKS_PARENT_VISIBLE_TOP_OR_RIGHT
-					<< wimp_CHILD_RS_EDGE_SHIFT |
-			wimp_CHILD_LINKS_PARENT_VISIBLE_TOP_OR_RIGHT
-					<< wimp_CHILD_TS_EDGE_SHIFT);
+				<< wimp_CHILD_TS_EDGE_SHIFT);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_open_window_nested: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_open_window_nested: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		return false;
 	}
 
-  	/* load themes */
+	/* load themes */
 	ro_gui_options_theme_load();
 
 	/* set the current selection */
@@ -158,15 +174,18 @@ bool ro_gui_options_theme_initialise(wimp_w w)
 	if (!theme_choice)
 		theme_choice = ro_gui_theme_find("Aletheia");
 	for (toolbar = toolbars; toolbar; toolbar = toolbar->next)
-		ro_gui_set_icon_selected_state(theme_pane, toolbar->icon_number,
-				(toolbar->descriptor == theme_choice));
+		ro_gui_set_icon_selected_state(theme_pane,
+					       toolbar->icon_number,
+					       (toolbar->descriptor ==
+						theme_choice));
 	ro_gui_wimp_event_memorise(theme_pane);
 	ro_gui_wimp_event_set_help_prefix(theme_pane, "HelpThemePConfig");
 
 	ro_gui_wimp_event_register_mouse_click(w, ro_gui_options_theme_click);
 	ro_gui_wimp_event_register_cancel(w, THEME_CANCEL_BUTTON);
-	ro_gui_wimp_event_register_ok(w, THEME_OK_BUTTON,
-			ro_gui_options_theme_ok);
+	ro_gui_wimp_event_register_ok(w,
+				      THEME_OK_BUTTON,
+				      ro_gui_options_theme_ok);
 	ro_gui_wimp_event_set_help_prefix(w, "HelpThemeConfig");
 	ro_gui_wimp_event_memorise(w);
 
@@ -181,8 +200,11 @@ void ro_gui_options_theme_finalise(wimp_w w)
 		ro_gui_wimp_event_finalise(theme_pane);
 		error = xwimp_delete_window(theme_pane);
 		if (error) {
-			NSLOG(netsurf, INFO, "xwimp_delete_window: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_delete_window: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 		}
 		theme_pane = 0;
@@ -197,9 +219,10 @@ bool ro_gui_options_theme_ok(wimp_w w)
 
 	/* find the current selection */
 	for (toolbar = toolbars; toolbar; toolbar = toolbar->next) {
-		if (ro_gui_get_icon_selected_state(theme_pane, toolbar->icon_number)) {
+		if (ro_gui_get_icon_selected_state(theme_pane,
+						   toolbar->icon_number)) {
 			theme_new = toolbar->descriptor;
-		  	break;
+			break;
 		}
 	}
 
@@ -209,7 +232,7 @@ bool ro_gui_options_theme_ok(wimp_w w)
 		ro_gui_theme_apply(theme_new);
 	} else {
 		nsoption_set_charp(theme, NULL);
-        }
+	}
 	ro_gui_save_options();
 
 	/* store the pane status */
@@ -223,19 +246,20 @@ bool ro_gui_options_theme_click(wimp_pointer *pointer)
 	struct toolbar_display *toolbar;
 
 	switch (pointer->i) {
-		case THEME_DEFAULT_BUTTON:
-			theme_default = ro_gui_theme_find("Aletheia");
-			for (toolbar = toolbars; toolbar; toolbar = toolbar->next)
-				ro_gui_set_icon_selected_state(theme_pane,
-						toolbar->icon_number,
-						(toolbar->descriptor == theme_default));
-			break;
-		case THEME_CANCEL_BUTTON:
-			ro_gui_wimp_event_restore(theme_pane);
-			break;
-		case THEME_OK_BUTTON:
-			ro_gui_wimp_event_memorise(theme_pane);
-			break;
+	case THEME_DEFAULT_BUTTON:
+		theme_default = ro_gui_theme_find("Aletheia");
+		for (toolbar = toolbars; toolbar; toolbar = toolbar->next)
+			ro_gui_set_icon_selected_state(theme_pane,
+						       toolbar->icon_number,
+						       (toolbar->descriptor ==
+							theme_default));
+		break;
+	case THEME_CANCEL_BUTTON:
+		ro_gui_wimp_event_restore(theme_pane);
+		break;
+	case THEME_OK_BUTTON:
+		ro_gui_wimp_event_memorise(theme_pane);
+		break;
 	}
 	return false;
 }
@@ -243,7 +267,7 @@ bool ro_gui_options_theme_click(wimp_pointer *pointer)
 void ro_gui_options_theme_load(void)
 {
 	os_error *error;
-	os_box extent = { 0, 0, 0, 0 };
+	os_box extent = {0, 0, 0, 0};
 	struct theme_descriptor *descriptor;
 	struct toolbar_display *link;
 	struct toolbar_display *toolbar_display;
@@ -264,16 +288,22 @@ void ro_gui_options_theme_load(void)
 	descriptor = theme_list;
 	while (descriptor != NULL) {
 		/* try to create a toolbar */
-		toolbar = ro_toolbar_create(descriptor, NULL,
-				THEME_STYLE_BROWSER_TOOLBAR,
-				TOOLBAR_FLAGS_DISPLAY, NULL, NULL, NULL);
+		toolbar = ro_toolbar_create(descriptor,
+					    NULL,
+					    THEME_STYLE_BROWSER_TOOLBAR,
+					    TOOLBAR_FLAGS_DISPLAY,
+					    NULL,
+					    NULL,
+					    NULL);
 		if (toolbar != NULL) {
-			ro_toolbar_add_buttons(toolbar, brower_toolbar_buttons,
+			ro_toolbar_add_buttons(toolbar,
+					       brower_toolbar_buttons,
 					       nsoption_charp(toolbar_browser));
 			ro_toolbar_add_url(toolbar);
 			ro_toolbar_add_throbber(toolbar);
 			ro_toolbar_rebuild(toolbar);
-			toolbar_display = calloc(sizeof(struct toolbar_display), 1);
+			toolbar_display = calloc(sizeof(struct toolbar_display),
+						 1);
 			if (!toolbar_display) {
 				NSLOG(netsurf, INFO, "No memory for calloc()");
 				ro_warn_user("NoMemory", 0);
@@ -285,7 +315,8 @@ void ro_gui_options_theme_load(void)
 				toolbars = toolbar_display;
 			} else {
 				link = toolbars;
-				while (link->next) link = link->next;
+				while (link->next)
+					link = link->next;
 				link->next = toolbar_display;
 			}
 			theme_count++;
@@ -297,8 +328,11 @@ void ro_gui_options_theme_load(void)
 	state.w = theme_pane;
 	error = xwimp_get_window_state(&state);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_window_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_window_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
@@ -311,19 +345,22 @@ void ro_gui_options_theme_load(void)
 	link = toolbars;
 	new_icon.w = theme_pane;
 	new_icon.icon.flags = wimp_ICON_TEXT | wimp_ICON_INDIRECTED |
-			wimp_ICON_VCENTRED |
-			(wimp_COLOUR_BLACK << wimp_ICON_FG_COLOUR_SHIFT) |
-			(wimp_COLOUR_VERY_LIGHT_GREY << wimp_ICON_BG_COLOUR_SHIFT);
+			      wimp_ICON_VCENTRED |
+			      (wimp_COLOUR_BLACK << wimp_ICON_FG_COLOUR_SHIFT) |
+			      (wimp_COLOUR_VERY_LIGHT_GREY
+			       << wimp_ICON_BG_COLOUR_SHIFT);
 	while (link) {
 		/* update the toolbar */
 		int item_height = 44 + 44 + 16;
-		if (link->next) item_height += 16;
+		if (link->next)
+			item_height += 16;
 		ro_toolbar_process(link->toolbar, parent_width, false);
-		extent.y0 = nested_y -
-				ro_toolbar_height(link->toolbar) -
-				item_height;
-		if (link->next) extent.y0 -= 16;
-		if (extent.y0 > min_extent) extent.y0 = min_extent;
+		extent.y0 = nested_y - ro_toolbar_height(link->toolbar) -
+			    item_height;
+		if (link->next)
+			extent.y0 -= 16;
+		if (extent.y0 > min_extent)
+			extent.y0 = min_extent;
 		xwimp_set_extent(theme_pane, &extent);
 
 		/* create the descriptor icons and separator line */
@@ -332,17 +369,17 @@ void ro_gui_options_theme_load(void)
 		new_icon.icon.flags &= ~wimp_ICON_BORDER;
 		new_icon.icon.flags |= wimp_ICON_SPRITE;
 		new_icon.icon.extent.y1 = nested_y -
-				ro_toolbar_height(link->toolbar) - 8;
+					  ro_toolbar_height(link->toolbar) - 8;
 		new_icon.icon.extent.y0 = nested_y -
-				ro_toolbar_height(link->toolbar) - 52;
+					  ro_toolbar_height(link->toolbar) - 52;
 		new_icon.icon.data.indirected_text_and_sprite.text =
 			(char *)&link->descriptor->name;
 		new_icon.icon.data.indirected_text_and_sprite.size =
 			strlen(link->descriptor->name) + 1;
 		new_icon.icon.data.indirected_text_and_sprite.validation =
-				theme_radio_validation;
-		new_icon.icon.flags |= (wimp_BUTTON_RADIO <<
-				wimp_ICON_BUTTON_TYPE_SHIFT);
+			theme_radio_validation;
+		new_icon.icon.flags |= (wimp_BUTTON_RADIO
+					<< wimp_ICON_BUTTON_TYPE_SHIFT);
 		xwimp_create_icon(&new_icon, &link->icon_number);
 		new_icon.icon.flags &= ~wimp_ICON_SPRITE;
 		new_icon.icon.extent.x0 = 52;
@@ -353,9 +390,9 @@ void ro_gui_options_theme_load(void)
 		new_icon.icon.data.indirected_text.size =
 			strlen(link->descriptor->author) + 1;
 		new_icon.icon.data.indirected_text.validation =
-				theme_null_validation;
-		new_icon.icon.flags &= ~(wimp_BUTTON_RADIO <<
-				wimp_ICON_BUTTON_TYPE_SHIFT);
+			theme_null_validation;
+		new_icon.icon.flags &= ~(wimp_BUTTON_RADIO
+					 << wimp_ICON_BUTTON_TYPE_SHIFT);
 		xwimp_create_icon(&new_icon, 0);
 		if (link->next) {
 			new_icon.icon.flags |= wimp_ICON_BORDER;
@@ -364,9 +401,9 @@ void ro_gui_options_theme_load(void)
 			new_icon.icon.extent.y1 -= 52;
 			new_icon.icon.extent.y0 = new_icon.icon.extent.y1 - 8;
 			new_icon.icon.data.indirected_text.text =
-					theme_null_validation;
+				theme_null_validation;
 			new_icon.icon.data.indirected_text.validation =
-					theme_line_validation;
+				theme_line_validation;
 			new_icon.icon.data.indirected_text.size = 1;
 			xwimp_create_icon(&new_icon, 0);
 		}
@@ -376,16 +413,17 @@ void ro_gui_options_theme_load(void)
 		state.yscroll = 0;
 		state.visible.y1 = nested_y + base_extent;
 		state.visible.y0 = state.visible.y1 -
-				ro_toolbar_height(link->toolbar) + 2;
-		xwimp_open_window_nested(PTR_WIMP_OPEN(&state), theme_pane,
+				   ro_toolbar_height(link->toolbar) + 2;
+		xwimp_open_window_nested(
+			PTR_WIMP_OPEN(&state),
+			theme_pane,
+			wimp_CHILD_LINKS_PARENT_WORK_AREA
+					<< wimp_CHILD_BS_EDGE_SHIFT |
 				wimp_CHILD_LINKS_PARENT_WORK_AREA
-						<< wimp_CHILD_BS_EDGE_SHIFT |
-				wimp_CHILD_LINKS_PARENT_WORK_AREA
-						<< wimp_CHILD_TS_EDGE_SHIFT);
+					<< wimp_CHILD_TS_EDGE_SHIFT);
 
 		/* continue processing */
-		nested_y -= ro_toolbar_height(link->toolbar) +
-				item_height;
+		nested_y -= ro_toolbar_height(link->toolbar) + item_height;
 		link = link->next;
 	}
 
@@ -413,8 +451,7 @@ void ro_gui_options_theme_free(void)
 		xwimp_delete_icon(theme_pane, toolbar->icon_number);
 		xwimp_delete_icon(theme_pane, toolbar->icon_number + 1);
 		if (next_toolbar)
-			xwimp_delete_icon(theme_pane,
-					toolbar->icon_number + 2);
+			xwimp_delete_icon(theme_pane, toolbar->icon_number + 2);
 		ro_toolbar_destroy(toolbar->toolbar);
 		free(toolbar);
 	}

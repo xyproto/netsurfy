@@ -1,5 +1,6 @@
 /*
- * Copyright 2008, 2009, 2012, 2016 Chris Young <chris@unsatisfactorysoftware.co.uk>
+ * Copyright 2008, 2009, 2012, 2016 Chris Young
+ * <chris@unsatisfactorysoftware.co.uk>
  *
  * This file is part of NetSurf, http://www.netsurf-browser.org/
  *
@@ -39,20 +40,31 @@ void ami_font_close_disk_font(struct TextFont *tfont);
 /* Font engine tables */
 struct ami_font_functions {
 	nserror (*width)(const plot_font_style_t *fstyle,
-			const char *string, size_t length,
-			int *width);
+			 const char *string,
+			 size_t length,
+			 int *width);
 
 	nserror (*posn)(const plot_font_style_t *fstyle,
-			const char *string, size_t length,
-			int x, size_t *char_offset, int *actual_x);
+			const char *string,
+			size_t length,
+			int x,
+			size_t *char_offset,
+			int *actual_x);
 
 	nserror (*split)(const plot_font_style_t *fstyle,
-			const char *string, size_t length,
-			int x, size_t *char_offset, int *actual_x);
+			 const char *string,
+			 size_t length,
+			 int x,
+			 size_t *char_offset,
+			 int *actual_x);
 
-	ULONG (*text)(struct RastPort *rp, const char *string,
-			ULONG length, const plot_font_style_t *fstyle,
-			int x, int y, bool aa);
+	ULONG (*text)(struct RastPort *rp,
+		      const char *string,
+		      ULONG length,
+		      const plot_font_style_t *fstyle,
+		      int x,
+		      int y,
+		      bool aa);
 };
 
 extern struct ami_font_functions *ami_nsfont;
@@ -60,4 +72,3 @@ extern struct ami_font_functions *ami_nsfont;
 extern struct gui_layout_table *ami_layout_table;
 
 #endif
-

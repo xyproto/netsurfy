@@ -44,7 +44,7 @@ void init_os_info(void)
 
 	atari_sysinfo.gemdos_version = Sversion();
 
-	if( tos_getcookie (C_FSMC, &cookie_FSMC ) == C_FOUND ) {
+	if (tos_getcookie(C_FSMC, &cookie_FSMC) == C_FOUND) {
 		atari_sysinfo.gdos_FSMC = 1;
 	} else {
 		atari_sysinfo.gdos_FSMC = 0;
@@ -54,14 +54,16 @@ void init_os_info(void)
 	atari_sysinfo.small_sfont_pxh = 4;
 	/* todo: detect if system font is monospaced */
 	atari_sysinfo.sfont_monospaced = true;
-	if( appl_xgetinfo(AES_LARGEFONT, &out[0],  &out[1],  &out[2], &out[3] ) > 0 ){
+	if (appl_xgetinfo(AES_LARGEFONT, &out[0], &out[1], &out[2], &out[3]) >
+	    0) {
 		atari_sysinfo.large_sfont_pxh = out[0];
 	}
-	if( appl_xgetinfo(AES_SMALLFONT, &out[0],  &out[1],  &out[2], &out[3] ) > 0 ){
+	if (appl_xgetinfo(AES_SMALLFONT, &out[0], &out[1], &out[2], &out[3]) >
+	    0) {
 		atari_sysinfo.small_sfont_pxh = out[0];
 	}
 	atari_sysinfo.aes_max_win_title_len = 79;
-	if (sys_type() & (SYS_MAGIC|SYS_NAES|SYS_XAAES)) {
+	if (sys_type() & (SYS_MAGIC | SYS_NAES | SYS_XAAES)) {
 		if (sys_NAES()) {
 			atari_sysinfo.aes_max_win_title_len = 127;
 		}
@@ -73,28 +75,28 @@ void init_os_info(void)
 
 
 /* exported interface documented in atari/osspec.h */
-int tos_getcookie(long tag, long * value)
+int tos_getcookie(long tag, long *value)
 {
-	COOKIE * cptr;
+	COOKIE *cptr;
 
-	if( atari_sysinfo.gemdos_version > TOS4VER ){
-		return( Getcookie(tag, value) );
+	if (atari_sysinfo.gemdos_version > TOS4VER) {
+		return (Getcookie(tag, value));
 	}
 
-	cptr = (COOKIE*)Setexc(0x0168, -1L);
-	if(cptr != NULL) {
+	cptr = (COOKIE *)Setexc(0x0168, -1L);
+	if (cptr != NULL) {
 		do {
-			if( cptr->c == tag ){
-				if(cptr->v != 0 ){
-					if( value != NULL ){
+			if (cptr->c == tag) {
+				if (cptr->v != 0) {
+					if (value != NULL) {
 						*value = cptr->v;
 					}
-					return( C_FOUND );
+					return (C_FOUND);
 				}
 			}
-		} while( (cptr++)->c != 0L );
+		} while ((cptr++)->c != 0L);
 	}
-	return( C_NOTFOUND );
+	return (C_NOTFOUND);
 }
 
 /*
@@ -104,19 +106,19 @@ int tos_getcookie(long tag, long * value)
 
 */
 
-char *gemdos_realpath(const char * path, char * rpath)
+char *gemdos_realpath(const char *path, char *rpath)
 {
-	char work[PATH_MAX+1];
-	char * r;
+	char work[PATH_MAX + 1];
+	char *r;
 
 	if (rpath == NULL) {
 		return (NULL);
 	}
 
 	// Check if the path is already absolute:
-	if(path[1] == ':'){
+	if (path[1] == ':') {
 		strcpy(rpath, path);
-		return(rpath);
+		return (rpath);
 	}
 
 	NSLOG(netsurf, INFO, "realpath in: %s\n", path);
@@ -124,7 +126,7 @@ char *gemdos_realpath(const char * path, char * rpath)
 	if (r != NULL) {
 		unx2dos((const char *)r, rpath);
 		NSLOG(netsurf, INFO, "realpath out: %s\n", rpath);
-		return(rpath);
+		return (rpath);
 	} else {
 		NSLOG(netsurf, INFO, "realpath out: NULL!\n");
 	}

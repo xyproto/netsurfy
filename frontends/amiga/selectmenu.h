@@ -24,7 +24,8 @@
 struct gui_window;
 struct form_control;
 
-void gui_create_form_select_menu(struct gui_window *g, struct form_control *control);
+void gui_create_form_select_menu(struct gui_window *g,
+				 struct form_control *control);
 
 /**
  * Opens popupmenu.library to check the version.
@@ -34,4 +35,3 @@ void gui_create_form_select_menu(struct gui_window *g, struct form_control *cont
  */
 BOOL ami_selectmenu_is_safe(void);
 #endif
-

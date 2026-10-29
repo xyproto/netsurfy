@@ -40,13 +40,13 @@
 #define FONT_FACE_COUNT 10
 
 struct font_desc {
-    const char *name;
-    int width, height;
-    const char *encoding;
+	const char *name;
+	int width, height;
+	const char *encoding;
 };
 
 /* extern int ft_load_type; */
 
-int ctor_font_plotter_freetype( FONT_PLOTTER self );
+int ctor_font_plotter_freetype(FONT_PLOTTER self);
 
 #endif

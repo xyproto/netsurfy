@@ -45,11 +45,11 @@
 #define START_PREFIX ('0' + '0' * 10)
 
 struct directory {
-	int numeric_prefix;		/** numeric representation of prefix */
-	char prefix[10];		/** directory prefix, eg '00/11/52/' */
-	unsigned int low_used;		/** first 32 files, 1 bit per file */
-	unsigned int high_used;		/** last 32 files, 1 bit per file */
-	struct directory *next;		/** next directory (sorted by prefix) */
+	int numeric_prefix; /** numeric representation of prefix */
+	char prefix[10]; /** directory prefix, eg '00/11/52/' */
+	unsigned int low_used; /** first 32 files, 1 bit per file */
+	unsigned int high_used; /** last 32 files, 1 bit per file */
+	struct directory *next; /** next directory (sorted by prefix) */
 };
 
 
@@ -74,9 +74,11 @@ const char *filename_request(void)
 	for (dir = root; dir; dir = dir->next) {
 		if ((dir->low_used & dir->high_used) != FULL_WORD) {
 			if (dir->low_used != FULL_WORD) {
-				for (i = 0; (dir->low_used & (1 << i)); i++);
+				for (i = 0; (dir->low_used & (1 << i)); i++)
+					;
 			} else {
-				for (i = 0; (dir->high_used & (1 << i)); i++);
+				for (i = 0; (dir->high_used & (1 << i)); i++)
+					;
 				i += 32;
 			}
 			break;
@@ -87,7 +89,8 @@ const char *filename_request(void)
 		/* no available slots - create a new directory */
 		dir = filename_create_directory(NULL);
 		if (dir == NULL) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "Failed to create a new directory.");
 			return NULL;
 		}
@@ -101,7 +104,11 @@ const char *filename_request(void)
 
 	i = i % 99;
 
-	snprintf(filename_buffer, sizeof(filename_buffer), "%s%.2u", dir->prefix, (unsigned int)i);
+	snprintf(filename_buffer,
+		 sizeof(filename_buffer),
+		 "%s%.2u",
+		 dir->prefix,
+		 (unsigned int)i);
 
 	return filename_buffer;
 }
@@ -156,8 +163,8 @@ void filename_release(const char *filename)
 
 	/* filename format is always '01/23/45/XX' */
 	index = ((filename[7] + filename[6] * 10 - START_PREFIX) |
-		((filename[4] + filename[3] * 10 - START_PREFIX) << 6) |
-		((filename[1] + filename[0] * 10 - START_PREFIX) << 12));
+		 ((filename[4] + filename[3] * 10 - START_PREFIX) << 6) |
+		 ((filename[1] + filename[0] * 10 - START_PREFIX) << 12));
 	file = (filename[10] + filename[9] * 10 - START_PREFIX);
 
 	/* modify the correct directory entry */
@@ -191,7 +198,8 @@ bool filename_initialise(void)
 			NSLOG(netsurf, INFO, "Creating \"%s\"", directory);
 			ret = nsmkdir(directory, S_IRWXU);
 			if (ret != 0 && errno != EEXIST) {
-				NSLOG(netsurf, INFO,
+				NSLOG(netsurf,
+				      INFO,
 				      "Failed to create directory \"%s\"",
 				      directory);
 				free(directory);
@@ -219,7 +227,8 @@ bool filename_initialise(void)
  */
 void filename_flush(void)
 {
-	while (filename_flush_directory(TEMP_FILENAME_PREFIX, 0));
+	while (filename_flush_directory(TEMP_FILENAME_PREFIX, 0))
+		;
 }
 
 
@@ -284,22 +293,27 @@ bool filename_flush_directory(const char *folder, int depth)
 
 		/* Ignore '.' and '..' */
 		if (strcmp(entry->d_name, ".") == 0 ||
-				strcmp(entry->d_name, "..") == 0)
+		    strcmp(entry->d_name, "..") == 0)
 			continue;
 
-		written = snprintf(child, sizeof(child), "%s/%s",
-				folder, entry->d_name);
+		written = snprintf(
+			child, sizeof(child), "%s/%s", folder, entry->d_name);
 		if (written == sizeof(child)) {
 			child[sizeof(child) - 1] = '\0';
 		}
 
 #if (defined(HAVE_DIRFD) && defined(HAVE_FSTATAT))
-		if (fstatat(dirfd(parent), entry->d_name, &statbuf,
-				AT_SYMLINK_NOFOLLOW) == -1) {
+		if (fstatat(dirfd(parent),
+			    entry->d_name,
+			    &statbuf,
+			    AT_SYMLINK_NOFOLLOW) == -1) {
 #else
 		if (stat(child, &statbuf) == -1) {
 #endif
-			NSLOG(netsurf, INFO, "Unable to stat %s: %s", child,
+			NSLOG(netsurf,
+			      INFO,
+			      "Unable to stat %s: %s",
+			      child,
 			      strerror(errno));
 			continue;
 		}
@@ -310,15 +324,13 @@ bool filename_flush_directory(const char *folder, int depth)
 			del = !S_ISDIR(statbuf.st_mode);
 		} else {
 			/* Delete any unexpected directories */
-		  	del = S_ISDIR(statbuf.st_mode);
+			del = S_ISDIR(statbuf.st_mode);
 		}
 
 		/* check we are a file numbered '00' -> '63' */
 		if (del == false && (entry->d_name[0] >= '0') &&
-				(entry->d_name[0] <= '6') &&
-				(entry->d_name[1] >= '0') &&
-				(entry->d_name[1] <= '9') &&
-				(entry->d_name[2] == '\0')) {
+		    (entry->d_name[0] <= '6') && (entry->d_name[1] >= '0') &&
+		    (entry->d_name[1] <= '9') && (entry->d_name[2] == '\0')) {
 			number = atoi(entry->d_name);
 
 			if (number >= 0 && number <= 63) {
@@ -341,7 +353,7 @@ bool filename_flush_directory(const char *folder, int depth)
 					/* Find in dir list */
 					for (dir = root; dir; dir = dir->next) {
 						number = dir->numeric_prefix &
-								prefix_mask;
+							 prefix_mask;
 						if (number == prefix) {
 							/* In list: retain */
 							del = false;
@@ -360,7 +372,7 @@ bool filename_flush_directory(const char *folder, int depth)
 
 		/* continue if this is a file we want to retain */
 		if (del == false && (!S_ISDIR(statbuf.st_mode)))
-		    	continue;
+			continue;
 
 		/* delete or recurse */
 		if (del) {
@@ -373,13 +385,16 @@ bool filename_flush_directory(const char *folder, int depth)
 #else
 				if (unlink(child)) {
 #endif
-					NSLOG(netsurf, INFO,
-					      "Failed to remove '%s'", child);
+					NSLOG(netsurf,
+					      INFO,
+					      "Failed to remove '%s'",
+					      child);
 				} else
 					changed = true;
 			}
 		} else {
-			while (filename_flush_directory(child, depth + 1));
+			while (filename_flush_directory(child, depth + 1))
+				;
 		}
 	}
 
@@ -410,8 +425,8 @@ static struct directory *filename_create_directory(const char *prefix)
 
 	/* get the lowest unique prefix, or use the provided one */
 	if (prefix == NULL) {
-		for (index = 0, old_dir = root; old_dir; 
-				index++, old_dir = old_dir->next) {
+		for (index = 0, old_dir = root; old_dir;
+		     index++, old_dir = old_dir->next) {
 			if (old_dir->numeric_prefix != index)
 				break;
 
@@ -429,8 +444,8 @@ static struct directory *filename_create_directory(const char *prefix)
 	} else {
 		/* prefix format is always '01/23/45/' */
 		index = ((prefix[7] + prefix[6] * 10 - START_PREFIX) |
-			((prefix[4] + prefix[3] * 10 - START_PREFIX) << 6) |
-			((prefix[1] + prefix[0] * 10 - START_PREFIX) << 12));
+			 ((prefix[4] + prefix[3] * 10 - START_PREFIX) << 6) |
+			 ((prefix[1] + prefix[0] * 10 - START_PREFIX) << 12));
 
 		for (old_dir = root; old_dir; old_dir = old_dir->next) {
 			if (old_dir->numeric_prefix == index)
@@ -467,9 +482,10 @@ static struct directory *filename_create_directory(const char *prefix)
 	 * create the child. */
 	if (prev_dir && strncmp(prev_dir->prefix, new_dir->prefix, 6) == 0) {
 		new_dir->prefix[8] = '\0';
-		sprintf(filename_directory, "%s/%s",
-				TEMP_FILENAME_PREFIX,
-				new_dir->prefix);
+		sprintf(filename_directory,
+			"%s/%s",
+			TEMP_FILENAME_PREFIX,
+			new_dir->prefix);
 		new_dir->prefix[8] = '/';
 
 		if (!is_dir(filename_directory)) {
@@ -480,7 +496,8 @@ static struct directory *filename_create_directory(const char *prefix)
 			 * whilst we are running if there is an error, so we
 			 * don't report this yet and try to create the
 			 * structure normally. */
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "Failed to create optimised structure '%s'",
 			      filename_directory);
 		}
@@ -502,7 +519,8 @@ static struct directory *filename_create_directory(const char *prefix)
 
 			if (!is_dir(filename_directory)) {
 				if (nsmkdir(filename_directory, S_IRWXU)) {
-					NSLOG(netsurf, INFO,
+					NSLOG(netsurf,
+					      INFO,
 					      "Failed to create directory '%s'",
 					      filename_directory);
 					return NULL;

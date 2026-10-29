@@ -65,10 +65,13 @@ struct fetcher_operation_table {
 	/**
 	 * Setup a fetch
 	 */
-	void *(*setup)(struct fetch *parent_fetch, struct nsurl *url,
-		bool only_2xx, bool downgrade_tls, const char *post_urlenc,
-		const struct fetch_multipart_data *post_multipart,
-		const char **headers);
+	void *(*setup)(struct fetch *parent_fetch,
+		       struct nsurl *url,
+		       bool only_2xx,
+		       bool downgrade_tls,
+		       const char *post_urlenc,
+		       const struct fetch_multipart_data *post_multipart,
+		       const char **headers);
 
 	/**
 	 * start a fetch.
@@ -93,7 +96,9 @@ struct fetcher_operation_table {
 	/**
 	 * update an fdset with the FDs needed to poll cleanly
 	 */
-	int (*fdset)(lwc_string *scheme, fd_set *read_set, fd_set *write_set,
+	int (*fdset)(lwc_string *scheme,
+		     fd_set *read_set,
+		     fd_set *write_set,
 		     fd_set *error_set);
 
 	/**
@@ -110,7 +115,8 @@ struct fetcher_operation_table {
  * \param ops The operations for the fetcher.
  * \return NSERROR_OK or appropriate error code.
  */
-nserror fetcher_add(lwc_string *scheme, const struct fetcher_operation_table *ops);
+nserror
+fetcher_add(lwc_string *scheme, const struct fetcher_operation_table *ops);
 
 
 /**

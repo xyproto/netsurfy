@@ -19,7 +19,8 @@
 #ifndef _NETSURF_WINDOWS_FINDFILE_H_
 #define _NETSURF_WINDOWS_FINDFILE_H_
 
-extern char *nsws_find_resource(char *buf, const char *filename, const char *def);
+extern char *
+nsws_find_resource(char *buf, const char *filename, const char *def);
 
 char **nsws_init_resource(const char *resource_path);
 

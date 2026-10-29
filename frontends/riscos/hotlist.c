@@ -64,7 +64,7 @@ static struct ro_hotlist_window *hotlist_window = NULL;
 static wimp_window *dialog_hotlist_template;
 
 /** Hotlist Query Handler. */
-static query_id	hotlist_query = QUERY_INVALID;
+static query_id hotlist_query = QUERY_INVALID;
 static nsurl *hotlist_delete_url = NULL;
 
 /**
@@ -74,7 +74,7 @@ static nsurl *hotlist_delete_url = NULL;
  */
 struct ro_hotlist_message_hotlist_addurl {
 	wimp_MESSAGE_HEADER_MEMBERS /**< The standard message header. */
-	char *url; /**< Pointer to the URL in RMA. */
+		char *url; /**< Pointer to the URL in RMA. */
 	char *title; /**< Pointer to the title in RMA. */
 	char appname[32]; /**< The application name. */
 };
@@ -103,17 +103,14 @@ static char *hotlist_title = NULL;
  * \param originy The risc os plotter y origin.
  * \return NSERROR_OK on success otherwise apropriate error code
  */
-static nserror
-hotlist_draw(struct ro_corewindow *ro_cw,
-	     int originx,
-	     int originy,
-	     struct rect *r)
+static nserror hotlist_draw(struct ro_corewindow *ro_cw,
+			    int originx,
+			    int originy,
+			    struct rect *r)
 {
-	struct redraw_context ctx = {
-		.interactive = true,
-		.background_images = true,
-		.plot = &ro_plotters
-	};
+	struct redraw_context ctx = {.interactive = true,
+				     .background_images = true,
+				     .plot = &ro_plotters};
 
 	ro_plot_origin_x = originx;
 	ro_plot_origin_y = originy;
@@ -152,10 +149,10 @@ static nserror hotlist_key(struct ro_corewindow *ro_cw, uint32_t nskey)
  * \param y location of event
  * \return NSERROR_OK on sucess otherwise apropriate error code.
  */
-static nserror
-hotlist_mouse(struct ro_corewindow *ro_cw,
-	      browser_mouse_state mouse_state,
-	      int x, int y)
+static nserror hotlist_mouse(struct ro_corewindow *ro_cw,
+			     browser_mouse_state mouse_state,
+			     int x,
+			     int y)
 {
 	hotlist_mouse_action(mouse_state, x, y);
 
@@ -266,10 +263,10 @@ hotlist_menu_prepare(wimp_w w, wimp_i i, wimp_menu *menu, wimp_pointer *pointer)
 	bool selection;
 	struct ro_hotlist_window *hotlistw;
 
-	hotlistw = (struct ro_hotlist_window *)ro_gui_wimp_event_get_user_data(w);
+	hotlistw = (struct ro_hotlist_window *)ro_gui_wimp_event_get_user_data(
+		w);
 
-	if ((hotlistw == NULL) ||
-	    (menu != hotlistw->menu)) {
+	if ((hotlistw == NULL) || (menu != hotlistw->menu)) {
 		return false;
 	}
 
@@ -278,18 +275,26 @@ hotlist_menu_prepare(wimp_w w, wimp_i i, wimp_menu *menu, wimp_pointer *pointer)
 	ro_gui_menu_set_entry_shaded(menu, TREE_SELECTION, !selection);
 	ro_gui_menu_set_entry_shaded(menu, TREE_CLEAR_SELECTION, !selection);
 
-	ro_gui_save_prepare(GUI_SAVE_HOTLIST_EXPORT_HTML,
-			    NULL, NULL, NULL, NULL);
+	ro_gui_save_prepare(
+		GUI_SAVE_HOTLIST_EXPORT_HTML, NULL, NULL, NULL, NULL);
 
-	ro_gui_menu_set_entry_shaded(menu, TOOLBAR_BUTTONS,
-			ro_toolbar_menu_option_shade(hotlistw->core.toolbar));
-	ro_gui_menu_set_entry_ticked(menu, TOOLBAR_BUTTONS,
-			ro_toolbar_menu_buttons_tick(hotlistw->core.toolbar));
+	ro_gui_menu_set_entry_shaded(menu,
+				     TOOLBAR_BUTTONS,
+				     ro_toolbar_menu_option_shade(
+					     hotlistw->core.toolbar));
+	ro_gui_menu_set_entry_ticked(menu,
+				     TOOLBAR_BUTTONS,
+				     ro_toolbar_menu_buttons_tick(
+					     hotlistw->core.toolbar));
 
-	ro_gui_menu_set_entry_shaded(menu, TOOLBAR_EDIT,
-			ro_toolbar_menu_edit_shade(hotlistw->core.toolbar));
-	ro_gui_menu_set_entry_ticked(menu, TOOLBAR_EDIT,
-			ro_toolbar_menu_edit_tick(hotlistw->core.toolbar));
+	ro_gui_menu_set_entry_shaded(menu,
+				     TOOLBAR_EDIT,
+				     ro_toolbar_menu_edit_shade(
+					     hotlistw->core.toolbar));
+	ro_gui_menu_set_entry_ticked(menu,
+				     TOOLBAR_EDIT,
+				     ro_toolbar_menu_edit_tick(
+					     hotlistw->core.toolbar));
 
 	return true;
 }
@@ -304,12 +309,11 @@ hotlist_menu_prepare(wimp_w w, wimp_i i, wimp_menu *menu, wimp_pointer *pointer)
  * \param selection The wimp menu selection data.
  * \param action The selected menu action.
  */
-static void
-hotlist_menu_warning(wimp_w w,
-		     wimp_i i,
-		     wimp_menu *menu,
-		     wimp_selection *selection,
-		     menu_action action)
+static void hotlist_menu_warning(wimp_w w,
+				 wimp_i i,
+				 wimp_menu *menu,
+				 wimp_selection *selection,
+				 menu_action action)
 {
 	/* Do nothing */
 }
@@ -325,19 +329,18 @@ hotlist_menu_warning(wimp_w w,
  * \param action The selected menu action.
  * \return true if action accepted; else false.
  */
-static bool
-hotlist_menu_select(wimp_w w,
-		    wimp_i i,
-		    wimp_menu *menu,
-		    wimp_selection *selection,
-		    menu_action action)
+static bool hotlist_menu_select(wimp_w w,
+				wimp_i i,
+				wimp_menu *menu,
+				wimp_selection *selection,
+				menu_action action)
 {
 	struct ro_hotlist_window *hotlistw;
 
-	hotlistw = (struct ro_hotlist_window *)ro_gui_wimp_event_get_user_data(w);
+	hotlistw = (struct ro_hotlist_window *)ro_gui_wimp_event_get_user_data(
+		w);
 
-	if ((hotlistw == NULL) ||
-	    (menu != hotlistw->menu)) {
+	if ((hotlistw == NULL) || (menu != hotlistw->menu)) {
 		return false;
 	}
 
@@ -401,7 +404,8 @@ hotlist_menu_select(wimp_w w,
 
 	case TOOLBAR_BUTTONS:
 		ro_toolbar_set_display_buttons(hotlistw->core.toolbar,
-			!ro_toolbar_get_display_buttons(hotlistw->core.toolbar));
+					       !ro_toolbar_get_display_buttons(
+						       hotlistw->core.toolbar));
 		return true;
 
 	case TOOLBAR_EDIT:
@@ -427,41 +431,54 @@ static nserror ro_hotlist_init(void)
 	struct ro_hotlist_window *ncwin;
 	nserror res;
 	static const struct ns_menu hotlist_menu_def = {
-		"Hotlist", {
-			{ "Hotlist", NO_ACTION, 0 },
-			{ "Hotlist.New", NO_ACTION, 0 },
-			{ "Hotlist.New.Folder", TREE_NEW_FOLDER, 0 },
-			{ "Hotlist.New.Link", TREE_NEW_LINK, 0 },
-			{ "_Hotlist.Export", HOTLIST_EXPORT, &dialog_saveas },
-			{ "Hotlist.Expand", TREE_EXPAND_ALL, 0 },
-			{ "Hotlist.Expand.All", TREE_EXPAND_ALL, 0 },
-			{ "Hotlist.Expand.Folders", TREE_EXPAND_FOLDERS, 0 },
-			{ "Hotlist.Expand.Links", TREE_EXPAND_LINKS, 0 },
-			{ "Hotlist.Collapse", TREE_COLLAPSE_ALL, 0 },
-			{ "Hotlist.Collapse.All", TREE_COLLAPSE_ALL, 0 },
-			{ "Hotlist.Collapse.Folders", TREE_COLLAPSE_FOLDERS, 0 },
-			{ "Hotlist.Collapse.Links", TREE_COLLAPSE_LINKS, 0 },
-			{ "Hotlist.Toolbars", NO_ACTION, 0 },
-			{ "_Hotlist.Toolbars.ToolButtons", TOOLBAR_BUTTONS, 0 },
-			{ "Hotlist.Toolbars.EditToolbar", TOOLBAR_EDIT, 0 },
-			{ "Selection", TREE_SELECTION, 0 },
-			{ "Selection.Edit", TREE_SELECTION_EDIT, 0 },
-			{ "Selection.Launch", TREE_SELECTION_LAUNCH, 0 },
-			{ "Selection.Delete", TREE_SELECTION_DELETE, 0 },
-			{ "SelectAll", TREE_SELECT_ALL, 0 },
-			{ "Clear", TREE_CLEAR_SELECTION, 0 },
-			{ NULL, 0, 0}
-		}
-	};
+		"Hotlist",
+		{{"Hotlist", NO_ACTION, 0},
+		 {"Hotlist.New", NO_ACTION, 0},
+		 {"Hotlist.New.Folder", TREE_NEW_FOLDER, 0},
+		 {"Hotlist.New.Link", TREE_NEW_LINK, 0},
+		 {"_Hotlist.Export", HOTLIST_EXPORT, &dialog_saveas},
+		 {"Hotlist.Expand", TREE_EXPAND_ALL, 0},
+		 {"Hotlist.Expand.All", TREE_EXPAND_ALL, 0},
+		 {"Hotlist.Expand.Folders", TREE_EXPAND_FOLDERS, 0},
+		 {"Hotlist.Expand.Links", TREE_EXPAND_LINKS, 0},
+		 {"Hotlist.Collapse", TREE_COLLAPSE_ALL, 0},
+		 {"Hotlist.Collapse.All", TREE_COLLAPSE_ALL, 0},
+		 {"Hotlist.Collapse.Folders", TREE_COLLAPSE_FOLDERS, 0},
+		 {"Hotlist.Collapse.Links", TREE_COLLAPSE_LINKS, 0},
+		 {"Hotlist.Toolbars", NO_ACTION, 0},
+		 {"_Hotlist.Toolbars.ToolButtons", TOOLBAR_BUTTONS, 0},
+		 {"Hotlist.Toolbars.EditToolbar", TOOLBAR_EDIT, 0},
+		 {"Selection", TREE_SELECTION, 0},
+		 {"Selection.Edit", TREE_SELECTION_EDIT, 0},
+		 {"Selection.Launch", TREE_SELECTION_LAUNCH, 0},
+		 {"Selection.Delete", TREE_SELECTION_DELETE, 0},
+		 {"SelectAll", TREE_SELECT_ALL, 0},
+		 {"Clear", TREE_CLEAR_SELECTION, 0},
+		 {NULL, 0, 0}}};
 
 	static const struct button_bar_buttons hotlist_toolbar_buttons[] = {
-		{ "delete", TOOLBAR_BUTTON_DELETE, TOOLBAR_BUTTON_NONE, '0', "0" },
-		{ "expand", TOOLBAR_BUTTON_EXPAND, TOOLBAR_BUTTON_COLLAPSE, '1', "1" },
-		{ "open", TOOLBAR_BUTTON_OPEN, TOOLBAR_BUTTON_CLOSE, '2', "2" },
-		{ "launch", TOOLBAR_BUTTON_LAUNCH, TOOLBAR_BUTTON_NONE, '3', "3" },
-		{ "create", TOOLBAR_BUTTON_CREATE, TOOLBAR_BUTTON_NONE, '4', "4" },
-		{ NULL, TOOLBAR_BUTTON_NONE, TOOLBAR_BUTTON_NONE, '\0', "" }
-	};
+		{"delete",
+		 TOOLBAR_BUTTON_DELETE,
+		 TOOLBAR_BUTTON_NONE,
+		 '0',
+		 "0"},
+		{"expand",
+		 TOOLBAR_BUTTON_EXPAND,
+		 TOOLBAR_BUTTON_COLLAPSE,
+		 '1',
+		 "1"},
+		{"open", TOOLBAR_BUTTON_OPEN, TOOLBAR_BUTTON_CLOSE, '2', "2"},
+		{"launch",
+		 TOOLBAR_BUTTON_LAUNCH,
+		 TOOLBAR_BUTTON_NONE,
+		 '3',
+		 "3"},
+		{"create",
+		 TOOLBAR_BUTTON_CREATE,
+		 TOOLBAR_BUTTON_NONE,
+		 '4',
+		 "4"},
+		{NULL, TOOLBAR_BUTTON_NONE, TOOLBAR_BUTTON_NONE, '\0', ""}};
 
 	if (hotlist_window != NULL) {
 		return NSERROR_OK;
@@ -475,8 +492,11 @@ static nserror ro_hotlist_init(void)
 	/* create window from template */
 	error = xwimp_create_window(dialog_hotlist_template, &ncwin->core.wh);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_create_window: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_create_window: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		free(ncwin);
 		return NSERROR_NOMEM;
@@ -517,8 +537,8 @@ static nserror ro_hotlist_init(void)
 	/* Build the hotlist window menu. */
 	ncwin->menu = ro_gui_menu_define_menu(&hotlist_menu_def);
 
-	ro_gui_wimp_event_register_menu(ncwin->core.wh,
-					ncwin->menu, false, false);
+	ro_gui_wimp_event_register_menu(
+		ncwin->core.wh, ncwin->menu, false, false);
 	ro_gui_wimp_event_register_menu_prepare(ncwin->core.wh,
 						hotlist_menu_prepare);
 	ro_gui_wimp_event_register_menu_selection(ncwin->core.wh,
@@ -547,7 +567,9 @@ nserror ro_gui_hotlist_present(void)
 		char command[2048];
 		os_error *error;
 
-		snprintf(command, sizeof(command), "Filer_Run %s",
+		snprintf(command,
+			 sizeof(command),
+			 "Filer_Run %s",
 			 nsoption_charp(external_hotlist_app));
 		error = xos_cli(command);
 
@@ -555,7 +577,10 @@ nserror ro_gui_hotlist_present(void)
 			return NSERROR_OK;
 		}
 
-		NSLOG(netsurf, INFO, "xos_cli: 0x%x: %s", error->errnum,
+		NSLOG(netsurf,
+		      INFO,
+		      "xos_cli: 0x%x: %s",
+		      error->errnum,
 		      error->errmess);
 		ro_warn_user("Failed to launch external hotlist: %s",
 			     error->errmess);
@@ -566,7 +591,8 @@ nserror ro_gui_hotlist_present(void)
 		NSLOG(netsurf, INFO, "Presenting");
 		ro_gui_dialog_open_top(hotlist_window->core.wh,
 				       hotlist_window->core.toolbar,
-				       600, 800);
+				       600,
+				       800);
 	} else {
 		NSLOG(netsurf, INFO, "Failed presenting code %d", res);
 	}
@@ -606,8 +632,7 @@ nserror ro_gui_hotlist_finalise(void)
 /* exported interface documented in riscos/hotlist.h */
 bool ro_gui_hotlist_check_window(wimp_w wh)
 {
-	if ((hotlist_window != NULL) &&
-	    (hotlist_window->core.wh == wh)) {
+	if ((hotlist_window != NULL) && (hotlist_window->core.wh == wh)) {
 		return true;
 	}
 	return false;
@@ -617,8 +642,7 @@ bool ro_gui_hotlist_check_window(wimp_w wh)
 /* exported interface documented in riscos/hotlist.h */
 bool ro_gui_hotlist_check_menu(wimp_menu *menu)
 {
-	if ((hotlist_window != NULL) &&
-	    (hotlist_window->menu == menu)) {
+	if ((hotlist_window != NULL) && (hotlist_window->menu == menu)) {
 		return true;
 	}
 	return false;
@@ -669,7 +693,7 @@ void ro_gui_hotlist_add_page(nsurl *url)
 	const struct url_data *data;
 	wimp_message message;
 	struct ro_hotlist_message_hotlist_addurl *add_url =
-		(struct ro_hotlist_message_hotlist_addurl *) &message;
+		(struct ro_hotlist_message_hotlist_addurl *)&message;
 
 	if (url == NULL) {
 		return;
@@ -779,17 +803,14 @@ ro_gui_hotlist_remove_cancelled(query_id id, enum query_response res, void *p)
 /**
  * removal query dialog callbacks.
  */
-static const query_callback remove_funcs = {
-	ro_gui_hotlist_remove_confirmed,
-	ro_gui_hotlist_remove_cancelled
-};
+static const query_callback remove_funcs = {ro_gui_hotlist_remove_confirmed,
+					    ro_gui_hotlist_remove_cancelled};
 
 
 /* exported interface documented in riscos/hotlist.h */
 void ro_gui_hotlist_remove_page(nsurl *url)
 {
-	if ((url == NULL) ||
-	    nsoption_bool(external_hotlists) ||
+	if ((url == NULL) || nsoption_bool(external_hotlists) ||
 	    !hotlist_has_url(url)) {
 		return;
 	}
@@ -809,8 +830,10 @@ void ro_gui_hotlist_remove_page(nsurl *url)
 	 * want us to be careful in which case just do it.
 	 */
 	if (nsoption_bool(confirm_hotlist_remove)) {
-		hotlist_query = query_user("RemoveHotlist", NULL,
-					   &remove_funcs, NULL,
+		hotlist_query = query_user("RemoveHotlist",
+					   NULL,
+					   &remove_funcs,
+					   NULL,
 					   messages_get("Remove"),
 					   messages_get("DontRemove"));
 
@@ -825,8 +848,7 @@ void ro_gui_hotlist_remove_page(nsurl *url)
 /* exported interface documented in riscos/hotlist.h */
 bool ro_gui_hotlist_has_page(nsurl *url)
 {
-	if ((url == NULL) ||
-	    nsoption_bool(external_hotlists)) {
+	if ((url == NULL) || nsoption_bool(external_hotlists)) {
 		return false;
 	}
 

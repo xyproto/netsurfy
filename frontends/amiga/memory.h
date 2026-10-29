@@ -32,7 +32,8 @@
 
 /* Alloc/free a block cleared to non-zero */
 #ifdef __amigaos4__
-#define ami_memory_clear_alloc(s,v) AllocVecTags(s, AVT_ClearWithValue, v, TAG_DONE)
+#define ami_memory_clear_alloc(s, v)                                           \
+	AllocVecTags(s, AVT_ClearWithValue, v, TAG_DONE)
 #define ami_memory_clear_free(p) FreeVec(p)
 #else
 void *ami_memory_clear_alloc(size_t size, UBYTE value);
@@ -41,20 +42,25 @@ void *ami_memory_clear_alloc(size_t size, UBYTE value);
 
 /* Itempool cross-compatibility */
 #ifdef __amigaos4__
-#define ami_memory_itempool_create(s) AllocSysObjectTags(ASOT_ITEMPOOL, \
-		ASOITEM_MFlags, MEMF_PRIVATE, \
-		ASOITEM_ItemSize, s, \
-		ASOITEM_GCPolicy, ITEMGC_AFTERCOUNT, \
-		ASOITEM_GCParameter, 100, \
-		TAG_DONE)
+#define ami_memory_itempool_create(s)                                          \
+	AllocSysObjectTags(ASOT_ITEMPOOL,                                      \
+			   ASOITEM_MFlags,                                     \
+			   MEMF_PRIVATE,                                       \
+			   ASOITEM_ItemSize,                                   \
+			   s,                                                  \
+			   ASOITEM_GCPolicy,                                   \
+			   ITEMGC_AFTERCOUNT,                                  \
+			   ASOITEM_GCParameter,                                \
+			   100,                                                \
+			   TAG_DONE)
 #define ami_memory_itempool_delete(p) FreeSysObject(ASOT_ITEMPOOL, p)
-#define ami_memory_itempool_alloc(p,s) ItemPoolAlloc(p)
-#define ami_memory_itempool_free(p,i,s) ItemPoolFree(p,i)
+#define ami_memory_itempool_alloc(p, s) ItemPoolAlloc(p)
+#define ami_memory_itempool_free(p, i, s) ItemPoolFree(p, i)
 #else
 #define ami_memory_itempool_create(s) ((APTR)1)
 #define ami_memory_itempool_delete(p) ((void)0)
-#define ami_memory_itempool_alloc(p,s) malloc(s)
-#define ami_memory_itempool_free(p,i,s) free(i)
+#define ami_memory_itempool_alloc(p, s) malloc(s)
+#define ami_memory_itempool_free(p, i, s) free(i)
 #endif
 
 /* clib2 slab allocator */
@@ -64,5 +70,4 @@ struct Interrupt *ami_memory_init(void);
 void ami_memory_fini(struct Interrupt *memhandler);
 #endif
 
-#endif //AMIGA_MEMORY_H
-
+#endif // AMIGA_MEMORY_H

@@ -31,20 +31,20 @@
 #include "atari/gemtk/gemtk.h"
 
 
-static int filesize(char * path)
+static int filesize(char *path)
 {
-	FILE 	*f;
-	int 	fs;
+	FILE *f;
+	int fs;
 
-	f = fopen( path, "r+b");
-	if(!f)
-		return(-1);
+	f = fopen(path, "r+b");
+	if (!f)
+		return (-1);
 
 	fseek(f, 0L, SEEK_END);
 	fs = ftell(f);
 	fclose(f);
 
-	return(fs);
+	return (fs);
 }
 
 int scrap_txt_write(char *str)
@@ -52,31 +52,28 @@ int scrap_txt_write(char *str)
 	scrap_wtxt(str);
 
 
-    // Send SC_CHANGED message:
-    gemtk_send_msg(SC_CHANGED, 0, 2, 0, 0, 0, 0);
+	// Send SC_CHANGED message:
+	gemtk_send_msg(SC_CHANGED, 0, 2, 0, 0, 0, 0);
 
-    return(0);
-
+	return (0);
 }
 
 char *scrap_txt_read(void)
 {
-	char * buf = NULL;
+	char *buf = NULL;
 	char path[80];
 
-	if (get_scrapdir (path))
-	{
+	if (get_scrapdir(path)) {
 		int len;
-		strcat (path, "scrap.txt");
+		strcat(path, "scrap.txt");
 		len = filesize(path);
-		if(len > 0){
+		if (len > 0) {
 			int file;
-			if ((file = (int) Fopen (path, 0)) >= 0)
-			{
+			if ((file = (int)Fopen(path, 0)) >= 0) {
 				buf = malloc(len);
-				if(buf){
-					len = Fread (file, len, buf);
-					Fclose (file);
+				if (buf) {
+					len = Fread(file, len, buf);
+					Fclose(file);
 					buf[len] = '\0';
 					return buf;
 				}
@@ -85,4 +82,3 @@ char *scrap_txt_read(void)
 	}
 	return buf;
 }
-

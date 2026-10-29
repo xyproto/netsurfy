@@ -57,17 +57,14 @@ static RECT plot_clip;
  * \param height the height to plot
  * \return NSERROR_OK on sucess else error code.
  */
-static nserror
-plot_block(COLORREF col, int x, int y, int width, int height)
+static nserror plot_block(COLORREF col, int x, int y, int width, int height)
 {
 	HRGN clipregion;
 	HGDIOBJ original = NULL;
 
 	/* Bail early if we can */
-	if ((x >= plot_clip.right) ||
-	    ((x + width) < plot_clip.left) ||
-	    (y >= plot_clip.bottom) ||
-	    ((y + height) < plot_clip.top)) {
+	if ((x >= plot_clip.right) || ((x + width) < plot_clip.left) ||
+	    (y >= plot_clip.bottom) || ((y + height) < plot_clip.top)) {
 		/* Image completely outside clip region */
 		return NSERROR_OK;
 	}
@@ -86,7 +83,7 @@ plot_block(COLORREF col, int x, int y, int width, int height)
 	SelectClipRgn(plot_hdc, clipregion);
 
 	/* Saving the original pen object */
-	original = SelectObject(plot_hdc,GetStockObject(DC_PEN));
+	original = SelectObject(plot_hdc, GetStockObject(DC_PEN));
 
 	SelectObject(plot_hdc, GetStockObject(DC_PEN));
 	SelectObject(plot_hdc, GetStockObject(DC_BRUSH));
@@ -94,12 +91,12 @@ plot_block(COLORREF col, int x, int y, int width, int height)
 	SetDCBrushColor(plot_hdc, col);
 	Rectangle(plot_hdc, x, y, width, height);
 
-	SelectObject(plot_hdc,original); /* Restoring the original pen object */
+	SelectObject(plot_hdc,
+		     original); /* Restoring the original pen object */
 
 	DeleteObject(clipregion);
 
 	return NSERROR_OK;
-
 }
 
 
@@ -116,24 +113,29 @@ plot_block(COLORREF col, int x, int y, int width, int height)
  * \param height The height to plot the bitmap into
  * \return NSERROR_OK on success else appropriate error code.
  */
-static nserror
-plot_alpha_bitmap(HDC hdc,
-		  struct bitmap *bitmap,
-		  int x, int y,
-		  int width, int height)
+static nserror plot_alpha_bitmap(HDC hdc,
+				 struct bitmap *bitmap,
+				 int x,
+				 int y,
+				 int width,
+				 int height)
 {
 #ifdef WINDOWS_GDI_ALPHA_WORKED
-	BLENDFUNCTION blnd = {  AC_SRC_OVER, 0, 0xff, AC_SRC_ALPHA };
+	BLENDFUNCTION blnd = {AC_SRC_OVER, 0, 0xff, AC_SRC_ALPHA};
 	HDC bmihdc;
 	bool bltres;
 	bmihdc = CreateCompatibleDC(hdc);
 	SelectObject(bmihdc, bitmap->windib);
 	bltres = AlphaBlend(hdc,
-			    x, y,
-			    width, height,
+			    x,
+			    y,
+			    width,
+			    height,
 			    bmihdc,
-			    0, 0,
-			    bitmap->width, bitmap->height,
+			    0,
+			    0,
+			    bitmap->width,
+			    bitmap->height,
 			    blnd);
 	DeleteDC(bmihdc);
 	if (!bltres) {
@@ -149,21 +151,35 @@ plot_alpha_bitmap(HDC hdc,
 	BITMAPINFO *bmi;
 	HBITMAP MemBMh;
 
-	NSLOG(plot, DEEPDEBUG, "%p bitmap %d,%d width %d height %d",
-		 bitmap, x, y, width, height);
-	NSLOG(plot, DEEPDEBUG, "clipped %ld,%ld to %ld,%ld",
-		 plot_clip.left, plot_clip.top,
-		 plot_clip.right, plot_clip.bottom);
+	NSLOG(plot,
+	      DEEPDEBUG,
+	      "%p bitmap %d,%d width %d height %d",
+	      bitmap,
+	      x,
+	      y,
+	      width,
+	      height);
+	NSLOG(plot,
+	      DEEPDEBUG,
+	      "clipped %ld,%ld to %ld,%ld",
+	      plot_clip.left,
+	      plot_clip.top,
+	      plot_clip.right,
+	      plot_clip.bottom);
 
 	Memhdc = CreateCompatibleDC(hdc);
 	if (Memhdc == NULL) {
 		return NSERROR_INVALID;
 	}
 
-	if ((bitmap->width != width) ||
-	    (bitmap->height != height)) {
-		NSLOG(plot, DEEPDEBUG, "scaling from %d,%d to %d,%d",
-			 bitmap->width, bitmap->height, width, height);
+	if ((bitmap->width != width) || (bitmap->height != height)) {
+		NSLOG(plot,
+		      DEEPDEBUG,
+		      "scaling from %d,%d to %d,%d",
+		      bitmap->width,
+		      bitmap->height,
+		      width,
+		      height);
 		bitmap = bitmap_scale(bitmap, width, height);
 		if (bitmap == NULL) {
 			return NSERROR_INVALID;
@@ -171,15 +187,15 @@ plot_alpha_bitmap(HDC hdc,
 		isscaled = true;
 	}
 
-	bmi = (BITMAPINFO *) malloc(sizeof(BITMAPINFOHEADER) +
-				    (bitmap->width * bitmap->height * 4));
+	bmi = (BITMAPINFO *)malloc(sizeof(BITMAPINFOHEADER) +
+				   (bitmap->width * bitmap->height * 4));
 	if (bmi == NULL) {
 		DeleteDC(Memhdc);
 		return NSERROR_INVALID;
 	}
 
 	MemBMh = CreateCompatibleBitmap(hdc, bitmap->width, bitmap->height);
-	if (MemBMh == NULL){
+	if (MemBMh == NULL) {
 		free(bmi);
 		DeleteDC(Memhdc);
 		return NSERROR_INVALID;
@@ -203,7 +219,12 @@ plot_alpha_bitmap(HDC hdc,
 	bmih.biClrImportant = 0;
 	bmi->bmiHeader = bmih;
 
-	GetDIBits(hdc, MemBMh, 0, bitmap->height, bmi->bmiColors, bmi,
+	GetDIBits(hdc,
+		  MemBMh,
+		  0,
+		  bitmap->height,
+		  bmi->bmiColors,
+		  bmi,
 		  DIB_RGB_COLORS);
 
 	/* then load 'foreground' bits from bitmap->pixdata */
@@ -214,7 +235,8 @@ plot_alpha_bitmap(HDC hdc,
 	     v++, vv += bitmap->width, vi -= width4) {
 		for (h = 0, hh = 0; h < bitmap->width; h++, hh += 4) {
 			alpha = bitmap->pixdata[vi + hh + 3];
-/* multiplication of alpha value; subject to profiling could be optional */
+			/* multiplication of alpha value; subject to profiling
+			 * could be optional */
 			if (alpha == 0xFF) {
 				bmi->bmiColors[vv + h].rgbBlue =
 					bitmap->pixdata[vi + hh + 2];
@@ -225,28 +247,37 @@ plot_alpha_bitmap(HDC hdc,
 			} else if (alpha > 0) {
 				transparency = 0x100 - alpha;
 				bmi->bmiColors[vv + h].rgbBlue =
-					(bmi->bmiColors[vv + h].rgbBlue
-					 * transparency +
+					(bmi->bmiColors[vv + h].rgbBlue *
+						 transparency +
 					 (bitmap->pixdata[vi + hh + 2]) *
-					 alpha) >> 8;
+						 alpha) >>
+					8;
 				bmi->bmiColors[vv + h].rgbGreen =
-					(bmi->bmiColors[vv + h].
-					 rgbGreen
-					 * transparency +
+					(bmi->bmiColors[vv + h].rgbGreen *
+						 transparency +
 					 (bitmap->pixdata[vi + hh + 1]) *
-					 alpha) >> 8;
+						 alpha) >>
+					8;
 				bmi->bmiColors[vv + h].rgbRed =
-					(bmi->bmiColors[vv + h].rgbRed
-					 * transparency +
-					 bitmap->pixdata[vi + hh]
-					 * alpha) >> 8;
+					(bmi->bmiColors[vv + h].rgbRed *
+						 transparency +
+					 bitmap->pixdata[vi + hh] * alpha) >>
+					8;
 			}
 		}
 	}
-	SetDIBitsToDevice(hdc, x, y, bitmap->width, bitmap->height,
-			  0, 0, 0, bitmap->height,
-			  (const void *) bmi->bmiColors,
-			  bmi, DIB_RGB_COLORS);
+	SetDIBitsToDevice(hdc,
+			  x,
+			  y,
+			  bitmap->width,
+			  bitmap->height,
+			  0,
+			  0,
+			  0,
+			  bitmap->height,
+			  (const void *)bmi->bmiColors,
+			  bmi,
+			  DIB_RGB_COLORS);
 
 	if (isscaled && bitmap && bitmap->pixdata) {
 		free(bitmap->pixdata);
@@ -279,10 +310,8 @@ plot_bitmap(struct bitmap *bitmap, int x, int y, int width, int height)
 	nserror res = NSERROR_OK;
 
 	/* Bail early if we can */
-	if ((x >= plot_clip.right) ||
-	    ((x + width) < plot_clip.left) ||
-	    (y >= plot_clip.bottom) ||
-	    ((y + height) < plot_clip.top)) {
+	if ((x >= plot_clip.right) || ((x + width) < plot_clip.left) ||
+	    (y >= plot_clip.bottom) || ((y + height) < plot_clip.top)) {
 		/* Image completely outside clip region */
 		return NSERROR_OK;
 	}
@@ -303,13 +332,15 @@ plot_bitmap(struct bitmap *bitmap, int x, int y, int width, int height)
 	if (bitmap->opaque) {
 		int bltres;
 		/* opaque bitmap */
-		if ((bitmap->width == width) &&
-		    (bitmap->height == height)) {
+		if ((bitmap->width == width) && (bitmap->height == height)) {
 			/* unscaled */
 			bltres = SetDIBitsToDevice(plot_hdc,
-						   x, y,
-						   width, height,
-						   0, 0,
+						   x,
+						   y,
+						   width,
+						   height,
+						   0,
+						   0,
 						   0,
 						   height,
 						   bitmap->pixdata,
@@ -319,16 +350,18 @@ plot_bitmap(struct bitmap *bitmap, int x, int y, int width, int height)
 			/* scaled */
 			SetStretchBltMode(plot_hdc, COLORONCOLOR);
 			bltres = StretchDIBits(plot_hdc,
-					       x, y,
-					       width, height,
-					       0, 0,
-					       bitmap->width, bitmap->height,
+					       x,
+					       y,
+					       width,
+					       height,
+					       0,
+					       0,
+					       bitmap->width,
+					       bitmap->height,
 					       bitmap->pixdata,
 					       (BITMAPINFO *)bitmap->pbmi,
 					       DIB_RGB_COLORS,
 					       SRCCOPY);
-
-
 		}
 		/* check to see if GDI operation failed */
 		if (bltres == 0) {
@@ -356,7 +389,13 @@ plot_bitmap(struct bitmap *bitmap, int x, int y, int width, int height)
  */
 static nserror clip(const struct redraw_context *ctx, const struct rect *clip)
 {
-	NSLOG(plot, DEEPDEBUG, "clip %d,%d to %d,%d", clip->x0, clip->y0, clip->x1, clip->y1);
+	NSLOG(plot,
+	      DEEPDEBUG,
+	      "clip %d,%d to %d,%d",
+	      clip->x0,
+	      clip->y0,
+	      clip->x1,
+	      clip->y1);
 
 	plot_clip.left = clip->x0;
 	plot_clip.top = clip->y0;
@@ -383,14 +422,22 @@ static nserror clip(const struct redraw_context *ctx, const struct rect *clip)
  * \param angle2 The finish angle of the arc.
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-arc(const struct redraw_context *ctx,
-    const plot_style_t *style,
-    int x, int y,
-    int radius, int angle1, int angle2)
+static nserror arc(const struct redraw_context *ctx,
+		   const plot_style_t *style,
+		   int x,
+		   int y,
+		   int radius,
+		   int angle1,
+		   int angle2)
 {
-	NSLOG(plot, DEEPDEBUG, "arc centre %d,%d radius %d from %d to %d", x, y, radius,
-		 angle1, angle2);
+	NSLOG(plot,
+	      DEEPDEBUG,
+	      "arc centre %d,%d radius %d from %d to %d",
+	      x,
+	      y,
+	      radius,
+	      angle1,
+	      angle2);
 
 	/* ensure the plot HDC is set */
 	if (plot_hdc == NULL) {
@@ -409,7 +456,7 @@ arc(const struct redraw_context *ctx,
 		DeleteObject(clipregion);
 		return NSERROR_INVALID;
 	}
-	HGDIOBJ penbak = SelectObject(plot_hdc, (HGDIOBJ) pen);
+	HGDIOBJ penbak = SelectObject(plot_hdc, (HGDIOBJ)pen);
 	if (penbak == NULL) {
 		DeleteObject(clipregion);
 		DeleteObject(pen);
@@ -417,9 +464,9 @@ arc(const struct redraw_context *ctx,
 	}
 
 	int q1, q2;
-	double a1=1.0, a2=1.0, b1=1.0, b2=1.0;
-	q1 = (int) ((angle1 + 45) / 90) - 45;
-	q2 = (int) ((angle2 + 45) / 90) - 45;
+	double a1 = 1.0, a2 = 1.0, b1 = 1.0, b2 = 1.0;
+	q1 = (int)((angle1 + 45) / 90) - 45;
+	q2 = (int)((angle2 + 45) / 90) - 45;
 	while (q1 > 4)
 		q1 -= 4;
 	while (q2 > 4)
@@ -431,7 +478,7 @@ arc(const struct redraw_context *ctx,
 	angle1 = ((angle1 + 45) % 90) - 45;
 	angle2 = ((angle2 + 45) % 90) - 45;
 
-	switch(q1) {
+	switch (q1) {
 	case 1:
 		a1 = 1.0;
 		b1 = -tan((M_PI / 180) * angle1);
@@ -450,7 +497,7 @@ arc(const struct redraw_context *ctx,
 		break;
 	}
 
-	switch(q2) {
+	switch (q2) {
 	case 1:
 		a2 = 1.0;
 		b2 = -tan((M_PI / 180) * angle2);
@@ -471,9 +518,15 @@ arc(const struct redraw_context *ctx,
 
 	SelectClipRgn(plot_hdc, clipregion);
 
-	Arc(plot_hdc, x - radius, y - radius, x + radius, y + radius,
-	    x + (int)(a1 * radius), y + (int)(b1 * radius),
-	    x + (int)(a2 * radius), y + (int)(b2 * radius));
+	Arc(plot_hdc,
+	    x - radius,
+	    y - radius,
+	    x + radius,
+	    y + radius,
+	    x + (int)(a1 * radius),
+	    y + (int)(b1 * radius),
+	    x + (int)(a2 * radius),
+	    y + (int)(b2 * radius));
 
 	SelectClipRgn(plot_hdc, NULL);
 	pen = SelectObject(plot_hdc, penbak);
@@ -496,10 +549,11 @@ arc(const struct redraw_context *ctx,
  * \param radius circle radius.
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-disc(const struct redraw_context *ctx,
-     const plot_style_t *style,
-     int x, int y, int radius)
+static nserror disc(const struct redraw_context *ctx,
+		    const plot_style_t *style,
+		    int x,
+		    int y,
+		    int radius)
 {
 	NSLOG(plot, DEEPDEBUG, "disc at %d,%d radius %d", x, y, radius);
 
@@ -514,14 +568,14 @@ disc(const struct redraw_context *ctx,
 		return NSERROR_INVALID;
 	}
 
-	COLORREF col = (DWORD)((style->fill_colour | style->stroke_colour)
-			       & 0x00FFFFFF);
+	COLORREF col = (DWORD)((style->fill_colour | style->stroke_colour) &
+			       0x00FFFFFF);
 	HPEN pen = CreatePen(PS_GEOMETRIC | PS_SOLID, 1, col);
 	if (pen == NULL) {
 		DeleteObject(clipregion);
 		return NSERROR_INVALID;
 	}
-	HGDIOBJ penbak = SelectObject(plot_hdc, (HGDIOBJ) pen);
+	HGDIOBJ penbak = SelectObject(plot_hdc, (HGDIOBJ)pen);
 	if (penbak == NULL) {
 		DeleteObject(clipregion);
 		DeleteObject(pen);
@@ -534,7 +588,7 @@ disc(const struct redraw_context *ctx,
 		DeleteObject(pen);
 		return NSERROR_INVALID;
 	}
-	HGDIOBJ brushbak = SelectObject(plot_hdc, (HGDIOBJ) brush);
+	HGDIOBJ brushbak = SelectObject(plot_hdc, (HGDIOBJ)brush);
 	if (brushbak == NULL) {
 		DeleteObject(clipregion);
 		SelectObject(plot_hdc, penbak);
@@ -546,11 +600,21 @@ disc(const struct redraw_context *ctx,
 	SelectClipRgn(plot_hdc, clipregion);
 
 	if (style->fill_type == PLOT_OP_TYPE_NONE) {
-		Arc(plot_hdc, x - radius, y - radius, x + radius, y + radius,
-		    x - radius, y - radius,
-		    x - radius, y - radius);
+		Arc(plot_hdc,
+		    x - radius,
+		    y - radius,
+		    x + radius,
+		    y + radius,
+		    x - radius,
+		    y - radius,
+		    x - radius,
+		    y - radius);
 	} else {
-		Ellipse(plot_hdc, x - radius, y - radius, x + radius, y + radius);
+		Ellipse(plot_hdc,
+			x - radius,
+			y - radius,
+			x + radius,
+			y + radius);
 	}
 
 	SelectClipRgn(plot_hdc, NULL);
@@ -575,13 +639,17 @@ disc(const struct redraw_context *ctx,
  * \param line A rectangle defining the line to be drawn
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-line(const struct redraw_context *ctx,
-     const plot_style_t *style,
-     const struct rect *line)
+static nserror line(const struct redraw_context *ctx,
+		    const plot_style_t *style,
+		    const struct rect *line)
 {
-	NSLOG(plot, DEEPDEBUG, "from %d,%d to %d,%d",
-	      line->x0, line->y0, line->x1, line->y1);
+	NSLOG(plot,
+	      DEEPDEBUG,
+	      "from %d,%d to %d,%d",
+	      line->x0,
+	      line->y0,
+	      line->x1,
+	      line->y1);
 
 	/* ensure the plot HDC is set */
 	if (plot_hdc == NULL) {
@@ -597,18 +665,20 @@ line(const struct redraw_context *ctx,
 	COLORREF col = (DWORD)(style->stroke_colour & 0x00FFFFFF);
 	/* windows 0x00bbggrr */
 	DWORD penstyle = PS_GEOMETRIC |
-		((style->stroke_type == PLOT_OP_TYPE_DOT) ? PS_DOT :
-		 (style->stroke_type == PLOT_OP_TYPE_DASH) ? PS_DASH:
-		 0);
+			 ((style->stroke_type == PLOT_OP_TYPE_DOT)    ? PS_DOT
+			  : (style->stroke_type == PLOT_OP_TYPE_DASH) ? PS_DASH
+								      : 0);
 	LOGBRUSH lb = {BS_SOLID, col, 0};
 	HPEN pen = ExtCreatePen(penstyle,
-			plot_style_fixed_to_int(style->stroke_width),
-			&lb, 0, NULL);
+				plot_style_fixed_to_int(style->stroke_width),
+				&lb,
+				0,
+				NULL);
 	if (pen == NULL) {
 		DeleteObject(clipregion);
 		return NSERROR_INVALID;
 	}
-	HGDIOBJ bak = SelectObject(plot_hdc, (HGDIOBJ) pen);
+	HGDIOBJ bak = SelectObject(plot_hdc, (HGDIOBJ)pen);
 	if (bak == NULL) {
 		DeleteObject(pen);
 		DeleteObject(clipregion);
@@ -617,7 +687,7 @@ line(const struct redraw_context *ctx,
 
 	SelectClipRgn(plot_hdc, clipregion);
 
-	MoveToEx(plot_hdc, line->x0, line->y0, (LPPOINT) NULL);
+	MoveToEx(plot_hdc, line->x0, line->y0, (LPPOINT)NULL);
 
 	LineTo(plot_hdc, line->x1, line->y1);
 
@@ -644,13 +714,17 @@ line(const struct redraw_context *ctx,
  * \param rect A rectangle defining the line to be drawn
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-rectangle(const struct redraw_context *ctx,
-	  const plot_style_t *style,
-	  const struct rect *rect)
+static nserror rectangle(const struct redraw_context *ctx,
+			 const plot_style_t *style,
+			 const struct rect *rect)
 {
-	NSLOG(plot, DEEPDEBUG, "rectangle from %d,%d to %d,%d",
-		 rect->x0, rect->y0, rect->x1, rect->y1);
+	NSLOG(plot,
+	      DEEPDEBUG,
+	      "rectangle from %d,%d to %d,%d",
+	      rect->x0,
+	      rect->y0,
+	      rect->x1,
+	      rect->y1);
 
 	/* ensure the plot HDC is set */
 	if (plot_hdc == NULL) {
@@ -664,34 +738,40 @@ rectangle(const struct redraw_context *ctx,
 	}
 
 	COLORREF pencol = (DWORD)(style->stroke_colour & 0x00FFFFFF);
-	DWORD penstyle = PS_GEOMETRIC |
-		(style->stroke_type == PLOT_OP_TYPE_DOT ? PS_DOT :
-		 (style->stroke_type == PLOT_OP_TYPE_DASH ? PS_DASH :
-		  (style->stroke_type == PLOT_OP_TYPE_NONE ? PS_NULL :
-		   0)));
+	DWORD penstyle =
+		PS_GEOMETRIC |
+		(style->stroke_type == PLOT_OP_TYPE_DOT
+			 ? PS_DOT
+			 : (style->stroke_type == PLOT_OP_TYPE_DASH
+				    ? PS_DASH
+				    : (style->stroke_type == PLOT_OP_TYPE_NONE
+					       ? PS_NULL
+					       : 0)));
 	LOGBRUSH lb = {BS_SOLID, pencol, 0};
 	LOGBRUSH lb1 = {BS_SOLID, style->fill_colour, 0};
 	if (style->fill_type == PLOT_OP_TYPE_NONE)
 		lb1.lbStyle = BS_HOLLOW;
 
 	HPEN pen = ExtCreatePen(penstyle,
-			plot_style_fixed_to_int(style->stroke_width),
-			&lb, 0, NULL);
+				plot_style_fixed_to_int(style->stroke_width),
+				&lb,
+				0,
+				NULL);
 	if (pen == NULL) {
 		return NSERROR_INVALID;
 	}
-	HGDIOBJ penbak = SelectObject(plot_hdc, (HGDIOBJ) pen);
+	HGDIOBJ penbak = SelectObject(plot_hdc, (HGDIOBJ)pen);
 	if (penbak == NULL) {
 		DeleteObject(pen);
 		return NSERROR_INVALID;
 	}
 	HBRUSH brush = CreateBrushIndirect(&lb1);
-	if (brush  == NULL) {
+	if (brush == NULL) {
 		SelectObject(plot_hdc, penbak);
 		DeleteObject(pen);
 		return NSERROR_INVALID;
 	}
-	HGDIOBJ brushbak = SelectObject(plot_hdc, (HGDIOBJ) brush);
+	HGDIOBJ brushbak = SelectObject(plot_hdc, (HGDIOBJ)brush);
 	if (brushbak == NULL) {
 		SelectObject(plot_hdc, penbak);
 		DeleteObject(pen);
@@ -729,11 +809,10 @@ rectangle(const struct redraw_context *ctx,
  * \param n number of verticies.
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-polygon(const struct redraw_context *ctx,
-	const plot_style_t *style,
-	const int *p,
-	unsigned int n)
+static nserror polygon(const struct redraw_context *ctx,
+		       const plot_style_t *style,
+		       const int *p,
+		       unsigned int n)
 {
 	NSLOG(plot, DEEPDEBUG, "polygon %d points", n);
 
@@ -780,8 +859,8 @@ polygon(const struct redraw_context *ctx,
 	}
 	SetPolyFillMode(plot_hdc, WINDING);
 	for (i = 0; i < n; i++) {
-		points[i].x = (long) p[2 * i];
-		points[i].y = (long) p[2 * i + 1];
+		points[i].x = (long)p[2 * i];
+		points[i].y = (long)p[2 * i + 1];
 
 		NSLOG(plot, DEEPDEBUG, "%ld,%ld ", points[i].x, points[i].y);
 	}
@@ -817,12 +896,11 @@ polygon(const struct redraw_context *ctx,
  * \param transform A transform to apply to the path.
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-path(const struct redraw_context *ctx,
-     const plot_style_t *pstyle,
-     const float *p,
-     unsigned int n,
-     const float transform[6])
+static nserror path(const struct redraw_context *ctx,
+		    const plot_style_t *pstyle,
+		    const float *p,
+		    unsigned int n,
+		    const float transform[6])
 {
 	NSLOG(plot, DEEPDEBUG, "path unimplemented");
 	return NSERROR_OK;
@@ -853,22 +931,29 @@ path(const struct redraw_context *ctx,
  * \param flags the flags controlling the type of plot operation
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-bitmap(const struct redraw_context *ctx,
-       struct bitmap *bitmap,
-       int x, int y,
-       int width,
-       int height,
-       colour bg,
-       bitmap_flags_t flags)
+static nserror bitmap(const struct redraw_context *ctx,
+		      struct bitmap *bitmap,
+		      int x,
+		      int y,
+		      int width,
+		      int height,
+		      colour bg,
+		      bitmap_flags_t flags)
 {
-	int xf,yf;
+	int xf, yf;
 	bool repeat_x = (flags & BITMAPF_REPEAT_X);
 	bool repeat_y = (flags & BITMAPF_REPEAT_Y);
 
 	/* Bail early if we can */
 
-	NSLOG(plot, DEEPDEBUG, "Plotting %p at %d,%d by %d,%d",bitmap, x,y,width,height);
+	NSLOG(plot,
+	      DEEPDEBUG,
+	      "Plotting %p at %d,%d by %d,%d",
+	      bitmap,
+	      x,
+	      y,
+	      width,
+	      height);
 
 	if (bitmap == NULL) {
 		NSLOG(netsurf, INFO, "Passed null bitmap!");
@@ -891,7 +976,8 @@ bitmap(const struct redraw_context *ctx,
 			if ((*(bitmap->pixdata + 3) & 0xff) == 0) {
 				return NSERROR_OK;
 			}
-			return plot_block((*(COLORREF *)bitmap->pixdata) & 0xffffff,
+			return plot_block((*(COLORREF *)bitmap->pixdata) &
+						  0xffffff,
 					  x,
 					  y,
 					  x + width,
@@ -906,7 +992,8 @@ bitmap(const struct redraw_context *ctx,
 	 * of the area.  Can only be done when image is fully opaque. */
 	if ((bitmap->width == 1) && (bitmap->height == 1)) {
 		if ((*(COLORREF *)bitmap->pixdata & 0xff000000) != 0) {
-			return plot_block((*(COLORREF *)bitmap->pixdata) & 0xffffff,
+			return plot_block((*(COLORREF *)bitmap->pixdata) &
+						  0xffffff,
 					  plot_clip.left,
 					  plot_clip.top,
 					  plot_clip.right,
@@ -922,7 +1009,8 @@ bitmap(const struct redraw_context *ctx,
 		if (bitmap->opaque) {
 			/** TODO: Currently using top left pixel. Maybe centre
 			 *        pixel or average value would be better. */
-			return plot_block((*(COLORREF *)bitmap->pixdata) & 0xffffff,
+			return plot_block((*(COLORREF *)bitmap->pixdata) &
+						  0xffffff,
 					  plot_clip.left,
 					  plot_clip.top,
 					  plot_clip.right,
@@ -930,23 +1018,40 @@ bitmap(const struct redraw_context *ctx,
 		}
 	}
 
-	NSLOG(plot, DEEPDEBUG, "Tiled plotting %d,%d by %d,%d", x, y, width, height);
-	NSLOG(plot, DEEPDEBUG, "clipped %ld,%ld to %ld,%ld",
-		 plot_clip.left, plot_clip.top,
-		 plot_clip.right, plot_clip.bottom);
+	NSLOG(plot,
+	      DEEPDEBUG,
+	      "Tiled plotting %d,%d by %d,%d",
+	      x,
+	      y,
+	      width,
+	      height);
+	NSLOG(plot,
+	      DEEPDEBUG,
+	      "clipped %ld,%ld to %ld,%ld",
+	      plot_clip.left,
+	      plot_clip.top,
+	      plot_clip.right,
+	      plot_clip.bottom);
 
 	/* get left most tile position */
 	if (repeat_x) {
-		for (; x > plot_clip.left; x -= width);
+		for (; x > plot_clip.left; x -= width)
+			;
 	}
 
 	/* get top most tile position */
 	if (repeat_y) {
-		for (; y > plot_clip.top; y -= height);
+		for (; y > plot_clip.top; y -= height)
+			;
 	}
 
-	NSLOG(plot, DEEPDEBUG, "repeat from %d,%d to %ld,%ld",
-		 x, y, plot_clip.right, plot_clip.bottom);
+	NSLOG(plot,
+	      DEEPDEBUG,
+	      "repeat from %d,%d to %ld,%ld",
+	      x,
+	      y,
+	      plot_clip.right,
+	      plot_clip.bottom);
 
 	/* tile down and across to extents */
 	for (xf = x; xf < plot_clip.right; xf += width) {
@@ -974,13 +1079,12 @@ bitmap(const struct redraw_context *ctx,
  * \param length length of string, in bytes
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-text(const struct redraw_context *ctx,
-     const struct plot_font_style *fstyle,
-     int x,
-     int y,
-     const char *text,
-     size_t length)
+static nserror text(const struct redraw_context *ctx,
+		    const struct plot_font_style *fstyle,
+		    int x,
+		    int y,
+		    const char *text,
+		    size_t length)
 {
 	NSLOG(plot, DEEPDEBUG, "words %s at %d,%d", text, x, y);
 
@@ -1003,7 +1107,7 @@ text(const struct redraw_context *ctx,
 	int wlen;
 	SIZE s;
 	LPWSTR wstring;
-	fontbak = (HFONT) SelectObject(plot_hdc, font);
+	fontbak = (HFONT)SelectObject(plot_hdc, font);
 	GetTextExtentPoint(plot_hdc, text, length, &s);
 
 	SelectClipRgn(plot_hdc, clipregion);
@@ -1011,10 +1115,10 @@ text(const struct redraw_context *ctx,
 	SetTextAlign(plot_hdc, TA_BASELINE | TA_LEFT);
 	if ((fstyle->background & 0xFF000000) != 0x01000000) {
 		/* 100% alpha */
-		SetBkColor(plot_hdc, (DWORD) (fstyle->background & 0x00FFFFFF));
+		SetBkColor(plot_hdc, (DWORD)(fstyle->background & 0x00FFFFFF));
 	}
 	SetBkMode(plot_hdc, TRANSPARENT);
-	SetTextColor(plot_hdc, (DWORD) (fstyle->foreground & 0x00FFFFFF));
+	SetTextColor(plot_hdc, (DWORD)(fstyle->foreground & 0x00FFFFFF));
 
 	wlen = MultiByteToWideChar(CP_UTF8, 0, text, length, NULL, 0);
 	wstring = malloc(2 * (wlen + 1));

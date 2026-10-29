@@ -20,29 +20,28 @@
 #define NS_ATARI_MISC_H
 
 
-#define SBUF8_TO_LBUF8(sbuf,lbuf)\
-	lbuf[0] = (long)sbuf[0];\
-	lbuf[1] = (long)sbuf[1];\
-	lbuf[2] = (long)sbuf[2];\
-	lbuf[3] = (long)sbuf[3];\
-	lbuf[4] = (long)sbuf[4];\
-	lbuf[5] = (long)sbuf[5];\
-	lbuf[6] = (long)sbuf[6];\
+#define SBUF8_TO_LBUF8(sbuf, lbuf)                                             \
+	lbuf[0] = (long)sbuf[0];                                               \
+	lbuf[1] = (long)sbuf[1];                                               \
+	lbuf[2] = (long)sbuf[2];                                               \
+	lbuf[3] = (long)sbuf[3];                                               \
+	lbuf[4] = (long)sbuf[4];                                               \
+	lbuf[5] = (long)sbuf[5];                                               \
+	lbuf[6] = (long)sbuf[6];                                               \
 	lbuf[7] = (long)sbuf[7];
 
-#define RECT_TO_GRECT(r,g) \
-	do {							     \
-		(g)->g_x = (r->x0 < r->x1) ? r->x0 : r->x1 ;	     \
-		(g)->g_y = (r->y0 < r->y1) ? r->y0 : r->y1 ;	     \
-		(g)->g_w = (r->x0 < r->x1) ? r->x1 - r->x0 : r->x0 - r->x1 ; \
-		(g)->g_h = (r->y0 < r->y1) ? r->y1 - r->y0 : r->y0 - r->y1 ; \
-	} while(0)
-
+#define RECT_TO_GRECT(r, g)                                                    \
+	do {                                                                   \
+		(g)->g_x = (r->x0 < r->x1) ? r->x0 : r->x1;                    \
+		(g)->g_y = (r->y0 < r->y1) ? r->y0 : r->y1;                    \
+		(g)->g_w = (r->x0 < r->x1) ? r->x1 - r->x0 : r->x0 - r->x1;    \
+		(g)->g_h = (r->y0 < r->y1) ? r->y1 - r->y0 : r->y0 - r->y1;    \
+	} while (0)
 
 
 /* Modes for find_gui_window: */
 #define BY_WINDOM_HANDLE 0x0
-#define BY_GEM_HANDLE    0x1
+#define BY_GEM_HANDLE 0x1
 
 /**
  */
@@ -50,31 +49,31 @@ typedef int (*scan_process_callback)(int pid, void *data);
 
 /**
  */
-struct gui_window * find_guiwin_by_aes_handle(short handle);
+struct gui_window *find_guiwin_by_aes_handle(short handle);
 
 /**
  */
-bool is_process_running(const char * name);
+bool is_process_running(const char *name);
 
 /**
  */
-void gem_set_cursor( MFORM_EX * cursor );
+void gem_set_cursor(MFORM_EX *cursor);
 
 /**
  */
-void dbg_grect(const char * str, GRECT * r);
+void dbg_grect(const char *str, GRECT *r);
 
 /**
  */
-void dbg_pxy(const char * str, short * pxy);
+void dbg_pxy(const char *str, short *pxy);
 
 /**
  */
-void dbg_rect(const char * str, int * pxy);
+void dbg_rect(const char *str, int *pxy);
 
 /**
  */
-const char * file_select(const char * title, const char * name);
+const char *file_select(const char *title, const char *name);
 
 /**
  * Convert NKC to netsurf input key code and/or to ucs4 (depends on keycode).
@@ -84,7 +83,7 @@ const char * file_select(const char * title, const char * name);
  * \return The netsurf input keycode or 0 and ucs4_out updated with
  *          the NKC converted to UC4 encoding.
  */
-long nkc_to_input_key(short nkc, long * ucs4_out);
+long nkc_to_input_key(short nkc, long *ucs4_out);
 
 /**
  * Cause an abnormal program termination.
@@ -93,7 +92,7 @@ long nkc_to_input_key(short nkc, long * ucs4_out);
  *
  * \param error The message to display to the user.
  */
-void die(const char * const error) __attribute__ ((noreturn));
+void die(const char *const error) __attribute__((noreturn));
 
 /**
  * Warn the user of an event.

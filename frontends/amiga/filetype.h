@@ -36,9 +36,11 @@ void ami_mime_free(void);
 void ami_mime_dump(void);
 
 struct Node *ami_mime_from_datatype(struct DataType *dt,
-		lwc_string **mimetype, struct Node *start_node);
+				    lwc_string **mimetype,
+				    struct Node *start_node);
 struct Node *ami_mime_to_filetype(lwc_string *mimetype,
-		lwc_string **filetype, struct Node *start_node);
+				  lwc_string **filetype,
+				  struct Node *start_node);
 
 const char *ami_mime_content_to_filetype(struct hlcache_handle *c);
 lwc_string *ami_mime_content_to_cmd(struct hlcache_handle *c);

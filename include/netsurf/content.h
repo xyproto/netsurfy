@@ -75,7 +75,8 @@ struct bitmap *content_get_bitmap(struct hlcache_handle *h);
  * \param op encoding operation.
  * \return Pointer to content info or NULL if none.
  */
-const char *content_get_encoding(struct hlcache_handle *h, enum content_encoding_type op);
+const char *
+content_get_encoding(struct hlcache_handle *h, enum content_encoding_type op);
 
 
 /**
@@ -156,7 +157,10 @@ void content_invalidate_reuse_data(struct hlcache_handle *h);
  *
  * Calls the redraw function for the content.
  */
-bool content_redraw(struct hlcache_handle *h, struct content_redraw_data *data, const struct rect *clip, const struct redraw_context *ctx);
+bool content_redraw(struct hlcache_handle *h,
+		    struct content_redraw_data *data,
+		    const struct rect *clip,
+		    const struct redraw_context *ctx);
 
 
 /**
@@ -176,7 +180,10 @@ bool content_redraw(struct hlcache_handle *h, struct content_redraw_data *data, 
  *
  * Units for width and height are pixels.
  */
-bool content_scaled_redraw(struct hlcache_handle *h, int width, int height, const struct redraw_context *ctx);
+bool content_scaled_redraw(struct hlcache_handle *h,
+			   int width,
+			   int height,
+			   const struct redraw_context *ctx);
 
 
 /**

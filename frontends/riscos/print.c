@@ -105,11 +105,13 @@ static bool print_send_printtypeknown(wimp_message *m);
 static bool print_document(struct gui_window *g, const char *filename);
 static const char *print_declare_fonts(struct hlcache_handle *h);
 static void print_fonts_callback(void *context,
-		const char *font_name, unsigned int font_size,
-		const uint8_t *s8, const uint32_t *s32, unsigned int n,
-		int x, int y);
-
-
+				 const char *font_name,
+				 unsigned int font_size,
+				 const uint8_t *s8,
+				 const uint32_t *s32,
+				 unsigned int n,
+				 int x,
+				 int y);
 
 
 /**
@@ -118,10 +120,12 @@ static void print_fonts_callback(void *context,
 
 void ro_gui_print_init(void)
 {
-  	wimp_i radio_print_type[] = {ICON_PRINT_TO_BOTTOM, ICON_PRINT_SHEETS,
-  			-1};
-  	wimp_i radio_print_orientation[] = {ICON_PRINT_UPRIGHT,
-  			ICON_PRINT_SIDEWAYS, -1};
+	wimp_i radio_print_type[] = {ICON_PRINT_TO_BOTTOM,
+				     ICON_PRINT_SHEETS,
+				     -1};
+	wimp_i radio_print_orientation[] = {ICON_PRINT_UPRIGHT,
+					    ICON_PRINT_SIDEWAYS,
+					    -1};
 
 	dialog_print = ro_gui_dialog_create("print");
 	ro_gui_wimp_event_register_radio(dialog_print, radio_print_type);
@@ -129,22 +133,33 @@ void ro_gui_print_init(void)
 	ro_gui_wimp_event_register_checkbox(dialog_print, ICON_PRINT_FG_IMAGES);
 	ro_gui_wimp_event_register_checkbox(dialog_print, ICON_PRINT_BG_IMAGES);
 	ro_gui_wimp_event_register_checkbox(dialog_print,
-			ICON_PRINT_IN_BACKGROUND);
+					    ICON_PRINT_IN_BACKGROUND);
 	ro_gui_wimp_event_register_checkbox(dialog_print,
-			ICON_PRINT_TEXT_BLACK);
+					    ICON_PRINT_TEXT_BLACK);
 	ro_gui_wimp_event_register_text_field(dialog_print,
-			ICON_PRINT_SHEETS_TEXT);
+					      ICON_PRINT_SHEETS_TEXT);
 	ro_gui_wimp_event_register_numeric_field(dialog_print,
-			ICON_PRINT_COPIES, ICON_PRINT_COPIES_UP,
-			ICON_PRINT_COPIES_DOWN, 1, 99, 1, 0);
+						 ICON_PRINT_COPIES,
+						 ICON_PRINT_COPIES_UP,
+						 ICON_PRINT_COPIES_DOWN,
+						 1,
+						 99,
+						 1,
+						 0);
 	ro_gui_wimp_event_register_numeric_field(dialog_print,
-			ICON_PRINT_SHEETS_VALUE, ICON_PRINT_SHEETS_UP,
-			ICON_PRINT_SHEETS_DOWN, 1, 99, 1, 0);
+						 ICON_PRINT_SHEETS_VALUE,
+						 ICON_PRINT_SHEETS_UP,
+						 ICON_PRINT_SHEETS_DOWN,
+						 1,
+						 99,
+						 1,
+						 0);
 	ro_gui_wimp_event_register_cancel(dialog_print, ICON_PRINT_CANCEL);
 	ro_gui_wimp_event_register_mouse_click(dialog_print,
-			ro_gui_print_click);
-	ro_gui_wimp_event_register_ok(dialog_print, ICON_PRINT_PRINT,
-			ro_gui_print_apply);
+					       ro_gui_print_click);
+	ro_gui_wimp_event_register_ok(dialog_print,
+				      ICON_PRINT_PRINT,
+				      ro_gui_print_apply);
 	ro_gui_wimp_event_set_help_prefix(dialog_print, "HelpPrint");
 }
 
@@ -169,39 +184,49 @@ void ro_gui_print_prepare(struct gui_window *g)
 	/* Read Printer Driver name */
 	error = xpdriver_info(0, 0, 0, 0, &desc, 0, 0, 0);
 	if (error) {
-		NSLOG(netsurf, INFO, "xpdriver_info: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xpdriver_info: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		printers_exists = false;
 	}
 
-	ro_gui_set_icon_selected_state(dialog_print, ICON_PRINT_TO_BOTTOM,
-			true);
+	ro_gui_set_icon_selected_state(dialog_print,
+				       ICON_PRINT_TO_BOTTOM,
+				       true);
 
 	ro_gui_set_icon_selected_state(dialog_print, ICON_PRINT_SHEETS, false);
 	ro_gui_set_icon_integer(dialog_print, ICON_PRINT_SHEETS_VALUE, 1);
 	print_update_sheets_shaded_state(true);
 
-	ro_gui_set_icon_selected_state(dialog_print, ICON_PRINT_FG_IMAGES,
-			true);
+	ro_gui_set_icon_selected_state(dialog_print,
+				       ICON_PRINT_FG_IMAGES,
+				       true);
 	ro_gui_set_icon_shaded_state(dialog_print, ICON_PRINT_FG_IMAGES, true);
 
-	ro_gui_set_icon_selected_state(dialog_print, ICON_PRINT_BG_IMAGES,
-			print_bg_images);
+	ro_gui_set_icon_selected_state(dialog_print,
+				       ICON_PRINT_BG_IMAGES,
+				       print_bg_images);
 
-	ro_gui_set_icon_selected_state(dialog_print, ICON_PRINT_IN_BACKGROUND,
-			false);
+	ro_gui_set_icon_selected_state(dialog_print,
+				       ICON_PRINT_IN_BACKGROUND,
+				       false);
 
 	ro_gui_set_icon_selected_state(dialog_print, ICON_PRINT_UPRIGHT, true);
-	ro_gui_set_icon_selected_state(dialog_print, ICON_PRINT_SIDEWAYS,
-			false);
+	ro_gui_set_icon_selected_state(dialog_print,
+				       ICON_PRINT_SIDEWAYS,
+				       false);
 
-	ro_gui_set_icon_selected_state(dialog_print, ICON_PRINT_TEXT_BLACK,
-			false);
+	ro_gui_set_icon_selected_state(dialog_print,
+				       ICON_PRINT_TEXT_BLACK,
+				       false);
 
 	ro_gui_set_icon_integer(dialog_print, ICON_PRINT_COPIES, 1);
 
-	ro_gui_set_icon_shaded_state(dialog_print, ICON_PRINT_PRINT,
-			!printers_exists);
+	ro_gui_set_icon_shaded_state(dialog_print,
+				     ICON_PRINT_PRINT,
+				     !printers_exists);
 	if (printers_exists)
 		ro_gui_set_window_title(dialog_print, desc);
 
@@ -221,11 +246,11 @@ bool ro_gui_print_click(wimp_pointer *pointer)
 		return true;
 
 	switch (pointer->i) {
-		case ICON_PRINT_TO_BOTTOM:
-		case ICON_PRINT_SHEETS:
-			print_update_sheets_shaded_state(pointer->i !=
-					ICON_PRINT_SHEETS);
-			break;
+	case ICON_PRINT_TO_BOTTOM:
+	case ICON_PRINT_SHEETS:
+		print_update_sheets_shaded_state(pointer->i !=
+						 ICON_PRINT_SHEETS);
+		break;
 	}
 	return false;
 }
@@ -237,27 +262,27 @@ bool ro_gui_print_click(wimp_pointer *pointer)
 
 bool ro_gui_print_apply(wimp_w w)
 {
-	int copies = atoi(ro_gui_get_icon_string(dialog_print,
-						ICON_PRINT_COPIES));
-	int sheets = atoi(ro_gui_get_icon_string(dialog_print,
-						ICON_PRINT_SHEETS_VALUE));
+	int copies = atoi(
+		ro_gui_get_icon_string(dialog_print, ICON_PRINT_COPIES));
+	int sheets = atoi(
+		ro_gui_get_icon_string(dialog_print, ICON_PRINT_SHEETS_VALUE));
 
-	print_in_background = ro_gui_get_icon_selected_state(dialog_print,
-			ICON_PRINT_IN_BACKGROUND);
-	print_text_black = ro_gui_get_icon_selected_state(dialog_print,
-			ICON_PRINT_TEXT_BLACK);
+	print_in_background = ro_gui_get_icon_selected_state(
+		dialog_print, ICON_PRINT_IN_BACKGROUND);
+	print_text_black = ro_gui_get_icon_selected_state(
+		dialog_print, ICON_PRINT_TEXT_BLACK);
 	print_sideways = ro_gui_get_icon_selected_state(dialog_print,
-			ICON_PRINT_SIDEWAYS);
+							ICON_PRINT_SIDEWAYS);
 	print_num_copies = copies;
 	if (ro_gui_get_icon_selected_state(dialog_print, ICON_PRINT_SHEETS))
 		print_max_sheets = sheets;
 	else
 		print_max_sheets = -1;
 	print_bg_images = ro_gui_get_icon_selected_state(dialog_print,
-			ICON_PRINT_BG_IMAGES);
+							 ICON_PRINT_BG_IMAGES);
 
-	print_send_printsave(browser_window_get_content(
-			ro_print_current_window->bw));
+	print_send_printsave(
+		browser_window_get_content(ro_print_current_window->bw));
 
 	return true;
 }
@@ -295,7 +320,7 @@ void print_send_printsave(struct hlcache_handle *h)
 	if (212 < len)
 		len = 212;
 
-	m.size = ((44+len+3) & ~3);
+	m.size = ((44 + len + 3) & ~3);
 	m.your_ref = 0;
 	m.action = message_PRINT_SAVE;
 	m.w = (wimp_w)0;
@@ -305,10 +330,14 @@ void print_send_printsave(struct hlcache_handle *h)
 	strncpy(m.file_name, content_get_title(h), 211);
 	m.file_name[211] = 0;
 	e = xwimp_send_message(wimp_USER_MESSAGE_RECORDED,
-			(wimp_message *)&m, 0);
+			       (wimp_message *)&m,
+			       0);
 	if (e) {
-		NSLOG(netsurf, INFO, "xwimp_send_message: 0x%x: %s",
-		      e->errnum, e->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_send_message: 0x%x: %s",
+		      e->errnum,
+		      e->errmess);
 		ro_warn_user("WimpError", e->errmess);
 		ro_print_cleanup();
 	}
@@ -332,8 +361,11 @@ bool print_send_printtypeknown(wimp_message *m)
 	m->action = message_PRINT_TYPE_KNOWN;
 	e = xwimp_send_message(wimp_USER_MESSAGE, m, m->sender);
 	if (e) {
-		NSLOG(netsurf, INFO, "xwimp_send_message: 0x%x: %s",
-		      e->errnum, e->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_send_message: 0x%x: %s",
+		      e->errnum,
+		      e->errmess);
 		ro_warn_user("WimpError", e->errmess);
 		return false;
 	}
@@ -369,7 +401,8 @@ void ro_print_save_bounce(wimp_message *m)
 
 void ro_print_error(wimp_message *m)
 {
-	pdriver_message_print_error *p = (pdriver_message_print_error*)&m->data;
+	pdriver_message_print_error *p =
+		(pdriver_message_print_error *)&m->data;
 	if (m->your_ref == 0 || m->your_ref != print_prev_message)
 		return;
 
@@ -391,18 +424,16 @@ void ro_print_error(wimp_message *m)
 void ro_print_type_odd(wimp_message *m)
 {
 	if ((m->your_ref == 0 || m->your_ref == print_prev_message) &&
-						!print_in_background) {
+	    !print_in_background) {
 		/* reply to a previous message (ie printsave) */
 		if (ro_print_current_window && print_send_printtypeknown(m)) {
 			print_document(ro_print_current_window, "printer:");
 		}
 		ro_print_cleanup();
-	}
-	else {
+	} else {
 		/* broadcast message */
 		/* no need to do anything */
 	}
-
 }
 
 
@@ -433,14 +464,17 @@ bool ro_print_ack(wimp_message *m)
 	os_error *error;
 
 	if (m->your_ref == 0 || m->your_ref != print_prev_message ||
-			!ro_print_current_window)
+	    !ro_print_current_window)
 		return false;
 
 	/* read printer driver type */
 	error = xpdriver_info(&info_type, 0, 0, 0, 0, 0, 0, 0);
 	if (error) {
-		NSLOG(netsurf, INFO, "xpdriver_info: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xpdriver_info: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("PrintError", error->errmess);
 		ro_print_cleanup();
 		return true;
@@ -449,7 +483,7 @@ bool ro_print_ack(wimp_message *m)
 
 	/* print to file */
 	if (!print_document(ro_print_current_window,
-			m->data.data_xfer.file_name)) {
+			    m->data.data_xfer.file_name)) {
 		ro_print_cleanup();
 		return true;
 	}
@@ -465,12 +499,14 @@ bool ro_print_ack(wimp_message *m)
 
 	error = xwimp_send_message(wimp_USER_MESSAGE_RECORDED, m, m->sender);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_send_message: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_send_message: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		/* and delete temporary file */
-		xosfile_delete(m->data.data_xfer.file_name,
-				0, 0, 0, 0, 0);
+		xosfile_delete(m->data.data_xfer.file_name, 0, 0, 0, 0, 0);
 	}
 	print_prev_message = m->my_ref;
 
@@ -538,8 +574,11 @@ bool print_document(struct gui_window *g, const char *filename)
 	/* read printer driver features */
 	error = xpdriver_info(0, 0, 0, &features, 0, 0, 0, 0);
 	if (error) {
-		NSLOG(netsurf, INFO, "xpdriver_info: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xpdriver_info: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("PrintError", error->errmess);
 		return false;
 	}
@@ -547,8 +586,11 @@ bool print_document(struct gui_window *g, const char *filename)
 	/* read page size */
 	error = xpdriver_page_size(0, 0, &left, &bottom, &right, &top);
 	if (error) {
-		NSLOG(netsurf, INFO, "xpdriver_page_size: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xpdriver_page_size: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("PrintError", error->errmess);
 		return false;
 	}
@@ -569,10 +611,16 @@ bool print_document(struct gui_window *g, const char *filename)
 
 	/* open printer file */
 	error = xosfind_openoutw(osfind_NO_PATH | osfind_ERROR_IF_DIR |
-			osfind_ERROR_IF_ABSENT, filename, 0, &fhandle);
+					 osfind_ERROR_IF_ABSENT,
+				 filename,
+				 0,
+				 &fhandle);
 	if (error) {
-		NSLOG(netsurf, INFO, "xosfind_openoutw: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xosfind_openoutw: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("PrintError", error->errmess);
 		return false;
 	}
@@ -580,8 +628,11 @@ bool print_document(struct gui_window *g, const char *filename)
 	/* select print job */
 	error = xpdriver_select_jobw(fhandle, "NetSurf", &old_job);
 	if (error) {
-		NSLOG(netsurf, INFO, "xpdriver_select_jobw: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xpdriver_select_jobw: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("PrintError", error->errmess);
 		xosfind_closew(fhandle);
 		return false;
@@ -608,7 +659,7 @@ bool print_document(struct gui_window *g, const char *filename)
 		osbool more;
 
 		if (print_sideways) {
-			b.x0 = bottom / 400 -2;
+			b.x0 = bottom / 400 - 2;
 			b.y0 = left / 400 - 2;
 			b.x1 = top / 400 + 2;
 			b.y1 = right / 400 + 2;
@@ -621,7 +672,7 @@ bool print_document(struct gui_window *g, const char *filename)
 			ro_plot_origin_x = bottom / 400;
 			ro_plot_origin_y = right / 400 + yscroll * 2;
 		} else {
-			b.x0 = left / 400 -2;
+			b.x0 = left / 400 - 2;
 			b.y0 = bottom / 400 - 2;
 			b.x1 = right / 400 + 2;
 			b.y1 = top / 400 + 2;
@@ -635,13 +686,14 @@ bool print_document(struct gui_window *g, const char *filename)
 			ro_plot_origin_y = top / 400 + yscroll * 2;
 		}
 
-		xhourglass_percentage((int) (yscroll * 100 /
-				content_get_height(h)));
+		xhourglass_percentage(
+			(int)(yscroll * 100 / content_get_height(h)));
 
 		/* give page rectangle */
 		error = xpdriver_give_rectangle(0, &b, &t, &p, os_COLOUR_WHITE);
 		if (error) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xpdriver_give_rectangle: 0x%x: %s",
 			      error->errnum,
 			      error->errmess);
@@ -649,15 +701,23 @@ bool print_document(struct gui_window *g, const char *filename)
 			goto error;
 		}
 
-		NSLOG(netsurf, INFO, "given rectangle: [(%d, %d), (%d, %d)]",
-		      b.x0, b.y0, b.x1, b.y1);
+		NSLOG(netsurf,
+		      INFO,
+		      "given rectangle: [(%d, %d), (%d, %d)]",
+		      b.x0,
+		      b.y0,
+		      b.x1,
+		      b.y1);
 
 		/* and redraw the document */
-		error = xpdriver_draw_page(print_num_copies, &b, 0, 0,
-				&more, 0);
+		error = xpdriver_draw_page(
+			print_num_copies, &b, 0, 0, &more, 0);
 		if (error) {
-			NSLOG(netsurf, INFO, "xpdriver_draw_page: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xpdriver_draw_page: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			error_message = error->errmess;
 			goto error;
 		}
@@ -668,20 +728,23 @@ bool print_document(struct gui_window *g, const char *filename)
 			struct redraw_context ctx = {
 				.interactive = false,
 				.background_images = print_bg_images,
-				.plot = &ro_plotters
-			};
+				.plot = &ro_plotters};
 
-			NSLOG(netsurf, INFO,
-			      "redrawing area: [(%d, %d), (%d, %d)]", b.x0,
-			      b.y0, b.x1, b.y1);
+			NSLOG(netsurf,
+			      INFO,
+			      "redrawing area: [(%d, %d), (%d, %d)]",
+			      b.x0,
+			      b.y0,
+			      b.x1,
+			      b.y1);
 
 			ro_plot_clip_rect.x0 = b.x0 - ro_plot_origin_x;
 			ro_plot_clip_rect.y0 = ro_plot_origin_y - b.y0;
 			ro_plot_clip_rect.x1 = b.x1 - ro_plot_origin_x;
 			ro_plot_clip_rect.y1 = ro_plot_origin_y - b.y1;
 
-			clip.x0 = (ro_plot_clip_rect.x0    ) / 2; /* left   */
-			clip.y0 = (ro_plot_clip_rect.y1    ) / 2; /* top    */
+			clip.x0 = (ro_plot_clip_rect.x0) / 2; /* left   */
+			clip.y0 = (ro_plot_clip_rect.y1) / 2; /* top    */
 			clip.x1 = (ro_plot_clip_rect.x1 + 1) / 2; /* right  */
 			clip.y1 = (ro_plot_clip_rect.y0 + 1) / 2; /* bottom */
 
@@ -701,7 +764,8 @@ bool print_document(struct gui_window *g, const char *filename)
 
 			error = xpdriver_get_rectangle(&b, &more, 0);
 			if (error) {
-				NSLOG(netsurf, INFO,
+				NSLOG(netsurf,
+				      INFO,
 				      "xpdriver_get_rectangle: 0x%x: %s",
 				      error->errnum,
 				      error->errmess);
@@ -724,18 +788,24 @@ bool print_document(struct gui_window *g, const char *filename)
 	 * happen on some versions of RISC OS 6).
 	 */
 
-	error = (os_error *) _swix(PDriver_EndJob, _IN(0), (int) fhandle);
+	error = (os_error *)_swix(PDriver_EndJob, _IN(0), (int)fhandle);
 	if (error) {
-		NSLOG(netsurf, INFO, "xpdriver_end_jobw: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xpdriver_end_jobw: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		error_message = error->errmess;
 		goto error;
 	}
 
 	error = xosfind_closew(fhandle);
 	if (error) {
-		NSLOG(netsurf, INFO, "xosfind_closew: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xosfind_closew: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("PrintError", error->errmess);
 		return false;
 	}
@@ -743,7 +813,8 @@ bool print_document(struct gui_window *g, const char *filename)
 	if (old_job) {
 		error = xpdriver_select_jobw(old_job, 0, 0);
 		if (error) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xpdriver_select_jobw: 0x%x: %s",
 			      error->errnum,
 			      error->errmess);
@@ -776,13 +847,11 @@ error:
 	rufl_invalidate_cache();
 
 	/* restore document layout */
-	if (content_get_type(h)  == CONTENT_HTML)
+	if (content_get_type(h) == CONTENT_HTML)
 		content_reformat(h, false, saved_width, saved_height);
 
 	return false;
 }
-
-
 
 
 static nserror
@@ -791,65 +860,65 @@ print_fonts_plot_clip(const struct redraw_context *ctx, const struct rect *clip)
 	return NSERROR_OK;
 }
 
-static nserror
-print_fonts_plot_arc(const struct redraw_context *ctx,
-	       const plot_style_t *style,
-	       int x, int y, int radius, int angle1, int angle2)
+static nserror print_fonts_plot_arc(const struct redraw_context *ctx,
+				    const plot_style_t *style,
+				    int x,
+				    int y,
+				    int radius,
+				    int angle1,
+				    int angle2)
 {
 	return NSERROR_OK;
 }
 
-static nserror
-print_fonts_plot_disc(const struct redraw_context *ctx,
-		      const plot_style_t *style,
-		      int x, int y, int radius)
+static nserror print_fonts_plot_disc(const struct redraw_context *ctx,
+				     const plot_style_t *style,
+				     int x,
+				     int y,
+				     int radius)
 {
 	return NSERROR_OK;
 }
 
-static nserror
-print_fonts_plot_line(const struct redraw_context *ctx,
-		      const plot_style_t *style,
-		      const struct rect *line)
+static nserror print_fonts_plot_line(const struct redraw_context *ctx,
+				     const plot_style_t *style,
+				     const struct rect *line)
 {
 	return NSERROR_OK;
 }
 
-static nserror
-print_fonts_plot_rectangle(const struct redraw_context *ctx,
-		     const plot_style_t *style,
-		     const struct rect *rect)
+static nserror print_fonts_plot_rectangle(const struct redraw_context *ctx,
+					  const plot_style_t *style,
+					  const struct rect *rect)
 {
 	return NSERROR_OK;
 }
 
-static nserror
-print_fonts_plot_polygon(const struct redraw_context *ctx,
-		   const plot_style_t *style,
-		   const int *p,
-		   unsigned int n)
+static nserror print_fonts_plot_polygon(const struct redraw_context *ctx,
+					const plot_style_t *style,
+					const int *p,
+					unsigned int n)
 {
 	return NSERROR_OK;
 }
 
-static nserror
-print_fonts_plot_path(const struct redraw_context *ctx,
-		const plot_style_t *pstyle,
-		const float *p,
-		unsigned int n,
-		const float transform[6])
+static nserror print_fonts_plot_path(const struct redraw_context *ctx,
+				     const plot_style_t *pstyle,
+				     const float *p,
+				     unsigned int n,
+				     const float transform[6])
 {
 	return NSERROR_OK;
 }
 
-static nserror
-print_fonts_plot_bitmap(const struct redraw_context *ctx,
-	       struct bitmap *bitmap,
-	       int x, int y,
-	       int width,
-	       int height,
-	       colour bg,
-	       bitmap_flags_t flags)
+static nserror print_fonts_plot_bitmap(const struct redraw_context *ctx,
+				       struct bitmap *bitmap,
+				       int x,
+				       int y,
+				       int width,
+				       int height,
+				       colour bg,
+				       bitmap_flags_t flags)
 {
 	return NSERROR_OK;
 }
@@ -865,13 +934,12 @@ print_fonts_plot_bitmap(const struct redraw_context *ctx,
  * \param length length of string, in bytes
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-print_fonts_plot_text(const struct redraw_context *ctx,
-		const struct plot_font_style *fstyle,
-		int x,
-		int y,
-		const char *text,
-		size_t length)
+static nserror print_fonts_plot_text(const struct redraw_context *ctx,
+				     const struct plot_font_style *fstyle,
+				     int x,
+				     int y,
+				     const char *text,
+				     size_t length)
 {
 	const char *font_family;
 	unsigned int font_size;
@@ -880,18 +948,26 @@ print_fonts_plot_text(const struct redraw_context *ctx,
 
 	nsfont_read_style(fstyle, &font_family, &font_size, &font_style);
 
-	code = rufl_paint_callback(font_family, font_style, font_size,
-			text, length, 0, 0, print_fonts_callback, 0);
+	code = rufl_paint_callback(font_family,
+				   font_style,
+				   font_size,
+				   text,
+				   length,
+				   0,
+				   0,
+				   print_fonts_callback,
+				   0);
 	if (code != rufl_OK) {
 		if (code == rufl_FONT_MANAGER_ERROR) {
-			NSLOG(netsurf, INFO,
-			      "rufl_paint_callback: rufl_FONT_MANAGER_ERROR: ""0x%x: %s",
+			NSLOG(netsurf,
+			      INFO,
+			      "rufl_paint_callback: rufl_FONT_MANAGER_ERROR: "
+			      "0x%x: %s",
 			      rufl_fm_error->errnum,
 			      rufl_fm_error->errmess);
 			print_fonts_error = rufl_fm_error->errmess;
 		} else {
-			NSLOG(netsurf, INFO, "rufl_paint_callback: 0x%x",
-			      code);
+			NSLOG(netsurf, INFO, "rufl_paint_callback: 0x%x", code);
 		}
 		return NSERROR_INVALID;
 	}
@@ -907,7 +983,7 @@ print_fonts_plot_text(const struct redraw_context *ctx,
  *
  * All the functions do nothing except for print_fonts_plot_text,
  * which records the fonts used.
-*/
+ */
 static const struct plotter_table print_fonts_plotters = {
 	.rectangle = print_fonts_plot_rectangle,
 	.line = print_fonts_plot_line,
@@ -936,11 +1012,9 @@ const char *print_declare_fonts(struct hlcache_handle *h)
 	struct content_redraw_data data;
 	const char *error_message = 0;
 	os_error *error;
-	struct redraw_context ctx = {
-		.interactive = false,
-		.background_images = false,
-		.plot = &print_fonts_plotters
-	};
+	struct redraw_context ctx = {.interactive = false,
+				     .background_images = false,
+				     .plot = &print_fonts_plotters};
 
 	free(print_fonts_list);
 	print_fonts_list = 0;
@@ -967,10 +1041,12 @@ const char *print_declare_fonts(struct hlcache_handle *h)
 
 	for (i = 0; i != print_fonts_count; ++i) {
 		NSLOG(netsurf, INFO, "%u %s", i, print_fonts_list[i]);
-		error = xpdriver_declare_font(0, print_fonts_list[i],
-				pdriver_KERNED);
+		error = xpdriver_declare_font(0,
+					      print_fonts_list[i],
+					      pdriver_KERNED);
 		if (error) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xpdriver_declare_font: 0x%x: %s",
 			      error->errnum,
 			      error->errmess);
@@ -980,8 +1056,11 @@ const char *print_declare_fonts(struct hlcache_handle *h)
 	}
 	error = xpdriver_declare_font(0, 0, 0);
 	if (error) {
-		NSLOG(netsurf, INFO, "xpdriver_declare_font: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xpdriver_declare_font: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		error_message = error->errmess;
 		goto end;
 	}
@@ -1003,31 +1082,36 @@ end:
  */
 
 void print_fonts_callback(void *context,
-		const char *font_name, unsigned int font_size,
-		const uint8_t *s8, const uint32_t *s32, unsigned int n,
-		int x, int y)
+			  const char *font_name,
+			  unsigned int font_size,
+			  const uint8_t *s8,
+			  const uint32_t *s32,
+			  unsigned int n,
+			  int x,
+			  int y)
 {
 	unsigned int i;
 	char **fonts_list;
 
-	(void) context;  /* unused */
-	(void) font_size;  /* unused */
-	(void) x;  /* unused */
-	(void) y;  /* unused */
+	(void)context; /* unused */
+	(void)font_size; /* unused */
+	(void)x; /* unused */
+	(void)y; /* unused */
 
 	assert(s8 || s32);
 
 	/* check if the font name is new */
 	for (i = 0; i != print_fonts_count &&
-			strcmp(print_fonts_list[i], font_name) != 0; i++)
+		    strcmp(print_fonts_list[i], font_name) != 0;
+	     i++)
 		;
 	if (i != print_fonts_count)
 		return;
 
 	/* add to list of fonts */
 	fonts_list = realloc(print_fonts_list,
-			sizeof print_fonts_list[0] *
-			(print_fonts_count + 1));
+			     sizeof print_fonts_list[0] *
+				     (print_fonts_count + 1));
 	if (!fonts_list) {
 		print_fonts_error = messages_get("NoMemory");
 		return;
@@ -1040,4 +1124,3 @@ void print_fonts_callback(void *context,
 	print_fonts_list = fonts_list;
 	print_fonts_count++;
 }
-

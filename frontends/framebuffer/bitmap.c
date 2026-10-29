@@ -132,7 +132,8 @@ static void bitmap_destroy(void *bitmap)
  *
  * \param  bitmap  a bitmap, as returned by bitmap_create()
  */
-static void bitmap_modified(void *bitmap) {
+static void bitmap_modified(void *bitmap)
+{
 }
 
 /**
@@ -184,7 +185,7 @@ static int bitmap_get_width(void *bitmap)
 
 	nsfb_get_geometry(bm, &width, NULL, NULL);
 
-	return(width);
+	return (width);
 }
 
 static int bitmap_get_height(void *bitmap)
@@ -196,7 +197,7 @@ static int bitmap_get_height(void *bitmap)
 
 	nsfb_get_geometry(bm, NULL, &height, NULL);
 
-	return(height);
+	return (height);
 }
 
 /**
@@ -207,21 +208,18 @@ static int bitmap_get_height(void *bitmap)
  * \return true on success and bitmap updated else false
  */
 static nserror
-bitmap_render(struct bitmap *bitmap,
-	      struct hlcache_handle *content)
+bitmap_render(struct bitmap *bitmap, struct hlcache_handle *content)
 {
 	nsfb_t *tbm = (nsfb_t *)bitmap; /* target bitmap */
 	nsfb_t *bm; /* temporary bitmap */
 	nsfb_t *current; /* current main fb */
 	int width, height; /* target bitmap width height */
-	int cwidth, cheight;/* content width /height */
+	int cwidth, cheight; /* content width /height */
 	nsfb_bbox_t loc;
 
-	struct redraw_context ctx = {
-		.interactive = false,
-		.background_images = true,
-		.plot = &fb_plotters
-	};
+	struct redraw_context ctx = {.interactive = false,
+				     .background_images = true,
+				     .plot = &fb_plotters};
 
 	nsfb_get_geometry(tbm, &width, &height, NULL);
 

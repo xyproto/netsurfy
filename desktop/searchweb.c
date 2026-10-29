@@ -53,7 +53,8 @@ static struct search_web_ctx_s {
 } search_web_ctx;
 
 
-static const char *default_providers = "DuckDuckGo|www.duckduckgo.com|https://www.duckduckgo.com/html/?q=%s|https://www.duckduckgo.com/favicon.ico|\n";
+static const char *default_providers =
+	"DuckDuckGo|www.duckduckgo.com|https://www.duckduckgo.com/html/?q=%s|https://www.duckduckgo.com/favicon.ico|\n";
 
 static const char *default_search_icon_url = "resource:icons/search.png";
 
@@ -69,10 +70,9 @@ static const char *default_search_icon_url = "resource:icons/search.png";
  * \param providers_size_out Size of buffer.
  * \return NSERROR_OK and providers_out updated or appropriate error code.
  */
-static nserror
-read_providers(const char *fname,
-	       char **providers_out,
-	       size_t *providers_size_out)
+static nserror read_providers(const char *fname,
+			      char **providers_out,
+			      size_t *providers_size_out)
 {
 	FILE *providersf;
 	long ftellsize;
@@ -135,11 +135,10 @@ read_providers(const char *fname,
  * \param providers_count The number of providers in the output array.
  * \return NSERROR_OK on success or error code on failure.
  */
-static nserror
-parse_providers(char *providersd,
-		size_t providers_size,
-		struct search_provider **providers_out,
-		size_t *providers_count)
+static nserror parse_providers(char *providersd,
+			       size_t providers_size,
+			       struct search_provider **providers_out,
+			       size_t *providers_count)
 {
 	size_t pcount = 0; /* number of providers */
 	size_t pidx;
@@ -151,7 +150,7 @@ parse_providers(char *providersd,
 		nl = strchr(nl, '\n');
 		if (nl != NULL) {
 			nl++;
-			pcount+=1;
+			pcount += 1;
 		}
 	}
 
@@ -227,10 +226,9 @@ parse_providers(char *providersd,
  * \param url_out The resulting url.
  * \return NSERROR_OK on success or appropriate error code.
  */
-static nserror
-make_search_nsurl(struct search_provider *provider,
-		const char *term,
-		nsurl **url_out)
+static nserror make_search_nsurl(struct search_provider *provider,
+				 const char *term,
+				 nsurl **url_out)
 {
 	nserror ret;
 	nsurl *url;
@@ -248,7 +246,7 @@ make_search_nsurl(struct search_provider *provider,
 
 	searchstr = provider->searchstring;
 
-	urlstr_len = strlen(searchstr) + strlen(eterm)  + 1;
+	urlstr_len = strlen(searchstr) + strlen(eterm) + 1;
 	urlstro = urlstr = malloc(urlstr_len);
 	if (urlstr == NULL) {
 		free(eterm);
@@ -256,7 +254,7 @@ make_search_nsurl(struct search_provider *provider,
 	}
 
 	/* composite search url */
-	for ( ; *searchstr != 0; searchstr++, urlstro++) {
+	for (; *searchstr != 0; searchstr++, urlstro++) {
 		*urlstro = *searchstr;
 		if ((*searchstr == '%') && (searchstr[1] == 's')) {
 			searchstr++; /* skip % */
@@ -280,24 +278,27 @@ make_search_nsurl(struct search_provider *provider,
 /**
  * callback for hlcache icon fetch events.
  */
-static nserror
-search_web_ico_callback(hlcache_handle *ico,
-			const hlcache_event *event,
-			void *pw)
+static nserror search_web_ico_callback(hlcache_handle *ico,
+				       const hlcache_event *event,
+				       void *pw)
 {
 	struct search_provider *provider = pw;
 
 	switch (event->type) {
 
 	case CONTENT_MSG_DONE:
-		NSLOG(netsurf, INFO, "icon '%s' retrieved",
+		NSLOG(netsurf,
+		      INFO,
+		      "icon '%s' retrieved",
 		      nsurl_access(hlcache_handle_get_url(ico)));
 		guit->search_web->provider_update(provider->name,
 						  content_get_bitmap(ico));
 		break;
 
 	case CONTENT_MSG_ERROR:
-		NSLOG(netsurf, INFO, "icon %s error: %s",
+		NSLOG(netsurf,
+		      INFO,
+		      "icon %s error: %s",
 		      nsurl_access(hlcache_handle_get_url(ico)),
 		      event->data.errordata.errormsg);
 
@@ -314,10 +315,9 @@ search_web_ico_callback(hlcache_handle *ico,
 }
 
 /* exported interface documented in desktop/searchweb.h */
-nserror
-search_web_omni(const char *term,
-		enum search_web_omni_flags flags,
-		struct nsurl **url_out)
+nserror search_web_omni(const char *term,
+			enum search_web_omni_flags flags,
+			struct nsurl **url_out)
 {
 	nserror ret;
 	nsurl *url;
@@ -365,7 +365,8 @@ search_web_omni(const char *term,
 	}
 
 	/* turn search into a nsurl */
-	ret = make_search_nsurl(&search_web_ctx.providers[search_web_ctx.current], term, &url);
+	ret = make_search_nsurl(
+		&search_web_ctx.providers[search_web_ctx.current], term, &url);
 	if (ret != NSERROR_OK) {
 		return ret;
 	}
@@ -393,7 +394,8 @@ nserror search_web_get_provider_bitmap(struct bitmap **bitmap_out)
 	}
 	if ((ico_bitmap == NULL) &&
 	    (search_web_ctx.default_ico_handle != NULL)) {
-		ico_bitmap = content_get_bitmap(search_web_ctx.default_ico_handle);
+		ico_bitmap = content_get_bitmap(
+			search_web_ctx.default_ico_handle);
 	}
 
 	*bitmap_out = ico_bitmap;
@@ -415,8 +417,9 @@ nserror search_web_select_provider(const char *selection)
 
 	/* negative value just selects whatevers current */
 	if (selection != NULL) {
-		for (pidx=0; pidx < search_web_ctx.providers_count;pidx++) {
-			if (strcmp(search_web_ctx.providers[pidx].name, selection)==0) {
+		for (pidx = 0; pidx < search_web_ctx.providers_count; pidx++) {
+			if (strcmp(search_web_ctx.providers[pidx].name,
+				   selection) == 0) {
 				search_web_ctx.current = pidx;
 				break;
 			}
@@ -435,7 +438,8 @@ nserror search_web_select_provider(const char *selection)
 	}
 	if ((ico_bitmap == NULL) &&
 	    (search_web_ctx.default_ico_handle != NULL)) {
-		ico_bitmap = content_get_bitmap(search_web_ctx.default_ico_handle);
+		ico_bitmap = content_get_bitmap(
+			search_web_ctx.default_ico_handle);
 	}
 
 	/* signal the frontend with the provider change. Bitmap may
@@ -454,10 +458,14 @@ nserror search_web_select_provider(const char *selection)
 			return ret;
 		}
 
-		ret = hlcache_handle_retrieve(icon_nsurl, 0, NULL, NULL,
+		ret = hlcache_handle_retrieve(icon_nsurl,
+					      0,
+					      NULL,
+					      NULL,
 					      search_web_ico_callback,
 					      provider,
-					      NULL, CONTENT_IMAGE,
+					      NULL,
+					      CONTENT_IMAGE,
 					      &provider->ico_handle);
 		nsurl_unref(icon_nsurl);
 		if (ret != NSERROR_OK) {
@@ -473,16 +481,16 @@ nserror search_web_select_provider(const char *selection)
  * callback for hlcache icon fetch events.
  */
 static nserror
-default_ico_callback(hlcache_handle *ico,
-		     const hlcache_event *event,
-		     void *pw)
+default_ico_callback(hlcache_handle *ico, const hlcache_event *event, void *pw)
 {
 	struct search_web_ctx_s *ctx = pw;
 
 	switch (event->type) {
 
 	case CONTENT_MSG_DONE:
-		NSLOG(netsurf, INFO, "default icon '%s' retrieved",
+		NSLOG(netsurf,
+		      INFO,
+		      "default icon '%s' retrieved",
 		      nsurl_access(hlcache_handle_get_url(ico)));
 
 		/* only set to default icon if providers icon has no handle */
@@ -494,7 +502,9 @@ default_ico_callback(hlcache_handle *ico,
 		break;
 
 	case CONTENT_MSG_ERROR:
-		NSLOG(netsurf, INFO, "icon %s error: %s",
+		NSLOG(netsurf,
+		      INFO,
+		      "icon %s error: %s",
 		      nsurl_access(hlcache_handle_get_url(ico)),
 		      event->data.errordata.errormsg);
 
@@ -514,7 +524,7 @@ default_ico_callback(hlcache_handle *ico,
 ssize_t search_web_iterate_providers(ssize_t iter, const char **name)
 {
 	if (iter < 0) {
-		iter=0;
+		iter = 0;
 	} else {
 		iter++;
 	}
@@ -601,7 +611,8 @@ nserror search_web_finalise(void)
 	}
 	for (pidx = 0; pidx < search_web_ctx.providers_count; pidx++) {
 		if (search_web_ctx.providers[pidx].ico_handle != NULL) {
-			hlcache_handle_release(search_web_ctx.providers[pidx].ico_handle);
+			hlcache_handle_release(
+				search_web_ctx.providers[pidx].ico_handle);
 		}
 	}
 

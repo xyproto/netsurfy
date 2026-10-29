@@ -69,7 +69,7 @@ extern nserror nslog_set_filter_by_options(void);
 #define NETSURF_LOG_LEVEL INFO
 #endif
 
-#define NSLOG_LVL(level) NSLOG_LEVEL_ ## level
+#define NSLOG_LVL(level) NSLOG_LEVEL_##level
 #define NSLOG_EVL(level) NSLOG_LVL(level)
 #define NSLOG_COMPILED_MIN_LEVEL NSLOG_EVL(NETSURF_LOG_LEVEL)
 
@@ -100,26 +100,28 @@ enum nslog_level {
 	NSLOG_LEVEL_CRITICAL = 6
 };
 
-extern void nslog_log(const char *file, const char *func, int ln, const char *format, ...) __attribute__ ((format (printf, 4, 5)));
+extern void
+nslog_log(const char *file, const char *func, int ln, const char *format, ...)
+	__attribute__((format(printf, 4, 5)));
 
-#  ifdef __GNUC__
-#    define LOG_FN __PRETTY_FUNCTION__
-#    define LOG_LN __LINE__
-#  elif defined(__CC_NORCROFT)
-#    define LOG_FN __func__
-#    define LOG_LN __LINE__
-#  else
-#    define LOG_FN ""
-#    define LOG_LN __LINE__
-#  endif
+#ifdef __GNUC__
+#define LOG_FN __PRETTY_FUNCTION__
+#define LOG_LN __LINE__
+#elif defined(__CC_NORCROFT)
+#define LOG_FN __func__
+#define LOG_LN __LINE__
+#else
+#define LOG_FN ""
+#define LOG_LN __LINE__
+#endif
 
-#define NSLOG(catname, level, logmsg, args...)				\
-	do {								\
-		if (NSLOG_LEVEL_##level >= NSLOG_COMPILED_MIN_LEVEL) {	\
-			nslog_log(__FILE__, LOG_FN, LOG_LN, logmsg , ##args); \
-		}							\
-	} while(0)
+#define NSLOG(catname, level, logmsg, args...)                                 \
+	do {                                                                   \
+		if (NSLOG_LEVEL_##level >= NSLOG_COMPILED_MIN_LEVEL) {         \
+			nslog_log(__FILE__, LOG_FN, LOG_LN, logmsg, ##args);   \
+		}                                                              \
+	} while (0)
 
-#endif  /* WITH_NSLOG */
+#endif /* WITH_NSLOG */
 
 #endif

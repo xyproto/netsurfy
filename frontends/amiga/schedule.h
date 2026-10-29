@@ -55,4 +55,3 @@ nserror ami_schedule_create(struct MsgPort *msgport);
  */
 void ami_schedule_free(void);
 #endif
-

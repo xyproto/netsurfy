@@ -41,8 +41,7 @@
 #include "widget.h"
 
 /* exported function documented in fbtk.h */
-void
-fbtk_input(fbtk_widget_t *root, nsfb_event_t *event)
+void fbtk_input(fbtk_widget_t *root, nsfb_event_t *event)
 {
 	fbtk_widget_t *input;
 
@@ -59,8 +58,7 @@ fbtk_input(fbtk_widget_t *root, nsfb_event_t *event)
 }
 
 /* exported function documented in fbtk.h */
-void
-fbtk_click(fbtk_widget_t *widget, nsfb_event_t *event)
+void fbtk_click(fbtk_widget_t *widget, nsfb_event_t *event)
 {
 	fbtk_widget_t *root;
 	fbtk_widget_t *clicked;
@@ -87,12 +85,12 @@ fbtk_click(fbtk_widget_t *widget, nsfb_event_t *event)
 	NSLOG(netsurf, DEEPDEBUG, "clicked %p at %d,%d", clicked, x, y);
 
 	/* post the click */
-	fbtk_post_callback(clicked, FBTK_CBT_CLICK, event, cloc.x0 - x, cloc.y0 - y);
+	fbtk_post_callback(
+		clicked, FBTK_CBT_CLICK, event, cloc.x0 - x, cloc.y0 - y);
 }
 
 /* exported function documented in fbtk.h */
-bool
-fbtk_tgrab_pointer(fbtk_widget_t *widget)
+bool fbtk_tgrab_pointer(fbtk_widget_t *widget)
 {
 	fbtk_widget_t *root;
 
@@ -113,8 +111,7 @@ fbtk_tgrab_pointer(fbtk_widget_t *widget)
 }
 
 /* exported function documented in fbtk.h */
-void
-fbtk_warp_pointer(fbtk_widget_t *widget, int x, int y, bool relative)
+void fbtk_warp_pointer(fbtk_widget_t *widget, int x, int y, bool relative)
 {
 	fbtk_widget_t *root;
 	fbtk_widget_t *moved;
@@ -153,9 +150,11 @@ fbtk_warp_pointer(fbtk_widget_t *widget, int x, int y, bool relative)
 
 		/* post enter and leaving messages */
 		if (moved != root->u.root.prev) {
-			fbtk_post_callback(root->u.root.prev, FBTK_CBT_POINTERLEAVE);
+			fbtk_post_callback(root->u.root.prev,
+					   FBTK_CBT_POINTERLEAVE);
 			root->u.root.prev = moved;
-			fbtk_post_callback(root->u.root.prev, FBTK_CBT_POINTERENTER);
+			fbtk_post_callback(root->u.root.prev,
+					   FBTK_CBT_POINTERENTER);
 		}
 	} else {
 		/* pointer movement has been grabbed by a widget */
@@ -179,13 +178,12 @@ fbtk_warp_pointer(fbtk_widget_t *widget, int x, int y, bool relative)
 	}
 
 	/* post the movement */
-	fbtk_post_callback(moved, FBTK_CBT_POINTERMOVE, cloc.x0 - x, cloc.y0 - y);
-
+	fbtk_post_callback(
+		moved, FBTK_CBT_POINTERMOVE, cloc.x0 - x, cloc.y0 - y);
 }
 
 /* exported function documented in fbtk.h */
-bool
-fbtk_event(fbtk_widget_t *root, nsfb_event_t *event, int timeout)
+bool fbtk_event(fbtk_widget_t *root, nsfb_event_t *event, int timeout)
 {
 	nsfb_bbox_t cloc;
 	bool unused = false; /* is the event available */
@@ -197,18 +195,18 @@ fbtk_event(fbtk_widget_t *root, nsfb_event_t *event, int timeout)
 	do {
 		if (nsfb_event(root->u.root.fb, event, timeout) == false) {
 			if (move_pointer)
-				fbtk_warp_pointer(root, cloc.x0, cloc.y0,
-						false);
+				fbtk_warp_pointer(
+					root, cloc.x0, cloc.y0, false);
 			return false;
 		}
 
 		if (move_pointer && event->type != NSFB_EVENT_MOVE_RELATIVE &&
-				event->type != NSFB_EVENT_MOVE_ABSOLUTE) {
+		    event->type != NSFB_EVENT_MOVE_ABSOLUTE) {
 			/* Flush the movements */
 			fbtk_warp_pointer(root, cloc.x0, cloc.y0, false);
 
 		} else if (!move_pointer &&
-				event->type == NSFB_EVENT_MOVE_RELATIVE) {
+			   event->type == NSFB_EVENT_MOVE_RELATIVE) {
 			/* Get current pointer coords */
 			nsfb_cursor_loc_get(root->u.root.fb, &cloc);
 		}
@@ -249,65 +247,64 @@ fbtk_event(fbtk_widget_t *root, nsfb_event_t *event, int timeout)
 		case NSFB_EVENT_RESIZE:
 			/* Try to resize framebuffer */
 			gui_resize(root,
-					event->value.resize.w,
-					event->value.resize.h);
+				   event->value.resize.w,
+				   event->value.resize.h);
 			break;
 
 		default:
 			break;
 		}
 	} while (event->type == NSFB_EVENT_MOVE_RELATIVE ||
-			event->type == NSFB_EVENT_MOVE_ABSOLUTE);
+		 event->type == NSFB_EVENT_MOVE_ABSOLUTE);
 	return unused;
 }
 
 static int keymap[] = {
 	/* 0    1    2    3    4    5    6    7    8    9               */
-	-1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,   8,   9, /*   0 -   9 */
-	-1,  -1,  -1,  13,  -1,  -1,  -1,  -1,  -1,  -1, /*  10 -  19 */
-	-1,  -1,  -1,  -1,  -1,  -1,  -1,  27,  -1,  -1, /*  20 -  29 */
-	-1,  -1, ' ', '!', '"', '#', '$',  -1, '&','\'', /*  30 -  39 */
-	'(', ')', '*', '+', ',', '-', '.', '/', '0', '1', /*  40 -  49 */
-	'2', '3', '4', '5', '6', '7', '8', '9', ':', ';', /*  50 -  59 */
-	'<', '=', '>', '?', '@',  -1,  -1,  -1,  -1,  -1, /*  60 -  69 */
-	-1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, /*  70 -  79 */
-	-1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, /*  80 -  89 */
-	-1, '[','\\', ']', '~', '_', '`', 'a', 'b', 'c', /*  90 -  99 */
-	'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', /* 100 - 109 */
-	'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', /* 110 - 119 */
-	'x', 'y', 'z',  -1,  -1,  -1,  -1,  -1,  -1,  -1, /* 120 - 129 */
+	-1,  -1,  -1,	-1,  -1,  -1,  -1,  -1,	 8,   9, /*   0 -   9 */
+	-1,  -1,  -1,	13,  -1,  -1,  -1,  -1,	 -1,  -1, /*  10 -  19 */
+	-1,  -1,  -1,	-1,  -1,  -1,  -1,  27,	 -1,  -1, /*  20 -  29 */
+	-1,  -1,  ' ',	'!', '"', '#', '$', -1,	 '&', '\'', /*  30 -  39 */
+	'(', ')', '*',	'+', ',', '-', '.', '/', '0', '1', /*  40 -  49 */
+	'2', '3', '4',	'5', '6', '7', '8', '9', ':', ';', /*  50 -  59 */
+	'<', '=', '>',	'?', '@', -1,  -1,  -1,	 -1,  -1, /*  60 -  69 */
+	-1,  -1,  -1,	-1,  -1,  -1,  -1,  -1,	 -1,  -1, /*  70 -  79 */
+	-1,  -1,  -1,	-1,  -1,  -1,  -1,  -1,	 -1,  -1, /*  80 -  89 */
+	-1,  '[', '\\', ']', '~', '_', '`', 'a', 'b', 'c', /*  90 -  99 */
+	'd', 'e', 'f',	'g', 'h', 'i', 'j', 'k', 'l', 'm', /* 100 - 109 */
+	'n', 'o', 'p',	'q', 'r', 's', 't', 'u', 'v', 'w', /* 110 - 119 */
+	'x', 'y', 'z',	-1,  -1,  -1,  -1,  -1,	 -1,  -1, /* 120 - 129 */
 };
 
 static int sh_keymap[] = {
 	/* 0    1    2    3    4    5    6    7    8    9               */
-	-1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,   8,   9, /*   0 -   9 */
-	-1,  -1,  -1,  13,  -1,  -1,  -1,  -1,  -1,  -1, /*  10 -  19 */
-	-1,  -1,  -1,  -1,  -1,  -1,  -1,  27,  -1,  -1, /*  20 -  29 */
-	-1,  -1, ' ', '!', '"', '~', '$',  -1, '&', '@', /*  30 -  39 */
+	-1,  -1,  -1,  -1,  -1,	 -1,  -1,  -1,	8,   9, /*   0 -   9 */
+	-1,  -1,  -1,  13,  -1,	 -1,  -1,  -1,	-1,  -1, /*  10 -  19 */
+	-1,  -1,  -1,  -1,  -1,	 -1,  -1,  27,	-1,  -1, /*  20 -  29 */
+	-1,  -1,  ' ', '!', '"', '~', '$', -1,	'&', '@', /*  30 -  39 */
 	'(', ')', '*', '+', '<', '_', '>', '?', ')', '!', /*  40 -  49 */
 	'"', 243, '$', '%', '^', '&', '*', '(', ';', ':', /*  50 -  59 */
-	'<', '+', '>', '?', '@',  -1,  -1,  -1,  -1,  -1, /*  60 -  69 */
-	-1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, /*  70 -  79 */
-	-1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, /*  80 -  89 */
-	-1, '{', '|', '}', '~', '_', 254, 'A', 'B', 'C', /*  90 -  99 */
+	'<', '+', '>', '?', '@', -1,  -1,  -1,	-1,  -1, /*  60 -  69 */
+	-1,  -1,  -1,  -1,  -1,	 -1,  -1,  -1,	-1,  -1, /*  70 -  79 */
+	-1,  -1,  -1,  -1,  -1,	 -1,  -1,  -1,	-1,  -1, /*  80 -  89 */
+	-1,  '{', '|', '}', '~', '_', 254, 'A', 'B', 'C', /*  90 -  99 */
 	'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', /* 100 - 109 */
 	'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', /* 110 - 119 */
-	'X', 'Y', 'Z',  -1,  -1,  -1,  -1,  -1,  -1,  -1, /* 120 - 129 */
+	'X', 'Y', 'Z', -1,  -1,	 -1,  -1,  -1,	-1,  -1, /* 120 - 129 */
 };
 
 
 /* exported function documented in fbtk.h */
-int
-fbtk_keycode_to_ucs4(int code, fbtk_modifier_type mods)
+int fbtk_keycode_to_ucs4(int code, fbtk_modifier_type mods)
 {
 	int ucs4 = -1;
 
 	if (mods & FBTK_MOD_LSHIFT || mods & FBTK_MOD_RSHIFT) {
-		if ((code >= 0) && (code < (int) NOF_ELEMENTS(sh_keymap)))
+		if ((code >= 0) && (code < (int)NOF_ELEMENTS(sh_keymap)))
 			ucs4 = sh_keymap[code];
 
 	} else if (mods == FBTK_MOD_CLEAR) {
-		if ((code >= 0) && (code < (int) NOF_ELEMENTS(keymap)))
+		if ((code >= 0) && (code < (int)NOF_ELEMENTS(keymap)))
 			ucs4 = keymap[code];
 
 	} else if (mods & FBTK_MOD_LCTRL || mods & FBTK_MOD_RCTRL) {

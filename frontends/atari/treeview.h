@@ -29,9 +29,9 @@ extern struct core_window_table *atari_core_window_table;
  * atari_treeview_create as the flags parameter to have an standardized treeview
  * window.
  */
-#define ATARI_TREEVIEW_WIDGETS (CLOSER | MOVER | SIZER| NAME | FULLER |	\
-				SMALLER | VSLIDE | HSLIDE | UPARROW | DNARROW |	\
-				LFARROW | RTARROW)
+#define ATARI_TREEVIEW_WIDGETS                                                 \
+	(CLOSER | MOVER | SIZER | NAME | FULLER | SMALLER | VSLIDE | HSLIDE |  \
+	 UPARROW | DNARROW | LFARROW | RTARROW)
 
 enum treeview_area_e {
 	TREEVIEW_AREA_WORK = 0,
@@ -52,9 +52,17 @@ struct atari_treeview_window;
 /** \todo atari add drag_status callback */
 typedef nserror (*atari_treeview_init2_callback)(struct core_window *cw);
 typedef void (*atari_treeview_finish_callback)(struct core_window *cw);
-typedef void (*atari_treeview_keypress_callback)(struct core_window *cw, uint32_t ucs4);
-typedef void (*atari_treeview_mouse_action_callback)(struct core_window *cw, browser_mouse_state mouse, int x, int y);
-typedef void (*atari_treeview_draw_callback)(struct core_window *cw, int x, int y, struct rect *clip, const struct redraw_context *ctx);
+typedef void (*atari_treeview_keypress_callback)(struct core_window *cw,
+						 uint32_t ucs4);
+typedef void (*atari_treeview_mouse_action_callback)(struct core_window *cw,
+						     browser_mouse_state mouse,
+						     int x,
+						     int y);
+typedef void (*atari_treeview_draw_callback)(struct core_window *cw,
+					     int x,
+					     int y,
+					     struct rect *clip,
+					     const struct redraw_context *ctx);
 
 struct atari_treeview_callbacks {
 	atari_treeview_init2_callback init_phase2;
@@ -69,7 +77,11 @@ struct atari_treeview_callbacks {
  * Initalize an window to be an treeview window.
  *
  */
-struct core_window *atari_treeview_create(GUIWIN *win, struct atari_treeview_callbacks * callbacks, void * user_data, uint32_t flags);
+struct core_window *
+atari_treeview_create(GUIWIN *win,
+		      struct atari_treeview_callbacks *callbacks,
+		      void *user_data,
+		      uint32_t flags);
 
 /**
  * Free the Treeview, but not the gemtk window used for the treeview.
@@ -95,12 +107,14 @@ void atari_treeview_close(struct core_window *cw);
  * Get the window manager window handle
  */
 
-GUIWIN * atari_treeview_get_gemtk_window(struct core_window *cw);
+GUIWIN *atari_treeview_get_gemtk_window(struct core_window *cw);
 
 /**
  * Get an specific area inside the window.
  */
-void atari_treeview_get_grect(struct core_window *cw, enum treeview_area_e mode, GRECT *dest);
+void atari_treeview_get_grect(struct core_window *cw,
+			      enum treeview_area_e mode,
+			      GRECT *dest);
 
 /**
  * Process all pending redraw requests for a single treeview
@@ -122,4 +136,4 @@ void *atari_treeview_get_user_data(struct core_window *cw);
  */
 void atari_treeview_flush_redraws(void);
 
-#endif //NSATARI_TREEVIEW_H
+#endif // NSATARI_TREEVIEW_H

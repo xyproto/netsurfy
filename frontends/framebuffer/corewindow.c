@@ -123,56 +123,52 @@ static int fb_cw_draw_event(fbtk_widget_t *widget, fbtk_callback_info *cbi)
 /**
  * callback from core to request a redraw
  */
-static nserror
-fb_cw_invalidate(struct core_window *cw, const struct rect *r)
+static nserror fb_cw_invalidate(struct core_window *cw, const struct rect *r)
 {
-/*	struct fb_corewindow *fb_cw = (struct fb_corewindow *)cw;
+	/*	struct fb_corewindow *fb_cw = (struct fb_corewindow *)cw;
 
-	toolkit_widget_queue_draw_area(fb_cw->widget,
-				       r->x0, r->y0,
-				       r->x1 - r->x0, r->y1 - r->y0);
-*/
+		toolkit_widget_queue_draw_area(fb_cw->widget,
+					       r->x0, r->y0,
+					       r->x1 - r->x0, r->y1 - r->y0);
+	*/
 	return NSERROR_OK;
 }
 
 
-static nserror
-fb_cw_update_size(struct core_window *cw, int width, int height)
+static nserror fb_cw_update_size(struct core_window *cw, int width, int height)
 {
-/*	struct fb_corewindow *fb_cw = (struct fb_corewindow *)cw;
+	/*	struct fb_corewindow *fb_cw = (struct fb_corewindow *)cw;
 
-	toolkit_widget_set_size_request(FB_WIDGET(fb_cw->drawing_area),
-				    width, height);
-*/
+		toolkit_widget_set_size_request(FB_WIDGET(fb_cw->drawing_area),
+					    width, height);
+	*/
 	return NSERROR_OK;
 }
 
 
-static nserror
-fb_cw_set_scroll(struct core_window *cw, int x, int y)
+static nserror fb_cw_set_scroll(struct core_window *cw, int x, int y)
 {
-/*	struct fb_corewindow *fb_cw = (struct fb_corewindow *)cw;
+	/*	struct fb_corewindow *fb_cw = (struct fb_corewindow *)cw;
 
-	toolkit_scroll_widget(fb_cw->widget, r);
-*/
+		toolkit_scroll_widget(fb_cw->widget, r);
+	*/
 	return NSERROR_OK;
 }
 
 
-static nserror
-fb_cw_get_scroll(const struct core_window *cw, int *x, int *y)
+static nserror fb_cw_get_scroll(const struct core_window *cw, int *x, int *y)
 {
-/*	struct fb_corewindow *fb_cw = (struct fb_corewindow *)cw;
+	/*	struct fb_corewindow *fb_cw = (struct fb_corewindow *)cw;
 
-	toolkit_scroll_widget(fb_cw->widget, r);
-*/
+		toolkit_scroll_widget(fb_cw->widget, r);
+	*/
 	return NSERROR_NOT_IMPLEMENTED;
 }
 
 
-static nserror
-fb_cw_get_window_dimensions(const struct core_window *cw,
-		int *width, int *height)
+static nserror fb_cw_get_window_dimensions(const struct core_window *cw,
+					   int *width,
+					   int *height)
 {
 	struct fb_corewindow *fb_cw = (struct fb_corewindow *)cw;
 
@@ -198,8 +194,7 @@ struct core_window_table fb_cw_cb_table = {
 	.set_scroll = fb_cw_set_scroll,
 	.get_scroll = fb_cw_get_scroll,
 	.get_dimensions = fb_cw_get_window_dimensions,
-	.drag_status = fb_cw_drag_status
-};
+	.drag_status = fb_cw_drag_status};
 
 struct core_window_table *framebuffer_core_window_table = &fb_cw_cb_table;
 
@@ -216,52 +211,50 @@ nserror fb_corewindow_init(fbtk_widget_t *parent, struct fb_corewindow *fb_cw)
 	/* container window */
 	fb_cw->wnd = fbtk_create_window(parent, 0, 0, 0, 0, 0);
 
-	fb_cw->drawable = fbtk_create_user(fb_cw->wnd,
-					   0, 0,
-					   -furniture_width, -furniture_width,
-					   fb_cw);
+	fb_cw->drawable = fbtk_create_user(
+		fb_cw->wnd, 0, 0, -furniture_width, -furniture_width, fb_cw);
 
-	fbtk_set_handler(fb_cw->drawable,
-			 FBTK_CBT_REDRAW,
-			 fb_cw_draw_event,
-			 fb_cw);
+	fbtk_set_handler(
+		fb_cw->drawable, FBTK_CBT_REDRAW, fb_cw_draw_event, fb_cw);
 
 	fbtk_set_handler(fb_cw->drawable,
 			 FBTK_CBT_CLICK,
 			 fb_cw_mouse_press_event,
 			 fb_cw);
-/*
-	fbtk_set_handler(fb_cw->drawable,
-			 FBTK_CBT_INPUT,
-			 fb_cw_input_event,
-			 fb_cw);
+	/*
+		fbtk_set_handler(fb_cw->drawable,
+				 FBTK_CBT_INPUT,
+				 fb_cw_input_event,
+				 fb_cw);
 
-	fbtk_set_handler(fb_cw->drawable,
-			 FBTK_CBT_POINTERMOVE,
-			 fb_cw_move_event,
-			 fb_cw);
-*/
+		fbtk_set_handler(fb_cw->drawable,
+				 FBTK_CBT_POINTERMOVE,
+				 fb_cw_move_event,
+				 fb_cw);
+	*/
 
 	/* create horizontal scrollbar */
-	fb_cw->hscroll = fbtk_create_hscroll(fb_cw->wnd,
-					   0,
-					   fbtk_get_height(fb_cw->wnd) - furniture_width,
-					   fbtk_get_width(fb_cw->wnd) - furniture_width,
-					   furniture_width,
-					   FB_SCROLL_COLOUR,
-					   FB_FRAME_COLOUR,
-					   NULL,
-					   NULL);
+	fb_cw->hscroll = fbtk_create_hscroll(
+		fb_cw->wnd,
+		0,
+		fbtk_get_height(fb_cw->wnd) - furniture_width,
+		fbtk_get_width(fb_cw->wnd) - furniture_width,
+		furniture_width,
+		FB_SCROLL_COLOUR,
+		FB_FRAME_COLOUR,
+		NULL,
+		NULL);
 
-	fb_cw->vscroll = fbtk_create_vscroll(fb_cw->wnd,
-					   fbtk_get_width(fb_cw->wnd) - furniture_width,
-					   0,
-					   furniture_width,
-					   fbtk_get_height(fb_cw->wnd) - furniture_width,
-					   FB_SCROLL_COLOUR,
-					   FB_FRAME_COLOUR,
-					   NULL,
-					   NULL);
+	fb_cw->vscroll = fbtk_create_vscroll(
+		fb_cw->wnd,
+		fbtk_get_width(fb_cw->wnd) - furniture_width,
+		0,
+		furniture_width,
+		fbtk_get_height(fb_cw->wnd) - furniture_width,
+		FB_SCROLL_COLOUR,
+		FB_FRAME_COLOUR,
+		NULL,
+		NULL);
 
 	fbtk_create_fill(fb_cw->wnd,
 			 fbtk_get_width(fb_cw->wnd) - furniture_width,

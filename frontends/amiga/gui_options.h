@@ -22,8 +22,8 @@
 void ami_gui_opts_open(void);
 
 /* Web search list */
-/* Return s a list of web search provider, and optionally the current provider index */
+/* Return s a list of web search provider, and optionally the current provider
+ * index */
 struct List *ami_gui_opts_websearch(int *idx);
 void ami_gui_opts_websearch_free(struct List *websearchlist);
 #endif
-

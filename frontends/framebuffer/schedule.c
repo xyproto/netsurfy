@@ -30,9 +30,8 @@ static struct nscallback *schedule_list = NULL;
 /**
  * scheduled callback.
  */
-struct nscallback
-{
-        struct nscallback *next;
+struct nscallback {
+	struct nscallback *next;
 	struct timeval tv;
 	void (*callback)(void *p);
 	void *p;
@@ -48,45 +47,47 @@ struct nscallback
  */
 static nserror schedule_remove(void (*callback)(void *p), void *p)
 {
-        struct nscallback *cur_nscb;
-        struct nscallback *prev_nscb;
-        struct nscallback *unlnk_nscb;
+	struct nscallback *cur_nscb;
+	struct nscallback *prev_nscb;
+	struct nscallback *unlnk_nscb;
 
 	/* check there is something on the list to remove */
-        if (schedule_list == NULL) {
-                return NSERROR_OK;
+	if (schedule_list == NULL) {
+		return NSERROR_OK;
 	}
 
 	NSLOG(schedule, DEBUG, "removing %p, %p", callback, p);
 
-        cur_nscb = schedule_list;
-        prev_nscb = NULL;
+	cur_nscb = schedule_list;
+	prev_nscb = NULL;
 
-        while (cur_nscb != NULL) {
-                if ((cur_nscb->callback ==  callback) &&
-                    (cur_nscb->p ==  p)) {
-                        /* item to remove */
+	while (cur_nscb != NULL) {
+		if ((cur_nscb->callback == callback) && (cur_nscb->p == p)) {
+			/* item to remove */
 
-                        NSLOG(schedule, DEBUG,
+			NSLOG(schedule,
+			      DEBUG,
 			      "callback entry %p removing  %p(%p)",
-                             cur_nscb, cur_nscb->callback, cur_nscb->p);
+			      cur_nscb,
+			      cur_nscb->callback,
+			      cur_nscb->p);
 
-                        /* remove callback */
-                        unlnk_nscb = cur_nscb;
-                        cur_nscb = unlnk_nscb->next;
+			/* remove callback */
+			unlnk_nscb = cur_nscb;
+			cur_nscb = unlnk_nscb->next;
 
-                        if (prev_nscb == NULL) {
-                                schedule_list = cur_nscb;
-                        } else {
-                                prev_nscb->next = cur_nscb;
-                        }
-                        free (unlnk_nscb);
-                } else {
-                        /* move to next element */
-                        prev_nscb = cur_nscb;
-                        cur_nscb = prev_nscb->next;
-                }
-        }
+			if (prev_nscb == NULL) {
+				schedule_list = cur_nscb;
+			} else {
+				prev_nscb->next = cur_nscb;
+			}
+			free(unlnk_nscb);
+		} else {
+			/* move to next element */
+			prev_nscb = cur_nscb;
+			cur_nscb = prev_nscb->next;
+		}
+	}
 
 	return NSERROR_OK;
 }
@@ -106,8 +107,8 @@ nserror framebuffer_schedule(int tival, void (*callback)(void *p), void *p)
 
 	NSLOG(schedule, DEBUG, "Adding %p(%p) in %d", callback, p, tival);
 
-        tv.tv_sec = tival / 1000; /* miliseconds to seconds */
-        tv.tv_usec = (tival % 1000) * 1000; /* remainder to microseconds */
+	tv.tv_sec = tival / 1000; /* miliseconds to seconds */
+	tv.tv_usec = (tival % 1000) * 1000; /* remainder to microseconds */
 
 	nscb = calloc(1, sizeof(struct nscallback));
 
@@ -117,9 +118,9 @@ nserror framebuffer_schedule(int tival, void (*callback)(void *p), void *p)
 	nscb->callback = callback;
 	nscb->p = p;
 
-        /* add to list front */
-        nscb->next = schedule_list;
-        schedule_list = nscb;
+	/* add to list front */
+	nscb->next = schedule_list;
+	schedule_list = nscb;
 
 	return NSERROR_OK;
 }
@@ -130,86 +131,90 @@ int schedule_run(void)
 	struct timeval tv;
 	struct timeval nexttime;
 	struct timeval rettime;
-        struct nscallback *cur_nscb;
-        struct nscallback *prev_nscb;
-        struct nscallback *unlnk_nscb;
+	struct nscallback *cur_nscb;
+	struct nscallback *prev_nscb;
+	struct nscallback *unlnk_nscb;
 
-        if (schedule_list == NULL)
-                return -1;
+	if (schedule_list == NULL)
+		return -1;
 
 	/* reset enumeration to the start of the list */
-        cur_nscb = schedule_list;
-        prev_nscb = NULL;
+	cur_nscb = schedule_list;
+	prev_nscb = NULL;
 	nexttime = cur_nscb->tv;
 
 	gettimeofday(&tv, NULL);
 
-        while (cur_nscb != NULL) {
-                if (timercmp(&tv, &cur_nscb->tv, >)) {
-                        /* scheduled time */
+	while (cur_nscb != NULL) {
+		if (timercmp(&tv, &cur_nscb->tv, >)) {
+			/* scheduled time */
 
-                        /* remove callback */
-                        unlnk_nscb = cur_nscb;
+			/* remove callback */
+			unlnk_nscb = cur_nscb;
 
-                        if (prev_nscb == NULL) {
-                                schedule_list = unlnk_nscb->next;
-                        } else {
-                                prev_nscb->next = unlnk_nscb->next;
-                        }
+			if (prev_nscb == NULL) {
+				schedule_list = unlnk_nscb->next;
+			} else {
+				prev_nscb->next = unlnk_nscb->next;
+			}
 
-                        unlnk_nscb->callback(unlnk_nscb->p);
+			unlnk_nscb->callback(unlnk_nscb->p);
 
-                        free(unlnk_nscb);
+			free(unlnk_nscb);
 
-                        /* need to deal with callback modifying the list. */
+			/* need to deal with callback modifying the list. */
 			if (schedule_list == NULL)
 				return -1; /* no more callbacks scheduled */
-			
-                        /* reset enumeration to the start of the list */
-                        cur_nscb = schedule_list;
-                        prev_nscb = NULL;
+
+			/* reset enumeration to the start of the list */
+			cur_nscb = schedule_list;
+			prev_nscb = NULL;
 			nexttime = cur_nscb->tv;
-                } else {
+		} else {
 			/* if the time to the event is sooner than the
-			 * currently recorded soonest event record it 
+			 * currently recorded soonest event record it
 			 */
 			if (timercmp(&nexttime, &cur_nscb->tv, >)) {
 				nexttime = cur_nscb->tv;
 			}
-                        /* move to next element */
-                        prev_nscb = cur_nscb;
-                        cur_nscb = prev_nscb->next;
-                }
-        }
+			/* move to next element */
+			prev_nscb = cur_nscb;
+			cur_nscb = prev_nscb->next;
+		}
+	}
 
 	/* make rettime relative to now */
 	timersub(&nexttime, &tv, &rettime);
 
-	NSLOG(schedule, DEBUG,
+	NSLOG(schedule,
+	      DEBUG,
 	      "returning time to next event as %ldms",
-	      (rettime.tv_sec * 1000) + (rettime.tv_usec / 1000)); 
+	      (rettime.tv_sec * 1000) + (rettime.tv_usec / 1000));
 
 	/* return next event time in milliseconds (24days max wait) */
-        return (rettime.tv_sec * 1000) + (rettime.tv_usec / 1000);
+	return (rettime.tv_sec * 1000) + (rettime.tv_usec / 1000);
 }
 
 void list_schedule(void)
 {
 	struct timeval tv;
-        struct nscallback *cur_nscb;
+	struct nscallback *cur_nscb;
 
 	gettimeofday(&tv, NULL);
 
-        NSLOG(netsurf, INFO, "schedule list at %ld:%ld", tv.tv_sec,
-              tv.tv_usec);
+	NSLOG(netsurf, INFO, "schedule list at %ld:%ld", tv.tv_sec, tv.tv_usec);
 
-        cur_nscb = schedule_list;
+	cur_nscb = schedule_list;
 
-        while (cur_nscb != NULL) {
-                NSLOG(netsurf, INFO, "Schedule %p at %ld:%ld", cur_nscb,
-                      cur_nscb->tv.tv_sec, cur_nscb->tv.tv_usec);
-                cur_nscb = cur_nscb->next;
-        }
+	while (cur_nscb != NULL) {
+		NSLOG(netsurf,
+		      INFO,
+		      "Schedule %p at %ld:%ld",
+		      cur_nscb,
+		      cur_nscb->tv.tv_sec,
+		      cur_nscb->tv.tv_usec);
+		cur_nscb = cur_nscb->next;
+	}
 }
 
 

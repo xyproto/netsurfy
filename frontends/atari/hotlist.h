@@ -31,8 +31,8 @@
 /* The hotlist window, toolbar and treeview data. */
 
 struct atari_hotlist {
-	GUIWIN * window;
-	//ATARI_TREEVIEW_PTR tv;/*< The hotlist treeview handle.  */
+	GUIWIN *window;
+	// ATARI_TREEVIEW_PTR tv;/*< The hotlist treeview handle.  */
 	struct core_window *tv;
 	bool init;
 	char path[PATH_MAX];
@@ -40,12 +40,12 @@ struct atari_hotlist {
 
 extern struct atari_hotlist hl;
 
-void atari_hotlist_init( void );
-void atari_hotlist_open( void );
-void atari_hotlist_close( void );
-void atari_hotlist_destroy( void );
-void atari_hotlist_add_page( const char * url, const char * title );
-void atari_hotlist_redraw( void );
+void atari_hotlist_init(void);
+void atari_hotlist_open(void);
+void atari_hotlist_close(void);
+void atari_hotlist_destroy(void);
+void atari_hotlist_add_page(const char *url, const char *title);
+void atari_hotlist_redraw(void);
 
 
 #endif

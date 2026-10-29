@@ -36,7 +36,7 @@ extern int os_version;
 
 extern bool os_alpha_sprite_supported;
 
-extern const char * NETSURF_DIR;
+extern const char *NETSURF_DIR;
 
 struct toolbar;
 struct status_bar;
@@ -51,23 +51,26 @@ struct hlcache_handle;
 
 enum gui_pointer_shape;
 
-extern wimp_t task_handle;	/**< RISC OS wimp task handle. */
+extern wimp_t task_handle; /**< RISC OS wimp task handle. */
 
 extern wimp_w dialog_info, dialog_saveas, dialog_zoom, dialog_pageinfo,
 	dialog_objinfo, dialog_tooltip, dialog_warning, dialog_openurl,
-	dialog_folder, dialog_entry, dialog_url_complete,
-	dialog_search, dialog_print, dialog_theme_install;
+	dialog_folder, dialog_entry, dialog_url_complete, dialog_search,
+	dialog_print, dialog_theme_install;
 extern wimp_w current_menu_window;
 extern bool current_menu_open;
-extern wimp_menu *recent_search_menu;	/* search.c */
+extern wimp_menu *recent_search_menu; /* search.c */
 extern bool gui_redraw_debug;
 extern osspriteop_area *gui_sprites;
 extern bool dialog_folder_add, dialog_entry_add, hotlist_insert;
 extern bool print_active, print_text_black;
 extern bool no_font_blending;
 
-typedef enum { GUI_DRAG_NONE, GUI_DRAG_DOWNLOAD_SAVE, GUI_DRAG_SAVE }
-		ro_gui_drag_type;
+typedef enum {
+	GUI_DRAG_NONE,
+	GUI_DRAG_DOWNLOAD_SAVE,
+	GUI_DRAG_SAVE
+} ro_gui_drag_type;
 
 extern ro_gui_drag_type gui_current_drag_type;
 
@@ -78,30 +81,32 @@ struct gui_window {
 	/** Associated platform-independent browser window data. */
 	struct browser_window *bw;
 
-	struct toolbar *toolbar;	/**< Toolbar, or 0 if not present. */
-	struct status_bar *status_bar;	/**< Status bar, or 0 if not present. */
+	struct toolbar *toolbar; /**< Toolbar, or 0 if not present. */
+	struct status_bar *status_bar; /**< Status bar, or 0 if not present. */
 
-	wimp_w window;		/**< RISC OS window handle. */
+	wimp_w window; /**< RISC OS window handle. */
 
-	int old_width;		/**< Width when last opened / os units. */
-	int old_height;		/**< Height when last opened / os units. */
-	bool update_extent;	/**< Update the extent on next opening */
-	bool active;		/**< Whether the throbber should be active */
+	int old_width; /**< Width when last opened / os units. */
+	int old_height; /**< Height when last opened / os units. */
+	bool update_extent; /**< Update the extent on next opening */
+	bool active; /**< Whether the throbber should be active */
 
-	char title[256];	/**< Buffer for window title. */
+	char title[256]; /**< Buffer for window title. */
 
-	int iconise_icon;	/**< ID number of icon when window is iconised */
+	int iconise_icon; /**< ID number of icon when window is iconised */
 
-	char validation[12];	/**< Validation string for colours */
+	char validation[12]; /**< Validation string for colours */
 
 	/** Options. */
 	struct {
-		bool buffer_animations;	/**< Use screen buffering for animations. */
-		bool buffer_everything;	/**< Use screen buffering for everything. */
+		bool buffer_animations; /**< Use screen buffering for
+					   animations. */
+		bool buffer_everything; /**< Use screen buffering for
+					   everything. */
 	} option;
 
-	struct gui_window *prev;	/**< Previous in linked list. */
-	struct gui_window *next;	/**< Next in linked list. */
+	struct gui_window *prev; /**< Previous in linked list. */
+	struct gui_window *next; /**< Next in linked list. */
 };
 
 
@@ -125,7 +130,7 @@ nserror ro_warn_user(const char *warning, const char *detail);
  *
  * \param error The message to display to the user.
  */
-void die(const char * const error) __attribute__ ((noreturn));
+void die(const char *const error) __attribute__((noreturn));
 
 /* in download.c */
 void ro_gui_download_init(void);

@@ -48,7 +48,7 @@
 #include "amiga/gui_menu.h"
 #include "amiga/utf8.h"
 
-#define ID_UTF8  MAKE_ID('U','T','F','8')
+#define ID_UTF8 MAKE_ID('U', 'T', 'F', '8')
 
 static struct IFFHandle *iffh = NULL;
 
@@ -56,10 +56,8 @@ static struct IFFHandle *ami_clipboard_init_internal(int unit)
 {
 	struct IFFHandle *iffhandle = NULL;
 
-	if((iffhandle = AllocIFF()))
-	{
-		if((iffhandle->iff_Stream = (ULONG)OpenClipboard(unit)))
-		{
+	if ((iffhandle = AllocIFF())) {
+		if ((iffhandle->iff_Stream = (ULONG)OpenClipboard(unit))) {
 			InitIFFasClip(iffhandle);
 		}
 	}
@@ -74,8 +72,10 @@ void ami_clipboard_init(void)
 
 static void ami_clipboard_free_internal(struct IFFHandle *iffhandle)
 {
-	if(iffhandle == NULL) return;
-	if(iffhandle->iff_Stream) CloseClipboard((struct ClipboardHandle *)iffhandle->iff_Stream);
+	if (iffhandle == NULL)
+		return;
+	if (iffhandle->iff_Stream)
+		CloseClipboard((struct ClipboardHandle *)iffhandle->iff_Stream);
 	FreeIFF(iffhandle);
 }
 
@@ -86,74 +86,96 @@ void ami_clipboard_free(void)
 
 void gui_start_selection(struct gui_window *g)
 {
-	if(!g) return;
-	if(!ami_gui_get_window(g)) return;
-	if(nsoption_bool(kiosk_mode) == true) return;
+	if (!g)
+		return;
+	if (!ami_gui_get_window(g))
+		return;
+	if (nsoption_bool(kiosk_mode) == true)
+		return;
 
-	ami_gui_menu_set_disabled(ami_gui_get_window(g), ami_gui_get_menu(g), M_COPY, false);
-	ami_gui_menu_set_disabled(ami_gui_get_window(g), ami_gui_get_menu(g), M_CLEAR, false);
+	ami_gui_menu_set_disabled(
+		ami_gui_get_window(g), ami_gui_get_menu(g), M_COPY, false);
+	ami_gui_menu_set_disabled(
+		ami_gui_get_window(g), ami_gui_get_menu(g), M_CLEAR, false);
 
-	if (browser_window_get_editor_flags(ami_gui_get_browser_window(g)) & BW_EDITOR_CAN_CUT)
-		ami_gui_menu_set_disabled(ami_gui_get_window(g), ami_gui_get_menu(g), M_CUT, false);
+	if (browser_window_get_editor_flags(ami_gui_get_browser_window(g)) &
+	    BW_EDITOR_CAN_CUT)
+		ami_gui_menu_set_disabled(ami_gui_get_window(g),
+					  ami_gui_get_menu(g),
+					  M_CUT,
+					  false);
 }
 
-static char *ami_clipboard_cat_collection(struct CollectionItem *ci, LONG codeset, size_t *text_length)
+static char *ami_clipboard_cat_collection(struct CollectionItem *ci,
+					  LONG codeset,
+					  size_t *text_length)
 {
 	struct CollectionItem *ci_new = NULL, *ci_next = NULL, *ci_curr = ci;
 	size_t len = 0;
 	char *text = NULL, *p;
 
 	/* Scan the collected chunks to find out the total size.
-	 * If they are not in UTF-8, convert the chunks first and create a new CollectionItem list.
+	 * If they are not in UTF-8, convert the chunks first and create a new
+	 * CollectionItem list.
 	 */
 	do {
-		switch(codeset) {
-			case 106:
-				len += ci_curr->ci_Size;
-			break;
-			
-			case 0:
-				if(ci_new) {
-					ci_next->ci_Next = calloc(1, sizeof(struct CollectionItem));
-					ci_next = ci_next->ci_Next;
-				} else {
-					ci_new = calloc(1, sizeof(struct CollectionItem));
-					ci_next = ci_new;
-				}
-				
-				utf8_from_local_encoding(ci_curr->ci_Data, ci_curr->ci_Size, (char **)&ci_next->ci_Data);
-				ci_next->ci_Size = strlen(ci_next->ci_Data);
-				len += ci_next->ci_Size;
+		switch (codeset) {
+		case 106:
+			len += ci_curr->ci_Size;
 			break;
 
-			default:
-				if(ci_new) {
-					ci_next->ci_Next = calloc(1, sizeof(struct CollectionItem));
-					ci_next = ci_next->ci_Next;
-				} else {
-					ci_new = calloc(1, sizeof(struct CollectionItem));
-					ci_next = ci_new;
-				}
-				
-				utf8_from_enc(ci_curr->ci_Data,
-						(const char *)ObtainCharsetInfo(DFCS_NUMBER,
-										codeset, DFCS_MIMENAME),
-					      ci_curr->ci_Size, (char **)&ci_next->ci_Data, NULL);
-				ci_next->ci_Size = strlen(ci_next->ci_Data);
-				len += ci_next->ci_Size;
+		case 0:
+			if (ci_new) {
+				ci_next->ci_Next = calloc(
+					1, sizeof(struct CollectionItem));
+				ci_next = ci_next->ci_Next;
+			} else {
+				ci_new = calloc(1,
+						sizeof(struct CollectionItem));
+				ci_next = ci_new;
+			}
+
+			utf8_from_local_encoding(ci_curr->ci_Data,
+						 ci_curr->ci_Size,
+						 (char **)&ci_next->ci_Data);
+			ci_next->ci_Size = strlen(ci_next->ci_Data);
+			len += ci_next->ci_Size;
+			break;
+
+		default:
+			if (ci_new) {
+				ci_next->ci_Next = calloc(
+					1, sizeof(struct CollectionItem));
+				ci_next = ci_next->ci_Next;
+			} else {
+				ci_new = calloc(1,
+						sizeof(struct CollectionItem));
+				ci_next = ci_new;
+			}
+
+			utf8_from_enc(
+				ci_curr->ci_Data,
+				(const char *)ObtainCharsetInfo(
+					DFCS_NUMBER, codeset, DFCS_MIMENAME),
+				ci_curr->ci_Size,
+				(char **)&ci_next->ci_Data,
+				NULL);
+			ci_next->ci_Size = strlen(ci_next->ci_Data);
+			len += ci_next->ci_Size;
 			break;
 		}
 	} while ((ci_curr = ci_curr->ci_Next));
 
 	text = malloc(len);
 
-	if(text == NULL) return NULL;
+	if (text == NULL)
+		return NULL;
 
 	/* p points to the end of the buffer. This is because the chunks are
 	 * in the list in reverse order. */
 	p = text + len;
 
-	if(ci_new) {
+	if (ci_new) {
 		ci_curr = ci_new;
 	} else {
 		ci_curr = ci;
@@ -163,8 +185,8 @@ static char *ami_clipboard_cat_collection(struct CollectionItem *ci, LONG codese
 		p -= ci_curr->ci_Size;
 		memcpy(p, ci_curr->ci_Data, ci_curr->ci_Size);
 		ci_next = ci_curr->ci_Next;
-		
-		if(ci_new) {
+
+		if (ci_new) {
 			free(ci_curr->ci_Data);
 			free(ci_curr);
 		}
@@ -180,20 +202,25 @@ static void gui_get_clipboard(char **buffer, size_t *length)
 	struct StoredProperty *sp = NULL;
 	struct CSet *cset;
 
-	if(OpenIFF(iffh,IFFF_READ)) return;
-	
-	if(CollectionChunk(iffh,ID_FTXT,ID_CHRS)) return;
-	if(PropChunk(iffh,ID_FTXT,ID_CSET)) return;
-	if(CollectionChunk(iffh,ID_FTXT,ID_UTF8)) return;
-	if(StopOnExit(iffh, ID_FTXT, ID_FORM)) return;
-	
-	ParseIFF(iffh,IFFPARSE_SCAN);
+	if (OpenIFF(iffh, IFFF_READ))
+		return;
 
-	if((ci = FindCollection(iffh, ID_FTXT, ID_UTF8))) {
+	if (CollectionChunk(iffh, ID_FTXT, ID_CHRS))
+		return;
+	if (PropChunk(iffh, ID_FTXT, ID_CSET))
+		return;
+	if (CollectionChunk(iffh, ID_FTXT, ID_UTF8))
+		return;
+	if (StopOnExit(iffh, ID_FTXT, ID_FORM))
+		return;
+
+	ParseIFF(iffh, IFFPARSE_SCAN);
+
+	if ((ci = FindCollection(iffh, ID_FTXT, ID_UTF8))) {
 		*buffer = ami_clipboard_cat_collection(ci, 106, length);
-	} else if((ci = FindCollection(iffh, ID_FTXT, ID_CHRS))) {
+	} else if ((ci = FindCollection(iffh, ID_FTXT, ID_CHRS))) {
 		LONG codeset = 0;
-		if((sp = FindProp(iffh, ID_FTXT, ID_CSET))) {
+		if ((sp = FindProp(iffh, ID_FTXT, ID_CSET))) {
 			cset = (struct CSet *)sp->sp_Data;
 			codeset = cset->CodeSet;
 		}
@@ -203,47 +230,49 @@ static void gui_get_clipboard(char **buffer, size_t *length)
 	CloseIFF(iffh);
 }
 
-static void gui_set_clipboard(const char *buffer, size_t length,
-	nsclipboard_styles styles[], int n_styles)
+static void gui_set_clipboard(const char *buffer,
+			      size_t length,
+			      nsclipboard_styles styles[],
+			      int n_styles)
 {
 	char *text;
 	struct CSet cset = {0, {0}};
 
-	if(buffer == NULL) return;
+	if (buffer == NULL)
+		return;
 
-	if(!(OpenIFF(iffh, IFFF_WRITE)))
-	{
-		if(!(PushChunk(iffh, ID_FTXT, ID_FORM, IFFSIZE_UNKNOWN)))
-		{
-			if(nsoption_bool(clipboard_write_utf8))
-			{
-				if(!(PushChunk(iffh, 0, ID_CSET, 32)))
-				{
+	if (!(OpenIFF(iffh, IFFF_WRITE))) {
+		if (!(PushChunk(iffh, ID_FTXT, ID_FORM, IFFSIZE_UNKNOWN))) {
+			if (nsoption_bool(clipboard_write_utf8)) {
+				if (!(PushChunk(iffh, 0, ID_CSET, 32))) {
 					cset.CodeSet = 106; // UTF-8
 					WriteChunkBytes(iffh, &cset, 32);
 					PopChunk(iffh);
 				}
 			}
-		}
-		else
-		{
+		} else {
 			PopChunk(iffh);
 		}
 
-		if(!(PushChunk(iffh, 0, ID_CHRS, IFFSIZE_UNKNOWN))) {
-			if(nsoption_bool(clipboard_write_utf8)) {
+		if (!(PushChunk(iffh, 0, ID_CHRS, IFFSIZE_UNKNOWN))) {
+			if (nsoption_bool(clipboard_write_utf8)) {
 				WriteChunkBytes(iffh, buffer, length);
 			} else {
-				if(utf8_to_local_encoding(buffer, length, &text) == NSERROR_OK) {
+				if (utf8_to_local_encoding(
+					    buffer, length, &text) ==
+				    NSERROR_OK) {
 					char *p;
 
 					p = text;
 
-					while(*p != '\0') {
-						if(*p == 0xa0) *p = 0x20;
+					while (*p != '\0') {
+						if (*p == 0xa0)
+							*p = 0x20;
 						p++;
 					}
-					WriteChunkBytes(iffh, text, strlen(text));
+					WriteChunkBytes(iffh,
+							text,
+							strlen(text));
 					ami_utf8_free(text);
 				}
 			}
@@ -253,7 +282,7 @@ static void gui_set_clipboard(const char *buffer, size_t length,
 			PopChunk(iffh);
 		}
 
-		if(!(PushChunk(iffh, 0, ID_UTF8, IFFSIZE_UNKNOWN))) {
+		if (!(PushChunk(iffh, 0, ID_UTF8, IFFSIZE_UNKNOWN))) {
 			WriteChunkBytes(iffh, buffer, length);
 			PopChunk(iffh);
 		} else {
@@ -271,12 +300,12 @@ void ami_drag_selection(struct gui_window *g)
 	char *sel;
 	struct IFFHandle *old_iffh = iffh;
 	struct gui_window_2 *gwin = ami_window_at_pointer(AMINS_WINDOW);
-	
-	/* NB: 'gwin' is at the drop point, 'g' is where the selection was dragged from.
-	 * These may be different if the selection has been dragged between windows. */
-	
-	if(!gwin)
-	{
+
+	/* NB: 'gwin' is at the drop point, 'g' is where the selection was
+	 * dragged from. These may be different if the selection has been
+	 * dragged between windows. */
+
+	if (!gwin) {
 		ami_gui_beep();
 		return;
 	}
@@ -284,46 +313,59 @@ void ami_drag_selection(struct gui_window *g)
 	x = ami_gui2_get_window(gwin)->MouseX;
 	y = ami_gui2_get_window(gwin)->MouseY;
 
-	if(ami_text_box_at_point(gwin, (ULONG *)&x, (ULONG *)&y))
-	{
+	if (ami_text_box_at_point(gwin, (ULONG *)&x, (ULONG *)&y)) {
 		iffh = ami_clipboard_init_internal(1);
 
-		browser_window_key_press(ami_gui_get_browser_window(g), NS_KEY_COPY_SELECTION);
-		browser_window_mouse_click(ami_gui2_get_browser_window(gwin), BROWSER_MOUSE_PRESS_1, x, y);
-		browser_window_key_press(ami_gui2_get_browser_window(gwin), NS_KEY_PASTE);
+		browser_window_key_press(ami_gui_get_browser_window(g),
+					 NS_KEY_COPY_SELECTION);
+		browser_window_mouse_click(ami_gui2_get_browser_window(gwin),
+					   BROWSER_MOUSE_PRESS_1,
+					   x,
+					   y);
+		browser_window_key_press(ami_gui2_get_browser_window(gwin),
+					 NS_KEY_PASTE);
 
 		ami_clipboard_free_internal(iffh);
 		iffh = old_iffh;
-	}
-	else
-	{
+	} else {
 		x = ami_gui2_get_window(gwin)->MouseX;
 		y = ami_gui2_get_window(gwin)->MouseY;
 
-		if(ami_gadget_hit(ami_gui2_get_object(gwin, AMI_GAD_URL), x, y))
-		{
-			if((sel = browser_window_get_selection(ami_gui_get_browser_window(g))))
-			{
+		if (ami_gadget_hit(
+			    ami_gui2_get_object(gwin, AMI_GAD_URL), x, y)) {
+			if ((sel = browser_window_get_selection(
+				     ami_gui_get_browser_window(g)))) {
 				utf8text = ami_utf8_easy(sel);
-				RefreshSetGadgetAttrs((struct Gadget *)ami_gui2_get_object(gwin, AMI_GAD_URL),
-					ami_gui2_get_window(gwin), NULL, STRINGA_TextVal, utf8text, TAG_DONE);
+				RefreshSetGadgetAttrs(
+					(struct Gadget *)ami_gui2_get_object(
+						gwin, AMI_GAD_URL),
+					ami_gui2_get_window(gwin),
+					NULL,
+					STRINGA_TextVal,
+					utf8text,
+					TAG_DONE);
 				free(sel);
 				ami_utf8_free(utf8text);
 			}
-		}
-		else if(ami_gadget_hit(ami_gui2_get_object(gwin, AMI_GAD_SEARCH), x, y))
-		{
-			if((sel = browser_window_get_selection(ami_gui_get_browser_window(g))))
-			{
+		} else if (ami_gadget_hit(ami_gui2_get_object(gwin,
+							      AMI_GAD_SEARCH),
+					  x,
+					  y)) {
+			if ((sel = browser_window_get_selection(
+				     ami_gui_get_browser_window(g)))) {
 				utf8text = ami_utf8_easy(sel);
-				RefreshSetGadgetAttrs((struct Gadget *)ami_gui2_get_object(gwin, AMI_GAD_SEARCH),
-					ami_gui2_get_window(gwin), NULL, STRINGA_TextVal, utf8text, TAG_DONE);
+				RefreshSetGadgetAttrs(
+					(struct Gadget *)ami_gui2_get_object(
+						gwin, AMI_GAD_SEARCH),
+					ami_gui2_get_window(gwin),
+					NULL,
+					STRINGA_TextVal,
+					utf8text,
+					TAG_DONE);
 				free(sel);
 				ami_utf8_free(utf8text);
 			}
-		}
-		else
-		{
+		} else {
 			ami_gui_beep();
 		}
 	}
@@ -339,9 +381,8 @@ bool ami_easy_clipboard_bitmap(struct bitmap *bitmap)
 {
 	Object *dto = NULL;
 
-	if((dto = ami_datatype_object_from_bitmap(bitmap)))
-	{
-		DoDTMethod(dto,NULL,NULL,DTM_COPY,NULL);
+	if ((dto = ami_datatype_object_from_bitmap(bitmap))) {
+		DoDTMethod(dto, NULL, NULL, DTM_COPY, NULL);
 		DisposeDTObject(dto);
 	}
 	return true;
@@ -361,7 +402,7 @@ bool ami_easy_clipboard_svg(struct hlcache_handle *c)
 		return false;
 	}
 
-	if (!(OpenIFF(iffh,IFFF_WRITE))) {
+	if (!(OpenIFF(iffh, IFFF_WRITE))) {
 		ami_svg_to_dr2d(iffh,
 				(const char *)source_data,
 				source_size,

@@ -53,7 +53,7 @@ START_TEST(corestrings_test)
 	res = corestrings_fini();
 
 	malloc_limit(UINT_MAX);
-	
+
 	if (_i < CORESTRING_TEST_COUNT) {
 		/* This test is invalid when running a sanitized build */
 #ifndef __SANITIZE_ADDRESS__

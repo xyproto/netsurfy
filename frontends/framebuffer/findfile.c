@@ -68,23 +68,23 @@ static char **get_language_names(void)
 {
 	char **langv; /* output string vector of languages */
 	int langc; /* count of languages in vector */
-	const char *envlang; /* colon separated list of languages from environment */
+	const char *envlang; /* colon separated list of languages from
+				environment */
 	int lstart = 0; /* offset to start of current language */
 	int lunder = 0; /* offset to underscore in current language */
 	int lend = 0; /* offset to end of current language */
 	char *nlang;
-	
+
 	langv = calloc(MAX_LANGV_SIZE + 2, sizeof(char *));
 	if (langv == NULL) {
 		return NULL;
 	}
 
 	envlang = get_language_env();
-	
+
 	for (langc = 0; langc < MAX_LANGV_SIZE; langc++) {
 		/* work through envlang splitting on : */
-		while ((envlang[lend] != 0) &&
-		       (envlang[lend] != ':') &&
+		while ((envlang[lend] != 0) && (envlang[lend] != ':') &&
 		       (envlang[lend] != '.')) {
 			if (envlang[lend] == '_') {
 				lunder = lend;
@@ -106,8 +106,7 @@ static char **get_language_names(void)
 		}
 
 		/* if we stopped at the dot, move to the colon delimiter */
-		while ((envlang[lend] != 0) &&
-		       (envlang[lend] != ':')) {
+		while ((envlang[lend] != 0) && (envlang[lend] != ':')) {
 			lend++;
 		}
 		if (envlang[lend] == 0) {
@@ -127,8 +126,7 @@ static char **get_language_names(void)
  * is performed here, once, rather than every time a resource is
  * searched for.
  */
-char **
-fb_init_resource_path(const char *resource_path)
+char **fb_init_resource_path(const char *resource_path)
 {
 	char **pathv; /* resource path string vector */
 	char **respath; /* resource paths vector */
@@ -138,7 +136,7 @@ fb_init_resource_path(const char *resource_path)
 
 	langv = get_language_names();
 
-	respath = filepath_generate(pathv, (const char * const *)langv);
+	respath = filepath_generate(pathv, (const char *const *)langv);
 
 	filepath_free_strvec(langv);
 
@@ -148,10 +146,8 @@ fb_init_resource_path(const char *resource_path)
 }
 
 
-
 /*
  * Local Variables:
  * c-basic-offset: 8
  * End:
  */
-

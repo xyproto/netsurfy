@@ -44,66 +44,66 @@
 #define BUTTONBAR_VALIDATION_LENGTH 40
 
 struct button_bar_button {
-	wimp_i				icon;
-	bool				shaded;
-	bool				separator;
+	wimp_i icon;
+	bool shaded;
+	bool separator;
 
-	button_bar_action		select_action;
-	button_bar_action		adjust_action;
+	button_bar_action select_action;
+	button_bar_action adjust_action;
 
-	int				x_pos, y_pos;
-	int				x_size, y_size;
+	int x_pos, y_pos;
+	int x_size, y_size;
 
-	char				sprite[BUTTONBAR_SPRITE_NAME_LENGTH];
-	char				validation[BUTTONBAR_VALIDATION_LENGTH];
-	char				opt_key;
-	const char			*help_suffix;
+	char sprite[BUTTONBAR_SPRITE_NAME_LENGTH];
+	char validation[BUTTONBAR_VALIDATION_LENGTH];
+	char opt_key;
+	const char *help_suffix;
 
-	struct button_bar_button	*bar_next;
-	struct button_bar_button	*next;
+	struct button_bar_button *bar_next;
+	struct button_bar_button *next;
 };
 
 
 struct button_bar {
 	/** The applied theme (or NULL to use the default) */
-	struct theme_descriptor		*theme;
+	struct theme_descriptor *theme;
 
 	/** The widget dimensions. */
-	int				x_min, y_min;
-	int				separator_width;
-	int				vertical_offset;
+	int x_min, y_min;
+	int separator_width;
+	int vertical_offset;
 
-	bool				separators;
+	bool separators;
 
 	/** The window details and bar position. */
-	wimp_w				window;
-	os_box				extent;
-	osspriteop_area			*sprites;
-	int				background;
+	wimp_w window;
+	os_box extent;
+	osspriteop_area *sprites;
+	int background;
 
-	bool				hidden;
+	bool hidden;
 
-	bool				edit;
-	struct button_bar		*edit_target;
-	struct button_bar		*edit_source;
-	void				(*edit_refresh)(void *);
-	void				*edit_client_data;
+	bool edit;
+	struct button_bar *edit_target;
+	struct button_bar *edit_source;
+	void (*edit_refresh)(void *);
+	void *edit_client_data;
 
 	/** The list of all the defined buttons. */
 
-	struct button_bar_button	*buttons;
+	struct button_bar_button *buttons;
 
 	/** The list of the buttons in the current bar. */
 
-	struct button_bar_button	*bar;
+	struct button_bar_button *bar;
 };
 
-static char			null_text_string[] = "";
-static char			separator_name[] = "separator";
+static char null_text_string[] = "";
+static char separator_name[] = "separator";
 
-static struct button_bar	*drag_start = NULL;
-static char			drag_opt = '\0';
-static bool			drag_separator = false;
+static struct button_bar *drag_start = NULL;
+static char drag_opt = '\0';
+static bool drag_separator = false;
 
 /*
  * Private function prototypes.
@@ -114,25 +114,29 @@ static bool ro_gui_button_bar_icon_update(struct button_bar *button_bar);
 static bool ro_gui_button_bar_icon_resize(struct button_bar *button_bar);
 static void ro_gui_button_bar_drag_end(wimp_dragged *drag, void *data);
 static void ro_gui_button_bar_sync_editors(struct button_bar *target,
-		struct button_bar *source);
-static struct button_bar_button *ro_gui_button_bar_find_icon(
-		struct button_bar *button_bar, wimp_i icon);
-static struct button_bar_button *ro_gui_button_bar_find_opt_key(
-		struct button_bar *button_bar, char opt_key);
-static struct button_bar_button *ro_gui_button_bar_find_action(
-		struct button_bar *button_bar, button_bar_action action);
-static struct button_bar_button *ro_gui_button_bar_find_coords(
-		struct button_bar *button_bar, os_coord pos,
-		bool *separator, bool *right);
+					   struct button_bar *source);
+static struct button_bar_button *
+ro_gui_button_bar_find_icon(struct button_bar *button_bar, wimp_i icon);
+static struct button_bar_button *
+ro_gui_button_bar_find_opt_key(struct button_bar *button_bar, char opt_key);
+static struct button_bar_button *
+ro_gui_button_bar_find_action(struct button_bar *button_bar,
+			      button_bar_action action);
+static struct button_bar_button *
+ro_gui_button_bar_find_coords(struct button_bar *button_bar,
+			      os_coord pos,
+			      bool *separator,
+			      bool *right);
 
 /* This is an exported interface documented in button_bar.h */
 
-struct button_bar *ro_gui_button_bar_create(struct theme_descriptor *theme,
-		const struct button_bar_buttons buttons[])
+struct button_bar *
+ro_gui_button_bar_create(struct theme_descriptor *theme,
+			 const struct button_bar_buttons buttons[])
 {
-	struct button_bar		*button_bar;
-	struct button_bar_button	*icon, *new_icon;
-	int				def;
+	struct button_bar *button_bar;
+	struct button_bar_button *icon, *new_icon;
+	int def;
 
 	/* Allocate memory. */
 
@@ -188,11 +192,15 @@ struct button_bar *ro_gui_button_bar_create(struct theme_descriptor *theme,
 		icon->next = NULL;
 		icon->bar_next = NULL;
 
-		strncpy(icon->sprite, buttons[def].icon,
-				BUTTONBAR_SPRITE_NAME_LENGTH - 1);
-		icon->sprite[BUTTONBAR_SPRITE_NAME_LENGTH-1] = 0;
-		snprintf(icon->validation, BUTTONBAR_VALIDATION_LENGTH,
-				"R5;S%s,p%s", icon->sprite, icon->sprite);
+		strncpy(icon->sprite,
+			buttons[def].icon,
+			BUTTONBAR_SPRITE_NAME_LENGTH - 1);
+		icon->sprite[BUTTONBAR_SPRITE_NAME_LENGTH - 1] = 0;
+		snprintf(icon->validation,
+			 BUTTONBAR_VALIDATION_LENGTH,
+			 "R5;S%s,p%s",
+			 icon->sprite,
+			 icon->sprite);
 
 		icon->icon = -1;
 		icon->shaded = false;
@@ -218,14 +226,13 @@ struct button_bar *ro_gui_button_bar_create(struct theme_descriptor *theme,
 /* This is an exported interface documented in button_bar.h */
 
 bool ro_gui_button_bar_link_editor(struct button_bar *target,
-		struct button_bar *source, void (* refresh)(void *),
-		void *client_data)
+				   struct button_bar *source,
+				   void (*refresh)(void *),
+				   void *client_data)
 {
-	if (target == NULL || source == NULL ||
-			target->edit_target != NULL ||
-			target->edit_source != NULL ||
-			source->edit_target != NULL ||
-			source->edit_source != NULL)
+	if (target == NULL || source == NULL || target->edit_target != NULL ||
+	    target->edit_source != NULL || source->edit_target != NULL ||
+	    source->edit_source != NULL)
 		return false;
 
 	target->edit_source = source;
@@ -243,11 +250,13 @@ bool ro_gui_button_bar_link_editor(struct button_bar *target,
 /* This is an exported interface documented in button_bar.h */
 
 bool ro_gui_button_bar_rebuild(struct button_bar *button_bar,
-		struct theme_descriptor *theme, theme_style style,
-		wimp_w window, bool edit)
+			       struct theme_descriptor *theme,
+			       theme_style style,
+			       wimp_w window,
+			       bool edit)
 {
-	struct button_bar_button	*button;
-	int				height;
+	struct button_bar_button *button;
+	int height;
 
 
 	if (button_bar == NULL)
@@ -256,15 +265,17 @@ bool ro_gui_button_bar_rebuild(struct button_bar *button_bar,
 	button_bar->theme = theme;
 	button_bar->window = window;
 	button_bar->sprites = ro_gui_theme_get_sprites(theme);
-	button_bar->background = ro_gui_theme_get_style_element(theme, style,
-			THEME_ELEMENT_BACKGROUND);
+	button_bar->background = ro_gui_theme_get_style_element(
+		theme, style, THEME_ELEMENT_BACKGROUND);
 
 	button_bar->edit = edit;
 
 	height = 0;
 	button_bar->separator_width = 16;
-	ro_gui_wimp_get_sprite_dimensions(button_bar->sprites, separator_name,
-			&button_bar->separator_width, &height);
+	ro_gui_wimp_get_sprite_dimensions(button_bar->sprites,
+					  separator_name,
+					  &button_bar->separator_width,
+					  &height);
 
 	/* If the separator height is 0, then either the sprite really is
 	 * zero pixels high or the default was used as no sprite was found.
@@ -281,8 +292,9 @@ bool ro_gui_button_bar_rebuild(struct button_bar *button_bar,
 		button->icon = -1;
 
 		ro_gui_wimp_get_sprite_dimensions(button_bar->sprites,
-				button->sprite,
-				&button->x_size, &button->y_size);
+						  button->sprite,
+						  &button->x_size,
+						  &button->y_size);
 
 		button = button->next;
 	}
@@ -292,7 +304,7 @@ bool ro_gui_button_bar_rebuild(struct button_bar *button_bar,
 
 	if (button_bar->edit && button_bar->edit_target != NULL)
 		ro_gui_button_bar_sync_editors(button_bar->edit_target,
-				button_bar);
+					       button_bar);
 
 	return ro_gui_button_bar_icon_update(button_bar);
 }
@@ -301,10 +313,10 @@ bool ro_gui_button_bar_rebuild(struct button_bar *button_bar,
 /* This is an exported interface documented in button_bar.h */
 
 bool ro_gui_button_bar_arrange_buttons(struct button_bar *button_bar,
-		char order[])
+				       char order[])
 {
-	struct button_bar_button	*button, *new;
-	int				i;
+	struct button_bar_button *button, *new;
+	int i;
 
 	if (button_bar == NULL || order == NULL)
 		return false;
@@ -314,7 +326,7 @@ bool ro_gui_button_bar_arrange_buttons(struct button_bar *button_bar,
 	button_bar->bar = NULL;
 
 	for (button = button_bar->buttons; button != NULL;
-			button = button->next) {
+	     button = button->next) {
 		button->bar_next = NULL;
 		button->separator = false;
 	}
@@ -326,7 +338,7 @@ bool ro_gui_button_bar_arrange_buttons(struct button_bar *button_bar,
 	for (i = 0; order[i] != '\0'; i++) {
 		if (order[i] != '|') {
 			new = ro_gui_button_bar_find_opt_key(button_bar,
-					order[i]);
+							     order[i]);
 
 			if (new != NULL) {
 				if (button == NULL)
@@ -358,8 +370,8 @@ bool ro_gui_button_bar_arrange_buttons(struct button_bar *button_bar,
 
 bool ro_gui_button_bar_place_buttons(struct button_bar *button_bar)
 {
-	struct button_bar_button	*button;
-	int				x_pos, y_pos, height;
+	struct button_bar_button *button;
+	int x_pos, y_pos, height;
 
 	if (button_bar == NULL)
 		return false;
@@ -394,7 +406,7 @@ bool ro_gui_button_bar_place_buttons(struct button_bar *button_bar)
 
 void ro_gui_button_bar_destroy(struct button_bar *button_bar)
 {
-	struct button_bar_button	*button;
+	struct button_bar_button *button;
 
 	if (button_bar == NULL)
 		return;
@@ -414,7 +426,8 @@ void ro_gui_button_bar_destroy(struct button_bar *button_bar)
 /* This is an exported interface documented in button_bar.h */
 
 bool ro_gui_button_bar_get_dims(struct button_bar *button_bar,
-		int *width, int *height)
+				int *width,
+				int *height)
 {
 	if (button_bar == NULL)
 		return false;
@@ -435,7 +448,10 @@ bool ro_gui_button_bar_get_dims(struct button_bar *button_bar,
 /* This is an exported interface documented in button_bar.h */
 
 bool ro_gui_button_bar_set_extent(struct button_bar *button_bar,
-		int x0, int y0, int x1, int y1)
+				  int x0,
+				  int y0,
+				  int x1,
+				  int y1)
 {
 	if (button_bar == NULL)
 		return false;
@@ -444,8 +460,7 @@ bool ro_gui_button_bar_set_extent(struct button_bar *button_bar,
 		return false;
 
 	if (button_bar->extent.x0 == x0 && button_bar->extent.y0 == y0 &&
-			button_bar->extent.x1 == x1 &&
-			button_bar->extent.y1 == y1)
+	    button_bar->extent.x1 == x1 && button_bar->extent.y1 == y1)
 		return true;
 
 	/* Redraw the relevant bits of the toolbar. We can't optimise for
@@ -455,8 +470,10 @@ bool ro_gui_button_bar_set_extent(struct button_bar *button_bar,
 
 	if (button_bar->window != NULL) {
 		xwimp_force_redraw(button_bar->window,
-				button_bar->extent.x0, button_bar->extent.y0,
-				button_bar->extent.x1, button_bar->extent.y1);
+				   button_bar->extent.x0,
+				   button_bar->extent.y0,
+				   button_bar->extent.x1,
+				   button_bar->extent.y1);
 		xwimp_force_redraw(button_bar->window, x0, y0, x1, y1);
 	}
 
@@ -466,8 +483,8 @@ bool ro_gui_button_bar_set_extent(struct button_bar *button_bar,
 	button_bar->extent.y1 = y1;
 
 	if ((y1 - y0) > button_bar->y_min)
-		button_bar->vertical_offset =
-				((y1 - y0) - button_bar->y_min) / 2;
+		button_bar->vertical_offset = ((y1 - y0) - button_bar->y_min) /
+					      2;
 	else
 		button_bar->vertical_offset = 0;
 
@@ -482,9 +499,9 @@ bool ro_gui_button_bar_set_extent(struct button_bar *button_bar,
 
 bool ro_gui_button_bar_icon_update(struct button_bar *button_bar)
 {
-	wimp_icon_create		icon;
-	struct button_bar_button	*button, *b;
-	os_error			*error;
+	wimp_icon_create icon;
+	struct button_bar_button *button, *b;
+	os_error *error;
 
 
 	if (button_bar == NULL || button_bar->window == NULL)
@@ -511,11 +528,11 @@ bool ro_gui_button_bar_icon_update(struct button_bar *button_bar)
 			icon.icon.extent.x1 = 0;
 			icon.icon.extent.y1 = 0;
 			icon.icon.flags = wimp_ICON_TEXT | wimp_ICON_SPRITE |
-					wimp_ICON_INDIRECTED |
-					wimp_ICON_HCENTRED |
-					wimp_ICON_VCENTRED |
-					(button_bar->background
-						<< wimp_ICON_BG_COLOUR_SHIFT);
+					  wimp_ICON_INDIRECTED |
+					  wimp_ICON_HCENTRED |
+					  wimp_ICON_VCENTRED |
+					  (button_bar->background
+					   << wimp_ICON_BG_COLOUR_SHIFT);
 			icon.icon.data.indirected_text.size = 1;
 
 			/* We don't actually shade buttons unless there's no
@@ -523,23 +540,26 @@ bool ro_gui_button_bar_icon_update(struct button_bar *button_bar)
 			 */
 
 			if (button->shaded && (!button_bar->edit ||
-					button_bar->edit_target != NULL))
+					       button_bar->edit_target != NULL))
 				icon.icon.flags |= wimp_ICON_SHADED;
 
 			if (button_bar->edit)
-				icon.icon.flags |= (wimp_BUTTON_CLICK_DRAG <<
-						wimp_ICON_BUTTON_TYPE_SHIFT);
+				icon.icon.flags |=
+					(wimp_BUTTON_CLICK_DRAG
+					 << wimp_ICON_BUTTON_TYPE_SHIFT);
 			else
-				icon.icon.flags |= (wimp_BUTTON_CLICK <<
-						wimp_ICON_BUTTON_TYPE_SHIFT);
+				icon.icon.flags |=
+					(wimp_BUTTON_CLICK
+					 << wimp_ICON_BUTTON_TYPE_SHIFT);
 
 			icon.icon.data.indirected_text.text = null_text_string;
 			icon.icon.data.indirected_text.validation =
-					button->validation;
+				button->validation;
 
 			error = xwimp_create_icon(&icon, &button->icon);
 			if (error) {
-				NSLOG(netsurf, INFO,
+				NSLOG(netsurf,
+				      INFO,
 				      "xwimp_create_icon: 0x%x: %s",
 				      error->errnum,
 				      error->errmess);
@@ -547,12 +567,13 @@ bool ro_gui_button_bar_icon_update(struct button_bar *button_bar)
 				button->icon = -1;
 				return false;
 			}
-		} else if ((!on_bar || button_bar->hidden)
-				&& button->icon != -1) {
+		} else if ((!on_bar || button_bar->hidden) &&
+			   button->icon != -1) {
 			error = xwimp_delete_icon(button_bar->window,
-					button->icon);
+						  button->icon);
 			if (error != NULL) {
-				NSLOG(netsurf, INFO,
+				NSLOG(netsurf,
+				      INFO,
 				      "xwimp_delete_icon: 0x%x: %s",
 				      error->errnum,
 				      error->errmess);
@@ -580,8 +601,8 @@ bool ro_gui_button_bar_icon_update(struct button_bar *button_bar)
 
 bool ro_gui_button_bar_icon_resize(struct button_bar *button_bar)
 {
-	os_error			*error;
-	struct button_bar_button	*button;
+	os_error *error;
+	struct button_bar_button *button;
 
 	if (button_bar == NULL || button_bar->hidden)
 		return (button_bar == NULL) ? false : true;
@@ -591,21 +612,22 @@ bool ro_gui_button_bar_icon_resize(struct button_bar *button_bar)
 	button = button_bar->bar;
 
 	while (button != NULL) {
-		if(button->icon != -1) {
-			error = xwimp_resize_icon(button_bar->window,
-					button->icon,
-					button_bar->extent.x0 + button->x_pos,
-					button_bar->extent.y0 +
-						button_bar->vertical_offset +
-						button->y_pos,
-					button_bar->extent.x0 + button->x_pos +
-						button->x_size,
-					button_bar->extent.y0 +
-						button_bar->vertical_offset +
-						button->y_pos +
-						button->y_size);
+		if (button->icon != -1) {
+			error = xwimp_resize_icon(
+				button_bar->window,
+				button->icon,
+				button_bar->extent.x0 + button->x_pos,
+				button_bar->extent.y0 +
+					button_bar->vertical_offset +
+					button->y_pos,
+				button_bar->extent.x0 + button->x_pos +
+					button->x_size,
+				button_bar->extent.y0 +
+					button_bar->vertical_offset +
+					button->y_pos + button->y_size);
 			if (error != NULL) {
-				NSLOG(netsurf, INFO,
+				NSLOG(netsurf,
+				      INFO,
 				      "xwimp_resize_icon: 0x%x: %s",
 				      error->errnum,
 				      error->errmess);
@@ -638,9 +660,10 @@ bool ro_gui_button_bar_hide(struct button_bar *button_bar, bool hide)
 /* This is an exported interface documented in button_bar.h */
 
 bool ro_gui_button_bar_shade_button(struct button_bar *button_bar,
-		button_bar_action action, bool shaded)
+				    button_bar_action action,
+				    bool shaded)
 {
-	struct button_bar_button	*button;
+	struct button_bar_button *button;
 
 	if (button_bar == NULL)
 		return false;
@@ -659,9 +682,10 @@ bool ro_gui_button_bar_shade_button(struct button_bar *button_bar,
 	 */
 
 	if (button->icon != -1 &&
-			(!button_bar->edit || button_bar->edit_target != NULL))
-		ro_gui_set_icon_shaded_state(button_bar->window, button->icon,
-				shaded);
+	    (!button_bar->edit || button_bar->edit_target != NULL))
+		ro_gui_set_icon_shaded_state(button_bar->window,
+					     button->icon,
+					     shaded);
 
 	return true;
 }
@@ -669,49 +693,50 @@ bool ro_gui_button_bar_shade_button(struct button_bar *button_bar,
 
 /* This is an exported interface documented in button_bar.h */
 
-void ro_gui_button_bar_redraw(struct button_bar *button_bar,
-		wimp_draw *redraw)
+void ro_gui_button_bar_redraw(struct button_bar *button_bar, wimp_draw *redraw)
 {
-	wimp_icon			icon;
-	struct button_bar_button	*button;
+	wimp_icon icon;
+	struct button_bar_button *button;
 
 	/* Test for a valid button bar, and then check that the redraw box
 	 * coincides with the bar's extent.
 	 */
 
 	if (button_bar == NULL || button_bar->hidden ||
-			(redraw->clip.x0 - (redraw->box.x0 - redraw->xscroll))
-					> button_bar->extent.x1 ||
-			(redraw->clip.y0 - (redraw->box.y1 - redraw->yscroll))
-					> button_bar->extent.y1 ||
-			(redraw->clip.x1 - (redraw->box.x0 - redraw->xscroll))
-					< button_bar->extent.x0 ||
-			(redraw->clip.y1 - (redraw->box.y1 - redraw->yscroll))
-					< button_bar->extent.y0 ||
-			(!button_bar->edit && !button_bar->separators))
+	    (redraw->clip.x0 - (redraw->box.x0 - redraw->xscroll)) >
+		    button_bar->extent.x1 ||
+	    (redraw->clip.y0 - (redraw->box.y1 - redraw->yscroll)) >
+		    button_bar->extent.y1 ||
+	    (redraw->clip.x1 - (redraw->box.x0 - redraw->xscroll)) <
+		    button_bar->extent.x0 ||
+	    (redraw->clip.y1 - (redraw->box.y1 - redraw->yscroll)) <
+		    button_bar->extent.y0 ||
+	    (!button_bar->edit && !button_bar->separators))
 		return;
 
 	icon.flags = wimp_ICON_SPRITE | wimp_ICON_INDIRECTED |
-			wimp_ICON_HCENTRED | wimp_ICON_VCENTRED;
+		     wimp_ICON_HCENTRED | wimp_ICON_VCENTRED;
 	if (button_bar->edit)
-		icon.flags |= wimp_ICON_BORDER | wimp_COLOUR_DARK_GREY <<
-				wimp_ICON_FG_COLOUR_SHIFT;
+		icon.flags |= wimp_ICON_BORDER |
+			      wimp_COLOUR_DARK_GREY
+				      << wimp_ICON_FG_COLOUR_SHIFT;
 	if (!button_bar->separators)
-		icon.flags |= wimp_ICON_FILLED | wimp_COLOUR_LIGHT_GREY <<
-				wimp_ICON_BG_COLOUR_SHIFT;
-	icon.data.indirected_sprite.id = (osspriteop_id) separator_name;
+		icon.flags |= wimp_ICON_FILLED |
+			      wimp_COLOUR_LIGHT_GREY
+				      << wimp_ICON_BG_COLOUR_SHIFT;
+	icon.data.indirected_sprite.id = (osspriteop_id)separator_name;
 	icon.data.indirected_sprite.area = button_bar->sprites;
 	icon.data.indirected_sprite.size = 12;
 	icon.extent.y0 = button_bar->extent.y0 + button_bar->vertical_offset;
 	icon.extent.y1 = icon.extent.y0 + button_bar->y_min;
 
 	for (button = button_bar->bar; button != NULL;
-			button = button->bar_next) {
+	     button = button->bar_next) {
 		if (button->separator) {
-			icon.extent.x0 = button_bar->extent.x0 +
-					button->x_pos + button->x_size;
+			icon.extent.x0 = button_bar->extent.x0 + button->x_pos +
+					 button->x_size;
 			icon.extent.x1 = icon.extent.x0 +
-					button_bar->separator_width;
+					 button_bar->separator_width;
 			xwimp_plot_icon(&icon);
 		}
 	}
@@ -721,12 +746,13 @@ void ro_gui_button_bar_redraw(struct button_bar *button_bar,
 /* This is an exported interface documented in button_bar.h */
 
 bool ro_gui_button_bar_click(struct button_bar *button_bar,
-		wimp_pointer *pointer, wimp_window_state *state,
-		button_bar_action *action)
+			     wimp_pointer *pointer,
+			     wimp_window_state *state,
+			     button_bar_action *action)
 {
-	struct button_bar_button	*button;
-	os_coord			pos;
-	os_box				box;
+	struct button_bar_button *button;
+	os_coord pos;
+	os_box box;
 
 	if (button_bar == NULL || button_bar->hidden)
 		return false;
@@ -737,8 +763,7 @@ bool ro_gui_button_bar_click(struct button_bar *button_bar,
 	pos.y = pointer->pos.y - state->visible.y1 + state->yscroll;
 
 	if (pos.x < button_bar->extent.x0 || pos.x > button_bar->extent.x1 ||
-			pos.y < button_bar->extent.y0 ||
-			pos.y > button_bar->extent.y1)
+	    pos.y < button_bar->extent.y0 || pos.y > button_bar->extent.y1)
 		return false;
 
 	if (button_bar->edit && pointer->buttons == wimp_DRAG_SELECT) {
@@ -746,11 +771,11 @@ bool ro_gui_button_bar_click(struct button_bar *button_bar,
 		 * icons (buttons) and work area (separators).
 		 */
 
-		button = ro_gui_button_bar_find_coords(button_bar, pos,
-				&drag_separator, NULL);
+		button = ro_gui_button_bar_find_coords(
+			button_bar, pos, &drag_separator, NULL);
 
 		if (button != NULL && (!button->shaded || drag_separator ||
-				button_bar->edit_source != NULL)) {
+				       button_bar->edit_source != NULL)) {
 			char *sprite;
 			os_error *error;
 
@@ -759,7 +784,7 @@ bool ro_gui_button_bar_click(struct button_bar *button_bar,
 
 			if (drag_separator) {
 				box.x0 = pointer->pos.x -
-						button_bar->separator_width / 2;
+					 button_bar->separator_width / 2;
 				box.x1 = box.x0 + button_bar->separator_width;
 				sprite = separator_name;
 			} else {
@@ -771,29 +796,33 @@ bool ro_gui_button_bar_click(struct button_bar *button_bar,
 			box.y0 = pointer->pos.y - button->y_size / 2;
 			box.y1 = box.y0 + button->y_size;
 
-			error = xdragasprite_start(dragasprite_HPOS_CENTRE |
+			error = xdragasprite_start(
+				dragasprite_HPOS_CENTRE |
 					dragasprite_VPOS_CENTRE |
 					dragasprite_BOUND_SPRITE |
 					dragasprite_BOUND_TO_WINDOW |
 					dragasprite_DROP_SHADOW,
-					button_bar->sprites,
-					sprite, &box, NULL);
+				button_bar->sprites,
+				sprite,
+				&box,
+				NULL);
 			if (error)
-				NSLOG(netsurf, INFO,
+				NSLOG(netsurf,
+				      INFO,
 				      "xdragasprite_start: 0x%x: %s",
 				      error->errnum,
 				      error->errmess);
 
-			ro_mouse_drag_start(ro_gui_button_bar_drag_end,
-					NULL, NULL, NULL);
+			ro_mouse_drag_start(
+				ro_gui_button_bar_drag_end, NULL, NULL, NULL);
 
 
 			return true;
 		}
 
 	} else if (!button_bar->edit && pointer->i != -1 &&
-			(pointer->buttons == wimp_CLICK_SELECT ||
-			pointer->buttons == wimp_CLICK_ADJUST)) {
+		   (pointer->buttons == wimp_CLICK_SELECT ||
+		    pointer->buttons == wimp_CLICK_ADJUST)) {
 		/* This isn't an editor click, so we're only interested in
 		 * Select or Adjust clicks that occur on physical icons.
 		 */
@@ -823,12 +852,15 @@ bool ro_gui_button_bar_click(struct button_bar *button_bar,
 
 /* This is an exported interface documented in button_bar.h */
 
-bool ro_gui_button_bar_help_suffix(struct button_bar *button_bar, wimp_i i,
-		os_coord *mouse, wimp_window_state *state,
-		wimp_mouse_state buttons, const char **suffix)
+bool ro_gui_button_bar_help_suffix(struct button_bar *button_bar,
+				   wimp_i i,
+				   os_coord *mouse,
+				   wimp_window_state *state,
+				   wimp_mouse_state buttons,
+				   const char **suffix)
 {
-	os_coord			pos;
-	struct button_bar_button	*button;
+	os_coord pos;
+	struct button_bar_button *button;
 
 	if (button_bar == NULL || button_bar->hidden)
 		return false;
@@ -839,8 +871,7 @@ bool ro_gui_button_bar_help_suffix(struct button_bar *button_bar, wimp_i i,
 	pos.y = mouse->y - state->visible.y1 + state->yscroll;
 
 	if (pos.x < button_bar->extent.x0 || pos.x > button_bar->extent.x1 ||
-			pos.y < button_bar->extent.y0 ||
-			pos.y > button_bar->extent.y1)
+	    pos.y < button_bar->extent.y0 || pos.y > button_bar->extent.y1)
 		return false;
 
 	/* Look up and return the help suffix assocuated with the button. */
@@ -865,14 +896,14 @@ bool ro_gui_button_bar_help_suffix(struct button_bar *button_bar, wimp_i i,
 
 void ro_gui_button_bar_drag_end(wimp_dragged *drag, void *data)
 {
-	struct button_bar		*drag_end = NULL;
-	struct button_bar		*source = NULL, *target = NULL;
-	struct button_bar_button	*button, *drop, *previous;
-	bool				right, separator;
-	wimp_window_state		state;
-	wimp_pointer			pointer;
-	os_coord			pos;
-	os_error			*error;
+	struct button_bar *drag_end = NULL;
+	struct button_bar *source = NULL, *target = NULL;
+	struct button_bar_button *button, *drop, *previous;
+	bool right, separator;
+	wimp_window_state state;
+	wimp_pointer pointer;
+	os_coord pos;
+	os_error *error;
 
 	xdragasprite_stop();
 
@@ -883,8 +914,11 @@ void ro_gui_button_bar_drag_end(wimp_dragged *drag, void *data)
 
 	error = xwimp_get_pointer_info(&pointer);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_pointer_info: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_pointer_info: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
@@ -894,8 +928,11 @@ void ro_gui_button_bar_drag_end(wimp_dragged *drag, void *data)
 	state.w = drag_start->window;
 	error = xwimp_get_window_state(&state);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_window_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_window_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
@@ -909,15 +946,13 @@ void ro_gui_button_bar_drag_end(wimp_dragged *drag, void *data)
 		source = drag_start;
 		target = drag_start->edit_target;
 		if (pos.x >= target->extent.x0 && pos.x <= target->extent.x1 &&
-				pos.y >= target->extent.y0 &&
-				pos.y <= target->extent.y1)
+		    pos.y >= target->extent.y0 && pos.y <= target->extent.y1)
 			drag_end = target;
 	} else if (drag_start->edit_source != NULL) {
 		source = drag_start->edit_source;
 		target = drag_start;
 		if (pos.x >= target->extent.x0 && pos.x <= target->extent.x1 &&
-				pos.y >= target->extent.y0 &&
-				pos.y <= target->extent.y1)
+		    pos.y >= target->extent.y0 && pos.y <= target->extent.y1)
 			drag_end = target;
 		/* drag_end == source and drag_end == NULL are both equivalent
 		 * as far as the following code are concerned, and we don't need
@@ -930,8 +965,8 @@ void ro_gui_button_bar_drag_end(wimp_dragged *drag, void *data)
 	/* The drag finished in the target bar, so find out where. */
 
 	if (drag_end == target) {
-		drop = ro_gui_button_bar_find_coords(target, pos,
-				&separator, &right);
+		drop = ro_gui_button_bar_find_coords(
+			target, pos, &separator, &right);
 	} else {
 		drop = NULL;
 	}
@@ -953,13 +988,14 @@ void ro_gui_button_bar_drag_end(wimp_dragged *drag, void *data)
 		} else if (target->bar == button) {
 			target->bar = button->bar_next;
 		} else {
-			for (previous = target->bar; previous != NULL &&
-					previous->bar_next != button;
-					previous = previous->bar_next);
+			for (previous = target->bar;
+			     previous != NULL && previous->bar_next != button;
+			     previous = previous->bar_next)
+				;
 			assert(previous != NULL);
 			previous->bar_next = button->bar_next;
-			if (button->separator)			// ??
-				previous->separator = true;	// ??
+			if (button->separator) // ??
+				previous->separator = true; // ??
 		}
 	}
 
@@ -984,9 +1020,10 @@ void ro_gui_button_bar_drag_end(wimp_dragged *drag, void *data)
 			button->bar_next = target->bar;
 			target->bar = button;
 		} else if (target->bar != drop) {
-			for (previous = target->bar; previous != NULL &&
-					previous->bar_next != drop;
-					previous = previous->bar_next);
+			for (previous = target->bar;
+			     previous != NULL && previous->bar_next != drop;
+			     previous = previous->bar_next)
+				;
 			assert(previous != NULL);
 
 			if (drag_separator) {
@@ -1011,8 +1048,10 @@ void ro_gui_button_bar_drag_end(wimp_dragged *drag, void *data)
 	ro_gui_button_bar_sync_editors(target, source);
 
 	xwimp_force_redraw(target->window,
-			target->extent.x0, target->extent.y0,
-			target->extent.x1, target->extent.y1);
+			   target->extent.x0,
+			   target->extent.y0,
+			   target->extent.x1,
+			   target->extent.y1);
 
 	if (source->edit_refresh != NULL)
 		source->edit_refresh(source->edit_client_data);
@@ -1030,9 +1069,9 @@ void ro_gui_button_bar_drag_end(wimp_dragged *drag, void *data)
  */
 
 void ro_gui_button_bar_sync_editors(struct button_bar *target,
-		struct button_bar *source)
+				    struct button_bar *source)
 {
-	struct button_bar_button	*sb, *tb;
+	struct button_bar_button *sb, *tb;
 
 	if (source == NULL || target == NULL)
 		return;
@@ -1057,8 +1096,9 @@ void ro_gui_button_bar_sync_editors(struct button_bar *target,
 
 	for (sb = source->bar; sb != NULL; sb = sb->bar_next)
 		if (sb->icon != -1)
-			ro_gui_set_icon_shaded_state(source->window, sb->icon,
-					sb->shaded);
+			ro_gui_set_icon_shaded_state(source->window,
+						     sb->icon,
+						     sb->shaded);
 }
 
 
@@ -1066,16 +1106,16 @@ void ro_gui_button_bar_sync_editors(struct button_bar *target,
 
 char *ro_gui_button_bar_get_config(struct button_bar *button_bar)
 {
-	struct button_bar_button	*button;
-	size_t				size;
-	char				*config;
-	int				i;
+	struct button_bar_button *button;
+	size_t size;
+	char *config;
+	int i;
 
 	if (button_bar == NULL)
 		return NULL;
 
 	for (size = 1, button = button_bar->bar; button != NULL;
-			button = button->bar_next) {
+	     button = button->bar_next) {
 		size++;
 		if (button->separator)
 			size++;
@@ -1089,7 +1129,7 @@ char *ro_gui_button_bar_get_config(struct button_bar *button_bar)
 	}
 
 	for (i = 0, button = button_bar->bar; button != NULL;
-			button = button->bar_next) {
+	     button = button->bar_next) {
 		config[i++] = button->opt_key;
 		if (button->separator)
 			config[i++] = '|';
@@ -1109,10 +1149,10 @@ char *ro_gui_button_bar_get_config(struct button_bar *button_bar)
  * \return			Pointer to the button bar icon, or NULL.
  */
 
-struct button_bar_button *ro_gui_button_bar_find_icon(
-		struct button_bar *button_bar, wimp_i icon)
+struct button_bar_button *
+ro_gui_button_bar_find_icon(struct button_bar *button_bar, wimp_i icon)
 {
-	struct button_bar_button	*button;
+	struct button_bar_button *button;
 
 	if (button_bar == NULL || icon == -1)
 		return NULL;
@@ -1134,10 +1174,10 @@ struct button_bar_button *ro_gui_button_bar_find_icon(
  * \return			Pointer to the button bar icon, or NULL.
  */
 
-struct button_bar_button *ro_gui_button_bar_find_opt_key(
-		struct button_bar *button_bar, char opt_key)
+struct button_bar_button *
+ro_gui_button_bar_find_opt_key(struct button_bar *button_bar, char opt_key)
 {
-	struct button_bar_button	*button;
+	struct button_bar_button *button;
 
 	if (button_bar == NULL)
 		return NULL;
@@ -1159,19 +1199,19 @@ struct button_bar_button *ro_gui_button_bar_find_opt_key(
  * \return			Pointer to the button bar icon, or NULL.
  */
 
-struct button_bar_button *ro_gui_button_bar_find_action(
-		struct button_bar *button_bar, button_bar_action action)
+struct button_bar_button *
+ro_gui_button_bar_find_action(struct button_bar *button_bar,
+			      button_bar_action action)
 {
-	struct button_bar_button	*button;
+	struct button_bar_button *button;
 
 	if (button_bar == NULL)
 		return NULL;
 
 	button = button_bar->buttons;
 
-	while (button != NULL &&
-			button->select_action != action &&
-			button->adjust_action != action)
+	while (button != NULL && button->select_action != action &&
+	       button->adjust_action != action)
 		button = button->next;
 
 	return button;
@@ -1190,11 +1230,13 @@ struct button_bar_button *ro_gui_button_bar_find_action(
  * \return			Pointer to the button bar icon, or NULL.
  */
 
-struct button_bar_button *ro_gui_button_bar_find_coords(
-		struct button_bar *button_bar, os_coord pos,
-		bool *separator, bool *right)
+struct button_bar_button *
+ro_gui_button_bar_find_coords(struct button_bar *button_bar,
+			      os_coord pos,
+			      bool *separator,
+			      bool *right)
 {
-	struct button_bar_button	*button;
+	struct button_bar_button *button;
 
 	if (button_bar == NULL)
 		return NULL;
@@ -1215,8 +1257,9 @@ struct button_bar_button *ro_gui_button_bar_find_coords(
 				*separator = false;
 
 			if (right != NULL)
-				*right = (pos.x > x0 + button->x_size/2) ?
-						true : false;
+				*right = (pos.x > x0 + button->x_size / 2)
+						 ? true
+						 : false;
 			return button;
 		}
 
@@ -1226,13 +1269,14 @@ struct button_bar_button *ro_gui_button_bar_find_coords(
 		/* Match separator extents. */
 
 		if (pos.x > x0 && pos.y > y0 && pos.x < x1 && pos.y < y1 &&
-				button->separator) {
+		    button->separator) {
 			if (separator != NULL)
 				*separator = true;
 
 			if (right != NULL)
-				*right = (x0 + button_bar->separator_width/2) ?
-						true : false;
+				*right = (x0 + button_bar->separator_width / 2)
+						 ? true
+						 : false;
 			return button;
 		}
 
@@ -1241,4 +1285,3 @@ struct button_bar_button *ro_gui_button_bar_find_coords(
 
 	return NULL;
 }
-

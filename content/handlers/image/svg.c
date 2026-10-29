@@ -48,7 +48,6 @@ typedef struct svg_content {
 } svg_content;
 
 
-
 static nserror svg_create_svg_data(svg_content *c)
 {
 	c->diagram = svgtiny_create();
@@ -71,9 +70,12 @@ no_memory:
  */
 
 static nserror svg_create(const content_handler *handler,
-		lwc_string *imime_type, const struct http_parameter *params,
-		struct llcache_handle *llcache, const char *fallback_charset,
-		bool quirks, struct content **c)
+			  lwc_string *imime_type,
+			  const struct http_parameter *params,
+			  struct llcache_handle *llcache,
+			  const char *fallback_charset,
+			  bool quirks,
+			  struct content **c)
 {
 	svg_content *svg;
 	nserror error;
@@ -82,8 +84,13 @@ static nserror svg_create(const content_handler *handler,
 	if (svg == NULL)
 		return NSERROR_NOMEM;
 
-	error = content__init(&svg->base, handler, imime_type, params,
-			llcache, fallback_charset, quirks);
+	error = content__init(&svg->base,
+			      handler,
+			      imime_type,
+			      params,
+			      llcache,
+			      fallback_charset,
+			      quirks);
 	if (error != NSERROR_OK) {
 		free(svg);
 		return error;
@@ -95,11 +102,10 @@ static nserror svg_create(const content_handler *handler,
 		return error;
 	}
 
-	*c = (struct content *) svg;
+	*c = (struct content *)svg;
 
 	return NSERROR_OK;
 }
-
 
 
 /**
@@ -112,7 +118,7 @@ static bool svg_convert(struct content *c)
 	if (c->title)
 		snprintf(c->title, 100, messages_get("svgTitle"),
 				width, height, c->source_size);*/
-	//c->size += ?;
+	// c->size += ?;
 	content_set_ready(c);
 	content_set_done(c);
 	/* Done: update status bar */
@@ -127,7 +133,7 @@ static bool svg_convert(struct content *c)
 
 static void svg_reformat(struct content *c, int width, int height)
 {
-	svg_content *svg = (svg_content *) c;
+	svg_content *svg = (svg_content *)c;
 	const uint8_t *source_data;
 	size_t source_size;
 
@@ -157,16 +163,15 @@ static void svg_reformat(struct content *c, int width, int height)
  * Redraw a CONTENT_SVG.
  */
 
-static bool
-svg_redraw_internal(svg_content *svg,
-		    int x,
-		    int y,
-		    int width,
-		    int height,
-		    const struct rect *clip,
-		    const struct redraw_context *ctx,
-		    float scale,
-		    colour background_colour)
+static bool svg_redraw_internal(svg_content *svg,
+				int x,
+				int y,
+				int width,
+				int height,
+				const struct rect *clip,
+				const struct redraw_context *ctx,
+				float scale,
+				colour background_colour)
 {
 	float transform[6];
 	struct svgtiny_diagram *diagram = svg->diagram;
@@ -178,16 +183,16 @@ svg_redraw_internal(svg_content *svg,
 
 	assert(diagram);
 
-	transform[0] = (float) width / (float) svg->base.width;
+	transform[0] = (float)width / (float)svg->base.width;
 	transform[1] = 0;
 	transform[2] = 0;
-	transform[3] = (float) height / (float) svg->base.height;
+	transform[3] = (float)height / (float)svg->base.height;
 	transform[4] = x;
 	transform[5] = y;
 
-#define BGR(c) (((svgtiny_RED((c))) |					\
-		 (svgtiny_GREEN((c)) << 8) |				\
-		 (svgtiny_BLUE((c)) << 16)))
+#define BGR(c)                                                                 \
+	(((svgtiny_RED((c))) | (svgtiny_GREEN((c)) << 8) |                     \
+	  (svgtiny_BLUE((c)) << 16)))
 
 	for (i = 0; i != diagram->shape_count; i++) {
 		if (diagram->shape[i].path) {
@@ -197,10 +202,11 @@ svg_redraw_internal(svg_content *svg,
 				pstyle.stroke_colour = NS_TRANSPARENT;
 			} else {
 				pstyle.stroke_type = PLOT_OP_TYPE_SOLID;
-				pstyle.stroke_colour = BGR(diagram->shape[i].stroke);
+				pstyle.stroke_colour = BGR(
+					diagram->shape[i].stroke);
 			}
 			pstyle.stroke_width = plot_style_int_to_fixed(
-					diagram->shape[i].stroke_width);
+				diagram->shape[i].stroke_width);
 
 			/* fill style */
 			if (diagram->shape[i].fill == svgtiny_TRANSPARENT) {
@@ -208,26 +214,27 @@ svg_redraw_internal(svg_content *svg,
 				pstyle.fill_colour = NS_TRANSPARENT;
 			} else {
 				pstyle.fill_type = PLOT_OP_TYPE_SOLID;
-				pstyle.fill_colour = BGR(diagram->shape[i].fill);
+				pstyle.fill_colour = BGR(
+					diagram->shape[i].fill);
 			}
 
 			/* draw the path */
 			res = ctx->plot->path(ctx,
-					&pstyle,
-					diagram->shape[i].path,
-					diagram->shape[i].path_length,
-					transform);
+					      &pstyle,
+					      diagram->shape[i].path,
+					      diagram->shape[i].path_length,
+					      transform);
 			if (res != NSERROR_OK) {
 				return false;
 			}
 
 		} else if (diagram->shape[i].text) {
 			px = transform[0] * diagram->shape[i].text_x +
-				transform[2] * diagram->shape[i].text_y +
-				transform[4];
+			     transform[2] * diagram->shape[i].text_y +
+			     transform[4];
 			py = transform[1] * diagram->shape[i].text_x +
-				transform[3] * diagram->shape[i].text_y +
-				transform[5];
+			     transform[3] * diagram->shape[i].text_y +
+			     transform[5];
 
 			fstyle.background = 0xffffff;
 			fstyle.foreground = 0x000000;
@@ -235,7 +242,8 @@ svg_redraw_internal(svg_content *svg,
 
 			res = ctx->plot->text(ctx,
 					      &fstyle,
-					      px, py,
+					      px,
+					      py,
 					      diagram->shape[i].text,
 					      strlen(diagram->shape[i].text));
 			if (res != NSERROR_OK) {
@@ -250,11 +258,10 @@ svg_redraw_internal(svg_content *svg,
 }
 
 
-static bool
-svg_redraw_tiled_internal(svg_content *svg,
-			  struct content_redraw_data *data,
-			  const struct rect *clip,
-			  const struct redraw_context *ctx)
+static bool svg_redraw_tiled_internal(svg_content *svg,
+				      struct content_redraw_data *data,
+				      const struct rect *clip,
+				      const struct redraw_context *ctx)
 {
 	/* Tiled redraw required.  SVG repeats to extents of clip
 	 * rectangle, in x, y or both directions */
@@ -265,13 +272,15 @@ svg_redraw_tiled_internal(svg_content *svg,
 
 	/* Find the redraw boundaries to loop within */
 	if (data->repeat_x) {
-		for (; x0 > clip->x0; x0 -= data->width);
+		for (; x0 > clip->x0; x0 -= data->width)
+			;
 		x1 = clip->x1;
 	} else {
 		x1 = x + 1;
 	}
 	if (data->repeat_y) {
-		for (; y0 > clip->y0; y0 -= data->height);
+		for (; y0 > clip->y0; y0 -= data->height)
+			;
 		y1 = clip->y1;
 	} else {
 		y1 = y + 1;
@@ -280,9 +289,14 @@ svg_redraw_tiled_internal(svg_content *svg,
 	/* Repeatedly plot the SVG across the area */
 	for (y = y0; y < y1; y += data->height) {
 		for (x = x0; x < x1; x += data->width) {
-			if (!svg_redraw_internal(svg, x, y,
-						 data->width, data->height,
-						 clip, ctx, data->scale,
+			if (!svg_redraw_internal(svg,
+						 x,
+						 y,
+						 data->width,
+						 data->height,
+						 clip,
+						 ctx,
+						 data->scale,
 						 data->background_colour)) {
 				return false;
 			}
@@ -296,11 +310,10 @@ svg_redraw_tiled_internal(svg_content *svg,
 /**
  * Redraw a CONTENT_SVG.
  */
-static bool
-svg_redraw(struct content *c,
-	   struct content_redraw_data *data,
-	   const struct rect *clip,
-	   const struct redraw_context *ctx)
+static bool svg_redraw(struct content *c,
+		       struct content_redraw_data *data,
+		       const struct rect *clip,
+		       const struct redraw_context *ctx)
 {
 	svg_content *svg = (svg_content *)c;
 
@@ -312,10 +325,15 @@ svg_redraw(struct content *c,
 
 	if ((data->repeat_x == false) && (data->repeat_y == false)) {
 		/* Simple case: SVG is not tiled */
-		return svg_redraw_internal(svg, data->x, data->y,
-				data->width, data->height,
-				clip, ctx, data->scale,
-				data->background_colour);
+		return svg_redraw_internal(svg,
+					   data->x,
+					   data->y,
+					   data->width,
+					   data->height,
+					   clip,
+					   ctx,
+					   data->scale,
+					   data->background_colour);
 	}
 
 	return svg_redraw_tiled_internal(svg, data, clip, ctx);
@@ -328,7 +346,7 @@ svg_redraw(struct content *c,
 
 static void svg_destroy(struct content *c)
 {
-	svg_content *svg = (svg_content *) c;
+	svg_content *svg = (svg_content *)c;
 
 	if (svg->diagram != NULL)
 		svgtiny_free(svg->diagram);
@@ -358,14 +376,14 @@ static nserror svg_clone(const struct content *old, struct content **newc)
 	}
 
 	if (old->status == CONTENT_STATUS_READY ||
-			old->status == CONTENT_STATUS_DONE) {
+	    old->status == CONTENT_STATUS_DONE) {
 		if (svg_convert(&svg->base) == false) {
 			content_destroy(&svg->base);
 			return NSERROR_CLONE_FAILED;
 		}
 	}
 
-	*newc = (struct content *) svg;
+	*newc = (struct content *)svg;
 
 	return NSERROR_OK;
 }
@@ -383,13 +401,9 @@ static const content_handler svg_content_handler = {
 	.redraw = svg_redraw,
 	.clone = svg_clone,
 	.type = svg_content_type,
-	.no_share = true
-};
+	.no_share = true};
 
-static const char *svg_types[] = {
-	"image/svg",
-	"image/svg+xml"
-};
+static const char *svg_types[] = {"image/svg", "image/svg+xml"};
 
 
 CONTENT_FACTORY_REGISTER_TYPES(svg, svg_types, svg_content_handler);

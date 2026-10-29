@@ -34,14 +34,17 @@ void amiga_icon_fini(void);
 #else
 
 #define amiga_icon_init() NSERROR_OK
-#define amiga_icon_fini() ((void) 0)
+#define amiga_icon_fini() ((void)0)
 
 #endif /* WITH_AMIGA_ICON */
 
 struct hlcache_handle;
 
-void amiga_icon_superimpose_favicon(char *path, struct hlcache_handle *icon, char *type);
-void amiga_icon_superimpose_favicon_internal(struct hlcache_handle *icon, struct DiskObject *dobj);
+void amiga_icon_superimpose_favicon(char *path,
+				    struct hlcache_handle *icon,
+				    char *type);
+void amiga_icon_superimpose_favicon_internal(struct hlcache_handle *icon,
+					     struct DiskObject *dobj);
 struct DiskObject *amiga_icon_from_bitmap(struct bitmap *bm);
 void amiga_icon_free(struct DiskObject *dobj);
 #endif

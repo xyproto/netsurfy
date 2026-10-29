@@ -38,6 +38,7 @@ nserror amiga_warn_user(const char *warning, const char *detail);
 char *translate_escape_chars(const char *s);
 void ami_misc_fatal_error(const char *message);
 int32 amiga_warn_user_multi(const char *body,
-	const char *opt1, const char *opt2, struct Window *win);
+			    const char *opt1,
+			    const char *opt2,
+			    struct Window *win);
 #endif
-

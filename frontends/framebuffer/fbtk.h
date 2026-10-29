@@ -26,7 +26,8 @@
 #define FB_COLOUR_BLACK 0xFF000000
 #define FB_COLOUR_WHITE 0xFFFFFFFF
 
-#define FBTK_WIDGET_PADDING 30 /**< percentage of widget size used for padding */ 
+#define FBTK_WIDGET_PADDING                                                    \
+	30 /**< percentage of widget size used for padding */
 #define FBTK_DPI 90 /**< screen DPI */
 
 typedef struct fbtk_widget_s fbtk_widget_t;
@@ -61,23 +62,23 @@ typedef struct fbtk_callback_info {
 
 /** framebuffer toolkit bitmaps  */
 struct fbtk_bitmap {
-        int width;
-        int height;
-        uint8_t *pixdata;
-        bool opaque;
+	int width;
+	int height;
+	uint8_t *pixdata;
+	bool opaque;
 
-        /* The following two are only used for cursors */
-        int hot_x;
-        int hot_y;
+	/* The following two are only used for cursors */
+	int hot_x;
+	int hot_y;
 };
 
 /** Key modifier status */
 typedef enum fbtk_modifier_type {
-	FBTK_MOD_CLEAR  = 0,
+	FBTK_MOD_CLEAR = 0,
 	FBTK_MOD_LSHIFT = (1 << 0),
 	FBTK_MOD_RSHIFT = (1 << 1),
-	FBTK_MOD_LCTRL  = (1 << 2),
-	FBTK_MOD_RCTRL  = (1 << 3)
+	FBTK_MOD_LCTRL = (1 << 2),
+	FBTK_MOD_RCTRL = (1 << 3)
 } fbtk_modifier_type;
 
 typedef int (*fbtk_callback)(fbtk_widget_t *widget, fbtk_callback_info *cbi);
@@ -124,11 +125,11 @@ bool fbtk_get_redraw_pending(fbtk_widget_t *widget);
 
 /** clip a bounding box to a widgets area.
  */
-bool fbtk_clip_to_widget(fbtk_widget_t *widget, bbox_t * restrict box);
+bool fbtk_clip_to_widget(fbtk_widget_t *widget, bbox_t *restrict box);
 
 /** clip one bounding box to another.
  */
-bool fbtk_clip_rect(const bbox_t * restrict clip, bbox_t * restrict box);
+bool fbtk_clip_rect(const bbox_t *restrict clip, bbox_t *restrict box);
 
 /***************** Callback processing ********************/
 
@@ -150,7 +151,10 @@ int fbtk_post_callback(fbtk_widget_t *widget, fbtk_callback_type cbt, ...);
  * @param pw The private pointer to pass when calling the callback.
  * @return The previous callback handler for the type or NULL.
  */
-fbtk_callback fbtk_set_handler(fbtk_widget_t *widget, fbtk_callback_type cbt, fbtk_callback cb, void *pw);
+fbtk_callback fbtk_set_handler(fbtk_widget_t *widget,
+			       fbtk_callback_type cbt,
+			       fbtk_callback cb,
+			       void *pw);
 
 /** Get a callback handler.
  */
@@ -277,7 +281,11 @@ bool fbtk_get_caret(fbtk_widget_t *widget, int *x, int *y, int *height);
  * Change the widget's position and size. (Doesn't redraw)
  *
  */
-bool fbtk_set_pos_and_size(fbtk_widget_t *widget, int x, int y, int width, int height);
+bool fbtk_set_pos_and_size(fbtk_widget_t *widget,
+			   int x,
+			   int y,
+			   int width,
+			   int height);
 
 /**
  * Set caret owner and position
@@ -289,8 +297,12 @@ bool fbtk_set_pos_and_size(fbtk_widget_t *widget, int x, int y, int width, int h
  * @param height  height of caret
  * @param remove_caret callback when caret is removed.
  */
-void fbtk_set_caret(fbtk_widget_t *widget, bool set, int x, int y, int height,
-		void (*remove_caret)(fbtk_widget_t *widget));
+void fbtk_set_caret(fbtk_widget_t *widget,
+		    bool set,
+		    int x,
+		    int y,
+		    int height,
+		    void (*remove_caret)(fbtk_widget_t *widget));
 
 /**
  * Map a widget and request it is redrawn.
@@ -318,7 +330,6 @@ void fbtk_request_redraw(fbtk_widget_t *widget);
 int fbtk_destroy_widget(fbtk_widget_t *widget);
 
 
-
 /********************************* Widgets *********************************/
 
 
@@ -337,8 +348,12 @@ int fbtk_destroy_widget(fbtk_widget_t *widget);
  * @param bg The background colour.
  * @return new window widget handle or NULL on error.
  */
-fbtk_widget_t *fbtk_create_window(fbtk_widget_t *parent, int x, int y, int width, int height, colour bg);
-
+fbtk_widget_t *fbtk_create_window(fbtk_widget_t *parent,
+				  int x,
+				  int y,
+				  int width,
+				  int height,
+				  colour bg);
 
 
 /**
@@ -354,8 +369,12 @@ fbtk_widget_t *fbtk_create_window(fbtk_widget_t *parent, int x, int y, int width
  * @param c widget colour
  * @return new widget handle or NULL on error.
  */
-fbtk_widget_t *
-fbtk_create_fill(fbtk_widget_t *window, int x, int y, int width, int height, colour c);
+fbtk_widget_t *fbtk_create_fill(fbtk_widget_t *window,
+				int x,
+				int y,
+				int width,
+				int height,
+				colour c);
 
 
 /**
@@ -374,8 +393,15 @@ fbtk_create_fill(fbtk_widget_t *window, int x, int y, int width, int height, col
  * @param context context passed to callback.
  * @return new widget handle or NULL on error.
  */
-fbtk_widget_t *
-fbtk_create_hscroll(fbtk_widget_t *window, int x, int y, int width, int height, colour fg, colour bg, fbtk_callback callback, void *context);
+fbtk_widget_t *fbtk_create_hscroll(fbtk_widget_t *window,
+				   int x,
+				   int y,
+				   int width,
+				   int height,
+				   colour fg,
+				   colour bg,
+				   fbtk_callback callback,
+				   void *context);
 
 /**
  * Create a vertical scroll widget
@@ -393,12 +419,19 @@ fbtk_create_hscroll(fbtk_widget_t *window, int x, int y, int width, int height, 
  * @param context context passed to callback.
  * @return new widget handle or NULL on error.
  */
-fbtk_widget_t *
-fbtk_create_vscroll(fbtk_widget_t *window, int x, int y, int width, int height, colour fg, colour bg, fbtk_callback callback, void *context);
+fbtk_widget_t *fbtk_create_vscroll(fbtk_widget_t *window,
+				   int x,
+				   int y,
+				   int width,
+				   int height,
+				   colour fg,
+				   colour bg,
+				   fbtk_callback callback,
+				   void *context);
 
 /**
  * Set scoll widget parameters
- * 
+ *
  * @param widget The widget to set the parameters for.
  * @param min The minimum range value.
  * @param max The maximum range value.
@@ -406,11 +439,15 @@ fbtk_create_vscroll(fbtk_widget_t *window, int x, int y, int width, int height, 
  * @param page The amout to scroll for a page.
  * @return true if the scroll parameter was set else false.
  */
-bool fbtk_set_scroll_parameters(fbtk_widget_t *widget, int min, int max, int thumb, int page);
+bool fbtk_set_scroll_parameters(fbtk_widget_t *widget,
+				int min,
+				int max,
+				int thumb,
+				int page);
 
 /**
  * set scroll widget position.
- * 
+ *
  * @param widget The widget to set the position on.
  * @param pos The position to set
  * @return true if the scroll parameter was set else false.
@@ -428,7 +465,10 @@ bool fbtk_set_scroll_position(fbtk_widget_t *widget, int pos);
  * @param height   new height
  */
 void fbtk_reposition_hscroll(fbtk_widget_t *scrollh,
-		int x, int y, int width, int height);
+			     int x,
+			     int y,
+			     int width,
+			     int height);
 
 /**
  * Move and/or resize a vertical scroll widget
@@ -440,7 +480,10 @@ void fbtk_reposition_hscroll(fbtk_widget_t *scrollh,
  * @param height   new height
  */
 void fbtk_reposition_vscroll(fbtk_widget_t *scrollv,
-		int x, int y, int width, int height);
+			     int x,
+			     int y,
+			     int width,
+			     int height);
 
 
 /**
@@ -456,7 +499,12 @@ void fbtk_reposition_vscroll(fbtk_widget_t *scrollv,
  * @param pw The private pointer which can be read using ::fbtk_get_userpw
  * @return new widget handle or NULL on error.
  */
-fbtk_widget_t *fbtk_create_user(fbtk_widget_t *window, int x, int y, int width, int height, void *pw);
+fbtk_widget_t *fbtk_create_user(fbtk_widget_t *window,
+				int x,
+				int y,
+				int width,
+				int height,
+				void *pw);
 
 
 /**
@@ -482,7 +530,13 @@ void *fbtk_get_userpw(fbtk_widget_t *widget);
  * @param image The bitmap to put in the widget
  * @return new widget handle or NULL on error.
  */
-fbtk_widget_t *fbtk_create_bitmap(fbtk_widget_t *window, int x, int y, int width, int height, colour c, struct fbtk_bitmap *image);
+fbtk_widget_t *fbtk_create_bitmap(fbtk_widget_t *window,
+				  int x,
+				  int y,
+				  int width,
+				  int height,
+				  colour c,
+				  struct fbtk_bitmap *image);
 
 
 /**
@@ -511,7 +565,15 @@ void fbtk_set_bitmap(fbtk_widget_t *widget, struct fbtk_bitmap *image);
  * @param pw The context tp pass to the callback
  * @return new widget handle or NULL on error.
  */
-fbtk_widget_t *fbtk_create_button(fbtk_widget_t *window, int x, int y, int width, int height, colour c, struct fbtk_bitmap *image, fbtk_callback click, void *pw);
+fbtk_widget_t *fbtk_create_button(fbtk_widget_t *window,
+				  int x,
+				  int y,
+				  int width,
+				  int height,
+				  colour c,
+				  struct fbtk_bitmap *image,
+				  fbtk_callback click,
+				  void *pw);
 
 
 /**
@@ -527,7 +589,14 @@ fbtk_widget_t *fbtk_create_button(fbtk_widget_t *window, int x, int y, int width
  * @param outline widget will have a border.
  * @return new widget handle or NULL on error.
  */
-fbtk_widget_t *fbtk_create_text(fbtk_widget_t *window, int x, int y, int width, int height, colour bg, colour fg, bool outline);
+fbtk_widget_t *fbtk_create_text(fbtk_widget_t *window,
+				int x,
+				int y,
+				int width,
+				int height,
+				colour bg,
+				colour fg,
+				bool outline);
 
 
 /**
@@ -544,7 +613,15 @@ fbtk_widget_t *fbtk_create_text(fbtk_widget_t *window, int x, int y, int width, 
  * @param pw The context tp pass to the callback
  * @return new widget handle or NULL on error.
  */
-fbtk_widget_t *fbtk_create_text_button(fbtk_widget_t *window, int x, int y, int width, int height, colour bg, colour fg, fbtk_callback click, void *pw);
+fbtk_widget_t *fbtk_create_text_button(fbtk_widget_t *window,
+				       int x,
+				       int y,
+				       int width,
+				       int height,
+				       colour bg,
+				       colour fg,
+				       fbtk_callback click,
+				       void *pw);
 
 
 /**
@@ -566,7 +643,16 @@ fbtk_widget_t *fbtk_create_text_button(fbtk_widget_t *window, int x, int y, int 
  * @param pw Context pointer passed to entry callback.
  * @return new widget handle or NULL on error.
  */
-fbtk_widget_t *fbtk_create_writable_text(fbtk_widget_t *window, int x, int y, int width, int height, colour bg, colour fg, bool outline, fbtk_enter_t enter, void *pw);
+fbtk_widget_t *fbtk_create_writable_text(fbtk_widget_t *window,
+					 int x,
+					 int y,
+					 int width,
+					 int height,
+					 colour bg,
+					 colour fg,
+					 bool outline,
+					 fbtk_enter_t enter,
+					 void *pw);
 
 
 /**

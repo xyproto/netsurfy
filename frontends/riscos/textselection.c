@@ -46,14 +46,14 @@
 
 
 #ifndef wimp_DRAG_CLAIM_SUPPRESS_DRAGBOX
-#define wimp_DRAG_CLAIM_SUPPRESS_DRAGBOX ((wimp_drag_claim_flags) 0x2u)
+#define wimp_DRAG_CLAIM_SUPPRESS_DRAGBOX ((wimp_drag_claim_flags)0x2u)
 #endif
 
 
 /** Receive of Dragging message has claimed it */
 static bool dragging_claimed = false;
 static wimp_t dragging_claimant;
-static os_box dragging_box = { -34, -34, 34, 34 };  /* \todo - size properly */
+static os_box dragging_box = {-34, -34, 34, 34}; /* \todo - size properly */
 static wimp_drag_claim_flags last_claim_flags = 0;
 static struct gui_window *last_start_window;
 
@@ -62,7 +62,7 @@ static bool drag_claimed = false;
 static bool owns_clipboard = false;
 static bool owns_caret_and_selection = false;
 
-/* Current clipboard contents if we own the clipboard 
+/* Current clipboard contents if we own the clipboard
  * Current paste buffer if we don't
  */
 static char *clipboard = NULL;
@@ -97,8 +97,11 @@ void gui_start_selection(struct gui_window *g)
 	state.w = g->window;
 	error = xwimp_get_window_state(&state);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_window_state 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_window_state 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
@@ -110,10 +113,14 @@ void gui_start_selection(struct gui_window *g)
 	msg.flags = wimp_CLAIM_CARET_OR_SELECTION;
 
 	error = xwimp_send_message(wimp_USER_MESSAGE,
-			(wimp_message*)&msg, wimp_BROADCAST);
+				   (wimp_message *)&msg,
+				   wimp_BROADCAST);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_send_message: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_send_message: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 	}
 	owns_caret_and_selection = true;
@@ -126,14 +133,18 @@ void gui_start_selection(struct gui_window *g)
 	scroll.pause_duration = 0;
 	scroll.state_change = (void *)0;
 	error = xwimp_auto_scroll(wimp_AUTO_SCROLL_ENABLE_VERTICAL |
-			wimp_AUTO_SCROLL_ENABLE_HORIZONTAL,
-			&scroll, 0);
+					  wimp_AUTO_SCROLL_ENABLE_HORIZONTAL,
+				  &scroll,
+				  0);
 	if (error)
-		NSLOG(netsurf, INFO, "xwimp_auto_scroll: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_auto_scroll: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 
-	ro_mouse_drag_start(ro_gui_selection_drag_end, ro_gui_window_mouse_at,
-			NULL, g);
+	ro_mouse_drag_start(
+		ro_gui_selection_drag_end, ro_gui_window_mouse_at, NULL, g);
 
 	drag.type = wimp_DRAG_USER_POINT;
 	/* Don't constrain mouse pointer during drags */
@@ -144,8 +155,11 @@ void gui_start_selection(struct gui_window *g)
 
 	error = xwimp_drag_box(&drag);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_drag_box: 0x%x : %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_drag_box: 0x%x : %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 	}
 	last_start_window = g;
@@ -165,30 +179,40 @@ static void ro_gui_selection_drag_end(wimp_dragged *drag, void *data)
 	wimp_pointer pointer;
 	os_error *error;
 	os_coord pos;
-	struct gui_window *g = (struct gui_window *) data;
+	struct gui_window *g = (struct gui_window *)data;
 
 	scroll.w = g->window;
 	error = xwimp_auto_scroll(0, &scroll, 0);
 	if (error)
-		NSLOG(netsurf, INFO, "xwimp_auto_scroll: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_auto_scroll: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 
-	error = xwimp_drag_box((wimp_drag*)-1);
+	error = xwimp_drag_box((wimp_drag *)-1);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_drag_box: 0x%x : %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_drag_box: 0x%x : %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 	}
 
 	error = xwimp_get_pointer_info(&pointer);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_pointer_info 0x%x : %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_pointer_info 0x%x : %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
 
-	if (ro_gui_window_to_window_pos(g, drag->final.x0, drag->final.y0, &pos)) {
+	if (ro_gui_window_to_window_pos(
+		    g, drag->final.x0, drag->final.y0, &pos)) {
 		browser_window_mouse_track(g->bw, 0, pos.x, pos.y);
 	}
 }
@@ -201,8 +225,10 @@ static void ro_gui_selection_drag_end(wimp_dragged *drag, void *data)
  * \param  styles    Array of styles given to text runs, owned by core, or NULL
  * \param  n_styles  Number of text run styles in array
  */
-static void gui_set_clipboard(const char *buffer, size_t length,
-		nsclipboard_styles styles[], int n_styles)
+static void gui_set_clipboard(const char *buffer,
+			      size_t length,
+			      nsclipboard_styles styles[],
+			      int n_styles)
 {
 	char *new_cb;
 
@@ -233,10 +259,14 @@ static void gui_set_clipboard(const char *buffer, size_t length,
 		msg.flags = wimp_CLAIM_CLIPBOARD;
 
 		error = xwimp_send_message(wimp_USER_MESSAGE,
-				(wimp_message*)&msg, wimp_BROADCAST);
+					   (wimp_message *)&msg,
+					   wimp_BROADCAST);
 		if (error) {
-			NSLOG(netsurf, INFO, "xwimp_send_message: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_send_message: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 		}
 		owns_clipboard = true;
@@ -307,7 +337,8 @@ static void ro_gui_selection_prepare_paste_bounced(wimp_message *message)
  */
 
 void ro_gui_selection_prepare_paste(wimp_w w,
-		ro_gui_selection_prepare_paste_cb cb, void *pw)
+				    ro_gui_selection_prepare_paste_cb cb,
+				    void *pw)
 {
 	if (owns_clipboard) {
 		/* We own the clipboard: we're already prepared */
@@ -330,9 +361,11 @@ void ro_gui_selection_prepare_paste(wimp_w w,
 		msg.file_types[0] = osfile_TYPE_TEXT;
 		msg.file_types[1] = ~0;
 
-		success = ro_message_send_message(wimp_USER_MESSAGE_RECORDED,
-				(wimp_message *) &msg, wimp_BROADCAST,
-				ro_gui_selection_prepare_paste_bounced);
+		success = ro_message_send_message(
+			wimp_USER_MESSAGE_RECORDED,
+			(wimp_message *)&msg,
+			wimp_BROADCAST,
+			ro_gui_selection_prepare_paste_bounced);
 		if (success == false) {
 			/* Ensure key is handled, anyway */
 			cb(pw);
@@ -352,7 +385,7 @@ void ro_gui_selection_prepare_paste(wimp_w w,
  * \return True if message was handled, false otherwise
  */
 bool ro_gui_selection_prepare_paste_datasave(
-		wimp_full_message_data_xfer *dataxfer)
+	wimp_full_message_data_xfer *dataxfer)
 {
 	bool success;
 
@@ -373,9 +406,11 @@ bool ro_gui_selection_prepare_paste_datasave(
 	dataxfer->est_size = -1;
 	memcpy(dataxfer->file_name, "<Wimp$Scrap>", SLEN("<Wimp$Scrap>") + 1);
 
-	success = ro_message_send_message(wimp_USER_MESSAGE_RECORDED,
-			(wimp_message *) dataxfer, dataxfer->sender,
-			ro_gui_selection_prepare_paste_bounced);
+	success = ro_message_send_message(
+		wimp_USER_MESSAGE_RECORDED,
+		(wimp_message *)dataxfer,
+		dataxfer->sender,
+		ro_gui_selection_prepare_paste_bounced);
 	if (success == false) {
 		ro_gui_selection_prepare_paste_complete();
 	} else {
@@ -393,7 +428,7 @@ bool ro_gui_selection_prepare_paste_datasave(
  * \return True if message was handled, false otherwise
  */
 bool ro_gui_selection_prepare_paste_dataload(
-		wimp_full_message_data_xfer *dataxfer)
+	wimp_full_message_data_xfer *dataxfer)
 {
 	FILE *fp;
 
@@ -414,8 +449,9 @@ bool ro_gui_selection_prepare_paste_dataload(
 				nserror ret;
 				fread(local_cb, 1, size, fp);
 
-				ret = utf8_from_local_encoding(local_cb, size,
-						&clipboard);
+				ret = utf8_from_local_encoding(local_cb,
+							       size,
+							       &clipboard);
 				if (ret == NSERROR_OK) {
 					clip_length = strlen(clipboard);
 				}
@@ -431,7 +467,9 @@ bool ro_gui_selection_prepare_paste_dataload(
 	dataxfer->action = message_DATA_LOAD_ACK;
 	dataxfer->your_ref = dataxfer->my_ref;
 	ro_message_send_message(wimp_USER_MESSAGE,
-			(wimp_message *) dataxfer, dataxfer->sender, NULL);
+				(wimp_message *)dataxfer,
+				dataxfer->sender,
+				NULL);
 
 	ro_gui_selection_prepare_paste_complete();
 	return true;
@@ -474,20 +512,21 @@ void ro_gui_selection_claim_entity(wimp_full_message_claim_entity *claim)
 void ro_gui_selection_data_request(wimp_full_message_data_request *req)
 {
 	if (owns_clipboard && clip_length > 0 &&
-		(req->flags & wimp_DATA_REQUEST_CLIPBOARD)) {
+	    (req->flags & wimp_DATA_REQUEST_CLIPBOARD)) {
 		wimp_full_message_data_xfer message;
 		int size;
-//		int i;
+		//		int i;
 
-//		for(i = 0; i < NOF_ELEMENTS(req->file_types); i++) {
-//			bits ftype = req->file_types[i];
-//			if (ftype == ~0U) break;	/* list terminator */
-//
-//			NSLOG(netsurf, INFO, "type %x", ftype);
-//			i++;
-//		}
+		//		for(i = 0; i < NOF_ELEMENTS(req->file_types);
+		//i++) { 			bits ftype = req->file_types[i]; 			if (ftype == ~0U)
+		//break;	/* list terminator */
+		//
+		//			NSLOG(netsurf, INFO, "type %x", ftype);
+		//			i++;
+		//		}
 
-		/* we can only supply text at the moment, so that's what you're getting! */
+		/* we can only supply text at the moment, so that's what you're
+		 * getting! */
 		size = offsetof(wimp_full_message_data_xfer, file_name) + 9;
 		message.size = (size + 3) & ~3;
 		message.your_ref = req->my_ref;
@@ -500,7 +539,8 @@ void ro_gui_selection_data_request(wimp_full_message_data_request *req)
 		memcpy(message.file_name, "TextFile", 9);
 
 		ro_gui_send_datasave(GUI_SAVE_CLIPBOARD_CONTENTS,
-				&message, req->sender);
+				     &message,
+				     req->sender);
 	}
 }
 
@@ -509,7 +549,8 @@ void ro_gui_selection_data_request(wimp_full_message_data_request *req)
  * Save the clipboard contents to a file.
  *
  * \param  path  the pathname of the file
- * \return true iff success, otherwise reporting the error before returning false
+ * \return true iff success, otherwise reporting the error before returning
+ * false
  */
 
 bool ro_gui_save_clipboard(const char *path)
@@ -526,15 +567,19 @@ bool ro_gui_save_clipboard(const char *path)
 		return false;
 	}
 
-	error = xosfile_save_stamped(path, osfile_TYPE_TEXT,
-			(byte*) local_cb,
-			(byte*) local_cb + strlen(local_cb));
+	error = xosfile_save_stamped(path,
+				     osfile_TYPE_TEXT,
+				     (byte *)local_cb,
+				     (byte *)local_cb + strlen(local_cb));
 
 	free(local_cb);
 
 	if (error) {
-		NSLOG(netsurf, INFO, "xosfile_save_stamped: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xosfile_save_stamped: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("SaveError", error->errmess);
 		return false;
 	}
@@ -550,7 +595,8 @@ bool ro_gui_save_clipboard(const char *path)
 
 void ro_gui_selection_dragging(wimp_message *message)
 {
-	wimp_full_message_dragging *drag = (wimp_full_message_dragging*)message;
+	wimp_full_message_dragging *drag = (wimp_full_message_dragging *)
+		message;
 	struct gui_window *g;
 	os_coord pos;
 
@@ -572,7 +618,6 @@ void ro_gui_selection_dragging(wimp_message *message)
 }
 
 
-
 /**
  * Reset drag-and-drop state when drag completes (DataSave received)
  */
@@ -589,7 +634,8 @@ void ro_gui_selection_drag_reset(void)
 
 void ro_gui_selection_drag_claim(wimp_message *message)
 {
-	wimp_full_message_drag_claim *claim = (wimp_full_message_drag_claim*)message;
+	wimp_full_message_drag_claim *claim = (wimp_full_message_drag_claim *)
+		message;
 
 	dragging_claimant = message->sender;
 	dragging_claimed = true;
@@ -597,14 +643,13 @@ void ro_gui_selection_drag_claim(wimp_message *message)
 	/* have we been asked to remove the drag box/sprite? */
 	if (claim->flags & wimp_DRAG_CLAIM_SUPPRESS_DRAGBOX) {
 		ro_gui_drag_box_cancel();
-	}
-	else {
+	} else {
 		/* \todo - restore it here? */
 	}
 
 	/* do we need to restore the default pointer shape? */
 	if ((last_claim_flags & wimp_DRAG_CLAIM_POINTER_CHANGED) &&
-			!(claim->flags & wimp_DRAG_CLAIM_POINTER_CHANGED)) {
+	    !(claim->flags & wimp_DRAG_CLAIM_POINTER_CHANGED)) {
 		gui_window_set_pointer(last_start_window, GUI_POINTER_DEFAULT);
 	}
 
@@ -616,7 +661,10 @@ void ro_gui_selection_send_dragging(wimp_pointer *pointer)
 {
 	wimp_full_message_dragging dragmsg;
 
-	NSLOG(netsurf, INFO, "sending DRAGGING to %p, %d", pointer->w,
+	NSLOG(netsurf,
+	      INFO,
+	      "sending DRAGGING to %p, %d",
+	      pointer->w,
 	      pointer->i);
 
 	dragmsg.size = offsetof(wimp_full_message_dragging, file_types) + 8;
@@ -625,26 +673,30 @@ void ro_gui_selection_send_dragging(wimp_pointer *pointer)
 	dragmsg.w = pointer->w;
 	dragmsg.i = pointer->i;
 	dragmsg.pos = pointer->pos;
-/* \todo - this is interesting because it depends upon not just the state of the
-      shift key, but also whether it /can/ be deleted, ie. from text area/input
-      rather than page contents */
+	/* \todo - this is interesting because it depends upon not just the
+	   state of the shift key, but also whether it /can/ be deleted, ie.
+	   from text area/input rather than page contents */
 	dragmsg.flags = wimp_DRAGGING_FROM_SELECTION;
 	dragmsg.box = dragging_box;
 	dragmsg.file_types[0] = osfile_TYPE_TEXT;
 	dragmsg.file_types[1] = ~0;
 
-	/* if the message_dragmsg messages have been claimed we must address them
-	   to the claimant task, which is not necessarily the task that owns whatever
-	   window happens to be under the pointer */
+	/* if the message_dragmsg messages have been claimed we must address
+	   them to the claimant task, which is not necessarily the task that
+	   owns whatever window happens to be under the pointer */
 
 	if (dragging_claimed) {
 		ro_message_send_message(wimp_USER_MESSAGE_RECORDED,
-				(wimp_message*)&dragmsg, dragging_claimant, ro_gui_dragging_bounced);
-	}
-	else {
+					(wimp_message *)&dragmsg,
+					dragging_claimant,
+					ro_gui_dragging_bounced);
+	} else {
 		ro_message_send_message_to_window(wimp_USER_MESSAGE_RECORDED,
-				(wimp_message*)&dragmsg, pointer->w, pointer->i,
-				ro_gui_dragging_bounced, &dragging_claimant);
+						  (wimp_message *)&dragmsg,
+						  pointer->w,
+						  pointer->i,
+						  ro_gui_dragging_bounced,
+						  &dragging_claimant);
 	}
 }
 

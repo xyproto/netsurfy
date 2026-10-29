@@ -39,13 +39,6 @@ else
 endif
 
 
-# Build tool to convert file to comiled data
-#
-$(TOOLROOT)/xxd: tools/xxd.c $(TOOLROOT)/created
-	$(VQ)echo "BUILD CC: $@"
-	$(Q)$(BUILD_CC) $(BUILD_CFLAGS) -o $@ $< $(BUILD_LDFLAGS)
-
-
 # Build tool to filter messages
 #
 $(TOOLROOT)/split-messages: tools/split-messages.c $(TOOLROOT)/created

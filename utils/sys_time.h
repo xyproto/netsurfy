@@ -31,41 +31,41 @@
 #include <sys/time.h>
 
 #ifndef timerclear
-#define	timerclear(a) ((a)->tv_sec = (a)->tv_usec = 0)
+#define timerclear(a) ((a)->tv_sec = (a)->tv_usec = 0)
 #endif
 
 #ifndef timerisset
-#define	timerisset(a) ((a)->tv_sec || (a)->tv_usec)
+#define timerisset(a) ((a)->tv_sec || (a)->tv_usec)
 #endif
 
 #ifndef timeradd
-#define timeradd(a, aa, result)						\
-	do {								\
-		(result)->tv_sec = (a)->tv_sec + (aa)->tv_sec;		\
-		(result)->tv_usec = (a)->tv_usec + (aa)->tv_usec;	\
-		if ((result)->tv_usec >= 1000000) {			\
-			++(result)->tv_sec;				\
-			(result)->tv_usec -= 1000000;			\
-		}							\
+#define timeradd(a, aa, result)                                                \
+	do {                                                                   \
+		(result)->tv_sec = (a)->tv_sec + (aa)->tv_sec;                 \
+		(result)->tv_usec = (a)->tv_usec + (aa)->tv_usec;              \
+		if ((result)->tv_usec >= 1000000) {                            \
+			++(result)->tv_sec;                                    \
+			(result)->tv_usec -= 1000000;                          \
+		}                                                              \
 	} while (0)
 #endif
 
 #ifndef timersub
-#define timersub(a, aa, result)						\
-	do {								\
-		(result)->tv_sec = (a)->tv_sec - (aa)->tv_sec;		\
-		(result)->tv_usec = (a)->tv_usec - (aa)->tv_usec;	\
-		if ((result)->tv_usec < 0) {				\
-			--(result)->tv_sec;				\
-			(result)->tv_usec += 1000000;			\
-		}							\
+#define timersub(a, aa, result)                                                \
+	do {                                                                   \
+		(result)->tv_sec = (a)->tv_sec - (aa)->tv_sec;                 \
+		(result)->tv_usec = (a)->tv_usec - (aa)->tv_usec;              \
+		if ((result)->tv_usec < 0) {                                   \
+			--(result)->tv_sec;                                    \
+			(result)->tv_usec += 1000000;                          \
+		}                                                              \
 	} while (0)
 #endif
 
 #ifndef timercmp
-#define timercmp(a, aa, cmp)						\
-	(((a)->tv_sec cmp (aa)->tv_sec) ||				\
-	 ((a)->tv_sec == (aa)->tv_sec && (a)->tv_usec cmp (aa)->tv_usec))
+#define timercmp(a, aa, cmp)                                                   \
+	(((a)->tv_sec cmp(aa)->tv_sec) ||                                      \
+	 ((a)->tv_sec == (aa)->tv_sec && (a)->tv_usec cmp(aa)->tv_usec))
 #endif
 
 #endif

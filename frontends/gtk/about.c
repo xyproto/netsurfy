@@ -79,7 +79,10 @@ static void nsgtk_about_close_clicked(GtkButton *button, gpointer data)
 	gtk_window_destroy(GTK_WINDOW(data));
 }
 
-static GtkWidget *about_add_button(GtkWidget *box, GtkWidget *dialog, const char *label, GCallback callback)
+static GtkWidget *about_add_button(GtkWidget *box,
+				   GtkWidget *dialog,
+				   const char *label,
+				   GCallback callback)
 {
 	GtkWidget *button = gtk_button_new_with_label(label);
 
@@ -107,7 +110,8 @@ void nsgtk_about_dialog_init(GtkWindow *parent)
 	gtk_window_set_child(GTK_WINDOW(dialog), vbox);
 
 	/* NetSurf icon */
-	if (nsgdk_pixbuf_new_from_resname("netsurf.xpm", &pixbuf) == NSERROR_OK) {
+	if (nsgdk_pixbuf_new_from_resname("netsurf.xpm", &pixbuf) ==
+	    NSERROR_OK) {
 		GtkWidget *image;
 
 		image = nsgtk_image_new_from_pixbuf(pixbuf);
@@ -118,18 +122,20 @@ void nsgtk_about_dialog_init(GtkWindow *parent)
 	}
 
 	/* version string */
-	label = gtk_label_new (NULL);
-	name_string = g_markup_printf_escaped("<span size=\"xx-large\" weight=\"bold\">NetSurf %s</span>", netsurf_version);
-	gtk_label_set_markup (GTK_LABEL (label), name_string);
+	label = gtk_label_new(NULL);
+	name_string = g_markup_printf_escaped(
+		"<span size=\"xx-large\" weight=\"bold\">NetSurf %s</span>",
+		netsurf_version);
+	gtk_label_set_markup(GTK_LABEL(label), name_string);
 	g_free(name_string);
-	gtk_label_set_selectable (GTK_LABEL (label), TRUE);
-	gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
+	gtk_label_set_selectable(GTK_LABEL(label), TRUE);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_CENTER);
 	gtk_box_append(GTK_BOX(vbox), label);
 
 	label = gtk_label_new(messages_get("AboutDesc"));
-	gtk_label_set_selectable(GTK_LABEL (label), TRUE);
-	gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_CENTER);
-	gtk_label_set_wrap(GTK_LABEL (label), TRUE);
+	gtk_label_set_selectable(GTK_LABEL(label), TRUE);
+	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_CENTER);
+	gtk_label_set_wrap(GTK_LABEL(label), TRUE);
 	gtk_box_append(GTK_BOX(vbox), label);
 
 	label = gtk_label_new(messages_get("NetSurfCopyright"));
@@ -140,9 +146,18 @@ void nsgtk_about_dialog_init(GtkWindow *parent)
 	buttons = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
 	gtk_widget_set_halign(buttons, GTK_ALIGN_END);
 	gtk_widget_set_margin_top(buttons, 6);
-	about_add_button(buttons, dialog, "Licence", G_CALLBACK(nsgtk_about_licence_clicked));
-	about_add_button(buttons, dialog, "Credits", G_CALLBACK(nsgtk_about_credits_clicked));
-	close = about_add_button(buttons, dialog, "Close", G_CALLBACK(nsgtk_about_close_clicked));
+	about_add_button(buttons,
+			 dialog,
+			 "Licence",
+			 G_CALLBACK(nsgtk_about_licence_clicked));
+	about_add_button(buttons,
+			 dialog,
+			 "Credits",
+			 G_CALLBACK(nsgtk_about_credits_clicked));
+	close = about_add_button(buttons,
+				 dialog,
+				 "Close",
+				 G_CALLBACK(nsgtk_about_close_clicked));
 	gtk_box_append(GTK_BOX(vbox), buttons);
 
 	gtk_window_set_default_widget(GTK_WINDOW(dialog), close);

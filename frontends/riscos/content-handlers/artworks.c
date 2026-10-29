@@ -48,13 +48,13 @@
 #include "riscos/wimputils.h"
 
 #define AWRender_FileInitAddress 0x46080
-#define AWRender_RenderAddress   0x46081
-#define AWRender_DocBounds       0x46082
-#define AWRender_SendDefs        0x46083
-#define AWRender_ClaimVectors    0x46084
-#define AWRender_ReleaseVectors  0x46085
-#define AWRender_FindFirstFont   0x46086
-#define AWRender_FindNextFont    0x46087
+#define AWRender_RenderAddress 0x46081
+#define AWRender_DocBounds 0x46082
+#define AWRender_SendDefs 0x46083
+#define AWRender_ClaimVectors 0x46084
+#define AWRender_ReleaseVectors 0x46085
+#define AWRender_FindFirstFont 0x46086
+#define AWRender_FindNextFont 0x46087
 
 
 #define INITIAL_BLOCK_SIZE 0x1000
@@ -93,30 +93,35 @@ struct awinfo_block {
 /* Assembler routines for interfacing with the ArtworksRenderer module */
 
 extern os_error *awrender_init(const char **doc,
-		size_t *doc_size,
-		void *routine,
-		void *workspace);
+			       size_t *doc_size,
+			       void *routine,
+			       void *workspace);
 
 extern os_error *awrender_render(const char *doc,
-		const struct awinfo_block *info,
-		const os_trfm *trans,
-		const int *vdu_vars,
-		void **rsz_block,
-		size_t *rsz_size,
-		int wysiwyg_setting,
-		int output_dest,
-		size_t doc_size,
-		void *routine,
-		void *workspace);
+				 const struct awinfo_block *info,
+				 const os_trfm *trans,
+				 const int *vdu_vars,
+				 void **rsz_block,
+				 size_t *rsz_size,
+				 int wysiwyg_setting,
+				 int output_dest,
+				 size_t doc_size,
+				 void *routine,
+				 void *workspace);
 
 static nserror artworks_create(const content_handler *handler,
-		lwc_string *imime_type, const struct http_parameter *params,
-		llcache_handle *llcache, const char *fallback_charset,
-		bool quirks, struct content **c);
+			       lwc_string *imime_type,
+			       const struct http_parameter *params,
+			       llcache_handle *llcache,
+			       const char *fallback_charset,
+			       bool quirks,
+			       struct content **c);
 static bool artworks_convert(struct content *c);
 static void artworks_destroy(struct content *c);
-static bool artworks_redraw(struct content *c, struct content_redraw_data *data,
-		const struct rect *clip, const struct redraw_context *ctx);
+static bool artworks_redraw(struct content *c,
+			    struct content_redraw_data *data,
+			    const struct rect *clip,
+			    const struct redraw_context *ctx);
 static nserror artworks_clone(const struct content *old, struct content **newc);
 static content_type artworks_content_type(void);
 
@@ -130,17 +135,19 @@ static const content_handler artworks_content_handler = {
 	.no_share = false,
 };
 
-static const char *artworks_types[] = {
-	"image/x-artworks"
-};
+static const char *artworks_types[] = {"image/x-artworks"};
 
-CONTENT_FACTORY_REGISTER_TYPES(artworks, artworks_types, 
-		artworks_content_handler)
+CONTENT_FACTORY_REGISTER_TYPES(artworks,
+			       artworks_types,
+			       artworks_content_handler)
 
 nserror artworks_create(const content_handler *handler,
-		lwc_string *imime_type, const struct http_parameter *params,
-		llcache_handle *llcache, const char *fallback_charset,
-		bool quirks, struct content **c)
+			lwc_string *imime_type,
+			const struct http_parameter *params,
+			llcache_handle *llcache,
+			const char *fallback_charset,
+			bool quirks,
+			struct content **c)
 {
 	artworks_content *aw;
 	nserror error;
@@ -149,14 +156,19 @@ nserror artworks_create(const content_handler *handler,
 	if (aw == NULL)
 		return NSERROR_NOMEM;
 
-	error = content__init(&aw->base, handler, imime_type, params,
-			llcache, fallback_charset, quirks);
+	error = content__init(&aw->base,
+			      handler,
+			      imime_type,
+			      params,
+			      llcache,
+			      fallback_charset,
+			      quirks);
 	if (error != NSERROR_OK) {
 		free(aw);
 		return error;
 	}
 
-	*c = (struct content *) aw;
+	*c = (struct content *)aw;
 
 	return NSERROR_OK;
 }
@@ -170,20 +182,24 @@ nserror artworks_create(const content_handler *handler,
 
 bool artworks_convert(struct content *c)
 {
-	artworks_content *aw = (artworks_content *) c;
+	artworks_content *aw = (artworks_content *)c;
 	union content_msg_data msg_data;
 	const uint8_t *source_data;
 	size_t source_size;
 	void *init_workspace;
 	void *init_routine;
 	os_error *error;
-	int used = -1;  /* slightly better with older OSLib versions */
+	int used = -1; /* slightly better with older OSLib versions */
 	char *title;
 
 	/* check whether AWViewer has been seen and we can therefore
 		locate the ArtWorks rendering modules */
-	xos_read_var_val_size("Alias$LoadArtWorksModules", 0, os_VARTYPE_STRING,
-				&used, NULL, NULL);
+	xos_read_var_val_size("Alias$LoadArtWorksModules",
+			      0,
+			      os_VARTYPE_STRING,
+			      &used,
+			      NULL,
+			      NULL);
 	if (used >= 0) {
 		NSLOG(netsurf, INFO, "Alias$LoadArtWorksModules not defined");
 		msg_data.errordata.errorcode = NSERROR_UNKNOWN;
@@ -195,7 +211,10 @@ bool artworks_convert(struct content *c)
 	/* load the modules, or do nothing if they're already loaded */
 	error = xos_cli("LoadArtWorksModules");
 	if (error) {
-		NSLOG(netsurf, INFO, "xos_cli: 0x%x: %s", error->errnum,
+		NSLOG(netsurf,
+		      INFO,
+		      "xos_cli: 0x%x: %s",
+		      error->errnum,
 		      error->errmess);
 		msg_data.errordata.errorcode = NSERROR_UNKNOWN;
 		msg_data.errordata.errormsg = error->errmess;
@@ -204,23 +223,32 @@ bool artworks_convert(struct content *c)
 	}
 
 	/* lookup the addresses of the init and render routines */
-	error = (os_error*)_swix(AWRender_FileInitAddress, _OUT(0) | _OUT(1),
-				&init_routine, &init_workspace);
+	error = (os_error *)_swix(AWRender_FileInitAddress,
+				  _OUT(0) | _OUT(1),
+				  &init_routine,
+				  &init_workspace);
 	if (error) {
-		NSLOG(netsurf, INFO, "AWRender_FileInitAddress: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "AWRender_FileInitAddress: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		msg_data.errordata.errorcode = NSERROR_UNKNOWN;
 		msg_data.errordata.errormsg = error->errmess;
 		content_broadcast(c, CONTENT_MSG_ERROR, &msg_data);
 		return false;
 	}
 
-	error = (os_error*)_swix(AWRender_RenderAddress, _OUT(0) | _OUT(1),
-				&aw->render_routine,
-				&aw->render_workspace);
+	error = (os_error *)_swix(AWRender_RenderAddress,
+				  _OUT(0) | _OUT(1),
+				  &aw->render_routine,
+				  &aw->render_workspace);
 	if (error) {
-		NSLOG(netsurf, INFO, "AWRender_RenderAddress: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "AWRender_RenderAddress: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		msg_data.errordata.errorcode = NSERROR_UNKNOWN;
 		msg_data.errordata.errormsg = error->errmess;
 		content_broadcast(c, CONTENT_MSG_ERROR, &msg_data);
@@ -230,36 +258,50 @@ bool artworks_convert(struct content *c)
 	source_data = content__get_source_data(c, &source_size);
 
 	/* initialise (convert file to new format if required) */
-	error = awrender_init((const char **)&source_data, &source_size,
-			init_routine, init_workspace);
+	error = awrender_init((const char **)&source_data,
+			      &source_size,
+			      init_routine,
+			      init_workspace);
 	if (error) {
-		NSLOG(netsurf, INFO, "awrender_init: 0x%x : %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "awrender_init: 0x%x : %s",
+		      error->errnum,
+		      error->errmess);
 		msg_data.errordata.errorcode = NSERROR_UNKNOWN;
 		msg_data.errordata.errormsg = error->errmess;
 		content_broadcast(c, CONTENT_MSG_ERROR, &msg_data);
 		return false;
 	}
 
-	error = (os_error*)_swix(AWRender_DocBounds, 
-			_IN(0) | _OUT(2) | _OUT(3) | _OUT(4) | _OUT(5),
-			source_data,
-			&aw->x0,
-			&aw->y0,
-			&aw->x1,
-			&aw->y1);
+	error = (os_error *)_swix(AWRender_DocBounds,
+				  _IN(0) | _OUT(2) | _OUT(3) | _OUT(4) |
+					  _OUT(5),
+				  source_data,
+				  &aw->x0,
+				  &aw->y0,
+				  &aw->x1,
+				  &aw->y1);
 
 	if (error) {
-		NSLOG(netsurf, INFO, "AWRender_DocBounds: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "AWRender_DocBounds: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		msg_data.errordata.errorcode = NSERROR_UNKNOWN;
 		msg_data.errordata.errormsg = error->errmess;
 		content_broadcast(c, CONTENT_MSG_ERROR, &msg_data);
 		return false;
 	}
 
-	NSLOG(netsurf, INFO, "bounding box: %d,%d,%d,%d", aw->x0, aw->y0,
-	      aw->x1, aw->y1);
+	NSLOG(netsurf,
+	      INFO,
+	      "bounding box: %d,%d,%d,%d",
+	      aw->x0,
+	      aw->y0,
+	      aw->x1,
+	      aw->y1);
 
 	/* create the resizable workspace required by the
 		ArtWorksRenderer rendering routine */
@@ -267,7 +309,8 @@ bool artworks_convert(struct content *c)
 	aw->size = INITIAL_BLOCK_SIZE;
 	aw->block = malloc(INITIAL_BLOCK_SIZE);
 	if (!aw->block) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "failed to create block for ArtworksRenderer");
 		msg_data.errordata.errorcode = NSERROR_NOMEM;
 		msg_data.errordata.errormsg = messages_get("NoMemory");
@@ -275,12 +318,14 @@ bool artworks_convert(struct content *c)
 		return false;
 	}
 
-	c->width  = (aw->x1 - aw->x0) / 512;
+	c->width = (aw->x1 - aw->x0) / 512;
 	c->height = (aw->y1 - aw->y0) / 512;
 
 	title = messages_get_buff("ArtWorksTitle",
-			nsurl_access_leaf(llcache_handle_get_url(c->llcache)),
-			c->width, c->height);
+				  nsurl_access_leaf(
+					  llcache_handle_get_url(c->llcache)),
+				  c->width,
+				  c->height);
 	if (title != NULL) {
 		content__set_title(c, title);
 		free(title);
@@ -299,7 +344,7 @@ bool artworks_convert(struct content *c)
 
 void artworks_destroy(struct content *c)
 {
-	artworks_content *aw = (artworks_content *) c;
+	artworks_content *aw = (artworks_content *)c;
 
 	free(aw->block);
 }
@@ -309,18 +354,16 @@ void artworks_destroy(struct content *c)
  * Redraw a CONTENT_ARTWORKS.
  */
 
-bool artworks_redraw(struct content *c, struct content_redraw_data *data,
-		const struct rect *clip, const struct redraw_context *ctx)
+bool artworks_redraw(struct content *c,
+		     struct content_redraw_data *data,
+		     const struct rect *clip,
+		     const struct redraw_context *ctx)
 {
-	static const ns_os_vdu_var_list vars = {
-		os_MODEVAR_XEIG_FACTOR,
-		{
-			os_MODEVAR_YEIG_FACTOR,
-			os_MODEVAR_LOG2_BPP,
-			os_VDUVAR_END_LIST
-		}
-	};
-	artworks_content *aw = (artworks_content *) c;
+	static const ns_os_vdu_var_list vars = {os_MODEVAR_XEIG_FACTOR,
+						{os_MODEVAR_YEIG_FACTOR,
+						 os_MODEVAR_LOG2_BPP,
+						 os_VDUVAR_END_LIST}};
+	artworks_content *aw = (artworks_content *)c;
 	struct awinfo_block info;
 	const uint8_t *source_data;
 	size_t source_size;
@@ -338,9 +381,10 @@ bool artworks_redraw(struct content *c, struct content_redraw_data *data,
 
 	/* pick up render addresses again in case they've changed
 	   (eg. newer AWRender module loaded since we first loaded this file) */
-	(void)_swix(AWRender_RenderAddress, _OUT(0) | _OUT(1),
-				&aw->render_routine,
-				&aw->render_workspace);
+	(void)_swix(AWRender_RenderAddress,
+		    _OUT(0) | _OUT(1),
+		    &aw->render_routine,
+		    &aw->render_workspace);
 
 	/* Scaled image. Transform units (65536*OS units) */
 	matrix.entries[0][0] = data->width * 65536 / c->width;
@@ -349,10 +393,10 @@ bool artworks_redraw(struct content *c, struct content_redraw_data *data,
 	matrix.entries[1][1] = data->height * 65536 / c->height;
 	/* Draw units. (x,y) = bottom left */
 	matrix.entries[2][0] = ro_plot_origin_x * 256 + data->x * 512 -
-			aw->x0 * data->width / c->width;
+			       aw->x0 * data->width / c->width;
 	matrix.entries[2][1] = ro_plot_origin_y * 256 -
-			(data->y + data->height) * 512 -
-			aw->y0 * data->height / c->height;
+			       (data->y + data->height) * 512 -
+			       aw->y0 * data->height / c->height;
 
 	info.ditherx = ro_plot_origin_x;
 	info.dithery = ro_plot_origin_y;
@@ -367,14 +411,13 @@ bool artworks_redraw(struct content *c, struct content_redraw_data *data,
 		info.clip_y0 = ((c->height - clip_y1) * 512) + aw->y0 - 511;
 		info.clip_x1 = (clip_x1 * 512) + aw->x0 + 511;
 		info.clip_y1 = ((c->height - clip_y0) * 512) + aw->y0 + 511;
-	}
-	else {
+	} else {
 		info.clip_x0 = (clip_x0 * 512 / data->scale) + aw->x0 - 511;
 		info.clip_y0 = ((c->height - (clip_y1 / data->scale)) * 512) +
-				aw->y0 - 511;
+			       aw->y0 - 511;
 		info.clip_x1 = (clip_x1 * 512 / data->scale) + aw->x0 + 511;
 		info.clip_y1 = ((c->height - (clip_y0 / data->scale)) * 512) +
-				aw->y0 + 511;
+			       aw->y0 + 511;
 	}
 
 	info.print_lowx = 0;
@@ -384,15 +427,21 @@ bool artworks_redraw(struct content *c, struct content_redraw_data *data,
 
 	error = xos_read_vdu_variables(PTR_OS_VDU_VAR_LIST(&vars), vals);
 	if (error) {
-		NSLOG(netsurf, INFO, "xos_read_vdu_variables: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xos_read_vdu_variables: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		return false;
 	}
 
-	error = xwimp_read_palette((os_palette*)&vals[3]);
+	error = xwimp_read_palette((os_palette *)&vals[3]);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_read_palette: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_read_palette: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		return false;
 	}
 
@@ -404,15 +453,18 @@ bool artworks_redraw(struct content *c, struct content_redraw_data *data,
 				vals,
 				&aw->block,
 				&aw->size,
-				110,	/* fully anti-aliased */
+				110, /* fully anti-aliased */
 				0,
 				source_size,
 				aw->render_routine,
 				aw->render_workspace);
 
 	if (error) {
-		NSLOG(netsurf, INFO, "awrender_render: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "awrender_render: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		return false;
 	}
 
@@ -435,15 +487,15 @@ nserror artworks_clone(const struct content *old, struct content **newc)
 	}
 
 	/* Simply re-run convert */
-	if (old->status == CONTENT_STATUS_READY || 
-			old->status == CONTENT_STATUS_DONE) {
+	if (old->status == CONTENT_STATUS_READY ||
+	    old->status == CONTENT_STATUS_DONE) {
 		if (artworks_convert(&aw->base) == false) {
 			content_destroy(&aw->base);
 			return NSERROR_CLONE_FAILED;
 		}
 	}
 
-	*newc = (struct content *) aw;
+	*newc = (struct content *)aw;
 
 	return NSERROR_OK;
 }

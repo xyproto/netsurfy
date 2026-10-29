@@ -30,7 +30,7 @@
 /* A list of possible toolbar actions. */
 
 typedef enum {
-	TOOLBAR_BUTTON_NONE = 0,		/* Special case: no action */
+	TOOLBAR_BUTTON_NONE = 0, /* Special case: no action */
 	TOOLBAR_BUTTON_BACK,
 	TOOLBAR_BUTTON_BACK_NEW,
 	TOOLBAR_BUTTON_UP,
@@ -69,11 +69,11 @@ typedef enum {
  */
 
 struct button_bar_buttons {
-	const char		*icon;		/**< The sprite used for the icon.    */
-	button_bar_action	select;		/**< The action for select clicks.    */
-	button_bar_action	adjust;		/**< The action for Adjust clicks.    */
-	const char		opt_key;	/**< The char used in option strings. */
-	const char		*help;		/**< The interactive help token.      */
+	const char *icon; /**< The sprite used for the icon.    */
+	button_bar_action select; /**< The action for select clicks.    */
+	button_bar_action adjust; /**< The action for Adjust clicks.    */
+	const char opt_key; /**< The char used in option strings. */
+	const char *help; /**< The interactive help token.      */
 };
 
 /* \TODO -- Move these to the correct modules.
@@ -82,18 +82,33 @@ struct button_bar_buttons {
 static const struct button_bar_buttons brower_toolbar_buttons[] = {
 	{"back", TOOLBAR_BUTTON_BACK, TOOLBAR_BUTTON_BACK_NEW, '0', "0"},
 	{"up", TOOLBAR_BUTTON_UP, TOOLBAR_BUTTON_UP_NEW, 'b', "11"},
-	{"forward", TOOLBAR_BUTTON_FORWARD, TOOLBAR_BUTTON_FORWARD_NEW, '1', "1"},
+	{"forward",
+	 TOOLBAR_BUTTON_FORWARD,
+	 TOOLBAR_BUTTON_FORWARD_NEW,
+	 '1',
+	 "1"},
 	{"stop", TOOLBAR_BUTTON_STOP, TOOLBAR_BUTTON_NONE, '2', "2"},
 	{"reload", TOOLBAR_BUTTON_RELOAD, TOOLBAR_BUTTON_RELOAD_ALL, '3', "3"},
 	{"home", TOOLBAR_BUTTON_HOME, TOOLBAR_BUTTON_NONE, '4', "4"},
-	{"history", TOOLBAR_BUTTON_HISTORY_LOCAL, TOOLBAR_BUTTON_HISTORY_GLOBAL, '5', "5"},
-	{"save", TOOLBAR_BUTTON_SAVE_SOURCE, TOOLBAR_BUTTON_SAVE_COMPLETE, '6', "6"},
+	{"history",
+	 TOOLBAR_BUTTON_HISTORY_LOCAL,
+	 TOOLBAR_BUTTON_HISTORY_GLOBAL,
+	 '5',
+	 "5"},
+	{"save",
+	 TOOLBAR_BUTTON_SAVE_SOURCE,
+	 TOOLBAR_BUTTON_SAVE_COMPLETE,
+	 '6',
+	 "6"},
 	{"print", TOOLBAR_BUTTON_PRINT, TOOLBAR_BUTTON_NONE, '7', "7"},
-	{"hotlist", TOOLBAR_BUTTON_BOOKMARK_OPEN, TOOLBAR_BUTTON_BOOKMARK_ADD, '8', "8"},
+	{"hotlist",
+	 TOOLBAR_BUTTON_BOOKMARK_OPEN,
+	 TOOLBAR_BUTTON_BOOKMARK_ADD,
+	 '8',
+	 "8"},
 	{"scale", TOOLBAR_BUTTON_SCALE, TOOLBAR_BUTTON_NONE, '9', "9"},
 	{"search", TOOLBAR_BUTTON_SEARCH, TOOLBAR_BUTTON_NONE, 'a', "10"},
-	{NULL, TOOLBAR_BUTTON_NONE, TOOLBAR_BUTTON_NONE, '\0', ""}
-};
+	{NULL, TOOLBAR_BUTTON_NONE, TOOLBAR_BUTTON_NONE, '\0', ""}};
 
 struct button_bar;
 
@@ -106,8 +121,9 @@ struct button_bar;
  * \return			A button bar handle, or NULL on failure.
  */
 
-struct button_bar *ro_gui_button_bar_create(struct theme_descriptor *theme,
-		const struct button_bar_buttons buttons[]);
+struct button_bar *
+ro_gui_button_bar_create(struct theme_descriptor *theme,
+			 const struct button_bar_buttons buttons[]);
 
 
 /**
@@ -126,8 +142,9 @@ struct button_bar *ro_gui_button_bar_create(struct theme_descriptor *theme,
  */
 
 bool ro_gui_button_bar_link_editor(struct button_bar *target,
-		struct button_bar *source, void (* refresh)(void *),
-		void *client_data);
+				   struct button_bar *source,
+				   void (*refresh)(void *),
+				   void *client_data);
 
 /**
  * Place a button bar into a toolbar window and initialise any theme-specific
@@ -144,8 +161,10 @@ bool ro_gui_button_bar_link_editor(struct button_bar *target,
  */
 
 bool ro_gui_button_bar_rebuild(struct button_bar *button_bar,
-		struct theme_descriptor *theme, theme_style style,
-		wimp_w window, bool edit);
+			       struct theme_descriptor *theme,
+			       theme_style style,
+			       wimp_w window,
+			       bool edit);
 
 
 /**
@@ -158,7 +177,7 @@ bool ro_gui_button_bar_rebuild(struct button_bar *button_bar,
  */
 
 bool ro_gui_button_bar_arrange_buttons(struct button_bar *button_bar,
-		char order[]);
+				       char order[]);
 
 
 /**
@@ -181,7 +200,8 @@ void ro_gui_button_bar_destroy(struct button_bar *button_bar);
  */
 
 bool ro_gui_button_bar_get_dims(struct button_bar *button_bar,
-		int *width, int *height);
+				int *width,
+				int *height);
 
 
 /**
@@ -198,7 +218,10 @@ bool ro_gui_button_bar_get_dims(struct button_bar *button_bar,
  */
 
 bool ro_gui_button_bar_set_extent(struct button_bar *button_bar,
-		int x0, int y0, int x1, int y1);
+				  int x0,
+				  int y0,
+				  int x1,
+				  int y1);
 
 
 /**
@@ -222,7 +245,8 @@ bool ro_gui_button_bar_hide(struct button_bar *button_bar, bool hide);
  */
 
 bool ro_gui_button_bar_shade_button(struct button_bar *button_bar,
-		button_bar_action action, bool shaded);
+				    button_bar_action action,
+				    bool shaded);
 
 
 /**
@@ -232,8 +256,7 @@ bool ro_gui_button_bar_shade_button(struct button_bar *button_bar,
  * \param *redraw		The Wimp redraw rectangle to process.
  */
 
-void ro_gui_button_bar_redraw(struct button_bar *button_bar,
-		wimp_draw *redraw);
+void ro_gui_button_bar_redraw(struct button_bar *button_bar, wimp_draw *redraw);
 
 
 /**
@@ -249,8 +272,9 @@ void ro_gui_button_bar_redraw(struct button_bar *button_bar,
  */
 
 bool ro_gui_button_bar_click(struct button_bar *button_bar,
-		wimp_pointer *pointer, wimp_window_state *state,
-		button_bar_action *action);
+			     wimp_pointer *pointer,
+			     wimp_window_state *state,
+			     button_bar_action *action);
 
 
 /**
@@ -265,9 +289,12 @@ bool ro_gui_button_bar_click(struct button_bar *button_bar,
  * \return			true if handled exclusively; else false.
  */
 
-bool ro_gui_button_bar_help_suffix(struct button_bar *button_bar, wimp_i i,
-		os_coord *mouse, wimp_window_state *state,
-		wimp_mouse_state buttons, const char **suffix);
+bool ro_gui_button_bar_help_suffix(struct button_bar *button_bar,
+				   wimp_i i,
+				   os_coord *mouse,
+				   wimp_window_state *state,
+				   wimp_mouse_state buttons,
+				   const char **suffix);
 
 
 /**
@@ -282,4 +309,3 @@ bool ro_gui_button_bar_help_suffix(struct button_bar *button_bar, wimp_i i,
 char *ro_gui_button_bar_get_config(struct button_bar *button_bar);
 
 #endif
-

@@ -120,4 +120,3 @@ extern Class *WindowClass;
 bool ami_libs_open(void);
 void ami_libs_close(void);
 #endif
-

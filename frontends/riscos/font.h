@@ -36,11 +36,15 @@ extern rufl_style ro_gui_desktop_font_style;
 void nsfont_init(void);
 bool nsfont_exists(const char *font_family);
 const char *nsfont_fallback_font(void);
-bool nsfont_paint(const struct plot_font_style *fstyle, const char *string,
-		size_t length, int x, int y);
+bool nsfont_paint(const struct plot_font_style *fstyle,
+		  const char *string,
+		  size_t length,
+		  int x,
+		  int y);
 void nsfont_read_style(const struct plot_font_style *fstyle,
-		const char **font_family, unsigned int *font_size,
-		rufl_style *font_style);
+		       const char **font_family,
+		       unsigned int *font_size,
+		       rufl_style *font_style);
 void ro_gui_wimp_get_desktop_font(void);
 
 #endif

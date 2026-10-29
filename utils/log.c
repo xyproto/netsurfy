@@ -84,8 +84,11 @@ static const char *nslog_gettime(void)
 
 	timeval_subtract(&tv, &now_tv, &start_tv);
 
-	snprintf(buff, sizeof(buff),"(%ld.%06ld)",
-		 (long)tv.tv_sec, (long)tv.tv_usec);
+	snprintf(buff,
+		 sizeof(buff),
+		 "(%ld.%06ld)",
+		 (long)tv.tv_sec,
+		 (long)tv.tv_usec);
 
 	return buff;
 }
@@ -103,11 +106,10 @@ NSLOG_DEFINE_CATEGORY(flex, "Flex");
 NSLOG_DEFINE_CATEGORY(dukky, "Duktape JavaScript Binding");
 NSLOG_DEFINE_CATEGORY(jserrors, "JavaScript error messages");
 
-static void
-netsurf_render_log(void *_ctx,
-		   nslog_entry_context_t *ctx,
-		   const char *fmt,
-		   va_list args)
+static void netsurf_render_log(void *_ctx,
+			       nslog_entry_context_t *ctx,
+			       const char *fmt,
+			       va_list args)
 {
 	fprintf(logfile,
 		"%s [%s %.*s] %.*s:%i %.*s: ",
@@ -128,8 +130,7 @@ netsurf_render_log(void *_ctx,
 }
 
 /* exported interface documented in utils/log.h */
-nserror
-nslog_set_filter(const char *filter)
+nserror nslog_set_filter(const char *filter)
 {
 	nslog_error err;
 	nslog_filter_t *filt = NULL;
@@ -153,8 +154,11 @@ nslog_set_filter(const char *filter)
 
 #else
 
-void
-nslog_log(const char *file, const char *func, int ln, const char *format, ...)
+void nslog_log(const char *file,
+	       const char *func,
+	       int ln,
+	       const char *format,
+	       ...)
 {
 	va_list ap;
 
@@ -177,8 +181,7 @@ nslog_log(const char *file, const char *func, int ln, const char *format, ...)
 }
 
 /* exported interface documented in utils/log.h */
-nserror
-nslog_set_filter(const char *filter)
+nserror nslog_set_filter(const char *filter)
 {
 	(void)(filter);
 	return NSERROR_OK;
@@ -192,9 +195,7 @@ nserror nslog_init(nslog_ensure_t *ensure, int *pargc, char **argv)
 	struct utsname utsname;
 	nserror ret = NSERROR_OK;
 
-	if (((*pargc) > 1) &&
-	    (argv[1][0] == '-') &&
-	    (argv[1][1] == 'v') &&
+	if (((*pargc) > 1) && (argv[1][0] == '-') && (argv[1][1] == 'v') &&
 	    (argv[1][2] == 0)) {
 		int argcmv;
 
@@ -209,10 +210,8 @@ nserror nslog_init(nslog_ensure_t *ensure, int *pargc, char **argv)
 
 		/* ensure we actually show logging */
 		verbose_log = true;
-	} else if (((*pargc) > 2) &&
-		   (argv[1][0] == '-') &&
-		   (argv[1][1] == 'V') &&
-		   (argv[1][2] == 0)) {
+	} else if (((*pargc) > 2) && (argv[1][0] == '-') &&
+		   (argv[1][1] == 'V') && (argv[1][2] == 0)) {
 		int argcmv;
 
 		/* verbose logging to file */
@@ -239,8 +238,7 @@ nserror nslog_init(nslog_ensure_t *ensure, int *pargc, char **argv)
 	}
 
 	/* ensure output file handle is correctly configured */
-	if ((verbose_log == true) &&
-	    (ensure != NULL) &&
+	if ((verbose_log == true) && (ensure != NULL) &&
 	    (ensure(logfile) == false)) {
 		/* failed to ensure output configuration */
 		ret = NSERROR_INIT_FAILED;
@@ -249,12 +247,13 @@ nserror nslog_init(nslog_ensure_t *ensure, int *pargc, char **argv)
 
 #ifdef WITH_NSLOG
 
-	if (nslog_set_filter(verbose_log ?
-			     NETSURF_BUILTIN_VERBOSE_FILTER :
-			     NETSURF_BUILTIN_LOG_FILTER) != NSERROR_OK) {
+	if (nslog_set_filter(verbose_log ? NETSURF_BUILTIN_VERBOSE_FILTER
+					 : NETSURF_BUILTIN_LOG_FILTER) !=
+	    NSERROR_OK) {
 		ret = NSERROR_INIT_FAILED;
 		verbose_log = false;
-	} else if (nslog_set_render_callback(netsurf_render_log, NULL) != NSLOG_NO_ERROR) {
+	} else if (nslog_set_render_callback(netsurf_render_log, NULL) !=
+		   NSLOG_NO_ERROR) {
 		ret = NSERROR_INIT_FAILED;
 		verbose_log = false;
 	} else if (nslog_uncork() != NSLOG_NO_ERROR) {
@@ -268,10 +267,12 @@ nserror nslog_init(nslog_ensure_t *ensure, int *pargc, char **argv)
 	if (ret == NSERROR_OK) {
 		NSLOG(netsurf, INFO, "NetSurf version '%s'", netsurf_version);
 		if (uname(&utsname) < 0) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "Failed to extract machine information");
 		} else {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "NetSurf on <%s>, node <%s>, release <%s>, version <%s>, machine <%s>",
 			      utsname.sysname,
 			      utsname.nodename,
@@ -285,8 +286,7 @@ nserror nslog_init(nslog_ensure_t *ensure, int *pargc, char **argv)
 }
 
 /* exported interface documented in utils/log.h */
-nserror
-nslog_set_filter_by_options(void)
+nserror nslog_set_filter_by_options(void)
 {
 	if (verbose_log)
 		return nslog_set_filter(nsoption_charp(verbose_filter));
@@ -295,10 +295,10 @@ nslog_set_filter_by_options(void)
 }
 
 /* exported interface documented in utils/log.h */
-void
-nslog_finalise(void)
+void nslog_finalise(void)
 {
-	NSLOG(netsurf, INFO,
+	NSLOG(netsurf,
+	      INFO,
 	      "Finalising logging, please report any further messages");
 	verbose_log = true;
 	if (logfile != stderr) {

@@ -62,17 +62,19 @@ struct ami_pageinfo_window {
 /**
  * destroy a previously created pageinfo window
  */
-static void
-ami_pageinfo_destroy(struct ami_corewindow *ami_cw)
+static void ami_pageinfo_destroy(struct ami_corewindow *ami_cw)
 {
 	nserror res;
-	struct ami_pageinfo_window *pageinfo_win = (struct ami_pageinfo_window *)ami_cw;
-	if(pageinfo_win->pi != NULL) {
+	struct ami_pageinfo_window *pageinfo_win =
+		(struct ami_pageinfo_window *)ami_cw;
+	if (pageinfo_win->pi != NULL) {
 		res = page_info_destroy(pageinfo_win->pi);
 
 		if (res == NSERROR_OK) {
 			pageinfo_win->pi = NULL;
-			ami_corewindow_fini(&pageinfo_win->core); /* closes the window for us */
+			ami_corewindow_fini(
+				&pageinfo_win
+					 ->core); /* closes the window for us */
 		}
 	}
 }
@@ -80,8 +82,7 @@ ami_pageinfo_destroy(struct ami_corewindow *ami_cw)
 /**
  * close pageinfo window (callback)
  */
-static void
-ami_pageinfo_close_cb(void *p)
+static void ami_pageinfo_close_cb(void *p)
 {
 	ami_pageinfo_destroy((struct ami_corewindow *)p);
 }
@@ -95,10 +96,9 @@ ami_pageinfo_close_cb(void *p)
  * \param result event as returned by RA_HandleInput()
  * \return TRUE if window closed during event processing
  */
-static BOOL
-ami_pageinfo_event(struct ami_corewindow *ami_cw, ULONG result)
+static BOOL ami_pageinfo_event(struct ami_corewindow *ami_cw, ULONG result)
 {
-	if((result & WMHI_CLASSMASK) == WMHI_INACTIVE) {
+	if ((result & WMHI_CLASSMASK) == WMHI_INACTIVE) {
 		/* Window went inactive, so schedule to close it */
 		ami_schedule(0, ami_pageinfo_close_cb, ami_cw);
 		/* NB: do not return TRUE here as we're still open for now */
@@ -115,20 +115,23 @@ ami_pageinfo_event(struct ami_corewindow *ami_cw, ULONG result)
  * \param y location of event
  * \return NSERROR_OK on success otherwise apropriate error code
  */
-static nserror
-ami_pageinfo_mouse(struct ami_corewindow *ami_cw,
-					browser_mouse_state mouse_state,
-					int x, int y)
+static nserror ami_pageinfo_mouse(struct ami_corewindow *ami_cw,
+				  browser_mouse_state mouse_state,
+				  int x,
+				  int y)
 {
 	bool did_something = false;
-	struct ami_pageinfo_window *pageinfo_win = (struct ami_pageinfo_window *)ami_cw;
+	struct ami_pageinfo_window *pageinfo_win =
+		(struct ami_pageinfo_window *)ami_cw;
 
-	if(page_info_mouse_action(pageinfo_win->pi, mouse_state, x, y, &did_something) == NSERROR_OK)
+	if (page_info_mouse_action(
+		    pageinfo_win->pi, mouse_state, x, y, &did_something) ==
+	    NSERROR_OK)
 		if (did_something == true) {
 			/* Something happened so we need to close ourselves */
 			ami_schedule(0, ami_pageinfo_close_cb, pageinfo_win);
 		}
-		
+
 	return NSERROR_OK;
 }
 
@@ -139,13 +142,13 @@ ami_pageinfo_mouse(struct ami_corewindow *ami_cw,
  * \param nskey The netsurf key code
  * \return NSERROR_OK on success otherwise apropriate error code
  */
-static nserror
-ami_pageinfo_key(struct ami_corewindow *ami_cw, uint32_t nskey)
+static nserror ami_pageinfo_key(struct ami_corewindow *ami_cw, uint32_t nskey)
 {
-	struct ami_pageinfo_window *pageinfo_win = (struct ami_pageinfo_window *)ami_cw;
+	struct ami_pageinfo_window *pageinfo_win =
+		(struct ami_pageinfo_window *)ami_cw;
 
 	if (page_info_keypress(pageinfo_win->pi, nskey)) {
-			return NSERROR_OK;
+		return NSERROR_OK;
 	}
 	return NSERROR_NOT_IMPLEMENTED;
 }
@@ -160,10 +163,14 @@ ami_pageinfo_key(struct ami_corewindow *ami_cw, uint32_t nskey)
  * \param ctx The drawing context
  * \return NSERROR_OK on success otherwise apropriate error code
  */
-static nserror
-ami_pageinfo_draw(struct ami_corewindow *ami_cw, int x, int y, struct rect *r, struct redraw_context *ctx)
+static nserror ami_pageinfo_draw(struct ami_corewindow *ami_cw,
+				 int x,
+				 int y,
+				 struct rect *r,
+				 struct redraw_context *ctx)
 {
-	struct ami_pageinfo_window *pageinfo_win = (struct ami_pageinfo_window *)ami_cw;
+	struct ami_pageinfo_window *pageinfo_win =
+		(struct ami_pageinfo_window *)ami_cw;
 
 	page_info_redraw(pageinfo_win->pi, x, y, r, ctx);
 
@@ -171,49 +178,38 @@ ami_pageinfo_draw(struct ami_corewindow *ami_cw, int x, int y, struct rect *r, s
 }
 
 static nserror
-ami_pageinfo_create_window(struct ami_pageinfo_window *pageinfo_win, ULONG left, ULONG top)
+ami_pageinfo_create_window(struct ami_pageinfo_window *pageinfo_win,
+			   ULONG left,
+			   ULONG top)
 {
-	struct ami_corewindow *ami_cw = (struct ami_corewindow *)&pageinfo_win->core;
+	struct ami_corewindow *ami_cw =
+		(struct ami_corewindow *)&pageinfo_win->core;
 	ULONG refresh_mode = WA_SmartRefresh;
 	struct Screen *scrn = ami_gui_get_screen();
 
-	if(nsoption_bool(window_simple_refresh) == true) {
+	if (nsoption_bool(window_simple_refresh) == true) {
 		refresh_mode = WA_SimpleRefresh;
 	}
 
-	ami_cw->objects[GID_CW_WIN] = WindowObj,
-  	    WA_ScreenTitle, ami_gui_get_screen_title(),
-       	WA_Activate, TRUE,
-       	WA_DepthGadget, FALSE,
-       	WA_DragBar, FALSE,
-       	WA_CloseGadget, FALSE,
-       	WA_SizeGadget, FALSE,
-       	WA_Borderless, TRUE,
-		WA_Left, left,
-		WA_Top, top,
-		WA_PubScreen, scrn,
-		WA_ReportMouse, TRUE,
-		refresh_mode, TRUE,
-		WA_IDCMP, IDCMP_MOUSEMOVE | IDCMP_MOUSEBUTTONS | IDCMP_NEWSIZE |
-				IDCMP_RAWKEY | IDCMP_IDCMPUPDATE | IDCMP_INACTIVEWINDOW |
-				IDCMP_EXTENDEDMOUSE | IDCMP_SIZEVERIFY | IDCMP_REFRESHWINDOW,
-		WINDOW_IDCMPHook, &ami_cw->idcmp_hook,
-		WINDOW_IDCMPHookBits, IDCMP_IDCMPUPDATE | IDCMP_EXTENDEDMOUSE |
-				IDCMP_SIZEVERIFY | IDCMP_REFRESHWINDOW,
-		WINDOW_SharedPort, ami_gui_get_shared_msgport(),
-		WINDOW_UserData, pageinfo_win,
-		WINDOW_IconifyGadget, FALSE,
-		WINDOW_ParentGroup, ami_cw->objects[GID_CW_MAIN] = LayoutVObj,
-			LAYOUT_AddChild, ami_cw->objects[GID_CW_DRAW] = SpaceObj,
-				GA_ID, GID_CW_DRAW,
-				SPACE_Transparent, TRUE,
-				SPACE_BevelStyle, BVS_BOX,
-				GA_RelVerify, TRUE,
-   			SpaceEnd,
-		EndGroup,
-	EndWindow;
+	ami_cw->objects[GID_CW_WIN] = WindowObj, WA_ScreenTitle,
+	ami_gui_get_screen_title(), WA_Activate, TRUE, WA_DepthGadget, FALSE,
+	WA_DragBar, FALSE, WA_CloseGadget, FALSE, WA_SizeGadget, FALSE,
+	WA_Borderless, TRUE, WA_Left, left, WA_Top, top, WA_PubScreen, scrn,
+	WA_ReportMouse, TRUE, refresh_mode, TRUE, WA_IDCMP,
+	IDCMP_MOUSEMOVE | IDCMP_MOUSEBUTTONS | IDCMP_NEWSIZE | IDCMP_RAWKEY |
+		IDCMP_IDCMPUPDATE | IDCMP_INACTIVEWINDOW | IDCMP_EXTENDEDMOUSE |
+		IDCMP_SIZEVERIFY | IDCMP_REFRESHWINDOW,
+	WINDOW_IDCMPHook, &ami_cw->idcmp_hook, WINDOW_IDCMPHookBits,
+	IDCMP_IDCMPUPDATE | IDCMP_EXTENDEDMOUSE | IDCMP_SIZEVERIFY |
+		IDCMP_REFRESHWINDOW,
+	WINDOW_SharedPort, ami_gui_get_shared_msgport(), WINDOW_UserData,
+	pageinfo_win, WINDOW_IconifyGadget, FALSE, WINDOW_ParentGroup,
+	ami_cw->objects[GID_CW_MAIN] = LayoutVObj, LAYOUT_AddChild,
+	ami_cw->objects[GID_CW_DRAW] = SpaceObj, GA_ID, GID_CW_DRAW,
+	SPACE_Transparent, TRUE, SPACE_BevelStyle, BVS_BOX, GA_RelVerify, TRUE,
+	SpaceEnd, EndGroup, EndWindow;
 
-	if(ami_cw->objects[GID_CW_WIN] == NULL) {
+	if (ami_cw->objects[GID_CW_WIN] == NULL) {
 		return NSERROR_NOMEM;
 	}
 
@@ -257,9 +253,7 @@ nserror ami_pageinfo_open(struct browser_window *bw, ULONG left, ULONG top)
 		return res;
 	}
 
-	res = page_info_create((struct core_window *)ncwin,
-			       bw,
-			       &ncwin->pi);
+	res = page_info_create((struct core_window *)ncwin, bw, &ncwin->pi);
 
 	if (res != NSERROR_OK) {
 		ami_utf8_free(ncwin->core.wintitle);
@@ -268,15 +262,20 @@ nserror ami_pageinfo_open(struct browser_window *bw, ULONG left, ULONG top)
 		return res;
 	}
 
-	if(page_info_get_size(ncwin->pi, &width, &height) == NSERROR_OK) {
+	if (page_info_get_size(ncwin->pi, &width, &height) == NSERROR_OK) {
 		/* Set window to the correct size.
-		 * TODO: this should really set the size of ncwin->core.objects[GID_CW_DRAW]
-		 * and let the window adjust, here we've hardcoded to add 6x4px as that's
-		 * what window.class does before v45.
+		 * TODO: this should really set the size of
+		 * ncwin->core.objects[GID_CW_DRAW] and let the window adjust,
+		 * here we've hardcoded to add 6x4px as that's what window.class
+		 * does before v45.
 		 */
-		SetAttrs(ncwin->core.objects[GID_CW_WIN], WA_InnerWidth, width + 6, WA_InnerHeight, height + 4, TAG_DONE);
+		SetAttrs(ncwin->core.objects[GID_CW_WIN],
+			 WA_InnerWidth,
+			 width + 6,
+			 WA_InnerHeight,
+			 height + 4,
+			 TAG_DONE);
 	}
 
 	return NSERROR_OK;
 }
-

@@ -74,34 +74,36 @@ static gboolean nsgtk_pi_destroy(gpointer data)
 	return G_SOURCE_REMOVE;
 }
 
-static void
-nsgtk_pi_closed(GtkPopover *popover, gpointer data)
+static void nsgtk_pi_closed(GtkPopover *popover, gpointer data)
 {
 	g_idle_add(nsgtk_pi_destroy, data);
 }
 
-static void
-nsgtk_pi_close_callback(void *pw)
+static void nsgtk_pi_close_callback(void *pw)
 {
 	struct nsgtk_pi_window *pi_win = pw;
 
 	gtk_popover_popdown(GTK_POPOVER(pi_win->dlg));
 }
 
-static nserror
-nsgtk_pi_mouse(struct nsgtk_corewindow *nsgtk_cw,
-		    browser_mouse_state mouse_state,
-		    int x, int y)
+static nserror nsgtk_pi_mouse(struct nsgtk_corewindow *nsgtk_cw,
+			      browser_mouse_state mouse_state,
+			      int x,
+			      int y)
 {
 	struct nsgtk_pi_window *pi_win;
 	bool did_something = false;
 	/* technically degenerate container of */
 	pi_win = (struct nsgtk_pi_window *)nsgtk_cw;
 
-	if (page_info_mouse_action(pi_win->pi, mouse_state, x, y, &did_something) == NSERROR_OK) {
+	if (page_info_mouse_action(
+		    pi_win->pi, mouse_state, x, y, &did_something) ==
+	    NSERROR_OK) {
 		if (did_something == true) {
 			/* Something happened so we need to close ourselves */
-			guit->misc->schedule(0, nsgtk_pi_close_callback, pi_win);
+			guit->misc->schedule(0,
+					     nsgtk_pi_close_callback,
+					     pi_win);
 		}
 	}
 
@@ -115,8 +117,7 @@ nsgtk_pi_mouse(struct nsgtk_corewindow *nsgtk_cw,
  * \param nskey The netsurf key code
  * \return NSERROR_OK on success otherwise appropriate error code
  */
-static nserror
-nsgtk_pi_key(struct nsgtk_corewindow *nsgtk_cw, uint32_t nskey)
+static nserror nsgtk_pi_key(struct nsgtk_corewindow *nsgtk_cw, uint32_t nskey)
 {
 	struct nsgtk_pi_window *pi_win;
 
@@ -136,14 +137,11 @@ nsgtk_pi_key(struct nsgtk_corewindow *nsgtk_cw, uint32_t nskey)
  * \param r The rectangle of the window that needs updating.
  * \return NSERROR_OK on success otherwise appropriate error code
  */
-static nserror
-nsgtk_pi_draw(struct nsgtk_corewindow *nsgtk_cw, struct rect *r)
+static nserror nsgtk_pi_draw(struct nsgtk_corewindow *nsgtk_cw, struct rect *r)
 {
-	struct redraw_context ctx = {
-		.interactive = true,
-		.background_images = true,
-		.plot = &nsgtk_plotters
-	};
+	struct redraw_context ctx = {.interactive = true,
+				     .background_images = true,
+				     .plot = &nsgtk_plotters};
 	struct nsgtk_pi_window *pi_win;
 
 	/* technically degenerate container of */
@@ -167,13 +165,16 @@ nserror nsgtk_page_info(GtkWidget *anchor, struct browser_window *bw)
 
 	res = nsgtk_builder_new_from_resname("pageinfo", &ncwin->builder);
 	if (res != NSERROR_OK) {
-		NSLOG(netsurf, CRITICAL, "Page Info UI builder init failed %s", messages_get_errorcode(res));
+		NSLOG(netsurf,
+		      CRITICAL,
+		      "Page Info UI builder init failed %s",
+		      messages_get_errorcode(res));
 		free(ncwin);
 		return res;
 	}
 
-	ncwin->dlg = GTK_WIDGET(gtk_builder_get_object(ncwin->builder,
-						       "PGIWindow"));
+	ncwin->dlg = GTK_WIDGET(
+		gtk_builder_get_object(ncwin->builder, "PGIWindow"));
 	gtk_widget_set_parent(ncwin->dlg, anchor);
 
 	ncwin->core.drawing_area = GTK_DRAWING_AREA(

@@ -52,68 +52,74 @@ struct ro_corewindow {
 	/** content height */
 	int content_height;
 
-        /** drag status set by core */
-        core_window_drag_status drag_status;
+	/** drag status set by core */
+	core_window_drag_status drag_status;
 
-        /**
-         * callback to draw on drawable area of ro core window
-         *
-         * \param ro_cw The riscos core window structure.
+	/**
+	 * callback to draw on drawable area of ro core window
+	 *
+	 * \param ro_cw The riscos core window structure.
 	 * \param originx The risc os plotter x origin.
 	 * \param originy The risc os plotter y origin.
-         * \param r The rectangle of the window that needs updating.
-         * \return NSERROR_OK on success otherwise apropriate error code
-         */
-        nserror (*draw)(struct ro_corewindow *ro_cw, int originx, int originy, struct rect *r);
-
-        /**
-         * callback for keypress on ro core window
-         *
-         * \param ro_cw The ro core window structure.
-         * \param nskey The netsurf key code.
-         * \return NSERROR_OK if key processed,
-         *         NSERROR_NOT_IMPLEMENTED if key not processed
-         *         otherwise apropriate error code
-         */
-        nserror (*key)(struct ro_corewindow *ro_cw, uint32_t nskey);
-
-        /**
-         * callback for mouse event on ro core window
-         *
-         * \param ro_cw The ro core window structure.
-         * \param mouse_state mouse state
-         * \param x location of event
-         * \param y location of event
-         * \return NSERROR_OK on sucess otherwise apropriate error code.
-         */
-        nserror (*mouse)(struct ro_corewindow *ro_cw, browser_mouse_state mouse_state, int x, int y);
+	 * \param r The rectangle of the window that needs updating.
+	 * \return NSERROR_OK on success otherwise apropriate error code
+	 */
+	nserror (*draw)(struct ro_corewindow *ro_cw,
+			int originx,
+			int originy,
+			struct rect *r);
 
 	/**
-         * callback for clicks in ro core window toolbar.
-         *
-         * \param ro_cw The ro core window structure.
-         * \param action The button bar action.
-         * \return NSERROR_OK if config saved, otherwise apropriate error code
-         */
-        nserror (*toolbar_click)(struct ro_corewindow *ro_cw, button_bar_action action);
+	 * callback for keypress on ro core window
+	 *
+	 * \param ro_cw The ro core window structure.
+	 * \param nskey The netsurf key code.
+	 * \return NSERROR_OK if key processed,
+	 *         NSERROR_NOT_IMPLEMENTED if key not processed
+	 *         otherwise apropriate error code
+	 */
+	nserror (*key)(struct ro_corewindow *ro_cw, uint32_t nskey);
 
 	/**
-         * callback for updating state of buttons in ro core window toolbar.
-         *
-         * \param ro_cw The ro core window structure.
-         * \return NSERROR_OK if config saved, otherwise apropriate error code
-         */
-        nserror (*toolbar_update)(struct ro_corewindow *ro_cw);
+	 * callback for mouse event on ro core window
+	 *
+	 * \param ro_cw The ro core window structure.
+	 * \param mouse_state mouse state
+	 * \param x location of event
+	 * \param y location of event
+	 * \return NSERROR_OK on sucess otherwise apropriate error code.
+	 */
+	nserror (*mouse)(struct ro_corewindow *ro_cw,
+			 browser_mouse_state mouse_state,
+			 int x,
+			 int y);
 
 	/**
-         * callback for saving ro core window toolbar state.
-         *
-         * \param ro_cw The ro core window structure.
-         * \param config The new toolbar configuration.
-         * \return NSERROR_OK if config saved, otherwise apropriate error code
-         */
-        nserror (*toolbar_save)(struct ro_corewindow *ro_cw, char *config);
+	 * callback for clicks in ro core window toolbar.
+	 *
+	 * \param ro_cw The ro core window structure.
+	 * \param action The button bar action.
+	 * \return NSERROR_OK if config saved, otherwise apropriate error code
+	 */
+	nserror (*toolbar_click)(struct ro_corewindow *ro_cw,
+				 button_bar_action action);
 
+	/**
+	 * callback for updating state of buttons in ro core window toolbar.
+	 *
+	 * \param ro_cw The ro core window structure.
+	 * \return NSERROR_OK if config saved, otherwise apropriate error code
+	 */
+	nserror (*toolbar_update)(struct ro_corewindow *ro_cw);
+
+	/**
+	 * callback for saving ro core window toolbar state.
+	 *
+	 * \param ro_cw The ro core window structure.
+	 * \param config The new toolbar configuration.
+	 * \return NSERROR_OK if config saved, otherwise apropriate error code
+	 */
+	nserror (*toolbar_save)(struct ro_corewindow *ro_cw, char *config);
 };
 
 /**
@@ -128,7 +134,11 @@ struct ro_corewindow {
  * \param tb_help Thh toolbar help text
  * \return NSERROR_OK on successful initialisation otherwise error code.
  */
-nserror ro_corewindow_init(struct ro_corewindow *ro_cw, const struct button_bar_buttons *tb_buttons, char *tb_order, theme_style tb_style, const char *tb_help);
+nserror ro_corewindow_init(struct ro_corewindow *ro_cw,
+			   const struct button_bar_buttons *tb_buttons,
+			   char *tb_order,
+			   theme_style tb_style,
+			   const char *tb_help);
 
 /**
  * finalise elements of ro core window.

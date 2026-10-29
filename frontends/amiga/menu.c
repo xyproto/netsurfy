@@ -64,17 +64,23 @@ bool ami_menu_get_selected(struct Menu *menu, struct IntuiMessage *msg)
 {
 	bool checked = false;
 
-	if(LIB_IS_AT_LEAST((struct Library *)IntuitionBase, 54, 6)) {
+	if (LIB_IS_AT_LEAST((struct Library *)IntuitionBase, 54, 6)) {
 #ifdef __amigaos4__
 		ULONG state;
 		struct ExtIntuiMessage *emsg = (struct ExtIntuiMessage *)msg;
 
-		state = IDoMethod((Object *)menu, MM_GETSTATE, 0, emsg->eim_LongCode, MS_CHECKED);
-		if(state & MS_CHECKED) checked = true;
-#endif	
+		state = IDoMethod((Object *)menu,
+				  MM_GETSTATE,
+				  0,
+				  emsg->eim_LongCode,
+				  MS_CHECKED);
+		if (state & MS_CHECKED)
+			checked = true;
+#endif
 	} else {
 		struct MenuItem *item = ItemAddress(menu, msg->Code);
-		if(item && (item->Flags & CHECKED)) checked = true;
+		if (item && (item->Flags & CHECKED))
+			checked = true;
 	}
 
 	return checked;
@@ -83,20 +89,23 @@ bool ami_menu_get_selected(struct Menu *menu, struct IntuiMessage *msg)
 /* menu creation code */
 void ami_menu_free_lab_item(struct ami_menu_data **md, int i)
 {
-	if(md[i] == NULL) return;
-	if(md[i]->menulab &&
-			(md[i]->menulab != NM_BARLABEL) &&
-			(md[i]->menulab != ML_SEPARATOR)) {
-		if(md[i]->menutype & MENU_IMAGE) {
-			if(md[i]->menuobj) DisposeObject(md[i]->menuobj);
+	if (md[i] == NULL)
+		return;
+	if (md[i]->menulab && (md[i]->menulab != NM_BARLABEL) &&
+	    (md[i]->menulab != ML_SEPARATOR)) {
+		if (md[i]->menutype & MENU_IMAGE) {
+			if (md[i]->menuobj)
+				DisposeObject(md[i]->menuobj);
 		}
 
 		ami_utf8_free(md[i]->menulab);
 	}
 
-	if(md[i]->menukey != NULL) free(md[i]->menukey);
-	if(md[i]->menuicon != NULL) free(md[i]->menuicon);
-	
+	if (md[i]->menukey != NULL)
+		free(md[i]->menukey);
+	if (md[i]->menuicon != NULL)
+		free(md[i]->menuicon);
+
 	md[i]->menuicon = NULL;
 	md[i]->menulab = NULL;
 	md[i]->menuobj = NULL;
@@ -110,50 +119,64 @@ static void ami_menu_free_labs(struct ami_menu_data **md, int max)
 {
 	int i;
 
-	for(i = 0; i <= max; i++) {
+	for (i = 0; i <= max; i++) {
 		ami_menu_free_lab_item(md, i);
 	}
 }
 
-void ami_menu_alloc_item(struct ami_menu_data **md, int num, UBYTE type,
-			const char *restrict label, const char *restrict key, const char *restrict icon,
-			void *restrict func, void *restrict hookdata, UWORD flags)
+void ami_menu_alloc_item(struct ami_menu_data **md,
+			 int num,
+			 UBYTE type,
+			 const char *restrict label,
+			 const char *restrict key,
+			 const char *restrict icon,
+			 void *restrict func,
+			 void *restrict hookdata,
+			 UWORD flags)
 {
-	if(md[num] != NULL) free(md[num]);
+	if (md[num] != NULL)
+		free(md[num]);
 	md[num] = calloc(1, sizeof(struct ami_menu_data));
-	if(md[num] == NULL) return;
-	
+	if (md[num] == NULL)
+		return;
+
 	md[num]->menutype = type;
 	md[num]->flags = flags;
-	
-	if(type == NM_END) return;
 
-	if((label == NM_BARLABEL) || (strcmp(label, "--") == 0)) {
+	if (type == NM_END)
+		return;
+
+	if ((label == NM_BARLABEL) || (strcmp(label, "--") == 0)) {
 		md[num]->menulab = NM_BARLABEL;
 		icon = NULL;
 	} else { /* horrid non-generic stuff */
-		if(((num >= AMI_MENU_AREXX) && (num < AMI_MENU_AREXX_MAX)) ||
-		((num >= AMI_MENU_HOTLIST) && (num < AMI_MENU_HOTLIST_MAX))) {
-			md[num]->menulab = ami_utf8_easy(label);		
+		if (((num >= AMI_MENU_AREXX) && (num < AMI_MENU_AREXX_MAX)) ||
+		    ((num >= AMI_MENU_HOTLIST) &&
+		     (num < AMI_MENU_HOTLIST_MAX))) {
+			md[num]->menulab = ami_utf8_easy(label);
 		} else {
 			md[num]->menulab = ami_utf8_easy(messages_get(label));
 		}
 	}
 
 	md[num]->menuicon = NULL;
-	if(key) md[num]->menukey = strdup(key);
-	if(func) md[num]->menu_hook.h_Entry = (HOOKFUNC)func;
-	if(hookdata) md[num]->menu_hook.h_Data = hookdata;
+	if (key)
+		md[num]->menukey = strdup(key);
+	if (func)
+		md[num]->menu_hook.h_Entry = (HOOKFUNC)func;
+	if (hookdata)
+		md[num]->menu_hook.h_Data = hookdata;
 
 #ifdef __amigaos4__
 	char menu_icon[1024];
 
-	if(LIB_IS_AT_LEAST((struct Library *)GadToolsBase, 53, 7)) {
-		if(icon) {
-			if(ami_locate_resource(menu_icon, icon) == true) {
+	if (LIB_IS_AT_LEAST((struct Library *)GadToolsBase, 53, 7)) {
+		if (icon) {
+			if (ami_locate_resource(menu_icon, icon) == true) {
 				md[num]->menuicon = (char *)strdup(menu_icon);
 			} else {
-				/* If the requested icon can't be found, put blank space in instead */
+				/* If the requested icon can't be found, put
+				 * blank space in instead */
 				md[num]->menuicon = (char *)strdup(NSA_SPACE);
 			}
 		}
@@ -164,23 +187,31 @@ void ami_menu_alloc_item(struct ami_menu_data **md, int num, UBYTE type,
 static void ami_menu_load_glyphs(struct DrawInfo *dri)
 {
 #ifdef __amigaos4__
-	if(LIB_IS_AT_LEAST((struct Library *)GadToolsBase, 53, 7)) {
-		for(int i = 0; i < NSA_GLYPH_MAX; i++)
+	if (LIB_IS_AT_LEAST((struct Library *)GadToolsBase, 53, 7)) {
+		for (int i = 0; i < NSA_GLYPH_MAX; i++)
 			menu_glyph[i] = NULL;
 
-		menu_glyph[NSA_GLYPH_SUBMENU] = NewObject(NULL, "sysiclass",
-											SYSIA_Which, MENUSUB,
-											SYSIA_DrawInfo, dri,
-										TAG_DONE);
-		menu_glyph[NSA_GLYPH_AMIGAKEY] = NewObject(NULL, "sysiclass",
-											SYSIA_Which, AMIGAKEY,
-											SYSIA_DrawInfo, dri,
-										TAG_DONE);
-		GetAttr(IA_Width, menu_glyph[NSA_GLYPH_SUBMENU],
+		menu_glyph[NSA_GLYPH_SUBMENU] = NewObject(NULL,
+							  "sysiclass",
+							  SYSIA_Which,
+							  MENUSUB,
+							  SYSIA_DrawInfo,
+							  dri,
+							  TAG_DONE);
+		menu_glyph[NSA_GLYPH_AMIGAKEY] = NewObject(NULL,
+							   "sysiclass",
+							   SYSIA_Which,
+							   AMIGAKEY,
+							   SYSIA_DrawInfo,
+							   dri,
+							   TAG_DONE);
+		GetAttr(IA_Width,
+			menu_glyph[NSA_GLYPH_SUBMENU],
 			(ULONG *)&menu_glyph_width[NSA_GLYPH_SUBMENU]);
-		GetAttr(IA_Width, menu_glyph[NSA_GLYPH_AMIGAKEY],
+		GetAttr(IA_Width,
+			menu_glyph[NSA_GLYPH_AMIGAKEY],
 			(ULONG *)&menu_glyph_width[NSA_GLYPH_AMIGAKEY]);
-	
+
 		menu_glyphs_loaded = true;
 	}
 #endif
@@ -189,15 +220,17 @@ static void ami_menu_load_glyphs(struct DrawInfo *dri)
 void ami_menu_free_glyphs(void)
 {
 #ifdef __amigaos4__
-	if(LIB_IS_AT_LEAST((struct Library *)GadToolsBase, 53, 7)) {
+	if (LIB_IS_AT_LEAST((struct Library *)GadToolsBase, 53, 7)) {
 		int i;
-		if(menu_glyphs_loaded == false) return;
+		if (menu_glyphs_loaded == false)
+			return;
 
-		for(i = 0; i < NSA_GLYPH_MAX; i++) {
-			if(menu_glyph[i]) DisposeObject(menu_glyph[i]);
+		for (i = 0; i < NSA_GLYPH_MAX; i++) {
+			if (menu_glyph[i])
+				DisposeObject(menu_glyph[i]);
 			menu_glyph[i] = NULL;
 		};
-	
+
 		menu_glyphs_loaded = false;
 	}
 #endif
@@ -207,12 +240,16 @@ static bool ami_menu_item_has_submenu(struct ami_menu_data **md, int j, int max)
 {
 	int k;
 
-	if (md[j] == NULL) return false;
-	if (md[j]->menutype != NM_ITEM) return false;
+	if (md[j] == NULL)
+		return false;
+	if (md[j]->menutype != NM_ITEM)
+		return false;
 
 	for (k = j + 1; k < max; k++) {
-		if (md[k] == NULL) continue;
-		if (md[k]->menutype == NM_IGNORE) continue;
+		if (md[k] == NULL)
+			continue;
+		if (md[k]->menutype == NM_IGNORE)
+			continue;
 
 		if (md[k]->menutype == NM_SUB) {
 			return true;
@@ -227,7 +264,10 @@ static bool ami_menu_item_has_submenu(struct ami_menu_data **md, int j, int max)
 	return false;
 }
 
-static int ami_menu_calc_item_width(struct ami_menu_data **md, int j, int max, struct RastPort *rp)
+static int ami_menu_calc_item_width(struct ami_menu_data **md,
+				    int j,
+				    int max,
+				    struct RastPort *rp)
 {
 	int space_width = TextLength(rp, " ", 1);
 	int item_size;
@@ -235,17 +275,18 @@ static int ami_menu_calc_item_width(struct ami_menu_data **md, int j, int max, s
 	item_size = TextLength(rp, md[j]->menulab, strlen(md[j]->menulab));
 	item_size += space_width;
 
-	if(md[j]->menukey) {
+	if (md[j]->menukey) {
 		item_size += TextLength(rp, md[j]->menukey, 1);
 		item_size += menu_glyph_width[NSA_GLYPH_AMIGAKEY];
 		/* account for submenu glyph width */
 	} else {
-		/* assume worst case - it doesn't really matter if we make menus wider */
+		/* assume worst case - it doesn't really matter if we make menus
+		 * wider */
 		item_size += TextLength(rp, "M", 1);
 		item_size += menu_glyph_width[NSA_GLYPH_AMIGAKEY];
 	}
 
-	if(md[j]->menuicon) {
+	if (md[j]->menuicon) {
 		item_size += 16;
 	}
 
@@ -258,61 +299,91 @@ static int ami_menu_calc_item_width(struct ami_menu_data **md, int j, int max, s
 }
 
 #ifdef __amigaos4__
-static int ami_menu_layout_mc_recursive(Object *menu_parent, struct ami_menu_data **md, int level, int i, int max)
+static int ami_menu_layout_mc_recursive(Object *menu_parent,
+					struct ami_menu_data **md,
+					int level,
+					int i,
+					int max)
 {
 	int j;
 	Object *menu_item = menu_parent;
-	
-	for(j = i; j < max; j++) {
-		/* skip empty entries */
-		if(md[j] == NULL) continue;
-		if(md[j]->menutype == NM_IGNORE) continue;
 
-		if(md[j]->menutype == level) {
-			if(md[j]->menulab == NM_BARLABEL)
+	for (j = i; j < max; j++) {
+		/* skip empty entries */
+		if (md[j] == NULL)
+			continue;
+		if (md[j]->menutype == NM_IGNORE)
+			continue;
+
+		if (md[j]->menutype == level) {
+			if (md[j]->menulab == NM_BARLABEL)
 				md[j]->menulab = ML_SEPARATOR;
 
-			if(level == NM_TITLE) {
-				menu_item = NewObject(NULL, "menuclass",
-					MA_Type, T_MENU,
-					MA_ID, j,
-					MA_Label, md[j]->menulab,
-					TAG_DONE);
+			if (level == NM_TITLE) {
+				menu_item = NewObject(NULL,
+						      "menuclass",
+						      MA_Type,
+						      T_MENU,
+						      MA_ID,
+						      j,
+						      MA_Label,
+						      md[j]->menulab,
+						      TAG_DONE);
 			} else {
 				Object *menu_img = NULL;
-				
-				if(md[j]->menuicon) {
-					menu_img = BitMapObj,
-						IA_Scalable, TRUE,
-						BITMAP_Screen, ami_gui_get_screen(),
-						BITMAP_SourceFile, md[j]->menuicon,
-						BITMAP_Masking, TRUE,
-					BitMapEnd;
+
+				if (md[j]->menuicon) {
+					menu_img = BitMapObj, IA_Scalable, TRUE,
+					BITMAP_Screen, ami_gui_get_screen(),
+					BITMAP_SourceFile, md[j]->menuicon,
+					BITMAP_Masking, TRUE, BitMapEnd;
 				}
-				
-				
-				menu_item = NewObject(NULL, "menuclass",
-					MA_Type, T_ITEM,
-					MA_ID, j,
-					MA_Label, md[j]->menulab,
-					MA_Image, menu_img,
-					MA_Key, md[j]->menukey,
-					MA_UserData, &md[j]->menu_hook, /* NB: Intentionally UserData */
-					MA_Disabled, (md[j]->flags & NM_ITEMDISABLED) ? TRUE : FALSE,
-					MA_Selected, (md[j]->flags & CHECKED) ? TRUE : FALSE,
-					MA_Toggle, (md[j]->flags & MENUTOGGLE) ? TRUE : FALSE,
+
+
+				menu_item = NewObject(
+					NULL,
+					"menuclass",
+					MA_Type,
+					T_ITEM,
+					MA_ID,
+					j,
+					MA_Label,
+					md[j]->menulab,
+					MA_Image,
+					menu_img,
+					MA_Key,
+					md[j]->menukey,
+					MA_UserData,
+					&md[j]->menu_hook, /* NB: Intentionally
+							      UserData */
+					MA_Disabled,
+					(md[j]->flags & NM_ITEMDISABLED)
+						? TRUE
+						: FALSE,
+					MA_Selected,
+					(md[j]->flags & CHECKED) ? TRUE : FALSE,
+					MA_Toggle,
+					(md[j]->flags & MENUTOGGLE) ? TRUE
+								    : FALSE,
 					TAG_DONE);
 			}
 
-			if(menu_item != NULL) {
-				NSLOG(netsurf, DEEPDEBUG,
-					  "Adding item %p ID %d (%s) to parent %p",
-					  menu_item, j, (md[j]->menulab == NM_BARLABEL) ? "" : md[j]->menulab, menu_parent);
+			if (menu_item != NULL) {
+				NSLOG(netsurf,
+				      DEEPDEBUG,
+				      "Adding item %p ID %d (%s) to parent %p",
+				      menu_item,
+				      j,
+				      (md[j]->menulab == NM_BARLABEL)
+					      ? ""
+					      : md[j]->menulab,
+				      menu_parent);
 				IDoMethod(menu_parent, OM_ADDMEMBER, menu_item);
 			}
 			continue;
 		} else if (md[j]->menutype > level) {
-			j = ami_menu_layout_mc_recursive(menu_item, md, md[j]->menutype, j, max);
+			j = ami_menu_layout_mc_recursive(
+				menu_item, md, md[j]->menutype, j, max);
 		} else {
 			break;
 		}
@@ -322,10 +393,13 @@ static int ami_menu_layout_mc_recursive(Object *menu_parent, struct ami_menu_dat
 
 static struct Menu *ami_menu_layout_mc(struct ami_menu_data **md, int max)
 {
-	Object *menu_root = NewObject(NULL, "menuclass",
-		MA_Type, T_ROOT,
-		MA_EmbeddedKey, FALSE,
-		TAG_DONE);
+	Object *menu_root = NewObject(NULL,
+				      "menuclass",
+				      MA_Type,
+				      T_ROOT,
+				      MA_EmbeddedKey,
+				      FALSE,
+				      TAG_DONE);
 
 	ami_menu_layout_mc_recursive(menu_root, md, NM_TITLE, 0, max);
 
@@ -346,125 +420,140 @@ static struct Menu *ami_menu_layout_gt(struct ami_menu_data **md, int max)
 	struct DrawInfo *dri = GetScreenDrawInfo(scrn);
 	int space_width = TextLength(rp, " ", 1);
 
-	if(menu_glyphs_loaded == false)
+	if (menu_glyphs_loaded == false)
 		ami_menu_load_glyphs(dri);
 
 	nm = calloc(1, sizeof(struct NewMenu) * (max + 1));
-	if(nm == NULL) return NULL;
+	if (nm == NULL)
+		return NULL;
 
-	for(i = 0; i < max; i++) {
-		if(md[i] == NULL) {
+	for (i = 0; i < max; i++) {
+		if (md[i] == NULL) {
 			nm[i].nm_Type = NM_IGNORE;
 			continue;
 		}
 
-		if(md[i]->menutype == NM_TITLE) {
+		if (md[i]->menutype == NM_TITLE) {
 			j = i + 1;
 			txtlen = 0;
 			do {
-				if(md[j]->menulab != NM_BARLABEL) {
-					if(md[j]->menutype == NM_ITEM) {
-						int item_size = ami_menu_calc_item_width(md, j, max, rp);
-						if(item_size > txtlen) {
+				if (md[j]->menulab != NM_BARLABEL) {
+					if (md[j]->menutype == NM_ITEM) {
+						int item_size =
+							ami_menu_calc_item_width(
+								md, j, max, rp);
+						if (item_size > txtlen) {
 							txtlen = item_size;
 						}
 					}
 				}
 				j++;
-			} while((j <= max) && (md[j] != NULL) && (md[j]->menutype != NM_TITLE) && (md[j]->menutype != 0));
+			} while ((j <= max) && (md[j] != NULL) &&
+				 (md[j]->menutype != NM_TITLE) &&
+				 (md[j]->menutype != 0));
 		}
 #ifdef __amigaos4__
-		if(LIB_IS_AT_LEAST((struct Library *)GadToolsBase, 53, 7)) {
-			/* GadTools 53.7+ only. For now we will only create the menu
-				using label.image if there's a bitmap associated with the item. */
-			if((md[i]->menuicon != NULL) && (md[i]->menulab != NM_BARLABEL)) {
+		if (LIB_IS_AT_LEAST((struct Library *)GadToolsBase, 53, 7)) {
+			/* GadTools 53.7+ only. For now we will only create the
+			   menu using label.image if there's a bitmap associated
+			   with the item. */
+			if ((md[i]->menuicon != NULL) &&
+			    (md[i]->menulab != NM_BARLABEL)) {
 				int icon_width = 0;
 				Object *restrict submenuarrow = NULL;
-				Object *restrict icon = BitMapObj,
-						IA_Scalable, TRUE,
-						BITMAP_Screen, scrn,
-						BITMAP_SourceFile, md[i]->menuicon,
-						BITMAP_Masking, TRUE,
-					BitMapEnd;
+				Object *restrict icon = BitMapObj, IA_Scalable,
+						 TRUE, BITMAP_Screen, scrn,
+						 BITMAP_SourceFile,
+						 md[i]->menuicon,
+						 BITMAP_Masking, TRUE,
+						 BitMapEnd;
 
-				/* \todo make this scale the bitmap to these dimensions */
+				/* \todo make this scale the bitmap to these
+				 * dimensions */
 				SetAttrs(icon,
-					BITMAP_Width, 16,
-					BITMAP_Height, 16,
-					TAG_DONE);
+					 BITMAP_Width,
+					 16,
+					 BITMAP_Height,
+					 16,
+					 TAG_DONE);
 
 				GetAttr(IA_Width, icon, (ULONG *)&icon_width);
 
-				if(md[i]->menutype != NM_SUB) {
+				if (md[i]->menutype != NM_SUB) {
 					left_posn = txtlen;
 				}
 
 				left_posn = left_posn -
-					TextLength(rp, md[i]->menulab, strlen(md[i]->menulab)) -
-					icon_width - space_width;
+					    TextLength(rp,
+						       md[i]->menulab,
+						       strlen(md[i]->menulab)) -
+					    icon_width - space_width;
 
-				if((md[i]->menutype == NM_ITEM) && md[i+1] && (md[i+1]->menutype == NM_SUB)) {
-					left_posn -= menu_glyph_width[NSA_GLYPH_SUBMENU];
+				if ((md[i]->menutype == NM_ITEM) && md[i + 1] &&
+				    (md[i + 1]->menutype == NM_SUB)) {
+					left_posn -= menu_glyph_width
+						[NSA_GLYPH_SUBMENU];
 
-					submenuarrow = NewObject(NULL, "sysiclass",
-									SYSIA_Which, MENUSUB,
-									SYSIA_DrawInfo, dri,
-									IA_Left, left_posn,
-									TAG_DONE);
+					submenuarrow = NewObject(NULL,
+								 "sysiclass",
+								 SYSIA_Which,
+								 MENUSUB,
+								 SYSIA_DrawInfo,
+								 dri,
+								 IA_Left,
+								 left_posn,
+								 TAG_DONE);
 				}
 
-				md[i]->menuobj = LabelObj,
-					LABEL_MenuMode, TRUE,
-					LABEL_DrawInfo, dri,
-					LABEL_DisposeImage, TRUE,
-					LABEL_Image, icon,
-					LABEL_Text, " ",
-					LABEL_Text, md[i]->menulab,
-					LABEL_DisposeImage, TRUE,
-					LABEL_Image, submenuarrow,
-				LabelEnd;
+				md[i]->menuobj = LabelObj, LABEL_MenuMode, TRUE,
+				LABEL_DrawInfo, dri, LABEL_DisposeImage, TRUE,
+				LABEL_Image, icon, LABEL_Text, " ", LABEL_Text,
+				md[i]->menulab, LABEL_DisposeImage, TRUE,
+				LABEL_Image, submenuarrow, LabelEnd;
 
-				if(md[i]->menuobj) md[i]->menutype |= MENU_IMAGE;
+				if (md[i]->menuobj)
+					md[i]->menutype |= MENU_IMAGE;
 			}
 		}
 #endif
 		nm[i].nm_Type = md[i]->menutype;
-		
-		if(md[i]->menuobj)
+
+		if (md[i]->menuobj)
 			nm[i].nm_Label = (void *)md[i]->menuobj;
 		else
 			nm[i].nm_Label = md[i]->menulab;
 
-		if((md[i]->menukey) && (strlen(md[i]->menukey) == 1)) {
+		if ((md[i]->menukey) && (strlen(md[i]->menukey) == 1)) {
 			nm[i].nm_CommKey = md[i]->menukey;
 		}
 		nm[i].nm_Flags = md[i]->flags;
-		if(md[i]->menu_hook.h_Entry) nm[i].nm_UserData = &md[i]->menu_hook;
+		if (md[i]->menu_hook.h_Entry)
+			nm[i].nm_UserData = &md[i]->menu_hook;
 
-		if(md[i]->menuicon) {
+		if (md[i]->menuicon) {
 			free(md[i]->menuicon);
 			md[i]->menuicon = NULL;
 		}
 	}
-	
+
 	FreeScreenDrawInfo(scrn, dri);
 
 	vi = GetVisualInfo(scrn, TAG_DONE);
 	imenu = CreateMenus(nm, TAG_DONE);
-	LayoutMenus(imenu, vi,
-		GTMN_NewLookMenus, TRUE, TAG_DONE);
+	LayoutMenus(imenu, vi, GTMN_NewLookMenus, TRUE, TAG_DONE);
 	free(nm);
-	FreeVisualInfo(vi); /* Not using GadTools after layout so shouldn't need this */
-	
+	FreeVisualInfo(vi); /* Not using GadTools after layout so shouldn't need
+			       this */
+
 	return imenu;
 }
 
 struct Menu *ami_menu_layout(struct ami_menu_data **md, int max)
 {
-	if(LIB_IS_AT_LEAST((struct Library *)IntuitionBase, 54, 6)) {
+	if (LIB_IS_AT_LEAST((struct Library *)IntuitionBase, 54, 6)) {
 #ifdef __amigaos4__
 		return ami_menu_layout_mc(md, max);
-#endif	
+#endif
 	} else {
 		return ami_menu_layout_gt(md, max);
 	}
@@ -473,36 +562,46 @@ struct Menu *ami_menu_layout(struct ami_menu_data **md, int max)
 void ami_menu_free_menu(struct ami_menu_data **md, int max, struct Menu *imenu)
 {
 	ami_menu_free_labs(md, max);
-	if(LIB_IS_AT_LEAST((struct Library *)IntuitionBase, 54, 6)) {
-		DisposeObject((Object *)imenu); // if we detach our menu from the window we need to do this manually
+	if (LIB_IS_AT_LEAST((struct Library *)IntuitionBase, 54, 6)) {
+		DisposeObject(
+			(Object *)imenu); // if we detach our menu from the
+					  // window we need to do this manually
 	} else {
 		FreeMenus(imenu);
 	}
 }
 
-void ami_menu_refresh(struct Menu *menu, struct ami_menu_data **md, int menu_item, int max,
-	nserror (*cb)(struct ami_menu_data **md))
+void ami_menu_refresh(struct Menu *menu,
+		      struct ami_menu_data **md,
+		      int menu_item,
+		      int max,
+		      nserror (*cb)(struct ami_menu_data **md))
 {
 #ifdef __amigaos4__
 	Object *restrict obj;
 	Object *restrict menu_item_obj;
 	int i;
 
-	if(menu == NULL) return;
+	if (menu == NULL)
+		return;
 
-	if(LIB_IS_AT_LEAST((struct Library *)IntuitionBase, 54, 6)) {
+	if (LIB_IS_AT_LEAST((struct Library *)IntuitionBase, 54, 6)) {
 		/* find the address of the menu */
-		menu_item_obj = (Object *)IDoMethod((Object *)menu, MM_FINDID, 0, menu_item);
+		menu_item_obj = (Object *)IDoMethod(
+			(Object *)menu, MM_FINDID, 0, menu_item);
 
 		/* remove all children */
-		while((obj = (Object *)IDoMethod(menu_item_obj, MM_NEXTCHILD, 0, NULL)) != NULL) {
+		while ((obj = (Object *)IDoMethod(
+				menu_item_obj, MM_NEXTCHILD, 0, NULL)) !=
+		       NULL) {
 			IDoMethod(menu_item_obj, OM_REMMEMBER, obj);
 			DisposeObject(obj);
 		}
 
 		/* free associated data */
-		for(i = (menu_item + 1); i <= max; i++) {
-			if(md[i] == NULL) continue;
+		for (i = (menu_item + 1); i <= max; i++) {
+			if (md[i] == NULL)
+				continue;
 			ami_menu_free_lab_item(md, i);
 		}
 
@@ -510,8 +609,8 @@ void ami_menu_refresh(struct Menu *menu, struct ami_menu_data **md, int menu_ite
 		cb(md);
 
 		/* re-add items to menu */
-		ami_menu_layout_mc_recursive(menu_item_obj, md, NM_ITEM, (menu_item + 1), max);
+		ami_menu_layout_mc_recursive(
+			menu_item_obj, md, NM_ITEM, (menu_item + 1), max);
 	}
 #endif
 }
-

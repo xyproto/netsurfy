@@ -88,7 +88,7 @@ struct gui_globals {
 	LONG open_num;
 	ULONG apen_colr;
 	ULONG open_colr;
-	int width;  /* size of bm and    */
+	int width; /* size of bm and    */
 	int height; /* associated memory */
 };
 
@@ -97,10 +97,10 @@ static APTR pool_pens = NULL;
 static bool palette_mapped = true; /* palette-mapped state for the screen */
 
 #ifndef M_PI /* For some reason we don't always get this from math.h */
-#define M_PI		3.14159265358979323846
+#define M_PI 3.14159265358979323846
 #endif
 
-#define PATT_DOT  0xAAAA
+#define PATT_DOT 0xAAAA
 #define PATT_DASH 0xCCCC
 #define PATT_LINE 0xFFFF
 
@@ -109,28 +109,33 @@ static bool palette_mapped = true; /* palette-mapped state for the screen */
   */
 #define AREA_SIZE 25000
 
-struct gui_globals *ami_plot_ra_alloc(ULONG width, ULONG height, bool force32bit, bool alloc_pen_list)
+struct gui_globals *ami_plot_ra_alloc(ULONG width,
+				      ULONG height,
+				      bool force32bit,
+				      bool alloc_pen_list)
 {
 	/* init shared bitmaps */
- 	int depth = 32;
+	int depth = 32;
 	struct BitMap *friend = NULL;
 	struct Screen *scrn = ami_gui_get_screen();
 
 	struct gui_globals *gg = malloc(sizeof(struct gui_globals));
 
-	if(force32bit == false) depth = GetBitMapAttr(scrn->RastPort.BitMap, BMA_DEPTH);
+	if (force32bit == false)
+		depth = GetBitMapAttr(scrn->RastPort.BitMap, BMA_DEPTH);
 	NSLOG(netsurf, INFO, "Screen depth = %d", depth);
 
- 	bitmap_set_format(&(bitmap_fmt_t) {
+	bitmap_set_format(&(bitmap_fmt_t){
 		.layout = BITMAP_LAYOUT_ARGB8888,
 		.pma = false,
 	});
-   	
- 	NSLOG(netsurf, INFO, "Set bitmap format to 0xAARRGGBB (native endian)");
 
-	if(depth < 16) {
+	NSLOG(netsurf, INFO, "Set bitmap format to 0xAARRGGBB (native endian)");
+
+	if (depth < 16) {
 		gg->palette_mapped = true;
-		if(force32bit == false) palette_mapped = true;
+		if (force32bit == false)
+			palette_mapped = true;
 	} else {
 		gg->palette_mapped = false;
 	}
@@ -141,78 +146,97 @@ struct gui_globals *ami_plot_ra_alloc(ULONG width, ULONG height, bool force32bit
 	 * For OS3 AGA, we get no display blitted if we use a friend BitMap,
 	 * however on RTG it seems to be a benefit.
 	 */
-	if(nsoption_bool(friend_bitmap) == true) {
+	if (nsoption_bool(friend_bitmap) == true) {
 		friend = scrn->RastPort.BitMap;
 	} else {
 		/* Force friend BitMaps on for obvious RTG screens under OS3.
-		 * If we get a bit smarter about this we can lose the user option. */
-		if((depth > 8) && (force32bit == false)) friend = scrn->RastPort.BitMap;
+		 * If we get a bit smarter about this we can lose the user
+		 * option. */
+		if ((depth > 8) && (force32bit == false))
+			friend = scrn->RastPort.BitMap;
 	}
 #endif
 
 	/* Probably need to fix this next line */
-	if(gg->palette_mapped == true) nsoption_set_bool(font_antialiasing, false);
+	if (gg->palette_mapped == true)
+		nsoption_set_bool(font_antialiasing, false);
 
-	if(!width) width = nsoption_int(redraw_tile_size_x);
-	if(!height) height = nsoption_int(redraw_tile_size_y);
+	if (!width)
+		width = nsoption_int(redraw_tile_size_x);
+	if (!height)
+		height = nsoption_int(redraw_tile_size_y);
 	gg->width = width;
 	gg->height = height;
 
 	gg->layerinfo = NewLayerInfo();
 	gg->areabuf = malloc(AREA_SIZE);
 
-	/* OS3/AGA requires this to be in chip mem.  RTG would probably rather it wasn't. */
+	/* OS3/AGA requires this to be in chip mem.  RTG would probably rather
+	 * it wasn't. */
 	gg->tmprasbuf = ami_memory_chip_alloc(width * height);
 
-	if(gg->palette_mapped == true) {
+	if (gg->palette_mapped == true) {
 		gg->bm = AllocBitMap(width, height, depth, 0, friend);
 	} else {
 #ifdef __amigaos4__
-		/* Screen depth is reported as 24 even when it's actually 32-bit.
-		 * We get freezes and other problems on OS4 if we befriend at any
-		 * other depths, hence this check.
-		 * \todo use friend BitMaps but avoid CompositeTags() at non-32-bit
-		 * as that seems to be the cause of the problems.
+		/* Screen depth is reported as 24 even when it's actually
+		 * 32-bit. We get freezes and other problems on OS4 if we
+		 * befriend at any other depths, hence this check.
+		 * \todo use friend BitMaps but avoid CompositeTags() at
+		 * non-32-bit as that seems to be the cause of the problems.
 		 */
-		if((depth >= 24) && (force32bit == false)) friend = scrn->RastPort.BitMap;
+		if ((depth >= 24) && (force32bit == false))
+			friend = scrn->RastPort.BitMap;
 #endif
-		gg->bm = ami_rtg_allocbitmap(width, height, 32, 0, friend, RGBFB_A8R8G8B8);
+		gg->bm = ami_rtg_allocbitmap(
+			width, height, 32, 0, friend, RGBFB_A8R8G8B8);
 	}
 
-	if(!gg->bm) amiga_warn_user("NoMemory","");
+	if (!gg->bm)
+		amiga_warn_user("NoMemory", "");
 
 	gg->rp = malloc(sizeof(struct RastPort));
-	if(!gg->rp) amiga_warn_user("NoMemory","");
+	if (!gg->rp)
+		amiga_warn_user("NoMemory", "");
 
 	InitRastPort(gg->rp);
 	gg->rp->BitMap = gg->bm;
 
-	SetDrMd(gg->rp,BGBACKFILL);
+	SetDrMd(gg->rp, BGBACKFILL);
 
-	gg->rp->Layer = CreateUpfrontLayer(gg->layerinfo,gg->rp->BitMap,0,0,
-					width-1, height-1, LAYERSIMPLE, NULL);
+	gg->rp->Layer = CreateUpfrontLayer(gg->layerinfo,
+					   gg->rp->BitMap,
+					   0,
+					   0,
+					   width - 1,
+					   height - 1,
+					   LAYERSIMPLE,
+					   NULL);
 
-	InstallLayerHook(gg->rp->Layer,LAYERS_NOBACKFILL);
+	InstallLayerHook(gg->rp->Layer, LAYERS_NOBACKFILL);
 
 	gg->rp->AreaInfo = malloc(sizeof(struct AreaInfo));
-	if((!gg->areabuf) || (!gg->rp->AreaInfo))	amiga_warn_user("NoMemory","");
+	if ((!gg->areabuf) || (!gg->rp->AreaInfo))
+		amiga_warn_user("NoMemory", "");
 
-	InitArea(gg->rp->AreaInfo, gg->areabuf, AREA_SIZE/5);
+	InitArea(gg->rp->AreaInfo, gg->areabuf, AREA_SIZE / 5);
 
 	gg->rp->TmpRas = malloc(sizeof(struct TmpRas));
-	if((!gg->tmprasbuf) || (!gg->rp->TmpRas))	amiga_warn_user("NoMemory","");
+	if ((!gg->tmprasbuf) || (!gg->rp->TmpRas))
+		amiga_warn_user("NoMemory", "");
 
 	InitTmpRas(gg->rp->TmpRas, gg->tmprasbuf, width * height);
 
 	gg->shared_pens = NULL;
 	gg->managed_pen_list = false;
 
-	if(gg->palette_mapped == true) {
-		if(pool_pens == NULL) {
-			pool_pens = ami_memory_itempool_create(sizeof(struct ami_plot_pen));
+	if (gg->palette_mapped == true) {
+		if (pool_pens == NULL) {
+			pool_pens = ami_memory_itempool_create(
+				sizeof(struct ami_plot_pen));
 		}
 
-		if(alloc_pen_list == true) {
+		if (alloc_pen_list == true) {
 			gg->shared_pens = ami_AllocMinList();
 			gg->managed_pen_list = true;
 		}
@@ -228,7 +252,9 @@ struct gui_globals *ami_plot_ra_alloc(ULONG width, ULONG height, bool force32bit
 	gg->open_colr = NS_TRANSPARENT;
 
 	init_layers_count++;
-	NSLOG(netsurf, INFO, "Layer initialised (total: %d)",
+	NSLOG(netsurf,
+	      INFO,
+	      "Layer initialised (total: %d)",
 	      init_layers_count);
 
 	return gg;
@@ -238,29 +264,33 @@ void ami_plot_ra_free(struct gui_globals *gg)
 {
 	init_layers_count--;
 
-	if(init_layers_count < 0) return;
+	if (init_layers_count < 0)
+		return;
 
-	if(gg->managed_pen_list == true) {
+	if (gg->managed_pen_list == true) {
 		ami_plot_release_pens(gg->shared_pens);
 		free(gg->shared_pens);
 		gg->shared_pens = NULL;
 	}
 
-	if((init_layers_count == 0) && (pool_pens != NULL)) {
+	if ((init_layers_count == 0) && (pool_pens != NULL)) {
 		ami_memory_itempool_delete(pool_pens);
 		pool_pens = NULL;
 	}
 
-	if(gg->rp) {
-		if(gg->rp->Layer != NULL) {
+	if (gg->rp) {
+		if (gg->rp->Layer != NULL) {
 			ami_clearclipreg(gg);
 			/* Remove the clip region */
-			struct Region *reg = InstallClipRegion(gg->rp->Layer,NULL);
-			if(reg) DisposeRegion(reg);
-			if(gg->reg) DisposeRegion(gg->reg);
+			struct Region *reg = InstallClipRegion(gg->rp->Layer,
+							       NULL);
+			if (reg)
+				DisposeRegion(reg);
+			if (gg->reg)
+				DisposeRegion(gg->reg);
 			gg->reg = NULL;
-			
-			/* Delete the layer */	
+
+			/* Delete the layer */
 			DeleteLayer(0, gg->rp->Layer);
 		}
 		free(gg->rp->TmpRas);
@@ -271,7 +301,8 @@ void ami_plot_ra_free(struct gui_globals *gg)
 	ami_memory_chip_free(gg->tmprasbuf);
 	free(gg->areabuf);
 	DisposeLayerInfo(gg->layerinfo);
-	if(gg->bm) ami_rtg_freebitmap(gg->bm);
+	if (gg->bm)
+		ami_rtg_freebitmap(gg->bm);
 
 	free(gg);
 }
@@ -302,17 +333,17 @@ void ami_clearclipreg(struct gui_globals *gg)
 
 	gg->rect.MinX = 0;
 	gg->rect.MinY = 0;
-	gg->rect.MaxX = gg->width-1;
-	gg->rect.MaxY = gg->height-1;
+	gg->rect.MaxX = gg->width - 1;
+	gg->rect.MaxY = gg->height - 1;
 
-	if(__builtin_expect(gg->reg == NULL, 0)) {
+	if (__builtin_expect(gg->reg == NULL, 0)) {
 		gg->reg = NewRegion();
 	} else {
 		ClearRegion(gg->reg);
 	}
-	
+
 	OrRectRegion(gg->reg, &gg->rect);
-	
+
 	gg->reg = InstallClipRegion(gg->rp->Layer, gg->reg);
 
 	gg->apen_num = -1;
@@ -325,18 +356,23 @@ static ULONG ami_plot_obtain_pen(struct MinList *shared_pens, ULONG colr)
 	struct Screen *scrn = ami_gui_get_screen();
 
 	LONG pen = ObtainBestPenA(scrn->ViewPort.ColorMap,
-			(colr & 0x000000ff) << 24,
-			(colr & 0x0000ff00) << 16,
-			(colr & 0x00ff0000) << 8,
-			NULL);
-	
-	if(pen == -1) NSLOG(netsurf, INFO,
-			    "WARNING: Cannot allocate pen for ABGR:%lx", colr);
+				  (colr & 0x000000ff) << 24,
+				  (colr & 0x0000ff00) << 16,
+				  (colr & 0x00ff0000) << 8,
+				  NULL);
 
-	if((shared_pens != NULL) && (pool_pens != NULL)) {
-		if((node = (struct ami_plot_pen *)ami_memory_itempool_alloc(pool_pens, sizeof(struct ami_plot_pen)))) {
+	if (pen == -1)
+		NSLOG(netsurf,
+		      INFO,
+		      "WARNING: Cannot allocate pen for ABGR:%lx",
+		      colr);
+
+	if ((shared_pens != NULL) && (pool_pens != NULL)) {
+		if ((node = (struct ami_plot_pen *)ami_memory_itempool_alloc(
+			     pool_pens, sizeof(struct ami_plot_pen)))) {
 			node->pen = pen;
-			AddTail((struct List *)shared_pens, (struct Node *)node);
+			AddTail((struct List *)shared_pens,
+				(struct Node *)node);
 		}
 	} else {
 		/* Immediately release the pen if we can't keep track of it. */
@@ -351,86 +387,108 @@ void ami_plot_release_pens(struct MinList *shared_pens)
 	struct ami_plot_pen *node;
 	struct ami_plot_pen *nnode;
 
-	if(shared_pens == NULL) return;
-	if(IsMinListEmpty(shared_pens)) return;
+	if (shared_pens == NULL)
+		return;
+	if (IsMinListEmpty(shared_pens))
+		return;
 	node = (struct ami_plot_pen *)GetHead((struct List *)shared_pens);
 
 	do {
 		nnode = (struct ami_plot_pen *)GetSucc((struct Node *)node);
 		ReleasePen(scrn->ViewPort.ColorMap, node->pen);
 		Remove((struct Node *)node);
-		ami_memory_itempool_free(pool_pens, node, sizeof(struct ami_plot_pen));
-	} while((node = nnode));
+		ami_memory_itempool_free(pool_pens,
+					 node,
+					 sizeof(struct ami_plot_pen));
+	} while ((node = nnode));
 }
 
-static void ami_plot_setapen(struct gui_globals *glob, struct RastPort *rp, ULONG colr)
-{	
+static void
+ami_plot_setapen(struct gui_globals *glob, struct RastPort *rp, ULONG colr)
+{
 #ifdef __amigaos4__
-	if(glob->palette_mapped == false) {
-		if(glob->apen_colr == colr) return;
-		SetRPAttrs(rp, RPTAG_APenColor,
-			ns_color_to_nscss(colr),
-			TAG_DONE);
+	if (glob->palette_mapped == false) {
+		if (glob->apen_colr == colr)
+			return;
+		SetRPAttrs(
+			rp, RPTAG_APenColor, ns_color_to_nscss(colr), TAG_DONE);
 	} else
 #endif
 	{
-		if (glob->apen_num != -1 && glob->apen_colr == colr) return;
+		if (glob->apen_num != -1 && glob->apen_colr == colr)
+			return;
 		LONG pen = ami_plot_obtain_pen(glob->shared_pens, colr);
-		if((pen != -1) && (pen != glob->apen_num)) SetAPen(rp, pen);
-		if(glob->shared_pens != NULL) glob->apen_num = pen;
+		if ((pen != -1) && (pen != glob->apen_num))
+			SetAPen(rp, pen);
+		if (glob->shared_pens != NULL)
+			glob->apen_num = pen;
 	}
-	
+
 	glob->apen_colr = colr;
 }
 
-static void ami_plot_setopen(struct gui_globals *glob, struct RastPort *rp, ULONG colr)
+static void
+ami_plot_setopen(struct gui_globals *glob, struct RastPort *rp, ULONG colr)
 {
 #ifdef __amigaos4__
-	if(glob->palette_mapped == false) {
-		if(glob->open_colr == colr) return;
-		SetRPAttrs(rp, RPTAG_OPenColor,
-			ns_color_to_nscss(colr),
-			TAG_DONE);
+	if (glob->palette_mapped == false) {
+		if (glob->open_colr == colr)
+			return;
+		SetRPAttrs(
+			rp, RPTAG_OPenColor, ns_color_to_nscss(colr), TAG_DONE);
 	} else
 #endif
 	{
-		if (glob->open_num != -1 && glob->open_colr == colr) return;
+		if (glob->open_num != -1 && glob->open_colr == colr)
+			return;
 		LONG pen = ami_plot_obtain_pen(glob->shared_pens, colr);
-		if((pen != -1) && (pen != glob->open_num)) SetOPen(rp, pen);
-		if(glob->shared_pens != NULL) glob->open_num = pen;
+		if ((pen != -1) && (pen != glob->open_num))
+			SetOPen(rp, pen);
+		if (glob->shared_pens != NULL)
+			glob->open_num = pen;
 	}
-	
+
 	glob->open_colr = colr;
 }
 
 void ami_plot_clear_bbox(struct RastPort *rp, struct IBox *bbox)
 {
-	if((bbox == NULL) || (rp == NULL)) return;
+	if ((bbox == NULL) || (rp == NULL))
+		return;
 
-	EraseRect(rp, bbox->Left, bbox->Top,
-		bbox->Width + bbox->Left, bbox->Height + bbox->Top);
+	EraseRect(rp,
+		  bbox->Left,
+		  bbox->Top,
+		  bbox->Width + bbox->Left,
+		  bbox->Height + bbox->Top);
 }
 
 
-static void ami_arc_gfxlib(struct RastPort *rp, int x, int y, int radius, int angle1, int angle2)
+static void ami_arc_gfxlib(struct RastPort *rp,
+			   int x,
+			   int y,
+			   int radius,
+			   int angle1,
+			   int angle2)
 {
 	float angle1_r = (float)(angle1) * (M_PI / 180.0);
 	float angle2_r = (float)(angle2) * (M_PI / 180.0);
 	float angle, b, c;
-	float step = 0.1; //(angle2_r - angle1_r) / ((angle2_r - angle1_r) * (float)radius);
+	float step = 0.1; //(angle2_r - angle1_r) / ((angle2_r - angle1_r) *
+			  //(float)radius);
 	int x0, y0, x1, y1;
 
 	x0 = x;
 	y0 = y;
-	
+
 	b = angle1_r;
 	c = angle2_r;
-	
+
 	x1 = (int)(cos(b) * (float)radius);
 	y1 = (int)(sin(b) * (float)radius);
 	Move(rp, x0 + x1, y0 - y1);
-		
-	for(angle = (b + step); angle <= c; angle += step) {
+
+	for (angle = (b + step); angle <= c; angle += step) {
 		x1 = (int)(cos(angle) * (float)radius);
 		y1 = (int)(sin(angle) * (float)radius);
 		Draw(rp, x0 + x1, y0 - y1);
@@ -439,8 +497,13 @@ static void ami_arc_gfxlib(struct RastPort *rp, int x, int y, int radius, int an
 
 /**
  */
-static nserror
-ami_bitmap(struct gui_globals *glob, int x, int y, int width, int height, struct bitmap *bitmap, colour bg)
+static nserror ami_bitmap(struct gui_globals *glob,
+			  int x,
+			  int y,
+			  int width,
+			  int height,
+			  struct bitmap *bitmap,
+			  colour bg)
 {
 	NSLOG(plot, DEEPDEBUG, "[ami_plotter] Entered ami_bitmap()");
 	struct Screen *scrn = ami_gui_get_screen();
@@ -451,13 +514,17 @@ ami_bitmap(struct gui_globals *glob, int x, int y, int width, int height, struct
 	}
 
 	if (((x + width) < glob->rect.MinX) ||
-	    ((y + height) < glob->rect.MinY) ||
-	    (x > glob->rect.MaxX) ||
+	    ((y + height) < glob->rect.MinY) || (x > glob->rect.MaxX) ||
 	    (y > glob->rect.MaxY)) {
 		return NSERROR_OK;
 	}
 
-	tbm = ami_bitmap_get_native(bitmap, width, height, glob->palette_mapped, glob->rp->BitMap, bg);
+	tbm = ami_bitmap_get_native(bitmap,
+				    width,
+				    height,
+				    glob->palette_mapped,
+				    glob->rp->BitMap,
+				    bg);
 	if (!tbm) {
 		return NSERROR_OK;
 	}
@@ -466,32 +533,45 @@ ami_bitmap(struct gui_globals *glob, int x, int y, int width, int height, struct
 
 #ifdef __amigaos4__
 	if (__builtin_expect((GfxBase->LibNode.lib_Version >= 53) &&
-			     (glob->palette_mapped == false), 1)) {
+				     (glob->palette_mapped == false),
+			     1)) {
 		uint32 comptype = COMPOSITE_Src_Over_Dest;
 		uint32 compflags = COMPFLAG_IgnoreDestAlpha;
-		if(amiga_bitmap_get_opaque(bitmap)) {
+		if (amiga_bitmap_get_opaque(bitmap)) {
 			compflags |= COMPFLAG_SrcAlphaOverride;
 			comptype = COMPOSITE_Src;
 		}
 
-		CompositeTags(comptype,tbm,glob->rp->BitMap,
-					COMPTAG_Flags, compflags,
-					COMPTAG_DestX,glob->rect.MinX,
-					COMPTAG_DestY,glob->rect.MinY,
-					COMPTAG_DestWidth,glob->rect.MaxX - glob->rect.MinX + 1,
-					COMPTAG_DestHeight,glob->rect.MaxY - glob->rect.MinY + 1,
-					COMPTAG_SrcWidth,width,
-					COMPTAG_SrcHeight,height,
-					COMPTAG_OffsetX,x,
-					COMPTAG_OffsetY,y,
-					COMPTAG_FriendBitMap, scrn->RastPort.BitMap,
-					TAG_DONE);
+		CompositeTags(comptype,
+			      tbm,
+			      glob->rp->BitMap,
+			      COMPTAG_Flags,
+			      compflags,
+			      COMPTAG_DestX,
+			      glob->rect.MinX,
+			      COMPTAG_DestY,
+			      glob->rect.MinY,
+			      COMPTAG_DestWidth,
+			      glob->rect.MaxX - glob->rect.MinX + 1,
+			      COMPTAG_DestHeight,
+			      glob->rect.MaxY - glob->rect.MinY + 1,
+			      COMPTAG_SrcWidth,
+			      width,
+			      COMPTAG_SrcHeight,
+			      height,
+			      COMPTAG_OffsetX,
+			      x,
+			      COMPTAG_OffsetY,
+			      y,
+			      COMPTAG_FriendBitMap,
+			      scrn->RastPort.BitMap,
+			      TAG_DONE);
 	} else
 #endif
 	{
 		ULONG tag = TAG_IGNORE, tag_data, minterm = 0xc0;
 
-#ifdef __amigaos4__		
+#ifdef __amigaos4__
 		if (glob->palette_mapped == false) {
 			tag = BLITA_UseSrcAlpha;
 			tag_data = !amiga_bitmap_get_opaque(bitmap);
@@ -499,29 +579,50 @@ ami_bitmap(struct gui_globals *glob, int x, int y, int width, int height, struct
 		} else {
 #endif
 			tag = BLITA_MaskPlane;
-			if ((tag_data = (ULONG)ami_bitmap_get_mask(bitmap, width, height, tbm)))
+			if ((tag_data = (ULONG)ami_bitmap_get_mask(
+				     bitmap, width, height, tbm)))
 				minterm = MINTERM_SRCMASK;
 
 #ifdef __amigaos4__
 		}
 
-		BltBitMapTags(BLITA_Width,width,
-						BLITA_Height,height,
-						BLITA_Source,tbm,
-						BLITA_Dest,glob->rp,
-						BLITA_DestX,x,
-						BLITA_DestY,y,
-						BLITA_SrcType,BLITT_BITMAP,
-						BLITA_DestType,BLITT_RASTPORT,
-						BLITA_Minterm, minterm,
-						tag, tag_data,
-						TAG_DONE);
+		BltBitMapTags(BLITA_Width,
+			      width,
+			      BLITA_Height,
+			      height,
+			      BLITA_Source,
+			      tbm,
+			      BLITA_Dest,
+			      glob->rp,
+			      BLITA_DestX,
+			      x,
+			      BLITA_DestY,
+			      y,
+			      BLITA_SrcType,
+			      BLITT_BITMAP,
+			      BLITA_DestType,
+			      BLITT_RASTPORT,
+			      BLITA_Minterm,
+			      minterm,
+			      tag,
+			      tag_data,
+			      TAG_DONE);
 #else
 
-		if(tag_data && (tag == BLITA_MaskPlane)) {
-			BltMaskBitMapRastPort(tbm, 0, 0, glob->rp, x, y, width, height, minterm, tag_data);
+		if (tag_data && (tag == BLITA_MaskPlane)) {
+			BltMaskBitMapRastPort(tbm,
+					      0,
+					      0,
+					      glob->rp,
+					      x,
+					      y,
+					      width,
+					      height,
+					      minterm,
+					      tag_data);
 		} else {
-			BltBitMapRastPort(tbm, 0, 0, glob->rp, x, y, width, height, 0xc0);
+			BltBitMapRastPort(
+				tbm, 0, 0, glob->rp, x, y, width, height, 0xc0);
 		}
 #endif
 	}
@@ -533,17 +634,24 @@ ami_bitmap(struct gui_globals *glob, int x, int y, int width, int height, struct
 	return NSERROR_OK;
 }
 
-static void ami_bezier(struct bez_point *restrict a, struct bez_point *restrict b,
-				struct bez_point *restrict c, struct bez_point *restrict d,
-				float t, struct bez_point *restrict p) {
-    p->x = pow((1 - t), 3) * a->x + 3 * t * pow((1 -t), 2) * b->x + 3 * (1-t) * pow(t, 2)* c->x + pow (t, 3)* d->x;
-    p->y = pow((1 - t), 3) * a->y + 3 * t * pow((1 -t), 2) * b->y + 3 * (1-t) * pow(t, 2)* c->y + pow (t, 3)* d->y;
+static void ami_bezier(struct bez_point *restrict a,
+		       struct bez_point *restrict b,
+		       struct bez_point *restrict c,
+		       struct bez_point *restrict d,
+		       float t,
+		       struct bez_point *restrict p)
+{
+	p->x = pow((1 - t), 3) * a->x + 3 * t * pow((1 - t), 2) * b->x +
+	       3 * (1 - t) * pow(t, 2) * c->x + pow(t, 3) * d->x;
+	p->y = pow((1 - t), 3) * a->y + 3 * t * pow((1 - t), 2) * b->y +
+	       3 * (1 - t) * pow(t, 2) * c->y + pow(t, 3) * d->y;
 }
 
 
 bool ami_plot_screen_is_palettemapped(void)
 {
-	/* This may not be entirely correct - previously we returned the state of the current BitMap */
+	/* This may not be entirely correct - previously we returned the state
+	 * of the current BitMap */
 	return palette_mapped;
 }
 
@@ -563,20 +671,19 @@ ami_clip(const struct redraw_context *ctx, const struct rect *clip)
 
 	NSLOG(plot, DEEPDEBUG, "[ami_plotter] Entered ami_clip()");
 
-	if( (glob->rect.MinX == clip->x0) &&
-		(glob->rect.MinY == clip->y0) &&
-		(glob->rect.MaxX == clip->x1-1) &&
-		(glob->rect.MaxY == clip->y1-1) ) {
-			return NSERROR_OK;
-		}
+	if ((glob->rect.MinX == clip->x0) && (glob->rect.MinY == clip->y0) &&
+	    (glob->rect.MaxX == clip->x1 - 1) &&
+	    (glob->rect.MaxY == clip->y1 - 1)) {
+		return NSERROR_OK;
+	}
 
 	if (glob->rp->Layer) {
 		glob->rect.MinX = clip->x0;
 		glob->rect.MinY = clip->y0;
-		glob->rect.MaxX = clip->x1-1;
-		glob->rect.MaxY = clip->y1-1;
+		glob->rect.MaxX = clip->x1 - 1;
+		glob->rect.MaxY = clip->y1 - 1;
 
-		if(__builtin_expect(glob->reg == NULL, 0)) {
+		if (__builtin_expect(glob->reg == NULL, 0)) {
 			glob->reg = NewRegion();
 		} else {
 			ClearRegion(glob->reg);
@@ -607,10 +714,13 @@ ami_clip(const struct redraw_context *ctx, const struct rect *clip)
  * \param angle2 The finish angle of the arc.
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-ami_arc(const struct redraw_context *ctx,
-	const plot_style_t *style,
-	int x, int y, int radius, int angle1, int angle2)
+static nserror ami_arc(const struct redraw_context *ctx,
+		       const plot_style_t *style,
+		       int x,
+		       int y,
+		       int radius,
+		       int angle1,
+		       int angle2)
 {
 	NSLOG(plot, DEEPDEBUG, "[ami_plotter] Entered ami_arc()");
 
@@ -639,10 +749,11 @@ ami_arc(const struct redraw_context *ctx,
  * \param radius circle radius.
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-ami_disc(const struct redraw_context *ctx,
-		const plot_style_t *style,
-		int x, int y, int radius)
+static nserror ami_disc(const struct redraw_context *ctx,
+			const plot_style_t *style,
+			int x,
+			int y,
+			int radius)
 {
 	NSLOG(plot, DEEPDEBUG, "[ami_plotter] Entered ami_disc()");
 
@@ -650,13 +761,13 @@ ami_disc(const struct redraw_context *ctx,
 
 	if (style->fill_type != PLOT_OP_TYPE_NONE) {
 		ami_plot_setapen(glob, glob->rp, style->fill_colour);
-		AreaCircle(glob->rp,x,y,radius);
+		AreaCircle(glob->rp, x, y, radius);
 		AreaEnd(glob->rp);
 	}
 
 	if (style->stroke_type != PLOT_OP_TYPE_NONE) {
 		ami_plot_setapen(glob, glob->rp, style->stroke_colour);
-		DrawEllipse(glob->rp,x,y,radius,radius);
+		DrawEllipse(glob->rp, x, y, radius, radius);
 	}
 
 	return NSERROR_OK;
@@ -674,10 +785,9 @@ ami_disc(const struct redraw_context *ctx,
  * \param line A rectangle defining the line to be drawn
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-ami_line(const struct redraw_context *ctx,
-		const plot_style_t *style,
-		const struct rect *line)
+static nserror ami_line(const struct redraw_context *ctx,
+			const plot_style_t *style,
+			const struct rect *line)
 {
 	NSLOG(plot, DEEPDEBUG, "[ami_plotter] Entered ami_line()");
 
@@ -687,17 +797,17 @@ ami_line(const struct redraw_context *ctx,
 	glob->rp->PenHeight = plot_style_fixed_to_int(style->stroke_width);
 
 	switch (style->stroke_type) {
-		case PLOT_OP_TYPE_SOLID: /**< Solid colour */
-		default:
-			glob->rp->LinePtrn = PATT_LINE;
+	case PLOT_OP_TYPE_SOLID: /**< Solid colour */
+	default:
+		glob->rp->LinePtrn = PATT_LINE;
 		break;
 
-		case PLOT_OP_TYPE_DOT: /**< Doted plot */
-			glob->rp->LinePtrn = PATT_DOT;
+	case PLOT_OP_TYPE_DOT: /**< Doted plot */
+		glob->rp->LinePtrn = PATT_DOT;
 		break;
 
-		case PLOT_OP_TYPE_DASH: /**< dashed plot */
-			glob->rp->LinePtrn = PATT_DASH;
+	case PLOT_OP_TYPE_DASH: /**< dashed plot */
+		glob->rp->LinePtrn = PATT_DASH;
 		break;
 	}
 
@@ -726,10 +836,9 @@ ami_line(const struct redraw_context *ctx,
  * \param rect A rectangle defining the line to be drawn
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-ami_rectangle(const struct redraw_context *ctx,
-		     const plot_style_t *style,
-		     const struct rect *rect)
+static nserror ami_rectangle(const struct redraw_context *ctx,
+			     const plot_style_t *style,
+			     const struct rect *rect)
 {
 	NSLOG(plot, DEEPDEBUG, "[ami_plotter] Entered ami_rectangle()");
 
@@ -737,27 +846,33 @@ ami_rectangle(const struct redraw_context *ctx,
 
 	if (style->fill_type != PLOT_OP_TYPE_NONE) {
 		ami_plot_setapen(glob, glob->rp, style->fill_colour);
-		RectFill(glob->rp, rect->x0, rect->y0, rect->x1- 1 , rect->y1 - 1);
+		RectFill(glob->rp,
+			 rect->x0,
+			 rect->y0,
+			 rect->x1 - 1,
+			 rect->y1 - 1);
 	}
 
 	if (style->stroke_type != PLOT_OP_TYPE_NONE) {
-		glob->rp->PenWidth = plot_style_fixed_to_int(style->stroke_width);
-		glob->rp->PenHeight = plot_style_fixed_to_int(style->stroke_width);
+		glob->rp->PenWidth = plot_style_fixed_to_int(
+			style->stroke_width);
+		glob->rp->PenHeight = plot_style_fixed_to_int(
+			style->stroke_width);
 
 		switch (style->stroke_type) {
-			case PLOT_OP_TYPE_SOLID: /**< Solid colour */
-			default:
-				glob->rp->LinePtrn = PATT_LINE;
+		case PLOT_OP_TYPE_SOLID: /**< Solid colour */
+		default:
+			glob->rp->LinePtrn = PATT_LINE;
 			break;
 
-			case PLOT_OP_TYPE_DOT: /**< Dotted plot */
-				glob->rp->LinePtrn = PATT_DOT;
+		case PLOT_OP_TYPE_DOT: /**< Dotted plot */
+			glob->rp->LinePtrn = PATT_DOT;
 			break;
 
-			case PLOT_OP_TYPE_DASH: /**< dashed plot */
-				glob->rp->LinePtrn = PATT_DASH;
+		case PLOT_OP_TYPE_DASH: /**< dashed plot */
+			glob->rp->LinePtrn = PATT_DASH;
 			break;
- 		}
+		}
 
 		ami_plot_setapen(glob, glob->rp, style->stroke_colour);
 		Move(glob->rp, rect->x0, rect->y0);
@@ -789,27 +904,27 @@ ami_rectangle(const struct redraw_context *ctx,
  * \param n number of verticies.
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-ami_polygon(const struct redraw_context *ctx,
-		   const plot_style_t *style,
-		   const int *p,
-		   unsigned int n)
+static nserror ami_polygon(const struct redraw_context *ctx,
+			   const plot_style_t *style,
+			   const int *p,
+			   unsigned int n)
 {
 	NSLOG(plot, DEEPDEBUG, "[ami_plotter] Entered ami_polygon()");
-	if(n < 2) return NSERROR_OK;
+	if (n < 2)
+		return NSERROR_OK;
 
 	struct gui_globals *glob = (struct gui_globals *)ctx->priv;
 
 	ami_plot_setapen(glob, glob->rp, style->fill_colour);
 
-	if (AreaMove(glob->rp,p[0],p[1]) == -1) {
+	if (AreaMove(glob->rp, p[0], p[1]) == -1) {
 		NSLOG(netsurf, INFO, "AreaMove: vector list full");
 		AreaEnd(glob->rp);
 		return NSERROR_OK;
 	}
 
 	for (uint32 k = 1; k < n; k++) {
-		if (AreaDraw(glob->rp,p[k*2],p[(k*2)+1]) == -1) {
+		if (AreaDraw(glob->rp, p[k * 2], p[(k * 2) + 1]) == -1) {
 			NSLOG(netsurf, INFO, "AreaDraw: vector list full");
 			AreaEnd(glob->rp);
 			return NSERROR_OK;
@@ -837,12 +952,11 @@ ami_polygon(const struct redraw_context *ctx,
  * \param transform A transform to apply to the path.
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-ami_path(const struct redraw_context *ctx,
-		const plot_style_t *pstyle,
-		const float *p,
-		unsigned int n,
-		const float transform[6])
+static nserror ami_path(const struct redraw_context *ctx,
+			const plot_style_t *pstyle,
+			const float *p,
+			unsigned int n,
+			const float transform[6])
 {
 	unsigned int i;
 	struct bez_point start_p = {0, 0}, cur_p = {0, 0}, p_a, p_b, p_c, p_r;
@@ -874,19 +988,21 @@ ami_path(const struct redraw_context *ctx,
 	}
 
 	/* Construct path */
-	for (i = 0; i < n; ) {
+	for (i = 0; i < n;) {
 		if (p[i] == PLOTTER_PATH_MOVE) {
 			if (pstyle->fill_colour != NS_TRANSPARENT) {
-				if (AreaMove(glob->rp, p[i+1], p[i+2]) == -1) {
-					NSLOG(netsurf, INFO,
+				if (AreaMove(glob->rp, p[i + 1], p[i + 2]) ==
+				    -1) {
+					NSLOG(netsurf,
+					      INFO,
 					      "AreaMove: vector list full");
 				}
 			} else {
-				Move(glob->rp, p[i+1], p[i+2]);
+				Move(glob->rp, p[i + 1], p[i + 2]);
 			}
 			/* Keep track for future Bezier curves/closes etc */
-			start_p.x = p[i+1];
-			start_p.y = p[i+2];
+			start_p.x = p[i + 1];
+			start_p.y = p[i + 2];
 			cur_p.x = start_p.x;
 			cur_p.y = start_p.y;
 			i += 3;
@@ -901,29 +1017,33 @@ ami_path(const struct redraw_context *ctx,
 			i++;
 		} else if (p[i] == PLOTTER_PATH_LINE) {
 			if (pstyle->fill_colour != NS_TRANSPARENT) {
-				if (AreaDraw(glob->rp, p[i+1], p[i+2]) == -1) {
-					NSLOG(netsurf, INFO,
+				if (AreaDraw(glob->rp, p[i + 1], p[i + 2]) ==
+				    -1) {
+					NSLOG(netsurf,
+					      INFO,
 					      "AreaDraw: vector list full");
 				}
 			} else {
-				Draw(glob->rp, p[i+1], p[i+2]);
+				Draw(glob->rp, p[i + 1], p[i + 2]);
 			}
-			cur_p.x = p[i+1];
-			cur_p.y = p[i+2];
+			cur_p.x = p[i + 1];
+			cur_p.y = p[i + 2];
 			i += 3;
 		} else if (p[i] == PLOTTER_PATH_BEZIER) {
-			p_a.x = p[i+1];
-			p_a.y = p[i+2];
-			p_b.x = p[i+3];
-			p_b.y = p[i+4];
-			p_c.x = p[i+5];
-			p_c.y = p[i+6];
+			p_a.x = p[i + 1];
+			p_a.y = p[i + 2];
+			p_b.x = p[i + 3];
+			p_b.y = p[i + 4];
+			p_c.x = p[i + 5];
+			p_c.y = p[i + 6];
 
 			for (float t = 0.0; t <= 1.0; t += 0.1) {
 				ami_bezier(&cur_p, &p_a, &p_b, &p_c, t, &p_r);
 				if (pstyle->fill_colour != NS_TRANSPARENT) {
-					if (AreaDraw(glob->rp, p_r.x, p_r.y) == -1) {
-						NSLOG(netsurf, INFO,
+					if (AreaDraw(glob->rp, p_r.x, p_r.y) ==
+					    -1) {
+						NSLOG(netsurf,
+						      INFO,
 						      "AreaDraw: vector list full");
 					}
 				} else {
@@ -975,16 +1095,16 @@ ami_path(const struct redraw_context *ctx,
  * \param flags the flags controlling the type of plot operation
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-ami_bitmap_tile(const struct redraw_context *ctx,
-		struct bitmap *bitmap,
-		int x, int y,
-		int width,
-		int height,
-		colour bg,
-		bitmap_flags_t flags)
+static nserror ami_bitmap_tile(const struct redraw_context *ctx,
+			       struct bitmap *bitmap,
+			       int x,
+			       int y,
+			       int width,
+			       int height,
+			       colour bg,
+			       bitmap_flags_t flags)
 {
-	int xf,yf,xm,ym,oy,ox;
+	int xf, yf, xm, ym, oy, ox;
 	struct BitMap *tbm = NULL;
 	bool repeat_x = (flags & BITMAPF_REPEAT_X);
 	bool repeat_y = (flags & BITMAPF_REPEAT_Y);
@@ -1008,21 +1128,28 @@ ami_bitmap_tile(const struct redraw_context *ctx,
 		return NSERROR_OK;
 	}
 
-	tbm = ami_bitmap_get_native(bitmap, width, height, glob->palette_mapped, glob->rp->BitMap, bg);
+	tbm = ami_bitmap_get_native(bitmap,
+				    width,
+				    height,
+				    glob->palette_mapped,
+				    glob->rp->BitMap,
+				    bg);
 	if (!tbm) {
 		return NSERROR_OK;
 	}
-	
+
 	struct Screen *scrn = ami_gui_get_screen();
 
 	ox = x;
 	oy = y;
 
 	/* get left most tile position */
-	for (; ox > 0; ox -= width);
+	for (; ox > 0; ox -= width)
+		;
 
 	/* get top most tile position */
-	for (; oy > 0; oy -= height);
+	for (; oy > 0; oy -= height)
+		;
 
 	if (ox < 0) {
 		ox = -ox;
@@ -1041,17 +1168,18 @@ ami_bitmap_tile(const struct redraw_context *ctx,
 	} else {
 		yf = y + height;
 	}
-	
+
 	ULONG tag = TAG_IGNORE, tag_data, minterm = 0xc0;
-	
+
 #ifdef __amigaos4__
-	if(glob->palette_mapped == false) {
+	if (glob->palette_mapped == false) {
 		tag = BLITA_UseSrcAlpha;
 		tag_data = TRUE;
 		minterm = 0xc0;
 	} else {
 #endif
-		if((tag_data = (ULONG)ami_bitmap_get_mask(bitmap, width, height, tbm))) {
+		if ((tag_data = (ULONG)ami_bitmap_get_mask(
+			     bitmap, width, height, tbm))) {
 			tag = BLITA_MaskPlane;
 			minterm = MINTERM_SRCMASK;
 		}
@@ -1064,45 +1192,87 @@ ami_bitmap_tile(const struct redraw_context *ctx,
 		for (y = -oy; y <= yf; y += height) {
 
 #ifdef __amigaos4__
-			if(__builtin_expect((GfxBase->LibNode.lib_Version >= 53) &&
-					(glob->palette_mapped == false), 1)) {
+			if (__builtin_expect(
+				    (GfxBase->LibNode.lib_Version >= 53) &&
+					    (glob->palette_mapped == false),
+				    1)) {
 
-				CompositeTags(COMPOSITE_Src_Over_Dest, tbm, glob->rp->BitMap,
-					COMPTAG_Flags, COMPFLAG_IgnoreDestAlpha,
-					COMPTAG_DestX, glob->rect.MinX,
-					COMPTAG_DestY, glob->rect.MinY,
-					COMPTAG_DestWidth, glob->rect.MaxX - glob->rect.MinX + 1,
-					COMPTAG_DestHeight, glob->rect.MaxY - glob->rect.MinY + 1,
-					COMPTAG_SrcWidth, width,
-					COMPTAG_SrcHeight, height,
-					COMPTAG_OffsetX, x,
-					COMPTAG_OffsetY, y,
-					COMPTAG_FriendBitMap, scrn->RastPort.BitMap,
+				CompositeTags(
+					COMPOSITE_Src_Over_Dest,
+					tbm,
+					glob->rp->BitMap,
+					COMPTAG_Flags,
+					COMPFLAG_IgnoreDestAlpha,
+					COMPTAG_DestX,
+					glob->rect.MinX,
+					COMPTAG_DestY,
+					glob->rect.MinY,
+					COMPTAG_DestWidth,
+					glob->rect.MaxX - glob->rect.MinX + 1,
+					COMPTAG_DestHeight,
+					glob->rect.MaxY - glob->rect.MinY + 1,
+					COMPTAG_SrcWidth,
+					width,
+					COMPTAG_SrcHeight,
+					height,
+					COMPTAG_OffsetX,
+					x,
+					COMPTAG_OffsetY,
+					y,
+					COMPTAG_FriendBitMap,
+					scrn->RastPort.BitMap,
 					TAG_DONE);
 			} else
 #endif
 			{
 #ifdef __amigaos4__
-				BltBitMapTags(BLITA_Width, width,
-					BLITA_Height, height,
-					BLITA_Source, tbm,
-					BLITA_SrcX, 0,
-					BLITA_SrcY, 0,
-					BLITA_Dest, glob->rp,
-					BLITA_DestX, x,
-					BLITA_DestY, y,
-					BLITA_SrcType, BLITT_BITMAP,
-					BLITA_DestType, BLITT_RASTPORT,
-					BLITA_Minterm, minterm,
-					tag, tag_data,
-					TAG_DONE);
+				BltBitMapTags(BLITA_Width,
+					      width,
+					      BLITA_Height,
+					      height,
+					      BLITA_Source,
+					      tbm,
+					      BLITA_SrcX,
+					      0,
+					      BLITA_SrcY,
+					      0,
+					      BLITA_Dest,
+					      glob->rp,
+					      BLITA_DestX,
+					      x,
+					      BLITA_DestY,
+					      y,
+					      BLITA_SrcType,
+					      BLITT_BITMAP,
+					      BLITA_DestType,
+					      BLITT_RASTPORT,
+					      BLITA_Minterm,
+					      minterm,
+					      tag,
+					      tag_data,
+					      TAG_DONE);
 #else
-				if(tag_data && (tag == BLITA_MaskPlane)) {
-					BltMaskBitMapRastPort(tbm, 0, 0, glob->rp, x, y,
-						width, height, minterm, tag_data);
+				if (tag_data && (tag == BLITA_MaskPlane)) {
+					BltMaskBitMapRastPort(tbm,
+							      0,
+							      0,
+							      glob->rp,
+							      x,
+							      y,
+							      width,
+							      height,
+							      minterm,
+							      tag_data);
 				} else {
-					BltBitMapRastPort(tbm, 0, 0, glob->rp, x, y,
-						width, height, 0xc0);
+					BltBitMapRastPort(tbm,
+							  0,
+							  0,
+							  glob->rp,
+							  x,
+							  y,
+							  width,
+							  height,
+							  0xc0);
 				}
 #endif
 			}
@@ -1129,13 +1299,12 @@ ami_bitmap_tile(const struct redraw_context *ctx,
  * \param length length of string, in bytes
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-ami_text(const struct redraw_context *ctx,
-		const struct plot_font_style *fstyle,
-		int x,
-		int y,
-		const char *text,
-		size_t length)
+static nserror ami_text(const struct redraw_context *ctx,
+			const struct plot_font_style *fstyle,
+			int x,
+			int y,
+			const char *text,
+			size_t length)
 {
 	NSLOG(plot, DEEPDEBUG, "[ami_plotter] Entered ami_text()");
 
@@ -1145,7 +1314,13 @@ ami_text(const struct redraw_context *ctx,
 		return NSERROR_OK;
 	}
 	ami_plot_setapen(glob, glob->rp, fstyle->foreground);
-	ami_nsfont->text(glob->rp, text, length, fstyle, x, y, nsoption_bool(font_antialiasing));
+	ami_nsfont->text(glob->rp,
+			 text,
+			 length,
+			 fstyle,
+			 x,
+			 y,
+			 nsoption_bool(font_antialiasing));
 
 	return NSERROR_OK;
 }
@@ -1163,4 +1338,3 @@ const struct plotter_table amiplot = {
 	.path = ami_path,
 	.option_knockout = true,
 };
-

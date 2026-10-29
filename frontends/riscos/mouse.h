@@ -45,10 +45,11 @@ void ro_mouse_poll(void);
  *			can't be cancelled.
  * \param *data		Data to be passed to the callback functions, or NULL.
  */
- 
+
 void ro_mouse_drag_start(void (*drag_end)(wimp_dragged *dragged, void *data),
-		void (*drag_track)(wimp_pointer *pointer, void *data),
-		void (*drag_cancel)(void *data), void *data);
+			 void (*drag_track)(wimp_pointer *pointer, void *data),
+			 void (*drag_cancel)(void *data),
+			 void *data);
 
 
 /**
@@ -75,8 +76,8 @@ void ro_mouse_drag_end(wimp_dragged *dragged);
  */
 
 void ro_mouse_track_start(void (*poll_end)(wimp_leaving *leaving, void *data),
-		void (*poll_track)(wimp_pointer *pointer, void *data),
-		void *data);
+			  void (*poll_track)(wimp_pointer *pointer, void *data),
+			  void *data);
 
 /**
  * Process Wimp_PointerLeaving events by terminating an active mouse track and
@@ -107,4 +108,3 @@ void ro_mouse_kill(void *data);
 os_t ro_mouse_poll_interval(void);
 
 #endif
-

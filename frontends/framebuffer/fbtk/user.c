@@ -28,28 +28,26 @@
 #include "widget.h"
 
 /* exported function documented in fbtk.h */
-void *
-fbtk_get_userpw(fbtk_widget_t *widget)
+void *fbtk_get_userpw(fbtk_widget_t *widget)
 {
-	if ((widget == NULL) ||
-	    (widget->type != FB_WIDGET_TYPE_USER))
+	if ((widget == NULL) || (widget->type != FB_WIDGET_TYPE_USER))
 		return NULL;
 
 	return widget->u.user.pw;
 }
 
 /* exported function documented in fbtk.h */
-fbtk_widget_t *
-fbtk_create_user(fbtk_widget_t *parent,
-		 int x,
-		 int y,
-		 int width,
-		 int height,
-		 void *pw)
+fbtk_widget_t *fbtk_create_user(fbtk_widget_t *parent,
+				int x,
+				int y,
+				int width,
+				int height,
+				void *pw)
 {
 	fbtk_widget_t *neww;
 
-	neww = fbtk_widget_new(parent, FB_WIDGET_TYPE_USER, x, y, width, height);
+	neww = fbtk_widget_new(
+		parent, FB_WIDGET_TYPE_USER, x, y, width, height);
 	neww->u.user.pw = pw;
 	neww->mapped = true;
 

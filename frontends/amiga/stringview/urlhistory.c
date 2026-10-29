@@ -41,38 +41,38 @@ static struct List PageList;
 #define ALLOCVEC_SHARED(N) AllocVec((N), MEMF_SHARED);
 #endif
 
-void URLHistory_Init( void )
+void URLHistory_Init(void)
 {
 	// Initialise page list
-	NewList( &PageList );
+	NewList(&PageList);
 }
 
 
-void URLHistory_Free( void )
+void URLHistory_Free(void)
 {
 	struct Node *node;
 
-	while(( node = RemHead( &PageList )))
-	{
-		if( node->ln_Name) FreeVec( node->ln_Name );
-		FreeVec( node );
+	while ((node = RemHead(&PageList))) {
+		if (node->ln_Name)
+			FreeVec(node->ln_Name);
+		FreeVec(node);
 	}
 }
 
 
-void URLHistory_ClearList( void )
+void URLHistory_ClearList(void)
 {
 	struct Node *node;
 
-	while(( node = RemHead( &PageList )))
-	{
-		if( node->ln_Name) FreeVec( node->ln_Name );
-		FreeVec( node );
+	while ((node = RemHead(&PageList))) {
+		if (node->ln_Name)
+			FreeVec(node->ln_Name);
+		FreeVec(node);
 	}
 }
 
 
-struct List * URLHistory_GetList( void )
+struct List *URLHistory_GetList(void)
 {
 	return &PageList;
 }
@@ -86,44 +86,40 @@ static bool URLHistoryFound(nsurl *url, const struct url_data *data)
 	*/
 
 	/* skip this URL if it is already in the list */
-	if(URLHistory_FindPage(nsurl_access(url))) return true;
+	if (URLHistory_FindPage(nsurl_access(url)))
+		return true;
 
 	node = ALLOCVEC_SHARED(sizeof(struct Node));
 
-	if ( node )
-	{
-    const char *u = nsurl_access(url);
-    STRPTR urladd = (STRPTR) ALLOCVEC_SHARED(strlen(u) + 1);
+	if (node) {
+		const char *u = nsurl_access(url);
+		STRPTR urladd = (STRPTR)ALLOCVEC_SHARED(strlen(u) + 1);
 
-    if (urladd)
-    {
-      strcpy(urladd, u);
-      node->ln_Name = urladd;
-      AddTail(&PageList, node);
-    }
-		else
-		{
+		if (urladd) {
+			strcpy(urladd, u);
+			node->ln_Name = urladd;
+			AddTail(&PageList, node);
+		} else {
 			FreeVec(node);
 		}
 	}
 	return true;
 }
 
-struct Node * URLHistory_FindPage( const char *urlString )
+struct Node *URLHistory_FindPage(const char *urlString)
 {
-	return FindName(&PageList,urlString);
+	return FindName(&PageList, urlString);
 }
 
 
-void URLHistory_AddPage( const char * urlString )
+void URLHistory_AddPage(const char *urlString)
 {
-	if(!nsoption_bool(url_suggestion)) return;
+	if (!nsoption_bool(url_suggestion))
+		return;
 
 	// Only search if length > 0
-	if( strlen( urlString ) > 0 )
-	{
+	if (strlen(urlString) > 0) {
 		urldb_iterate_partial(urlString, URLHistoryFound);
 	}
 }
 #endif //__amigaos4__
-

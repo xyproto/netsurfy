@@ -33,58 +33,63 @@
 const char *fetch_filetype(const char *unix_path)
 {
 	int l;
-	char * res = (char*)"text/html";
+	char *res = (char *)"text/html";
 	l = strlen(unix_path);
 
 	NSLOG(netsurf, INFO, "unix path: %s", unix_path);
 
-	/* This line is added for devlopment versions running from the root dir: */
-	if( strchr( unix_path, (int)'.' ) ){
+	/* This line is added for devlopment versions running from the root dir:
+	 */
+	if (strchr(unix_path, (int)'.')) {
 		if (2 < l && strcasecmp(unix_path + l - 3, "f79") == 0)
-			res = (char*)"text/css";
+			res = (char *)"text/css";
 		else if (2 < l && strcasecmp(unix_path + l - 3, "css") == 0)
-			res = (char*)"text/css";
+			res = (char *)"text/css";
 		else if (2 < l && strcasecmp(unix_path + l - 3, "jpg") == 0)
-			res = (char*)"image/jpeg";
+			res = (char *)"image/jpeg";
 		else if (3 < l && strcasecmp(unix_path + l - 4, "jpeg") == 0)
-			res = (char*)"image/jpeg";
+			res = (char *)"image/jpeg";
 		else if (2 < l && strcasecmp(unix_path + l - 3, "gif") == 0)
-			res = (char*)"image/gif";
+			res = (char *)"image/gif";
 		else if (2 < l && strcasecmp(unix_path + l - 3, "png") == 0)
-			res = (char*)"image/png";
+			res = (char *)"image/png";
 		else if (2 < l && strcasecmp(unix_path + l - 3, "jng") == 0)
-			res = (char*)"image/jng";
+			res = (char *)"image/jng";
 		else if (2 < l && strcasecmp(unix_path + l - 3, "svg") == 0)
-			res = (char*)"image/svg";
+			res = (char *)"image/svg";
 		else if (2 < l && strcasecmp(unix_path + l - 3, "txt") == 0)
-			res = (char*)"text/plain";
+			res = (char *)"text/plain";
 	} else {
-		FILE * fp;
+		FILE *fp;
 		char buffer[16];
-		fp = fopen( unix_path, "r" );
-		if( fp ){
-			int n=0;
+		fp = fopen(unix_path, "r");
+		if (fp) {
+			int n = 0;
 			int c;
 			do {
-				c = fgetc (fp);
-				if( c != EOF )
+				c = fgetc(fp);
+				if (c != EOF)
 					buffer[n] = (char)c;
 				else
 					buffer[n] = 0;
 				n++;
-			} while (c != EOF && n<15);
-			fclose( fp );
-			if( n > 0 ){
-				if( n > 5 && strncasecmp("GIF89", buffer, 5) == 0 )
-					res = (char*)"image/gif";
-				else if( n > 4 && strncasecmp("PNG", &buffer[1], 3) ==0 )
-					res = (char*)"image/png";
-				else if( n > 10 && strncasecmp("JFIF", &buffer[5], 4) == 0 )
-					res = (char*)"image/jpeg";
+			} while (c != EOF && n < 15);
+			fclose(fp);
+			if (n > 0) {
+				if (n > 5 &&
+				    strncasecmp("GIF89", buffer, 5) == 0)
+					res = (char *)"image/gif";
+				else if (n > 4 &&
+					 strncasecmp("PNG", &buffer[1], 3) == 0)
+					res = (char *)"image/png";
+				else if (n > 10 &&
+					 strncasecmp("JFIF", &buffer[5], 4) ==
+						 0)
+					res = (char *)"image/jpeg";
 			}
 		}
 	}
 
 	NSLOG(netsurf, INFO, "mime type: %s", res);
-	return( res );
+	return (res);
 }

@@ -67,7 +67,7 @@ static bool monkey_done = false;
  *
  * \param error The message to display to the user.
  */
-static void die(const char * const error)
+static void die(const char *const error)
 {
 	moutf(MOUT_DIE, "%s", error);
 	exit(EXIT_FAILURE);
@@ -123,7 +123,7 @@ static const char *get_language(void)
  * If the environment variables have more than LANGV_SIZE languages or
  * LANGS_SIZE bytes of data the results list will be curtailed.
  */
-static const char * const *get_languagev(void)
+static const char *const *get_languagev(void)
 {
 	static const char *langv[LANGV_SIZE];
 	int langidx = 0; /* index of next entry in vector */
@@ -146,9 +146,9 @@ static const char * const *get_languagev(void)
 		lang_len = strlen(lange) + 1;
 		if (lang_len < (LANGS_SIZE - 2)) {
 			memcpy(curp, lange, lang_len);
-			while ((curp[0] != 0) &&
-			       (langidx < (LANGV_SIZE - 2))) {
-				/* avoid using strchrnul as it is not portable */
+			while ((curp[0] != 0) && (langidx < (LANGV_SIZE - 2))) {
+				/* avoid using strchrnul as it is not portable
+				 */
 				cln = strchr(curp, ':');
 				if (cln == NULL) {
 					langv[langidx++] = curp;
@@ -156,7 +156,8 @@ static const char * const *get_languagev(void)
 					break;
 				} else {
 					if ((cln - curp) > 1) {
-						/* only place non empty entries in vector */
+						/* only place non empty entries
+						 * in vector */
 						langv[langidx++] = curp;
 					}
 					*cln++ = 0; /* null terminate */
@@ -186,10 +187,9 @@ static const char * const *get_languagev(void)
  * \param resource_path A shell style colon separated path list
  * \return A string vector of valid paths where resources can be found
  */
-static char **
-nsmonkey_init_resource(const char *resource_path)
+static char **nsmonkey_init_resource(const char *resource_path)
 {
-	const char * const *langv;
+	const char *const *langv;
 	char **pathv; /* resource path string vector */
 	char **respath; /* resource paths vector */
 
@@ -281,7 +281,7 @@ static void monkey_run(void)
 	int rdy_fd;
 	int schedtm;
 	struct timeval tv;
-	struct timeval* timeout;
+	struct timeval *timeout;
 
 	while (!monkey_done) {
 
@@ -317,7 +317,8 @@ static void monkey_run(void)
 			NSLOG(netsurf, INFO, "Iterate non-blocking");
 			moutf(MOUT_GENERIC, "POLL TIMED %d", schedtm);
 			tv.tv_sec = schedtm / 1000; /* miliseconds to seconds */
-			tv.tv_usec = (schedtm % 1000) * 1000; /* remainder to microseconds */
+			tv.tv_usec = (schedtm % 1000) *
+				     1000; /* remainder to microseconds */
 			timeout = &tv;
 			break;
 		}
@@ -328,7 +329,10 @@ static void monkey_run(void)
 				&exc_fd_set,
 				timeout);
 		if (rdy_fd < 0) {
-			NSLOG(netsurf, CRITICAL, "Unable to select: %s", strerror(errno));
+			NSLOG(netsurf,
+			      CRITICAL,
+			      "Unable to select: %s",
+			      strerror(errno));
 			monkey_done = true;
 		} else if (rdy_fd > 0) {
 			if (FD_ISSET(0, &read_fd_set)) {
@@ -342,15 +346,19 @@ static void monkey_run(void)
 #include <execinfo.h>
 static void *backtrace_buffer[4096];
 
-void
-__assert_fail(const char *__assertion, const char *__file,
-	      unsigned int __line, const char *__function)
+void __assert_fail(const char *__assertion,
+		   const char *__file,
+		   unsigned int __line,
+		   const char *__function)
 {
 	int frames;
 	fprintf(stderr,
 		"MONKEY: Assertion failure!\n"
 		"%s:%d: %s: Assertion `%s` failed.\n",
-		__file, __line, __function, __assertion);
+		__file,
+		__line,
+		__function,
+		__assertion);
 
 	frames = backtrace(&backtrace_buffer[0], 4096);
 	if (frames > 0 && frames < 4096) {
@@ -359,19 +367,23 @@ __assert_fail(const char *__assertion, const char *__file,
 		backtrace_symbols_fd(&backtrace_buffer[0], frames, 2);
 	}
 
-        abort();
+	abort();
 }
 
-static void
-signal_handler(int sig)
+static void signal_handler(int sig)
 {
 	int frames;
-	fprintf(stderr, "Caught signal %s (%d)\n",
-		((sig == SIGSEGV) ? "SIGSEGV" :
-		 ((sig == SIGILL) ? "SIGILL" :
-		  ((sig == SIGFPE) ? "SIGFPE" :
-		   ((sig == SIGBUS) ? "SIGBUS" :
-		    "unknown signal")))),
+	fprintf(stderr,
+		"Caught signal %s (%d)\n",
+		((sig == SIGSEGV)
+			 ? "SIGSEGV"
+			 : ((sig == SIGILL)
+				    ? "SIGILL"
+				    : ((sig == SIGFPE)
+					       ? "SIGFPE"
+					       : ((sig == SIGBUS)
+							  ? "SIGBUS"
+							  : "unknown signal")))),
 		sig);
 	frames = backtrace(&backtrace_buffer[0], 4096);
 	if (frames > 0 && frames < 4096) {
@@ -380,13 +392,12 @@ signal_handler(int sig)
 		backtrace_symbols_fd(&backtrace_buffer[0], frames, 2);
 	}
 
-        abort();
+	abort();
 }
 
 #endif
 
-int
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
 	char *messages;
 	char *options;
@@ -399,7 +410,7 @@ main(int argc, char **argv)
 		.fetch = monkey_fetch_table,
 		.bitmap = monkey_bitmap_table,
 		.layout = monkey_layout_table,
-                .llcache = filesystem_llcache_table,
+		.llcache = filesystem_llcache_table,
 	};
 
 #if (!defined(NDEBUG) && defined(HAVE_EXECINFO))
@@ -422,7 +433,9 @@ main(int argc, char **argv)
 	setbuf(stderr, NULL);
 
 	/* Prep the search paths */
-	respaths = nsmonkey_init_resource("${HOME}/.netsurf/:${NETSURFRES}:"MONKEY_RESPATH":./frontends/monkey/res");
+	respaths = nsmonkey_init_resource(
+		"${HOME}/.netsurf/:${NETSURFRES}:" MONKEY_RESPATH
+		":./frontends/monkey/res");
 
 	/* initialise logging. Not fatal if it fails but not much we can do
 	 * about it either.

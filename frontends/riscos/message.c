@@ -40,8 +40,9 @@ struct active_message {
 };
 struct active_message *current_messages = NULL;
 
-static struct active_message *ro_message_add(unsigned int message_code,
-		void (*callback)(wimp_message *message));
+static struct active_message *
+ro_message_add(unsigned int message_code,
+	       void (*callback)(wimp_message *message));
 static void ro_message_free(int ref);
 
 
@@ -54,8 +55,10 @@ static void ro_message_free(int ref);
  * \param callback	the code to call on a bounce
  * \return true on success, false otherwise
  */
-bool ro_message_send_message(wimp_event_no event, wimp_message *message,
-		wimp_t task, void (*callback)(wimp_message *message))
+bool ro_message_send_message(wimp_event_no event,
+			     wimp_message *message,
+			     wimp_t task,
+			     void (*callback)(wimp_message *message))
 {
 	os_error *error;
 
@@ -64,8 +67,11 @@ bool ro_message_send_message(wimp_event_no event, wimp_message *message,
 	/* send a message */
 	error = xwimp_send_message(event, message, task);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_send_message: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_send_message: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return false;
 	}
@@ -73,8 +79,9 @@ bool ro_message_send_message(wimp_event_no event, wimp_message *message,
 	/* register the default bounce handler */
 	if (callback) {
 		assert(event == wimp_USER_MESSAGE_RECORDED);
-		return ro_message_register_handler(message, message->action,
-				callback);
+		return ro_message_register_handler(message,
+						   message->action,
+						   callback);
 	}
 	return true;
 }
@@ -91,9 +98,12 @@ bool ro_message_send_message(wimp_event_no event, wimp_message *message,
  * \param to_t		receives the task handle of the window's creator
  * \return true on success, false otherwise
  */
-bool ro_message_send_message_to_window(wimp_event_no event, wimp_message *message,
-		wimp_w to_w, wimp_i to_i, void (*callback)(wimp_message *message),
-		wimp_t *to_t)
+bool ro_message_send_message_to_window(wimp_event_no event,
+				       wimp_message *message,
+				       wimp_w to_w,
+				       wimp_i to_i,
+				       void (*callback)(wimp_message *message),
+				       wimp_t *to_t)
 {
 	os_error *error;
 
@@ -102,7 +112,8 @@ bool ro_message_send_message_to_window(wimp_event_no event, wimp_message *messag
 	/* send a message */
 	error = xwimp_send_message_to_window(event, message, to_w, to_i, to_t);
 	if (error) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "xwimp_send_message_to_window: 0x%x: %s",
 		      error->errnum,
 		      error->errmess);
@@ -113,8 +124,9 @@ bool ro_message_send_message_to_window(wimp_event_no event, wimp_message *messag
 	/* register the default bounce handler */
 	if (callback) {
 		assert(event == wimp_USER_MESSAGE_RECORDED);
-		return ro_message_register_handler(message, message->action,
-				callback);
+		return ro_message_register_handler(message,
+						   message->action,
+						   callback);
 	}
 	return true;
 }
@@ -132,8 +144,8 @@ bool ro_message_send_message_to_window(wimp_event_no event, wimp_message *messag
  * \return true on success, false on memory exhaustion
  */
 bool ro_message_register_handler(wimp_message *message,
-		unsigned int message_code,
-		void (*callback)(wimp_message *message))
+				 unsigned int message_code,
+				 void (*callback)(wimp_message *message))
 {
 	struct active_message *add;
 
@@ -155,7 +167,7 @@ bool ro_message_register_handler(wimp_message *message,
  * \return true on success, false on memory exhaustion
  */
 bool ro_message_register_route(unsigned int message_code,
-		void (*callback)(wimp_message *message))
+			       void (*callback)(wimp_message *message))
 {
 	assert(callback);
 
@@ -163,7 +175,7 @@ bool ro_message_register_route(unsigned int message_code,
 }
 
 struct active_message *ro_message_add(unsigned int message_code,
-		void (*callback)(wimp_message *message))
+				      void (*callback)(wimp_message *message))
 {
 	struct active_message *add;
 
@@ -206,7 +218,7 @@ bool ro_message_handle_message(wimp_event_no event, wimp_message *message)
 		/* handle the message */
 		for (test = current_messages; test; test = test->next) {
 			if ((ref == test->id) &&
-					(message->action == test->message_code)) {
+			    (message->action == test->message_code)) {
 				handled = true;
 				if (test->callback)
 					test->callback(message);
@@ -221,7 +233,7 @@ bool ro_message_handle_message(wimp_event_no event, wimp_message *message)
 		/* handle simple routing */
 		for (test = current_messages; test; test = test->next) {
 			if ((test->id == 0) &&
-					(message->action == test->message_code)) {
+			    (message->action == test->message_code)) {
 				test->callback(message);
 				return true;
 			}

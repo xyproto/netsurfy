@@ -26,10 +26,7 @@ struct Hook;
 struct Menu;
 struct gui_window_2;
 
-enum {
-	AMI_CTXMENU_HISTORY_BACK = 0,
-	AMI_CTXMENU_HISTORY_FORWARD = 1
-};
+enum { AMI_CTXMENU_HISTORY_BACK = 0, AMI_CTXMENU_HISTORY_FORWARD = 1 };
 
 #ifdef __amigaos4__
 /**
@@ -62,14 +59,17 @@ void ami_ctxmenu_release_hook(struct Hook *hook);
  * Create history context menu
  * The first time this is run it will create an empty menu,
  * Subsequent runs will (re-)populate with the history.
- * This is to allow  the pointer to be obtained before the browser_window is opened.
+ * This is to allow  the pointer to be obtained before the browser_window is
+ * opened.
  *
  * \param direction AMI_CTXMENU_HISTORY_(BACK|FORWARD)
  * \param gwin struct gui_window_2 *
  * \returns pointer to menu (for convenience, is also stored in gwin structure)
- * The returned pointer MUST be disposed of with DisposeObject before program exit.
+ * The returned pointer MUST be disposed of with DisposeObject before program
+ * exit.
  */
-struct Menu *ami_ctxmenu_history_create(int direction, struct gui_window_2 *gwin);
+struct Menu *
+ami_ctxmenu_history_create(int direction, struct gui_window_2 *gwin);
 
 /**
  * Create ClickTab context menu
@@ -77,17 +77,35 @@ struct Menu *ami_ctxmenu_history_create(int direction, struct gui_window_2 *gwin
  * \param gwin struct gui_window_2 *
  * \param clicktab_obj ptr to memory to hold clicktab menu object
  * \returns pointer to menu (for convenience)
- * The returned pointer MUST be disposed of with DisposeObject before program exit.
+ * The returned pointer MUST be disposed of with DisposeObject before program
+ * exit.
  */
-struct Menu *ami_ctxmenu_clicktab_create(struct gui_window_2 *gwin, Object **clicktab_obj);
+struct Menu *
+ami_ctxmenu_clicktab_create(struct gui_window_2 *gwin, Object **clicktab_obj);
 
 #else //__amigaos4__
-inline void ami_ctxmenu_init(void) {}
-inline void ami_ctxmenu_free(void) {}
-inline struct Hook *ami_ctxmenu_get_hook(APTR data) {return NULL;}
-inline void ami_ctxmenu_release_hook(struct Hook *hook) {}
-inline struct Menu *ami_ctxmenu_history_create(int direction, struct gui_window_2 *gwin) {return NULL;}
-inline struct Menu *ami_ctxmenu_clicktab_create(struct gui_window_2 *gwin, Object **clicktab_obj) {return NULL;}
+inline void ami_ctxmenu_init(void)
+{
+}
+inline void ami_ctxmenu_free(void)
+{
+}
+inline struct Hook *ami_ctxmenu_get_hook(APTR data)
+{
+	return NULL;
+}
+inline void ami_ctxmenu_release_hook(struct Hook *hook)
+{
+}
+inline struct Menu *
+ami_ctxmenu_history_create(int direction, struct gui_window_2 *gwin)
+{
+	return NULL;
+}
+inline struct Menu *
+ami_ctxmenu_clicktab_create(struct gui_window_2 *gwin, Object **clicktab_obj)
+{
+	return NULL;
+}
 #endif //__amigaos4__
-#endif //AMIGA_CTXMENU_H
-
+#endif // AMIGA_CTXMENU_H

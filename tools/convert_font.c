@@ -33,48 +33,33 @@
 #include <unistd.h>
 #include <getopt.h>
 
-#define GLYPH_LEN	16
-#define BUCKETS		512
-#define CHUNK_SIZE	(64 * 1024)
-#define HEADER_MAX	2000
+#define GLYPH_LEN 16
+#define BUCKETS 512
+#define CHUNK_SIZE (64 * 1024)
+#define HEADER_MAX 2000
 
-#define SECTION_SIZE	(sizeof(uint16_t) * 256)
+#define SECTION_SIZE (sizeof(uint16_t) * 256)
 
-const char *labels[4] = {
-	"      Regular",
-	"       Italic",
-	"         Bold",
-	"Bold & Italic"
-};
+const char *labels[4] = {"      Regular",
+			 "       Italic",
+			 "         Bold",
+			 "Bold & Italic"};
 
-const char *var_lables[4] = {
-	"fb_regular",
-	"fb_italic",
-	"fb_bold",
-	"fb_bold_italic"
-};
+const char *var_lables[4] = {"fb_regular",
+			     "fb_italic",
+			     "fb_bold",
+			     "fb_bold_italic"};
 
-const char *short_labels[4] = {
-	"  ",
-	" i",
-	"b ",
-	"bi"
-};
+const char *short_labels[4] = {"  ", " i", "b ", "bi"};
 
 enum font_style {
-	REGULAR		= 0,
-	ITALIC		= (1 << 0),
-	BOLD		= (1 << 1),
-	ITALIC_BOLD	= (1 << 2)
+	REGULAR = 0,
+	ITALIC = (1 << 0),
+	BOLD = (1 << 1),
+	ITALIC_BOLD = (1 << 2)
 };
 
-enum log_level {
-	LOG_DEBUG,
-	LOG_INFO,
-	LOG_RESULT,
-	LOG_WARNING,
-	LOG_ERROR
-};
+enum log_level { LOG_DEBUG, LOG_INFO, LOG_RESULT, LOG_WARNING, LOG_ERROR };
 
 enum log_level level;
 
@@ -93,8 +78,8 @@ uint8_t code_point[GLYPH_LEN];
 /** Hash table */
 glyph_entry *ht[BUCKETS];
 
-#define LOG(lev, fmt, ...)				\
-	if (lev >= level)				\
+#define LOG(lev, fmt, ...)                                                     \
+	if (lev >= level)                                                      \
 		printf(fmt, ##__VA_ARGS__);
 
 /**
@@ -141,7 +126,7 @@ static inline bool glyphs_match(const uint8_t *g1, const uint8_t *g2)
  * \param new New glyph to add (may be freed)
  * \return pointer to glyph in hash chain
  */
-static glyph_entry * glyph_add_to_chain(glyph_entry **head, glyph_entry *new)
+static glyph_entry *glyph_add_to_chain(glyph_entry **head, glyph_entry *new)
 {
 	glyph_entry *e = *head;
 
@@ -197,7 +182,7 @@ static void free_chain(glyph_entry *head)
  * \param new New glyph to add (may be freed)
  * \return pointer to glyph in hash table
  */
-static glyph_entry * glyph_add_to_table(glyph_entry *new)
+static glyph_entry *glyph_add_to_table(glyph_entry *new)
 {
 	uint32_t hash = glyph_hash(new->data.u8);
 
@@ -225,7 +210,7 @@ struct parse_context {
 		GLYPH_ID,
 		BEFORE_GLYPH_DATA,
 		IN_GLYPH_DATA
-	} state;			/**< Current parser state */
+	} state; /**< Current parser state */
 
 	union {
 		struct {
@@ -251,12 +236,12 @@ struct parse_context {
 			int line_styles;
 			glyph_entry *e[4];
 		} in_gd;
-	} data;				/**< The state specific data */
+	} data; /**< The state specific data */
 
-	int id;				/**< Current ID */
+	int id; /**< Current ID */
 
-	int codepoints;			/**< Glyphs containing codepoints */
-	int count[4];			/**< Count of glyphs in file */
+	int codepoints; /**< Glyphs containing codepoints */
+	int count[4]; /**< Count of glyphs in file */
 };
 
 struct font_data {
@@ -285,16 +270,18 @@ static bool generate_font_header(const char *path, struct font_data *data)
 	fprintf(fp, "/*\n");
 	fwrite(data->header, 1, data->header_len, fp);
 	fprintf(fp, " */\n\n");
-	fprintf(fp, "/* Don't edit this file, it was generated from the "
-			"plain text source data. */\n\n");
+	fprintf(fp,
+		"/* Don't edit this file, it was generated from the "
+		"plain text source data. */\n\n");
 
 
 	for (s = 0; s < 4; s++) {
-		fprintf(fp, "extern const uint8_t *%s_section_table;\n",
+		fprintf(fp,
+			"extern const uint8_t *%s_section_table;\n",
 			var_lables[s]);
-		fprintf(fp, "extern const uint16_t *%s_sections;\n",
+		fprintf(fp,
+			"extern const uint16_t *%s_sections;\n",
 			var_lables[s]);
-
 	}
 
 	fprintf(fp, "extern const uint8_t *font_glyph_data;\n");
@@ -304,7 +291,6 @@ static bool generate_font_header(const char *path, struct font_data *data)
 	fclose(fp);
 
 	return true;
-
 }
 
 static bool generate_font_source(const char *path, struct font_data *data)
@@ -322,36 +308,46 @@ static bool generate_font_source(const char *path, struct font_data *data)
 	fprintf(fp, "/*\n");
 	fwrite(data->header, 1, data->header_len, fp);
 	fprintf(fp, " */\n\n");
-	fprintf(fp, "/* Don't edit this file, it was generated from the "
-			"plain text source data. */\n\n");
+	fprintf(fp,
+		"/* Don't edit this file, it was generated from the "
+		"plain text source data. */\n\n");
 
 	fprintf(fp, "#include <stdint.h>\n");
 	fprintf(fp, "\n");
 
 	for (s = 0; s < 4; s++) {
 
-		fprintf(fp, "static const uint8_t %s_section_table_c[256] = {\n",
-				var_lables[s]);
+		fprintf(fp,
+			"static const uint8_t %s_section_table_c[256] = {\n",
+			var_lables[s]);
 
 		for (i = 0; i < 256; i++) {
 			if (i == 255)
-				fprintf(fp, "0x%.2X\n",
-						data->section_table[s][i]);
+				fprintf(fp,
+					"0x%.2X\n",
+					data->section_table[s][i]);
 			else if (i % 8 == 7)
-				fprintf(fp, "0x%.2X,\n",
-						data->section_table[s][i]);
+				fprintf(fp,
+					"0x%.2X,\n",
+					data->section_table[s][i]);
 			else if (i % 8 == 0)
-				fprintf(fp, "\t0x%.2X, ",
-						data->section_table[s][i]);
+				fprintf(fp,
+					"\t0x%.2X, ",
+					data->section_table[s][i]);
 			else
-				fprintf(fp, "0x%.2X, ",
-						data->section_table[s][i]);
+				fprintf(fp,
+					"0x%.2X, ",
+					data->section_table[s][i]);
 		}
 
-		fprintf(fp, "};\nconst uint8_t *%s_section_table = &%s_section_table_c[0];\n\n",
-			var_lables[s], var_lables[s]);
-		fprintf(fp, "static const uint16_t %s_sections_c[%i] = {\n",
-				var_lables[s], data->sec_count[s] * 256);
+		fprintf(fp,
+			"};\nconst uint8_t *%s_section_table = &%s_section_table_c[0];\n\n",
+			var_lables[s],
+			var_lables[s]);
+		fprintf(fp,
+			"static const uint16_t %s_sections_c[%i] = {\n",
+			var_lables[s],
+			data->sec_count[s] * 256);
 
 		limit = data->sec_count[s] * 256;
 		for (i = 0; i < limit; i++) {
@@ -366,14 +362,19 @@ static bool generate_font_source(const char *path, struct font_data *data)
 				fprintf(fp, "0x%.4X, ", offset);
 		}
 
-		fprintf(fp, "};\nconst uint16_t *%s_sections = &%s_sections_c[0];\n\n", var_lables[s], var_lables[s]);
+		fprintf(fp,
+			"};\nconst uint16_t *%s_sections = &%s_sections_c[0];\n\n",
+			var_lables[s],
+			var_lables[s]);
 	}
 
-	fprintf(fp, "static const uint8_t font_glyph_data_c[%i] = {\n",
-			(data->glyphs + 1) * 16);
+	fprintf(fp,
+		"static const uint8_t font_glyph_data_c[%i] = {\n",
+		(data->glyphs + 1) * 16);
 
-	fprintf(fp, "\t0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,\n"
-		    "\t0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,\n");
+	fprintf(fp,
+		"\t0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,\n"
+		"\t0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,\n");
 
 	limit = data->glyphs;
 	for (i = 0; i < limit; i++) {
@@ -392,15 +393,16 @@ static bool generate_font_source(const char *path, struct font_data *data)
 	}
 
 	fprintf(fp, "};\n");
-	fprintf(fp, "const uint8_t *font_glyph_data = &font_glyph_data_c[0];\n\n");
+	fprintf(fp,
+		"const uint8_t *font_glyph_data = &font_glyph_data_c[0];\n\n");
 
 	fclose(fp);
 
 	return true;
 }
 
-static bool add_glyph_to_data(glyph_entry *add, int id, int style,
-		struct font_data *d)
+static bool
+add_glyph_to_data(glyph_entry *add, int id, int style, struct font_data *d)
 {
 	glyph_entry *e;
 	int offset;
@@ -413,14 +415,17 @@ static bool add_glyph_to_data(glyph_entry *add, int id, int style,
 		d->e[d->glyphs++] = e;
 		e->index = d->glyphs;
 		if (d->glyphs >= 0xfffd) {
-			LOG(LOG_ERROR, "  Too many glyphs for internal data "
-					"representation\n");
+			LOG(LOG_ERROR,
+			    "  Too many glyphs for internal data "
+			    "representation\n");
 			return false;
 		}
 	} else {
 		/* Duplicate glyph */
-		LOG(LOG_DEBUG, "  U+%.4X (%s) is duplicate\n",
-				id, short_labels[style]);
+		LOG(LOG_DEBUG,
+		    "  U+%.4X (%s) is duplicate\n",
+		    id,
+		    short_labels[style]);
 	}
 
 	/* Find glyph's section */
@@ -428,16 +433,16 @@ static bool add_glyph_to_data(glyph_entry *add, int id, int style,
 
 	/* Allocate section if needed */
 	if ((s == 0 && d->sections[style] == NULL) ||
-			(s != 0 && d->section_table[style][s] == 0)) {
+	    (s != 0 && d->section_table[style][s] == 0)) {
 		size_t size = (d->sec_count[style] + 1) * SECTION_SIZE;
 		uint16_t *temp = realloc(d->sections[style], size);
 		if (temp == NULL) {
-			LOG(LOG_ERROR, "  Couldn't increase sections "
-					"allocation\n");
+			LOG(LOG_ERROR,
+			    "  Couldn't increase sections "
+			    "allocation\n");
 			return false;
 		}
-		memset(temp + d->sec_count[style] * 256, 0,
-				SECTION_SIZE);
+		memset(temp + d->sec_count[style] * 256, 0, SECTION_SIZE);
 		d->section_table[style][s] = d->sec_count[style];
 		d->sections[style] = temp;
 		d->sec_count[style]++;
@@ -456,47 +461,57 @@ static bool check_glyph_data_valid(int pos, char c)
 
 	if (pos == 44) {
 		if (c != '\n') {
-			LOG(LOG_ERROR, "  Invalid glyph data: "
-					"expecting '\\n', got '%c' (%i)\n",
-					c, c);
+			LOG(LOG_ERROR,
+			    "  Invalid glyph data: "
+			    "expecting '\\n', got '%c' (%i)\n",
+			    c,
+			    c);
 			return false;
 		} else {
 			return true;
 		}
 	} else if (pos < 3) {
 		if (c != ' ') {
-			LOG(LOG_ERROR, "  Invalid glyph data: "
-					"expecting ' ', got '%c' (%i)\n",
-					c, c);
+			LOG(LOG_ERROR,
+			    "  Invalid glyph data: "
+			    "expecting ' ', got '%c' (%i)\n",
+			    c,
+			    c);
 			return false;
 		} else {
 			return true;
 		}
 	} else if (offset == 0) {
 		if (c != '\n' && c != ' ') {
-			LOG(LOG_ERROR, "  Invalid glyph data: "
-					"expecting '\\n' or ' ', "
-					"got '%c' (%i)\n",
-					c, c);
+			LOG(LOG_ERROR,
+			    "  Invalid glyph data: "
+			    "expecting '\\n' or ' ', "
+			    "got '%c' (%i)\n",
+			    c,
+			    c);
 			return false;
 		} else {
 			return true;
 		}
 	} else if (offset < 3) {
 		if (c != ' ') {
-			LOG(LOG_ERROR, "  Invalid glyph data: "
-					"expecting ' ', got '%c' (%i)\n",
-					c, c);
+			LOG(LOG_ERROR,
+			    "  Invalid glyph data: "
+			    "expecting ' ', got '%c' (%i)\n",
+			    c,
+			    c);
 			return false;
 		} else {
 			return true;
 		}
 	} else if (offset >= 3 && pos < 11) {
 		if (c != '.' && c != '#') {
-			LOG(LOG_ERROR, "  Invalid glyph data: "
-					"expecting '.' or '#', "
-					"got '%c' (%i)\n",
-					c, c);
+			LOG(LOG_ERROR,
+			    "  Invalid glyph data: "
+			    "expecting '.' or '#', "
+			    "got '%c' (%i)\n",
+			    c,
+			    c);
 			return false;
 		} else {
 			return true;
@@ -505,124 +520,61 @@ static bool check_glyph_data_valid(int pos, char c)
 
 	/* offset must be >=3 */
 	if (c != '.' && c != '#' && c != ' ') {
-		LOG(LOG_ERROR, "  Invalid glyph data: "
+		LOG(LOG_ERROR,
+		    "  Invalid glyph data: "
 		    "expecting '.', '#', or ' ', "
 		    "got '%c' (%i)\n",
-		    c, c);
+		    c,
+		    c);
 		return false;
 	}
 
 	return true;
 }
 
-#define SEVEN_SET	((1 << 0) | (1 << 1) | (1 << 2) | (1 << 3) | 	\
-			 (1 << 4) | (1 << 5) | (1 << 6))
+#define SEVEN_SET                                                              \
+	((1 << 0) | (1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5) |     \
+	 (1 << 6))
 
-#define THREE_SSS	((1 << 0) | (1 << 1) | (1 << 2))
-#define THREE_S_S	((1 << 0) |            (1 << 2))
-#define THREE__SS	((1 << 0) | (1 << 1)           )
-#define THREE_SS_	(           (1 << 1) | (1 << 2))
-#define THREE_S__			       (1 << 2)
-#define THREE__S_		    (1 << 1)
-#define THREE___S	 (1 << 0)
+#define THREE_SSS ((1 << 0) | (1 << 1) | (1 << 2))
+#define THREE_S_S ((1 << 0) | (1 << 2))
+#define THREE__SS ((1 << 0) | (1 << 1))
+#define THREE_SS_ ((1 << 1) | (1 << 2))
+#define THREE_S__ (1 << 2)
+#define THREE__S_ (1 << 1)
+#define THREE___S (1 << 0)
 
-uint8_t frag[16][5] = {
-	{ THREE_SSS,
-	  THREE_S_S,
-	  THREE_S_S,
-	  THREE_S_S,
-	  THREE_SSS },
+uint8_t frag[16][5] = {{THREE_SSS, THREE_S_S, THREE_S_S, THREE_S_S, THREE_SSS},
 
-	{ THREE__S_,
-	  THREE_SS_,
-	  THREE__S_,
-	  THREE__S_,
-	  THREE_SSS },
+		       {THREE__S_, THREE_SS_, THREE__S_, THREE__S_, THREE_SSS},
 
-	{ THREE_SS_,
-	  THREE___S,
-	  THREE__S_,
-	  THREE_S__,
-	  THREE_SSS },
+		       {THREE_SS_, THREE___S, THREE__S_, THREE_S__, THREE_SSS},
 
-	{ THREE_SS_,
-	  THREE___S,
-	  THREE_SS_,
-	  THREE___S,
-	  THREE_SS_ },
+		       {THREE_SS_, THREE___S, THREE_SS_, THREE___S, THREE_SS_},
 
-	{ THREE_S_S,
-	  THREE_S_S,
-	  THREE_SSS,
-	  THREE___S,
-	  THREE___S },
+		       {THREE_S_S, THREE_S_S, THREE_SSS, THREE___S, THREE___S},
 
-	{ THREE_SSS,
-	  THREE_S__,
-	  THREE_SSS,
-	  THREE___S,
-	  THREE_SSS },
+		       {THREE_SSS, THREE_S__, THREE_SSS, THREE___S, THREE_SSS},
 
-	{ THREE__SS,
-	  THREE_S__,
-	  THREE_SSS,
-	  THREE_S_S,
-	  THREE_SSS },
+		       {THREE__SS, THREE_S__, THREE_SSS, THREE_S_S, THREE_SSS},
 
-	{ THREE_SSS,
-	  THREE___S,
-	  THREE__S_,
-	  THREE__S_,
-	  THREE__S_ },
+		       {THREE_SSS, THREE___S, THREE__S_, THREE__S_, THREE__S_},
 
-	{ THREE_SSS,
-	  THREE_S_S,
-	  THREE_SSS,
-	  THREE_S_S,
-	  THREE_SSS },
+		       {THREE_SSS, THREE_S_S, THREE_SSS, THREE_S_S, THREE_SSS},
 
-	{ THREE_SSS,
-	  THREE_S_S,
-	  THREE_SSS,
-	  THREE___S,
-	  THREE___S },
+		       {THREE_SSS, THREE_S_S, THREE_SSS, THREE___S, THREE___S},
 
-	{ THREE__S_,
-	  THREE_S_S,
-	  THREE_SSS,
-	  THREE_S_S,
-	  THREE_S_S },
+		       {THREE__S_, THREE_S_S, THREE_SSS, THREE_S_S, THREE_S_S},
 
-	{ THREE_SS_,
-	  THREE_S_S,
-	  THREE_SS_,
-	  THREE_S_S,
-	  THREE_SS_ },
+		       {THREE_SS_, THREE_S_S, THREE_SS_, THREE_S_S, THREE_SS_},
 
-	{ THREE__S_,
-	  THREE_S_S,
-	  THREE_S__,
-	  THREE_S_S,
-	  THREE__S_ },
+		       {THREE__S_, THREE_S_S, THREE_S__, THREE_S_S, THREE__S_},
 
-	{ THREE_SS_,
-	  THREE_S_S,
-	  THREE_S_S,
-	  THREE_S_S,
-	  THREE_SS_ },
+		       {THREE_SS_, THREE_S_S, THREE_S_S, THREE_S_S, THREE_SS_},
 
-	{ THREE_SSS,
-	  THREE_S__,
-	  THREE_SS_,
-	  THREE_S__,
-	  THREE_SSS },
+		       {THREE_SSS, THREE_S__, THREE_SS_, THREE_S__, THREE_SSS},
 
-	{ THREE_SSS,
-	  THREE_S__,
-	  THREE_SS_,
-	  THREE_S__,
-	  THREE_S__ }
-};
+		       {THREE_SSS, THREE_S__, THREE_SS_, THREE_S__, THREE_S__}};
 
 static void build_codepoint(int id, bool italic, uint8_t *code_point)
 {
@@ -633,27 +585,27 @@ static void build_codepoint(int id, bool italic, uint8_t *code_point)
 	if (!italic)
 		shift = 1;
 
-	l =       (id >> 12);
-	r = 0xf & (id >>  8);
+	l = (id >> 12);
+	r = 0xf & (id >> 8);
 
-	code_point[ 0] = 0;
-	code_point[ 1] = SEVEN_SET << shift;
-	code_point[ 2] = 0;
+	code_point[0] = 0;
+	code_point[1] = SEVEN_SET << shift;
+	code_point[2] = 0;
 
-	code_point[ 3] = (frag[l][0] << (4 + shift)) | (frag[r][0] << shift);
-	code_point[ 4] = (frag[l][1] << (4 + shift)) | (frag[r][1] << shift);
-	code_point[ 5] = (frag[l][2] << (4 + shift)) | (frag[r][2] << shift);
-	code_point[ 6] = (frag[l][3] << (4 + shift)) | (frag[r][3] << shift);
-	code_point[ 7] = (frag[l][4] << (4 + shift)) | (frag[r][4] << shift);
+	code_point[3] = (frag[l][0] << (4 + shift)) | (frag[r][0] << shift);
+	code_point[4] = (frag[l][1] << (4 + shift)) | (frag[r][1] << shift);
+	code_point[5] = (frag[l][2] << (4 + shift)) | (frag[r][2] << shift);
+	code_point[6] = (frag[l][3] << (4 + shift)) | (frag[r][3] << shift);
+	code_point[7] = (frag[l][4] << (4 + shift)) | (frag[r][4] << shift);
 
-	code_point[ 8] = 0;
+	code_point[8] = 0;
 
 	shift = 1;
 
-	l = 0xf & (id >>  4);
-	r = 0xf &  id       ;
+	l = 0xf & (id >> 4);
+	r = 0xf & id;
 
-	code_point[ 9] = (frag[l][0] << (4 + shift)) | (frag[r][0] << shift);
+	code_point[9] = (frag[l][0] << (4 + shift)) | (frag[r][0] << shift);
 	code_point[10] = (frag[l][1] << (4 + shift)) | (frag[r][1] << shift);
 	code_point[11] = (frag[l][2] << (4 + shift)) | (frag[r][2] << shift);
 	code_point[12] = (frag[l][3] << (4 + shift)) | (frag[r][3] << shift);
@@ -686,8 +638,8 @@ static bool glyph_is_codepoint(const glyph_entry *e, int id, int style)
 }
 
 
-static bool parse_glyph_data(struct parse_context *ctx, char c,
-		struct font_data *d)
+static bool
+parse_glyph_data(struct parse_context *ctx, char c, struct font_data *d)
 {
 	int glyph = ctx->data.in_gd.pos / 11;
 	int g_pos = ctx->data.in_gd.pos % 11 - 3;
@@ -697,23 +649,24 @@ static bool parse_glyph_data(struct parse_context *ctx, char c,
 
 	/* Check that character is valid */
 	if (check_glyph_data_valid(ctx->data.in_gd.pos, c) == false) {
-		LOG(LOG_ERROR, "  Error in U+%.4X data: "
-				"glyph line: %i, pos: %i\n",
-				ctx->id,
-				ctx->data.in_gd.line,
-				ctx->data.in_gd.pos);
+		LOG(LOG_ERROR,
+		    "  Error in U+%.4X data: "
+		    "glyph line: %i, pos: %i\n",
+		    ctx->id,
+		    ctx->data.in_gd.line,
+		    ctx->data.in_gd.pos);
 		goto error;
 	}
 
 	/* Allocate glyph data if needed */
-	if (ctx->data.in_gd.line == 0 &&
-			(c == '.' || c == '#')) {
+	if (ctx->data.in_gd.line == 0 && (c == '.' || c == '#')) {
 		if (ctx->data.in_gd.e[glyph] == NULL) {
-			ctx->data.in_gd.e[glyph] =
-				calloc(1, sizeof(struct glyph_entry));
+			ctx->data.in_gd.e[glyph] = calloc(
+				1, sizeof(struct glyph_entry));
 			if (ctx->data.in_gd.e[glyph] == NULL) {
-				LOG(LOG_ERROR, "  Couldn't allocate memory for "
-						"glyph entry\n");
+				LOG(LOG_ERROR,
+				    "  Couldn't allocate memory for "
+				    "glyph entry\n");
 				goto error;
 			}
 
@@ -735,18 +688,21 @@ static bool parse_glyph_data(struct parse_context *ctx, char c,
 	if (c == '\n') {
 		if (ctx->data.in_gd.line == 0) {
 			if (ctx->data.in_gd.e[0] == NULL) {
-				LOG(LOG_ERROR, "  Error in U+%.4X data: "
-						"\"Regular\" glyph style must "
-						"be present\n", ctx->id);
+				LOG(LOG_ERROR,
+				    "  Error in U+%.4X data: "
+				    "\"Regular\" glyph style must "
+				    "be present\n",
+				    ctx->id);
 				goto error;
 			}
 		} else if (ctx->data.in_gd.styles !=
-				ctx->data.in_gd.line_styles) {
-			LOG(LOG_ERROR, "  Error in U+%.4X data: "
-					"glyph line: %i "
-					"styles don't match first line\n",
-					ctx->id,
-					ctx->data.in_gd.line);
+			   ctx->data.in_gd.line_styles) {
+			LOG(LOG_ERROR,
+			    "  Error in U+%.4X data: "
+			    "glyph line: %i "
+			    "styles don't match first line\n",
+			    ctx->id,
+			    ctx->data.in_gd.line);
 			goto error;
 		}
 
@@ -762,20 +718,21 @@ static bool parse_glyph_data(struct parse_context *ctx, char c,
 		for (i = 0; i < 4; i++) {
 			if (ctx->data.in_gd.e[i] != NULL) {
 				ctx->count[i] += 1;
-				if (glyph_is_codepoint(ctx->data.in_gd.e[i],
-						ctx->id, i)) {
-					LOG(LOG_DEBUG, "  U+%.4X (%s) is "
-							"codepoint\n",
-							ctx->id,
-							short_labels[i]);
+				if (glyph_is_codepoint(
+					    ctx->data.in_gd.e[i], ctx->id, i)) {
+					LOG(LOG_DEBUG,
+					    "  U+%.4X (%s) is "
+					    "codepoint\n",
+					    ctx->id,
+					    short_labels[i]);
 					ctx->codepoints += 1;
 					free(ctx->data.in_gd.e[i]);
 					ctx->data.in_gd.e[i] = NULL;
 					continue;
 				}
 
-				ok = add_glyph_to_data(ctx->data.in_gd.e[i],
-						ctx->id, i, d);
+				ok = add_glyph_to_data(
+					ctx->data.in_gd.e[i], ctx->id, i, d);
 				if (!ok) {
 					goto error;
 				}
@@ -817,7 +774,7 @@ static bool get_hex_digit_value(char c, int *v)
 	return true;
 }
 
-static bool assemble_codepoint(const char* c, int n, int *id)
+static bool assemble_codepoint(const char *c, int n, int *id)
 {
 	bool ok;
 	int v;
@@ -832,8 +789,10 @@ static bool assemble_codepoint(const char* c, int n, int *id)
 	return true;
 }
 
-static bool parse_chunk(struct parse_context *ctx, const char *buf, size_t len,
-		struct font_data *d)
+static bool parse_chunk(struct parse_context *ctx,
+			const char *buf,
+			size_t len,
+			struct font_data *d)
 {
 	int i;
 	bool ok;
@@ -866,12 +825,14 @@ static bool parse_chunk(struct parse_context *ctx, const char *buf, size_t len,
 		case IN_HEADER:
 			if (ctx->data.in_header.new_line == true) {
 				if (*pos != '*') {
-					LOG(LOG_INFO, "  Got header "
-							"(%i bytes)\n",
-							d->header_len);
-					LOG(LOG_DEBUG, "  Header:\n\n%.*s\n",
-							d->header_len,
-							d->header);
+					LOG(LOG_INFO,
+					    "  Got header "
+					    "(%i bytes)\n",
+					    d->header_len);
+					LOG(LOG_DEBUG,
+					    "  Header:\n\n%.*s\n",
+					    d->header_len,
+					    d->header);
 					ctx->data.before_id.new_line = false;
 					ctx->data.before_id.u = false;
 					ctx->state = BEFORE_ID;
@@ -886,9 +847,10 @@ static bool parse_chunk(struct parse_context *ctx, const char *buf, size_t len,
 			}
 
 			if (d->header_len == HEADER_MAX) {
-				LOG(LOG_ERROR, "  Header too long "
-						"(>%i bytes)\n",
-						d->header_len);
+				LOG(LOG_ERROR,
+				    "  Header too long "
+				    "(>%i bytes)\n",
+				    d->header_len);
 				return false;
 			}
 
@@ -897,15 +859,15 @@ static bool parse_chunk(struct parse_context *ctx, const char *buf, size_t len,
 
 		case BEFORE_ID:
 			if (*pos == '+' &&
-					ctx->data.before_id.new_line == true &&
-					ctx->data.before_id.u == true) {
+			    ctx->data.before_id.new_line == true &&
+			    ctx->data.before_id.u == true) {
 				ctx->data.g_id.c = 0;
 				ctx->id = 0;
 				ctx->state = GLYPH_ID;
 				break;
 
 			} else if (*pos == 'U' &&
-					ctx->data.before_id.new_line == true) {
+				   ctx->data.before_id.new_line == true) {
 				ctx->data.before_id.u = true;
 
 			} else if (*pos == '\n') {
@@ -919,8 +881,9 @@ static bool parse_chunk(struct parse_context *ctx, const char *buf, size_t len,
 			break;
 
 		case GLYPH_ID:
-			ok = assemble_codepoint(pos, ctx->data.g_id.c++,
-					&ctx->id);
+			ok = assemble_codepoint(pos,
+						ctx->data.g_id.c++,
+						&ctx->id);
 			if (!ok) {
 				LOG(LOG_ERROR, "  Invalid glyph ID\n");
 				return false;
@@ -956,19 +919,19 @@ static bool parse_chunk(struct parse_context *ctx, const char *buf, size_t len,
 				ctx->data.before_gd.prev_s = false;
 				ctx->data.before_gd.c = 0;
 			} else if (*pos == '-' &&
-					ctx->data.before_gd.new_line == true) {
+				   ctx->data.before_gd.new_line == true) {
 				assert(ctx->data.before_gd.c == 0);
 				ctx->data.before_gd.new_line = false;
 				ctx->data.before_gd.c++;
 				ctx->data.before_gd.prev_h = true;
 			} else if (*pos == ' ' &&
-					ctx->data.before_gd.prev_h == true) {
+				   ctx->data.before_gd.prev_h == true) {
 				assert(ctx->data.before_gd.prev_s == false);
 				ctx->data.before_gd.c++;
 				ctx->data.before_gd.prev_h = false;
 				ctx->data.before_gd.prev_s = true;
 			} else if (*pos == '-' &&
-					ctx->data.before_gd.prev_s == true) {
+				   ctx->data.before_gd.prev_s == true) {
 				assert(ctx->data.before_gd.prev_h == false);
 				ctx->data.before_gd.c++;
 				ctx->data.before_gd.prev_h = true;
@@ -994,8 +957,10 @@ static bool parse_chunk(struct parse_context *ctx, const char *buf, size_t len,
 	}
 
 	for (i = 0; i < 4; i++) {
-		LOG(LOG_DEBUG, "  %s: %i gylphs\n", labels[i],
-				ctx->count[i] - count[i]);
+		LOG(LOG_DEBUG,
+		    "  %s: %i gylphs\n",
+		    labels[i],
+		    ctx->count[i] - count[i]);
 	}
 
 	return true;
@@ -1062,11 +1027,9 @@ static bool load_font(const char *path, struct font_data **data)
 
 		/* Read chunk */
 		len = fread(buf, 1, CHUNK_SIZE, fp);
-		if (file_len - done < CHUNK_SIZE &&
-				len != file_len - done) {
+		if (file_len - done < CHUNK_SIZE && len != file_len - done) {
 			LOG(LOG_WARNING, "Last chunk has suspicious size\n");
-		} else if (file_len - done >= CHUNK_SIZE &&
-				len != CHUNK_SIZE) {
+		} else if (file_len - done >= CHUNK_SIZE && len != CHUNK_SIZE) {
 			LOG(LOG_ERROR, "Problem reading file\n");
 			free(buf);
 			free(d);
@@ -1101,10 +1064,13 @@ static bool load_font(const char *path, struct font_data **data)
 		count += ctx.count[i];
 	}
 
-	LOG(LOG_RESULT, "  Total %i gylphs "
-			"(of which %i unique, %i codepoints, %i duplicates)\n",
-			count, d->glyphs, ctx.codepoints,
-			count - d->glyphs - ctx.codepoints);
+	LOG(LOG_RESULT,
+	    "  Total %i gylphs "
+	    "(of which %i unique, %i codepoints, %i duplicates)\n",
+	    count,
+	    d->glyphs,
+	    ctx.codepoints,
+	    count - d->glyphs - ctx.codepoints);
 
 	free(buf);
 
@@ -1127,7 +1093,7 @@ static void log_usage(const char *argv0)
 	    argv0);
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
 	const char *in_path = NULL;
 	const char *out_path = NULL;
@@ -1141,14 +1107,15 @@ int main(int argc, char** argv)
 
 	/* Handle program arguments */
 	struct option long_options[] = {
-		{ "help",    no_argument,       NULL, 'h' },
-		{ "quiet",   no_argument,       NULL, 'q' },
-		{ "verbose", no_argument,       NULL, 'v' },
-		{ "debug",   no_argument,       NULL, 'd' },
-		{ "header",  required_argument, NULL, 'H' },
+		{"help", no_argument, NULL, 'h'},
+		{"quiet", no_argument, NULL, 'q'},
+		{"verbose", no_argument, NULL, 'v'},
+		{"debug", no_argument, NULL, 'd'},
+		{"header", required_argument, NULL, 'H'},
 	};
 
-	while ((opt = getopt_long(argc, argv, "hqvdH:", long_options, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hqvdH:", long_options, NULL)) !=
+	       -1) {
 		switch (opt) {
 		case 'q':
 			level = LOG_WARNING;

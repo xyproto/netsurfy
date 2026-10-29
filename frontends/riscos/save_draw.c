@@ -110,10 +110,13 @@ ro_save_draw_clip(const struct redraw_context *ctx, const struct rect *clip)
  * \param angle2 The finish angle of the arc.
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-ro_save_draw_arc(const struct redraw_context *ctx,
-	       const plot_style_t *style,
-	       int x, int y, int radius, int angle1, int angle2)
+static nserror ro_save_draw_arc(const struct redraw_context *ctx,
+				const plot_style_t *style,
+				int x,
+				int y,
+				int radius,
+				int angle1,
+				int angle2)
 {
 	return NSERROR_OK;
 }
@@ -131,10 +134,11 @@ ro_save_draw_arc(const struct redraw_context *ctx,
  * \param radius The radius of the circle.
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-ro_save_draw_disc(const struct redraw_context *ctx,
-		const plot_style_t *style,
-		int x, int y, int radius)
+static nserror ro_save_draw_disc(const struct redraw_context *ctx,
+				 const plot_style_t *style,
+				 int x,
+				 int y,
+				 int radius)
 {
 	return NSERROR_OK;
 }
@@ -151,17 +155,18 @@ ro_save_draw_disc(const struct redraw_context *ctx,
  * \param line A rectangle defining the line to be drawn
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-ro_save_draw_line(const struct redraw_context *ctx,
-		const plot_style_t *style,
-		const struct rect *line)
+static nserror ro_save_draw_line(const struct redraw_context *ctx,
+				 const plot_style_t *style,
+				 const struct rect *line)
 {
 	pencil_code code;
-	const int path[] = {
-		draw_MOVE_TO, line->x0 * 2, -line->y0 * 2 - 1,
-		draw_LINE_TO, line->x1 * 2, -line->y1 * 2 - 1,
-		draw_END_PATH
-	};
+	const int path[] = {draw_MOVE_TO,
+			    line->x0 * 2,
+			    -line->y0 * 2 - 1,
+			    draw_LINE_TO,
+			    line->x1 * 2,
+			    -line->y1 * 2 - 1,
+			    draw_END_PATH};
 
 	code = pencil_path(ro_save_draw_diagram,
 			   path,
@@ -172,7 +177,9 @@ ro_save_draw_line(const struct redraw_context *ctx,
 			   pencil_JOIN_MITRED,
 			   pencil_CAP_BUTT,
 			   pencil_CAP_BUTT,
-			   0, 0, false,
+			   0,
+			   0,
+			   false,
 			   pencil_SOLID);
 	if (code != pencil_OK)
 		return ro_save_draw_error(code);
@@ -194,20 +201,25 @@ ro_save_draw_line(const struct redraw_context *ctx,
  * \param rect A rectangle defining the line to be drawn
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-ro_save_draw_rectangle(const struct redraw_context *ctx,
-		     const plot_style_t *style,
-		     const struct rect *rect)
+static nserror ro_save_draw_rectangle(const struct redraw_context *ctx,
+				      const plot_style_t *style,
+				      const struct rect *rect)
 {
 	pencil_code code;
-	const int path[] = {
-		draw_MOVE_TO, rect->x0 * 2, -rect->y0 * 2 - 1,
-		draw_LINE_TO, rect->x1 * 2, -rect->y0 * 2 - 1,
-		draw_LINE_TO, rect->x1 * 2, -rect->y1 * 2 - 1,
-		draw_LINE_TO, rect->x0 * 2, -rect->y1 * 2 - 1,
-		draw_CLOSE_LINE,
-		draw_END_PATH
-	};
+	const int path[] = {draw_MOVE_TO,
+			    rect->x0 * 2,
+			    -rect->y0 * 2 - 1,
+			    draw_LINE_TO,
+			    rect->x1 * 2,
+			    -rect->y0 * 2 - 1,
+			    draw_LINE_TO,
+			    rect->x1 * 2,
+			    -rect->y1 * 2 - 1,
+			    draw_LINE_TO,
+			    rect->x0 * 2,
+			    -rect->y1 * 2 - 1,
+			    draw_CLOSE_LINE,
+			    draw_END_PATH};
 
 	if (style->fill_type != PLOT_OP_TYPE_NONE) {
 
@@ -265,11 +277,10 @@ ro_save_draw_rectangle(const struct redraw_context *ctx,
  * \param n number of verticies.
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-ro_save_draw_polygon(const struct redraw_context *ctx,
-		     const plot_style_t *style,
-		     const int *p,
-		     unsigned int n)
+static nserror ro_save_draw_polygon(const struct redraw_context *ctx,
+				    const plot_style_t *style,
+				    const int *p,
+				    unsigned int n)
 {
 	pencil_code code;
 	int path[n * 3 + 1];
@@ -284,7 +295,8 @@ ro_save_draw_polygon(const struct redraw_context *ctx,
 	path[n * 3] = draw_END_PATH;
 
 	code = pencil_path(ro_save_draw_diagram,
-			   path, n * 3 + 1,
+			   path,
+			   n * 3 + 1,
 			   style->fill_colour << 8,
 			   pencil_TRANSPARENT,
 			   0,
@@ -315,12 +327,11 @@ ro_save_draw_polygon(const struct redraw_context *ctx,
  * \param transform A transform to apply to the path.
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-ro_save_draw_path(const struct redraw_context *ctx,
-		  const plot_style_t *pstyle,
-		  const float *p,
-		  unsigned int n,
-		  const float transform[6])
+static nserror ro_save_draw_path(const struct redraw_context *ctx,
+				 const plot_style_t *pstyle,
+				 const float *p,
+				 unsigned int n,
+				 const float transform[6])
 {
 	pencil_code code;
 	int *path;
@@ -341,15 +352,17 @@ ro_save_draw_path(const struct redraw_context *ctx,
 		return NSERROR_INVALID;
 	}
 
-	for (i = 0; i < n; ) {
+	for (i = 0; i < n;) {
 		if (p[i] == PLOTTER_PATH_MOVE) {
 			path[i] = draw_MOVE_TO;
 			path[i + 1] = (transform[0] * p[i + 1] +
-					transform[2] * -p[i + 2] +
-					transform[4]) * 2;
+				       transform[2] * -p[i + 2] +
+				       transform[4]) *
+				      2;
 			path[i + 2] = (transform[1] * p[i + 1] +
-					transform[3] * -p[i + 2] +
-					-transform[5]) * 2;
+				       transform[3] * -p[i + 2] +
+				       -transform[5]) *
+				      2;
 			i += 3;
 		} else if (p[i] == PLOTTER_PATH_CLOSE) {
 			path[i] = draw_CLOSE_LINE;
@@ -357,33 +370,41 @@ ro_save_draw_path(const struct redraw_context *ctx,
 		} else if (p[i] == PLOTTER_PATH_LINE) {
 			path[i] = draw_LINE_TO;
 			path[i + 1] = (transform[0] * p[i + 1] +
-					transform[2] * -p[i + 2] +
-					transform[4]) * 2;
+				       transform[2] * -p[i + 2] +
+				       transform[4]) *
+				      2;
 			path[i + 2] = (transform[1] * p[i + 1] +
-					transform[3] * -p[i + 2] +
-					-transform[5]) * 2;
+				       transform[3] * -p[i + 2] +
+				       -transform[5]) *
+				      2;
 			i += 3;
 			empty_path = false;
 		} else if (p[i] == PLOTTER_PATH_BEZIER) {
 			path[i] = draw_BEZIER_TO;
 			path[i + 1] = (transform[0] * p[i + 1] +
-					transform[2] * -p[i + 2] +
-					transform[4]) * 2;
+				       transform[2] * -p[i + 2] +
+				       transform[4]) *
+				      2;
 			path[i + 2] = (transform[1] * p[i + 1] +
-					transform[3] * -p[i + 2] +
-					-transform[5]) * 2;
+				       transform[3] * -p[i + 2] +
+				       -transform[5]) *
+				      2;
 			path[i + 3] = (transform[0] * p[i + 3] +
-					transform[2] * -p[i + 4] +
-					transform[4]) * 2;
+				       transform[2] * -p[i + 4] +
+				       transform[4]) *
+				      2;
 			path[i + 4] = (transform[1] * p[i + 3] +
-					transform[3] * -p[i + 4] +
-					-transform[5]) * 2;
+				       transform[3] * -p[i + 4] +
+				       -transform[5]) *
+				      2;
 			path[i + 5] = (transform[0] * p[i + 5] +
-					transform[2] * -p[i + 6] +
-					transform[4]) * 2;
+				       transform[2] * -p[i + 6] +
+				       transform[4]) *
+				      2;
 			path[i + 6] = (transform[1] * p[i + 5] +
-					transform[3] * -p[i + 6] +
-					-transform[5]) * 2;
+				       transform[3] * -p[i + 6] +
+				       -transform[5]) *
+				      2;
 			i += 7;
 			empty_path = false;
 		} else {
@@ -400,13 +421,14 @@ ro_save_draw_path(const struct redraw_context *ctx,
 	}
 
 	code = pencil_path(ro_save_draw_diagram,
-			   path, i + 1,
-			   pstyle->fill_colour == NS_TRANSPARENT ?
-			   pencil_TRANSPARENT :
-			   pstyle->fill_colour << 8,
-			   pstyle->stroke_colour == NS_TRANSPARENT ?
-			   pencil_TRANSPARENT :
-			   pstyle->stroke_colour << 8,
+			   path,
+			   i + 1,
+			   pstyle->fill_colour == NS_TRANSPARENT
+				   ? pencil_TRANSPARENT
+				   : pstyle->fill_colour << 8,
+			   pstyle->stroke_colour == NS_TRANSPARENT
+				   ? pencil_TRANSPARENT
+				   : pstyle->stroke_colour << 8,
 			   plot_style_fixed_to_int(pstyle->stroke_width),
 			   pencil_JOIN_MITRED,
 			   pencil_CAP_BUTT,
@@ -447,14 +469,14 @@ ro_save_draw_path(const struct redraw_context *ctx,
  * \param flags the flags controlling the type of plot operation
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-ro_save_draw_bitmap(const struct redraw_context *ctx,
-		    struct bitmap *bitmap,
-		    int x, int y,
-		    int width,
-		    int height,
-		    colour bg,
-		    bitmap_flags_t flags)
+static nserror ro_save_draw_bitmap(const struct redraw_context *ctx,
+				   struct bitmap *bitmap,
+				   int x,
+				   int y,
+				   int width,
+				   int height,
+				   colour bg,
+				   bitmap_flags_t flags)
 {
 	pencil_code code;
 	const uint8_t *buffer;
@@ -466,10 +488,12 @@ ro_save_draw_bitmap(const struct redraw_context *ctx,
 	}
 
 	code = pencil_sprite(ro_save_draw_diagram,
-			     x * 2, (-y - height) * 2,
-			     width * 2, height * 2,
-			     ((char *) bitmap->sprite_area) +
-			     bitmap->sprite_area->first);
+			     x * 2,
+			     (-y - height) * 2,
+			     width * 2,
+			     height * 2,
+			     ((char *)bitmap->sprite_area) +
+				     bitmap->sprite_area->first);
 	if (code != pencil_OK)
 		return ro_save_draw_error(code);
 
@@ -488,13 +512,12 @@ ro_save_draw_bitmap(const struct redraw_context *ctx,
  * \param length length of string, in bytes
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-ro_save_draw_text(const struct redraw_context *ctx,
-		const struct plot_font_style *fstyle,
-		int x,
-		int y,
-		const char *text,
-		size_t length)
+static nserror ro_save_draw_text(const struct redraw_context *ctx,
+				 const struct plot_font_style *fstyle,
+				 int x,
+				 int y,
+				 const char *text,
+				 size_t length)
 {
 	pencil_code code;
 	const char *font_family;
@@ -503,9 +526,15 @@ ro_save_draw_text(const struct redraw_context *ctx,
 
 	nsfont_read_style(fstyle, &font_family, &font_size, &font_style);
 
-	code = pencil_text(ro_save_draw_diagram, x * 2, -y * 2, font_family,
-			font_style, font_size, text, length,
-			fstyle->foreground << 8);
+	code = pencil_text(ro_save_draw_diagram,
+			   x * 2,
+			   -y * 2,
+			   font_family,
+			   font_style,
+			   font_size,
+			   text,
+			   length,
+			   fstyle->foreground << 8);
 	if (code != pencil_OK)
 		return ro_save_draw_error(code);
 
@@ -538,8 +567,7 @@ ro_save_draw_group_start(const struct redraw_context *ctx, const char *name)
  * \param ctx The current redraw context.
  * \return NSERROR_OK on success else error code.
  */
-static nserror
-ro_save_draw_group_end(const struct redraw_context *ctx)
+static nserror ro_save_draw_group_end(const struct redraw_context *ctx)
 {
 	pencil_code code;
 
@@ -576,11 +604,9 @@ bool save_as_draw(struct hlcache_handle *h, const char *path)
 	struct content_redraw_data data;
 	size_t drawfile_size;
 	os_error *error;
-	struct redraw_context ctx = {
-		.interactive = false,
-		.background_images = true,
-		.plot = &ro_save_draw_plotters
-	};
+	struct redraw_context ctx = {.interactive = false,
+				     .background_images = true,
+				     .plot = &ro_save_draw_plotters};
 
 	ro_save_draw_diagram = pencil_create();
 	if (!ro_save_draw_diagram) {
@@ -610,8 +636,10 @@ bool save_as_draw(struct hlcache_handle *h, const char *path)
 
 	/*pencil_dump(ro_save_draw_diagram);*/
 
-	code = pencil_save_drawfile(ro_save_draw_diagram, "NetSurf",
-			&drawfile_buffer, &drawfile_size);
+	code = pencil_save_drawfile(ro_save_draw_diagram,
+				    "NetSurf",
+				    &drawfile_buffer,
+				    &drawfile_size);
 	if (code != pencil_OK) {
 		ro_warn_user("SaveError", 0);
 		pencil_free(ro_save_draw_diagram);
@@ -619,12 +647,16 @@ bool save_as_draw(struct hlcache_handle *h, const char *path)
 	}
 	assert(drawfile_buffer);
 
-	error = xosfile_save_stamped(path, osfile_TYPE_DRAW,
-			(byte *) drawfile_buffer,
-			(byte *) drawfile_buffer + drawfile_size);
+	error = xosfile_save_stamped(path,
+				     osfile_TYPE_DRAW,
+				     (byte *)drawfile_buffer,
+				     (byte *)drawfile_buffer + drawfile_size);
 	if (error) {
-		NSLOG(netsurf, INFO, "xosfile_save_stamped failed: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xosfile_save_stamped failed: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("SaveError", error->errmess);
 		pencil_free(ro_save_draw_diagram);
 		return false;

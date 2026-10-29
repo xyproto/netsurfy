@@ -24,15 +24,18 @@ nserror amiga_datatypes_init(void)
 	nserror err = NSERROR_OK;
 
 	err = amiga_dt_picture_init();
-	if(err != NSERROR_OK) return err;
+	if (err != NSERROR_OK)
+		return err;
 
 #ifdef WITH_DTANIM
 	err = amiga_dt_anim_init();
-	if(err != NSERROR_OK) return err;
+	if (err != NSERROR_OK)
+		return err;
 #endif
 
 	err = amiga_dt_sound_init();
-	if(err != NSERROR_OK) return err;
+	if (err != NSERROR_OK)
+		return err;
 
 	return NSERROR_OK;
 }

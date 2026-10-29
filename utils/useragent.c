@@ -37,55 +37,54 @@ static const char *core_user_agent_string = NULL;
  * Prepare core_user_agent_string with a string suitable for use as a
  * user agent in HTTP requests.
  */
-static void
-user_agent_build_string(void)
+static void user_agent_build_string(void)
 {
-        struct utsname un;
-        const char *sysname = "Unknown";
-        char *ua_string;
-        int len;
+	struct utsname un;
+	const char *sysname = "Unknown";
+	char *ua_string;
+	int len;
 
-        if (uname(&un) >= 0) {
-                sysname = un.sysname;
-                if (strcmp(sysname, "Linux") == 0) {
+	if (uname(&un) >= 0) {
+		sysname = un.sysname;
+		if (strcmp(sysname, "Linux") == 0) {
 			/* Force desktop, not mobile */
-                        sysname = "X11; Linux";
-                }
-        }
+			sysname = "X11; Linux";
+		}
+	}
 
-        len = snprintf(NULL, 0, NETSURF_UA_FORMAT_STRING,
-                       sysname,
-                       netsurf_version_major,
-                       netsurf_version_minor);
-        ua_string = malloc(len + 1);
-        if (!ua_string) {
-                /** \todo this needs handling better */
-                return;
-        }
-        snprintf(ua_string, len + 1,
-                 NETSURF_UA_FORMAT_STRING,
-                 sysname,
-                 netsurf_version_major,
-                 netsurf_version_minor);
+	len = snprintf(NULL,
+		       0,
+		       NETSURF_UA_FORMAT_STRING,
+		       sysname,
+		       netsurf_version_major,
+		       netsurf_version_minor);
+	ua_string = malloc(len + 1);
+	if (!ua_string) {
+		/** \todo this needs handling better */
+		return;
+	}
+	snprintf(ua_string,
+		 len + 1,
+		 NETSURF_UA_FORMAT_STRING,
+		 sysname,
+		 netsurf_version_major,
+		 netsurf_version_minor);
 
-        core_user_agent_string = ua_string;
+	core_user_agent_string = ua_string;
 
-        NSLOG(netsurf, INFO, "Built user agent \"%s\"",
-              core_user_agent_string);
+	NSLOG(netsurf, INFO, "Built user agent \"%s\"", core_user_agent_string);
 }
 
 /* This is a function so that later we can override it trivially */
-const char *
-user_agent_string(void)
+const char *user_agent_string(void)
 {
-        if (core_user_agent_string == NULL)
-                user_agent_build_string();
+	if (core_user_agent_string == NULL)
+		user_agent_build_string();
 	return core_user_agent_string;
 }
 
 /* Public API documented in useragent.h */
-void
-free_user_agent_string(void)
+void free_user_agent_string(void)
 {
 	if (core_user_agent_string != NULL) {
 		/* Nasty cast because we need to de-const it to free it */

@@ -41,18 +41,18 @@
 
 #define BOLD_WEIGHT 700
 
-static FT_Library library; 
+static FT_Library library;
 static FTC_Manager ft_cmanager;
-static FTC_CMapCache ft_cmap_cache ;
+static FTC_CMapCache ft_cmap_cache;
 static FTC_ImageCache ft_image_cache;
 
 int ft_load_type;
 
 /* cache manager faceID data to create freetype faceid on demand */
 typedef struct fb_faceid_s {
-        char *fontfile; /* path to font */
-        int index; /* index of font */
-        int cidx; /* character map index for unicode */
+	char *fontfile; /* path to font */
+	int index; /* index of font */
+	int cidx; /* character map index for unicode */
 } fb_faceid_t;
 
 
@@ -78,37 +78,39 @@ static fb_faceid_t *fb_faces[FB_FACE_COUNT];
 /**
  * map cache manager handle to face id
  */
-static FT_Error
-ft_face_requester(FTC_FaceID face_id,
-		  FT_Library  library,
-		  FT_Pointer request_data,
-		  FT_Face *face )
+static FT_Error ft_face_requester(FTC_FaceID face_id,
+				  FT_Library library,
+				  FT_Pointer request_data,
+				  FT_Face *face)
 {
-        FT_Error error;
-        fb_faceid_t *fb_face = (fb_faceid_t *)face_id;
-        int cidx;
+	FT_Error error;
+	fb_faceid_t *fb_face = (fb_faceid_t *)face_id;
+	int cidx;
 
-        error = FT_New_Face(library, fb_face->fontfile, fb_face->index, face); 
-        if (error) {
-                NSLOG(netsurf, INFO, "Could not find font (code %d)", error);
-        } else {
+	error = FT_New_Face(library, fb_face->fontfile, fb_face->index, face);
+	if (error) {
+		NSLOG(netsurf, INFO, "Could not find font (code %d)", error);
+	} else {
 
-                error = FT_Select_Charmap(*face, FT_ENCODING_UNICODE);
-                if (error) {
-                        NSLOG(netsurf, INFO,
-                              "Could not select charmap (code %d)", error);
-                } else {
-                        for (cidx = 0; cidx < (*face)->num_charmaps; cidx++) {
-                                if ((*face)->charmap == (*face)->charmaps[cidx]) {
-                                        fb_face->cidx = cidx;
-                                        break;
-                                }
-                        }
-                }
-        }
-        NSLOG(netsurf, INFO, "Loaded face from %s", fb_face->fontfile);
+		error = FT_Select_Charmap(*face, FT_ENCODING_UNICODE);
+		if (error) {
+			NSLOG(netsurf,
+			      INFO,
+			      "Could not select charmap (code %d)",
+			      error);
+		} else {
+			for (cidx = 0; cidx < (*face)->num_charmaps; cidx++) {
+				if ((*face)->charmap ==
+				    (*face)->charmaps[cidx]) {
+					fb_face->cidx = cidx;
+					break;
+				}
+			}
+		}
+	}
+	NSLOG(netsurf, INFO, "Loaded face from %s", fb_face->fontfile);
 
-        return error;
+	return error;
 }
 
 /**
@@ -117,74 +119,80 @@ ft_face_requester(FTC_FaceID face_id,
 static fb_faceid_t *
 fb_new_face(const char *option, const char *resname, const char *fontname)
 {
-        fb_faceid_t *newf;
-        FT_Error error;
-        FT_Face aface;
+	fb_faceid_t *newf;
+	FT_Error error;
+	FT_Face aface;
 	char buf[PATH_MAX];
 
-        newf = calloc(1, sizeof(fb_faceid_t));
+	newf = calloc(1, sizeof(fb_faceid_t));
 
-        if (option != NULL) {
-                newf->fontfile = strdup(option);
-        } else {
+	if (option != NULL) {
+		newf->fontfile = strdup(option);
+	} else {
 		filepath_sfind(respaths, buf, fontname);
-                newf->fontfile = strdup(buf);
-        }
+		newf->fontfile = strdup(buf);
+	}
 
-        error = FTC_Manager_LookupFace(ft_cmanager, (FTC_FaceID)newf, &aface);
-        if (error) {
-                NSLOG(netsurf, INFO, "Could not find font face %s (code %d)",
-                      fontname, error);
-                free(newf->fontfile);
-                free(newf);
-                newf = NULL;
-        }
+	error = FTC_Manager_LookupFace(ft_cmanager, (FTC_FaceID)newf, &aface);
+	if (error) {
+		NSLOG(netsurf,
+		      INFO,
+		      "Could not find font face %s (code %d)",
+		      fontname,
+		      error);
+		free(newf->fontfile);
+		free(newf);
+		newf = NULL;
+	}
 
-        return newf;
+	return newf;
 }
 
 /* exported interface documented in framebuffer/font.h */
 bool fb_font_init(void)
 {
-        FT_Error error;
-        FT_ULong max_cache_size;
-        FT_UInt max_faces = 6;
+	FT_Error error;
+	FT_ULong max_cache_size;
+	FT_UInt max_faces = 6;
 	fb_faceid_t *fb_face;
 
-        /* freetype library initialise */
-        error = FT_Init_FreeType( &library ); 
-        if (error) {
-                NSLOG(netsurf, INFO,
-                      "Freetype could not initialised (code %d)", error);
-                return false;
-        }
+	/* freetype library initialise */
+	error = FT_Init_FreeType(&library);
+	if (error) {
+		NSLOG(netsurf,
+		      INFO,
+		      "Freetype could not initialised (code %d)",
+		      error);
+		return false;
+	}
 
-        /* set the Glyph cache size up */
-        max_cache_size = nsoption_int(fb_font_cachesize) * 1024; 
+	/* set the Glyph cache size up */
+	max_cache_size = nsoption_int(fb_font_cachesize) * 1024;
 
 	if (max_cache_size < CACHE_MIN_SIZE) {
 		max_cache_size = CACHE_MIN_SIZE;
 	}
 
-        /* cache manager initialise */
-        error = FTC_Manager_New(library, 
-                                max_faces, 
-                                0, 
-                                max_cache_size, 
-                                ft_face_requester, 
-                                NULL, 
-                                &ft_cmanager);
-        if (error) {
-                NSLOG(netsurf, INFO,
-                      "Freetype could not initialise cache manager (code %d)",
-                      error);
-                FT_Done_FreeType(library);
-                return false;
-        }
+	/* cache manager initialise */
+	error = FTC_Manager_New(library,
+				max_faces,
+				0,
+				max_cache_size,
+				ft_face_requester,
+				NULL,
+				&ft_cmanager);
+	if (error) {
+		NSLOG(netsurf,
+		      INFO,
+		      "Freetype could not initialise cache manager (code %d)",
+		      error);
+		FT_Done_FreeType(library);
+		return false;
+	}
 
-        error = FTC_CMapCache_New(ft_cmanager, &ft_cmap_cache);
+	error = FTC_CMapCache_New(ft_cmanager, &ft_cmap_cache);
 
-        error = FTC_ImageCache_New(ft_cmanager, &ft_image_cache);
+	error = FTC_ImageCache_New(ft_cmanager, &ft_image_cache);
 
 	/* need to obtain the generic font faces */
 
@@ -194,21 +202,23 @@ bool fb_font_init(void)
 			      NETSURF_FB_FONT_SANS_SERIF);
 	if (fb_face == NULL) {
 		/* The sans serif font is the default and must be found. */
-                NSLOG(netsurf, INFO, "Could not find the default font");
-                FTC_Manager_Done(ft_cmanager);
-                FT_Done_FreeType(library);
-                return false;
-        } else {
+		NSLOG(netsurf, INFO, "Could not find the default font");
+		FTC_Manager_Done(ft_cmanager);
+		FT_Done_FreeType(library);
+		return false;
+	} else {
 		fb_faces[FB_FACE_SANS_SERIF] = fb_face;
 	}
 
 	/* Bold sans serif face */
 	fb_face = fb_new_face(nsoption_charp(fb_face_sans_serif_bold),
-                            "sans_serif_bold.ttf",
-                            NETSURF_FB_FONT_SANS_SERIF_BOLD);
+			      "sans_serif_bold.ttf",
+			      NETSURF_FB_FONT_SANS_SERIF_BOLD);
 	if (fb_face == NULL) {
-		/* seperate bold face unavailabe use the normal weight version */
-		fb_faces[FB_FACE_SANS_SERIF_BOLD] = fb_faces[FB_FACE_SANS_SERIF];
+		/* seperate bold face unavailabe use the normal weight version
+		 */
+		fb_faces[FB_FACE_SANS_SERIF_BOLD] =
+			fb_faces[FB_FACE_SANS_SERIF];
 	} else {
 		fb_faces[FB_FACE_SANS_SERIF_BOLD] = fb_face;
 	}
@@ -218,26 +228,30 @@ bool fb_font_init(void)
 			      "sans_serif_italic.ttf",
 			      NETSURF_FB_FONT_SANS_SERIF_ITALIC);
 	if (fb_face == NULL) {
-		/* seperate italic face unavailabe use the normal weight version */
-		fb_faces[FB_FACE_SANS_SERIF_ITALIC] = fb_faces[FB_FACE_SANS_SERIF];
+		/* seperate italic face unavailabe use the normal weight version
+		 */
+		fb_faces[FB_FACE_SANS_SERIF_ITALIC] =
+			fb_faces[FB_FACE_SANS_SERIF];
 	} else {
 		fb_faces[FB_FACE_SANS_SERIF_ITALIC] = fb_face;
 	}
 
 	/* Bold italic sans serif face */
-	fb_face = fb_new_face(nsoption_charp(fb_face_sans_serif_italic_bold), 
+	fb_face = fb_new_face(nsoption_charp(fb_face_sans_serif_italic_bold),
 			      "sans_serif_italic_bold.ttf",
 			      NETSURF_FB_FONT_SANS_SERIF_ITALIC_BOLD);
 	if (fb_face == NULL) {
-		/* seperate italic face unavailabe use the normal weight version */
-		fb_faces[FB_FACE_SANS_SERIF_ITALIC_BOLD] = fb_faces[FB_FACE_SANS_SERIF];
+		/* seperate italic face unavailabe use the normal weight version
+		 */
+		fb_faces[FB_FACE_SANS_SERIF_ITALIC_BOLD] =
+			fb_faces[FB_FACE_SANS_SERIF];
 	} else {
 		fb_faces[FB_FACE_SANS_SERIF_ITALIC_BOLD] = fb_face;
 	}
 
 	/* serif face */
 	fb_face = fb_new_face(nsoption_charp(fb_face_serif),
-                            "serif.ttf",
+			      "serif.ttf",
 			      NETSURF_FB_FONT_SERIF);
 	if (fb_face == NULL) {
 		/* serif face unavailabe use the default */
@@ -302,14 +316,14 @@ bool fb_font_init(void)
 		fb_faces[FB_FACE_FANTASY] = fb_face;
 	}
 
-        
-        /* set the default render mode */
-        if (nsoption_bool(fb_font_monochrome) == true)
-                ft_load_type = FT_LOAD_MONOCHROME; /* faster but less pretty */
-        else
-                ft_load_type = 0;
-        
-        return true;
+
+	/* set the default render mode */
+	if (nsoption_bool(fb_font_monochrome) == true)
+		ft_load_type = FT_LOAD_MONOCHROME; /* faster but less pretty */
+	else
+		ft_load_type = 0;
+
+	return true;
 }
 
 /* exported interface documented in framebuffer/font.h */
@@ -317,8 +331,8 @@ bool fb_font_finalise(void)
 {
 	int i, j;
 
-        FTC_Manager_Done(ft_cmanager);
-        FT_Done_FreeType(library);
+	FTC_Manager_Done(ft_cmanager);
+	FT_Done_FreeType(library);
 
 	for (i = 0; i < FB_FACE_COUNT; i++) {
 		if (fb_faces[i] == NULL)
@@ -336,7 +350,7 @@ bool fb_font_finalise(void)
 		fb_faces[i] = NULL;
 	}
 
-        return true;
+	return true;
 }
 
 /**
@@ -344,16 +358,16 @@ bool fb_font_finalise(void)
  */
 static void fb_fill_scalar(const plot_font_style_t *fstyle, FTC_Scaler srec)
 {
-        int selected_face = FB_FACE_DEFAULT;
+	int selected_face = FB_FACE_DEFAULT;
 
 	switch (fstyle->family) {
-                                
+
 	case PLOT_FONT_FAMILY_SERIF:
 		if (fstyle->weight >= BOLD_WEIGHT) {
-                        selected_face = FB_FACE_SERIF_BOLD;
+			selected_face = FB_FACE_SERIF_BOLD;
 		} else {
-                        selected_face = FB_FACE_SERIF;
-                }
+			selected_face = FB_FACE_SERIF;
+		}
 		break;
 
 	case PLOT_FONT_FAMILY_MONOSPACE:
@@ -361,36 +375,36 @@ static void fb_fill_scalar(const plot_font_style_t *fstyle, FTC_Scaler srec)
 			selected_face = FB_FACE_MONOSPACE_BOLD;
 		} else {
 			selected_face = FB_FACE_MONOSPACE;
-                }
+		}
 		break;
 
 	case PLOT_FONT_FAMILY_CURSIVE:
-                selected_face = FB_FACE_CURSIVE;
+		selected_face = FB_FACE_CURSIVE;
 		break;
 
 	case PLOT_FONT_FAMILY_FANTASY:
-                selected_face = FB_FACE_FANTASY;
+		selected_face = FB_FACE_FANTASY;
 		break;
 
 	case PLOT_FONT_FAMILY_SANS_SERIF:
 	default:
-		if ((fstyle->flags & FONTF_ITALIC) || 
+		if ((fstyle->flags & FONTF_ITALIC) ||
 		    (fstyle->flags & FONTF_OBLIQUE)) {
 			if (fstyle->weight >= BOLD_WEIGHT) {
-                                selected_face = FB_FACE_SANS_SERIF_ITALIC_BOLD;
+				selected_face = FB_FACE_SANS_SERIF_ITALIC_BOLD;
 			} else {
-                                selected_face = FB_FACE_SANS_SERIF_ITALIC;
+				selected_face = FB_FACE_SANS_SERIF_ITALIC;
 			}
 		} else {
 			if (fstyle->weight >= BOLD_WEIGHT) {
-                                selected_face = FB_FACE_SANS_SERIF_BOLD;
-                        } else {
-                                selected_face = FB_FACE_SANS_SERIF;
+				selected_face = FB_FACE_SANS_SERIF_BOLD;
+			} else {
+				selected_face = FB_FACE_SANS_SERIF;
 			}
-                }
+		}
 	}
 
-        srec->face_id = (FTC_FaceID)fb_faces[selected_face];
+	srec->face_id = (FTC_FaceID)fb_faces[selected_face];
 
 	srec->width = srec->height = (fstyle->size * 64) / PLOT_STYLE_SCALE;
 	srec->pixel = 0;
@@ -401,91 +415,92 @@ static void fb_fill_scalar(const plot_font_style_t *fstyle, FTC_Scaler srec)
 /* exported interface documented in framebuffer/freetype_font.h */
 FT_Glyph fb_getglyph(const plot_font_style_t *fstyle, uint32_t ucs4)
 {
-        FT_UInt glyph_index;
-        FTC_ScalerRec srec;
-        FT_Glyph glyph;
-        FT_Error error;
-        fb_faceid_t *fb_face; 
+	FT_UInt glyph_index;
+	FTC_ScalerRec srec;
+	FT_Glyph glyph;
+	FT_Error error;
+	fb_faceid_t *fb_face;
 
-        fb_fill_scalar(fstyle, &srec);
+	fb_fill_scalar(fstyle, &srec);
 
-        fb_face = (fb_faceid_t *)srec.face_id;
+	fb_face = (fb_faceid_t *)srec.face_id;
 
-        glyph_index = FTC_CMapCache_Lookup(ft_cmap_cache, srec.face_id,
-			fb_face->cidx, ucs4);
+	glyph_index = FTC_CMapCache_Lookup(
+		ft_cmap_cache, srec.face_id, fb_face->cidx, ucs4);
 
-        error = FTC_ImageCache_LookupScaler(ft_image_cache, 
-                                            &srec, 
-                                            FT_LOAD_RENDER | 
-                                            FT_LOAD_FORCE_AUTOHINT | 
-                                            ft_load_type, 
-                                            glyph_index, 
-                                            &glyph, 
-                                            NULL);
+	error = FTC_ImageCache_LookupScaler(
+		ft_image_cache,
+		&srec,
+		FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT | ft_load_type,
+		glyph_index,
+		&glyph,
+		NULL);
 	if (error != 0)
 		return NULL;
 
-        return glyph;
+	return glyph;
 }
 
 
 /* exported interface documented in framebuffer/freetype_font.h */
-nserror
-fb_font_width(const plot_font_style_t *fstyle,
-                         const char *string, size_t length,
-                         int *width)
+nserror fb_font_width(const plot_font_style_t *fstyle,
+		      const char *string,
+		      size_t length,
+		      int *width)
 {
-        uint32_t ucs4;
-        size_t nxtchr = 0;
-        FT_Glyph glyph;
+	uint32_t ucs4;
+	size_t nxtchr = 0;
+	FT_Glyph glyph;
 
-        *width = 0;
-        while (nxtchr < length) {
-                ucs4 = utf8_to_ucs4(string + nxtchr, length - nxtchr);
-                nxtchr = utf8_next(string, length, nxtchr);
+	*width = 0;
+	while (nxtchr < length) {
+		ucs4 = utf8_to_ucs4(string + nxtchr, length - nxtchr);
+		nxtchr = utf8_next(string, length, nxtchr);
 
-                glyph = fb_getglyph(fstyle, ucs4);
-                if (glyph == NULL)
-                        continue;
+		glyph = fb_getglyph(fstyle, ucs4);
+		if (glyph == NULL)
+			continue;
 
-                *width += glyph->advance.x >> 16;
-        }
+		*width += glyph->advance.x >> 16;
+	}
 	return NSERROR_OK;
 }
 
 
 /* exported interface documented in framebuffer/freetype_font.h */
-nserror
-fb_font_position(const plot_font_style_t *fstyle,
-		const char *string, size_t length,
-		int x, size_t *char_offset, int *actual_x)
+nserror fb_font_position(const plot_font_style_t *fstyle,
+			 const char *string,
+			 size_t length,
+			 int x,
+			 size_t *char_offset,
+			 int *actual_x)
 {
-        uint32_t ucs4;
-        size_t nxtchr = 0;
-        FT_Glyph glyph;
-        int prev_x = 0;
+	uint32_t ucs4;
+	size_t nxtchr = 0;
+	FT_Glyph glyph;
+	int prev_x = 0;
 
-        *actual_x = 0;
-        while (nxtchr < length) {
-                ucs4 = utf8_to_ucs4(string + nxtchr, length - nxtchr);
+	*actual_x = 0;
+	while (nxtchr < length) {
+		ucs4 = utf8_to_ucs4(string + nxtchr, length - nxtchr);
 
-                glyph = fb_getglyph(fstyle, ucs4);
-                if (glyph == NULL)
-                        continue;
+		glyph = fb_getglyph(fstyle, ucs4);
+		if (glyph == NULL)
+			continue;
 
-                *actual_x += glyph->advance.x >> 16;
-                if (*actual_x > x)
-                        break;
+		*actual_x += glyph->advance.x >> 16;
+		if (*actual_x > x)
+			break;
 
-                prev_x = *actual_x;
-                nxtchr = utf8_next(string, length, nxtchr);
-        }
+		prev_x = *actual_x;
+		nxtchr = utf8_next(string, length, nxtchr);
+	}
 
-        /* choose nearest of previous and last x */
-        if (abs(*actual_x - x) > abs(prev_x - x))
-                *actual_x = prev_x;
+	/* choose nearest of previous and last x */
+	if (abs(*actual_x - x) > abs(prev_x - x))
+		*actual_x = prev_x;
 
-        *char_offset = nxtchr;
+	*char_offset = nxtchr;
 	return NSERROR_OK;
 }
 
@@ -512,43 +527,45 @@ fb_font_position(const plot_font_style_t *fstyle,
  *
  * Returning char_offset == length means no split possible
  */
-static nserror
-fb_font_split(const plot_font_style_t *fstyle,
-		const char *string, size_t length,
-		int x, size_t *char_offset, int *actual_x)
+static nserror fb_font_split(const plot_font_style_t *fstyle,
+			     const char *string,
+			     size_t length,
+			     int x,
+			     size_t *char_offset,
+			     int *actual_x)
 {
-        uint32_t ucs4;
-        size_t nxtchr = 0;
-        int last_space_x = 0;
-        int last_space_idx = 0;
-        FT_Glyph glyph;
+	uint32_t ucs4;
+	size_t nxtchr = 0;
+	int last_space_x = 0;
+	int last_space_idx = 0;
+	FT_Glyph glyph;
 
-        *actual_x = 0;
-        while (nxtchr < length) {
-                ucs4 = utf8_to_ucs4(string + nxtchr, length - nxtchr);
+	*actual_x = 0;
+	while (nxtchr < length) {
+		ucs4 = utf8_to_ucs4(string + nxtchr, length - nxtchr);
 
-                glyph = fb_getglyph(fstyle, ucs4);
-                if (glyph == NULL)
-                        continue;
+		glyph = fb_getglyph(fstyle, ucs4);
+		if (glyph == NULL)
+			continue;
 
-                if (ucs4 == 0x20) {
-                        last_space_x = *actual_x;
-                        last_space_idx = nxtchr;
-                }
+		if (ucs4 == 0x20) {
+			last_space_x = *actual_x;
+			last_space_idx = nxtchr;
+		}
 
-                *actual_x += glyph->advance.x >> 16;
-                if (*actual_x > x && last_space_idx != 0) {
-                        /* string has exceeded available width and we've
-                         * found a space; return previous space */
-                        *actual_x = last_space_x;
-                        *char_offset = last_space_idx;
-                        return NSERROR_OK;
-                }
+		*actual_x += glyph->advance.x >> 16;
+		if (*actual_x > x && last_space_idx != 0) {
+			/* string has exceeded available width and we've
+			 * found a space; return previous space */
+			*actual_x = last_space_x;
+			*char_offset = last_space_idx;
+			return NSERROR_OK;
+		}
 
-                nxtchr = utf8_next(string, length, nxtchr);
-        }
+		nxtchr = utf8_next(string, length, nxtchr);
+	}
 
-        *char_offset = nxtchr;
+	*char_offset = nxtchr;
 
 	return NSERROR_OK;
 }

@@ -58,7 +58,8 @@
 static struct theme_descriptor *theme_current = NULL;
 static struct theme_descriptor *theme_descriptors = NULL;
 
-static bool ro_gui_theme_add_descriptor(const char *folder, const char *leafname);
+static bool
+ro_gui_theme_add_descriptor(const char *folder, const char *leafname);
 static void ro_gui_theme_get_available_in_dir(const char *directory);
 static void ro_gui_theme_free(struct theme_descriptor *descriptor);
 
@@ -105,12 +106,12 @@ struct theme_descriptor *ro_gui_theme_find(const char *leafname)
 		return NULL;
 
 	for (descriptor = theme_descriptors; descriptor;
-			descriptor = descriptor->next)
+	     descriptor = descriptor->next)
 		if (!strcmp(leafname, descriptor->leafname))
 			return descriptor;
 	/* fallback for 10 chars on old filesystems */
 	for (descriptor = theme_descriptors; descriptor;
-			descriptor = descriptor->next)
+	     descriptor = descriptor->next)
 		if (!strncmp(leafname, descriptor->leafname, 10))
 			return descriptor;
 	return NULL;
@@ -151,7 +152,8 @@ struct theme_descriptor *ro_gui_theme_get_available(void)
 					current->next->previous = current;
 
 				current = test->previous;
-				if (!current) current = test;
+				if (!current)
+					current = test;
 			} else {
 				current = current->next;
 			}
@@ -176,16 +178,23 @@ static void ro_gui_theme_get_available_in_dir(const char *directory)
 	osgbpb_INFO(100) info;
 
 	while (context != -1) {
-	  	/* read some directory info */
-		os_error *error = xosgbpb_dir_entries_info(directory,
-				(osgbpb_info_list *) &info, 1, context,
-				sizeof(info), 0, &read_count, &context);
+		/* read some directory info */
+		os_error *error = xosgbpb_dir_entries_info(
+			directory,
+			(osgbpb_info_list *)&info,
+			1,
+			context,
+			sizeof(info),
+			0,
+			&read_count,
+			&context);
 		if (error) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xosgbpb_dir_entries_info: 0x%x: %s",
 			      error->errnum,
 			      error->errmess);
-			if (error->errnum == 0xd6)	/* no such dir */
+			if (error->errnum == 0xd6) /* no such dir */
 				return;
 			ro_warn_user("MiscError", error->errmess);
 			break;
@@ -220,7 +229,7 @@ struct theme_descriptor *ro_gui_theme_get_current(void)
 
 osspriteop_area *ro_gui_theme_get_sprites(struct theme_descriptor *descriptor)
 {
-	osspriteop_area		*area;
+	osspriteop_area *area;
 
 	if (descriptor == NULL)
 		descriptor = theme_current;
@@ -228,7 +237,7 @@ osspriteop_area *ro_gui_theme_get_sprites(struct theme_descriptor *descriptor)
 	if (descriptor != NULL && descriptor->theme != NULL)
 		area = descriptor->theme->sprite_area;
 	else
-		area = (osspriteop_area *) 1;
+		area = (osspriteop_area *)1;
 
 	return area;
 }
@@ -249,7 +258,8 @@ osspriteop_area *ro_gui_theme_get_sprites(struct theme_descriptor *descriptor)
  */
 
 int ro_gui_theme_get_style_element(struct theme_descriptor *descriptor,
-		theme_style style, theme_element element)
+				   theme_style style,
+				   theme_element element)
 {
 	if (descriptor == NULL)
 		descriptor = theme_current;
@@ -259,7 +269,7 @@ int ro_gui_theme_get_style_element(struct theme_descriptor *descriptor,
 
 	switch (style) {
 	case THEME_STYLE_NONE:
-		switch(element) {
+		switch (element) {
 		case THEME_ELEMENT_FOREGROUND:
 			return wimp_COLOUR_BLACK;
 		case THEME_ELEMENT_BACKGROUND:
@@ -323,8 +333,11 @@ int ro_gui_theme_get_style_element(struct theme_descriptor *descriptor,
  */
 
 bool ro_gui_theme_get_throbber_data(struct theme_descriptor *descriptor,
-		int *frames, int *width, int *height,
-		bool *right, bool *redraw)
+				    int *frames,
+				    int *width,
+				    int *height,
+				    bool *right,
+				    bool *redraw)
 {
 	if (descriptor == NULL)
 		descriptor = theme_current;
@@ -367,18 +380,20 @@ bool ro_gui_theme_add_descriptor(const char *folder, const char *leafname)
 	/* create a full filename */
 	filename = malloc(strlen(folder) + strlen(leafname) + 2);
 	if (!filename) {
-	  	NSLOG(netsurf, INFO, "No memory for malloc");
-	  	ro_warn_user("NoMemory", 0);
-	  	return false;
+		NSLOG(netsurf, INFO, "No memory for malloc");
+		ro_warn_user("NoMemory", 0);
+		return false;
 	}
 	sprintf(filename, "%s.%s", folder, leafname);
 
 	/* get the header */
-	error = xosfind_openinw(osfind_NO_PATH, filename, 0,
-			&file_handle);
+	error = xosfind_openinw(osfind_NO_PATH, filename, 0, &file_handle);
 	if (error) {
-		NSLOG(netsurf, INFO, "xosfind_openinw: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xosfind_openinw: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("FileError", error->errmess);
 		free(filename);
 		return false;
@@ -388,25 +403,29 @@ bool ro_gui_theme_add_descriptor(const char *folder, const char *leafname)
 		return false;
 	}
 	error = xosgbpb_read_atw(file_handle,
-			(byte *) &file_header,
-			sizeof (struct theme_file_header),
-			0, &output_left);
+				 (byte *)&file_header,
+				 sizeof(struct theme_file_header),
+				 0,
+				 &output_left);
 	xosfind_closew(file_handle);
 	if (error) {
-		NSLOG(netsurf, INFO, "xosbgpb_read_atw: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xosbgpb_read_atw: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("FileError", error->errmess);
 		free(filename);
 		return false;
 	}
-	if (output_left > 0) {	/* should try to read more? */
-	  	free(filename);
-	  	return false;
+	if (output_left > 0) { /* should try to read more? */
+		free(filename);
+		return false;
 	}
 
 	/* create a new theme descriptor */
-	current = (struct theme_descriptor *)calloc(1,
-			sizeof(struct theme_descriptor));
+	current = (struct theme_descriptor *)calloc(
+		1, sizeof(struct theme_descriptor));
 	if (!current) {
 		NSLOG(netsurf, INFO, "calloc failed");
 		ro_warn_user("NoMemory", 0);
@@ -437,7 +456,6 @@ bool ro_gui_theme_add_descriptor(const char *folder, const char *leafname)
 	}
 	theme_descriptors = current;
 	return true;
-
 }
 
 
@@ -450,10 +468,10 @@ bool ro_gui_theme_add_descriptor(const char *folder, const char *leafname)
  * \return false for a badly formed theme, true otherwise
  */
 bool ro_gui_theme_read_file_header(struct theme_descriptor *descriptor,
-		struct theme_file_header *file_header)
+				   struct theme_file_header *file_header)
 {
 	if ((file_header->magic_value != 0x4d54534e) ||
-			(file_header->parser_version > 2))
+	    (file_header->parser_version > 2))
 		return false;
 
 	strcpy(descriptor->name, file_header->name);
@@ -465,13 +483,12 @@ bool ro_gui_theme_read_file_header(struct theme_descriptor *descriptor,
 	descriptor->decompressed_size = file_header->decompressed_sprite_size;
 	descriptor->compressed_size = file_header->compressed_sprite_size;
 	if (file_header->parser_version >= 2) {
-		descriptor->throbber_right =
-				!(file_header->theme_flags & (1 << 0));
-		descriptor->throbber_redraw =
-				file_header->theme_flags & (1 << 1);
+		descriptor->throbber_right = !(file_header->theme_flags &
+					       (1 << 0));
+		descriptor->throbber_redraw = file_header->theme_flags &
+					      (1 << 1);
 	} else {
-		descriptor->throbber_right =
-				(file_header->theme_flags == 0x00);
+		descriptor->throbber_right = (file_header->theme_flags == 0x00);
 		descriptor->throbber_redraw = true;
 	}
 	return true;
@@ -505,10 +522,11 @@ bool ro_gui_theme_open(struct theme_descriptor *descriptor, bool list)
 		start at the first descriptor.
 	*/
 	if (list && descriptor)
-		while (descriptor->previous) descriptor = descriptor->previous;
+		while (descriptor->previous)
+			descriptor = descriptor->previous;
 
 	/*	Open the themes
-	*/
+	 */
 	for (; descriptor; descriptor = next_descriptor) {
 		/* see if we should iterate through the entire list */
 		if (list)
@@ -523,8 +541,8 @@ bool ro_gui_theme_open(struct theme_descriptor *descriptor, bool list)
 		}
 
 		/* create a new theme */
-		descriptor->theme = (struct theme *)calloc(1,
-				sizeof(struct theme));
+		descriptor->theme = (struct theme *)calloc(
+			1, sizeof(struct theme));
 		if (!descriptor->theme) {
 			NSLOG(netsurf, INFO, "calloc() failed");
 			ro_warn_user("NoMemory", 0);
@@ -534,9 +552,15 @@ bool ro_gui_theme_open(struct theme_descriptor *descriptor, bool list)
 
 		/* try to load the associated file */
 		error = xosfile_read_stamped_no_path(descriptor->filename,
-				&obj_type, 0, 0, &file_size, 0, 0);
+						     &obj_type,
+						     0,
+						     0,
+						     &file_size,
+						     0,
+						     0);
 		if (error) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xosfile_read_stamped_no_path: 0x%x: %s",
 			      error->errnum,
 			      error->errmess);
@@ -551,11 +575,12 @@ bool ro_gui_theme_open(struct theme_descriptor *descriptor, bool list)
 			ro_warn_user("NoMemory", 0);
 			continue;
 		}
-		error = xosfile_load_stamped_no_path(descriptor->filename,
-				(byte *)raw_data, 0, 0, 0, 0, 0);
+		error = xosfile_load_stamped_no_path(
+			descriptor->filename, (byte *)raw_data, 0, 0, 0, 0, 0);
 		if (error) {
 			free(raw_data);
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xosfile_load_stamped_no_path: 0x%x: %s",
 			      error->errnum,
 			      error->errmess);
@@ -567,7 +592,8 @@ bool ro_gui_theme_open(struct theme_descriptor *descriptor, bool list)
 		error = xsquash_decompress_return_sizes(-1, &workspace_size, 0);
 		if (error) {
 			free(raw_data);
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xsquash_decompress_return_sizes: 0x%x: %s",
 			      error->errnum,
 			      error->errmess);
@@ -575,7 +601,7 @@ bool ro_gui_theme_open(struct theme_descriptor *descriptor, bool list)
 			continue;
 		}
 		decompressed = (osspriteop_area *)malloc(
-				descriptor->decompressed_size);
+			descriptor->decompressed_size);
 		workspace = malloc(workspace_size);
 		if ((!decompressed) || (!workspace)) {
 			free(decompressed);
@@ -584,19 +610,27 @@ bool ro_gui_theme_open(struct theme_descriptor *descriptor, bool list)
 			ro_warn_user("NoMemory", 0);
 			continue;
 		}
-		error = xsquash_decompress(squash_INPUT_ALL_PRESENT, workspace,
-				(byte *)(raw_data + sizeof(
-						struct theme_file_header)),
-				descriptor->compressed_size,
-				(byte *)decompressed,
-				descriptor->decompressed_size,
-				&status, 0, 0, 0, 0);
+		error = xsquash_decompress(
+			squash_INPUT_ALL_PRESENT,
+			workspace,
+			(byte *)(raw_data + sizeof(struct theme_file_header)),
+			descriptor->compressed_size,
+			(byte *)decompressed,
+			descriptor->decompressed_size,
+			&status,
+			0,
+			0,
+			0,
+			0);
 		free(workspace);
 		free(raw_data);
 		if (error) {
 			free(decompressed);
-			NSLOG(netsurf, INFO, "xsquash_decompress: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xsquash_decompress: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("MiscError", error->errmess);
 			continue;
 		}
@@ -609,12 +643,17 @@ bool ro_gui_theme_open(struct theme_descriptor *descriptor, bool list)
 		/* find the highest sprite called 'throbber%i', and get the
 		 * maximum dimensions for all 'thobber%i' icons. */
 		for (i = 1; i <= descriptor->theme->sprite_area->sprite_count;
-				i++) {
-			error = xosspriteop_return_name(osspriteop_USER_AREA,
-					descriptor->theme->sprite_area,
-					sprite_name, 16, i, 0);
+		     i++) {
+			error = xosspriteop_return_name(
+				osspriteop_USER_AREA,
+				descriptor->theme->sprite_area,
+				sprite_name,
+				16,
+				i,
+				0);
 			if (error) {
-				NSLOG(netsurf, INFO,
+				NSLOG(netsurf,
+				      INFO,
 				      "xosspriteop_return_name: 0x%x: %s",
 				      error->errnum,
 				      error->errmess);
@@ -626,13 +665,16 @@ bool ro_gui_theme_open(struct theme_descriptor *descriptor, bool list)
 
 			/* get the max sprite width/height */
 			error = xosspriteop_read_sprite_info(
-					osspriteop_USER_AREA,
-					descriptor->theme->sprite_area,
-					(osspriteop_id) name,
-					&dimensions.x, &dimensions.y,
-					(osbool *) 0, &mode);
+				osspriteop_USER_AREA,
+				descriptor->theme->sprite_area,
+				(osspriteop_id)name,
+				&dimensions.x,
+				&dimensions.y,
+				(osbool *)0,
+				&mode);
 			if (error) {
-				NSLOG(netsurf, INFO,
+				NSLOG(netsurf,
+				      INFO,
 				      "xosspriteop_read_sprite_info: 0x%x: %s",
 				      error->errnum,
 				      error->errmess);
@@ -640,12 +682,12 @@ bool ro_gui_theme_open(struct theme_descriptor *descriptor, bool list)
 				continue;
 			}
 			ro_convert_pixels_to_os_units(&dimensions, mode);
-			if (descriptor->theme->throbber_width <	dimensions.x)
+			if (descriptor->theme->throbber_width < dimensions.x)
 				descriptor->theme->throbber_width =
-						dimensions.x;
+					dimensions.x;
 			if (descriptor->theme->throbber_height < dimensions.y)
 				descriptor->theme->throbber_height =
-						dimensions.y;
+					dimensions.y;
 
 			/* get the throbber number */
 			n = atoi(sprite_name + 8);
@@ -745,7 +787,7 @@ void ro_gui_theme_free(struct theme_descriptor *descriptor)
 				descriptor->previous->next = descriptor->next;
 			if (descriptor->next)
 				descriptor->next->previous =
-						descriptor->previous;
+					descriptor->previous;
 
 			/* keep the cached list in sync */
 			if (theme_descriptors == descriptor)
@@ -757,5 +799,3 @@ void ro_gui_theme_free(struct theme_descriptor *descriptor)
 		}
 	}
 }
-
-

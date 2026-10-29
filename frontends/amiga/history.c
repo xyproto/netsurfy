@@ -56,24 +56,24 @@
 enum {
 	/* Project menu */
 	AMI_HISTORY_M_PROJECT = 0,
-	 AMI_HISTORY_M_EXPORT,
-	 AMI_HISTORY_M_BAR_P1,
-	 AMI_HISTORY_M_EXPAND,
-	  AMI_HISTORY_M_EXPAND_ALL,
-	  AMI_HISTORY_M_EXPAND_FOLDERS,
-	  AMI_HISTORY_M_EXPAND_LINKS,
-	 AMI_HISTORY_M_COLLAPSE,
-	  AMI_HISTORY_M_COLLAPSE_ALL,
-	  AMI_HISTORY_M_COLLAPSE_FOLDERS,
-	  AMI_HISTORY_M_COLLAPSE_LINKS,
-	 AMI_HISTORY_M_BAR_P2,
-	 AMI_HISTORY_M_CLOSE,
+	AMI_HISTORY_M_EXPORT,
+	AMI_HISTORY_M_BAR_P1,
+	AMI_HISTORY_M_EXPAND,
+	AMI_HISTORY_M_EXPAND_ALL,
+	AMI_HISTORY_M_EXPAND_FOLDERS,
+	AMI_HISTORY_M_EXPAND_LINKS,
+	AMI_HISTORY_M_COLLAPSE,
+	AMI_HISTORY_M_COLLAPSE_ALL,
+	AMI_HISTORY_M_COLLAPSE_FOLDERS,
+	AMI_HISTORY_M_COLLAPSE_LINKS,
+	AMI_HISTORY_M_BAR_P2,
+	AMI_HISTORY_M_CLOSE,
 	/* Edit menu */
 	AMI_HISTORY_M_EDIT,
-	 AMI_HISTORY_M_SELECTALL,
-	 AMI_HISTORY_M_CLEAR,
-	 AMI_HISTORY_M_BAR_E1,
-	 AMI_HISTORY_M_DELETE,
+	AMI_HISTORY_M_SELECTALL,
+	AMI_HISTORY_M_CLEAR,
+	AMI_HISTORY_M_BAR_E1,
+	AMI_HISTORY_M_DELETE,
 	AMI_HISTORY_M_LAST
 };
 
@@ -95,27 +95,31 @@ static void
 ami_history_global_menu_free(struct ami_history_global_window *history_win)
 {
 	SetAttrs(history_win->core.objects[GID_CW_WIN],
-		WINDOW_MenuStrip, NULL,
-	TAG_DONE);
-	
-	ami_menu_free_menu(history_win->menu_data, AMI_HISTORY_M_LAST, history_win->imenu);
+		 WINDOW_MenuStrip,
+		 NULL,
+		 TAG_DONE);
+
+	ami_menu_free_menu(history_win->menu_data,
+			   AMI_HISTORY_M_LAST,
+			   history_win->imenu);
 }
 
 /**
  * destroy a previously created history view
  */
-static void
-ami_history_global_destroy(struct ami_corewindow *ami_cw)
+static void ami_history_global_destroy(struct ami_corewindow *ami_cw)
 {
 	nserror res;
 
-	if(history_window == NULL)
+	if (history_window == NULL)
 		return;
 
 	res = global_history_fini();
 	if (res == NSERROR_OK) {
 		ami_history_global_menu_free(history_window);
-		res = ami_corewindow_fini(&history_window->core); /* closes the window for us, frees history_win */
+		res = ami_corewindow_fini(
+			&history_window->core); /* closes the window for us,
+						   frees history_win */
 		history_window = NULL;
 	}
 }
@@ -130,10 +134,10 @@ ami_history_global_destroy(struct ami_corewindow *ami_cw)
  * \param y location of event
  * \return NSERROR_OK on success otherwise apropriate error code
  */
-static nserror
-ami_history_global_mouse(struct ami_corewindow *ami_cw,
+static nserror ami_history_global_mouse(struct ami_corewindow *ami_cw,
 					browser_mouse_state mouse_state,
-					int x, int y)
+					int x,
+					int y)
 {
 	global_history_mouse_action(mouse_state, x, y);
 
@@ -151,7 +155,7 @@ static nserror
 ami_history_global_key(struct ami_corewindow *ami_cw, uint32_t nskey)
 {
 	if (global_history_keypress(nskey)) {
-			return NSERROR_OK;
+		return NSERROR_OK;
 	}
 	return NSERROR_NOT_IMPLEMENTED;
 }
@@ -166,10 +170,11 @@ ami_history_global_key(struct ami_corewindow *ami_cw, uint32_t nskey)
  * \param ctx The drawing context
  * \return NSERROR_OK on success otherwise apropriate error code
  */
-static nserror
-ami_history_global_draw(struct ami_corewindow *ami_cw,
-			int x, int y, struct rect *r,
-			struct redraw_context *ctx)
+static nserror ami_history_global_draw(struct ami_corewindow *ami_cw,
+				       int x,
+				       int y,
+				       struct rect *r,
+				       struct redraw_context *ctx)
 {
 	global_history_redraw(x, y, r, ctx);
 
@@ -193,23 +198,25 @@ ami_history_global_drag_end(struct ami_corewindow *ami_cw, int x, int y)
 	struct gui_window_2 *gwin;
 	struct ami_corewindow *cw;
 
-	if(global_history_has_selection()) {
+	if (global_history_has_selection()) {
 		ok = global_history_get_selection(&url, &title);
 	}
-	
-	if((ok == false) || (url == NULL)) {
+
+	if ((ok == false) || (url == NULL)) {
 		ami_gui_beep();
-	} else if(url) {
-		if((gwin = ami_window_at_pointer(AMINS_WINDOW))) {
-			browser_window_navigate(ami_gui2_get_browser_window(gwin),
-					url,
-					NULL,
-					BW_NAVIGATE_HISTORY,
-					NULL,
-					NULL,
-					NULL);
-		} else if((cw = (struct ami_corewindow *)ami_window_at_pointer(AMINS_COREWINDOW)) &&
-			(ami_cw->icon_drop != NULL)) {
+	} else if (url) {
+		if ((gwin = ami_window_at_pointer(AMINS_WINDOW))) {
+			browser_window_navigate(ami_gui2_get_browser_window(
+							gwin),
+						url,
+						NULL,
+						BW_NAVIGATE_HISTORY,
+						NULL,
+						NULL,
+						NULL);
+		} else if ((cw = (struct ami_corewindow *)ami_window_at_pointer(
+				    AMINS_COREWINDOW)) &&
+			   (ami_cw->icon_drop != NULL)) {
 			cw->icon_drop(cw, url, title, x, y);
 		}
 	}
@@ -220,77 +227,126 @@ ami_history_global_drag_end(struct ami_corewindow *ami_cw, int x, int y)
  * menu stuff
  */
 
- /* menu hook functions */
-HOOKF(void, ami_history_global_menu_item_project_export, APTR, window, struct IntuiMessage *)
+/* menu hook functions */
+HOOKF(void,
+      ami_history_global_menu_item_project_export,
+      APTR,
+      window,
+      struct IntuiMessage *)
 {
 	char fname[1024];
 	struct ami_corewindow *ami_cw;
 	GetAttr(WINDOW_UserData, (Object *)window, (ULONG *)&ami_cw);
 
-	if(AslRequestTags(savereq,
-		ASLFR_Window, ami_cw->win,
-		ASLFR_SleepWindow, TRUE,
-		ASLFR_TitleText, messages_get("NetSurf"),
-		ASLFR_Screen, ami_gui_get_screen(),
-		ASLFR_InitialFile, "history.html",
-		TAG_DONE)) {
-			strlcpy(fname, savereq->fr_Drawer, 1024);
-			AddPart(fname, savereq->fr_File, 1024);
-			ami_update_pointer(ami_cw->win, GUI_POINTER_WAIT);
-			global_history_export(fname, NULL);
-			ami_update_pointer(ami_cw->win, GUI_POINTER_DEFAULT);
+	if (AslRequestTags(savereq,
+			   ASLFR_Window,
+			   ami_cw->win,
+			   ASLFR_SleepWindow,
+			   TRUE,
+			   ASLFR_TitleText,
+			   messages_get("NetSurf"),
+			   ASLFR_Screen,
+			   ami_gui_get_screen(),
+			   ASLFR_InitialFile,
+			   "history.html",
+			   TAG_DONE)) {
+		strlcpy(fname, savereq->fr_Drawer, 1024);
+		AddPart(fname, savereq->fr_File, 1024);
+		ami_update_pointer(ami_cw->win, GUI_POINTER_WAIT);
+		global_history_export(fname, NULL);
+		ami_update_pointer(ami_cw->win, GUI_POINTER_DEFAULT);
 	}
 }
-									
-HOOKF(void, ami_history_global_menu_item_project_expand_all, APTR, window, struct IntuiMessage *)
+
+HOOKF(void,
+      ami_history_global_menu_item_project_expand_all,
+      APTR,
+      window,
+      struct IntuiMessage *)
 {
 	global_history_expand(false);
 }
- 
-HOOKF(void, ami_history_global_menu_item_project_expand_folders, APTR, window, struct IntuiMessage *)
+
+HOOKF(void,
+      ami_history_global_menu_item_project_expand_folders,
+      APTR,
+      window,
+      struct IntuiMessage *)
 {
 	global_history_expand(true);
 }
 
-HOOKF(void, ami_history_global_menu_item_project_expand_links, APTR, window, struct IntuiMessage *)
+HOOKF(void,
+      ami_history_global_menu_item_project_expand_links,
+      APTR,
+      window,
+      struct IntuiMessage *)
 {
 	global_history_expand(false);
 }
 
-HOOKF(void, ami_history_global_menu_item_project_collapse_all, APTR, window, struct IntuiMessage *)
-{
-	global_history_contract(true);
-}
- 
-HOOKF(void, ami_history_global_menu_item_project_collapse_folders, APTR, window, struct IntuiMessage *)
+HOOKF(void,
+      ami_history_global_menu_item_project_collapse_all,
+      APTR,
+      window,
+      struct IntuiMessage *)
 {
 	global_history_contract(true);
 }
 
-HOOKF(void, ami_history_global_menu_item_project_collapse_links, APTR, window, struct IntuiMessage *)
+HOOKF(void,
+      ami_history_global_menu_item_project_collapse_folders,
+      APTR,
+      window,
+      struct IntuiMessage *)
+{
+	global_history_contract(true);
+}
+
+HOOKF(void,
+      ami_history_global_menu_item_project_collapse_links,
+      APTR,
+      window,
+      struct IntuiMessage *)
 {
 	global_history_contract(false);
 }
 
-HOOKF(void, ami_history_global_menu_item_project_close, APTR, window, struct IntuiMessage *)
+HOOKF(void,
+      ami_history_global_menu_item_project_close,
+      APTR,
+      window,
+      struct IntuiMessage *)
 {
 	struct ami_corewindow *ami_cw;
 	GetAttr(WINDOW_UserData, (Object *)window, (ULONG *)&ami_cw);
-	
+
 	ami_cw->close_window = true;
 }
 
-HOOKF(void, ami_history_global_menu_item_edit_select_all, APTR, window, struct IntuiMessage *)
+HOOKF(void,
+      ami_history_global_menu_item_edit_select_all,
+      APTR,
+      window,
+      struct IntuiMessage *)
 {
 	global_history_keypress(NS_KEY_SELECT_ALL);
 }
 
-HOOKF(void, ami_history_global_menu_item_edit_clear, APTR, window, struct IntuiMessage *)
+HOOKF(void,
+      ami_history_global_menu_item_edit_clear,
+      APTR,
+      window,
+      struct IntuiMessage *)
 {
 	global_history_keypress(NS_KEY_CLEAR_SELECTION);
 }
 
-HOOKF(void, ami_history_global_menu_item_edit_delete, APTR, window, struct IntuiMessage *)
+HOOKF(void,
+      ami_history_global_menu_item_edit_delete,
+      APTR,
+      window,
+      struct IntuiMessage *)
 {
 	global_history_keypress(NS_KEY_DELETE_LEFT);
 }
@@ -300,46 +356,190 @@ HOOKF(void, ami_history_global_menu_item_edit_delete, APTR, window, struct Intui
 
 static void ami_history_global_menulabs(struct ami_menu_data **md)
 {
-	ami_menu_alloc_item(md, AMI_HISTORY_M_PROJECT, NM_TITLE, "Tree", NULL, NULL, NULL, NULL, 0);
-	ami_menu_alloc_item(md, AMI_HISTORY_M_EXPORT,   NM_ITEM, "TreeExport", "S", "TBImages:list_save",
-		ami_history_global_menu_item_project_export, NULL, 0);
-	ami_menu_alloc_item(md, AMI_HISTORY_M_BAR_P1, NM_ITEM, NM_BARLABEL, NULL, NULL, NULL, NULL, 0);
-	ami_menu_alloc_item(md, AMI_HISTORY_M_EXPAND,   NM_ITEM, "Expand", NULL, "TBImages:list_folderunfold", NULL, NULL, 0);
-	ami_menu_alloc_item(md, AMI_HISTORY_M_EXPAND_ALL,   NM_SUB, "All", "+", NULL,
-		ami_history_global_menu_item_project_expand_all, NULL, 0);
-	ami_menu_alloc_item(md, AMI_HISTORY_M_EXPAND_FOLDERS,   NM_SUB, "Folders", NULL, NULL,
-		ami_history_global_menu_item_project_expand_folders, NULL, 0);
-	ami_menu_alloc_item(md, AMI_HISTORY_M_EXPAND_LINKS,   NM_SUB, "Links", NULL, NULL,
-		ami_history_global_menu_item_project_expand_links, NULL, 0);
-	ami_menu_alloc_item(md, AMI_HISTORY_M_COLLAPSE,   NM_ITEM, "Collapse", NULL, "TBImages:list_folderfold", NULL, NULL, 0);
-	ami_menu_alloc_item(md, AMI_HISTORY_M_COLLAPSE_ALL,   NM_SUB, "All", "-", NULL,
-		ami_history_global_menu_item_project_collapse_all, NULL, 0);
-	ami_menu_alloc_item(md, AMI_HISTORY_M_COLLAPSE_FOLDERS,   NM_SUB, "Folders", NULL, NULL,
-		ami_history_global_menu_item_project_collapse_folders, NULL, 0);
-	ami_menu_alloc_item(md, AMI_HISTORY_M_COLLAPSE_LINKS,   NM_SUB, "Links", NULL, NULL,
-		ami_history_global_menu_item_project_collapse_links, NULL, 0);
-	ami_menu_alloc_item(md, AMI_HISTORY_M_BAR_P2, NM_ITEM, NM_BARLABEL, NULL, NULL, NULL, NULL, 0);
-	ami_menu_alloc_item(md, AMI_HISTORY_M_CLOSE,   NM_ITEM, "CloseWindow", "K", "TBImages:list_cancel",
-		ami_history_global_menu_item_project_close, NULL, 0);
+	ami_menu_alloc_item(md,
+			    AMI_HISTORY_M_PROJECT,
+			    NM_TITLE,
+			    "Tree",
+			    NULL,
+			    NULL,
+			    NULL,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_HISTORY_M_EXPORT,
+			    NM_ITEM,
+			    "TreeExport",
+			    "S",
+			    "TBImages:list_save",
+			    ami_history_global_menu_item_project_export,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_HISTORY_M_BAR_P1,
+			    NM_ITEM,
+			    NM_BARLABEL,
+			    NULL,
+			    NULL,
+			    NULL,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_HISTORY_M_EXPAND,
+			    NM_ITEM,
+			    "Expand",
+			    NULL,
+			    "TBImages:list_folderunfold",
+			    NULL,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_HISTORY_M_EXPAND_ALL,
+			    NM_SUB,
+			    "All",
+			    "+",
+			    NULL,
+			    ami_history_global_menu_item_project_expand_all,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_HISTORY_M_EXPAND_FOLDERS,
+			    NM_SUB,
+			    "Folders",
+			    NULL,
+			    NULL,
+			    ami_history_global_menu_item_project_expand_folders,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_HISTORY_M_EXPAND_LINKS,
+			    NM_SUB,
+			    "Links",
+			    NULL,
+			    NULL,
+			    ami_history_global_menu_item_project_expand_links,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_HISTORY_M_COLLAPSE,
+			    NM_ITEM,
+			    "Collapse",
+			    NULL,
+			    "TBImages:list_folderfold",
+			    NULL,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_HISTORY_M_COLLAPSE_ALL,
+			    NM_SUB,
+			    "All",
+			    "-",
+			    NULL,
+			    ami_history_global_menu_item_project_collapse_all,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(
+		md,
+		AMI_HISTORY_M_COLLAPSE_FOLDERS,
+		NM_SUB,
+		"Folders",
+		NULL,
+		NULL,
+		ami_history_global_menu_item_project_collapse_folders,
+		NULL,
+		0);
+	ami_menu_alloc_item(md,
+			    AMI_HISTORY_M_COLLAPSE_LINKS,
+			    NM_SUB,
+			    "Links",
+			    NULL,
+			    NULL,
+			    ami_history_global_menu_item_project_collapse_links,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_HISTORY_M_BAR_P2,
+			    NM_ITEM,
+			    NM_BARLABEL,
+			    NULL,
+			    NULL,
+			    NULL,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_HISTORY_M_CLOSE,
+			    NM_ITEM,
+			    "CloseWindow",
+			    "K",
+			    "TBImages:list_cancel",
+			    ami_history_global_menu_item_project_close,
+			    NULL,
+			    0);
 
-	ami_menu_alloc_item(md, AMI_HISTORY_M_EDIT, NM_TITLE, "Edit", NULL, NULL, NULL, NULL, 0);
-	ami_menu_alloc_item(md, AMI_HISTORY_M_SELECTALL,   NM_ITEM, "SelectAllNS", "A", NSA_SPACE,
-		ami_history_global_menu_item_edit_select_all, NULL, 0);
-	ami_menu_alloc_item(md, AMI_HISTORY_M_CLEAR,   NM_ITEM, "ClearNS", NULL, NSA_SPACE,
-		ami_history_global_menu_item_edit_clear, NULL, 0);
-	ami_menu_alloc_item(md, AMI_HISTORY_M_BAR_E1, NM_ITEM, NM_BARLABEL, NULL, NULL, NULL, NULL, 0);
-	ami_menu_alloc_item(md, AMI_HISTORY_M_DELETE,   NM_ITEM, "TreeDelete", "Del", "TBImages:list_delete",
-		ami_history_global_menu_item_edit_delete, NULL, 0);
+	ami_menu_alloc_item(md,
+			    AMI_HISTORY_M_EDIT,
+			    NM_TITLE,
+			    "Edit",
+			    NULL,
+			    NULL,
+			    NULL,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_HISTORY_M_SELECTALL,
+			    NM_ITEM,
+			    "SelectAllNS",
+			    "A",
+			    NSA_SPACE,
+			    ami_history_global_menu_item_edit_select_all,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_HISTORY_M_CLEAR,
+			    NM_ITEM,
+			    "ClearNS",
+			    NULL,
+			    NSA_SPACE,
+			    ami_history_global_menu_item_edit_clear,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_HISTORY_M_BAR_E1,
+			    NM_ITEM,
+			    NM_BARLABEL,
+			    NULL,
+			    NULL,
+			    NULL,
+			    NULL,
+			    0);
+	ami_menu_alloc_item(md,
+			    AMI_HISTORY_M_DELETE,
+			    NM_ITEM,
+			    "TreeDelete",
+			    "Del",
+			    "TBImages:list_delete",
+			    ami_history_global_menu_item_edit_delete,
+			    NULL,
+			    0);
 
-	ami_menu_alloc_item(md, AMI_HISTORY_M_LAST,   NM_END, NULL, NULL, NULL, NULL, NULL, 0);
+	ami_menu_alloc_item(md,
+			    AMI_HISTORY_M_LAST,
+			    NM_END,
+			    NULL,
+			    NULL,
+			    NULL,
+			    NULL,
+			    NULL,
+			    0);
 }
 
 static struct Menu *
 ami_history_global_menu_create(struct ami_history_global_window *history_win)
 {
 	ami_history_global_menulabs(history_win->menu_data);
-	history_win->imenu = ami_menu_layout(history_win->menu_data, AMI_HISTORY_M_LAST);
-	if(history_win->imenu == NULL) return NULL;
+	history_win->imenu = ami_menu_layout(history_win->menu_data,
+					     AMI_HISTORY_M_LAST);
+	if (history_win->imenu == NULL)
+		return NULL;
 
 	return history_win->imenu;
 }
@@ -348,58 +548,41 @@ ami_history_global_menu_create(struct ami_history_global_window *history_win)
 static nserror
 ami_history_global_create_window(struct ami_history_global_window *history_win)
 {
-	struct ami_corewindow *ami_cw = (struct ami_corewindow *)&history_win->core;
+	struct ami_corewindow *ami_cw =
+		(struct ami_corewindow *)&history_win->core;
 	ULONG refresh_mode = WA_SmartRefresh;
 
-	if(nsoption_bool(window_simple_refresh) == true) {
+	if (nsoption_bool(window_simple_refresh) == true) {
 		refresh_mode = WA_SimpleRefresh;
 	}
 
-	ami_cw->objects[GID_CW_WIN] = WindowObj,
-		WA_ScreenTitle, ami_gui_get_screen_title(),
-		WA_Title, ami_cw->wintitle,
-		WA_Activate, TRUE,
-		WA_DepthGadget, TRUE,
-		WA_DragBar, TRUE,
-		WA_CloseGadget, TRUE,
-		WA_SizeGadget, TRUE,
-		WA_SizeBRight, TRUE,
-		WA_Width, 150,
-		WA_Height, 200,
-		WA_PubScreen, ami_gui_get_screen(),
-		WA_ReportMouse, TRUE,
-		refresh_mode, TRUE,
-		WA_IDCMP, IDCMP_MOUSEMOVE | IDCMP_MOUSEBUTTONS | IDCMP_NEWSIZE |
-				IDCMP_RAWKEY | IDCMP_GADGETUP | IDCMP_IDCMPUPDATE |
-				IDCMP_EXTENDEDMOUSE | IDCMP_SIZEVERIFY | IDCMP_REFRESHWINDOW,
-		WINDOW_IDCMPHook, &ami_cw->idcmp_hook,
-		WINDOW_IDCMPHookBits, IDCMP_IDCMPUPDATE | IDCMP_EXTENDEDMOUSE |
-				IDCMP_SIZEVERIFY | IDCMP_REFRESHWINDOW,
-		WINDOW_SharedPort, ami_gui_get_shared_msgport(),
-		WINDOW_HorizProp, 1,
-		WINDOW_VertProp, 1,
-		WINDOW_UserData, history_win,
-		WINDOW_MenuStrip, ami_history_global_menu_create(history_win),
-		WINDOW_MenuUserData, WGUD_HOOK,
-		WINDOW_IconifyGadget, FALSE,
+	ami_cw->objects[GID_CW_WIN] = WindowObj, WA_ScreenTitle,
+	ami_gui_get_screen_title(), WA_Title, ami_cw->wintitle, WA_Activate,
+	TRUE, WA_DepthGadget, TRUE, WA_DragBar, TRUE, WA_CloseGadget, TRUE,
+	WA_SizeGadget, TRUE, WA_SizeBRight, TRUE, WA_Width, 150, WA_Height, 200,
+	WA_PubScreen, ami_gui_get_screen(), WA_ReportMouse, TRUE, refresh_mode,
+	TRUE, WA_IDCMP,
+	IDCMP_MOUSEMOVE | IDCMP_MOUSEBUTTONS | IDCMP_NEWSIZE | IDCMP_RAWKEY |
+		IDCMP_GADGETUP | IDCMP_IDCMPUPDATE | IDCMP_EXTENDEDMOUSE |
+		IDCMP_SIZEVERIFY | IDCMP_REFRESHWINDOW,
+	WINDOW_IDCMPHook, &ami_cw->idcmp_hook, WINDOW_IDCMPHookBits,
+	IDCMP_IDCMPUPDATE | IDCMP_EXTENDEDMOUSE | IDCMP_SIZEVERIFY |
+		IDCMP_REFRESHWINDOW,
+	WINDOW_SharedPort, ami_gui_get_shared_msgport(), WINDOW_HorizProp, 1,
+	WINDOW_VertProp, 1, WINDOW_UserData, history_win, WINDOW_MenuStrip,
+	ami_history_global_menu_create(history_win), WINDOW_MenuUserData,
+	WGUD_HOOK, WINDOW_IconifyGadget, FALSE,
 #ifdef __amigaos4__
-		WINDOW_UniqueID, "NS_HISTORY_GLOBAL_WIN",
-		WINDOW_PopupGadget, TRUE,
+	WINDOW_UniqueID, "NS_HISTORY_GLOBAL_WIN", WINDOW_PopupGadget, TRUE,
 #endif
-		WINDOW_Position, WPOS_CENTERSCREEN,
-		WINDOW_ParentGroup, ami_cw->objects[GID_CW_MAIN] = LayoutVObj,
-			LAYOUT_AddChild, ami_cw->objects[GID_CW_DRAW] = SpaceObj,
-				GA_ID, GID_CW_DRAW,
-				SPACE_Transparent, TRUE,
-				SPACE_BevelStyle, BVS_DISPLAY,
-				SPACE_MinWidth, 50,
-				SPACE_MinHeight, 16,
-				GA_RelVerify, TRUE,
-   			SpaceEnd,
-		EndGroup,
+	WINDOW_Position, WPOS_CENTERSCREEN, WINDOW_ParentGroup,
+	ami_cw->objects[GID_CW_MAIN] = LayoutVObj, LAYOUT_AddChild,
+	ami_cw->objects[GID_CW_DRAW] = SpaceObj, GA_ID, GID_CW_DRAW,
+	SPACE_Transparent, TRUE, SPACE_BevelStyle, BVS_DISPLAY, SPACE_MinWidth,
+	50, SPACE_MinHeight, 16, GA_RelVerify, TRUE, SpaceEnd, EndGroup,
 	EndWindow;
 
-	if(ami_cw->objects[GID_CW_WIN] == NULL) {
+	if (ami_cw->objects[GID_CW_WIN] == NULL) {
 		return NSERROR_NOMEM;
 	}
 
@@ -412,8 +595,8 @@ nserror ami_history_global_present(void)
 	struct ami_history_global_window *ncwin;
 	nserror res;
 
-	if(history_window != NULL) {
-		//windowtofront()
+	if (history_window != NULL) {
+		// windowtofront()
 		return NSERROR_OK;
 	}
 
@@ -422,7 +605,8 @@ nserror ami_history_global_present(void)
 		return NSERROR_NOMEM;
 	}
 
-	ncwin->core.wintitle = ami_utf8_easy((char *)messages_get("GlobalHistory"));
+	ncwin->core.wintitle = ami_utf8_easy(
+		(char *)messages_get("GlobalHistory"));
 
 	res = ami_history_global_create_window(ncwin);
 	if (res != NSERROR_OK) {
@@ -461,4 +645,3 @@ nserror ami_history_global_present(void)
 
 	return NSERROR_OK;
 }
-

@@ -55,7 +55,7 @@ static bool isWhitespace(char c)
 static bool isHex(char c)
 {
 	return ('0' <= c && c <= '9') ||
-			('A' <= (c & ~0x20) && (c & ~0x20) <= 'F');
+	       ('A' <= (c & ~0x20) && (c & ~0x20) <= 'F');
 }
 
 /**
@@ -98,8 +98,11 @@ static uint8_t charToHex(char c)
  *                        bytes consumed
  * \return true on success, false on invalid input
  */
-static bool parse_number(const char *data, bool maybe_negative, bool real,
-		css_fixed *value, size_t *consumed)
+static bool parse_number(const char *data,
+			 bool maybe_negative,
+			 bool real,
+			 css_fixed *value,
+			 size_t *consumed)
 {
 	size_t len;
 	const uint8_t *ptr;
@@ -111,7 +114,7 @@ static bool parse_number(const char *data, bool maybe_negative, bool real,
 	*consumed = 0;
 
 	len = strlen(data);
-	ptr = (const uint8_t *) data;
+	ptr = (const uint8_t *)data;
 
 	if (len == 0)
 		return false;
@@ -159,7 +162,7 @@ static bool parse_number(const char *data, bool maybe_negative, bool real,
 
 	/* And fracpart, again, assuming base 10 */
 	if (real && len > 1 && ptr[0] == '.' &&
-			('0' <= ptr[1] && ptr[1] <= '9')) {
+	    ('0' <= ptr[1] && ptr[1] <= '9')) {
 		ptr++;
 		len--;
 
@@ -176,7 +179,7 @@ static bool parse_number(const char *data, bool maybe_negative, bool real,
 			len--;
 		}
 
-		fracpart = ((1 << 10) * fracpart + pwr/2) / pwr;
+		fracpart = ((1 << 10) * fracpart + pwr / 2) / pwr;
 		if (fracpart >= (1 << 10)) {
 			intpart++;
 			fracpart &= (1 << 10) - 1;
@@ -207,7 +210,7 @@ static bool parse_number(const char *data, bool maybe_negative, bool real,
 
 	*value = (intpart << 10) | fracpart;
 
-	*consumed = ptr - (const uint8_t *) data;
+	*consumed = ptr - (const uint8_t *)data;
 
 	return true;
 }
@@ -221,8 +224,10 @@ static bool parse_number(const char *data, bool maybe_negative, bool real,
  * \param unit    Pointer to location to receive dimension's unit
  * \return true on success, false on invalid input
  */
-static bool parse_dimension(const char *data, bool strict, css_fixed *length,
-		css_unit *unit)
+static bool parse_dimension(const char *data,
+			    bool strict,
+			    css_fixed *length,
+			    css_unit *unit)
 {
 	size_t len;
 	size_t read;
@@ -281,160 +286,160 @@ static int cmp_colour_name(const void *a, const void *b)
 static bool parse_named_colour(const char *name, css_color *result)
 {
 	static const struct colour_map named_colours[] = {
-		{ "aliceblue",		0xfff0f8ff },
-		{ "antiquewhite",	0xfffaebd7 },
-		{ "aqua",		0xff00ffff },
-		{ "aquamarine",		0xff7fffd4 },
-		{ "azure",		0xfff0ffff },
-		{ "beige",		0xfff5f5dc },
-		{ "bisque",		0xffffe4c4 },
-		{ "black",		0xff000000 },
-		{ "blanchedalmond",	0xffffebcd },
-		{ "blue",		0xff0000ff },
-		{ "blueviolet",		0xff8a2be2 },
-		{ "brown",		0xffa52a2a },
-		{ "burlywood",		0xffdeb887 },
-		{ "cadetblue",		0xff5f9ea0 },
-		{ "chartreuse",		0xff7fff00 },
-		{ "chocolate",		0xffd2691e },
-		{ "coral",		0xffff7f50 },
-		{ "cornflowerblue",	0xff6495ed },
-		{ "cornsilk",		0xfffff8dc },
-		{ "crimson",		0xffdc143c },
-		{ "cyan",		0xff00ffff },
-		{ "darkblue",		0xff00008b },
-		{ "darkcyan",		0xff008b8b },
-		{ "darkgoldenrod",	0xffb8860b },
-		{ "darkgray",		0xffa9a9a9 },
-		{ "darkgreen",		0xff006400 },
-		{ "darkgrey",		0xffa9a9a9 },
-		{ "darkkhaki",		0xffbdb76b },
-		{ "darkmagenta",	0xff8b008b },
-		{ "darkolivegreen",	0xff556b2f },
-		{ "darkorange",		0xffff8c00 },
-		{ "darkorchid",		0xff9932cc },
-		{ "darkred",		0xff8b0000 },
-		{ "darksalmon",		0xffe9967a },
-		{ "darkseagreen",	0xff8fbc8f },
-		{ "darkslateblue",	0xff483d8b },
-		{ "darkslategray",	0xff2f4f4f },
-		{ "darkslategrey",	0xff2f4f4f },
-		{ "darkturquoise",	0xff00ced1 },
-		{ "darkviolet",		0xff9400d3 },
-		{ "deeppink",		0xffff1493 },
-		{ "deepskyblue",	0xff00bfff },
-		{ "dimgray",		0xff696969 },
-		{ "dimgrey",		0xff696969 },
-		{ "dodgerblue",		0xff1e90ff },
-		{ "feldspar",		0xffd19275 },
-		{ "firebrick",		0xffb22222 },
-		{ "floralwhite",	0xfffffaf0 },
-		{ "forestgreen",	0xff228b22 },
-		{ "fuchsia",		0xffff00ff },
-		{ "gainsboro",		0xffdcdcdc },
-		{ "ghostwhite",		0xfff8f8ff },
-		{ "gold",		0xffffd700 },
-		{ "goldenrod",		0xffdaa520 },
-		{ "gray",		0xff808080 },
-		{ "green",		0xff008000 },
-		{ "greenyellow",	0xffadff2f },
-		{ "grey",		0xff808080 },
-		{ "honeydew",		0xfff0fff0 },
-		{ "hotpink",		0xffff69b4 },
-		{ "indianred",		0xffcd5c5c },
-		{ "indigo",		0xff4b0082 },
-		{ "ivory",		0xfffffff0 },
-		{ "khaki",		0xfff0e68c },
-		{ "lavender",		0xffe6e6fa },
-		{ "lavenderblush",	0xfffff0f5 },
-		{ "lawngreen",		0xff7cfc00 },
-		{ "lemonchiffon",	0xfffffacd },
-		{ "lightblue",		0xffadd8e6 },
-		{ "lightcoral",		0xfff08080 },
-		{ "lightcyan",		0xffe0ffff },
-		{ "lightgoldenrodyellow",	0xfffafad2 },
-		{ "lightgray",		0xffd3d3d3 },
-		{ "lightgreen",		0xff90ee90 },
-		{ "lightgrey",		0xffd3d3d3 },
-		{ "lightpink",		0xffffb6c1 },
-		{ "lightsalmon",	0xffffa07a },
-		{ "lightseagreen",	0xff20b2aa },
-		{ "lightskyblue",	0xff87cefa },
-		{ "lightslateblue",	0xff8470ff },
-		{ "lightslategray",	0xff778899 },
-		{ "lightslategrey",	0xff778899 },
-		{ "lightsteelblue",	0xffb0c4de },
-		{ "lightyellow",	0xffffffe0 },
-		{ "lime",		0xff00ff00 },
-		{ "limegreen",		0xff32cd32 },
-		{ "linen",		0xfffaf0e6 },
-		{ "magenta",		0xffff00ff },
-		{ "maroon",		0xff800000 },
-		{ "mediumaquamarine",	0xff66cdaa },
-		{ "mediumblue",		0xff0000cd },
-		{ "mediumorchid",	0xffba55d3 },
-		{ "mediumpurple",	0xff9370db },
-		{ "mediumseagreen",	0xff3cb371 },
-		{ "mediumslateblue",	0xff7b68ee },
-		{ "mediumspringgreen",	0xff00fa9a },
-		{ "mediumturquoise",	0xff48d1cc },
-		{ "mediumvioletred",	0xffc71585 },
-		{ "midnightblue",	0xff191970 },
-		{ "mintcream",		0xfff5fffa },
-		{ "mistyrose",		0xffffe4e1 },
-		{ "moccasin",		0xffffe4b5 },
-		{ "navajowhite",	0xffffdead },
-		{ "navy",		0xff000080 },
-		{ "oldlace",		0xfffdf5e6 },
-		{ "olive",		0xff808000 },
-		{ "olivedrab",		0xff6b8e23 },
-		{ "orange",		0xffffa500 },
-		{ "orangered",		0xffff4500 },
-		{ "orchid",		0xffda70d6 },
-		{ "palegoldenrod",	0xffeee8aa },
-		{ "palegreen",		0xff98fb98 },
-		{ "paleturquoise",	0xffafeeee },
-		{ "palevioletred",	0xffdb7093 },
-		{ "papayawhip",		0xffffefd5 },
-		{ "peachpuff",		0xffffdab9 },
-		{ "peru",		0xffcd853f },
-		{ "pink",		0xffffc0cb },
-		{ "plum",		0xffdda0dd },
-		{ "powderblue",		0xffb0e0e6 },
-		{ "purple",		0xff800080 },
-		{ "red",		0xffff0000 },
-		{ "rosybrown",		0xffbc8f8f },
-		{ "royalblue",		0xff4169e1 },
-		{ "saddlebrown",	0xff8b4513 },
-		{ "salmon",		0xfffa8072 },
-		{ "sandybrown",		0xfff4a460 },
-		{ "seagreen",		0xff2e8b57 },
-		{ "seashell",		0xfffff5ee },
-		{ "sienna",		0xffa0522d },
-		{ "silver",		0xffc0c0c0 },
-		{ "skyblue",		0xff87ceeb },
-		{ "slateblue",		0xff6a5acd },
-		{ "slategray",		0xff708090 },
-		{ "slategrey",		0xff708090 },
-		{ "snow",		0xfffffafa },
-		{ "springgreen",	0xff00ff7f },
-		{ "steelblue",		0xff4682b4 },
-		{ "tan",		0xffd2b48c },
-		{ "teal",		0xff008080 },
-		{ "thistle",		0xffd8bfd8 },
-		{ "tomato",		0xffff6347 },
-		{ "turquoise",		0xff40e0d0 },
-		{ "violet",		0xffee82ee },
-		{ "violetred",		0xffd02090 },
-		{ "wheat",		0xfff5deb3 },
-		{ "white",		0xffffffff },
-		{ "whitesmoke",		0xfff5f5f5 },
-		{ "yellow",		0xffffff00 },
-		{ "yellowgreen",	0xff9acd32 }
-	};
+		{"aliceblue", 0xfff0f8ff},
+		{"antiquewhite", 0xfffaebd7},
+		{"aqua", 0xff00ffff},
+		{"aquamarine", 0xff7fffd4},
+		{"azure", 0xfff0ffff},
+		{"beige", 0xfff5f5dc},
+		{"bisque", 0xffffe4c4},
+		{"black", 0xff000000},
+		{"blanchedalmond", 0xffffebcd},
+		{"blue", 0xff0000ff},
+		{"blueviolet", 0xff8a2be2},
+		{"brown", 0xffa52a2a},
+		{"burlywood", 0xffdeb887},
+		{"cadetblue", 0xff5f9ea0},
+		{"chartreuse", 0xff7fff00},
+		{"chocolate", 0xffd2691e},
+		{"coral", 0xffff7f50},
+		{"cornflowerblue", 0xff6495ed},
+		{"cornsilk", 0xfffff8dc},
+		{"crimson", 0xffdc143c},
+		{"cyan", 0xff00ffff},
+		{"darkblue", 0xff00008b},
+		{"darkcyan", 0xff008b8b},
+		{"darkgoldenrod", 0xffb8860b},
+		{"darkgray", 0xffa9a9a9},
+		{"darkgreen", 0xff006400},
+		{"darkgrey", 0xffa9a9a9},
+		{"darkkhaki", 0xffbdb76b},
+		{"darkmagenta", 0xff8b008b},
+		{"darkolivegreen", 0xff556b2f},
+		{"darkorange", 0xffff8c00},
+		{"darkorchid", 0xff9932cc},
+		{"darkred", 0xff8b0000},
+		{"darksalmon", 0xffe9967a},
+		{"darkseagreen", 0xff8fbc8f},
+		{"darkslateblue", 0xff483d8b},
+		{"darkslategray", 0xff2f4f4f},
+		{"darkslategrey", 0xff2f4f4f},
+		{"darkturquoise", 0xff00ced1},
+		{"darkviolet", 0xff9400d3},
+		{"deeppink", 0xffff1493},
+		{"deepskyblue", 0xff00bfff},
+		{"dimgray", 0xff696969},
+		{"dimgrey", 0xff696969},
+		{"dodgerblue", 0xff1e90ff},
+		{"feldspar", 0xffd19275},
+		{"firebrick", 0xffb22222},
+		{"floralwhite", 0xfffffaf0},
+		{"forestgreen", 0xff228b22},
+		{"fuchsia", 0xffff00ff},
+		{"gainsboro", 0xffdcdcdc},
+		{"ghostwhite", 0xfff8f8ff},
+		{"gold", 0xffffd700},
+		{"goldenrod", 0xffdaa520},
+		{"gray", 0xff808080},
+		{"green", 0xff008000},
+		{"greenyellow", 0xffadff2f},
+		{"grey", 0xff808080},
+		{"honeydew", 0xfff0fff0},
+		{"hotpink", 0xffff69b4},
+		{"indianred", 0xffcd5c5c},
+		{"indigo", 0xff4b0082},
+		{"ivory", 0xfffffff0},
+		{"khaki", 0xfff0e68c},
+		{"lavender", 0xffe6e6fa},
+		{"lavenderblush", 0xfffff0f5},
+		{"lawngreen", 0xff7cfc00},
+		{"lemonchiffon", 0xfffffacd},
+		{"lightblue", 0xffadd8e6},
+		{"lightcoral", 0xfff08080},
+		{"lightcyan", 0xffe0ffff},
+		{"lightgoldenrodyellow", 0xfffafad2},
+		{"lightgray", 0xffd3d3d3},
+		{"lightgreen", 0xff90ee90},
+		{"lightgrey", 0xffd3d3d3},
+		{"lightpink", 0xffffb6c1},
+		{"lightsalmon", 0xffffa07a},
+		{"lightseagreen", 0xff20b2aa},
+		{"lightskyblue", 0xff87cefa},
+		{"lightslateblue", 0xff8470ff},
+		{"lightslategray", 0xff778899},
+		{"lightslategrey", 0xff778899},
+		{"lightsteelblue", 0xffb0c4de},
+		{"lightyellow", 0xffffffe0},
+		{"lime", 0xff00ff00},
+		{"limegreen", 0xff32cd32},
+		{"linen", 0xfffaf0e6},
+		{"magenta", 0xffff00ff},
+		{"maroon", 0xff800000},
+		{"mediumaquamarine", 0xff66cdaa},
+		{"mediumblue", 0xff0000cd},
+		{"mediumorchid", 0xffba55d3},
+		{"mediumpurple", 0xff9370db},
+		{"mediumseagreen", 0xff3cb371},
+		{"mediumslateblue", 0xff7b68ee},
+		{"mediumspringgreen", 0xff00fa9a},
+		{"mediumturquoise", 0xff48d1cc},
+		{"mediumvioletred", 0xffc71585},
+		{"midnightblue", 0xff191970},
+		{"mintcream", 0xfff5fffa},
+		{"mistyrose", 0xffffe4e1},
+		{"moccasin", 0xffffe4b5},
+		{"navajowhite", 0xffffdead},
+		{"navy", 0xff000080},
+		{"oldlace", 0xfffdf5e6},
+		{"olive", 0xff808000},
+		{"olivedrab", 0xff6b8e23},
+		{"orange", 0xffffa500},
+		{"orangered", 0xffff4500},
+		{"orchid", 0xffda70d6},
+		{"palegoldenrod", 0xffeee8aa},
+		{"palegreen", 0xff98fb98},
+		{"paleturquoise", 0xffafeeee},
+		{"palevioletred", 0xffdb7093},
+		{"papayawhip", 0xffffefd5},
+		{"peachpuff", 0xffffdab9},
+		{"peru", 0xffcd853f},
+		{"pink", 0xffffc0cb},
+		{"plum", 0xffdda0dd},
+		{"powderblue", 0xffb0e0e6},
+		{"purple", 0xff800080},
+		{"red", 0xffff0000},
+		{"rosybrown", 0xffbc8f8f},
+		{"royalblue", 0xff4169e1},
+		{"saddlebrown", 0xff8b4513},
+		{"salmon", 0xfffa8072},
+		{"sandybrown", 0xfff4a460},
+		{"seagreen", 0xff2e8b57},
+		{"seashell", 0xfffff5ee},
+		{"sienna", 0xffa0522d},
+		{"silver", 0xffc0c0c0},
+		{"skyblue", 0xff87ceeb},
+		{"slateblue", 0xff6a5acd},
+		{"slategray", 0xff708090},
+		{"slategrey", 0xff708090},
+		{"snow", 0xfffffafa},
+		{"springgreen", 0xff00ff7f},
+		{"steelblue", 0xff4682b4},
+		{"tan", 0xffd2b48c},
+		{"teal", 0xff008080},
+		{"thistle", 0xffd8bfd8},
+		{"tomato", 0xffff6347},
+		{"turquoise", 0xff40e0d0},
+		{"violet", 0xffee82ee},
+		{"violetred", 0xffd02090},
+		{"wheat", 0xfff5deb3},
+		{"white", 0xffffffff},
+		{"whitesmoke", 0xfff5f5f5},
+		{"yellow", 0xffffff00},
+		{"yellowgreen", 0xff9acd32}};
 	const struct colour_map *entry;
 
-	entry = bsearch(name, named_colours,
+	entry = bsearch(name,
+			named_colours,
 			sizeof(named_colours) / sizeof(named_colours[0]),
 			sizeof(named_colours[0]),
 			cmp_colour_name);
@@ -483,8 +488,8 @@ bool nscss_parse_colour(const char *data, css_color *result)
 
 		return true;
 	} else if (len == 6 && isHex(data[0]) && isHex(data[1]) &&
-			isHex(data[2]) && isHex(data[3]) && isHex(data[4]) &&
-			isHex(data[5])) {
+		   isHex(data[2]) && isHex(data[3]) && isHex(data[4]) &&
+		   isHex(data[5])) {
 		r = (charToHex(data[0]) << 4) | charToHex(data[1]);
 		g = (charToHex(data[2]) << 4) | charToHex(data[3]);
 		b = (charToHex(data[4]) << 4) | charToHex(data[5]);
@@ -506,8 +511,8 @@ bool nscss_parse_colour(const char *data, css_color *result)
  * \param unit  Pointer to location to receive unit
  * \return True on success, false on failure
  */
-static bool parse_font_size(const char *size, uint8_t *val,
-		css_fixed *len, css_unit *unit)
+static bool
+parse_font_size(const char *size, uint8_t *val, css_fixed *len, css_unit *unit)
 {
 	static const uint8_t size_map[] = {
 		CSS_FONT_SIZE_XX_SMALL,
@@ -516,7 +521,7 @@ static bool parse_font_size(const char *size, uint8_t *val,
 		CSS_FONT_SIZE_LARGE,
 		CSS_FONT_SIZE_X_LARGE,
 		CSS_FONT_SIZE_XX_LARGE,
-		CSS_FONT_SIZE_DIMENSION	/* xxx-large (see below) */
+		CSS_FONT_SIZE_DIMENSION /* xxx-large (see below) */
 	};
 
 	const char *p = size;
@@ -558,8 +563,9 @@ static bool parse_font_size(const char *size, uint8_t *val,
 
 	if (value == 7) {
 		/* Manufacture xxx-large */
-	  *len = FDIV(FMUL(INTTOFIX(3), INTTOFIX(nsoption_int(font_size))),
-				F_10);
+		*len = FDIV(FMUL(INTTOFIX(3),
+				 INTTOFIX(nsoption_int(font_size))),
+			    F_10);
 	} else {
 		/* Len is irrelevant */
 		*len = 0;
@@ -588,7 +594,7 @@ struct css_hint_ctx hint_ctx;
 nserror css_hint_init(void)
 {
 	hint_ctx.hints = malloc(sizeof(struct css_hint) *
-			MAX_HINTS_PER_ELEMENT);
+				MAX_HINTS_PER_ELEMENT);
 	if (hint_ctx.hints == NULL) {
 		return NSERROR_NOMEM;
 	}
@@ -626,9 +632,8 @@ static void css_hint_get_hints(struct css_hint **hints, uint32_t *nhints)
  * Presentational hint handlers                                               *
  ******************************************************************************/
 
-static void css_hint_table_cell_border_padding(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void
+css_hint_table_cell_border_padding(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &hint_ctx.hints[hint_ctx.len];
 	css_qname qs;
@@ -638,8 +643,7 @@ static void css_hint_table_cell_border_padding(
 
 	qs.ns = NULL;
 	qs.name = lwc_string_ref(corestring_lwc_table);
-	if (named_ancestor_node(ctx, node, &qs,
-			(void *)&tablenode) != CSS_OK) {
+	if (named_ancestor_node(ctx, node, &qs, (void *)&tablenode) != CSS_OK) {
 		/* Didn't find, or had error */
 		lwc_string_unref(qs.name);
 		return;
@@ -654,17 +658,18 @@ static void css_hint_table_cell_border_padding(
 	 */
 
 	exc = dom_element_get_attribute(tablenode,
-			corestring_dom_border, &attr);
+					corestring_dom_border,
+					&attr);
 
 	if (exc == DOM_NO_ERR && attr != NULL) {
 		uint32_t hint_prop;
 		css_hint_length hint_length;
 
-		if (parse_dimension(
-				dom_string_data(attr), false,
-						&hint_length.value,
-						&hint_length.unit) &&
-				INTTOFIX(0) != hint_length.value) {
+		if (parse_dimension(dom_string_data(attr),
+				    false,
+				    &hint_length.value,
+				    &hint_length.unit) &&
+		    INTTOFIX(0) != hint_length.value) {
 
 			for (hint_prop = CSS_PROP_BORDER_TOP_STYLE;
 			     hint_prop <= CSS_PROP_BORDER_LEFT_STYLE;
@@ -688,15 +693,15 @@ static void css_hint_table_cell_border_padding(
 	}
 
 	exc = dom_element_get_attribute(tablenode,
-			corestring_dom_bordercolor, &attr);
+					corestring_dom_bordercolor,
+					&attr);
 
 	if (exc == DOM_NO_ERR && attr != NULL) {
 		uint32_t hint_prop;
 		css_color hint_color;
 
-		if (nscss_parse_colour(
-				(const char *)dom_string_data(attr),
-				&hint_color)) {
+		if (nscss_parse_colour((const char *)dom_string_data(attr),
+				       &hint_color)) {
 
 			for (hint_prop = CSS_PROP_BORDER_TOP_COLOR;
 			     hint_prop <= CSS_PROP_BORDER_LEFT_COLOR;
@@ -711,16 +716,17 @@ static void css_hint_table_cell_border_padding(
 	}
 
 	exc = dom_element_get_attribute(tablenode,
-			corestring_dom_cellpadding, &attr);
+					corestring_dom_cellpadding,
+					&attr);
 
 	if (exc == DOM_NO_ERR && attr != NULL) {
 		uint32_t hint_prop;
 		css_hint_length hint_length;
 
-		if (parse_dimension(
-				dom_string_data(attr), false,
-						&hint_length.value,
-						&hint_length.unit)) {
+		if (parse_dimension(dom_string_data(attr),
+				    false,
+				    &hint_length.value,
+				    &hint_length.unit)) {
 
 			for (hint_prop = CSS_PROP_PADDING_TOP;
 			     hint_prop <= CSS_PROP_PADDING_LEFT;
@@ -736,40 +742,37 @@ static void css_hint_table_cell_border_padding(
 	}
 }
 
-static void css_hint_vertical_align_table_cells(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void
+css_hint_vertical_align_table_cells(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &hint_ctx.hints[hint_ctx.len];
 	dom_string *attr = NULL;
 	dom_exception err;
 
-	err = dom_element_get_attribute(node,
-			corestring_dom_valign, &attr);
+	err = dom_element_get_attribute(node, corestring_dom_valign, &attr);
 
 	if (err == DOM_NO_ERR && attr != NULL) {
 		hint->data.length.value = 0;
 		hint->data.length.unit = CSS_UNIT_PX;
-		if (dom_string_caseless_lwc_isequal(attr,
-				corestring_lwc_top)) {
+		if (dom_string_caseless_lwc_isequal(attr, corestring_lwc_top)) {
 			hint->prop = CSS_PROP_VERTICAL_ALIGN;
 			hint->status = CSS_VERTICAL_ALIGN_TOP;
 			css_hint_advance(&hint);
 
-		} else if (dom_string_caseless_lwc_isequal(attr,
-					corestring_lwc_middle)) {
+		} else if (dom_string_caseless_lwc_isequal(
+				   attr, corestring_lwc_middle)) {
 			hint->prop = CSS_PROP_VERTICAL_ALIGN;
 			hint->status = CSS_VERTICAL_ALIGN_MIDDLE;
 			css_hint_advance(&hint);
 
-		} else if (dom_string_caseless_lwc_isequal(attr,
-					corestring_lwc_bottom)) {
+		} else if (dom_string_caseless_lwc_isequal(
+				   attr, corestring_lwc_bottom)) {
 			hint->prop = CSS_PROP_VERTICAL_ALIGN;
 			hint->status = CSS_VERTICAL_ALIGN_BOTTOM;
 			css_hint_advance(&hint);
 
-		} else if (dom_string_caseless_lwc_isequal(attr,
-					corestring_lwc_baseline)) {
+		} else if (dom_string_caseless_lwc_isequal(
+				   attr, corestring_lwc_baseline)) {
 			hint->prop = CSS_PROP_VERTICAL_ALIGN;
 			hint->status = CSS_VERTICAL_ALIGN_BASELINE;
 			css_hint_advance(&hint);
@@ -778,42 +781,39 @@ static void css_hint_vertical_align_table_cells(
 	}
 }
 
-static void css_hint_vertical_align_replaced(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void
+css_hint_vertical_align_replaced(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &hint_ctx.hints[hint_ctx.len];
 	dom_string *attr = NULL;
 	dom_exception err;
 
-	err = dom_element_get_attribute(node,
-			corestring_dom_valign, &attr);
+	err = dom_element_get_attribute(node, corestring_dom_valign, &attr);
 
 	if (err == DOM_NO_ERR && attr != NULL) {
-		if (dom_string_caseless_lwc_isequal(attr,
-				corestring_lwc_top)) {
+		if (dom_string_caseless_lwc_isequal(attr, corestring_lwc_top)) {
 			hint->prop = CSS_PROP_VERTICAL_ALIGN;
 			hint->status = CSS_VERTICAL_ALIGN_TOP;
 			css_hint_advance(&hint);
 
-		} else if (dom_string_caseless_lwc_isequal(attr,
-					corestring_lwc_bottom) ||
-			   dom_string_caseless_lwc_isequal(attr,
-					corestring_lwc_baseline)) {
+		} else if (dom_string_caseless_lwc_isequal(
+				   attr, corestring_lwc_bottom) ||
+			   dom_string_caseless_lwc_isequal(
+				   attr, corestring_lwc_baseline)) {
 			hint->prop = CSS_PROP_VERTICAL_ALIGN;
 			hint->status = CSS_VERTICAL_ALIGN_BASELINE;
 			css_hint_advance(&hint);
 
-		} else if (dom_string_caseless_lwc_isequal(attr,
-					corestring_lwc_texttop)) {
+		} else if (dom_string_caseless_lwc_isequal(
+				   attr, corestring_lwc_texttop)) {
 			hint->prop = CSS_PROP_VERTICAL_ALIGN;
 			hint->status = CSS_VERTICAL_ALIGN_TEXT_TOP;
 			css_hint_advance(&hint);
 
-		} else if (dom_string_caseless_lwc_isequal(attr,
-					corestring_lwc_absmiddle) ||
-			   dom_string_caseless_lwc_isequal(attr,
-					corestring_lwc_abscenter)) {
+		} else if (dom_string_caseless_lwc_isequal(
+				   attr, corestring_lwc_absmiddle) ||
+			   dom_string_caseless_lwc_isequal(
+				   attr, corestring_lwc_abscenter)) {
 			hint->prop = CSS_PROP_VERTICAL_ALIGN;
 			hint->status = CSS_VERTICAL_ALIGN_MIDDLE;
 			css_hint_advance(&hint);
@@ -822,37 +822,34 @@ static void css_hint_vertical_align_replaced(
 	}
 }
 
-static void css_hint_text_align_normal(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void css_hint_text_align_normal(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &hint_ctx.hints[hint_ctx.len];
 	dom_string *align = NULL;
 	dom_exception err;
 
-	err = dom_element_get_attribute(node,
-			corestring_dom_align, &align);
+	err = dom_element_get_attribute(node, corestring_dom_align, &align);
 	if (err == DOM_NO_ERR && align != NULL) {
 		if (dom_string_caseless_lwc_isequal(align,
-				corestring_lwc_left)) {
+						    corestring_lwc_left)) {
 			hint->prop = CSS_PROP_TEXT_ALIGN;
 			hint->status = CSS_TEXT_ALIGN_LEFT;
 			css_hint_advance(&hint);
 
-		} else if (dom_string_caseless_lwc_isequal(align,
-					corestring_lwc_center)) {
+		} else if (dom_string_caseless_lwc_isequal(
+				   align, corestring_lwc_center)) {
 			hint->prop = CSS_PROP_TEXT_ALIGN;
 			hint->status = CSS_TEXT_ALIGN_CENTER;
 			css_hint_advance(&hint);
 
-		} else if (dom_string_caseless_lwc_isequal(align,
-					corestring_lwc_right)) {
+		} else if (dom_string_caseless_lwc_isequal(
+				   align, corestring_lwc_right)) {
 			hint->prop = CSS_PROP_TEXT_ALIGN;
 			hint->status = CSS_TEXT_ALIGN_RIGHT;
 			css_hint_advance(&hint);
 
-		} else if (dom_string_caseless_lwc_isequal(align,
-					corestring_lwc_justify)) {
+		} else if (dom_string_caseless_lwc_isequal(
+				   align, corestring_lwc_justify)) {
 			hint->prop = CSS_PROP_TEXT_ALIGN;
 			hint->status = CSS_TEXT_ALIGN_JUSTIFY;
 			css_hint_advance(&hint);
@@ -861,9 +858,7 @@ static void css_hint_text_align_normal(
 	}
 }
 
-static void css_hint_text_align_center(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void css_hint_text_align_center(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &hint_ctx.hints[hint_ctx.len];
 
@@ -872,27 +867,25 @@ static void css_hint_text_align_center(
 	css_hint_advance(&hint);
 }
 
-static void css_hint_margin_left_right_align_center(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void
+css_hint_margin_left_right_align_center(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &hint_ctx.hints[hint_ctx.len];
 	dom_string *attr;
 	dom_exception exc;
 
-	exc = dom_element_get_attribute(node,
-			corestring_dom_align, &attr);
+	exc = dom_element_get_attribute(node, corestring_dom_align, &attr);
 
 	if (exc == DOM_NO_ERR && attr != NULL) {
 		memset(hint, 0, sizeof(*hint) * 2);
 		if (dom_string_caseless_lwc_isequal(attr,
-						corestring_lwc_center) ||
-				dom_string_caseless_lwc_isequal(attr,
-						corestring_lwc_abscenter) ||
-				dom_string_caseless_lwc_isequal(attr,
-						corestring_lwc_middle) ||
-				dom_string_caseless_lwc_isequal(attr,
-						corestring_lwc_absmiddle)) {
+						    corestring_lwc_center) ||
+		    dom_string_caseless_lwc_isequal(attr,
+						    corestring_lwc_abscenter) ||
+		    dom_string_caseless_lwc_isequal(attr,
+						    corestring_lwc_middle) ||
+		    dom_string_caseless_lwc_isequal(attr,
+						    corestring_lwc_absmiddle)) {
 			hint->prop = CSS_PROP_MARGIN_LEFT;
 			hint->status = CSS_MARGIN_AUTO;
 			css_hint_advance(&hint);
@@ -905,38 +898,35 @@ static void css_hint_margin_left_right_align_center(
 	}
 }
 
-static void css_hint_text_align_special(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void css_hint_text_align_special(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &hint_ctx.hints[hint_ctx.len];
 	dom_string *align = NULL;
 	dom_exception err;
 
-	err = dom_element_get_attribute(node,
-			corestring_dom_align, &align);
+	err = dom_element_get_attribute(node, corestring_dom_align, &align);
 
 	if (err == DOM_NO_ERR && align != NULL) {
 		if (dom_string_caseless_lwc_isequal(align,
-				corestring_lwc_center)) {
+						    corestring_lwc_center)) {
 			hint->prop = CSS_PROP_TEXT_ALIGN;
 			hint->status = CSS_TEXT_ALIGN_LIBCSS_CENTER;
 			css_hint_advance(&hint);
 
-		} else if (dom_string_caseless_lwc_isequal(align,
-					corestring_lwc_left)) {
+		} else if (dom_string_caseless_lwc_isequal(
+				   align, corestring_lwc_left)) {
 			hint->prop = CSS_PROP_TEXT_ALIGN;
 			hint->status = CSS_TEXT_ALIGN_LIBCSS_LEFT;
 			css_hint_advance(&hint);
 
-		} else if (dom_string_caseless_lwc_isequal(align,
-					corestring_lwc_right)) {
+		} else if (dom_string_caseless_lwc_isequal(
+				   align, corestring_lwc_right)) {
 			hint->prop = CSS_PROP_TEXT_ALIGN;
 			hint->status = CSS_TEXT_ALIGN_LIBCSS_RIGHT;
 			css_hint_advance(&hint);
 
-		} else if (dom_string_caseless_lwc_isequal(align,
-					corestring_lwc_justify)) {
+		} else if (dom_string_caseless_lwc_isequal(
+				   align, corestring_lwc_justify)) {
 			hint->prop = CSS_PROP_TEXT_ALIGN;
 			hint->status = CSS_TEXT_ALIGN_JUSTIFY;
 			css_hint_advance(&hint);
@@ -945,9 +935,8 @@ static void css_hint_text_align_special(
 	}
 }
 
-static void css_hint_text_align_table_special(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void
+css_hint_text_align_table_special(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &hint_ctx.hints[hint_ctx.len];
 
@@ -956,23 +945,20 @@ static void css_hint_text_align_table_special(
 	css_hint_advance(&hint);
 }
 
-static void css_hint_margin_hspace_vspace(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void css_hint_margin_hspace_vspace(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &hint_ctx.hints[hint_ctx.len];
 	dom_string *attr = NULL;
 	dom_exception exc;
 
-	exc = dom_element_get_attribute(node,
-			corestring_dom_vspace, &attr);
+	exc = dom_element_get_attribute(node, corestring_dom_vspace, &attr);
 
 	if (exc == DOM_NO_ERR && attr != NULL) {
 		css_hint_length hint_length;
-		if (parse_dimension(
-				dom_string_data(attr), false,
-				&hint_length.value,
-				&hint_length.unit)) {
+		if (parse_dimension(dom_string_data(attr),
+				    false,
+				    &hint_length.value,
+				    &hint_length.unit)) {
 			hint->prop = CSS_PROP_MARGIN_TOP;
 			hint->data.length.value = hint_length.value;
 			hint->data.length.unit = hint_length.unit;
@@ -988,15 +974,14 @@ static void css_hint_margin_hspace_vspace(
 		dom_string_unref(attr);
 	}
 
-	exc = dom_element_get_attribute(node,
-			corestring_dom_hspace, &attr);
+	exc = dom_element_get_attribute(node, corestring_dom_hspace, &attr);
 
 	if (exc == DOM_NO_ERR && attr != NULL) {
 		css_hint_length hint_length;
-		if (parse_dimension(
-				dom_string_data(attr), false,
-				&hint_length.value,
-				&hint_length.unit)) {
+		if (parse_dimension(dom_string_data(attr),
+				    false,
+				    &hint_length.value,
+				    &hint_length.unit)) {
 			hint->prop = CSS_PROP_MARGIN_LEFT;
 			hint->data.length.value = hint_length.value;
 			hint->data.length.unit = hint_length.unit;
@@ -1013,21 +998,18 @@ static void css_hint_margin_hspace_vspace(
 	}
 }
 
-static void css_hint_margin_left_right_hr(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void css_hint_margin_left_right_hr(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &hint_ctx.hints[hint_ctx.len];
 	dom_string *attr;
 	dom_exception exc;
 
-	exc = dom_element_get_attribute(node,
-				corestring_dom_align, &attr);
+	exc = dom_element_get_attribute(node, corestring_dom_align, &attr);
 
 	if (exc == DOM_NO_ERR && attr != NULL) {
 		memset(hint, 0, sizeof(*hint) * 2);
 		if (dom_string_caseless_lwc_isequal(attr,
-				corestring_lwc_left)) {
+						    corestring_lwc_left)) {
 			hint->prop = CSS_PROP_MARGIN_LEFT;
 			hint->data.length.value = 0;
 			hint->data.length.unit = CSS_UNIT_PX;
@@ -1038,8 +1020,8 @@ static void css_hint_margin_left_right_hr(
 			hint->status = CSS_MARGIN_AUTO;
 			css_hint_advance(&hint);
 
-		} else if (dom_string_caseless_lwc_isequal(attr,
-				corestring_lwc_center)) {
+		} else if (dom_string_caseless_lwc_isequal(
+				   attr, corestring_lwc_center)) {
 			hint->prop = CSS_PROP_MARGIN_LEFT;
 			hint->status = CSS_MARGIN_AUTO;
 			css_hint_advance(&hint);
@@ -1048,8 +1030,8 @@ static void css_hint_margin_left_right_hr(
 			hint->status = CSS_MARGIN_AUTO;
 			css_hint_advance(&hint);
 
-		} else if (dom_string_caseless_lwc_isequal(attr,
-				corestring_lwc_right)) {
+		} else if (dom_string_caseless_lwc_isequal(
+				   attr, corestring_lwc_right)) {
 			hint->prop = CSS_PROP_MARGIN_LEFT;
 			hint->status = CSS_MARGIN_AUTO;
 			css_hint_advance(&hint);
@@ -1064,9 +1046,7 @@ static void css_hint_margin_left_right_hr(
 	}
 }
 
-static void css_hint_table_spacing_border(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void css_hint_table_spacing_border(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &hint_ctx.hints[hint_ctx.len];
 	dom_exception exc;
@@ -1079,17 +1059,17 @@ static void css_hint_table_spacing_border(
 		css_hint_length hint_length;
 
 		for (hint_prop = CSS_PROP_BORDER_TOP_STYLE;
-			     hint_prop <= CSS_PROP_BORDER_LEFT_STYLE;
-			     hint_prop++) {
-				hint->prop = hint_prop;
-				hint->status = CSS_BORDER_STYLE_OUTSET;
-				css_hint_advance(&hint);
+		     hint_prop <= CSS_PROP_BORDER_LEFT_STYLE;
+		     hint_prop++) {
+			hint->prop = hint_prop;
+			hint->status = CSS_BORDER_STYLE_OUTSET;
+			css_hint_advance(&hint);
 		}
 
-		if (parse_dimension(
-				dom_string_data(attr), false,
-						&hint_length.value,
-						&hint_length.unit)) {
+		if (parse_dimension(dom_string_data(attr),
+				    false,
+				    &hint_length.value,
+				    &hint_length.unit)) {
 
 			for (hint_prop = CSS_PROP_BORDER_TOP_WIDTH;
 			     hint_prop <= CSS_PROP_BORDER_LEFT_WIDTH;
@@ -1105,15 +1085,15 @@ static void css_hint_table_spacing_border(
 	}
 
 	exc = dom_element_get_attribute(node,
-			corestring_dom_bordercolor, &attr);
+					corestring_dom_bordercolor,
+					&attr);
 
 	if (exc == DOM_NO_ERR && attr != NULL) {
 		uint32_t hint_prop;
 		css_color hint_color;
 
-		if (nscss_parse_colour(
-				(const char *)dom_string_data(attr),
-				&hint_color)) {
+		if (nscss_parse_colour((const char *)dom_string_data(attr),
+				       &hint_color)) {
 
 			for (hint_prop = CSS_PROP_BORDER_TOP_COLOR;
 			     hint_prop <= CSS_PROP_BORDER_LEFT_COLOR;
@@ -1128,13 +1108,14 @@ static void css_hint_table_spacing_border(
 	}
 
 	exc = dom_element_get_attribute(node,
-			corestring_dom_cellspacing, &attr);
+					corestring_dom_cellspacing,
+					&attr);
 
 	if (exc == DOM_NO_ERR && attr != NULL) {
-		if (parse_dimension(
-				(const char *)dom_string_data(attr), false,
-						&hint->data.position.h.value,
-						&hint->data.position.h.unit)) {
+		if (parse_dimension((const char *)dom_string_data(attr),
+				    false,
+				    &hint->data.position.h.value,
+				    &hint->data.position.h.unit)) {
 			hint->prop = CSS_PROP_BORDER_SPACING;
 			hint->data.position.v = hint->data.position.h;
 			hint->status = CSS_BORDER_SPACING_SET;
@@ -1144,22 +1125,19 @@ static void css_hint_table_spacing_border(
 	}
 }
 
-static void css_hint_height(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void css_hint_height(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &hint_ctx.hints[hint_ctx.len];
 	dom_string *attr = NULL;
 	dom_exception err;
 
-	err = dom_element_get_attribute(node,
-			corestring_dom_height, &attr);
+	err = dom_element_get_attribute(node, corestring_dom_height, &attr);
 
 	if (err == DOM_NO_ERR && attr != NULL) {
-		if (parse_dimension(
-				(const char *)dom_string_data(attr), false,
-				&hint->data.length.value,
-				&hint->data.length.unit)) {
+		if (parse_dimension((const char *)dom_string_data(attr),
+				    false,
+				    &hint->data.length.value,
+				    &hint->data.length.unit)) {
 			hint->prop = CSS_PROP_HEIGHT;
 			hint->status = CSS_HEIGHT_SET;
 			css_hint_advance(&hint);
@@ -1168,22 +1146,19 @@ static void css_hint_height(
 	}
 }
 
-static void css_hint_width(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void css_hint_width(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &hint_ctx.hints[hint_ctx.len];
 	dom_string *attr = NULL;
 	dom_exception err;
 
-	err = dom_element_get_attribute(node,
-			corestring_dom_width, &attr);
+	err = dom_element_get_attribute(node, corestring_dom_width, &attr);
 
 	if (err == DOM_NO_ERR && attr != NULL) {
-		if (parse_dimension(
-				(const char *)dom_string_data(attr), false,
-				&hint->data.length.value,
-				&hint->data.length.unit)) {
+		if (parse_dimension((const char *)dom_string_data(attr),
+				    false,
+				    &hint->data.length.value,
+				    &hint->data.length.unit)) {
 			hint->prop = CSS_PROP_WIDTH;
 			hint->status = CSS_WIDTH_SET;
 			css_hint_advance(&hint);
@@ -1192,22 +1167,20 @@ static void css_hint_width(
 	}
 }
 
-static void css_hint_height_width_textarea(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void
+css_hint_height_width_textarea(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &hint_ctx.hints[hint_ctx.len];
 	dom_string *attr = NULL;
 	dom_exception err;
 
-	err = dom_element_get_attribute(node,
-			corestring_dom_rows, &attr);
+	err = dom_element_get_attribute(node, corestring_dom_rows, &attr);
 
 	if (err == DOM_NO_ERR && attr != NULL) {
-		if (parse_dimension(
-				(const char *)dom_string_data(attr), false,
-				&hint->data.length.value,
-				&hint->data.length.unit)) {
+		if (parse_dimension((const char *)dom_string_data(attr),
+				    false,
+				    &hint->data.length.value,
+				    &hint->data.length.unit)) {
 			hint->prop = CSS_PROP_HEIGHT;
 			hint->data.length.unit = CSS_UNIT_EM;
 			hint->status = CSS_HEIGHT_SET;
@@ -1216,14 +1189,13 @@ static void css_hint_height_width_textarea(
 		dom_string_unref(attr);
 	}
 
-	err = dom_element_get_attribute(node,
-			corestring_dom_cols, &attr);
+	err = dom_element_get_attribute(node, corestring_dom_cols, &attr);
 
 	if (err == DOM_NO_ERR && attr != NULL) {
-		if (parse_dimension(
-				(const char *)dom_string_data(attr), false,
-				&hint->data.length.value,
-				&hint->data.length.unit)) {
+		if (parse_dimension((const char *)dom_string_data(attr),
+				    false,
+				    &hint->data.length.value,
+				    &hint->data.length.unit)) {
 			hint->prop = CSS_PROP_WIDTH;
 			hint->data.length.unit = CSS_UNIT_EX;
 			hint->status = CSS_WIDTH_SET;
@@ -1233,23 +1205,20 @@ static void css_hint_height_width_textarea(
 	}
 }
 
-static void css_hint_height_width_canvas(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void css_hint_height_width_canvas(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &hint_ctx.hints[hint_ctx.len];
 	dom_string *attr = NULL;
 	dom_exception err;
 	bool set_dim = false;
 
-	err = dom_element_get_attribute(node,
-			corestring_dom_height, &attr);
+	err = dom_element_get_attribute(node, corestring_dom_height, &attr);
 
 	if (err == DOM_NO_ERR && attr != NULL) {
-		if (parse_dimension(
-				(const char *)dom_string_data(attr), true,
-				&hint->data.length.value,
-				&hint->data.length.unit)) {
+		if (parse_dimension((const char *)dom_string_data(attr),
+				    true,
+				    &hint->data.length.value,
+				    &hint->data.length.unit)) {
 			hint->prop = CSS_PROP_HEIGHT;
 			hint->data.length.unit = CSS_UNIT_PX;
 			hint->status = CSS_HEIGHT_SET;
@@ -1269,14 +1238,13 @@ static void css_hint_height_width_canvas(
 		set_dim = false;
 	}
 
-	err = dom_element_get_attribute(node,
-			corestring_dom_width, &attr);
+	err = dom_element_get_attribute(node, corestring_dom_width, &attr);
 
 	if (err == DOM_NO_ERR && attr != NULL) {
-		if (parse_dimension(
-				(const char *)dom_string_data(attr), true,
-				&hint->data.length.value,
-				&hint->data.length.unit)) {
+		if (parse_dimension((const char *)dom_string_data(attr),
+				    true,
+				    &hint->data.length.value,
+				    &hint->data.length.unit)) {
 			hint->prop = CSS_PROP_WIDTH;
 			hint->data.length.unit = CSS_UNIT_PX;
 			hint->status = CSS_WIDTH_SET;
@@ -1295,44 +1263,38 @@ static void css_hint_height_width_canvas(
 	}
 }
 
-static void css_hint_width_input(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void css_hint_width_input(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &(hint_ctx.hints[hint_ctx.len]);
 	dom_string *attr = NULL;
 	dom_exception err;
 
-	err = dom_element_get_attribute(node,
-			corestring_dom_size, &attr);
+	err = dom_element_get_attribute(node, corestring_dom_size, &attr);
 
 	if (err == DOM_NO_ERR && attr != NULL) {
-		if (parse_dimension(
-				(const char *)dom_string_data(attr), false,
-				&hint->data.length.value,
-				&hint->data.length.unit)) {
+		if (parse_dimension((const char *)dom_string_data(attr),
+				    false,
+				    &hint->data.length.value,
+				    &hint->data.length.unit)) {
 			dom_string *attr2 = NULL;
 
 			err = dom_element_get_attribute(node,
-					corestring_dom_type, &attr2);
+							corestring_dom_type,
+							&attr2);
 			if (err == DOM_NO_ERR) {
 
 				hint->prop = CSS_PROP_WIDTH;
 				hint->status = CSS_WIDTH_SET;
 
 				if (attr2 == NULL ||
-						dom_string_caseless_lwc_isequal(
-						attr2,
-						corestring_lwc_text) ||
-						dom_string_caseless_lwc_isequal(
-						attr2,
-						corestring_lwc_search) ||
-						dom_string_caseless_lwc_isequal(
-						attr2,
-						corestring_lwc_password) ||
-						dom_string_caseless_lwc_isequal(
-						attr2,
-						corestring_lwc_file)) {
+				    dom_string_caseless_lwc_isequal(
+					    attr2, corestring_lwc_text) ||
+				    dom_string_caseless_lwc_isequal(
+					    attr2, corestring_lwc_search) ||
+				    dom_string_caseless_lwc_isequal(
+					    attr2, corestring_lwc_password) ||
+				    dom_string_caseless_lwc_isequal(
+					    attr2, corestring_lwc_file)) {
 					hint->data.length.unit = CSS_UNIT_EX;
 				}
 				if (attr2 != NULL) {
@@ -1345,9 +1307,7 @@ static void css_hint_width_input(
 	}
 }
 
-static void css_hint_anchor_color(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void css_hint_anchor_color(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &hint_ctx.hints[hint_ctx.len];
 	css_error error;
@@ -1361,11 +1321,10 @@ static void css_hint_anchor_color(
 
 	qs.ns = NULL;
 	qs.name = lwc_string_ref(corestring_lwc_body);
-	if (named_ancestor_node(ctx, node, &qs,
-			(void *)&bodynode) != CSS_OK) {
+	if (named_ancestor_node(ctx, node, &qs, (void *)&bodynode) != CSS_OK) {
 		/* Didn't find, or had error */
 		lwc_string_unref(qs.name);
-		return ;
+		return;
 	}
 	lwc_string_unref(qs.name);
 
@@ -1379,16 +1338,17 @@ static void css_hint_anchor_color(
 
 	if (is_visited) {
 		err = dom_element_get_attribute(bodynode,
-				corestring_dom_vlink, &color);
+						corestring_dom_vlink,
+						&color);
 	} else {
 		err = dom_element_get_attribute(bodynode,
-				corestring_dom_link, &color);
+						corestring_dom_link,
+						&color);
 	}
 
 	if (err == DOM_NO_ERR && color != NULL) {
-		if (nscss_parse_colour(
-				(const char *)dom_string_data(color),
-						&hint->data.color)) {
+		if (nscss_parse_colour((const char *)dom_string_data(color),
+				       &hint->data.color)) {
 			hint->prop = CSS_PROP_COLOR;
 			hint->status = CSS_COLOR_COLOR;
 			css_hint_advance(&hint);
@@ -1397,9 +1357,7 @@ static void css_hint_anchor_color(
 	}
 }
 
-static void css_hint_body_color(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void css_hint_body_color(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &hint_ctx.hints[hint_ctx.len];
 	dom_exception err;
@@ -1408,9 +1366,8 @@ static void css_hint_body_color(
 	err = dom_element_get_attribute(node, corestring_dom_text, &color);
 
 	if (err == DOM_NO_ERR && color != NULL) {
-		if (nscss_parse_colour(
-				(const char *)dom_string_data(color),
-						&hint->data.color)) {
+		if (nscss_parse_colour((const char *)dom_string_data(color),
+				       &hint->data.color)) {
 			hint->prop = CSS_PROP_COLOR;
 			hint->status = CSS_COLOR_COLOR;
 			css_hint_advance(&hint);
@@ -1419,9 +1376,7 @@ static void css_hint_body_color(
 	}
 }
 
-static void css_hint_color(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void css_hint_color(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &hint_ctx.hints[hint_ctx.len];
 	dom_exception err;
@@ -1430,9 +1385,8 @@ static void css_hint_color(
 	err = dom_element_get_attribute(node, corestring_dom_color, &color);
 
 	if (err == DOM_NO_ERR && color != NULL) {
-		if (nscss_parse_colour(
-				(const char *)dom_string_data(color),
-						&hint->data.color)) {
+		if (nscss_parse_colour((const char *)dom_string_data(color),
+				       &hint->data.color)) {
 			hint->prop = CSS_PROP_COLOR;
 			hint->status = CSS_COLOR_COLOR;
 			css_hint_advance(&hint);
@@ -1441,9 +1395,7 @@ static void css_hint_color(
 	}
 }
 
-static void css_hint_font_size(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void css_hint_font_size(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &hint_ctx.hints[hint_ctx.len];
 	dom_exception err;
@@ -1451,11 +1403,10 @@ static void css_hint_font_size(
 
 	err = dom_element_get_attribute(node, corestring_dom_size, &size);
 	if (err == DOM_NO_ERR && size != NULL) {
-		if (parse_font_size(
-				(const char *)dom_string_data(size),
-						&hint->status,
-						&hint->data.length.value,
-						&hint->data.length.unit)) {
+		if (parse_font_size((const char *)dom_string_data(size),
+				    &hint->status,
+				    &hint->data.length.value,
+				    &hint->data.length.unit)) {
 			hint->prop = CSS_PROP_FONT_SIZE;
 			css_hint_advance(&hint);
 		}
@@ -1463,9 +1414,7 @@ static void css_hint_font_size(
 	}
 }
 
-static void css_hint_float(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void css_hint_float(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &hint_ctx.hints[hint_ctx.len];
 	dom_exception err;
@@ -1474,13 +1423,13 @@ static void css_hint_float(
 	err = dom_element_get_attribute(node, corestring_dom_align, &align);
 	if (err == DOM_NO_ERR && align != NULL) {
 		if (dom_string_caseless_lwc_isequal(align,
-				corestring_lwc_left)) {
+						    corestring_lwc_left)) {
 			hint->prop = CSS_PROP_FLOAT;
 			hint->status = CSS_FLOAT_LEFT;
 			css_hint_advance(&hint);
 
-		} else if (dom_string_caseless_lwc_isequal(align,
-				corestring_lwc_right)) {
+		} else if (dom_string_caseless_lwc_isequal(
+				   align, corestring_lwc_right)) {
 			hint->prop = CSS_PROP_FLOAT;
 			hint->status = CSS_FLOAT_RIGHT;
 			css_hint_advance(&hint);
@@ -1489,9 +1438,7 @@ static void css_hint_float(
 	}
 }
 
-static void css_hint_caption_side(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void css_hint_caption_side(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &hint_ctx.hints[hint_ctx.len];
 	dom_exception err;
@@ -1500,7 +1447,7 @@ static void css_hint_caption_side(
 	err = dom_element_get_attribute(node, corestring_dom_align, &align);
 	if (err == DOM_NO_ERR && align != NULL) {
 		if (dom_string_caseless_lwc_isequal(align,
-				corestring_lwc_bottom)) {
+						    corestring_lwc_bottom)) {
 			hint->prop = CSS_PROP_CAPTION_SIDE;
 			hint->status = CSS_CAPTION_SIDE_BOTTOM;
 			css_hint_advance(&hint);
@@ -1509,20 +1456,16 @@ static void css_hint_caption_side(
 	}
 }
 
-static void css_hint_bg_color(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void css_hint_bg_color(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &hint_ctx.hints[hint_ctx.len];
 	dom_exception err;
 	dom_string *bgcolor;
 
-	err = dom_element_get_attribute(node,
-			corestring_dom_bgcolor, &bgcolor);
+	err = dom_element_get_attribute(node, corestring_dom_bgcolor, &bgcolor);
 	if (err == DOM_NO_ERR && bgcolor != NULL) {
-		if (nscss_parse_colour(
-				(const char *)dom_string_data(bgcolor),
-				&hint->data.color)) {
+		if (nscss_parse_colour((const char *)dom_string_data(bgcolor),
+				       &hint->data.color)) {
 			hint->prop = CSS_PROP_BACKGROUND_COLOR;
 			hint->status = CSS_BACKGROUND_COLOR_COLOR;
 			css_hint_advance(&hint);
@@ -1531,26 +1474,25 @@ static void css_hint_bg_color(
 	}
 }
 
-static void css_hint_bg_image(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void css_hint_bg_image(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &(hint_ctx.hints[hint_ctx.len]);
 	dom_exception err;
 	dom_string *attr;
 
-	err = dom_element_get_attribute(node,
-			corestring_dom_background, &attr);
+	err = dom_element_get_attribute(node, corestring_dom_background, &attr);
 	if (err == DOM_NO_ERR && attr != NULL) {
 		nsurl *url;
 		nserror error = nsurl_join(ctx->base_url,
-				(const char *)dom_string_data(attr), &url);
+					   (const char *)dom_string_data(attr),
+					   &url);
 		dom_string_unref(attr);
 
 		if (error == NSERROR_OK) {
 			lwc_string *iurl;
 			lwc_error lerror = lwc_intern_string(nsurl_access(url),
-					nsurl_length(url), &iurl);
+							     nsurl_length(url),
+							     &iurl);
 			nsurl_unref(url);
 
 			if (lerror == lwc_error_ok) {
@@ -1563,9 +1505,7 @@ static void css_hint_bg_image(
 	}
 }
 
-static void css_hint_white_space_nowrap(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void css_hint_white_space_nowrap(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &(hint_ctx.hints[hint_ctx.len]);
 	dom_exception err;
@@ -1579,9 +1519,7 @@ static void css_hint_white_space_nowrap(
 	}
 }
 
-static void css_hint_list(
-		nscss_select_ctx *ctx,
-		dom_node *node)
+static void css_hint_list(nscss_select_ctx *ctx, dom_node *node)
 {
 	struct css_hint *hint = &(hint_ctx.hints[hint_ctx.len]);
 	dom_exception err;
@@ -1625,8 +1563,10 @@ static void css_hint_list(
 
 
 /* Exported function, documented in css/hints.h */
-css_error node_presentational_hint(void *pw, void *node,
-		uint32_t *nhints, css_hint **hints)
+css_error node_presentational_hint(void *pw,
+				   void *node,
+				   uint32_t *nhints,
+				   css_hint **hints)
 {
 	dom_exception exc;
 	dom_html_element_type tag_type;

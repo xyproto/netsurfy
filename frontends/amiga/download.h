@@ -28,15 +28,18 @@ struct gui_download_window;
 struct gui_window;
 struct nsurl;
 
-struct dlnode
-{
+struct dlnode {
 	struct Node node;
 	char *filename;
 };
 
 void ami_free_download_list(struct List *dllist);
-BOOL ami_download_check_overwrite(const char *file, struct Window *win, ULONG size);
+BOOL ami_download_check_overwrite(const char *file,
+				  struct Window *win,
+				  ULONG size);
 void ami_download_parse_backmsg(const char *backmsg);
 
-nserror gui_window_save_link(struct gui_window *g, struct nsurl *url, const char *title);
+nserror gui_window_save_link(struct gui_window *g,
+			     struct nsurl *url,
+			     const char *title);
 #endif

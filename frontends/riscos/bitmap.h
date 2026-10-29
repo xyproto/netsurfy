@@ -30,7 +30,7 @@ struct bitmap;
 extern struct gui_bitmap_table *riscos_bitmap_table;
 
 /** save with full alpha channel (if not opaque) */
-#define BITMAP_SAVE_FULL_ALPHA	(1 << 0)
+#define BITMAP_SAVE_FULL_ALPHA (1 << 0)
 
 /**
  * RISC OS wimp toolkit bitmap.
@@ -40,7 +40,7 @@ struct bitmap {
 	int height; /**< height of bitmap */
 
 	bool opaque; /**< Whether the bitmap is opaque. */
-	bool clear;  /**< Whether the bitmap should be initialised to zeros. */
+	bool clear; /**< Whether the bitmap should be initialised to zeros. */
 
 	struct osspriteop_area *sprite_area; /**< Uncompressed data, or NULL */
 };
@@ -60,7 +60,8 @@ struct osspriteop_area *riscos_bitmap_convert_8bpp(struct bitmap *bitmap);
  * \param content content structure to render
  * \return true on success and bitmap updated else false
  */
-nserror riscos_bitmap_render(struct bitmap *bitmap, struct hlcache_handle *content);
+nserror
+riscos_bitmap_render(struct bitmap *bitmap, struct hlcache_handle *content);
 
 /**
  * Overlay a sprite onto the given bitmap
@@ -68,7 +69,8 @@ nserror riscos_bitmap_render(struct bitmap *bitmap, struct hlcache_handle *conte
  * \param bitmap  bitmap object
  * \param s       8bpp sprite to be overlayed onto bitmap
  */
-void riscos_bitmap_overlay_sprite(struct bitmap *bitmap, const struct osspriteop_header *s);
+void riscos_bitmap_overlay_sprite(struct bitmap *bitmap,
+				  const struct osspriteop_header *s);
 
 /**
  * Create a bitmap.

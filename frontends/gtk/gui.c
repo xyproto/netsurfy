@@ -95,18 +95,22 @@ char **respaths;
 /* exported function documented in gtk/warn.h */
 nserror nsgtk_warning(const char *warning, const char *detail)
 {
-	char buf[300];	/* 300 is the size the RISC OS GUI uses */
+	char buf[300]; /* 300 is the size the RISC OS GUI uses */
 	static GtkWindow *nsgtk_warning_window;
 	GtkLabel *WarningLabel;
 
 	NSLOG(netsurf, INFO, "%s %s", warning, detail ? detail : "");
 	fflush(stdout);
 
-	nsgtk_warning_window = GTK_WINDOW(gtk_builder_get_object(warning_builder, "wndWarning"));
-	WarningLabel = GTK_LABEL(gtk_builder_get_object(warning_builder,
-							"labelWarning"));
+	nsgtk_warning_window = GTK_WINDOW(
+		gtk_builder_get_object(warning_builder, "wndWarning"));
+	WarningLabel = GTK_LABEL(
+		gtk_builder_get_object(warning_builder, "labelWarning"));
 
-	snprintf(buf, sizeof(buf), "%s %s", messages_get(warning),
+	snprintf(buf,
+		 sizeof(buf),
+		 "%s %s",
+		 messages_get(warning),
 		 detail ? detail : "");
 	buf[sizeof(buf) - 1] = 0;
 
@@ -249,7 +253,6 @@ uint32_t gtk_gui_gdkkey_to_nskey(guint keyval, GdkModifierType state)
 	case GDK_KEY(Hyper_L):
 	case GDK_KEY(Hyper_R):
 		return 0;
-
 	}
 	return gdk_keyval_to_unicode(keyval);
 }
@@ -262,17 +265,17 @@ uint32_t gtk_gui_gdkkey_to_nskey(guint keyval, GdkModifierType state)
  * is performed here, once, rather than every time a resource is
  * searched for.
  */
-static char **
-nsgtk_init_resource_path(const char *config_home)
+static char **nsgtk_init_resource_path(const char *config_home)
 {
 	char *resource_path;
 	int resource_path_len;
-	const gchar * const *langv;
+	const gchar *const *langv;
 	char **pathv; /* resource path string vector */
 	char **respath; /* resource paths vector */
 
 	if (config_home != NULL) {
-		resource_path_len = snprintf(NULL, 0,
+		resource_path_len = snprintf(NULL,
+					     0,
 					     "%s:${NETSURFRES}:%s",
 					     config_home,
 					     GTK_RESPATH);
@@ -280,14 +283,14 @@ nsgtk_init_resource_path(const char *config_home)
 		if (resource_path == NULL) {
 			return NULL;
 		}
-		snprintf(resource_path, resource_path_len + 1,
+		snprintf(resource_path,
+			 resource_path_len + 1,
 			 "%s:${NETSURFRES}:%s",
 			 config_home,
 			 GTK_RESPATH);
 	} else {
-		resource_path_len = snprintf(NULL, 0,
-					     "${NETSURFRES}:%s",
-					     GTK_RESPATH);
+		resource_path_len = snprintf(
+			NULL, 0, "${NETSURFRES}:%s", GTK_RESPATH);
 		resource_path = malloc(resource_path_len + 1);
 		if (resource_path == NULL) {
 			return NULL;
@@ -441,12 +444,19 @@ static nserror create_config_home(char **config_home_out)
 			return NSERROR_NOT_DIRECTORY;
 		}
 
-		ret = netsurf_mkpath(&config_home, NULL, 4, home_dir, ".config","netsurf", "/");
+		ret = netsurf_mkpath(&config_home,
+				     NULL,
+				     4,
+				     home_dir,
+				     ".config",
+				     "netsurf",
+				     "/");
 		if (ret != NSERROR_OK) {
 			return ret;
 		}
 	} else {
-		ret = netsurf_mkpath(&config_home, NULL, 3, xdg_config_dir, "netsurf", "/");
+		ret = netsurf_mkpath(
+			&config_home, NULL, 3, xdg_config_dir, "netsurf", "/");
 		if (ret != NSERROR_OK) {
 			return ret;
 		}
@@ -531,7 +541,8 @@ static nserror set_defaults(struct nsoption_s *defaults)
 	    (nsoption_charp(url_file) == NULL) ||
 	    (nsoption_charp(hotlist_path) == NULL) ||
 	    (nsoption_charp(downloads_directory) == NULL)) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "Failed initialising default resource paths");
 		return NSERROR_BAD_PARAMETER;
 	}
@@ -547,8 +558,9 @@ static nserror set_defaults(struct nsoption_s *defaults)
 	nsoption_set_int(button_type, 2);
 
 	/* set default items in toolbar */
-	nsoption_set_charp(toolbar_items,
-			   strdup("back/history/forward/reloadstop/url_bar/websearch/openmenu"));
+	nsoption_set_charp(
+		toolbar_items,
+		strdup("back/history/forward/reloadstop/url_bar/websearch/openmenu"));
 
 	/* set default for menu and tool bar visibility */
 	nsoption_set_charp(bar_show, strdup("tool"));
@@ -565,7 +577,7 @@ static nserror set_defaults(struct nsoption_s *defaults)
  *  - user choices loaded from Choices file
  *  - command line parameters
  */
-static nserror nsgtk_option_init(int *pargc, char** argv)
+static nserror nsgtk_option_init(int *pargc, char **argv)
 {
 	nserror ret;
 	char *choices = NULL;
@@ -700,12 +712,19 @@ static nserror create_cache_home(char **cache_home_out)
 			return NSERROR_NOT_DIRECTORY;
 		}
 
-		ret = netsurf_mkpath(&cache_home, NULL, 4, home_dir, ".cache", "netsurf", "/");
+		ret = netsurf_mkpath(&cache_home,
+				     NULL,
+				     4,
+				     home_dir,
+				     ".cache",
+				     "netsurf",
+				     "/");
 		if (ret != NSERROR_OK) {
 			return ret;
 		}
 	} else {
-		ret = netsurf_mkpath(&cache_home, NULL, 3, xdg_cache_dir, "netsurf", "/");
+		ret = netsurf_mkpath(
+			&cache_home, NULL, 3, xdg_cache_dir, "netsurf", "/");
 		if (ret != NSERROR_OK) {
 			return ret;
 		}
@@ -743,7 +762,8 @@ static nserror nsgtk_init(int *pargc, char ***pargv, char **cache_home)
 		ret = create_config_home(&nsgtk_config_home);
 	}
 	if (ret != NSERROR_OK) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "Unable to locate a configuration directory.");
 		nsgtk_config_home = NULL;
 	}
@@ -766,7 +786,8 @@ static nserror nsgtk_init(int *pargc, char ***pargv, char **cache_home)
 	/* initialise the gtk resource handling */
 	ret = nsgtk_init_resources(respaths);
 	if (ret != NSERROR_OK) {
-		fprintf(stderr, "GTK resources failed to initialise (%s)\n",
+		fprintf(stderr,
+			"GTK resources failed to initialise (%s)\n",
 			messages_get_errorcode(ret));
 		return ret;
 	}
@@ -774,7 +795,8 @@ static nserror nsgtk_init(int *pargc, char ***pargv, char **cache_home)
 	/* Initialise user options */
 	ret = nsgtk_option_init(pargc, *pargv);
 	if (ret != NSERROR_OK) {
-		fprintf(stderr, "Options failed to initialise (%s)\n",
+		fprintf(stderr,
+			"Options failed to initialise (%s)\n",
 			messages_get_errorcode(ret));
 		return ret;
 	}
@@ -782,7 +804,8 @@ static nserror nsgtk_init(int *pargc, char ***pargv, char **cache_home)
 	/* Initialise translated messages */
 	ret = nsgtk_messages_init(respaths);
 	if (ret != NSERROR_OK) {
-		fprintf(stderr, "Unable to load translated messages (%s)\n",
+		fprintf(stderr,
+			"Unable to load translated messages (%s)\n",
 			messages_get_errorcode(ret));
 		NSLOG(netsurf, INFO, "Unable to load translated messages");
 		/** \todo decide if message load faliure should be fatal */
@@ -803,16 +826,16 @@ static nserror nsgtk_init(int *pargc, char ***pargv, char **cache_home)
 }
 
 
-#if GTK_CHECK_VERSION(3,14,0)
+#if GTK_CHECK_VERSION(3, 14, 0)
 
 /**
  * adds named icons into gtk theme
  */
 static nserror nsgtk_add_named_icons_to_theme(void)
 {
-	gtk_icon_theme_add_resource_path(
-		gtk_icon_theme_get_for_display(gdk_display_get_default()),
-		"/org/netsurf/icons");
+	gtk_icon_theme_add_resource_path(gtk_icon_theme_get_for_display(
+						 gdk_display_get_default()),
+					 "/org/netsurf/icons");
 	return NSERROR_OK;
 }
 
@@ -880,7 +903,7 @@ static nserror nsgtk_add_named_icons_to_theme(void)
  * \param argv A string vector of command line arguments.
  * \respath A string vector of the path elements of resources
  */
-static nserror nsgtk_setup(int argc, char** argv, char **respath)
+static nserror nsgtk_setup(int argc, char **argv, char **respath)
 {
 	char buf[PATH_MAX];
 	char *resource_filename;
@@ -891,7 +914,8 @@ static nserror nsgtk_setup(int argc, char** argv, char **respath)
 	/* Initialise gtk accelerator table */
 	res = nsgtk_accelerator_init(respaths);
 	if (res != NSERROR_OK) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "Unable to load gtk accelerator configuration");
 		/* not fatal if this does not load */
 	}
@@ -915,7 +939,9 @@ static nserror nsgtk_setup(int argc, char** argv, char **respath)
 	resource_filename = filepath_find(respath, "SearchEngines");
 	search_web_init(resource_filename);
 	if (resource_filename != NULL) {
-		NSLOG(netsurf, INFO, "Using '%s' as Search Engines file",
+		NSLOG(netsurf,
+		      INFO,
+		      "Using '%s' as Search Engines file",
 		      resource_filename);
 		free(resource_filename);
 	}
@@ -924,8 +950,8 @@ static nserror nsgtk_setup(int argc, char** argv, char **respath)
 	/* Default favicon */
 	res = nsgdk_pixbuf_new_from_resname("favicon.png", &favicon_pixbuf);
 	if (res != NSERROR_OK) {
-		favicon_pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB,
-						false, 8, 16, 16);
+		favicon_pixbuf = gdk_pixbuf_new(
+			GDK_COLORSPACE_RGB, false, 8, 16, 16);
 	}
 
 	/* add named icons to gtk theme */
@@ -952,12 +978,15 @@ static nserror nsgtk_setup(int argc, char** argv, char **respath)
 	{
 		gint xft_dpi = -1;
 
-		g_object_get(gtk_settings_get_default(), "gtk-xft-dpi", &xft_dpi, NULL);
+		g_object_get(gtk_settings_get_default(),
+			     "gtk-xft-dpi",
+			     &xft_dpi,
+			     NULL);
 		browser_set_dpi(xft_dpi > 0 ? xft_dpi / 1024 : 96);
 	}
 	NSLOG(netsurf, INFO, "Set CSS DPI to %d", browser_get_dpi());
 
-	bitmap_set_format(&(bitmap_fmt_t) {
+	bitmap_set_format(&(bitmap_fmt_t){
 		.layout = BITMAP_LAYOUT_ARGB8888,
 		.pma = true,
 	});
@@ -1008,11 +1037,8 @@ static nserror nsgtk_setup(int argc, char** argv, char **respath)
 	/* create an initial browser window */
 	res = nsurl_create(addr, &url);
 	if (res == NSERROR_OK) {
-		res = browser_window_create(BW_CREATE_HISTORY,
-					    url,
-					    NULL,
-					    NULL,
-					    NULL);
+		res = browser_window_create(
+			BW_CREATE_HISTORY, url, NULL, NULL, NULL);
 		nsurl_unref(url);
 	}
 
@@ -1098,39 +1124,49 @@ static void nsgtk_finalise(void)
 
 	res = nsgtk_cookies_destroy();
 	if (res != NSERROR_OK) {
-		NSLOG(netsurf, INFO, "Error finalising cookie viewer: %s",
+		NSLOG(netsurf,
+		      INFO,
+		      "Error finalising cookie viewer: %s",
 		      messages_get_errorcode(res));
 	}
 
 	res = nsgtk_local_history_destroy();
 	if (res != NSERROR_OK) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "Error finalising local history viewer: %s",
 		      messages_get_errorcode(res));
 	}
 
 	res = nsgtk_global_history_destroy();
 	if (res != NSERROR_OK) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "Error finalising global history viewer: %s",
 		      messages_get_errorcode(res));
 	}
 
 	res = nsgtk_hotlist_destroy();
 	if (res != NSERROR_OK) {
-		NSLOG(netsurf, INFO, "Error finalising hotlist viewer: %s",
+		NSLOG(netsurf,
+		      INFO,
+		      "Error finalising hotlist viewer: %s",
 		      messages_get_errorcode(res));
 	}
 
 	res = hotlist_fini();
 	if (res != NSERROR_OK) {
-		NSLOG(netsurf, INFO, "Error finalising hotlist: %s",
+		NSLOG(netsurf,
+		      INFO,
+		      "Error finalising hotlist: %s",
 		      messages_get_errorcode(res));
 	}
 
 	res = save_complete_finalise();
 	if (res != NSERROR_OK) {
-		NSLOG(netsurf, INFO, "Error finalising save complete: %s",
+		NSLOG(netsurf,
+		      INFO,
+		      "Error finalising save complete: %s",
 		      messages_get_errorcode(res));
 	}
 
@@ -1146,14 +1182,13 @@ static void nsgtk_finalise(void)
 
 	/* finalise logging */
 	nslog_finalise();
-
 }
 
 
 /**
  * Main entry point from OS.
  */
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
 	nserror res;
 	char *cache_home = NULL;
@@ -1182,7 +1217,8 @@ int main(int argc, char** argv)
 	/* gtk specific initialisation */
 	res = nsgtk_init(&argc, &argv, &cache_home);
 	if (res != NSERROR_OK) {
-		fprintf(stderr, "NetSurf gtk failed to initialise (%s)\n",
+		fprintf(stderr,
+			"NetSurf gtk failed to initialise (%s)\n",
 			messages_get_errorcode(res));
 		return 2;
 	}
@@ -1191,7 +1227,8 @@ int main(int argc, char** argv)
 	res = netsurf_init(cache_home);
 	free(cache_home);
 	if (res != NSERROR_OK) {
-		fprintf(stderr, "NetSurf core failed to initialise (%s)\n",
+		fprintf(stderr,
+			"NetSurf core failed to initialise (%s)\n",
 			messages_get_errorcode(res));
 		return 3;
 	}
@@ -1200,7 +1237,8 @@ int main(int argc, char** argv)
 	res = nsgtk_setup(argc, argv, respaths);
 	if (res != NSERROR_OK) {
 		nsgtk_finalise();
-		fprintf(stderr, "NetSurf gtk setup failed (%s)\n",
+		fprintf(stderr,
+			"NetSurf gtk setup failed (%s)\n",
 			messages_get_errorcode(res));
 		return 4;
 	}

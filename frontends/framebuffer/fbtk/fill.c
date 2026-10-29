@@ -31,8 +31,7 @@
 
 #include "widget.h"
 
-static int
-fb_redraw_fill(fbtk_widget_t *widget, fbtk_callback_info *cbi)
+static int fb_redraw_fill(fbtk_widget_t *widget, fbtk_callback_info *cbi)
 {
 	nsfb_bbox_t bbox;
 	nsfb_t *nsfb;
@@ -55,17 +54,17 @@ fb_redraw_fill(fbtk_widget_t *widget, fbtk_callback_info *cbi)
 }
 
 /* exported function documented in fbtk.h */
-fbtk_widget_t *
-fbtk_create_fill(fbtk_widget_t *parent,
-		 int x,
-		 int y,
-		 int width,
-		 int height,
-		 colour c)
+fbtk_widget_t *fbtk_create_fill(fbtk_widget_t *parent,
+				int x,
+				int y,
+				int width,
+				int height,
+				colour c)
 {
 	fbtk_widget_t *neww;
 
-	neww = fbtk_widget_new(parent, FB_WIDGET_TYPE_FILL, x, y, width, height);
+	neww = fbtk_widget_new(
+		parent, FB_WIDGET_TYPE_FILL, x, y, width, height);
 	neww->bg = c;
 	neww->mapped = true;
 

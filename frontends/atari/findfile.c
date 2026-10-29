@@ -26,39 +26,39 @@
 #include "atari/gui.h"
 #include "atari/osspec.h"
 
-char * local_file_to_url( const char * filename )
+char *local_file_to_url(const char *filename)
 {
-	#define BACKSLASH	0x5C
-	char * url;
+#define BACKSLASH 0x5C
+	char *url;
 
 	NSLOG(netsurf, INFO, "in: %s", filename);
 
-	if( strlen(filename) <= 2){
-		return( NULL );
+	if (strlen(filename) <= 2) {
+		return (NULL);
 	}
 
-	char * fname_local = malloc( strlen(filename)+1 );
-	char * start = (char*)fname_local;
-	strcpy( start, filename );
+	char *fname_local = malloc(strlen(filename) + 1);
+	char *start = (char *)fname_local;
+	strcpy(start, filename);
 
 	/* convert backslashes: */
-	for( unsigned int i=0; i<strlen(start); i++ ){
-		if( start[i] == BACKSLASH ){
+	for (unsigned int i = 0; i < strlen(start); i++) {
+		if (start[i] == BACKSLASH) {
 			start[i] = '/';
 		}
 	}
 
 	// TODO: make file path absolute if it isn't yet.
-	url = malloc( strlen(start) + FILE_SCHEME_PREFIX_LEN + 1);
-	strcpy(url, FILE_SCHEME_PREFIX );
-	strcat(url, start );
+	url = malloc(strlen(start) + FILE_SCHEME_PREFIX_LEN + 1);
+	strcpy(url, FILE_SCHEME_PREFIX);
+	strcat(url, start);
 
 	free(fname_local);
 
 	NSLOG(netsurf, INFO, "out: %s", url);
 
-	return( url );
-	#undef BACKSLASH
+	return (url);
+#undef BACKSLASH
 }
 
 
@@ -74,10 +74,10 @@ char * local_file_to_url( const char * filename )
  *
  */
 #ifndef NETSURF_GEM_RESPATH
-	#define NETSURF_GEM_RESPATH "./res/"
+#define NETSURF_GEM_RESPATH "./res/"
 #endif
 
-char * atari_find_resource(char *buf, const char *filename, const char *def)
+char *atari_find_resource(char *buf, const char *filename, const char *def)
 {
 	char *cdir = NULL;
 	char t[PATH_MAX];

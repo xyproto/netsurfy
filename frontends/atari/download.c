@@ -42,18 +42,18 @@
 #include "atari/download.h"
 #include "atari/osspec.h"
 
-extern struct gui_window * input_window;
+extern struct gui_window *input_window;
 extern GRECT desk_area;
 
-static void gui_download_window_destroy( struct gui_download_window * gdw );
+static void gui_download_window_destroy(struct gui_download_window *gdw);
 static void on_abort_click(struct gui_download_window *dw);
 static void on_cbrdy_click(struct gui_download_window *dw);
-static void on_close(struct gui_download_window * dw);
+static void on_close(struct gui_download_window *dw);
 static void on_redraw(struct gui_download_window *dw, GRECT *clip);
 
 static void toolbar_redraw_cb(GUIWIN *win, uint16_t msg, GRECT *clip)
 {
-    struct gui_download_window *data;
+	struct gui_download_window *data;
 
 	if (msg != WM_REDRAW) {
 		data = gemtk_wm_get_user_data(win);
@@ -66,60 +66,58 @@ static void toolbar_redraw_cb(GUIWIN *win, uint16_t msg, GRECT *clip)
 
 static short on_aes_event(GUIWIN *win, EVMULT_OUT *ev_out, short msg[8])
 {
-    short retval = 0;
-    struct gui_download_window *data;
+	short retval = 0;
+	struct gui_download_window *data;
 
-    GRECT clip;
+	GRECT clip;
 
 	data = gemtk_wm_get_user_data(win);
 
-    if ((ev_out->emo_events & MU_MESAG) != 0) {
-        // handle message
-        //printf("download win msg: %d\n", msg[0]);
-        switch (msg[0]) {
+	if ((ev_out->emo_events & MU_MESAG) != 0) {
+		// handle message
+		// printf("download win msg: %d\n", msg[0]);
+		switch (msg[0]) {
 
-        case WM_REDRAW:
+		case WM_REDRAW:
 			clip.g_x = msg[4];
 			clip.g_y = msg[5];
 			clip.g_w = msg[6];
 			clip.g_h = msg[7];
 			on_redraw(data, &clip);
-            break;
+			break;
 
-        case WM_CLOSED:
-            // TODO: this needs to iterate through all gui windows and
-            // check if the rootwin is this window...
+		case WM_CLOSED:
+			// TODO: this needs to iterate through all gui windows
+			// and check if the rootwin is this window...
 			on_close(data);
-            break;
+			break;
 
-        case WM_TOOLBAR:
-			switch(msg[4]){
+		case WM_TOOLBAR:
+			switch (msg[4]) {
 
-				case DOWNLOAD_BT_ABORT:
-					on_abort_click(data);
+			case DOWNLOAD_BT_ABORT:
+				on_abort_click(data);
 				break;
 
-				case DOWNLOAD_CB_CLOSE_RDY:
-					on_cbrdy_click(data);
+			case DOWNLOAD_CB_CLOSE_RDY:
+				on_cbrdy_click(data);
 				break;
 
-				default: break;
+			default:
+				break;
 			}
-            break;
+			break;
 
-        default:
-            break;
-        }
-    }
-    if ((ev_out->emo_events & MU_KEYBD) != 0) {
+		default:
+			break;
+		}
+	}
+	if ((ev_out->emo_events & MU_KEYBD) != 0) {
+	}
+	if ((ev_out->emo_events & MU_BUTTON) != 0) {
+	}
 
-
-    }
-    if ((ev_out->emo_events & MU_BUTTON) != 0) {
-
-    }
-
-    return(retval);
+	return (retval);
 }
 
 static void on_redraw(struct gui_download_window *dw, GRECT *clip)
@@ -132,31 +130,39 @@ static void on_redraw(struct gui_download_window *dw, GRECT *clip)
 	tree->ob_x = work.g_x;
 	tree->ob_y = work.g_y;
 
-	if(!rc_intersect(clip, &work)){
+	if (!rc_intersect(clip, &work)) {
 		return;
 	}
 
 	/*
 		Update the AES Object to reflect current state of download:
 	*/
-	((TEDINFO *)get_obspec(tree, DOWNLOAD_FILENAME))->te_ptext = dw->lbl_file;
-	((TEDINFO *)get_obspec(tree, DOWNLOAD_LBL_BYTES))->te_ptext = dw->lbl_done;
-	((TEDINFO *)get_obspec(tree, DOWNLOAD_LBL_PERCENT))->te_ptext = dw->lbl_percent;
-	((TEDINFO *)get_obspec(tree, DOWNLOAD_LBL_SPEED))->te_ptext = dw->lbl_speed;
+	((TEDINFO *)get_obspec(tree, DOWNLOAD_FILENAME))->te_ptext =
+		dw->lbl_file;
+	((TEDINFO *)get_obspec(tree, DOWNLOAD_LBL_BYTES))->te_ptext =
+		dw->lbl_done;
+	((TEDINFO *)get_obspec(tree, DOWNLOAD_LBL_PERCENT))->te_ptext =
+		dw->lbl_percent;
+	((TEDINFO *)get_obspec(tree, DOWNLOAD_LBL_SPEED))->te_ptext =
+		dw->lbl_speed;
 
-	if (dw->size_total > 0 ) {
-		p = ((double)dw->size_downloaded / (double)dw->size_total * 100);
+	if (dw->size_total > 0) {
+		p = ((double)dw->size_downloaded / (double)dw->size_total *
+		     100);
 	}
-	tree[DOWNLOAD_PROGRESS_DONE].ob_width = MAX( MIN( p*(DOWNLOAD_BAR_MAX/100),
-													DOWNLOAD_BAR_MAX ), 1);
+	tree[DOWNLOAD_PROGRESS_DONE].ob_width = MAX(
+		MIN(p * (DOWNLOAD_BAR_MAX / 100), DOWNLOAD_BAR_MAX), 1);
 	if (dw->close_on_finish) {
-		tree[DOWNLOAD_CB_CLOSE_RDY].ob_state |= (OS_SELECTED | OS_CROSSED);
+		tree[DOWNLOAD_CB_CLOSE_RDY].ob_state |= (OS_SELECTED |
+							 OS_CROSSED);
 	} else {
-		tree[DOWNLOAD_CB_CLOSE_RDY].ob_state &= ~(OS_SELECTED | OS_CROSSED);
+		tree[DOWNLOAD_CB_CLOSE_RDY].ob_state &= ~(OS_SELECTED |
+							  OS_CROSSED);
 	}
 	tree[DOWNLOAD_BT_ABORT].ob_state &= ~OS_SELECTED;
 
-	/*Walk the AES rectangle list and redraw the visible areas of the window: */
+	/*Walk the AES rectangle list and redraw the visible areas of the
+	 * window: */
 	wind_get_grect(dw->aes_handle, WF_FIRSTXYWH, &visible);
 	while (visible.g_x && visible.g_y) {
 		if (rc_intersect(&work, &visible)) {
@@ -168,11 +174,10 @@ static void on_redraw(struct gui_download_window *dw, GRECT *clip)
 
 static void on_abort_click(struct gui_download_window *dw)
 {
-	if( dw->status == NSATARI_DOWNLOAD_COMPLETE
-		|| dw->status == NSATARI_DOWNLOAD_ERROR ) {
-			gemtk_wm_send_msg(dw->guiwin, WM_CLOSED, 0,0,0,0);
-	}
-	else if( dw->status != NSATARI_DOWNLOAD_CANCELED ){
+	if (dw->status == NSATARI_DOWNLOAD_COMPLETE ||
+	    dw->status == NSATARI_DOWNLOAD_ERROR) {
+		gemtk_wm_send_msg(dw->guiwin, WM_CLOSED, 0, 0, 0, 0);
+	} else if (dw->status != NSATARI_DOWNLOAD_CANCELED) {
 		dw->abort = true;
 	}
 }
@@ -181,20 +186,20 @@ static void on_cbrdy_click(struct gui_download_window *dw)
 {
 	dw->close_on_finish = !dw->close_on_finish;
 	if (dw->close_on_finish && dw->status == NSATARI_DOWNLOAD_COMPLETE) {
-		gemtk_wm_send_msg(dw->guiwin, WM_CLOSED, 0,0,0,0);
+		gemtk_wm_send_msg(dw->guiwin, WM_CLOSED, 0, 0, 0, 0);
 	}
 	gemtk_wm_exec_redraw(dw->guiwin, NULL);
 	evnt_timer(250);
 }
 
-static void on_close(struct gui_download_window * dw)
+static void on_close(struct gui_download_window *dw)
 {
 	gui_download_window_destroy(dw);
 }
 
-static void gui_download_window_destroy( struct gui_download_window * gdw)
+static void gui_download_window_destroy(struct gui_download_window *gdw)
 {
-        NSLOG(netsurf, INFO, "gdw %p", gdw);
+	NSLOG(netsurf, INFO, "gdw %p", gdw);
 
 	if (gdw->status == NSATARI_DOWNLOAD_WORKING) {
 		download_context_abort(gdw->ctx);
@@ -203,14 +208,14 @@ static void gui_download_window_destroy( struct gui_download_window * gdw)
 	download_context_destroy(gdw->ctx);
 
 	if (gdw->destination) {
-		free( gdw->destination );
+		free(gdw->destination);
 	}
 	if (gdw->fd != NULL) {
 		fclose(gdw->fd);
 		gdw->fd = NULL;
 	}
 	if (gdw->fbuf != NULL) {
-		free( gdw->fbuf );
+		free(gdw->fbuf);
 	}
 	gemtk_wm_remove(gdw->guiwin);
 	wind_close(gdw->aes_handle);
@@ -218,77 +223,84 @@ static void gui_download_window_destroy( struct gui_download_window * gdw)
 	free(gdw);
 }
 
-static char * select_filepath( const char * path, const char * filename )
+static char *select_filepath(const char *path, const char *filename)
 {
 	char tmp[PATH_MAX];
 	char res_path[PATH_MAX];
 	char res_file[PATH_MAX];
-	char * ret = NULL;
+	char *ret = NULL;
 
 	strncpy(res_path, path, PATH_MAX);
 	strncpy(res_file, filename, PATH_MAX);
-	res_file[PATH_MAX-1] = 0;
-	res_path[PATH_MAX-1] = 0;
+	res_file[PATH_MAX - 1] = 0;
+	res_path[PATH_MAX - 1] = 0;
 
-	if(select_file(res_path, res_file, (char*)"*",
-					(char*)messages_get("SaveAsNS"), NULL)) {
+	if (select_file(res_path,
+			res_file,
+			(char *)"*",
+			(char *)messages_get("SaveAsNS"),
+			NULL)) {
 		snprintf(tmp, PATH_MAX, "%s%s", res_path, res_file);
-		ret = malloc(strlen(tmp)+1);
+		ret = malloc(strlen(tmp) + 1);
 		strcpy(ret, tmp);
 	}
 
 	printf("download file: %s\n", ret);
-	return(ret);
+	return (ret);
 }
 
-static struct gui_download_window * 
+static struct gui_download_window *
 gui_download_window_create(download_context *ctx, struct gui_window *parent)
 {
 	const char *filename;
 	char *destination;
 	char gdos_path[PATH_MAX];
-	struct gui_download_window * gdw;
+	struct gui_download_window *gdw;
 	int dlgres = 0;
-	OBJECT * tree = gemtk_obj_get_tree(DOWNLOAD);
+	OBJECT *tree = gemtk_obj_get_tree(DOWNLOAD);
 	char alert[200];
 
 
-	NSLOG(netsurf, INFO, "Creating download window for gui window: %p",
+	NSLOG(netsurf,
+	      INFO,
+	      "Creating download window for gui window: %p",
 	      parent);
 
 	/* TODO: Implement real form and use messages file strings! */
 
-	if (tree == NULL){
+	if (tree == NULL) {
 		die("Couldn't find AES Object tree for download window!");
-		return(NULL);
+		return (NULL);
 	}
 
-	filename = download_context_get_filename((const download_context*)ctx);
-	snprintf(alert, 200, "[2][Accept download?|%.*s][Yes|Save as...|No]",
-			40,filename);
+	filename = download_context_get_filename((const download_context *)ctx);
+	snprintf(alert,
+		 200,
+		 "[2][Accept download?|%.*s][Yes|Save as...|No]",
+		 40,
+		 filename);
 	dlgres = form_alert(2, alert);
-	if( dlgres == 3){
-		return( NULL );
-	}
-	else if( dlgres == 2 ){
+	if (dlgres == 3) {
+		return (NULL);
+	} else if (dlgres == 2) {
 		gemdos_realpath(nsoption_charp(downloads_path), gdos_path);
-		char * tmp = select_filepath( gdos_path, filename );
-		if( tmp == NULL )
-			return( NULL );
+		char *tmp = select_filepath(gdos_path, filename);
+		if (tmp == NULL)
+			return (NULL);
 		destination = tmp;
 	} else {
-		int dstsize=0;
+		int dstsize = 0;
 		gemdos_realpath(nsoption_charp(downloads_path), gdos_path);
 		dstsize = strlen(gdos_path) + strlen(filename) + 2;
-		destination = malloc( dstsize );
+		destination = malloc(dstsize);
 		snprintf(destination, dstsize, "%s/%s", gdos_path, filename);
 	}
 
 	gdw = calloc(1, sizeof(struct gui_download_window));
-	if( gdw == NULL ){
+	if (gdw == NULL) {
 		atari_warn_user(NULL, "Out of memory!");
-		free( destination );
-		return( NULL );
+		free(destination);
+		return (NULL);
 	}
 
 	gdw->ctx = ctx;
@@ -304,35 +316,41 @@ gui_download_window_create(download_context *ctx, struct gui_window *parent)
 	gdw->tree = tree;
 
 	gdw->fd = fopen(gdw->destination, "wb");
-	if( gdw->fd == NULL ){
+	if (gdw->fd == NULL) {
 		char spare[200];
-		snprintf(spare, 200, "Couldn't open %s for writing!", gdw->destination);
+		snprintf(spare,
+			 200,
+			 "Couldn't open %s for writing!",
+			 gdw->destination);
 		gemtk_msg_box_show(GEMTK_MSG_BOX_ALERT, spare);
 		gui_download_window_destroy(gdw);
-		return( NULL );
+		return (NULL);
 	}
 
-	gdw->fbuf = malloc( gdw->fbufsize+1 );
-	if( gdw->fbuf != NULL ){
-		setvbuf( gdw->fd, gdw->fbuf, _IOFBF, gdw->fbufsize );
+	gdw->fbuf = malloc(gdw->fbufsize + 1);
+	if (gdw->fbuf != NULL) {
+		setvbuf(gdw->fd, gdw->fbuf, _IOFBF, gdw->fbufsize);
 	}
 
 	gdw->aes_handle = wind_create_grect(CLOSER | NAME | MOVER, &desk_area);
 	wind_set_str(gdw->aes_handle, WF_NAME, "Download");
 	unsigned long gwflags = GEMTK_WM_FLAG_DEFAULTS;
 	gdw->guiwin = gemtk_wm_add(gdw->aes_handle, gwflags, on_aes_event);
-	if( gdw->guiwin == NULL || gdw->fd == NULL ){
+	if (gdw->guiwin == NULL || gdw->fd == NULL) {
 		die("could not create guiwin");
 		gui_download_window_destroy(gdw);
-		return( NULL );
+		return (NULL);
 	}
 	gemtk_wm_set_user_data(gdw->guiwin, gdw);
 	gemtk_wm_set_toolbar(gdw->guiwin, tree, 0, 0);
 	gemtk_wm_set_toolbar_redraw_func(gdw->guiwin, toolbar_redraw_cb);
 
-	strncpy((char*)&gdw->lbl_file, filename, MAX_SLEN_LBL_FILE-1);
-	NSLOG(netsurf, INFO, "created download: %s (total size: %d)",
-	      gdw->destination, gdw->size_total);
+	strncpy((char *)&gdw->lbl_file, filename, MAX_SLEN_LBL_FILE - 1);
+	NSLOG(netsurf,
+	      INFO,
+	      "created download: %s (total size: %d)",
+	      gdw->destination,
+	      gdw->size_total);
 
 	GRECT work, curr;
 	work.g_x = 0;
@@ -348,29 +366,30 @@ gui_download_window_create(download_context *ctx, struct gui_window *parent)
 	wind_open_grect(gdw->aes_handle, &curr);
 	gdw->lastrdw = clock() / (CLOCKS_PER_SEC >> 3);
 
-	return(gdw);
+	return (gdw);
 }
 
 
 static nserror gui_download_window_data(struct gui_download_window *dw,
-		const char *data, unsigned int size)
+					const char *data,
+					unsigned int size)
 {
 	uint32_t clck = clock();
-	uint32_t tnow = clck / (CLOCKS_PER_SEC>>3);
+	uint32_t tnow = clck / (CLOCKS_PER_SEC >> 3);
 	uint32_t sdiff = (clck / (CLOCKS_PER_SEC)) - dw->start;
 
 	NSLOG(netsurf, INFO, "dw %p", dw);
 
-	if (dw->abort == true){
+	if (dw->abort == true) {
 		dw->status = NSATARI_DOWNLOAD_CANCELED;
 		dw->abort = false;
 		download_context_abort(dw->ctx);
 		gemtk_wm_exec_redraw(dw->guiwin, NULL);
-		return(NSERROR_OK);
+		return (NSERROR_OK);
 	}
 
 	/* save data */
-	fwrite( data , size, sizeof(unsigned char),dw->fd );
+	fwrite(data, size, sizeof(unsigned char), dw->fd);
 	dw->size_downloaded += size;
 
 	/* Update GUI */
@@ -380,39 +399,47 @@ static nserror gui_download_window_data(struct gui_download_window *dw,
 		dw->lastrdw = tnow;
 		speed = dw->size_downloaded / sdiff;
 
-		if( dw->size_total > 0 ){
+		if (dw->size_total > 0) {
 			uint32_t p = 0;
-			p = ((double)dw->size_downloaded / (double)dw->size_total * 100);
-			snprintf( (char*)&dw->lbl_percent, MAX_SLEN_LBL_PERCENT,
-				"%"PRIu32"%s", p, "%"
-			);
+			p = ((double)dw->size_downloaded /
+			     (double)dw->size_total * 100);
+			snprintf((char *)&dw->lbl_percent,
+				 MAX_SLEN_LBL_PERCENT,
+				 "%" PRIu32 "%s",
+				 p,
+				 "%");
 		} else {
-			snprintf( (char*)&dw->lbl_percent, MAX_SLEN_LBL_PERCENT,
-				"%s", "?%"
-			);
+			snprintf((char *)&dw->lbl_percent,
+				 MAX_SLEN_LBL_PERCENT,
+				 "%s",
+				 "?%");
 		}
-		snprintf( (char*)&dw->lbl_speed, MAX_SLEN_LBL_SPEED, "%s/s",
-			human_friendly_bytesize(speed)
-		);
-		snprintf( (char*)&dw->lbl_done, MAX_SLEN_LBL_DONE, "%s / %s",
-			human_friendly_bytesize(dw->size_downloaded),
-			(dw->size_total>0) ? human_friendly_bytesize(dw->size_total) : "?"
-		);
+		snprintf((char *)&dw->lbl_speed,
+			 MAX_SLEN_LBL_SPEED,
+			 "%s/s",
+			 human_friendly_bytesize(speed));
+		snprintf((char *)&dw->lbl_done,
+			 MAX_SLEN_LBL_DONE,
+			 "%s / %s",
+			 human_friendly_bytesize(dw->size_downloaded),
+			 (dw->size_total > 0)
+				 ? human_friendly_bytesize(dw->size_total)
+				 : "?");
 
 		gemtk_wm_exec_redraw(dw->guiwin, NULL);
 	}
 	return NSERROR_OK;
 }
 
-static void gui_download_window_error(struct gui_download_window *dw,
-                               const char *error_msg)
+static void
+gui_download_window_error(struct gui_download_window *dw, const char *error_msg)
 {
 	NSLOG(netsurf, INFO, "%s", error_msg);
 
-	strncpy((char*)&dw->lbl_file, error_msg, MAX_SLEN_LBL_FILE-1);
+	strncpy((char *)&dw->lbl_file, error_msg, MAX_SLEN_LBL_FILE - 1);
 	dw->status = NSATARI_DOWNLOAD_ERROR;
 	gemtk_wm_exec_redraw(dw->guiwin, NULL);
-	atari_window_set_status(input_window, messages_get("Done") );
+	atari_window_set_status(input_window, messages_get("Done"));
 	// TODO: change abort to close
 }
 
@@ -420,27 +447,33 @@ static void gui_download_window_done(struct gui_download_window *dw)
 {
 	NSLOG(netsurf, INFO, "dw %p", dw);
 
-// TODO: change abort to close
+	// TODO: change abort to close
 	dw->status = NSATARI_DOWNLOAD_COMPLETE;
 
-	if( dw->fd != NULL ) {
-		fclose( dw->fd );
+	if (dw->fd != NULL) {
+		fclose(dw->fd);
 		dw->fd = NULL;
 	}
 
 	if (dw->close_on_finish) {
 		gemtk_wm_send_msg(dw->guiwin, WM_CLOSED, 0, 0, 0, 0);
 	} else {
-		snprintf( (char*)&dw->lbl_percent, MAX_SLEN_LBL_PERCENT,
-			"%u%s", 100, "%"
-		);
-		snprintf( (char*)&dw->lbl_done, MAX_SLEN_LBL_DONE, "%s / %s",
-			human_friendly_bytesize(dw->size_downloaded),
-			(dw->size_total>0) ? human_friendly_bytesize(dw->size_total) : human_friendly_bytesize(dw->size_downloaded)
-		);
+		snprintf((char *)&dw->lbl_percent,
+			 MAX_SLEN_LBL_PERCENT,
+			 "%u%s",
+			 100,
+			 "%");
+		snprintf((char *)&dw->lbl_done,
+			 MAX_SLEN_LBL_DONE,
+			 "%s / %s",
+			 human_friendly_bytesize(dw->size_downloaded),
+			 (dw->size_total > 0)
+				 ? human_friendly_bytesize(dw->size_total)
+				 : human_friendly_bytesize(
+					   dw->size_downloaded));
 		gemtk_wm_exec_redraw(dw->guiwin, NULL);
 	}
-	atari_window_set_status(input_window, messages_get("Done") );
+	atari_window_set_status(input_window, messages_get("Done"));
 }
 
 static struct gui_download_table download_table = {

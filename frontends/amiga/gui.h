@@ -33,9 +33,13 @@
 #include "amiga/os3support.h"
 
 #ifdef __amigaos4__
-#define HOOKF(ret,func,type,ptr,msgtype) static ret func(struct Hook *hook, type ptr, msgtype msg)
+#define HOOKF(ret, func, type, ptr, msgtype)                                   \
+	static ret func(struct Hook *hook, type ptr, msgtype msg)
 #else
-#define HOOKF(ret,func,type,ptr,msgtype) static ASM ret func(REG(a0, struct Hook *hook),REG(a2, type ptr), REG(a1, msgtype msg))
+#define HOOKF(ret, func, type, ptr, msgtype)                                   \
+	static ASM ret func(REG(a0, struct Hook *hook),                        \
+			    REG(a2, type ptr),                                 \
+			    REG(a1, msgtype msg))
 #endif
 
 /* valid options for ami_gui_get_object */
@@ -60,14 +64,16 @@ struct history_entry;
 struct ami_win_event_table {
 	/* callback to handle events when using a shared msgport
 	 *
-	 * @param pointer to our window structure (must start with ami_generic_window)
+	 * @param pointer to our window structure (must start with
+	 * ami_generic_window)
 	 * @return TRUE if window was destroyed during event processing
 	 */
 	BOOL (*event)(void *w);
 
 	/* callback for explicit window closure
-	 * some windows are implicitly closed by the browser and should set this to NULL
-	*/
+	 * some windows are implicitly closed by the browser and should set this
+	 * to NULL
+	 */
 	void (*close)(void *w);
 };
 
@@ -76,7 +82,7 @@ struct ami_generic_window {
 	const struct ami_win_event_table *tbl;
 };
 
-#define IS_CURRENT_GW(GWIN,GW) (ami_gui2_get_gui_window(GWIN) == GW)
+#define IS_CURRENT_GW(GWIN, GW) (ami_gui2_get_gui_window(GWIN) == GW)
 
 /* The return value for these functions must be deallocated using FreeVec() */
 STRPTR ami_locale_langs(int *codeset);
@@ -88,9 +94,14 @@ void ami_try_quit(void);
 void ami_quit_netsurf(void);
 void ami_schedule_redraw(struct gui_window_2 *gwin, bool full_redraw);
 int ami_key_to_nskey(ULONG keycode, struct InputEvent *ie);
-bool ami_text_box_at_point(struct gui_window_2 *gwin, ULONG *restrict x, ULONG *restrict y);
-bool ami_mouse_to_ns_coords(struct gui_window_2 *gwin, int *restrict x, int *restrict y,
-	int mouse_x, int mouse_y);
+bool ami_text_box_at_point(struct gui_window_2 *gwin,
+			   ULONG *restrict x,
+			   ULONG *restrict y);
+bool ami_mouse_to_ns_coords(struct gui_window_2 *gwin,
+			    int *restrict x,
+			    int *restrict y,
+			    int mouse_x,
+			    int mouse_y);
 BOOL ami_gadget_hit(Object *obj, int x, int y);
 void ami_gui_history(struct gui_window_2 *gwin, bool back);
 void ami_gui_hotlist_update_all(void);
@@ -100,7 +111,9 @@ void ami_gui_update_hotlist_button(struct gui_window_2 *gwin);
 nserror ami_gui_new_blank_tab(struct gui_window_2 *gwin);
 int ami_gui_count_windows(int window, int *tabs);
 void ami_gui_set_scale(struct gui_window *gw, float scale);
-void ami_set_pointer(struct gui_window_2 *gwin, gui_pointer_shape shape, bool update);
+void ami_set_pointer(struct gui_window_2 *gwin,
+		     gui_pointer_shape shape,
+		     bool update);
 void ami_reset_pointer(struct gui_window_2 *gwin);
 void *ami_window_at_pointer(int type);
 
@@ -163,7 +176,9 @@ STRPTR ami_gui_get_screen_title(void);
 /**
  * Add a window to the NetSurf window list (to enable event processing)
  */
-nserror ami_gui_win_list_add(void *win, int type, const struct ami_win_event_table *table);
+nserror ami_gui_win_list_add(void *win,
+			     int type,
+			     const struct ami_win_event_table *table);
 
 /**
  * Remove a window from the NetSurf window list
@@ -187,8 +202,10 @@ int ami_gui_get_quals(Object *win_obj);
 /**
  * Check rect is not already queued for redraw
  */
-bool ami_gui_window_update_box_deferred_check(struct MinList *deferred_rects,
-				const struct rect *restrict new_rect, APTR mempool);
+bool ami_gui_window_update_box_deferred_check(
+	struct MinList *deferred_rects,
+	const struct rect *restrict new_rect,
+	APTR mempool);
 
 /**
  * Adjust scale by specified amount
@@ -259,12 +276,14 @@ struct hlcache_handle *ami_gui_get_favicon(struct gui_window *gw);
 /**
  * Get local history window from gui_window
  */
-struct ami_history_local_window *ami_gui_get_history_window(struct gui_window *gw);
+struct ami_history_local_window *
+ami_gui_get_history_window(struct gui_window *gw);
 
 /**
  * Set local history window in gui_window
  */
-void ami_gui_set_history_window(struct gui_window *gw, struct ami_history_local_window *hw);
+void ami_gui_set_history_window(struct gui_window *gw,
+				struct ami_history_local_window *hw);
 
 /**
  * Set search window in gui_window
@@ -312,7 +331,8 @@ struct Window *ami_gui2_get_window(struct gui_window_2 *gwin);
 struct Menu *ami_gui_get_menu(struct gui_window *gw);
 
 /**
- * Set imenu to gui_window_2. A value of NULL will free the menu (and menu_data!)
+ * Set imenu to gui_window_2. A value of NULL will free the menu (and
+ * menu_data!)
  */
 void ami_gui2_set_menu(struct gui_window_2 *gwin, struct Menu *menu);
 
@@ -334,12 +354,15 @@ int ami_gui2_get_ctxmenu_history_tmp(struct gui_window_2 *gwin);
 /**
  * Get ctxmenu history from gui_window_2
  */
-Object *ami_gui2_get_ctxmenu_history(struct gui_window_2 *gwin, ULONG direction);
+Object *
+ami_gui2_get_ctxmenu_history(struct gui_window_2 *gwin, ULONG direction);
 
 /**
  * Set ctxmenu history in gui_window_2
  */
-void ami_gui2_set_ctxmenu_history(struct gui_window_2 *gwin, ULONG direction, Object *ctx_hist);
+void ami_gui2_set_ctxmenu_history(struct gui_window_2 *gwin,
+				  ULONG direction,
+				  Object *ctx_hist);
 
 /**
  * Set closed in gui_window_2
@@ -356,7 +379,8 @@ void ami_gui2_set_new_content(struct gui_window_2 *gwin, bool new_content);
  *  Get a translated history entry title
  *  Stores the translation to be freed later
  */
-STRPTR ami_gui2_get_ctxmenu_history_title(struct gui_window_2 *gwin, int id, const struct history_entry *entry);
+STRPTR ami_gui2_get_ctxmenu_history_title(struct gui_window_2 *gwin,
+					  int id,
+					  const struct history_entry *entry);
 
 #endif
-

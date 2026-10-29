@@ -39,13 +39,13 @@ typedef enum {
 
 struct gui_download_window {
 	struct download_context *ctx;
-	struct gui_window * parent;
+	struct gui_window *parent;
 	GUIWIN *guiwin;
 	short aes_handle;
 	OBJECT *tree;
 	nsatari_download_status status;
 	char *destination;
-	FILE * fd;
+	FILE *fd;
 	char lbl_done[MAX_SLEN_LBL_DONE];
 	char lbl_percent[MAX_SLEN_LBL_PERCENT];
 	char lbl_speed[MAX_SLEN_LBL_SPEED];
@@ -54,7 +54,7 @@ struct gui_download_window {
 	uint32_t lastrdw;
 	uint32_t size_total;
 	uint32_t size_downloaded;
-	char * fbuf;
+	char *fbuf;
 	size_t fbufsize;
 	bool abort;
 	bool close_on_finish;

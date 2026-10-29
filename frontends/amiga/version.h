@@ -18,5 +18,5 @@
 
 #ifndef AMIGA_VERSION_H
 #define AMIGA_VERSION_H
-extern const char * const verdate;
+extern const char *const verdate;
 #endif

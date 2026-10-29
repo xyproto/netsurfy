@@ -22,27 +22,36 @@
 
 #include "amiga/rtg.h"
 
-struct BitMap *ami_rtg_allocbitmap(ULONG width, ULONG height, ULONG depth,
-	ULONG flags, struct BitMap *friend, RGBFTYPE format)
+struct BitMap *ami_rtg_allocbitmap(ULONG width,
+				   ULONG height,
+				   ULONG depth,
+				   ULONG flags,
+				   struct BitMap *friend,
+				   RGBFTYPE format)
 {
-	if(P96Base == NULL) {
+	if (P96Base == NULL) {
 		return AllocBitMap(width, height, depth, flags, friend);
 	} else {
-		return p96AllocBitMap(width, height, depth, flags, friend, format);
+		return p96AllocBitMap(
+			width, height, depth, flags, friend, format);
 	}
 }
 
 void ami_rtg_freebitmap(struct BitMap *bm)
 {
-	if(P96Base == NULL) {
+	if (P96Base == NULL) {
 		return FreeBitMap(bm);
 	} else {
 		return p96FreeBitMap(bm);
 	}
 }
 
-void ami_rtg_writepixelarray(UBYTE *pixdata, struct BitMap *bm,
-	ULONG width, ULONG height, ULONG bpr, ULONG format)
+void ami_rtg_writepixelarray(UBYTE *pixdata,
+			     struct BitMap *bm,
+			     ULONG width,
+			     ULONG height,
+			     ULONG bpr,
+			     ULONG format)
 {
 	struct RastPort trp;
 
@@ -50,10 +59,19 @@ void ami_rtg_writepixelarray(UBYTE *pixdata, struct BitMap *bm,
 	trp.BitMap = bm;
 
 	/* This requires P96 or gfx.lib v54 currently */
-	if(P96Base == NULL) {
+	if (P96Base == NULL) {
 #ifdef __amigaos4__
-		if(GfxBase->LibNode.lib_Version >= 54) {
-			WritePixelArray(pixdata, 0, 0, bpr, PIXF_A8R8G8B8, &trp, 0, 0, width, height);
+		if (GfxBase->LibNode.lib_Version >= 54) {
+			WritePixelArray(pixdata,
+					0,
+					0,
+					bpr,
+					PIXF_A8R8G8B8,
+					&trp,
+					0,
+					0,
+					width,
+					height);
 		}
 #endif
 	} else {
@@ -63,12 +81,23 @@ void ami_rtg_writepixelarray(UBYTE *pixdata, struct BitMap *bm,
 		ri.BytesPerRow = bpr;
 		ri.RGBFormat = format;
 
-		p96WritePixelArray((struct RenderInfo *)&ri, 0, 0, &trp, 0, 0, width, height);
+		p96WritePixelArray((struct RenderInfo *)&ri,
+				   0,
+				   0,
+				   &trp,
+				   0,
+				   0,
+				   width,
+				   height);
 	}
 }
 
-void ami_rtg_readpixelarray(struct BitMap *bm, UBYTE **pixdata,
-	ULONG width, ULONG height, ULONG bpr, ULONG format)
+void ami_rtg_readpixelarray(struct BitMap *bm,
+			    UBYTE **pixdata,
+			    ULONG width,
+			    ULONG height,
+			    ULONG bpr,
+			    ULONG format)
 {
 	struct RastPort trp;
 
@@ -76,10 +105,19 @@ void ami_rtg_readpixelarray(struct BitMap *bm, UBYTE **pixdata,
 	trp.BitMap = bm;
 
 	/* This requires P96 or gfx.lib v54 currently */
-	if(P96Base == NULL) {
+	if (P96Base == NULL) {
 #ifdef __amigaos4__
-		if(GfxBase->LibNode.lib_Version >= 54) {
-			ReadPixelArray(&trp, 0, 0, *pixdata, 0, 0, bpr, PIXF_A8R8G8B8, width, height);
+		if (GfxBase->LibNode.lib_Version >= 54) {
+			ReadPixelArray(&trp,
+				       0,
+				       0,
+				       *pixdata,
+				       0,
+				       0,
+				       bpr,
+				       PIXF_A8R8G8B8,
+				       width,
+				       height);
 		}
 #endif
 	} else {
@@ -89,7 +127,13 @@ void ami_rtg_readpixelarray(struct BitMap *bm, UBYTE **pixdata,
 		ri.BytesPerRow = bpr;
 		ri.RGBFormat = format;
 
-		p96ReadPixelArray((struct RenderInfo *)&ri, 0, 0, &trp, 0, 0, width, height);
+		p96ReadPixelArray((struct RenderInfo *)&ri,
+				  0,
+				  0,
+				  &trp,
+				  0,
+				  0,
+				  width,
+				  height);
 	}
 }
-

@@ -30,28 +30,27 @@ extern "C" {
 
 /* --- */
 
-struct myStringClassData
-{
-	struct SignalSemaphore  Semaphore;
-	uint32					WinXPos;
-	uint32					WinYPos;
-	uint32					WinWidth;
-	uint32					WinHeight;
-	struct Window *			Window;
-	Object *				WindowObject;
-	Object *				ListviewObject;
-	struct List				ListviewHeader;
-	int32					ListviewCount;
-	int32					ListviewSelected;
-	struct List *			SearchHeader;
-	STRPTR					SearchBuffer;
+struct myStringClassData {
+	struct SignalSemaphore Semaphore;
+	uint32 WinXPos;
+	uint32 WinYPos;
+	uint32 WinWidth;
+	uint32 WinHeight;
+	struct Window *Window;
+	Object *WindowObject;
+	Object *ListviewObject;
+	struct List ListviewHeader;
+	int32 ListviewCount;
+	int32 ListviewSelected;
+	struct List *SearchHeader;
+	STRPTR SearchBuffer;
 };
 
-#define STRINGVIEW_Header	0x50000001
+#define STRINGVIEW_Header 0x50000001
 
 /* protos */
 
-Class *	MakeStringClass(		void );
+Class *MakeStringClass(void);
 void FreeStringClass(Class *);
 
 /* The End */
@@ -60,4 +59,3 @@ void FreeStringClass(Class *);
 }
 #endif
 #endif
-

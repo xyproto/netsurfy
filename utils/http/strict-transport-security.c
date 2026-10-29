@@ -29,8 +29,8 @@
  * Representation of a Strict-Transport-Security
  */
 struct http_strict_transport_security {
-	uint32_t max_age;		/**< Max age (delta seconds) */
-	bool include_sub_domains;	/**< Whether subdomains are included */
+	uint32_t max_age; /**< Max age (delta seconds) */
+	bool include_sub_domains; /**< Whether subdomains are included */
 };
 
 /**
@@ -39,8 +39,8 @@ struct http_strict_transport_security {
 typedef struct http_directive {
 	http__item base;
 
-	lwc_string *name;		/**< Parameter name */
-	lwc_string *value;		/**< Parameter value (optional) */
+	lwc_string *name; /**< Parameter name */
+	lwc_string *value; /**< Parameter value (optional) */
 } http_directive;
 
 
@@ -51,8 +51,8 @@ static void http_destroy_directive(http_directive *self)
 	free(self);
 }
 
-static nserror http__parse_directive(const char **input,
-		http_directive **result)
+static nserror
+http__parse_directive(const char **input, http_directive **result)
 {
 	const char *pos = *input;
 	lwc_string *name;
@@ -107,16 +107,18 @@ static void http_directive_list_destroy(http_directive *list)
 }
 
 static nserror http_directive_list_find_item(const http_directive *list,
-		lwc_string *name, lwc_string **value)
+					     lwc_string *name,
+					     lwc_string **value)
 {
 	bool match;
 
 	while (list != NULL) {
-		if (lwc_string_caseless_isequal(name, list->name,
-				&match) == lwc_error_ok && match)
+		if (lwc_string_caseless_isequal(name, list->name, &match) ==
+			    lwc_error_ok &&
+		    match)
 			break;
 
-		list = (http_directive *) list->base.next;
+		list = (http_directive *)list->base.next;
 	}
 
 	if (list == NULL)
@@ -131,9 +133,10 @@ static nserror http_directive_list_find_item(const http_directive *list,
 	return NSERROR_OK;
 }
 
-static const http_directive *http_directive_list_iterate(
-		const http_directive *cur,
-		lwc_string **name, lwc_string **value)
+static const http_directive *
+http_directive_list_iterate(const http_directive *cur,
+			    lwc_string **name,
+			    lwc_string **value)
 {
 	if (cur == NULL)
 		return NULL;
@@ -145,7 +148,7 @@ static const http_directive *http_directive_list_iterate(
 		*value = NULL;
 	}
 
-	return (http_directive *) cur->base.next;
+	return (http_directive *)cur->base.next;
 }
 
 static uint32_t count(const http_directive *list, lwc_string *key)
@@ -154,12 +157,13 @@ static uint32_t count(const http_directive *list, lwc_string *key)
 	bool match;
 
 	while (list != NULL) {
-		if (lwc_string_caseless_isequal(key, list->name,
-				&match) == lwc_error_ok && match) {
+		if (lwc_string_caseless_isequal(key, list->name, &match) ==
+			    lwc_error_ok &&
+		    match) {
 			count++;
 		}
 
-		list = (http_directive *) list->base.next;
+		list = (http_directive *)list->base.next;
 	}
 
 	return count;
@@ -224,8 +228,9 @@ static nserror parse_max_age(lwc_string *value, uint32_t *result)
 }
 
 /* See strict-transport-security.h for documentation */
-nserror http_parse_strict_transport_security(const char *header_value,
-		http_strict_transport_security **result)
+nserror
+http_parse_strict_transport_security(const char *header_value,
+				     http_strict_transport_security **result)
 {
 	const char *pos = header_value;
 	http_strict_transport_security *sts;
@@ -248,8 +253,8 @@ nserror http_parse_strict_transport_security(const char *header_value,
 	http__skip_LWS(&pos);
 
 	if (*pos == ';') {
-		error = http__item_list_parse(&pos,
-				http__parse_directive, first, &directives);
+		error = http__item_list_parse(
+			&pos, http__parse_directive, first, &directives);
 		if (error != NSERROR_OK) {
 			if (directives != NULL) {
 				http_directive_list_destroy(directives);
@@ -268,7 +273,8 @@ nserror http_parse_strict_transport_security(const char *header_value,
 
 	/* max-age is required */
 	error = http_directive_list_find_item(directives,
-			corestring_lwc_max_age, &max_age_str);
+					      corestring_lwc_max_age,
+					      &max_age_str);
 	if (error != NSERROR_OK || max_age_str == NULL) {
 		http_directive_list_destroy(directives);
 		return NSERROR_NOT_FOUND;
@@ -284,7 +290,8 @@ nserror http_parse_strict_transport_security(const char *header_value,
 
 	/* includeSubDomains is optional and valueless */
 	error = http_directive_list_find_item(directives,
-			corestring_lwc_includesubdomains, &isd_str);
+					      corestring_lwc_includesubdomains,
+					      &isd_str);
 	if (error != NSERROR_OK && error != NSERROR_NOT_FOUND) {
 		http_directive_list_destroy(directives);
 		return NSERROR_NOT_FOUND;
@@ -314,22 +321,21 @@ nserror http_parse_strict_transport_security(const char *header_value,
 
 /* See strict-transport-security.h for documentation */
 void http_strict_transport_security_destroy(
-		http_strict_transport_security *victim)
+	http_strict_transport_security *victim)
 {
 	free(victim);
 }
 
 /* See strict-transport-security.h for documentation */
-uint32_t http_strict_transport_security_max_age(
-		http_strict_transport_security *sts)
+uint32_t
+http_strict_transport_security_max_age(http_strict_transport_security *sts)
 {
 	return sts->max_age;
 }
 
 /* See strict-transport-security.h for documentation */
 bool http_strict_transport_security_include_subdomains(
-		http_strict_transport_security *sts)
+	http_strict_transport_security *sts)
 {
 	return sts->include_sub_domains;
 }
-

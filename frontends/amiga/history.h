@@ -22,4 +22,3 @@
 /** Open the global history viewer */
 nserror ami_history_global_present(void);
 #endif
-

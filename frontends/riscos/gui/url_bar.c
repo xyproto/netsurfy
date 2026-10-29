@@ -60,54 +60,54 @@
 
 struct url_bar {
 	/** The applied theme (or NULL to use the default) */
-	struct theme_descriptor	*theme;
+	struct theme_descriptor *theme;
 
 	/** The widget dimensions. */
-	int			x_min, y_min;
+	int x_min, y_min;
 
 	/** The window and icon details. */
-	wimp_w			window;
-	os_box			extent;
-	osspriteop_area		*sprites;
+	wimp_w window;
+	os_box extent;
+	osspriteop_area *sprites;
 
-	wimp_i			container_icon;
+	wimp_i container_icon;
 
-	bool			hidden;
-	bool			display;
-	bool			shaded;
+	bool hidden;
+	bool display;
+	bool shaded;
 
 	struct {
-		char		sprite[URLBAR_PGINFO_NAME_LENGTH];
-		os_box		extent;
+		char sprite[URLBAR_PGINFO_NAME_LENGTH];
+		os_box extent;
 	} pginfo;
 
 	struct {
-		char		sprite[URLBAR_FAVICON_NAME_LENGTH];
-		int		type;
+		char sprite[URLBAR_FAVICON_NAME_LENGTH];
+		int type;
 		struct hlcache_handle *content;
-		os_box		extent;
-		os_coord	offset;
-		int		width;
-		int		height;
+		os_box extent;
+		os_coord offset;
+		int width;
+		int height;
 	} favicon;
 
 	struct {
-		wimp_i		icon;
-		char		*buffer;
-		size_t		size;
-		char		*buffer_utf8;
+		wimp_i icon;
+		char *buffer;
+		size_t size;
+		char *buffer_utf8;
 	} text;
 
 	struct {
-		wimp_i		icon;
-		int		x;
-		int		y;
+		wimp_i icon;
+		int x;
+		int y;
 	} suggest;
 
 	struct {
-		bool			set;
-		os_box			extent;
-		os_coord		offset;
+		bool set;
+		os_box extent;
+		os_coord offset;
 	} hotlist;
 };
 
@@ -132,9 +132,8 @@ enum url_bar_resource_id {
 
 /** Treeview content resources */
 static struct url_bar_resource url_bar_res[URLBAR_RES_LAST] = {
-	{ "resource:icons/hotlist-add.png", NULL, 0, false },
-	{ "resource:icons/hotlist-rmv.png", NULL, 0, false }
-};
+	{"resource:icons/hotlist-add.png", NULL, 0, false},
+	{"resource:icons/hotlist-rmv.png", NULL, 0, false}};
 
 
 /**
@@ -154,34 +153,38 @@ static bool ro_gui_url_bar_icon_resize(struct url_bar *url_bar, bool full)
 	os_coord eig = {1, 1};
 	wimp_caret caret;
 
-	if ((url_bar == NULL) ||
-	    (url_bar->window == NULL)) {
+	if ((url_bar == NULL) || (url_bar->window == NULL)) {
 		return false;
 	}
 
 	/* calculate 1px in OS units */
-	ro_convert_pixels_to_os_units(&eig, (os_mode) -1);
+	ro_convert_pixels_to_os_units(&eig, (os_mode)-1);
 
 	/* The vertical centre line of the widget's extent. */
 	centre = url_bar->extent.y0 +
-		(url_bar->extent.y1 - url_bar->extent.y0) / 2;
+		 (url_bar->extent.y1 - url_bar->extent.y0) / 2;
 
 	/* Position the container icon. */
 	if (url_bar->container_icon != -1) {
 		x0 = url_bar->extent.x0;
-		x1 = url_bar->extent.x1 -
-			url_bar->suggest.x - URLBAR_GRIGHT_GUTTER;
+		x1 = url_bar->extent.x1 - url_bar->suggest.x -
+		     URLBAR_GRIGHT_GUTTER;
 
 		y0 = centre - (URLBAR_HEIGHT / 2);
 		y1 = y0 + URLBAR_HEIGHT;
 
 		error = xwimp_resize_icon(url_bar->window,
 					  url_bar->container_icon,
-					  x0, y0, x1, y1);
+					  x0,
+					  y0,
+					  x1,
+					  y1);
 		if (error != NULL) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xwimp_resize_icon: 0x%x: %s",
-			      error->errnum, error->errmess);
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 			url_bar->container_icon = -1;
 			return false;
@@ -196,13 +199,14 @@ static bool ro_gui_url_bar_icon_resize(struct url_bar *url_bar, bool full)
 		y0 = centre - (url_bar->suggest.y / 2);
 		y1 = y0 + url_bar->suggest.y;
 
-		error = xwimp_resize_icon(url_bar->window,
-					  url_bar->suggest.icon,
-					  x0, y0, x1, y1);
+		error = xwimp_resize_icon(
+			url_bar->window, url_bar->suggest.icon, x0, y0, x1, y1);
 		if (error != NULL) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xwimp_resize_icon: 0x%x: %s",
-			      error->errnum, error->errmess);
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 			url_bar->suggest.icon = -1;
 			return false;
@@ -211,20 +215,22 @@ static bool ro_gui_url_bar_icon_resize(struct url_bar *url_bar, bool full)
 
 	/* Position the Text icon. */
 	if (url_bar->text.icon != -1) {
-		x0 = url_bar->extent.x0 + URLBAR_PGINFO_WIDTH + URLBAR_FAVICON_WIDTH;
+		x0 = url_bar->extent.x0 + URLBAR_PGINFO_WIDTH +
+		     URLBAR_FAVICON_WIDTH;
 		x1 = url_bar->extent.x1 - eig.x - URLBAR_HOTLIST_WIDTH -
-			url_bar->suggest.x - URLBAR_GRIGHT_GUTTER;
+		     url_bar->suggest.x - URLBAR_GRIGHT_GUTTER;
 
 		y0 = centre - (URLBAR_HEIGHT / 2) + eig.y;
 		y1 = y0 + URLBAR_HEIGHT - 2 * eig.y;
 
-		error = xwimp_resize_icon(url_bar->window,
-					  url_bar->text.icon,
-					  x0, y0, x1, y1);
+		error = xwimp_resize_icon(
+			url_bar->window, url_bar->text.icon, x0, y0, x1, y1);
 		if (error != NULL) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xwimp_resize_icon: 0x%x: %s",
-			      error->errnum, error->errmess);
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 			url_bar->text.icon = -1;
 			return false;
@@ -247,32 +253,36 @@ static bool ro_gui_url_bar_icon_resize(struct url_bar *url_bar, bool full)
 	url_bar->pginfo.extent.x0 = url_bar->extent.x0 + eig.x;
 	url_bar->pginfo.extent.x1 = url_bar->extent.x0 + URLBAR_PGINFO_WIDTH;
 	url_bar->pginfo.extent.y0 = centre - (URLBAR_HEIGHT / 2) + eig.y;
-	url_bar->pginfo.extent.y1 = url_bar->pginfo.extent.y0 + URLBAR_HEIGHT
-		- 2 * eig.y;
+	url_bar->pginfo.extent.y1 = url_bar->pginfo.extent.y0 + URLBAR_HEIGHT -
+				    2 * eig.y;
 
 	/* Position the Favicon icon. */
-	url_bar->favicon.extent.x0 = url_bar->extent.x0 + URLBAR_PGINFO_WIDTH ;
-	url_bar->favicon.extent.x1 = url_bar->extent.x0 + URLBAR_PGINFO_WIDTH + URLBAR_FAVICON_WIDTH;
+	url_bar->favicon.extent.x0 = url_bar->extent.x0 + URLBAR_PGINFO_WIDTH;
+	url_bar->favicon.extent.x1 = url_bar->extent.x0 + URLBAR_PGINFO_WIDTH +
+				     URLBAR_FAVICON_WIDTH;
 	url_bar->favicon.extent.y0 = centre - (URLBAR_HEIGHT / 2) + eig.y;
-	url_bar->favicon.extent.y1 = url_bar->favicon.extent.y0 + URLBAR_HEIGHT
-		- 2 * eig.y;
+	url_bar->favicon.extent.y1 = url_bar->favicon.extent.y0 +
+				     URLBAR_HEIGHT - 2 * eig.y;
 
 	/* Position the Hotlist icon. */
 	url_bar->hotlist.extent.x0 = url_bar->extent.x1 - eig.x -
-		URLBAR_HOTLIST_WIDTH - url_bar->suggest.x -
-		URLBAR_GRIGHT_GUTTER;
+				     URLBAR_HOTLIST_WIDTH - url_bar->suggest.x -
+				     URLBAR_GRIGHT_GUTTER;
 	url_bar->hotlist.extent.x1 = url_bar->hotlist.extent.x0 +
-		URLBAR_HOTLIST_WIDTH;
+				     URLBAR_HOTLIST_WIDTH;
 	url_bar->hotlist.extent.y0 = centre - (URLBAR_HEIGHT / 2) + eig.y;
-	url_bar->hotlist.extent.y1 = url_bar->hotlist.extent.y0 + URLBAR_HEIGHT
-		- 2 * eig.y;
+	url_bar->hotlist.extent.y1 = url_bar->hotlist.extent.y0 +
+				     URLBAR_HEIGHT - 2 * eig.y;
 
 	url_bar->hotlist.offset.x = ((url_bar->hotlist.extent.x1 -
 				      url_bar->hotlist.extent.x0) -
-				     (URLBAR_HOTLIST_SIZE * 2)) / 2;
+				     (URLBAR_HOTLIST_SIZE * 2)) /
+				    2;
 	url_bar->hotlist.offset.y = ((url_bar->hotlist.extent.y1 -
 				      url_bar->hotlist.extent.y0) -
-				     (URLBAR_HOTLIST_SIZE * 2)) / 2 - 1;
+				     (URLBAR_HOTLIST_SIZE * 2)) /
+					    2 -
+				    1;
 
 	return true;
 }
@@ -291,8 +301,7 @@ static bool ro_gui_url_bar_icon_update(struct url_bar *url_bar)
 	os_error *error;
 	bool resize;
 
-	if ((url_bar == NULL) ||
-	    (url_bar->window == NULL)) {
+	if ((url_bar == NULL) || (url_bar->window == NULL)) {
 		return false;
 	}
 
@@ -308,27 +317,32 @@ static bool ro_gui_url_bar_icon_update(struct url_bar *url_bar)
 
 	if (!url_bar->hidden && url_bar->container_icon == -1) {
 		icon.icon.flags = wimp_ICON_BORDER |
-			(wimp_COLOUR_BLACK << wimp_ICON_FG_COLOUR_SHIFT) |
-			(wimp_BUTTON_DOUBLE_CLICK_DRAG << wimp_ICON_BUTTON_TYPE_SHIFT);
+				  (wimp_COLOUR_BLACK
+				   << wimp_ICON_FG_COLOUR_SHIFT) |
+				  (wimp_BUTTON_DOUBLE_CLICK_DRAG
+				   << wimp_ICON_BUTTON_TYPE_SHIFT);
 		error = xwimp_create_icon(&icon, &url_bar->container_icon);
 		if (error != NULL) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xwimp_create_icon: 0x%x: %s",
-			      error->errnum, error->errmess);
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 			url_bar->container_icon = -1;
 			return false;
 		}
 
 		resize = true;
-	} else if ((url_bar->hidden) &&
-		   (url_bar->container_icon != -1)) {
+	} else if ((url_bar->hidden) && (url_bar->container_icon != -1)) {
 		error = xwimp_delete_icon(url_bar->window,
 					  url_bar->container_icon);
 		if (error != NULL) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xwimp_delete_icon: 0x%x: %s",
-			      error->errnum, error->errmess);
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 			return false;
 		}
@@ -337,32 +351,32 @@ static bool ro_gui_url_bar_icon_update(struct url_bar *url_bar)
 	}
 
 	/* Create or delete the text icon. */
-	if (!url_bar->hidden &&
-	    url_bar->text.icon == -1) {
+	if (!url_bar->hidden && url_bar->text.icon == -1) {
 		icon.icon.data.indirected_text.text = url_bar->text.buffer;
 		icon.icon.data.indirected_text.validation = text_validation;
 		icon.icon.data.indirected_text.size = url_bar->text.size;
-		icon.icon.flags = wimp_ICON_TEXT |
-			wimp_ICON_INDIRECTED |
-			wimp_ICON_VCENTRED |
-			wimp_ICON_FILLED |
-			(wimp_COLOUR_BLACK << wimp_ICON_FG_COLOUR_SHIFT);
+		icon.icon.flags = wimp_ICON_TEXT | wimp_ICON_INDIRECTED |
+				  wimp_ICON_VCENTRED | wimp_ICON_FILLED |
+				  (wimp_COLOUR_BLACK
+				   << wimp_ICON_FG_COLOUR_SHIFT);
 
 		if (url_bar->display) {
-			icon.icon.flags |= (wimp_BUTTON_NEVER <<
-					    wimp_ICON_BUTTON_TYPE_SHIFT);
+			icon.icon.flags |= (wimp_BUTTON_NEVER
+					    << wimp_ICON_BUTTON_TYPE_SHIFT);
 		} else if (!ns_wimp_has_text_selection()) {
-			icon.icon.flags |= (wimp_BUTTON_WRITE_CLICK_DRAG <<
-					    wimp_ICON_BUTTON_TYPE_SHIFT);
+			icon.icon.flags |= (wimp_BUTTON_WRITE_CLICK_DRAG
+					    << wimp_ICON_BUTTON_TYPE_SHIFT);
 		} else {
-			icon.icon.flags |= (wimp_BUTTON_WRITABLE <<
-					    wimp_ICON_BUTTON_TYPE_SHIFT);
+			icon.icon.flags |= (wimp_BUTTON_WRITABLE
+					    << wimp_ICON_BUTTON_TYPE_SHIFT);
 		}
 		error = xwimp_create_icon(&icon, &url_bar->text.icon);
 		if (error) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xwimp_create_icon: 0x%x: %s",
-			      error->errnum, error->errmess);
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 			url_bar->text.icon = -1;
 			return false;
@@ -370,14 +384,14 @@ static bool ro_gui_url_bar_icon_update(struct url_bar *url_bar)
 
 		resize = true;
 
-	} else if (url_bar->hidden &&
-		   url_bar->text.icon != -1) {
-		error = xwimp_delete_icon(url_bar->window,
-					  url_bar->text.icon);
+	} else if (url_bar->hidden && url_bar->text.icon != -1) {
+		error = xwimp_delete_icon(url_bar->window, url_bar->text.icon);
 		if (error != NULL) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xwimp_delete_icon: 0x%x: %s",
-			      error->errnum, error->errmess);
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 			return false;
 		}
@@ -386,31 +400,33 @@ static bool ro_gui_url_bar_icon_update(struct url_bar *url_bar)
 	}
 
 	/* Create or delete the suggest icon. */
-	if (!url_bar->hidden &&
-	    url_bar->suggest.icon == -1) {
+	if (!url_bar->hidden && url_bar->suggest.icon == -1) {
 		icon.icon.data.indirected_text.text = null_text_string;
 		icon.icon.data.indirected_text.size = 1;
 		icon.icon.data.indirected_text.validation = suggest_validation;
-		icon.icon.flags = wimp_ICON_TEXT |
-			wimp_ICON_SPRITE |
-			wimp_ICON_INDIRECTED |
-			wimp_ICON_HCENTRED |
-			wimp_ICON_VCENTRED |
-			(wimp_BUTTON_CLICK << wimp_ICON_BUTTON_TYPE_SHIFT);
+		icon.icon.flags = wimp_ICON_TEXT | wimp_ICON_SPRITE |
+				  wimp_ICON_INDIRECTED | wimp_ICON_HCENTRED |
+				  wimp_ICON_VCENTRED |
+				  (wimp_BUTTON_CLICK
+				   << wimp_ICON_BUTTON_TYPE_SHIFT);
 
 		error = xwimp_create_icon(&icon, &url_bar->suggest.icon);
 		if (error) {
-			NSLOG(netsurf, INFO, "xwimp_create_icon: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_create_icon: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 			return false;
 		}
 
 		if (!url_bar->display)
-			ro_gui_wimp_event_register_menu_gright(url_bar->window,
-							       wimp_ICON_WINDOW,
-							       url_bar->suggest.icon,
-							       ro_gui_url_suggest_menu);
+			ro_gui_wimp_event_register_menu_gright(
+				url_bar->window,
+				wimp_ICON_WINDOW,
+				url_bar->suggest.icon,
+				ro_gui_url_suggest_menu);
 
 		if (!ro_gui_url_bar_update_urlsuggest(url_bar)) {
 			return false;
@@ -418,16 +434,17 @@ static bool ro_gui_url_bar_icon_update(struct url_bar *url_bar)
 
 		resize = true;
 
-	} else if (url_bar->hidden &&
-		   url_bar->suggest.icon != -1) {
+	} else if (url_bar->hidden && url_bar->suggest.icon != -1) {
 		ro_gui_wimp_event_deregister(url_bar->window,
 					     url_bar->suggest.icon);
 		error = xwimp_delete_icon(url_bar->window,
 					  url_bar->suggest.icon);
 		if (error != NULL) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xwimp_delete_icon: 0x%x: %s",
-			      error->errnum, error->errmess);
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 			return false;
 		}
@@ -471,8 +488,7 @@ static bool ro_gui_url_bar_icon_update(struct url_bar *url_bar)
  */
 static void ro_gui_url_bar_set_hotlist(struct url_bar *url_bar, bool set)
 {
-	if (url_bar == NULL ||
-	    set == url_bar->hotlist.set) {
+	if (url_bar == NULL || set == url_bar->hotlist.set) {
 		return;
 	}
 
@@ -491,9 +507,9 @@ static void ro_gui_url_bar_set_hotlist(struct url_bar *url_bar, bool set)
 /**
  * Callback for hlcache.
  */
-static nserror
-ro_gui_url_bar_res_cb(hlcache_handle *handle,
-		      const hlcache_event *event, void *pw)
+static nserror ro_gui_url_bar_res_cb(hlcache_handle *handle,
+				     const hlcache_event *event,
+				     void *pw)
 {
 	struct url_bar_resource *r = pw;
 
@@ -534,7 +550,7 @@ struct url_bar *ro_gui_url_bar_create(struct theme_descriptor *theme)
 	url_bar->shaded = false;
 
 	url_bar->x_min = URLBAR_FAVICON_WIDTH + URLBAR_MIN_WIDTH +
-		URLBAR_HOTLIST_WIDTH;
+			 URLBAR_HOTLIST_WIDTH;
 	url_bar->y_min = URLBAR_HEIGHT;
 
 	url_bar->extent.x0 = 0;
@@ -589,13 +605,12 @@ struct url_bar *ro_gui_url_bar_create(struct theme_descriptor *theme)
 
 
 /* This is an exported interface documented in url_bar.h */
-bool
-ro_gui_url_bar_rebuild(struct url_bar *url_bar,
-		       struct theme_descriptor *theme,
-		       theme_style style,
-		       wimp_w window,
-		       bool display,
-		       bool shaded)
+bool ro_gui_url_bar_rebuild(struct url_bar *url_bar,
+			    struct theme_descriptor *theme,
+			    theme_style style,
+			    wimp_w window,
+			    bool display,
+			    bool shaded)
 {
 	if (url_bar == NULL) {
 		return false;
@@ -611,20 +626,18 @@ ro_gui_url_bar_rebuild(struct url_bar *url_bar,
 	url_bar->text.icon = -1;
 	url_bar->suggest.icon = -1;
 
-	ro_gui_wimp_get_sprite_dimensions((osspriteop_area *) -1,
+	ro_gui_wimp_get_sprite_dimensions((osspriteop_area *)-1,
 					  suggest_icon,
 					  &url_bar->suggest.x,
 					  &url_bar->suggest.y);
 
-	url_bar->x_min = URLBAR_PGINFO_WIDTH +
-		URLBAR_FAVICON_WIDTH +
-		URLBAR_MIN_WIDTH +
-		URLBAR_HOTLIST_WIDTH +
-		URLBAR_GRIGHT_GUTTER +
-		url_bar->suggest.x;
+	url_bar->x_min = URLBAR_PGINFO_WIDTH + URLBAR_FAVICON_WIDTH +
+			 URLBAR_MIN_WIDTH + URLBAR_HOTLIST_WIDTH +
+			 URLBAR_GRIGHT_GUTTER + url_bar->suggest.x;
 
-	url_bar->y_min = (url_bar->suggest.y > URLBAR_HEIGHT) ?
-		url_bar->suggest.y : URLBAR_HEIGHT;
+	url_bar->y_min = (url_bar->suggest.y > URLBAR_HEIGHT)
+				 ? url_bar->suggest.y
+				 : URLBAR_HEIGHT;
 
 	return ro_gui_url_bar_icon_update(url_bar);
 }
@@ -656,8 +669,7 @@ bool ro_gui_url_bar_get_dims(struct url_bar *url_bar, int *width, int *height)
 		return false;
 	}
 
-	if (url_bar->x_min != -1 &&
-	    url_bar->y_min != -1) {
+	if (url_bar->x_min != -1 && url_bar->y_min != -1) {
 		if (width != NULL) {
 			*width = url_bar->x_min;
 		}
@@ -673,9 +685,11 @@ bool ro_gui_url_bar_get_dims(struct url_bar *url_bar, int *width, int *height)
 
 
 /* This is an exported interface documented in url_bar.h */
-bool
-ro_gui_url_bar_set_extent(struct url_bar *url_bar,
-			  int x0, int y0, int x1, int y1)
+bool ro_gui_url_bar_set_extent(struct url_bar *url_bar,
+			       int x0,
+			       int y0,
+			       int x1,
+			       int y1)
 {
 	bool stretch;
 
@@ -683,31 +697,31 @@ ro_gui_url_bar_set_extent(struct url_bar *url_bar,
 		return false;
 	}
 
-	if ((x1 - x0) < url_bar->x_min ||
-	    (y1 - y0) < url_bar->y_min) {
+	if ((x1 - x0) < url_bar->x_min || (y1 - y0) < url_bar->y_min) {
 		return false;
 	}
 
-	if (url_bar->extent.x0 == x0 &&
-	    url_bar->extent.y0 == y0 &&
-	    url_bar->extent.x1 == x1 &&
-	    url_bar->extent.y1 == y1) {
+	if (url_bar->extent.x0 == x0 && url_bar->extent.y0 == y0 &&
+	    url_bar->extent.x1 == x1 && url_bar->extent.y1 == y1) {
 		return true;
 	}
 
 	/* If it's only the length that changes, less needs to be updated. */
-	stretch = (url_bar->extent.x0 == x0 &&
-		   url_bar->extent.y0 == y0 &&
-		   url_bar->extent.y1 == y1) ? true : false;
+	stretch = (url_bar->extent.x0 == x0 && url_bar->extent.y0 == y0 &&
+		   url_bar->extent.y1 == y1)
+			  ? true
+			  : false;
 
 	/* Redraw the relevant bits of the toolbar. */
-	if (url_bar->window != NULL &&
-	    !url_bar->hidden) {
+	if (url_bar->window != NULL && !url_bar->hidden) {
 		if (stretch) {
-			xwimp_force_redraw(url_bar->window,
-					   x0 + URLBAR_PGINFO_WIDTH + URLBAR_FAVICON_WIDTH, y0,
-					   (x1 > url_bar->extent.x1) ?
-					   x1 : url_bar->extent.x1, y1);
+			xwimp_force_redraw(
+				url_bar->window,
+				x0 + URLBAR_PGINFO_WIDTH + URLBAR_FAVICON_WIDTH,
+				y0,
+				(x1 > url_bar->extent.x1) ? x1
+							  : url_bar->extent.x1,
+				y1);
 		} else {
 			xwimp_force_redraw(url_bar->window,
 					   url_bar->extent.x0,
@@ -754,49 +768,48 @@ void ro_gui_url_bar_redraw(struct url_bar *url_bar, wimp_draw *redraw)
 		return;
 
 	if ((redraw->clip.x0 - (redraw->box.x0 - redraw->xscroll)) >
-	    (url_bar->pginfo.extent.x1) ||
+		    (url_bar->pginfo.extent.x1) ||
 	    (redraw->clip.y0 - (redraw->box.y1 - redraw->yscroll)) >
-	    (url_bar->pginfo.extent.y1) ||
+		    (url_bar->pginfo.extent.y1) ||
 	    (redraw->clip.x1 - (redraw->box.x0 - redraw->xscroll)) <
-	    (url_bar->pginfo.extent.x0) ||
+		    (url_bar->pginfo.extent.x0) ||
 	    (redraw->clip.y1 - (redraw->box.y1 - redraw->yscroll)) <
-	    (url_bar->pginfo.extent.y0)) {
+		    (url_bar->pginfo.extent.y0)) {
 		/* page info not in redraw area */
 		draw_pginfo = false;
 	}
 
 	if ((redraw->clip.x0 - (redraw->box.x0 - redraw->xscroll)) >
-	    (url_bar->favicon.extent.x1) ||
+		    (url_bar->favicon.extent.x1) ||
 	    (redraw->clip.y0 - (redraw->box.y1 - redraw->yscroll)) >
-	    (url_bar->favicon.extent.y1) ||
+		    (url_bar->favicon.extent.y1) ||
 	    (redraw->clip.x1 - (redraw->box.x0 - redraw->xscroll)) <
-	    (url_bar->favicon.extent.x0) ||
+		    (url_bar->favicon.extent.x0) ||
 	    (redraw->clip.y1 - (redraw->box.y1 - redraw->yscroll)) <
-	    (url_bar->favicon.extent.y0)) {
+		    (url_bar->favicon.extent.y0)) {
 		/* Favicon not in redraw area */
 		draw_favicon = false;
 	}
 
 	if ((redraw->clip.x0 - (redraw->box.x0 - redraw->xscroll)) >
-	    (url_bar->hotlist.extent.x1) ||
+		    (url_bar->hotlist.extent.x1) ||
 	    (redraw->clip.y0 - (redraw->box.y1 - redraw->yscroll)) >
-	    (url_bar->hotlist.extent.y1) ||
+		    (url_bar->hotlist.extent.y1) ||
 	    (redraw->clip.x1 - (redraw->box.x0 - redraw->xscroll)) <
-	    (url_bar->hotlist.extent.x0) ||
+		    (url_bar->hotlist.extent.x0) ||
 	    (redraw->clip.y1 - (redraw->box.y1 - redraw->yscroll)) <
-	    (url_bar->hotlist.extent.y0)) {
+		    (url_bar->hotlist.extent.y0)) {
 		/* Hotlist icon not in redraw area */
 		draw_hotlist = false;
 	}
 
 	if (draw_pginfo) {
-		icon.flags = wimp_ICON_SPRITE |
-			wimp_ICON_INDIRECTED |
-			wimp_ICON_FILLED |
-			wimp_ICON_HCENTRED |
-			wimp_ICON_VCENTRED |
-			(wimp_COLOUR_WHITE << wimp_ICON_BG_COLOUR_SHIFT);
-		icon.data.indirected_sprite.id = (osspriteop_id)url_bar->pginfo.sprite;
+		icon.flags = wimp_ICON_SPRITE | wimp_ICON_INDIRECTED |
+			     wimp_ICON_FILLED | wimp_ICON_HCENTRED |
+			     wimp_ICON_VCENTRED |
+			     (wimp_COLOUR_WHITE << wimp_ICON_BG_COLOUR_SHIFT);
+		icon.data.indirected_sprite.id = (osspriteop_id)
+							 url_bar->pginfo.sprite;
 		icon.data.indirected_sprite.area = url_bar->sprites;
 		icon.data.indirected_sprite.size = 12;
 
@@ -815,10 +828,8 @@ void ro_gui_url_bar_redraw(struct url_bar *url_bar, wimp_draw *redraw)
 				url_bar->favicon.sprite;
 			icon.data.indirected_text.size = 1;
 			icon.flags = wimp_ICON_TEXT | wimp_ICON_SPRITE |
-				wimp_ICON_INDIRECTED |
-				wimp_ICON_FILLED |
-				wimp_ICON_HCENTRED |
-				wimp_ICON_VCENTRED;
+				     wimp_ICON_INDIRECTED | wimp_ICON_FILLED |
+				     wimp_ICON_HCENTRED | wimp_ICON_VCENTRED;
 			icon.extent.x0 = url_bar->favicon.extent.x0;
 			icon.extent.x1 = url_bar->favicon.extent.x1;
 			icon.extent.y0 = url_bar->favicon.extent.y0;
@@ -827,23 +838,21 @@ void ro_gui_url_bar_redraw(struct url_bar *url_bar, wimp_draw *redraw)
 			xwimp_plot_icon(&icon);
 		} else {
 			struct content_redraw_data data;
-			struct redraw_context ctx = {
-				.interactive = true,
-				.background_images = true,
-				.plot = &ro_plotters
-			};
+			struct redraw_context ctx = {.interactive = true,
+						     .background_images = true,
+						     .plot = &ro_plotters};
 
 			xwimp_set_colour(wimp_COLOUR_WHITE);
 			xos_plot(os_MOVE_TO,
 				 (redraw->box.x0 - redraw->xscroll) +
-				 url_bar->favicon.extent.x0,
+					 url_bar->favicon.extent.x0,
 				 (redraw->box.y1 - redraw->yscroll) +
-				 url_bar->favicon.extent.y0);
+					 url_bar->favicon.extent.y0);
 			xos_plot(os_PLOT_TO | os_PLOT_RECTANGLE,
 				 (redraw->box.x0 - redraw->xscroll) +
-				 url_bar->favicon.extent.x1,
+					 url_bar->favicon.extent.x1,
 				 (redraw->box.y1 - redraw->yscroll) +
-				 url_bar->favicon.extent.y1);
+					 url_bar->favicon.extent.y1);
 
 			clip.x0 = (redraw->clip.x0 - ro_plot_origin_x) / 2;
 			clip.y0 = (ro_plot_origin_y - redraw->clip.y0) / 2;
@@ -851,9 +860,11 @@ void ro_gui_url_bar_redraw(struct url_bar *url_bar, wimp_draw *redraw)
 			clip.y1 = (ro_plot_origin_y - redraw->clip.y1) / 2;
 
 			data.x = (url_bar->favicon.extent.x0 +
-				  url_bar->favicon.offset.x) / 2;
+				  url_bar->favicon.offset.x) /
+				 2;
 			data.y = (url_bar->favicon.offset.y -
-				  url_bar->favicon.extent.y1) / 2;
+				  url_bar->favicon.extent.y1) /
+				 2;
 			data.width = url_bar->favicon.width;
 			data.height = url_bar->favicon.height;
 			data.background_colour = 0xFFFFFF;
@@ -861,33 +872,32 @@ void ro_gui_url_bar_redraw(struct url_bar *url_bar, wimp_draw *redraw)
 			data.repeat_x = false;
 			data.repeat_y = false;
 
-			content_redraw(url_bar->favicon.content,
-				       &data, &clip, &ctx);
+			content_redraw(
+				url_bar->favicon.content, &data, &clip, &ctx);
 		}
 	}
 
 	if (draw_hotlist) {
 		struct content_redraw_data data;
-		struct redraw_context ctx = {
-			.interactive = true,
-			.background_images = true,
-			.plot = &ro_plotters
-		};
-		struct url_bar_resource *hotlist_icon = url_bar->hotlist.set ?
-			&(url_bar_res[URLBAR_RES_HOTLIST_REMOVE]) :
-			&(url_bar_res[URLBAR_RES_HOTLIST_ADD]);
+		struct redraw_context ctx = {.interactive = true,
+					     .background_images = true,
+					     .plot = &ro_plotters};
+		struct url_bar_resource *hotlist_icon =
+			url_bar->hotlist.set
+				? &(url_bar_res[URLBAR_RES_HOTLIST_REMOVE])
+				: &(url_bar_res[URLBAR_RES_HOTLIST_ADD]);
 
 		xwimp_set_colour(wimp_COLOUR_WHITE);
 		xos_plot(os_MOVE_TO,
 			 (redraw->box.x0 - redraw->xscroll) +
-			 url_bar->hotlist.extent.x0,
+				 url_bar->hotlist.extent.x0,
 			 (redraw->box.y1 - redraw->yscroll) +
-			 url_bar->hotlist.extent.y0);
+				 url_bar->hotlist.extent.y0);
 		xos_plot(os_PLOT_TO | os_PLOT_RECTANGLE,
 			 (redraw->box.x0 - redraw->xscroll) +
-			 url_bar->hotlist.extent.x1,
+				 url_bar->hotlist.extent.x1,
 			 (redraw->box.y1 - redraw->yscroll) +
-			 url_bar->hotlist.extent.y1);
+				 url_bar->hotlist.extent.y1);
 
 		if (hotlist_icon->ready == false) {
 			return;
@@ -899,9 +909,11 @@ void ro_gui_url_bar_redraw(struct url_bar *url_bar, wimp_draw *redraw)
 		clip.y1 = (ro_plot_origin_y - redraw->clip.y1) / 2;
 
 		data.x = (url_bar->hotlist.extent.x0 +
-			  url_bar->hotlist.offset.x) / 2;
+			  url_bar->hotlist.offset.x) /
+			 2;
 		data.y = (url_bar->hotlist.offset.y -
-			  url_bar->hotlist.extent.y1) / 2;
+			  url_bar->hotlist.extent.y1) /
+			 2;
 		data.width = URLBAR_HOTLIST_SIZE;
 		data.height = URLBAR_HOTLIST_SIZE;
 		data.background_colour = 0xFFFFFF;
@@ -922,9 +934,7 @@ void ro_gui_url_bar_redraw(struct url_bar *url_bar, wimp_draw *redraw)
  */
 static inline bool is_point_in_box(os_coord *pos, os_box *box)
 {
-	if (pos->x < box->x0 ||
-	    pos->x > box->x1 ||
-	    pos->y < box->y0 ||
+	if (pos->x < box->x0 || pos->x > box->x1 || pos->y < box->y0 ||
 	    pos->y > box->y1) {
 		return false;
 	}
@@ -932,16 +942,15 @@ static inline bool is_point_in_box(os_coord *pos, os_box *box)
 }
 
 /* This is an exported interface documented in url_bar.h */
-bool
-ro_gui_url_bar_click(struct url_bar *url_bar,
-		     wimp_pointer *pointer,
-		     wimp_window_state *state,
-		     url_bar_action *action)
+bool ro_gui_url_bar_click(struct url_bar *url_bar,
+			  wimp_pointer *pointer,
+			  wimp_window_state *state,
+			  url_bar_action *action)
 {
 	os_coord pos;
 
-	if (url_bar == NULL || url_bar->hidden ||
-	    url_bar->display || url_bar->shaded) {
+	if (url_bar == NULL || url_bar->hidden || url_bar->display ||
+	    url_bar->shaded) {
 		return false;
 	}
 
@@ -979,7 +988,6 @@ ro_gui_url_bar_click(struct url_bar *url_bar,
 			}
 			return true;
 		}
-
 	}
 
 	/* If we find a Select or Adjust drag, check if it originated on the
@@ -1009,14 +1017,12 @@ ro_gui_url_bar_click(struct url_bar *url_bar,
 
 
 /* This is an exported interface documented in url_bar.h */
-bool
-ro_gui_url_bar_menu_prepare(struct url_bar *url_bar,
-			    wimp_i i,
-			    wimp_menu *menu,
-			    wimp_pointer *pointer)
+bool ro_gui_url_bar_menu_prepare(struct url_bar *url_bar,
+				 wimp_i i,
+				 wimp_menu *menu,
+				 wimp_pointer *pointer)
 {
-	if (url_bar == NULL ||
-	    url_bar->suggest.icon != i ||
+	if (url_bar == NULL || url_bar->suggest.icon != i ||
 	    menu != ro_gui_url_suggest_menu) {
 		return false;
 	}
@@ -1030,18 +1036,16 @@ ro_gui_url_bar_menu_prepare(struct url_bar *url_bar,
 
 
 /* This is an exported interface documented in url_bar.h */
-bool
-ro_gui_url_bar_menu_select(struct url_bar *url_bar,
-			   wimp_i i,
-			   wimp_menu *menu,
-			   wimp_selection *selection,
-			   menu_action action)
+bool ro_gui_url_bar_menu_select(struct url_bar *url_bar,
+				wimp_i i,
+				wimp_menu *menu,
+				wimp_selection *selection,
+				menu_action action)
 {
 	const char *urltxt;
 	struct gui_window *g;
 
-	if (url_bar == NULL ||
-	    url_bar->suggest.icon != i ||
+	if (url_bar == NULL || url_bar->suggest.icon != i ||
 	    menu != ro_gui_url_suggest_menu) {
 		return false;
 	}
@@ -1049,9 +1053,7 @@ ro_gui_url_bar_menu_select(struct url_bar *url_bar,
 	urltxt = ro_gui_url_suggest_get_selection(selection);
 	g = ro_gui_toolbar_lookup(url_bar->window);
 
-	if (urltxt != NULL &&
-	    g != NULL &&
-	    g->bw != NULL) {
+	if (urltxt != NULL && g != NULL && g->bw != NULL) {
 		nsurl *url;
 		nserror error;
 
@@ -1077,13 +1079,12 @@ ro_gui_url_bar_menu_select(struct url_bar *url_bar,
 
 
 /* This is an exported interface documented in url_bar.h */
-bool
-ro_gui_url_bar_help_suffix(struct url_bar *url_bar,
-			   wimp_i i,
-			   os_coord *mouse,
-			   wimp_window_state *state,
-			   wimp_mouse_state buttons,
-			   const char **suffix)
+bool ro_gui_url_bar_help_suffix(struct url_bar *url_bar,
+				wimp_i i,
+				os_coord *mouse,
+				wimp_window_state *state,
+				wimp_mouse_state buttons,
+				const char **suffix)
 {
 	os_coord pos;
 
@@ -1096,10 +1097,8 @@ ro_gui_url_bar_help_suffix(struct url_bar *url_bar,
 	pos.x = mouse->x - state->visible.x0 + state->xscroll;
 	pos.y = mouse->y - state->visible.y1 + state->yscroll;
 
-	if (pos.x < url_bar->extent.x0 ||
-	    pos.x > url_bar->extent.x1 ||
-	    pos.y < url_bar->extent.y0 ||
-	    pos.y > url_bar->extent.y1) {
+	if (pos.x < url_bar->extent.x0 || pos.x > url_bar->extent.x1 ||
+	    pos.y < url_bar->extent.y0 || pos.y > url_bar->extent.y1) {
 		return false;
 	}
 
@@ -1139,13 +1138,14 @@ bool ro_gui_url_bar_take_caret(struct url_bar *url_bar)
 		return false;
 	}
 
-	error = xwimp_set_caret_position(url_bar->window,
-					 url_bar->text.icon,
-					 -1, -1, -1, 0);
+	error = xwimp_set_caret_position(
+		url_bar->window, url_bar->text.icon, -1, -1, -1, 0);
 	if (error) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "xwimp_set_caret_position: 0x%x: %s",
-		      error->errnum, error->errmess);
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 
 		return false;
@@ -1156,11 +1156,10 @@ bool ro_gui_url_bar_take_caret(struct url_bar *url_bar)
 
 
 /* This is an exported interface documented in url_bar.h */
-void
-ro_gui_url_bar_set_url(struct url_bar *url_bar,
-		       const char *url,
-		       bool is_utf8,
-		       bool set_caret)
+void ro_gui_url_bar_set_url(struct url_bar *url_bar,
+			    const char *url,
+			    bool is_utf8,
+			    bool set_caret)
 {
 	wimp_caret caret;
 	os_error *error;
@@ -1168,9 +1167,7 @@ ro_gui_url_bar_set_url(struct url_bar *url_bar,
 	const char *local_url;
 	nsurl *n;
 
-	if (url_bar == NULL ||
-	    url_bar->text.buffer == NULL ||
-	    url == NULL) {
+	if (url_bar == NULL || url_bar->text.buffer == NULL || url == NULL) {
 		return;
 	}
 
@@ -1200,9 +1197,11 @@ ro_gui_url_bar_set_url(struct url_bar *url_bar,
 	 * for URL bar and log the full URL.
 	 */
 	if (strlen(local_url) >= url_bar->text.size) {
-		NSLOG(netsurf, WARNING,
+		NSLOG(netsurf,
+		      WARNING,
 		      "URL too long to show in URL bar (%zu chars): %s",
-		      strlen(url), url);
+		      strlen(url),
+		      url);
 	}
 
 	strncpy(url_bar->text.buffer, local_url, url_bar->text.size - 1);
@@ -1228,26 +1227,30 @@ ro_gui_url_bar_set_url(struct url_bar *url_bar,
 
 	error = xwimp_get_caret_position(&caret);
 	if (error) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "xwimp_get_caret_position: 0x%x: %s",
-		      error->errnum, error->errmess);
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
 
 	if (set_caret ||
-	    (caret.w == url_bar->window &&
-	     caret.i == url_bar->text.icon)) {
+	    (caret.w == url_bar->window && caret.i == url_bar->text.icon)) {
 		const char *set_url;
 		set_url = ro_gui_get_icon_string(url_bar->window,
 						 url_bar->text.icon);
 
 		error = xwimp_set_caret_position(url_bar->window,
 						 url_bar->text.icon,
-						 0, 0, -1,
+						 0,
+						 0,
+						 -1,
 						 strlen(set_url));
 		if (error) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xwimp_set_caret_position: 0x%x: %s",
 			      error->errnum,
 			      error->errmess);
@@ -1267,9 +1270,8 @@ void ro_gui_url_bar_update_hotlist(struct url_bar *url_bar)
 		return;
 	}
 
-	url = (const char *) url_bar->text.buffer;
-	if (url != NULL &&
-	    nsurl_create(url, &n) == NSERROR_OK) {
+	url = (const char *)url_bar->text.buffer;
+	if (url != NULL && nsurl_create(url, &n) == NSERROR_OK) {
 		ro_gui_url_bar_set_hotlist(url_bar, ro_gui_hotlist_has_page(n));
 		nsurl_unref(n);
 	}
@@ -1281,8 +1283,7 @@ const char *ro_gui_url_bar_get_url(struct url_bar *url_bar)
 {
 	nserror res;
 
-	if ((url_bar == NULL) ||
-	    (url_bar->text.buffer == NULL)) {
+	if ((url_bar == NULL) || (url_bar->text.buffer == NULL)) {
 		return NULL;
 	}
 
@@ -1292,16 +1293,17 @@ const char *ro_gui_url_bar_get_url(struct url_bar *url_bar)
 	}
 
 	if (url_bar->text.buffer[0] == '\0') {
-		return (const char *) url_bar->text.buffer;
+		return (const char *)url_bar->text.buffer;
 	}
 
-	res = utf8_from_local_encoding(url_bar->text.buffer, 0,
+	res = utf8_from_local_encoding(url_bar->text.buffer,
+				       0,
 				       &url_bar->text.buffer_utf8);
 	if (res == NSERROR_OK) {
 		return (const char *)url_bar->text.buffer_utf8;
 	}
 
-	return (const char *) url_bar->text.buffer;
+	return (const char *)url_bar->text.buffer;
 }
 
 
@@ -1323,9 +1325,11 @@ bool ro_gui_url_bar_get_url_extent(struct url_bar *url_bar, os_box *extent)
 	state.i = url_bar->container_icon;
 	error = xwimp_get_icon_state(&state);
 	if (error) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "xwimp_get_icon_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return false;
 	}
@@ -1340,45 +1344,39 @@ bool ro_gui_url_bar_get_url_extent(struct url_bar *url_bar, os_box *extent)
 
 
 /* This is an exported interface documented in url_bar.h */
-bool
-ro_gui_url_bar_test_for_text_field_click(struct url_bar *url_bar,
-					 wimp_pointer *pointer)
+bool ro_gui_url_bar_test_for_text_field_click(struct url_bar *url_bar,
+					      wimp_pointer *pointer)
 {
-	if (url_bar == NULL ||
-	    url_bar->hidden ||
-	    pointer == NULL) {
+	if (url_bar == NULL || url_bar->hidden || pointer == NULL) {
 		return false;
 	}
 
 	return (pointer->w == url_bar->window &&
-		pointer->i == url_bar->text.icon) ? true : false;
+		pointer->i == url_bar->text.icon)
+		       ? true
+		       : false;
 }
 
 
 /* This is an exported interface documented in url_bar.h */
-bool
-ro_gui_url_bar_test_for_text_field_keypress(struct url_bar *url_bar,
-					    wimp_key *key)
+bool ro_gui_url_bar_test_for_text_field_keypress(struct url_bar *url_bar,
+						 wimp_key *key)
 {
 	const char *url;
 	nsurl *n;
 
-	if (url_bar == NULL ||
-	    url_bar->hidden ||
-	    key == NULL) {
+	if (url_bar == NULL || url_bar->hidden || key == NULL) {
 		return false;
 	}
 
-	if (key->w != url_bar->window ||
-	    key->i != url_bar->text.icon) {
+	if (key->w != url_bar->window || key->i != url_bar->text.icon) {
 		return false;
 	}
 
 	/* Update hotlist indicator */
 
-	url = (const char *) url_bar->text.buffer;
-	if (url != NULL &&
-	    nsurl_create(url, &n) == NSERROR_OK) {
+	url = (const char *)url_bar->text.buffer;
+	if (url != NULL && nsurl_create(url, &n) == NSERROR_OK) {
 		ro_gui_url_bar_set_hotlist(url_bar, ro_gui_hotlist_has_page(n));
 		nsurl_unref(n);
 	} else if (url_bar->hotlist.set) {
@@ -1390,9 +1388,8 @@ ro_gui_url_bar_test_for_text_field_keypress(struct url_bar *url_bar,
 
 
 /* This is an exported interface documented in url_bar.h */
-bool
-ro_gui_url_bar_set_site_favicon(struct url_bar *url_bar,
-				struct hlcache_handle *h)
+bool ro_gui_url_bar_set_site_favicon(struct url_bar *url_bar,
+				     struct hlcache_handle *h)
 {
 	content_type type = CONTENT_NONE;
 
@@ -1421,17 +1418,20 @@ ro_gui_url_bar_set_site_favicon(struct url_bar *url_bar,
 
 		url_bar->favicon.offset.x = ((url_bar->favicon.extent.x1 -
 					      url_bar->favicon.extent.x0) -
-					     (url_bar->favicon.width * 2)) / 2;
+					     (url_bar->favicon.width * 2)) /
+					    2;
 		url_bar->favicon.offset.y = ((url_bar->favicon.extent.y1 -
 					      url_bar->favicon.extent.y0) -
-					     (url_bar->favicon.height * 2)) / 2;
+					     (url_bar->favicon.height * 2)) /
+					    2;
 	} else {
 		url_bar->favicon.content = NULL;
 
 		if (url_bar->favicon.type != 0) {
 			snprintf(url_bar->favicon.sprite,
 				 URLBAR_FAVICON_NAME_LENGTH,
-				 "Ssmall_%.3x", url_bar->favicon.type);
+				 "Ssmall_%.3x",
+				 url_bar->favicon.type);
 		} else {
 			snprintf(url_bar->favicon.sprite,
 				 URLBAR_FAVICON_NAME_LENGTH,
@@ -1489,7 +1489,7 @@ bool ro_gui_url_bar_page_info_change(struct url_bar *url_bar)
 		break;
 	}
 
-	strncpy(url_bar->pginfo.sprite,	icon_name, URLBAR_PGINFO_NAME_LENGTH);
+	strncpy(url_bar->pginfo.sprite, icon_name, URLBAR_PGINFO_NAME_LENGTH);
 
 	if (!url_bar->hidden) {
 		xwimp_force_redraw(url_bar->window,
@@ -1504,16 +1504,14 @@ bool ro_gui_url_bar_page_info_change(struct url_bar *url_bar)
 
 
 /* This is an exported interface documented in url_bar.h */
-bool
-ro_gui_url_bar_set_content_favicon(struct url_bar *url_bar,
-				   struct gui_window *g)
+bool ro_gui_url_bar_set_content_favicon(struct url_bar *url_bar,
+					struct gui_window *g)
 {
 	int type = 0;
-	char sprite[URLBAR_FAVICON_NAME_LENGTH-1];
+	char sprite[URLBAR_FAVICON_NAME_LENGTH - 1];
 	struct hlcache_handle *h;
 
-	if (url_bar == NULL ||
-	    g == NULL) {
+	if (url_bar == NULL || g == NULL) {
 		return false;
 	}
 
@@ -1523,8 +1521,8 @@ ro_gui_url_bar_set_content_favicon(struct url_bar *url_bar,
 	}
 
 	if (type != 0) {
-		snprintf(sprite, URLBAR_FAVICON_NAME_LENGTH,
-			 "small_%.3x", type);
+		snprintf(
+			sprite, URLBAR_FAVICON_NAME_LENGTH, "small_%.3x", type);
 
 		if (!ro_gui_wimp_sprite_exists(sprite)) {
 			type = 0;
@@ -1536,10 +1534,13 @@ ro_gui_url_bar_set_content_favicon(struct url_bar *url_bar,
 	if (url_bar->favicon.content == NULL) {
 		if (type == 0) {
 			snprintf(url_bar->favicon.sprite,
-				 URLBAR_FAVICON_NAME_LENGTH, "Ssmall_xxx");
+				 URLBAR_FAVICON_NAME_LENGTH,
+				 "Ssmall_xxx");
 		} else {
 			snprintf(url_bar->favicon.sprite,
-				 URLBAR_FAVICON_NAME_LENGTH, "S%s", sprite);
+				 URLBAR_FAVICON_NAME_LENGTH,
+				 "S%s",
+				 sprite);
 		}
 
 		if (!url_bar->hidden) {
@@ -1558,16 +1559,15 @@ ro_gui_url_bar_set_content_favicon(struct url_bar *url_bar,
 /* This is an exported interface documented in url_bar.h */
 bool ro_gui_url_bar_update_urlsuggest(struct url_bar *url_bar)
 {
-	if (url_bar == NULL ||
-	    url_bar->hidden) {
+	if (url_bar == NULL || url_bar->hidden) {
 		return (url_bar == NULL) ? false : true;
 	}
 
-	if (url_bar->window != NULL &&
-	    url_bar->suggest.icon != -1) {
-		ro_gui_set_icon_shaded_state(url_bar->window,
-					     url_bar->suggest.icon,
-					     !ro_gui_url_suggest_get_menu_available());
+	if (url_bar->window != NULL && url_bar->suggest.icon != -1) {
+		ro_gui_set_icon_shaded_state(
+			url_bar->window,
+			url_bar->suggest.icon,
+			!ro_gui_url_suggest_get_menu_available());
 	}
 
 	return true;

@@ -33,8 +33,11 @@
 #define NETSURF_VERSION_MINOR NETSURF_VERSION_MINOR_EXTERNAL "99999"
 #endif
 
-static const __attribute__((used)) char *verstag = "\0$VER: NetSurf " NETSURF_VERSION_MAJOR "." NETSURF_VERSION_MINOR " (" WT_COMPILEDATE ")\0";
-const char * const verdate = WT_COMPILEDATE;
-const char * const verarexx = NETSURF_VERSION_MAJOR "." NETSURF_VERSION_MINOR_EXTERNAL;
-const char * const wt_revid = WT_REVID;
-
+static const __attribute__((
+	used)) char *verstag = "\0$VER: NetSurf " NETSURF_VERSION_MAJOR
+			       "." NETSURF_VERSION_MINOR " (" WT_COMPILEDATE
+			       ")\0";
+const char *const verdate = WT_COMPILEDATE;
+const char *const verarexx = NETSURF_VERSION_MAJOR
+	"." NETSURF_VERSION_MINOR_EXTERNAL;
+const char *const wt_revid = WT_REVID;

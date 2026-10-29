@@ -42,9 +42,11 @@ static void nsgtk_tab_close_page(GtkWidget *page)
 {
 	GtkNotebook *notebook;
 
-	notebook = GTK_NOTEBOOK(gtk_widget_get_ancestor(page, GTK_TYPE_NOTEBOOK));
+	notebook = GTK_NOTEBOOK(
+		gtk_widget_get_ancestor(page, GTK_TYPE_NOTEBOOK));
 	if (notebook != NULL) {
-		gtk_notebook_remove_page(notebook, gtk_notebook_page_num(notebook, page));
+		gtk_notebook_remove_page(notebook,
+					 gtk_notebook_page_num(notebook, page));
 	}
 }
 
@@ -61,12 +63,11 @@ static void nsgtk_tab_close_clicked(GtkButton *button, gpointer user_data)
 /**
  * gtk event handler for button release on tab hbox
  */
-static void
-nsgtk_tab_button_release(GtkGestureClick *gesture,
-			 gint n_press,
-			 gdouble x,
-			 gdouble y,
-			 gpointer user_data)
+static void nsgtk_tab_button_release(GtkGestureClick *gesture,
+				     gint n_press,
+				     gdouble x,
+				     gdouble y,
+				     gpointer user_data)
 {
 	nsgtk_tab_close_page(GTK_WIDGET(user_data));
 }
@@ -79,10 +80,9 @@ nsgtk_tab_button_release(GtkGestureClick *gesture,
  * \param title The title of the page
  * \param icon_pixbuf The icon of the page
  */
-static GtkWidget *
-nsgtk_tab_label_setup(GtkWidget *page,
-		      const char *title,
-		      GdkPixbuf *icon_pixbuf)
+static GtkWidget *nsgtk_tab_label_setup(GtkWidget *page,
+					const char *title,
+					GdkPixbuf *icon_pixbuf)
 {
 	GtkWidget *hbox, *favicon, *label, *button;
 	GtkGesture *gesture;
@@ -123,9 +123,8 @@ nsgtk_tab_label_setup(GtkWidget *page,
 	g_object_set_data(G_OBJECT(hbox), "label", label);
 
 	/* attach signal handlers */
-	g_signal_connect(button,
-			 "clicked",
-			 G_CALLBACK(nsgtk_tab_close_clicked), page);
+	g_signal_connect(
+		button, "clicked", G_CALLBACK(nsgtk_tab_close_clicked), page);
 
 	/* middle click closes the tab */
 	gesture = gtk_gesture_click_new();
@@ -152,11 +151,10 @@ nsgtk_tab_label_setup(GtkWidget *page,
  * \param selpagenum The currently selected page number
  * \param user_data Unused
  */
-static void
-nsgtk_tab_switch_page(GtkNotebook *notebook,
-		      GtkWidget *page,
-		      guint selpagenum,
-		      gpointer user_data)
+static void nsgtk_tab_switch_page(GtkNotebook *notebook,
+				  GtkWidget *page,
+				  guint selpagenum,
+				  gpointer user_data)
 {
 	srcpagenum = gtk_notebook_get_current_page(notebook);
 }
@@ -170,11 +168,10 @@ nsgtk_tab_switch_page(GtkNotebook *notebook,
  * \param selpagenum The currently selected page number
  * \param user_data Unused
  */
-static void
-nsgtk_tab_switch_page_after(GtkNotebook *notebook,
-			    GtkWidget *selpage,
-			    guint selpagenum,
-			    gpointer user_data)
+static void nsgtk_tab_switch_page_after(GtkNotebook *notebook,
+					GtkWidget *selpage,
+					guint selpagenum,
+					gpointer user_data)
 {
 	GtkWidget *srcpage;
 	GtkWidget *addpage;
@@ -187,7 +184,8 @@ nsgtk_tab_switch_page_after(GtkNotebook *notebook,
 	/* check if trying to select the "add page" tab */
 	if (selpage != addpage) {
 		NSLOG(netsurf, INFO, "sel %d", selpagenum);
-		menubar = nsgtk_scaffolding_menu_bar(nsgtk_scaffolding_from_notebook(notebook));
+		menubar = nsgtk_scaffolding_menu_bar(
+			nsgtk_scaffolding_from_notebook(notebook));
 		gw = g_object_get_data(G_OBJECT(selpage), "gui_window");
 		if (gw != NULL) {
 			/* tab with web page in it */
@@ -229,11 +227,10 @@ nsgtk_tab_switch_page_after(GtkNotebook *notebook,
  * \param page_num The currently selected page number
  * \param user_data Unused
  */
-static void
-nsgtk_tab_page_reordered(GtkNotebook *notebook,
-			 GtkWidget *child,
-			 guint page_num,
-			 gpointer user_data)
+static void nsgtk_tab_page_reordered(GtkNotebook *notebook,
+				     GtkWidget *child,
+				     guint page_num,
+				     gpointer user_data)
 {
 	gint pages;
 	GtkWidget *addpage;
@@ -241,8 +238,7 @@ nsgtk_tab_page_reordered(GtkNotebook *notebook,
 	pages = gtk_notebook_get_n_pages(notebook);
 	addpage = g_object_get_data(G_OBJECT(notebook), "addtab");
 
-	if (((gint)page_num == (pages - 1)) &&
-	    (child != addpage)) {
+	if (((gint)page_num == (pages - 1)) && (child != addpage)) {
 		/* moved tab to end */
 		gtk_notebook_reorder_child(notebook, addpage, -1);
 	}
@@ -255,8 +251,7 @@ nsgtk_tab_page_reordered(GtkNotebook *notebook,
  * \param page_num The currently selected page number
  * \param user_data Unused
  */
-static void
-nsgtk_tab_orientation(GtkNotebook *notebook)
+static void nsgtk_tab_orientation(GtkNotebook *notebook)
 {
 	switch (nsoption_int(position_tab)) {
 	case 0:
@@ -274,15 +269,13 @@ nsgtk_tab_orientation(GtkNotebook *notebook)
 	case 3:
 		gtk_notebook_set_tab_pos(notebook, GTK_POS_BOTTOM);
 		break;
-
 	}
 }
 
 /**
  * adds a "new tab" tab
  */
-static GtkWidget *
-nsgtk_tab_add_newtab(GtkNotebook *notebook)
+static GtkWidget *nsgtk_tab_add_newtab(GtkNotebook *notebook)
 {
 	GtkWidget *tablabel;
 	GtkWidget *tabcontents;
@@ -382,12 +375,11 @@ nserror nsgtk_notebook_create(GtkBuilder *builder, GtkNotebook **notebook_out)
 }
 
 /* exported interface documented in gtk/tabs.h */
-nserror
-nsgtk_tab_add_page(GtkNotebook *notebook,
-		   GtkWidget *tab_contents,
-		   bool background,
-		   const char *title,
-		   GdkPixbuf *icon_pixbuf)
+nserror nsgtk_tab_add_page(GtkNotebook *notebook,
+			   GtkWidget *tab_contents,
+			   bool background,
+			   const char *title,
+			   GdkPixbuf *icon_pixbuf)
 {
 	GtkWidget *tabBox;
 	gint remember;
@@ -400,7 +392,8 @@ nsgtk_tab_add_page(GtkNotebook *notebook,
 
 	pages = gtk_notebook_get_n_pages(notebook);
 
-	newpage = gtk_notebook_insert_page(notebook, tab_contents, tabBox, pages - 1);
+	newpage = gtk_notebook_insert_page(
+		notebook, tab_contents, tabBox, pages - 1);
 
 	gtk_notebook_set_tab_reorderable(notebook, tab_contents, true);
 
@@ -429,8 +422,8 @@ void nsgtk_tab_add(struct gui_window *gw,
 
 	notebook = nsgtk_scaffolding_notebook(nsgtk_get_scaffold(gw));
 
-	nsgtk_tab_add_page(notebook, tab_contents, background, title, icon_pixbuf);
-
+	nsgtk_tab_add_page(
+		notebook, tab_contents, background, title, icon_pixbuf);
 }
 
 
@@ -444,7 +437,8 @@ nserror nsgtk_tab_set_icon(GtkWidget *page, GdkPixbuf *pixbuf)
 	if (pixbuf == NULL) {
 		return NSERROR_INVALID;
 	}
-	notebook = GTK_NOTEBOOK(gtk_widget_get_ancestor(page, GTK_TYPE_NOTEBOOK));
+	notebook = GTK_NOTEBOOK(
+		gtk_widget_get_ancestor(page, GTK_TYPE_NOTEBOOK));
 	if (notebook == NULL) {
 		return NSERROR_BAD_PARAMETER;
 	}
@@ -473,7 +467,8 @@ nserror nsgtk_tab_set_title(GtkWidget *page, const char *title)
 		return NSERROR_INVALID;
 	}
 
-	notebook = GTK_NOTEBOOK(gtk_widget_get_ancestor(page, GTK_TYPE_NOTEBOOK));
+	notebook = GTK_NOTEBOOK(
+		gtk_widget_get_ancestor(page, GTK_TYPE_NOTEBOOK));
 	if (notebook == NULL) {
 		return NSERROR_BAD_PARAMETER;
 	}
@@ -530,7 +525,6 @@ nserror nsgtk_tab_prev(GtkNotebook *notebook)
 	gtk_notebook_prev_page(notebook);
 
 	return NSERROR_OK;
-
 }
 
 nserror nsgtk_tab_next(GtkNotebook *notebook)

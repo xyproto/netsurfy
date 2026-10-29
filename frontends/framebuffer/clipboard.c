@@ -17,8 +17,8 @@
  */
 
 /** \file
-  * nsfb internal clipboard handling
-  */
+ * nsfb internal clipboard handling
+ */
 
 #include <assert.h>
 #include <stdint.h>
@@ -53,14 +53,18 @@ static void gui_get_clipboard(char **buffer, size_t *length)
 
 	if (gui_clipboard.length > 0) {
 		assert(gui_clipboard.buffer != NULL);
-		NSLOG(netsurf, INFO, "Pasting %zd bytes: \"%s\"\n",
-		      gui_clipboard.length, gui_clipboard.buffer);
+		NSLOG(netsurf,
+		      INFO,
+		      "Pasting %zd bytes: \"%s\"\n",
+		      gui_clipboard.length,
+		      gui_clipboard.buffer);
 
 		*buffer = malloc(gui_clipboard.length);
 
 		if (*buffer != NULL) {
-			memcpy(*buffer, gui_clipboard.buffer,
-					gui_clipboard.length);
+			memcpy(*buffer,
+			       gui_clipboard.buffer,
+			       gui_clipboard.length);
 			*length = gui_clipboard.length;
 		}
 	}
@@ -75,8 +79,10 @@ static void gui_get_clipboard(char **buffer, size_t *length)
  * \param  styles    Array of styles given to text runs, owned by core, or NULL
  * \param  n_styles  Number of text run styles in array
  */
-static void gui_set_clipboard(const char *buffer, size_t length,
-		nsclipboard_styles styles[], int n_styles)
+static void gui_set_clipboard(const char *buffer,
+			      size_t length,
+			      nsclipboard_styles styles[],
+			      int n_styles)
 {
 	if (gui_clipboard.buffer_len < length + 1) {
 		/* Make buffer big enough */

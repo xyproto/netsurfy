@@ -29,4 +29,3 @@ void ro_gui_iconbar_initialise(void);
 bool ro_gui_iconbar_check_menu(wimp_menu *menu);
 
 #endif
-

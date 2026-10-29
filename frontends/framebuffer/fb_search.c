@@ -29,46 +29,46 @@ static void gui_search_set_forward_state(bool active, void *p);
 static void gui_search_set_back_state(bool active, void *p);
 
 /**
-* Change the displayed search status.
-* \param found  search pattern matched in text
-* \param p the pointer sent to search_verify_new() / search_create_context()
-*/
+ * Change the displayed search status.
+ * \param found  search pattern matched in text
+ * \param p the pointer sent to search_verify_new() / search_create_context()
+ */
 void gui_search_set_status(bool found, void *p)
 {
 }
 
 /**
-* display hourglass while searching
-* \param active start/stop indicator
-* \param p the pointer sent to search_verify_new() / search_create_context()
-*/
+ * display hourglass while searching
+ * \param active start/stop indicator
+ * \param p the pointer sent to search_verify_new() / search_create_context()
+ */
 void gui_search_set_hourglass(bool active, void *p)
 {
 }
 
 /**
-* add search string to recent searches list
-* \param string search pattern
-* \param p the pointer sent to search_verify_new() / search_create_context()
-*/
+ * add search string to recent searches list
+ * \param string search pattern
+ * \param p the pointer sent to search_verify_new() / search_create_context()
+ */
 void gui_search_add_recent(const char *string, void *p)
 {
 }
 
 /**
-* activate search forwards button in gui
-* \param active activate/inactivate
-* \param p the pointer sent to search_verify_new() / search_create_context()
-*/
+ * activate search forwards button in gui
+ * \param active activate/inactivate
+ * \param p the pointer sent to search_verify_new() / search_create_context()
+ */
 void gui_search_set_forward_state(bool active, void *p)
 {
 }
 
 /**
-* activate search forwards button in gui
-* \param active activate/inactivate
-* \param p the pointer sent to search_verify_new() / search_create_context()
-*/
+ * activate search forwards button in gui
+ * \param active activate/inactivate
+ * \param p the pointer sent to search_verify_new() / search_create_context()
+ */
 void gui_search_set_back_state(bool active, void *p)
 {
 }

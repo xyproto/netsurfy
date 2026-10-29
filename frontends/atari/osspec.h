@@ -38,8 +38,8 @@ typedef struct {
 extern NS_ATARI_SYSINFO atari_sysinfo;
 
 void init_os_info(void);
-void fix_path(char * path);
-char * gemdos_realpath(const char * path, char * rpath);
-int tos_getcookie( long tag, long * value );
+void fix_path(char *path);
+char *gemdos_realpath(const char *path, char *rpath);
+int tos_getcookie(long tag, long *value);
 
 #endif

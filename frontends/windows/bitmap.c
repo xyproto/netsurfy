@@ -45,14 +45,19 @@
  * \param  state   flags   flags for bitmap creation
  * \return an opaque struct bitmap, or NULL on memory exhaustion
  */
-static void *win32_bitmap_create(int width, int height, enum gui_bitmap_flags flags)
+static void *
+win32_bitmap_create(int width, int height, enum gui_bitmap_flags flags)
 {
 	struct bitmap *bitmap;
 	BITMAPV5HEADER *pbmi;
 	HBITMAP windib;
 	uint8_t *pixdata;
 
-	NSLOG(netsurf, INFO, "width %d, height %d, flags %u", width, height,
+	NSLOG(netsurf,
+	      INFO,
+	      "width %d, height %d, flags %u",
+	      width,
+	      height,
 	      (unsigned)flags);
 
 	pbmi = calloc(1, sizeof(BITMAPV5HEADER));
@@ -72,14 +77,19 @@ static void *win32_bitmap_create(int width, int height, enum gui_bitmap_flags fl
 	pbmi->bV5BlueMask = 0xff0000; /* blue mask */
 	pbmi->bV5AlphaMask = 0xff000000; /* alpha mask */
 
-	windib = CreateDIBSection(NULL, (BITMAPINFO *)pbmi, DIB_RGB_COLORS, (void **)&pixdata, NULL, 0);
+	windib = CreateDIBSection(NULL,
+				  (BITMAPINFO *)pbmi,
+				  DIB_RGB_COLORS,
+				  (void **)&pixdata,
+				  NULL,
+				  0);
 
 	if (windib == NULL) {
 		free(pbmi);
 		return NULL;
 	}
 
-	bitmap = calloc(1 , sizeof(struct bitmap));
+	bitmap = calloc(1, sizeof(struct bitmap));
 	if (bitmap == NULL) {
 		DeleteObject(windib);
 		free(pbmi);
@@ -168,7 +178,8 @@ void win32_bitmap_destroy(void *bitmap)
  *
  * \param  bitmap  a bitmap, as returned by bitmap_create()
  */
-static void bitmap_modified(void *bitmap) {
+static void bitmap_modified(void *bitmap)
+{
 }
 
 /**
@@ -186,7 +197,10 @@ static void bitmap_set_opaque(void *bitmap, bool opaque)
 		return;
 	}
 
-	NSLOG(netsurf, INFO, "setting bitmap %p to %s", bm,
+	NSLOG(netsurf,
+	      INFO,
+	      "setting bitmap %p to %s",
+	      bm,
 	      opaque ? "opaque" : "transparent");
 	bm->opaque = opaque;
 }
@@ -218,7 +232,7 @@ static int bitmap_get_width(void *bitmap)
 		return 0;
 	}
 
-	return(bm->width);
+	return (bm->width);
 }
 
 static int bitmap_get_height(void *bitmap)
@@ -230,7 +244,7 @@ static int bitmap_get_height(void *bitmap)
 		return 0;
 	}
 
-	return(bm->height);
+	return (bm->height);
 }
 
 struct bitmap *bitmap_scale(struct bitmap *prescale, int width, int height)
@@ -256,12 +270,12 @@ struct bitmap *bitmap_scale(struct bitmap *prescale, int width, int height)
 		v = i * width;
 		vv = (int)((i * prescale->height) / height) * prescale->width;
 		for (ii = 0; ii < width; ii++) {
-			retpixdata[v + ii] = inpixdata[vv + (int)
-						       ((ii * prescale->width) / width)];
+			retpixdata[v + ii] =
+				inpixdata[vv + (int)((ii * prescale->width) /
+						     width)];
 		}
 	}
 	return ret;
-
 }
 
 
@@ -272,18 +286,21 @@ bitmap_render(struct bitmap *bitmap, struct hlcache_handle *content)
 	int height;
 	HDC hdc, bufferdc, minidc;
 	struct bitmap *fsbitmap;
-	struct redraw_context ctx = {
-		.interactive = false,
-		.background_images = true,
-		.plot = &win_plotters
-	};
+	struct redraw_context ctx = {.interactive = false,
+				     .background_images = true,
+				     .plot = &win_plotters};
 
 	width = min(max(content_get_width(content), bitmap->width), 1024);
 	height = ((width * bitmap->height) + (bitmap->width / 2)) /
-		bitmap->width;
+		 bitmap->width;
 
-	NSLOG(netsurf, INFO, "bitmap %p for content %p width %d, height %d",
-	      bitmap, content, width, height);
+	NSLOG(netsurf,
+	      INFO,
+	      "bitmap %p for content %p width %d, height %d",
+	      bitmap,
+	      content,
+	      width,
+	      height);
 
 	/* create two memory device contexts to put the bitmaps in */
 	bufferdc = CreateCompatibleDC(NULL);
@@ -298,7 +315,9 @@ bitmap_render(struct bitmap *bitmap, struct hlcache_handle *content)
 	}
 
 	/* create a full size bitmap and plot into it */
-	fsbitmap = win32_bitmap_create(width, height, BITMAP_CLEAR | BITMAP_OPAQUE);
+	fsbitmap = win32_bitmap_create(width,
+				       height,
+				       BITMAP_CLEAR | BITMAP_OPAQUE);
 
 	SelectObject(bufferdc, fsbitmap->windib);
 
@@ -313,7 +332,17 @@ bitmap_render(struct bitmap *bitmap, struct hlcache_handle *content)
 
 	bitmap->opaque = true;
 
-	StretchBlt(minidc, 0, 0, bitmap->width, bitmap->height, bufferdc, 0, 0, width, height, SRCCOPY);
+	StretchBlt(minidc,
+		   0,
+		   0,
+		   bitmap->width,
+		   bitmap->height,
+		   bufferdc,
+		   0,
+		   0,
+		   width,
+		   height,
+		   SRCCOPY);
 
 	DeleteDC(bufferdc);
 	DeleteDC(minidc);

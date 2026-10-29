@@ -21,8 +21,7 @@
 
 #include <proto/timer.h>
 
-struct ami_font_dfcache_node
-{
+struct ami_font_dfcache_node {
 #ifdef __amigaos4__
 	struct SkipNode skip_node;
 #endif
@@ -33,13 +32,17 @@ struct ami_font_dfcache_node
 
 
 /* locate an entry in the font cache, NULL if not found */
-struct ami_font_dfcache_node *ami_font_dfcache_locate(const char *font, ULONG size);
+struct ami_font_dfcache_node *
+ami_font_dfcache_locate(const char *font, ULONG size);
 
 /* allocate a cache entry */
-struct ami_font_dfcache_node *ami_font_dfcache_alloc_entry(const char *font, ULONG size);
+struct ami_font_dfcache_node *
+ami_font_dfcache_alloc_entry(const char *font, ULONG size);
 
 /* insert a cache entry into the list (OS3) */
-void ami_font_dfcache_insert(struct ami_font_dfcache_node *nodedata, const char *font, ULONG size);
+void ami_font_dfcache_insert(struct ami_font_dfcache_node *nodedata,
+			     const char *font,
+			     ULONG size);
 
 /* initialise the cache */
 void ami_font_dfcache_init(void);
@@ -48,5 +51,3 @@ void ami_font_dfcache_init(void);
 void ami_font_dfcache_fini(void);
 
 #endif
-
-

@@ -65,122 +65,162 @@ static struct ppref ppref;
  * This works for any widget which subclasses togglebutton (checkbox,
  * radiobutton etc.)
  */
-#define TOGGLEBUTTON_SIGNALS(WIDGET, OPTION)				\
-G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_toggled(GtkCheckButton *togglebutton,	\
-				     gpointer user_data);		\
-G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_toggled(GtkCheckButton *togglebutton,	\
-				     gpointer user_data)		\
-{									\
-	nsoption_set_bool(OPTION,					\
-			  gtk_check_button_get_active(togglebutton));	\
-}									\
-									\
-G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_realize(GtkWidget *widget,			\
-				     gpointer user_data);		\
-G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_realize(GtkWidget *widget,			\
-				     gpointer user_data)		\
-{									\
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(widget),		\
-				     nsoption_bool(OPTION));		\
-}
+#define TOGGLEBUTTON_SIGNALS(WIDGET, OPTION)                                   \
+	G_MODULE_EXPORT void nsgtk_preferences_##WIDGET##_toggled(             \
+		GtkCheckButton *togglebutton, gpointer user_data);             \
+	G_MODULE_EXPORT void nsgtk_preferences_##WIDGET##_toggled(             \
+		GtkCheckButton *togglebutton, gpointer user_data)              \
+	{                                                                      \
+		nsoption_set_bool(OPTION,                                      \
+				  gtk_check_button_get_active(togglebutton));  \
+	}                                                                      \
+                                                                               \
+	G_MODULE_EXPORT void nsgtk_preferences_##WIDGET##_realize(             \
+		GtkWidget *widget, gpointer user_data);                        \
+	G_MODULE_EXPORT void nsgtk_preferences_##WIDGET##_realize(             \
+		GtkWidget *widget, gpointer user_data)                         \
+	{                                                                      \
+		gtk_check_button_set_active(GTK_CHECK_BUTTON(widget),          \
+					    nsoption_bool(OPTION));            \
+	}
 
-#define SPINBUTTON_SIGNALS(WIDGET, OPTION, MULTIPLIER)			\
-G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_valuechanged(GtkSpinButton *spinbutton,	\
-					  gpointer user_data);		\
-G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_valuechanged(GtkSpinButton *spinbutton,	\
-					  gpointer user_data)		\
-{									\
-	nsoption_set_int(OPTION,					\
-		round(gtk_spin_button_get_value(spinbutton) * MULTIPLIER)); \
-}									\
-									\
-G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_realize(GtkWidget *widget, gpointer user_data); \
-G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_realize(GtkWidget *widget, gpointer user_data) \
-{									\
-	gtk_spin_button_set_value(GTK_SPIN_BUTTON(widget),		\
-		((gdouble)nsoption_int(OPTION)) / MULTIPLIER);		\
-}
+#define SPINBUTTON_SIGNALS(WIDGET, OPTION, MULTIPLIER)                         \
+	G_MODULE_EXPORT void nsgtk_preferences_##WIDGET##_valuechanged(        \
+		GtkSpinButton *spinbutton, gpointer user_data);                \
+	G_MODULE_EXPORT void nsgtk_preferences_##WIDGET##_valuechanged(        \
+		GtkSpinButton *spinbutton, gpointer user_data)                 \
+	{                                                                      \
+		nsoption_set_int(OPTION,                                       \
+				 round(gtk_spin_button_get_value(spinbutton) * \
+				       MULTIPLIER));                           \
+	}                                                                      \
+                                                                               \
+	G_MODULE_EXPORT void nsgtk_preferences_##WIDGET##_realize(             \
+		GtkWidget *widget, gpointer user_data);                        \
+	G_MODULE_EXPORT void nsgtk_preferences_##WIDGET##_realize(             \
+		GtkWidget *widget, gpointer user_data)                         \
+	{                                                                      \
+		gtk_spin_button_set_value(GTK_SPIN_BUTTON(widget),             \
+					  ((gdouble)nsoption_int(OPTION)) /    \
+						  MULTIPLIER);                 \
+	}
 
-#define SPINBUTTON_UINT_SIGNALS(WIDGET, OPTION, MULTIPLIER)		\
-G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_valuechanged(GtkSpinButton *spinbutton,	\
-					  gpointer user_data);		\
-G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_valuechanged(GtkSpinButton *spinbutton,	\
-					  gpointer user_data)		\
-{									\
-	nsoption_set_uint(OPTION,					\
-		round(gtk_spin_button_get_value(spinbutton) * MULTIPLIER)); \
-}									\
-									\
-G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_realize(GtkWidget *widget, gpointer user_data); \
-G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_realize(GtkWidget *widget, gpointer user_data) \
-{									\
-	gtk_spin_button_set_value(GTK_SPIN_BUTTON(widget),		\
-		((gdouble)nsoption_uint(OPTION)) / MULTIPLIER);		\
-}
+#define SPINBUTTON_UINT_SIGNALS(WIDGET, OPTION, MULTIPLIER)                    \
+	G_MODULE_EXPORT void nsgtk_preferences_##WIDGET##_valuechanged(        \
+		GtkSpinButton *spinbutton, gpointer user_data);                \
+	G_MODULE_EXPORT void nsgtk_preferences_##WIDGET##_valuechanged(        \
+		GtkSpinButton *spinbutton, gpointer user_data)                 \
+	{                                                                      \
+		nsoption_set_uint(                                             \
+			OPTION,                                                \
+			round(gtk_spin_button_get_value(spinbutton) *          \
+			      MULTIPLIER));                                    \
+	}                                                                      \
+                                                                               \
+	G_MODULE_EXPORT void nsgtk_preferences_##WIDGET##_realize(             \
+		GtkWidget *widget, gpointer user_data);                        \
+	G_MODULE_EXPORT void nsgtk_preferences_##WIDGET##_realize(             \
+		GtkWidget *widget, gpointer user_data)                         \
+	{                                                                      \
+		gtk_spin_button_set_value(GTK_SPIN_BUTTON(widget),             \
+					  ((gdouble)nsoption_uint(OPTION)) /   \
+						  MULTIPLIER);                 \
+	}
 
-#define ENTRY_SIGNALS(WIDGET, OPTION)					\
-G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_changed(GtkEditable *editable, gpointer user_data); \
-G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_changed(GtkEditable *editable, gpointer user_data)\
-{									\
-	nsoption_set_charp(OPTION,					\
-		strdup(gtk_editable_get_text(GTK_EDITABLE(editable))));	\
-}									\
-									\
-G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_realize(GtkWidget *widget,	gpointer user_data); \
-G_MODULE_EXPORT void							\
-nsgtk_preferences_##WIDGET##_realize(GtkWidget *widget,	gpointer user_data) \
-{									\
-	const char *OPTION;						\
-	OPTION = nsoption_charp(OPTION);				\
-	if (OPTION != NULL) {						\
-		gtk_editable_set_text(GTK_EDITABLE(widget), OPTION);		\
-	}								\
-}
+#define ENTRY_SIGNALS(WIDGET, OPTION)                                          \
+	G_MODULE_EXPORT void nsgtk_preferences_##WIDGET##_changed(             \
+		GtkEditable *editable, gpointer user_data);                    \
+	G_MODULE_EXPORT void nsgtk_preferences_##WIDGET##_changed(             \
+		GtkEditable *editable, gpointer user_data)                     \
+	{                                                                      \
+		nsoption_set_charp(OPTION,                                     \
+				   strdup(gtk_editable_get_text(               \
+					   GTK_EDITABLE(editable))));          \
+	}                                                                      \
+                                                                               \
+	G_MODULE_EXPORT void nsgtk_preferences_##WIDGET##_realize(             \
+		GtkWidget *widget, gpointer user_data);                        \
+	G_MODULE_EXPORT void nsgtk_preferences_##WIDGET##_realize(             \
+		GtkWidget *widget, gpointer user_data)                         \
+	{                                                                      \
+		const char *OPTION;                                            \
+		OPTION = nsoption_charp(OPTION);                               \
+		if (OPTION != NULL) {                                          \
+			gtk_editable_set_text(GTK_EDITABLE(widget), OPTION);   \
+		}                                                              \
+	}
 
 /* GTK module requires these to be exported symbols so these all need
  * forward declaring to avoid warnings
  */
-G_MODULE_EXPORT void nsgtk_preferences_comboProxyType_changed(GtkComboBox *combo, gpointer user_data);
-G_MODULE_EXPORT void nsgtk_preferences_comboProxyType_realize(GtkWidget *widget, gpointer user_data);
-G_MODULE_EXPORT void nsgtk_preferences_comboboxLoadImages_changed(GtkComboBox *combo, gpointer user_data);
-G_MODULE_EXPORT void nsgtk_preferences_comboboxLoadImages_realize(GtkWidget *widget, gpointer user_data);
-G_MODULE_EXPORT void nsgtk_preferences_comboDefault_changed(GtkComboBox *combo, gpointer user_data);
-G_MODULE_EXPORT void nsgtk_preferences_comboDefault_realize(GtkWidget *widget, gpointer user_data);
-G_MODULE_EXPORT void nsgtk_preferences_fontPreview_clicked(GtkButton *button, gpointer user_data);
-G_MODULE_EXPORT void nsgtk_preferences_comboboxLanguage_changed(GtkComboBox *combo, gpointer user_data);
-G_MODULE_EXPORT void nsgtk_preferences_comboboxLanguage_realize(GtkWidget *widget, gpointer user_data);
-G_MODULE_EXPORT void nsgtk_preferences_checkShowSingleTab_toggled(GtkCheckButton *togglebutton, gpointer user_data);
-G_MODULE_EXPORT void nsgtk_preferences_checkShowSingleTab_realize(GtkWidget *widget, gpointer user_data);
-G_MODULE_EXPORT void nsgtk_preferences_comboTabPosition_changed(GtkComboBox *widget, gpointer user_data);
-G_MODULE_EXPORT void nsgtk_preferences_comboTabPosition_realize(GtkWidget *widget, gpointer user_data);
-G_MODULE_EXPORT void nsgtk_preferences_comboDeveloperView_changed(GtkComboBox *widget, gpointer user_data);
-G_MODULE_EXPORT void nsgtk_preferences_comboDeveloperView_realize(GtkWidget *widget, gpointer user_data);
-G_MODULE_EXPORT void nsgtk_preferences_comboButtonType_changed(GtkComboBox *widget, gpointer user_data);
-G_MODULE_EXPORT void nsgtk_preferences_comboButtonType_realize(GtkWidget *widget, gpointer user_data);
-G_MODULE_EXPORT void nsgtk_preferences_setCurrentPage_clicked(GtkButton *button, gpointer user_data);
-G_MODULE_EXPORT void nsgtk_preferences_setDefaultPage_clicked(GtkButton *button, gpointer user_data);
-G_MODULE_EXPORT void nsgtk_preferences_comboSearch_changed(GtkComboBox *widget, gpointer user_data);
-G_MODULE_EXPORT void nsgtk_preferences_comboSearch_realize(GtkWidget *widget, gpointer user_data);
-G_MODULE_EXPORT void nsgtk_preferences_fileChooserDownloads_clicked(GtkButton *button, gpointer user_data);
-G_MODULE_EXPORT void nsgtk_preferences_fileChooserDownloads_realize(GtkWidget *widget, gpointer user_data);
-G_MODULE_EXPORT void nsgtk_preferences_close_clicked(GtkButton *button, gpointer user_data);
-G_MODULE_EXPORT gboolean nsgtk_preferences_dialogPreferences_closerequest(GtkWindow *dlg, gpointer user_data);
-G_MODULE_EXPORT void nsgtk_preferences_dialogPreferences_destroy(GtkWindow *dlg, gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_comboProxyType_changed(GtkComboBox *combo,
+					 gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_comboProxyType_realize(GtkWidget *widget, gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_comboboxLoadImages_changed(GtkComboBox *combo,
+					     gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_comboboxLoadImages_realize(GtkWidget *widget,
+					     gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_comboDefault_changed(GtkComboBox *combo, gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_comboDefault_realize(GtkWidget *widget, gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_fontPreview_clicked(GtkButton *button, gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_comboboxLanguage_changed(GtkComboBox *combo,
+					   gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_comboboxLanguage_realize(GtkWidget *widget,
+					   gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_checkShowSingleTab_toggled(GtkCheckButton *togglebutton,
+					     gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_checkShowSingleTab_realize(GtkWidget *widget,
+					     gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_comboTabPosition_changed(GtkComboBox *widget,
+					   gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_comboTabPosition_realize(GtkWidget *widget,
+					   gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_comboDeveloperView_changed(GtkComboBox *widget,
+					     gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_comboDeveloperView_realize(GtkWidget *widget,
+					     gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_comboButtonType_changed(GtkComboBox *widget,
+					  gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_comboButtonType_realize(GtkWidget *widget,
+					  gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_setCurrentPage_clicked(GtkButton *button, gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_setDefaultPage_clicked(GtkButton *button, gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_comboSearch_changed(GtkComboBox *widget, gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_comboSearch_realize(GtkWidget *widget, gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_fileChooserDownloads_clicked(GtkButton *button,
+					       gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_fileChooserDownloads_realize(GtkWidget *widget,
+					       gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_close_clicked(GtkButton *button, gpointer user_data);
+G_MODULE_EXPORT gboolean
+nsgtk_preferences_dialogPreferences_closerequest(GtkWindow *dlg,
+						 gpointer user_data);
+G_MODULE_EXPORT void
+nsgtk_preferences_dialogPreferences_destroy(GtkWindow *dlg, gpointer user_data);
 
 
 /********* PDF **********/
@@ -275,7 +315,6 @@ static void set_proxy_widgets_sensitivity(int proxyval, struct ppref *priv)
 	gtk_widget_set_sensitive(GTK_WIDGET(priv->entryProxyUser), user);
 	gtk_widget_set_sensitive(GTK_WIDGET(priv->entryProxyPassword), pass);
 	gtk_widget_set_sensitive(GTK_WIDGET(priv->entryProxyNoproxy), noproxy);
-
 }
 
 G_MODULE_EXPORT void
@@ -329,11 +368,11 @@ nsgtk_preferences_comboProxyType_realize(GtkWidget *widget, gpointer user_data)
 		if (nsoption_charp(http_proxy_host) == NULL) {
 			/* set to use a proxy without a host, turn proxy off */
 			proxytype = 0;
-		} else if (((proxytype == 2) ||
-			    (proxytype == 3)) &&
+		} else if (((proxytype == 2) || (proxytype == 3)) &&
 			   ((nsoption_charp(http_proxy_auth_user) == NULL) ||
 			    (nsoption_charp(http_proxy_auth_pass) == NULL))) {
-			/* authentication selected with empty credentials, turn proxy off */
+			/* authentication selected with empty credentials, turn
+			 * proxy off */
 			proxytype = 0;
 		}
 	}
@@ -390,10 +429,10 @@ SPINBUTTON_SIGNALS(spinHistoryAge, history_age, 1.0)
 /* Cache */
 
 /* memory cache size */
-SPINBUTTON_SIGNALS(spinMemoryCacheSize, memory_cache_size, (1024*1024))
+SPINBUTTON_SIGNALS(spinMemoryCacheSize, memory_cache_size, (1024 * 1024))
 
 /* disc cache size */
-SPINBUTTON_UINT_SIGNALS(spinDiscCacheSize, disc_cache_size, (1024*1024))
+SPINBUTTON_UINT_SIGNALS(spinDiscCacheSize, disc_cache_size, (1024 * 1024))
 
 
 /* disc cache age */
@@ -451,7 +490,7 @@ nsgtk_preferences_comboboxLoadImages_changed(GtkComboBox *combo,
 
 G_MODULE_EXPORT void
 nsgtk_preferences_comboboxLoadImages_realize(GtkWidget *widget,
-					   gpointer user_data)
+					     gpointer user_data)
 {
 	if (nsoption_bool(foreground_images)) {
 		if (nsoption_bool(background_images)) {
@@ -540,12 +579,11 @@ nsgtk_preferences_comboboxLanguage_changed(GtkComboBox *combo,
 /**
  * populate language combo from data
  */
-static nserror
-comboboxLanguage_add_from_data(GtkListStore *liststore,
-			       GtkComboBox *combobox,
-			       const char *accept_language,
-			       const uint8_t *data,
-			       size_t data_size)
+static nserror comboboxLanguage_add_from_data(GtkListStore *liststore,
+					      GtkComboBox *combobox,
+					      const char *accept_language,
+					      const uint8_t *data,
+					      size_t data_size)
 {
 	int active_language = -1;
 	GtkTreeIter iter;
@@ -569,7 +607,7 @@ comboboxLanguage_add_from_data(GtkListStore *liststore,
 		}
 		if (bufi > 0) {
 			gtk_list_store_append(liststore, &iter);
-			gtk_list_store_set(liststore, &iter, 0, buf, -1 );
+			gtk_list_store_set(liststore, &iter, 0, buf, -1);
 
 			if (strcmp(buf, accept_language) == 0) {
 				active_language = combo_row_count;
@@ -596,11 +634,10 @@ comboboxLanguage_add_from_data(GtkListStore *liststore,
 /**
  * populate language combo from file
  */
-static nserror
-comboboxLanguage_add_from_file(GtkListStore *liststore,
-			       GtkComboBox *combobox,
-			       const char *accept_language,
-			       const char *file_location)
+static nserror comboboxLanguage_add_from_file(GtkListStore *liststore,
+					      GtkComboBox *combobox,
+					      const char *accept_language,
+					      const char *file_location)
 {
 	int active_language = -1;
 	GtkTreeIter iter;
@@ -625,7 +662,7 @@ comboboxLanguage_add_from_file(GtkListStore *liststore,
 		buf[strlen(buf) - 1] = '\0';
 
 		gtk_list_store_append(liststore, &iter);
-		gtk_list_store_set(liststore, &iter, 0, buf, -1 );
+		gtk_list_store_set(liststore, &iter, 0, buf, -1);
 
 		if (strcmp(buf, accept_language) == 0) {
 			active_language = combo_row_count;
@@ -685,10 +722,11 @@ nsgtk_preferences_comboboxLanguage_realize(GtkWidget *widget,
 		/* attempt to read languages from file */
 		res = nsgtk_path_from_resname("languages", &languages_file);
 		if (res == NSERROR_OK) {
-			res = comboboxLanguage_add_from_file(priv->content_language,
-					GTK_COMBO_BOX(widget),
-					accept_language,
-					languages_file);
+			res = comboboxLanguage_add_from_file(
+				priv->content_language,
+				GTK_COMBO_BOX(widget),
+				accept_language,
+				languages_file);
 		}
 	}
 	if (res != NSERROR_OK) {
@@ -713,10 +751,10 @@ nsgtk_preferences_checkShowSingleTab_toggled(GtkCheckButton *togglebutton,
 
 G_MODULE_EXPORT void
 nsgtk_preferences_checkShowSingleTab_realize(GtkWidget *widget,
-				     gpointer user_data)
+					     gpointer user_data)
 {
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(widget),
-				     nsoption_bool(show_single_tab));
+				    nsoption_bool(show_single_tab));
 }
 
 /* switch to newly opened tabs immediately */
@@ -750,7 +788,7 @@ nsgtk_preferences_comboTabPosition_realize(GtkWidget *widget,
 /* developer view opening */
 G_MODULE_EXPORT void
 nsgtk_preferences_comboDeveloperView_changed(GtkComboBox *widget,
-					   gpointer user_data)
+					     gpointer user_data)
 {
 	/* set the option */
 	nsoption_set_int(developer_view, gtk_combo_box_get_active(widget));
@@ -758,7 +796,7 @@ nsgtk_preferences_comboDeveloperView_changed(GtkComboBox *widget,
 
 G_MODULE_EXPORT void
 nsgtk_preferences_comboDeveloperView_realize(GtkWidget *widget,
-					   gpointer user_data)
+					     gpointer user_data)
 {
 	gtk_combo_box_set_active(GTK_COMBO_BOX(widget),
 				 nsoption_int(developer_view));
@@ -775,7 +813,7 @@ TOGGLEBUTTON_SIGNALS(checkDisplayRecentURLs, url_suggestion)
 /* button position */
 G_MODULE_EXPORT void
 nsgtk_preferences_comboButtonType_changed(GtkComboBox *widget,
-					   gpointer user_data)
+					  gpointer user_data)
 {
 	nsoption_set_int(button_type, gtk_combo_box_get_active(widget) + 1);
 
@@ -784,13 +822,11 @@ nsgtk_preferences_comboButtonType_changed(GtkComboBox *widget,
 }
 
 G_MODULE_EXPORT void
-nsgtk_preferences_comboButtonType_realize(GtkWidget *widget,
-					   gpointer user_data)
+nsgtk_preferences_comboButtonType_realize(GtkWidget *widget, gpointer user_data)
 {
 	gtk_combo_box_set_active(GTK_COMBO_BOX(widget),
 				 nsoption_int(button_type) - 1);
 }
-
 
 
 /************ Main ************/
@@ -808,7 +844,8 @@ nsgtk_preferences_setCurrentPage_clicked(GtkButton *button, gpointer user_data)
 	const gchar *url = nsurl_access(browser_window_access_url(priv->bw));
 
 	if (priv->entryHomePageURL != NULL) {
-		gtk_editable_set_text(GTK_EDITABLE(priv->entryHomePageURL), url);
+		gtk_editable_set_text(GTK_EDITABLE(priv->entryHomePageURL),
+				      url);
 		nsoption_set_charp(homepage_url, strdup(url));
 	}
 }
@@ -821,7 +858,8 @@ nsgtk_preferences_setDefaultPage_clicked(GtkButton *button, gpointer user_data)
 	const gchar *url = NETSURF_HOMEPAGE;
 
 	if (priv->entryHomePageURL != NULL) {
-		gtk_editable_set_text(GTK_EDITABLE(priv->entryHomePageURL), url);
+		gtk_editable_set_text(GTK_EDITABLE(priv->entryHomePageURL),
+				      url);
 		nsoption_set_charp(homepage_url, strdup(url));
 	}
 }
@@ -837,9 +875,9 @@ nsgtk_preferences_comboSearch_changed(GtkComboBox *widget, gpointer user_data)
 {
 	gboolean set;
 	GtkTreeIter iter;
-	GtkTreeModel* model;
-	gchar* provider;
-	const char* defprovider;
+	GtkTreeModel *model;
+	gchar *provider;
+	const char *defprovider;
 
 	set = gtk_combo_box_get_active_iter(GTK_COMBO_BOX(widget), &iter);
 	if (!set) {
@@ -847,7 +885,7 @@ nsgtk_preferences_comboSearch_changed(GtkComboBox *widget, gpointer user_data)
 	}
 
 	model = gtk_combo_box_get_model(GTK_COMBO_BOX(widget));
-	gtk_tree_model_get(model, &iter, 0, &provider,  -1);
+	gtk_tree_model_get(model, &iter, 0, &provider, -1);
 
 	/* set search provider */
 	search_web_select_provider(provider);
@@ -882,9 +920,8 @@ nsgtk_preferences_comboSearch_realize(GtkWidget *widget, gpointer user_data)
 
 	iter = search_web_iterate_providers(-1, &name);
 	while (iter != -1) {
-		gtk_list_store_insert_with_values(priv->search_providers,
-						  NULL, -1,
-						  0, name, -1);
+		gtk_list_store_insert_with_values(
+			priv->search_providers, NULL, -1, 0, name, -1);
 		if ((provider != NULL) && (strcmp(name, provider) == 0)) {
 			provider_idx = iter;
 		}
@@ -905,8 +942,7 @@ TOGGLEBUTTON_SIGNALS(checkClearDownloads, downloads_clear)
 TOGGLEBUTTON_SIGNALS(checkRequestOverwrite, request_overwrite)
 
 /* download location */
-static void
-fileChooserDownloads_set_label(GtkButton *button)
+static void fileChooserDownloads_set_label(GtkButton *button)
 {
 	const char *dir = nsoption_charp(downloads_directory);
 	char *name;
@@ -920,16 +956,17 @@ fileChooserDownloads_set_label(GtkButton *button)
 	g_free(name);
 }
 
-static void
-fileChooserDownloads_chosen(GObject *source, GAsyncResult *result, gpointer data)
+static void fileChooserDownloads_chosen(GObject *source,
+					GAsyncResult *result,
+					gpointer data)
 {
 	GtkButton *button = GTK_BUTTON(data);
 	GFile *folder;
 	char *dir;
 
 	folder = gtk_file_dialog_select_folder_finish(GTK_FILE_DIALOG(source),
-						       result,
-						       NULL);
+						      result,
+						      NULL);
 	if (folder != NULL) {
 		dir = g_file_get_path(folder);
 		if (dir != NULL) {
@@ -953,7 +990,8 @@ nsgtk_preferences_fileChooserDownloads_clicked(GtkButton *button,
 	toplevel = gtk_widget_get_ancestor(GTK_WIDGET(button), GTK_TYPE_WINDOW);
 
 	dialog = gtk_file_dialog_new();
-	gtk_file_dialog_set_title(dialog, messages_get("preferencesDownloadsLocationTooltip"));
+	gtk_file_dialog_set_title(
+		dialog, messages_get("preferencesDownloadsLocationTooltip"));
 	if (dir != NULL) {
 		GFile *folder = g_file_new_for_path(dir);
 		gtk_file_dialog_set_initial_folder(dialog, folder);
@@ -1016,7 +1054,7 @@ nsgtk_preferences_dialogPreferences_destroy(GtkWindow *dlg, gpointer user_data)
 
 
 /* exported interface documented in gtk/preferences.h */
-GtkWidget* nsgtk_preferences(struct browser_window *bw, GtkWindow *parent)
+GtkWidget *nsgtk_preferences(struct browser_window *bw, GtkWindow *parent)
 {
 	GtkBuilder *preferences_builder;
 	struct ppref *priv = &ppref;
@@ -1037,9 +1075,10 @@ GtkWidget* nsgtk_preferences(struct browser_window *bw, GtkWindow *parent)
 	}
 
 	priv->dialog = gtk_builder_get_object(preferences_builder,
-					       "dialogPreferences");
+					      "dialogPreferences");
 	if (priv->dialog == NULL) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "Unable to get object for preferences dialog");
 		/* release builder as were done with it */
 		g_object_unref(G_OBJECT(preferences_builder));
@@ -1049,7 +1088,8 @@ GtkWidget* nsgtk_preferences(struct browser_window *bw, GtkWindow *parent)
 	/* need to explicitly obtain handles for some widgets enabling
 	 * updates by other widget events
 	 */
-#define GB(TYPE, NAME) GTK_##TYPE(gtk_builder_get_object(preferences_builder, #NAME))
+#define GB(TYPE, NAME)                                                         \
+	GTK_##TYPE(gtk_builder_get_object(preferences_builder, #NAME))
 	priv->entryHomePageURL = GB(ENTRY, entryHomePageURL);
 	priv->content_language = GB(LIST_STORE, liststore_content_language);
 	priv->search_providers = GB(LIST_STORE, liststore_search_provider);
@@ -1060,7 +1100,7 @@ GtkWidget* nsgtk_preferences(struct browser_window *bw, GtkWindow *parent)
 	priv->entryProxyNoproxy = GB(ENTRY, entryProxyNoproxy);
 #undef GB
 
-	
+
 	/* release builder as were done with it */
 	g_object_unref(G_OBJECT(preferences_builder));
 

@@ -262,21 +262,21 @@ static char *remove_underscores(const char *s, bool replacespace)
  * \param labelmsg The message key of the label
  * \param button_type The button type, see nsgtk_button_set_style()
  */
-static void
-set_button_content(GtkWidget *button,
-		   const char *iconname,
-		   const char *labelmsg,
-		   int button_type)
+static void set_button_content(GtkWidget *button,
+			       const char *iconname,
+			       const char *labelmsg,
+			       int button_type)
 {
 	char *label;
 
-	g_object_set_data_full(G_OBJECT(button), "nsgtk-icon",
-			       g_strdup(iconname), g_free);
-	g_object_set_data_full(G_OBJECT(button), "nsgtk-label",
-			       g_strdup(labelmsg), g_free);
+	g_object_set_data_full(
+		G_OBJECT(button), "nsgtk-icon", g_strdup(iconname), g_free);
+	g_object_set_data_full(
+		G_OBJECT(button), "nsgtk-label", g_strdup(labelmsg), g_free);
 
 	label = remove_underscores(messages_get(labelmsg), false);
-	nsgtk_button_set_style(GTK_BUTTON(button), iconname,
+	nsgtk_button_set_style(GTK_BUTTON(button),
+			       iconname,
 			       label != NULL ? label : labelmsg,
 			       button_type);
 	gtk_widget_set_tooltip_text(button, label);
@@ -292,18 +292,19 @@ set_button_content(GtkWidget *button,
  * \param sensitivity if the button should be sensitive to input
  * \param edit true if the button is for the customisation toolbox
  */
-static GtkWidget *
-make_button(const char *iconname,
-	    const char *labelmsg,
-	    bool sensitivity,
-	    bool edit)
+static GtkWidget *make_button(const char *iconname,
+			      const char *labelmsg,
+			      bool sensitivity,
+			      bool edit)
 {
 	GtkWidget *button;
 
 	button = gtk_button_new();
 	gtk_button_set_has_frame(GTK_BUTTON(button), FALSE);
 	gtk_widget_set_focus_on_click(button, FALSE);
-	set_button_content(button, iconname, labelmsg,
+	set_button_content(button,
+			   iconname,
+			   labelmsg,
 			   edit ? 3 : nsoption_int(button_type));
 	gtk_widget_set_sensitive(button, sensitivity);
 
@@ -314,8 +315,7 @@ make_button(const char *iconname,
 /**
  * create throbber toolbar item widget
  */
-static GtkWidget *
-make_toolbar_item_throbber(bool sensitivity, bool edit)
+static GtkWidget *make_toolbar_item_throbber(bool sensitivity, bool edit)
 {
 	nserror res;
 	GtkWidget *item;
@@ -331,12 +331,15 @@ make_toolbar_item_throbber(bool sensitivity, bool edit)
 
 		item = gtk_button_new();
 		gtk_button_set_has_frame(GTK_BUTTON(item), FALSE);
-		gtk_box_append(GTK_BOX(box), nsgtk_image_new_from_pixbuf(pixbuf));
-		gtk_box_append(GTK_BOX(box), gtk_label_new(messages_get("ToolThrob")));
+		gtk_box_append(GTK_BOX(box),
+			       nsgtk_image_new_from_pixbuf(pixbuf));
+		gtk_box_append(GTK_BOX(box),
+			       gtk_label_new(messages_get("ToolThrob")));
 		gtk_button_set_child(GTK_BUTTON(item), box);
 	} else {
 		item = nsgtk_image_new_from_pixbuf(pixbuf);
-		gtk_image_set_pixel_size(GTK_IMAGE(item), gdk_pixbuf_get_height(pixbuf));
+		gtk_image_set_pixel_size(GTK_IMAGE(item),
+					 gdk_pixbuf_get_height(pixbuf));
 		nsgtk_widget_set_alignment(item,
 					   GTK_ALIGN_CENTER,
 					   GTK_ALIGN_CENTER);
@@ -356,8 +359,7 @@ make_toolbar_item_throbber(bool sensitivity, bool edit)
  * \param sensitivity if the entry should be created sensitive to input
  * \param edit if the entry should be editable
  */
-static GtkWidget *
-make_toolbar_item_url_bar(bool sensitivity, bool edit)
+static GtkWidget *make_toolbar_item_url_bar(bool sensitivity, bool edit)
 {
 	GtkWidget *entry;
 	GtkEntryCompletion *completion;
@@ -368,8 +370,8 @@ make_toolbar_item_url_bar(bool sensitivity, bool edit)
 
 	entry = gtk_entry_new();
 	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(entry),
-					    GTK_ENTRY_ICON_PRIMARY,
-					    "page-info-internal");
+					  GTK_ENTRY_ICON_PRIMARY,
+					  "page-info-internal");
 
 	completion = gtk_entry_completion_new();
 	if (completion != NULL) {
@@ -388,8 +390,7 @@ make_toolbar_item_url_bar(bool sensitivity, bool edit)
 /**
  * create web search toolbar item widget
  */
-static GtkWidget *
-make_toolbar_item_websearch(bool sensitivity, bool edit)
+static GtkWidget *make_toolbar_item_websearch(bool sensitivity, bool edit)
 {
 	nserror res;
 	GtkWidget *entry;
@@ -414,8 +415,8 @@ make_toolbar_item_websearch(bool sensitivity, bool edit)
 		g_object_unref(pixbuf);
 	} else {
 		gtk_entry_set_icon_from_icon_name(GTK_ENTRY(entry),
-						    GTK_ENTRY_ICON_PRIMARY,
-						    NSGTK_STOCK_INFO);
+						  GTK_ENTRY_ICON_PRIMARY,
+						  NSGTK_STOCK_INFO);
 	}
 
 	gtk_widget_set_size_request(entry, NSGTK_WEBSEARCH_WIDTH, -1);
@@ -429,13 +430,13 @@ make_toolbar_item_websearch(bool sensitivity, bool edit)
 /**
  * create local history toolbar item widget
  */
-static GtkWidget *
-make_toolbar_item_history(bool sensitivity, bool edit)
+static GtkWidget *make_toolbar_item_history(bool sensitivity, bool edit)
 {
 	GtkWidget *item;
 
 	if (edit) {
-		return make_button("local-history", "gtkLocalHistory", sensitivity, true);
+		return make_button(
+			"local-history", "gtkLocalHistory", sensitivity, true);
 	}
 
 	item = gtk_button_new_from_icon_name("local-history");
@@ -460,19 +461,20 @@ make_toolbar_item(nsgtk_toolbar_button itemid, bool sensitivity)
 {
 	GtkWidget *toolitem = NULL;
 
-	switch(itemid) {
+	switch (itemid) {
 #define TOOLBAR_ITEM_y(identifier, label, iconame)
 #define TOOLBAR_ITEM_n(identifier, label, iconame)
-#define TOOLBAR_ITEM_t(identifier, label, iconame)		\
-	case identifier:					\
-		toolitem = make_button(iconame, #label, sensitivity, false); \
+#define TOOLBAR_ITEM_t(identifier, label, iconame)                             \
+	case identifier:                                                       \
+		toolitem = make_button(iconame, #label, sensitivity, false);   \
 		break;
-#define TOOLBAR_ITEM_b(identifier, label, iconame)		\
-	case identifier:					\
-		toolitem = make_button(iconame, #label, sensitivity, false); \
+#define TOOLBAR_ITEM_b(identifier, label, iconame)                             \
+	case identifier:                                                       \
+		toolitem = make_button(iconame, #label, sensitivity, false);   \
 		break;
-#define TOOLBAR_ITEM(identifier, name, snstvty, clicked, activate, label, iconame) \
-		TOOLBAR_ITEM_ ## clicked(identifier, label, iconame)
+#define TOOLBAR_ITEM(                                                          \
+	identifier, name, snstvty, clicked, activate, label, iconame)          \
+	TOOLBAR_ITEM_##clicked(identifier, label, iconame)
 
 #include "gtk/toolbar_items.h"
 
@@ -500,7 +502,6 @@ make_toolbar_item(nsgtk_toolbar_button itemid, bool sensitivity)
 
 	default:
 		break;
-
 	}
 	return toolitem;
 }
@@ -512,26 +513,26 @@ make_toolbar_item(nsgtk_toolbar_button itemid, bool sensitivity)
  * \param itemid the id of the widget
  * \return gtk widget
  */
-static GtkWidget *
-make_toolbox_item(nsgtk_toolbar_button itemid, bool bar)
+static GtkWidget *make_toolbox_item(nsgtk_toolbar_button itemid, bool bar)
 {
 	GtkWidget *toolitem = NULL;
 
-	switch(itemid) {
+	switch (itemid) {
 #define TOOLBAR_ITEM_y(identifier, label, iconame)
 #define TOOLBAR_ITEM_n(identifier, label, iconame)
-#define TOOLBAR_ITEM_t(identifier, label, iconame)		\
-	case identifier:					\
-		if (bar) {						\
-			toolitem = make_button(iconame, #label, true, true); \
-		}							\
+#define TOOLBAR_ITEM_t(identifier, label, iconame)                             \
+	case identifier:                                                       \
+		if (bar) {                                                     \
+			toolitem = make_button(iconame, #label, true, true);   \
+		}                                                              \
 		break;
-#define TOOLBAR_ITEM_b(identifier, label, iconame)		\
-	case identifier:					\
-		toolitem = make_button(iconame, #label, true, true); \
+#define TOOLBAR_ITEM_b(identifier, label, iconame)                             \
+	case identifier:                                                       \
+		toolitem = make_button(iconame, #label, true, true);           \
 		break;
-#define TOOLBAR_ITEM(identifier, name, snstvty, clicked, activate, label, iconame) \
-		TOOLBAR_ITEM_ ## clicked(identifier, label, iconame)
+#define TOOLBAR_ITEM(                                                          \
+	identifier, name, snstvty, clicked, activate, label, iconame)          \
+	TOOLBAR_ITEM_##clicked(identifier, label, iconame)
 
 #include "gtk/toolbar_items.h"
 
@@ -559,7 +560,6 @@ make_toolbox_item(nsgtk_toolbar_button itemid, bool bar)
 
 	default:
 		break;
-
 	}
 	return toolitem;
 }
@@ -588,8 +588,7 @@ itemid_from_location(struct nsgtk_toolbar *tb, int location)
 /**
  * save toolbar settings to file
  */
-static nserror
-nsgtk_toolbar_customisation_save(struct nsgtk_toolbar *tb)
+static nserror nsgtk_toolbar_customisation_save(struct nsgtk_toolbar *tb)
 {
 	int iidx; /* item index */
 	char *order; /* item ordering */
@@ -618,8 +617,7 @@ nsgtk_toolbar_customisation_save(struct nsgtk_toolbar *tb)
 
 	start = order;
 
-	for (location = BACK_BUTTON;
-	     location < PLACEHOLDER_BUTTON;
+	for (location = BACK_BUTTON; location < PLACEHOLDER_BUTTON;
 	     location++) {
 		int written;
 		itemid = itemid_from_location(tb, location);
@@ -628,11 +626,10 @@ nsgtk_toolbar_customisation_save(struct nsgtk_toolbar *tb)
 			break;
 		}
 		written = snprintf(start,
-				orderlen + 1 - (start - order),
-				"%s/",
-				tb->items[itemid].name);
-		if ((written < 0) ||
-		    (written > orderlen - (start - order))) {
+				   orderlen + 1 - (start - order),
+				   "%s/",
+				   tb->items[itemid].name);
+		if ((written < 0) || (written > orderlen - (start - order))) {
 			free(order);
 			return NSERROR_UNKNOWN;
 		}
@@ -693,13 +690,13 @@ customisation_toolbar_remove_item(struct nsgtk_toolbar *tb, int itemid)
  * The item id is offset by PLACEHOLDER_BUTTON for items dragged from the
  *   customisation toolbar instead of the toolbox.
  */
-static GdkContentProvider *
-toolbar_item_drag_prepare_cb(GtkDragSource *source,
-			     double x,
-			     double y,
-			     gpointer data)
+static GdkContentProvider *toolbar_item_drag_prepare_cb(GtkDragSource *source,
+							double x,
+							double y,
+							gpointer data)
 {
-	return gdk_content_provider_new_typed(G_TYPE_INT, GPOINTER_TO_INT(data));
+	return gdk_content_provider_new_typed(G_TYPE_INT,
+					      GPOINTER_TO_INT(data));
 }
 
 
@@ -765,12 +762,11 @@ toolbar_item_connect_signals(struct nsgtk_toolbar *tb, int itemid)
  *
  * called when a widget is dropped onto the store window
  */
-static gboolean
-customisation_container_drop_cb(GtkDropTarget *target,
-				const GValue *value,
-				double x,
-				double y,
-				gpointer data)
+static gboolean customisation_container_drop_cb(GtkDropTarget *target,
+						const GValue *value,
+						double x,
+						double y,
+						gpointer data)
 {
 	struct nsgtk_toolbar_customisation *tbc;
 	int itemid;
@@ -797,12 +793,11 @@ customisation_container_drop_cb(GtkDropTarget *target,
  *
  * called when a widget is dropped onto the toolbar
  */
-static gboolean
-customisation_toolbar_drop_cb(GtkDropTarget *target,
-			      const GValue *value,
-			      double x,
-			      double y,
-			      gpointer data)
+static gboolean customisation_toolbar_drop_cb(GtkDropTarget *target,
+					      const GValue *value,
+					      double x,
+					      double y,
+					      gpointer data)
 {
 	struct nsgtk_toolbar_customisation *tbc;
 	tbc = (struct nsgtk_toolbar_customisation *)data;
@@ -828,7 +823,8 @@ customisation_toolbar_drop_cb(GtkDropTarget *target,
 	     child = gtk_widget_get_next_sibling(child)) {
 		graphene_rect_t bounds;
 
-		if (gtk_widget_compute_bounds(child, tbc->toolbar.widget, &bounds) &&
+		if (gtk_widget_compute_bounds(
+			    child, tbc->toolbar.widget, &bounds) &&
 		    (x > bounds.origin.x + bounds.size.width / 2)) {
 			position++;
 		}
@@ -892,7 +888,8 @@ nsgtk_browser_window_create(struct browser_window *bw, bool intab)
 {
 	nserror res = NSERROR_OK;
 	nsurl *url = NULL;
-	int flags = BW_CREATE_HISTORY | BW_CREATE_FOREGROUND | BW_CREATE_FOCUS_LOCATION;
+	int flags = BW_CREATE_HISTORY | BW_CREATE_FOREGROUND |
+		    BW_CREATE_FOCUS_LOCATION;
 
 	if (intab) {
 		flags |= BW_CREATE_TAB;
@@ -929,8 +926,7 @@ nsgtk_browser_window_create(struct browser_window *bw, bool intab)
  * \param tb The toolbar to apply customisation to
  * \param NSERROR_OK on success else error code.
  */
-static nserror
-apply_user_button_customisation(struct nsgtk_toolbar *tb)
+static nserror apply_user_button_customisation(struct nsgtk_toolbar *tb)
 {
 	const char *tbitems; /* item order user config */
 	const char *start;
@@ -951,13 +947,16 @@ apply_user_button_customisation(struct nsgtk_toolbar *tb)
 	end = tbitems;
 	while (*end != 0) {
 		start = end;
-		while ((*end != 0) && (*end !='/')) {
+		while ((*end != 0) && (*end != '/')) {
 			end++;
 		}
 
 		for (iidx = BACK_BUTTON; iidx < PLACEHOLDER_BUTTON; iidx++) {
-			if (((ssize_t)strlen(tb->items[iidx].name) == (end - start)) &&
-			    (strncmp(tb->items[iidx].name, start, end - start) == 0)) {
+			if (((ssize_t)strlen(tb->items[iidx].name) ==
+			     (end - start)) &&
+			    (strncmp(tb->items[iidx].name,
+				     start,
+				     end - start) == 0)) {
 				tb->items[iidx].location = location++;
 				break;
 			}
@@ -1018,9 +1017,8 @@ static nserror populate_gtk_toolbar_widget(struct nsgtk_toolbar *tb)
 		if (itemid == PLACEHOLDER_BUTTON) {
 			break;
 		}
-		tb->items[itemid].button =
-			make_toolbar_item(itemid,
-					  tb->items[itemid].sensitivity);
+		tb->items[itemid].button = make_toolbar_item(
+			itemid, tb->items[itemid].sensitivity);
 		if (tb->items[itemid].button != NULL) {
 			gtk_box_append(GTK_BOX(tb->widget),
 				       tb->items[itemid].button);
@@ -1149,13 +1147,8 @@ toolbar_navigate_to_url(struct nsgtk_toolbar *tb, const char *urltxt)
 
 	bw = tb->get_bw(tb->get_ctx);
 
-	res = browser_window_navigate(bw,
-				      url,
-				      NULL,
-				      BW_NAVIGATE_HISTORY,
-				      NULL,
-				      NULL,
-				      NULL);
+	res = browser_window_navigate(
+		bw, url, NULL, BW_NAVIGATE_HISTORY, NULL, NULL, NULL);
 	nsurl_unref(url);
 
 	return res;
@@ -1165,12 +1158,11 @@ toolbar_navigate_to_url(struct nsgtk_toolbar *tb, const char *urltxt)
 /**
  * run a gtk file chooser as a save dialog to obtain a path
  */
-static nserror
-nsgtk_saveas_dialog(struct browser_window *bw,
-		    const char *title,
-		    GtkWindow *parent,
-		    bool folder,
-		    gchar **path_out)
+static nserror nsgtk_saveas_dialog(struct browser_window *bw,
+				   const char *title,
+				   GtkWindow *parent,
+				   bool folder,
+				   gchar **path_out)
 {
 	nserror res;
 	char *path; /* proposed path */
@@ -1194,7 +1186,9 @@ nsgtk_saveas_dialog(struct browser_window *bw,
 	chosen = nsgtk_save_file_choose(parent,
 					title,
 					NULL,
-					((!folder) || (access(path, F_OK) != 0)) ? path : NULL);
+					((!folder) || (access(path, F_OK) != 0))
+						? path
+						: NULL);
 	free(path);
 	if (chosen == NULL) {
 		return NSERROR_NOT_FOUND;
@@ -1214,8 +1208,7 @@ nsgtk_saveas_dialog(struct browser_window *bw,
 /**
  * connect all signals to widgets in a customisation
  */
-static nserror
-toolbar_customisation_connect_signals(struct nsgtk_toolbar *tb)
+static nserror toolbar_customisation_connect_signals(struct nsgtk_toolbar *tb)
 {
 	int iidx;
 
@@ -1239,10 +1232,9 @@ toolbar_customisation_connect_signals(struct nsgtk_toolbar *tb)
  * \param enditem The item index of the beginning of the next row
  * \return NSERROR_OK on successs else error
  */
-static nserror
-add_toolbox_row(struct nsgtk_toolbar_customisation *tbc,
-		int startitem,
-		int enditem)
+static nserror add_toolbox_row(struct nsgtk_toolbar_customisation *tbc,
+			       int startitem,
+			       int enditem)
 {
 	GtkWidget *rowbar;
 	int iidx;
@@ -1351,8 +1343,8 @@ static void customisation_close(struct nsgtk_toolbar_customisation *tbc)
 	GtkNotebook *notebook;
 	gint pagenum;
 
-	notebook = GTK_NOTEBOOK(gtk_widget_get_ancestor(tbc->container,
-							GTK_TYPE_NOTEBOOK));
+	notebook = GTK_NOTEBOOK(
+		gtk_widget_get_ancestor(tbc->container, GTK_TYPE_NOTEBOOK));
 	if (notebook != NULL) {
 		pagenum = gtk_notebook_page_num(notebook, tbc->container);
 		if (pagenum > 0) {
@@ -1368,8 +1360,7 @@ static void customisation_close(struct nsgtk_toolbar_customisation *tbc)
  *
  * when 'save settings' button is clicked
  */
-static gboolean
-customisation_apply_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean customisation_apply_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar_customisation *tbc;
 	tbc = (struct nsgtk_toolbar_customisation *)data;
@@ -1397,8 +1388,7 @@ static void customisation_discard_clicked_cb(GtkWidget *widget, gpointer data)
  *
  * when 'reload defaults' button is clicked
  */
-static gboolean
-customisation_reset_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean customisation_reset_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar_customisation *tbc;
 	tbc = (struct nsgtk_toolbar_customisation *)data;
@@ -1442,8 +1432,8 @@ static gboolean cutomize_button_clicked_cb(GtkWidget *widget, gpointer data)
 	int iidx; /* item index */
 
 	/* obtain the notebook being added to */
-	notebook = GTK_NOTEBOOK(gtk_widget_get_ancestor(widget,
-							GTK_TYPE_NOTEBOOK));
+	notebook = GTK_NOTEBOOK(
+		gtk_widget_get_ancestor(widget, GTK_TYPE_NOTEBOOK));
 	if (notebook == NULL) {
 		return TRUE;
 	}
@@ -1466,7 +1456,8 @@ static gboolean cutomize_button_clicked_cb(GtkWidget *widget, gpointer data)
 	}
 
 	/* get container box widget which forms a page of the tabs */
-	tbc->container = GTK_WIDGET(gtk_builder_get_object(builder, "customisation"));
+	tbc->container = GTK_WIDGET(
+		gtk_builder_get_object(builder, "customisation"));
 	if (tbc->container == NULL) {
 		goto cutomize_button_clicked_cb_error;
 	}
@@ -1478,7 +1469,8 @@ static gboolean cutomize_button_clicked_cb(GtkWidget *widget, gpointer data)
 	}
 
 	/* customisation toolbar container */
-	tbc->toolbar.widget = GTK_WIDGET(gtk_builder_get_object(builder, "toolbar"));
+	tbc->toolbar.widget = GTK_WIDGET(
+		gtk_builder_get_object(builder, "toolbar"));
 	if (tbc->toolbar.widget == NULL) {
 		goto cutomize_button_clicked_cb_error;
 	}
@@ -1497,19 +1489,18 @@ static gboolean cutomize_button_clicked_cb(GtkWidget *widget, gpointer data)
 	}
 
 	/* use toolbox for widgets to drag to/from */
-	res = toolbar_customisation_create_toolbox(tbc,
-			gtk_widget_get_width(GTK_WIDGET(notebook)));
+	res = toolbar_customisation_create_toolbox(
+		tbc, gtk_widget_get_width(GTK_WIDGET(notebook)));
 	if (res != NSERROR_OK) {
 		goto cutomize_button_clicked_cb_error;
 	}
 
 	/* items dropped on the toolbar are added to it */
 	target = gtk_drop_target_new(G_TYPE_INT, GDK_ACTION_COPY);
-	g_signal_connect(target,
-			 "drop",
-			 G_CALLBACK(customisation_toolbar_drop_cb),
-			 tbc);
-	gtk_widget_add_controller(tbc->toolbar.widget, GTK_EVENT_CONTROLLER(target));
+	g_signal_connect(
+		target, "drop", G_CALLBACK(customisation_toolbar_drop_cb), tbc);
+	gtk_widget_add_controller(tbc->toolbar.widget,
+				  GTK_EVENT_CONTROLLER(target));
 
 	/* items dropped elsewhere are removed from the toolbar */
 	target = gtk_drop_target_new(G_TYPE_INT, GDK_ACTION_COPY);
@@ -1556,11 +1547,10 @@ static gboolean cutomize_button_clicked_cb(GtkWidget *widget, gpointer data)
 
 	return TRUE;
 
- cutomize_button_clicked_cb_error:
+cutomize_button_clicked_cb_error:
 	free(tbc);
 	g_object_unref(builder);
 	return TRUE;
-
 }
 
 
@@ -1571,8 +1561,7 @@ static gboolean cutomize_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-back_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean back_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	struct browser_window *bw;
@@ -1586,9 +1575,10 @@ back_button_clicked_cb(GtkWidget *widget, gpointer data)
 		browser_window_history_back(bw, false);
 
 		set_item_sensitivity(&tb->items[BACK_BUTTON],
-				browser_window_history_back_available(bw));
+				     browser_window_history_back_available(bw));
 		set_item_sensitivity(&tb->items[FORWARD_BUTTON],
-				browser_window_history_forward_available(bw));
+				     browser_window_history_forward_available(
+					     bw));
 
 		nsgtk_local_history_hide();
 	}
@@ -1603,8 +1593,7 @@ back_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-forward_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean forward_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	struct browser_window *bw;
@@ -1618,9 +1607,10 @@ forward_button_clicked_cb(GtkWidget *widget, gpointer data)
 		browser_window_history_forward(bw, false);
 
 		set_item_sensitivity(&tb->items[BACK_BUTTON],
-				browser_window_history_back_available(bw));
+				     browser_window_history_back_available(bw));
 		set_item_sensitivity(&tb->items[FORWARD_BUTTON],
-				browser_window_history_forward_available(bw));
+				     browser_window_history_forward_available(
+					     bw));
 		nsgtk_local_history_hide();
 	}
 	return TRUE;
@@ -1634,8 +1624,7 @@ forward_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-stop_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean stop_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 
@@ -1652,8 +1641,7 @@ stop_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-reload_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean reload_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	struct browser_window *bw;
@@ -1676,8 +1664,7 @@ reload_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-reloadstop_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean reloadstop_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	struct browser_window *bw;
@@ -1704,8 +1691,7 @@ reloadstop_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-home_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean home_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	nserror res;
@@ -1769,8 +1755,7 @@ static gboolean url_entry_activate_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE to allow activation.
  */
-static gboolean
-url_entry_changed_cb(GtkEditable *editable, gpointer data)
+static gboolean url_entry_changed_cb(GtkEditable *editable, gpointer data)
 {
 	return nsgtk_completion_update(GTK_ENTRY(editable));
 }
@@ -1786,10 +1771,9 @@ url_entry_changed_cb(GtkEditable *editable, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE to allow activation.
  */
-static void
-url_entry_icon_release_cb(GtkEntry *entry,
-			   GtkEntryIconPosition icon_pos,
-			   gpointer data)
+static void url_entry_icon_release_cb(GtkEntry *entry,
+				      GtkEntryIconPosition icon_pos,
+				      gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	struct browser_window *bw;
@@ -1822,13 +1806,8 @@ static gboolean websearch_entry_activate_cb(GtkWidget *widget, gpointer data)
 	if (res == NSERROR_OK) {
 		bw = tb->get_bw(tb->get_ctx);
 
-		res = browser_window_navigate(bw,
-					      url,
-					      NULL,
-					      BW_NAVIGATE_HISTORY,
-					      NULL,
-					      NULL,
-					      NULL);
+		res = browser_window_navigate(
+			bw, url, NULL, BW_NAVIGATE_HISTORY, NULL, NULL, NULL);
 		nsurl_unref(url);
 	}
 	if (res != NSERROR_OK) {
@@ -1847,13 +1826,13 @@ static gboolean websearch_entry_activate_cb(GtkWidget *widget, gpointer data)
  * \param controller The focus controller of the entry.
  * \param data The toolbar context passed when the signal was connected
  */
-static void
-websearch_entry_button_press_cb(GtkEventControllerFocus *controller,
-			     gpointer data)
+static void websearch_entry_button_press_cb(GtkEventControllerFocus *controller,
+					    gpointer data)
 {
 	GtkWidget *widget;
 
-	widget = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(controller));
+	widget = gtk_event_controller_get_widget(
+		GTK_EVENT_CONTROLLER(controller));
 	gtk_editable_select_region(GTK_EDITABLE(widget), 0, -1);
 }
 
@@ -1865,8 +1844,7 @@ websearch_entry_button_press_cb(GtkEventControllerFocus *controller,
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-newwindow_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean newwindow_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	nserror res;
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
@@ -1887,8 +1865,7 @@ newwindow_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-newtab_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean newtab_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	nserror res;
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
@@ -1917,7 +1894,7 @@ static void openfile_chosen(const char *filename, void *pw)
 	if (urltxt == NULL) {
 		return;
 	}
-	snprintf(urltxt, urltxt_size, FILE_SCHEME_PREFIX"%s", filename);
+	snprintf(urltxt, urltxt_size, FILE_SCHEME_PREFIX "%s", filename);
 
 	res = nsurl_create(urltxt, &url);
 	if (res == NSERROR_OK) {
@@ -1944,18 +1921,14 @@ static void openfile_chosen(const char *filename, void *pw)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-openfile_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean openfile_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	GtkWidget *toplevel;
 
 	toplevel = gtk_widget_get_ancestor(widget, GTK_TYPE_WINDOW);
 
-	nsgtk_open_file_dialog(GTK_WINDOW(toplevel),
-			       "Open File",
-			       NULL,
-			       openfile_chosen,
-			       data);
+	nsgtk_open_file_dialog(
+		GTK_WINDOW(toplevel), "Open File", NULL, openfile_chosen, data);
 
 	return TRUE;
 }
@@ -1968,8 +1941,7 @@ openfile_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-closewindow_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean closewindow_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	GtkWidget *toplevel;
 	toplevel = gtk_widget_get_ancestor(widget, GTK_TYPE_WINDOW);
@@ -1985,8 +1957,7 @@ closewindow_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-savepage_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean savepage_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	struct browser_window *bw;
@@ -2009,7 +1980,8 @@ savepage_button_clicked_cb(GtkWidget *widget, gpointer data)
 
 	d = opendir(path);
 	if (d == NULL) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "Unable to open directory %s for complete save: %s",
 		      path,
 		      strerror(errno));
@@ -2037,8 +2009,7 @@ savepage_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-pdf_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean pdf_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	struct browser_window *bw;
@@ -2050,11 +2021,8 @@ pdf_button_clicked_cb(GtkWidget *widget, gpointer data)
 
 	toplevel = gtk_widget_get_ancestor(widget, GTK_TYPE_WINDOW);
 
-	res = nsgtk_saveas_dialog(bw,
-				  "Export to PDF",
-				  GTK_WINDOW(toplevel),
-				  false,
-				  &filename);
+	res = nsgtk_saveas_dialog(
+		bw, "Export to PDF", GTK_WINDOW(toplevel), false, &filename);
 	if (res != NSERROR_OK) {
 		return FALSE;
 	}
@@ -2068,17 +2036,16 @@ pdf_button_clicked_cb(GtkWidget *widget, gpointer data)
 	haru_nsfont_set_scale((float)option_export_scale / 100);
 
 	settings = print_make_settings(PRINT_OPTIONS,
-				       (const char *) filename,
+				       (const char *)filename,
 				       &haru_nsfont);
 	g_free(filename);
 	if (settings == NULL) {
 		return TRUE;
 	}
 	/* This will clean up the print_settings object for us */
-	print_basic_run(browser_window_get_content(bw),	&pdf_printer, settings);
+	print_basic_run(browser_window_get_content(bw), &pdf_printer, settings);
 #endif
 	return TRUE;
-
 }
 
 
@@ -2089,8 +2056,7 @@ pdf_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-plaintext_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean plaintext_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	struct browser_window *bw;
@@ -2126,8 +2092,7 @@ plaintext_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-print_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean print_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	struct browser_window *bw;
@@ -2152,7 +2117,8 @@ print_button_clicked_cb(GtkWidget *widget, gpointer data)
 	/* use previously saved settings if any */
 	netsurf_mkpath(&settings_fname, NULL, 2, nsgtk_config_home, "Print");
 	if (settings_fname != NULL) {
-		print_settings = gtk_print_settings_new_from_file(settings_fname, NULL);
+		print_settings = gtk_print_settings_new_from_file(
+			settings_fname, NULL);
 		if (print_settings != NULL) {
 			gtk_print_operation_set_print_settings(print_op,
 							       print_settings);
@@ -2192,18 +2158,21 @@ print_button_clicked_cb(GtkWidget *widget, gpointer data)
 			 G_CALLBACK(gtk_print_signal_end_print),
 			 nssettings);
 
-	if (content_get_type(browser_window_get_content(bw)) != CONTENT_TEXTPLAIN) {
-		res = gtk_print_operation_run(print_op,
-					      GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
-					      GTK_WINDOW(toplevel),
-					      NULL);
+	if (content_get_type(browser_window_get_content(bw)) !=
+	    CONTENT_TEXTPLAIN) {
+		res = gtk_print_operation_run(
+			print_op,
+			GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
+			GTK_WINDOW(toplevel),
+			NULL);
 	}
 
 	/* if the settings were used save them for future use */
 	if (settings_fname != NULL) {
 		if (res == GTK_PRINT_OPERATION_RESULT_APPLY) {
 			/* Do not increment the settings reference */
-			print_settings = gtk_print_operation_get_print_settings(print_op);
+			print_settings = gtk_print_operation_get_print_settings(
+				print_op);
 
 			gtk_print_settings_to_file(print_settings,
 						   settings_fname,
@@ -2226,8 +2195,7 @@ print_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-quit_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean quit_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	nsgtk_scaffolding_destroy_all();
 	return TRUE;
@@ -2241,8 +2209,7 @@ quit_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-cut_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean cut_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	struct browser_window *bw;
@@ -2272,8 +2239,7 @@ cut_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-copy_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean copy_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	struct browser_window *bw;
@@ -2303,8 +2269,7 @@ copy_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-paste_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean paste_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	struct browser_window *bw;
@@ -2334,8 +2299,7 @@ paste_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-delete_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean delete_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	struct browser_window *bw;
@@ -2365,8 +2329,7 @@ delete_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-selectall_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean selectall_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	struct browser_window *bw;
@@ -2396,8 +2359,7 @@ selectall_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-preferences_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean preferences_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	struct browser_window *bw;
@@ -2424,8 +2386,7 @@ preferences_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-zoomplus_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean zoomplus_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	struct browser_window *bw;
@@ -2445,8 +2406,7 @@ zoomplus_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-zoomminus_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean zoomminus_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	struct browser_window *bw;
@@ -2456,7 +2416,6 @@ zoomminus_button_clicked_cb(GtkWidget *widget, gpointer data)
 	browser_window_set_scale(bw, -0.05, false);
 
 	return TRUE;
-
 }
 
 
@@ -2467,8 +2426,7 @@ zoomminus_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-zoomnormal_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean zoomnormal_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	struct browser_window *bw;
@@ -2488,12 +2446,12 @@ zoomnormal_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-fullscreen_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean fullscreen_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	GtkWindow *gtkwindow; /* gtk window widget is in */
 
-	gtkwindow = GTK_WINDOW(gtk_widget_get_ancestor(widget,GTK_TYPE_WINDOW));
+	gtkwindow = GTK_WINDOW(
+		gtk_widget_get_ancestor(widget, GTK_TYPE_WINDOW));
 
 	if (gtk_window_is_fullscreen(gtkwindow)) {
 		gtk_window_unfullscreen(gtkwindow);
@@ -2511,8 +2469,7 @@ fullscreen_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-viewsource_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean viewsource_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	nserror res;
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
@@ -2521,7 +2478,8 @@ viewsource_button_clicked_cb(GtkWidget *widget, gpointer data)
 
 	bw = tb->get_bw(tb->get_ctx);
 
-	gtkwindow = GTK_WINDOW(gtk_widget_get_ancestor(widget,GTK_TYPE_WINDOW));
+	gtkwindow = GTK_WINDOW(
+		gtk_widget_get_ancestor(widget, GTK_TYPE_WINDOW));
 
 	res = nsgtk_viewsource(gtkwindow, bw);
 	if (res != NSERROR_OK) {
@@ -2539,11 +2497,11 @@ viewsource_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-downloads_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean downloads_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	GtkWindow *gtkwindow; /* gtk window widget is in */
-	gtkwindow = GTK_WINDOW(gtk_widget_get_ancestor(widget,GTK_TYPE_WINDOW));
+	gtkwindow = GTK_WINDOW(
+		gtk_widget_get_ancestor(widget, GTK_TYPE_WINDOW));
 	nsgtk_download_show(gtkwindow);
 	return TRUE;
 }
@@ -2608,8 +2566,7 @@ toggledebugging_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-debugboxtree_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean debugboxtree_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	struct browser_window *bw;
@@ -2652,8 +2609,7 @@ debugboxtree_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-debugdomtree_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean debugdomtree_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	struct browser_window *bw;
@@ -2686,7 +2642,6 @@ debugdomtree_button_clicked_cb(GtkWidget *widget, gpointer data)
 	g_free(fname);
 
 	return TRUE;
-
 }
 
 
@@ -2697,8 +2652,7 @@ debugdomtree_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-localhistory_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean localhistory_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	nserror res;
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
@@ -2714,7 +2668,8 @@ localhistory_button_clicked_cb(GtkWidget *widget, gpointer data)
 
 		res = nsgtk_local_history_present(anchor, bw);
 		if (res != NSERROR_OK) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "Unable to present local history window.");
 		}
 	}
@@ -2728,8 +2683,7 @@ localhistory_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-history_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean history_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	return localhistory_button_clicked_cb(widget, data);
 }
@@ -2748,7 +2702,8 @@ globalhistory_button_clicked_cb(GtkWidget *widget, gpointer data)
 	nserror res;
 	res = nsgtk_global_history_present();
 	if (res != NSERROR_OK) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "Unable to initialise global history window.");
 	}
 	return TRUE;
@@ -2762,8 +2717,7 @@ globalhistory_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-addbookmarks_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean addbookmarks_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	struct browser_window *bw;
@@ -2802,8 +2756,7 @@ showbookmarks_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-showcookies_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean showcookies_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	nserror res;
 	res = nsgtk_cookies_present(NULL);
@@ -2821,8 +2774,7 @@ showcookies_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-openlocation_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean openlocation_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	GtkWidget *entry;
@@ -2842,13 +2794,13 @@ openlocation_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-contents_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean contents_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	nserror res;
 
-	res = toolbar_navigate_to_url(tb, "https://www.netsurf-browser.org/documentation/");
+	res = toolbar_navigate_to_url(
+		tb, "https://www.netsurf-browser.org/documentation/");
 	if (res != NSERROR_OK) {
 		nsgtk_warning(messages_get_errorcode(res), 0);
 	}
@@ -2863,13 +2815,13 @@ contents_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-guide_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean guide_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	nserror res;
 
-	res = toolbar_navigate_to_url(tb, "https://www.netsurf-browser.org/documentation/guide");
+	res = toolbar_navigate_to_url(
+		tb, "https://www.netsurf-browser.org/documentation/guide");
 	if (res != NSERROR_OK) {
 		nsgtk_warning(messages_get_errorcode(res), 0);
 	}
@@ -2885,13 +2837,13 @@ guide_button_clicked_cb(GtkWidget *widget, gpointer data)
  * \param data The toolbar context passed when the signal was connected
  * \return TRUE
  */
-static gboolean
-info_button_clicked_cb(GtkWidget *widget, gpointer data)
+static gboolean info_button_clicked_cb(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	nserror res;
 
-	res = toolbar_navigate_to_url(tb, "https://www.netsurf-browser.org/documentation/info");
+	res = toolbar_navigate_to_url(
+		tb, "https://www.netsurf-browser.org/documentation/info");
 	if (res != NSERROR_OK) {
 		nsgtk_warning(messages_get_errorcode(res), 0);
 	}
@@ -2952,20 +2904,16 @@ toolbar_item_create(nsgtk_toolbar_button id, struct nsgtk_toolbar_item *item)
 
 	/* set item defaults from macro */
 	switch (id) {
-#define TOOLBAR_ITEM_t(name)						\
-		item->clicked = name##_button_clicked_cb;
-#define TOOLBAR_ITEM_b(name)						\
-		item->clicked = name##_button_clicked_cb;
-#define TOOLBAR_ITEM_y(name)						\
-		item->clicked = name##_button_clicked_cb;
-#define TOOLBAR_ITEM_n(name)						\
-		item->clicked = NULL;
-#define TOOLBAR_ITEM(identifier, iname, snstvty, clicked, activate, label, iconame) \
-	case identifier:						\
-		item->name = #iname;					\
-		item->sensitivity = snstvty;				\
-		TOOLBAR_ITEM_ ## clicked(iname)				\
-		break;
+#define TOOLBAR_ITEM_t(name) item->clicked = name##_button_clicked_cb;
+#define TOOLBAR_ITEM_b(name) item->clicked = name##_button_clicked_cb;
+#define TOOLBAR_ITEM_y(name) item->clicked = name##_button_clicked_cb;
+#define TOOLBAR_ITEM_n(name) item->clicked = NULL;
+#define TOOLBAR_ITEM(                                                          \
+	identifier, iname, snstvty, clicked, activate, label, iconame)         \
+	case identifier:                                                       \
+		item->name = #iname;                                           \
+		item->sensitivity = snstvty;                                   \
+		TOOLBAR_ITEM_##clicked(iname) break;
 
 #include "gtk/toolbar_items.h"
 
@@ -3103,7 +3051,6 @@ toolbar_connect_signal(struct nsgtk_toolbar *tb, nsgtk_toolbar_button itemid)
 					 tb);
 		}
 		break;
-
 	}
 
 	return NSERROR_OK;
@@ -3117,7 +3064,8 @@ static nserror toolbar_connect_signals(struct nsgtk_toolbar *tb)
 	int location; /* location index */
 	nsgtk_toolbar_button itemid; /* item id */
 
-	for (location = BACK_BUTTON; location < PLACEHOLDER_BUTTON; location++) {
+	for (location = BACK_BUTTON; location < PLACEHOLDER_BUTTON;
+	     location++) {
 		itemid = itemid_from_location(tb, location);
 		if (itemid == PLACEHOLDER_BUTTON) {
 			/* no more filled locations */
@@ -3140,12 +3088,11 @@ static nserror toolbar_connect_signals(struct nsgtk_toolbar *tb)
  * \param data The context pointer passed when the connection was made.
  * \return TRUE to indicate signal handled.
  */
-static void
-toolbar_popup_context_menu_cb(GtkGestureClick *gesture,
-			      gint n_press,
-			      gdouble x,
-			      gdouble y,
-			      gpointer data)
+static void toolbar_popup_context_menu_cb(GtkGestureClick *gesture,
+					  gint n_press,
+					  gdouble x,
+					  gdouble y,
+					  gpointer data)
 {
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	struct gui_window *gw;
@@ -3175,12 +3122,11 @@ static void toolbar_destroy_cb(GtkWidget *widget, gpointer data)
 
 
 /* exported interface documented in toolbar.h */
-nserror
-nsgtk_toolbar_create(GtkBuilder *builder,
-		     struct browser_window *(*get_bw)(void *ctx),
-		     void *get_ctx,
-		     bool want_location_focus,
-		     struct nsgtk_toolbar **tb_out)
+nserror nsgtk_toolbar_create(GtkBuilder *builder,
+			     struct browser_window *(*get_bw)(void *ctx),
+			     void *get_ctx,
+			     bool want_location_focus,
+			     struct nsgtk_toolbar **tb_out)
 {
 	nserror res;
 	struct nsgtk_toolbar *tb;
@@ -3213,10 +3159,8 @@ nsgtk_toolbar_create(GtkBuilder *builder,
 	gtk_widget_add_controller(tb->widget, GTK_EVENT_CONTROLLER(gesture));
 
 	/* close and cleanup on delete signal */
-	g_signal_connect(tb->widget,
-			 "destroy",
-			 G_CALLBACK(toolbar_destroy_cb),
-			 tb);
+	g_signal_connect(
+		tb->widget, "destroy", G_CALLBACK(toolbar_destroy_cb), tb);
 
 	/* allocate button contexts */
 	for (bidx = BACK_BUTTON; bidx < PLACEHOLDER_BUTTON; bidx++) {
@@ -3256,8 +3200,8 @@ nserror nsgtk_toolbar_restyle(struct nsgtk_toolbar *tb)
 			char *icon = g_strdup(iconname);
 			char *label = g_strdup(labelmsg);
 
-			set_button_content(button, icon, label,
-					   nsoption_int(button_type));
+			set_button_content(
+				button, icon, label, nsoption_int(button_type));
 			g_free(icon);
 			g_free(label);
 		}
@@ -3305,8 +3249,8 @@ nserror nsgtk_toolbar_throbber(struct nsgtk_toolbar *tb, bool active)
 	/* stopping the throbber */
 	nsgtk_schedule(-1, next_throbber_frame, tb);
 	tb->throb_frame = 0;
-	res =  set_throbber_frame(tb->items[THROBBER_ITEM].button,
-				  tb->throb_frame);
+	res = set_throbber_frame(tb->items[THROBBER_ITEM].button,
+				 tb->throb_frame);
 
 	bw = tb->get_bw(tb->get_ctx);
 
@@ -3373,8 +3317,8 @@ nserror nsgtk_toolbar_page_info_change(struct nsgtk_toolbar *tb)
 	}
 
 	gtk_entry_set_icon_from_icon_name(GTK_ENTRY(url_entry),
-					    GTK_ENTRY_ICON_PRIMARY,
-					    icon_name);
+					  GTK_ENTRY_ICON_PRIMARY,
+					  icon_name);
 	return NSERROR_OK;
 }
 
@@ -3403,15 +3347,17 @@ nserror nsgtk_toolbar_set_url(struct nsgtk_toolbar *tb, nsurl *url)
 		url_text = nsurl_access(url);
 	}
 
-	if (strcmp(url_text, gtk_editable_get_text(GTK_EDITABLE(url_entry))) != 0) {
+	if (strcmp(url_text, gtk_editable_get_text(GTK_EDITABLE(url_entry))) !=
+	    0) {
 		/* The URL bar content has changed, we need to update it */
 		gint startpos, endpos;
 		bool was_selected;
 		gtk_editable_get_selection_bounds(GTK_EDITABLE(url_entry),
-						  &startpos, &endpos);
+						  &startpos,
+						  &endpos);
 		was_selected = gtk_widget_is_focus(GTK_WIDGET(url_entry)) &&
-			startpos == 0 &&
-			endpos == gtk_entry_get_text_length(url_entry);
+			       startpos == 0 &&
+			       endpos == gtk_entry_get_text_length(url_entry);
 		gtk_editable_set_text(GTK_EDITABLE(url_entry), url_text);
 		if (was_selected && tb->loc_focus != LFS_IDLE) {
 			gtk_widget_grab_focus(GTK_WIDGET(url_entry));
@@ -3448,8 +3394,8 @@ nsgtk_toolbar_set_websearch_image(struct nsgtk_toolbar *tb, GdkPixbuf *pixbuf)
 						 pixbuf);
 	} else {
 		gtk_entry_set_icon_from_icon_name(GTK_ENTRY(entry),
-						    GTK_ENTRY_ICON_PRIMARY,
-						    NSGTK_STOCK_INFO);
+						  GTK_ENTRY_ICON_PRIMARY,
+						  NSGTK_STOCK_INFO);
 	}
 
 	return NSERROR_OK;
@@ -3457,9 +3403,8 @@ nsgtk_toolbar_set_websearch_image(struct nsgtk_toolbar *tb, GdkPixbuf *pixbuf)
 
 
 /* exported interface documented in toolbar.h */
-nserror
-nsgtk_toolbar_item_activate(struct nsgtk_toolbar *tb,
-			    nsgtk_toolbar_button itemid)
+nserror nsgtk_toolbar_item_activate(struct nsgtk_toolbar *tb,
+				    nsgtk_toolbar_button itemid)
 {
 	GtkWidget *widget;
 

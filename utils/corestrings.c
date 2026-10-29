@@ -28,9 +28,9 @@
 #include "utils/utils.h"
 
 /* define corestrings */
-#define CORESTRING_LWC_VALUE(NAME,VALUE) lwc_string *corestring_lwc_##NAME
-#define CORESTRING_DOM_VALUE(NAME,VALUE) dom_string *corestring_dom_##NAME
-#define CORESTRING_NSURL(NAME,VALUE) nsurl *corestring_nsurl_##NAME
+#define CORESTRING_LWC_VALUE(NAME, VALUE) lwc_string *corestring_lwc_##NAME
+#define CORESTRING_DOM_VALUE(NAME, VALUE) dom_string *corestring_dom_##NAME
+#define CORESTRING_NSURL(NAME, VALUE) nsurl *corestring_nsurl_##NAME
 #include "utils/corestringlist.h"
 #undef CORESTRING_LWC_VALUE
 #undef CORESTRING_DOM_VALUE
@@ -46,26 +46,26 @@ nserror corestrings_fini(void)
 	}
 	corestrings_initialised = 0;
 
-#define CORESTRING_LWC_VALUE(NAME,VALUE)				\
-	do {								\
-		lwc_string_unref(corestring_lwc_##NAME);		\
-		corestring_lwc_##NAME = NULL;				\
+#define CORESTRING_LWC_VALUE(NAME, VALUE)                                      \
+	do {                                                                   \
+		lwc_string_unref(corestring_lwc_##NAME);                       \
+		corestring_lwc_##NAME = NULL;                                  \
 	} while (0)
 
-#define CORESTRING_DOM_VALUE(NAME,VALUE)				\
-	do {								\
-		if (corestring_dom_##NAME != NULL) {			\
-			dom_string_unref(corestring_dom_##NAME);	\
-			corestring_dom_##NAME = NULL;			\
-		}							\
+#define CORESTRING_DOM_VALUE(NAME, VALUE)                                      \
+	do {                                                                   \
+		if (corestring_dom_##NAME != NULL) {                           \
+			dom_string_unref(corestring_dom_##NAME);               \
+			corestring_dom_##NAME = NULL;                          \
+		}                                                              \
 	} while (0)
 
-#define CORESTRING_NSURL(NAME,VALUE)					\
-	do {								\
-		if (corestring_nsurl_##NAME != NULL) {			\
-			nsurl_unref(corestring_nsurl_##NAME);		\
-			corestring_nsurl_##NAME = NULL;			\
-		}							\
+#define CORESTRING_NSURL(NAME, VALUE)                                          \
+	do {                                                                   \
+		if (corestring_nsurl_##NAME != NULL) {                         \
+			nsurl_unref(corestring_nsurl_##NAME);                  \
+			corestring_nsurl_##NAME = NULL;                        \
+		}                                                              \
 	} while (0)
 
 
@@ -91,40 +91,36 @@ nserror corestrings_init(void)
 	}
 	corestrings_initialised = 1;
 
-#define CORESTRING_LWC_VALUE(NAME,VALUE)				\
-	do {								\
-		lerror = lwc_intern_string(				\
-			(const char *)VALUE,				\
-			sizeof(VALUE) - 1,				\
-			&corestring_lwc_##NAME );			\
-		if ((lerror != lwc_error_ok) ||				\
-		    (corestring_lwc_##NAME == NULL)) {			\
-			error = NSERROR_NOMEM;				\
-			goto error;					\
-		}							\
-	} while(0)
+#define CORESTRING_LWC_VALUE(NAME, VALUE)                                      \
+	do {                                                                   \
+		lerror = lwc_intern_string((const char *)VALUE,                \
+					   sizeof(VALUE) - 1,                  \
+					   &corestring_lwc_##NAME);            \
+		if ((lerror != lwc_error_ok) ||                                \
+		    (corestring_lwc_##NAME == NULL)) {                         \
+			error = NSERROR_NOMEM;                                 \
+			goto error;                                            \
+		}                                                              \
+	} while (0)
 
-#define CORESTRING_DOM_VALUE(NAME,VALUE)				\
-	do {								\
-		exc = dom_string_create_interned(			\
-				(const uint8_t *)VALUE,			\
-				sizeof(VALUE) - 1,			\
-				&corestring_dom_##NAME );		\
-		if ((exc != DOM_NO_ERR) ||				\
-				(corestring_dom_##NAME == NULL)) {	\
-			error = NSERROR_NOMEM;				\
-			goto error;					\
-		}							\
-	} while(0)
+#define CORESTRING_DOM_VALUE(NAME, VALUE)                                      \
+	do {                                                                   \
+		exc = dom_string_create_interned((const uint8_t *)VALUE,       \
+						 sizeof(VALUE) - 1,            \
+						 &corestring_dom_##NAME);      \
+		if ((exc != DOM_NO_ERR) || (corestring_dom_##NAME == NULL)) {  \
+			error = NSERROR_NOMEM;                                 \
+			goto error;                                            \
+		}                                                              \
+	} while (0)
 
-#define CORESTRING_NSURL(NAME,VALUE)					\
-	do {								\
-		error = nsurl_create(VALUE,				\
-				     &corestring_nsurl_##NAME);		\
-		if (error != NSERROR_OK) {				\
-			goto error;					\
-		}							\
-	} while(0)
+#define CORESTRING_NSURL(NAME, VALUE)                                          \
+	do {                                                                   \
+		error = nsurl_create(VALUE, &corestring_nsurl_##NAME);         \
+		if (error != NSERROR_OK) {                                     \
+			goto error;                                            \
+		}                                                              \
+	} while (0)
 
 #include "utils/corestringlist.h"
 

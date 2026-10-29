@@ -71,7 +71,7 @@
  * 4096 : Cache hit/miss/speculative miss/fail 656/109/ 25/0 (83%/13%/ 3%/ 0%)
  * 8192 : Cache hit/miss/speculative miss/fail 648/104/ 40/0 (81%/13%/ 5%/ 0%)
  * ALL  : Cache hit/miss/speculative miss/fail 775/  0/161/0 (82%/ 0%/17%/ 0%)
-*/
+ */
 #define SPECULATE_SMALL 4096
 
 /** the time between image cache clean runs in ms. */
@@ -99,8 +99,12 @@
 
 static void netsurf_lwc_iterator(lwc_string *str, void *pw)
 {
-	NSLOG(netsurf, WARNING, "[%3"PRIu32"] %.*s", str->refcnt,
-	      (int)lwc_string_length(str), lwc_string_data(str));
+	NSLOG(netsurf,
+	      WARNING,
+	      "[%3" PRIu32 "] %.*s",
+	      str->refcnt,
+	      (int)lwc_string_length(str),
+	      lwc_string_data(str));
 }
 
 /* exported interface documented in netsurf/netsurf.h */
@@ -114,13 +118,11 @@ nserror netsurf_init(const char *store_path)
 			.minimum_bandwidth = LLCACHE_STORE_MIN_BANDWIDTH,
 			.maximum_bandwidth = LLCACHE_STORE_MAX_BANDWIDTH,
 			.time_quantum = LLCACHE_STORE_TIME_QUANTUM,
-		}
-	}; 
+		}};
 	struct image_cache_parameters image_cache_parameters = {
 		.bg_clean_time = IMAGE_CACHE_CLEAN_TIME,
-		.speculative_small = SPECULATE_SMALL
-	};
-	
+		.speculative_small = SPECULATE_SMALL};
+
 #ifdef HAVE_SIGPIPE
 	/* Ignore SIGPIPE - this is necessary as OpenSSL can generate these
 	 * and the default action is to terminate the app. There's no easy
@@ -146,13 +148,15 @@ nserror netsurf_init(const char *store_path)
 
 	if (hlcache_parameters.llcache.limit < MINIMUM_MEMORY_CACHE_SIZE) {
 		hlcache_parameters.llcache.limit = MINIMUM_MEMORY_CACHE_SIZE;
-		NSLOG(netsurf, INFO,
-		      "Setting minimum memory cache size %"PRIsizet,
+		NSLOG(netsurf,
+		      INFO,
+		      "Setting minimum memory cache size %" PRIsizet,
 		      hlcache_parameters.llcache.limit);
-	} 
+	}
 
 	/* Set up the max attempts made to fetch a timing out resource */
-	hlcache_parameters.llcache.fetch_attempts = nsoption_uint(max_retried_fetches);
+	hlcache_parameters.llcache.fetch_attempts = nsoption_uint(
+		max_retried_fetches);
 
 	/* image cache is 25% of total memory cache size */
 	image_cache_parameters.limit = hlcache_parameters.llcache.limit / 4;
@@ -167,13 +171,14 @@ nserror netsurf_init(const char *store_path)
 	hlcache_parameters.llcache.store.limit = nsoption_uint(disc_cache_size);
 
 	/* set backing store hysterissi to 20% */
-	hlcache_parameters.llcache.store.hysteresis = hlcache_parameters.llcache.store.limit / 5;
+	hlcache_parameters.llcache.store.hysteresis =
+		hlcache_parameters.llcache.store.limit / 5;
 
 	/* set the path to the backing store */
 	hlcache_parameters.llcache.store.path =
-		nsoption_charp(disc_cache_path) ?
-		nsoption_charp(disc_cache_path) :
-		store_path;
+		nsoption_charp(disc_cache_path)
+			? nsoption_charp(disc_cache_path)
+			: store_path;
 
 	/* image handler bitmap cache */
 	ret = image_cache_init(&image_cache_parameters);
@@ -203,7 +208,7 @@ nserror netsurf_init(const char *store_path)
 	ret = fetcher_init();
 	if (ret != NSERROR_OK)
 		return ret;
-	
+
 	/* Initialise the hlcache and allow it to init the llcache for us */
 	ret = hlcache_initialise(&hlcache_parameters);
 	if (ret != NSERROR_OK)
@@ -232,7 +237,7 @@ nserror netsurf_init(const char *store_path)
 void netsurf_exit(void)
 {
 	hlcache_stop();
-	
+
 	NSLOG(netsurf, INFO, "Closing GUI");
 	guit->misc->quit();
 
@@ -273,7 +278,9 @@ void netsurf_exit(void)
 
 	corestrings_fini();
 	if (dom_namespace_finalise() != DOM_NO_ERR) {
-		NSLOG(netsurf, WARNING, "Unable to finalise DOM namespace strings");
+		NSLOG(netsurf,
+		      WARNING,
+		      "Unable to finalise DOM namespace strings");
 	}
 	NSLOG(netsurf, INFO, "Remaining lwc strings:");
 	lwc_iterate_strings(netsurf_lwc_iterator, NULL);

@@ -29,24 +29,28 @@
  * If a redraw is scheduled and all slots are used, the rectangle will
  *  be merged to one of the existing slots.
  */
-#define MAX_REDRW_SLOTS	32
+#define MAX_REDRW_SLOTS 32
 
 /**
  * This struct holds scheduled redraw requests.
  */
-struct s_redrw_slots
-{
+struct s_redrw_slots {
 	struct rect areas[MAX_REDRW_SLOTS];
 	short size;
 	short volatile areas_used;
 };
 
-void redraw_slots_init(struct s_redrw_slots * slots, short size);
-void redraw_slot_schedule(struct s_redrw_slots * slots, short x0, short y0,
-                          short x1, short y1, bool force);
-void redraw_slot_schedule_grect(struct s_redrw_slots * slots, GRECT *area,
-                                bool force);
-void redraw_slots_remove_area(struct s_redrw_slots * slots, int i);
-void redraw_slots_free(struct s_redrw_slots * slots);
+void redraw_slots_init(struct s_redrw_slots *slots, short size);
+void redraw_slot_schedule(struct s_redrw_slots *slots,
+			  short x0,
+			  short y0,
+			  short x1,
+			  short y1,
+			  bool force);
+void redraw_slot_schedule_grect(struct s_redrw_slots *slots,
+				GRECT *area,
+				bool force);
+void redraw_slots_remove_area(struct s_redrw_slots *slots, int i);
+void redraw_slots_free(struct s_redrw_slots *slots);
 
 #endif

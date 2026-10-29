@@ -86,10 +86,11 @@ const char *fetch_filetype(const char *unix_path)
 		return "application/riscos";
 	}
 
-	error = xosfile_read_stamped_no_path(path, &objtype, 0, 0, 0, 0,
-			&file_type);
+	error = xosfile_read_stamped_no_path(
+		path, &objtype, 0, 0, 0, 0, &file_type);
 	if (error) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "xosfile_read_stamped_no_path failed: %s",
 		      error->errmess);
 		free(path);
@@ -108,11 +109,13 @@ const char *fetch_filetype(const char *unix_path)
 		char *slash = strrchr(path, '/');
 		if (slash) {
 			error = xmimemaptranslate_extension_to_filetype(
-					slash+1, &temp);
+				slash + 1, &temp);
 			if (error)
 				/* ignore error and leave file_type alone */
-				NSLOG(netsurf, INFO,
-				      "xmimemaptranslate_extension_to_filetype: ""0x%x %s",
+				NSLOG(netsurf,
+				      INFO,
+				      "xmimemaptranslate_extension_to_filetype: "
+				      "0x%x %s",
 				      error->errnum,
 				      error->errmess);
 			else
@@ -121,8 +124,11 @@ const char *fetch_filetype(const char *unix_path)
 	}
 
 	/* search for MIME type in our internal table */
-	t = bsearch(&file_type, type_map, TYPE_MAP_COUNT,
-				sizeof(type_map[0]), cmp_type);
+	t = bsearch(&file_type,
+		    type_map,
+		    TYPE_MAP_COUNT,
+		    sizeof(type_map[0]),
+		    cmp_type);
 	if (t) {
 		/* found, so return it */
 		free(path);
@@ -147,7 +153,6 @@ const char *fetch_filetype(const char *unix_path)
 
 	NSLOG(netsurf, INFO, "mime type '%s'", type_buf);
 	return (const char *)type_buf;
-
 }
 
 /* exported interface documented in riscos/filetype.h */
@@ -168,8 +173,11 @@ char *fetch_mimetype(const char *ro_path)
 
 	e = xosfile_read_no_path(ro_path, &objtype, &load, 0, 0, 0);
 	if (e) {
-		NSLOG(netsurf, INFO, "xosfile_read_no_path: 0x%x: %s",
-		      e->errnum, e->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xosfile_read_no_path: 0x%x: %s",
+		      e->errnum,
+		      e->errmess);
 		free(mime);
 		return 0;
 	}
@@ -180,9 +188,8 @@ char *fetch_mimetype(const char *ro_path)
 	}
 
 	if ((load >> 20) & 0xFFF) {
-		filetype = (load>>8) & 0x000FFF;
-	}
-	else {
+		filetype = (load >> 8) & 0x000FFF;
+	} else {
 		free(mime);
 		return 0; /* no idea */
 	}
@@ -191,7 +198,7 @@ char *fetch_mimetype(const char *ro_path)
 	 * extension to a filetype via the MimeMap file. */
 	slash = strrchr(ro_path, '/');
 	if (slash && filetype == osfile_TYPE_TEXT) {
-		e = xmimemaptranslate_extension_to_filetype(slash+1, &load);
+		e = xmimemaptranslate_extension_to_filetype(slash + 1, &load);
 		if (e)
 			/* if we get an error here, simply ignore it and
 			 * leave filetype unchanged */
@@ -201,8 +208,11 @@ char *fetch_mimetype(const char *ro_path)
 	}
 
 	/* search for MIME type in our internal table */
-	t = bsearch(&filetype, type_map, TYPE_MAP_COUNT,
-				sizeof(type_map[0]), cmp_type);
+	t = bsearch(&filetype,
+		    type_map,
+		    TYPE_MAP_COUNT,
+		    sizeof(type_map[0]),
+		    cmp_type);
 	if (t) {
 		/* found, so return it */
 		strncpy(mime, t->mime_type, BUF_SIZE);
@@ -212,7 +222,8 @@ char *fetch_mimetype(const char *ro_path)
 	/* not in internal table, so ask MimeMap */
 	e = xmimemaptranslate_filetype_to_mime_type(filetype, mime);
 	if (e) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "xmimemaptranslate_filetype_to_mime_type: 0x%x: %s",
 		      e->errnum,
 		      e->errmess);
@@ -295,7 +306,7 @@ int ro_content_filetype_from_mime_type(lwc_string *mime_type)
 		const struct type_entry *e = &type_map[index - 1];
 
 		if (strlen(e->mime_type) == lwc_string_length(mime_type) &&
-				strncasecmp(e->mime_type,
+		    strncasecmp(e->mime_type,
 				lwc_string_data(mime_type),
 				lwc_string_length(mime_type)) == 0)
 			return e->file_type;
@@ -303,7 +314,7 @@ int ro_content_filetype_from_mime_type(lwc_string *mime_type)
 
 	/* Ask MimeMap module */
 	error = xmimemaptranslate_mime_type_to_filetype(
-			lwc_string_data(mime_type), (bits *) &file_type);
+		lwc_string_data(mime_type), (bits *)&file_type);
 	if (error)
 		file_type = 0xffd;
 
@@ -312,12 +323,17 @@ int ro_content_filetype_from_mime_type(lwc_string *mime_type)
 
 
 /* exported interface documented in riscos/filetype.h */
-int ro_content_filetype_from_type(content_type type) {
+int ro_content_filetype_from_type(content_type type)
+{
 	switch (type) {
-	case CONTENT_HTML:	return FILETYPE_HTML;
-	case CONTENT_TEXTPLAIN:	return 0xfff;
-	case CONTENT_CSS:	return 0xf79;
-	default:		break;
+	case CONTENT_HTML:
+		return FILETYPE_HTML;
+	case CONTENT_TEXTPLAIN:
+		return 0xfff;
+	case CONTENT_CSS:
+		return 0xf79;
+	default:
+		break;
 	}
 	return 0;
 }
@@ -346,10 +362,10 @@ bits ro_filetype_from_unix_path(const char *unix_path)
 		return osfile_TYPE_DATA;
 	}
 
-	error = xosfile_read_stamped_no_path(path, 0, 0, 0, 0, 0,
-			&file_type);
+	error = xosfile_read_stamped_no_path(path, 0, 0, 0, 0, 0, &file_type);
 	if (error) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "xosfile_read_stamped_no_path failed: %s",
 		      error->errmess);
 		free(path);
@@ -360,4 +376,3 @@ bits ro_filetype_from_unix_path(const char *unix_path)
 
 	return file_type;
 }
-

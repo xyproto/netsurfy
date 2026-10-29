@@ -37,32 +37,32 @@
  * param h height of the buffer (in pixel)
  * param flags MFDB_FLAG_NOALLOC | MFDB_FLAG_ZEROMEM | MFDB_FLAG_STAND
  * returns size of the fd_addr buffer required or allocated
-*/
-int init_mfdb(int bpp, int w, int h, uint32_t flags, MFDB * out )
+ */
+int init_mfdb(int bpp, int w, int h, uint32_t flags, MFDB *out)
 {
 	int dststride;
-	dststride = MFDB_STRIDE( w );
-	int size = MFDB_SIZE( bpp, dststride, h );
-	if( bpp > 0 ) {
-		if( (flags & MFDB_FLAG_NOALLOC) == 0  ) {
-			out->fd_addr = malloc( size );
-			if( out->fd_addr == NULL ){
-				return( 0 );
+	dststride = MFDB_STRIDE(w);
+	int size = MFDB_SIZE(bpp, dststride, h);
+	if (bpp > 0) {
+		if ((flags & MFDB_FLAG_NOALLOC) == 0) {
+			out->fd_addr = malloc(size);
+			if (out->fd_addr == NULL) {
+				return (0);
 			}
-			if( (flags & MFDB_FLAG_ZEROMEM) ){
-				memset( out->fd_addr, 0, size );
+			if ((flags & MFDB_FLAG_ZEROMEM)) {
+				memset(out->fd_addr, 0, size);
 			}
 		}
 		out->fd_stand = (flags & MFDB_FLAG_STAND) ? 1 : 0;
 		out->fd_nplanes = (short)bpp;
 		out->fd_r1 = out->fd_r2 = out->fd_r3 = 0;
 	} else {
-		memset( out, 0, sizeof(MFDB) );
+		memset(out, 0, sizeof(MFDB));
 	}
 	out->fd_w = dststride;
 	out->fd_h = h;
 	out->fd_wdwidth = dststride >> 4;
-	return( size );
+	return (size);
 }
 
 
@@ -77,38 +77,47 @@ int init_mfdb(int bpp, int w, int h, uint32_t flags, MFDB * out )
  * \param  pixdata 	NULL or an memory address to use as the bitmap pixdata
  * \return an opaque struct bitmap, or NULL on memory exhaustion
  */
-static void *atari_bitmap_create_ex( int w, int h, short bpp, int rowstride, enum gui_bitmap_flags flags, void * pixdata )
+static void *atari_bitmap_create_ex(int w,
+				    int h,
+				    short bpp,
+				    int rowstride,
+				    enum gui_bitmap_flags flags,
+				    void *pixdata)
 {
-	struct bitmap * bitmap;
+	struct bitmap *bitmap;
 
-	NSLOG(netsurf, INFO,
-	  "width %d (rowstride: %d, bpp: %d), height %d, flags %u", w,
-	  rowstride, bpp, h, (unsigned)flags);
+	NSLOG(netsurf,
+	      INFO,
+	      "width %d (rowstride: %d, bpp: %d), height %d, flags %u",
+	      w,
+	      rowstride,
+	      bpp,
+	      h,
+	      (unsigned)flags);
 
-	if( rowstride == 0) {
+	if (rowstride == 0) {
 		rowstride = bpp * w;
 	}
 
-	assert( rowstride >= (w * bpp) );
-	bitmap = calloc(1 , sizeof(struct bitmap) );
+	assert(rowstride >= (w * bpp));
+	bitmap = calloc(1, sizeof(struct bitmap));
 	if (bitmap) {
-		if( pixdata == NULL) {
-			bitmap->pixdata = calloc(1, (rowstride * h)+128);
-		}
-		else {
+		if (pixdata == NULL) {
+			bitmap->pixdata = calloc(1, (rowstride * h) + 128);
+		} else {
 			bitmap->pixdata = pixdata;
 		}
 
-	if (bitmap->pixdata != NULL) {
+		if (bitmap->pixdata != NULL) {
 			bitmap->width = w;
 			bitmap->height = h;
 			bitmap->opaque = (flags & BITMAP_OPAQUE) ? true : false;
 			bitmap->bpp = bpp;
 			bitmap->resized = NULL;
 			bitmap->rowstride = rowstride;
-	} else {
+		} else {
 			free(bitmap);
-			bitmap=NULL;
+			bitmap = NULL;
 			NSLOG(netsurf, INFO, "Out of memory!");
 		}
 	}
@@ -120,7 +129,8 @@ static void *atari_bitmap_create_ex( int w, int h, short bpp, int rowstride, enu
 /* exported interface documented in atari/bitmap.h */
 void *atari_bitmap_create(int w, int h, enum gui_bitmap_flags flags)
 {
-	return atari_bitmap_create_ex( w, h, NS_BMP_DEFAULT_BPP, w * NS_BMP_DEFAULT_BPP, flags, NULL );
+	return atari_bitmap_create_ex(
+		w, h, NS_BMP_DEFAULT_BPP, w * NS_BMP_DEFAULT_BPP, flags, NULL);
 }
 
 /**
@@ -131,13 +141,13 @@ void *atari_bitmap_create(int w, int h, enum gui_bitmap_flags flags)
 static void bitmap_modified(void *bitmap)
 {
 	struct bitmap *bm = bitmap;
-	if( bm->resized != NULL ) {
-		atari_bitmap_destroy( bm->resized );
+	if (bm->resized != NULL) {
+		atari_bitmap_destroy(bm->resized);
 		bm->resized = NULL;
 	}
-	if( bm->converted ){
-		if( bm->pixdata != bm->native.fd_addr ){
-			free( bm->native.fd_addr );
+	if (bm->converted) {
+		if (bm->pixdata != bm->native.fd_addr) {
+			free(bm->native.fd_addr);
 		}
 		bm->native.fd_addr = NULL;
 		bm->converted = false;
@@ -146,30 +156,36 @@ static void bitmap_modified(void *bitmap)
 
 
 /* exported interface documented in atari/bitmap.h */
-void *atari_bitmap_realloc( int w, int h, short bpp, int rowstride, unsigned int state, void * bmp )
+void *atari_bitmap_realloc(int w,
+			   int h,
+			   short bpp,
+			   int rowstride,
+			   unsigned int state,
+			   void *bmp)
 {
-	struct bitmap * bitmap = bmp;
+	struct bitmap *bitmap = bmp;
 	int newsize = rowstride * h;
 
-	if( bitmap == NULL ) {
-		return( NULL );
+	if (bitmap == NULL) {
+		return (NULL);
 	}
 
-	assert( bitmap->pixdata != NULL );
+	assert(bitmap->pixdata != NULL);
 	int oldsize = bitmap->rowstride * bitmap->height;
-	bool doalloc = (state & BITMAP_GROW) ? (newsize > oldsize) : (newsize != oldsize);
-	if( newsize > oldsize )
-		assert( doalloc == true );
-	if( doalloc ) {
+	bool doalloc = (state & BITMAP_GROW) ? (newsize > oldsize)
+					     : (newsize != oldsize);
+	if (newsize > oldsize)
+		assert(doalloc == true);
+	if (doalloc) {
 		// TODO: set red band to a specific value and check the red band
 		// on bitmap_destroy()
-		bitmap->pixdata = realloc( bitmap->pixdata, newsize + 128 );
-		if( bitmap->pixdata == NULL )
-			return( NULL );
+		bitmap->pixdata = realloc(bitmap->pixdata, newsize + 128);
+		if (bitmap->pixdata == NULL)
+			return (NULL);
 	}
 
-	if( state & BITMAP_CLEAR ){
-		memset( bitmap->pixdata, 0x00, newsize + 128  );
+	if (state & BITMAP_CLEAR) {
+		memset(bitmap->pixdata, 0x00, newsize + 128);
 	}
 
 	bitmap->width = w;
@@ -177,8 +193,8 @@ void *atari_bitmap_realloc( int w, int h, short bpp, int rowstride, unsigned int
 	bitmap->bpp = bpp;
 	bitmap->resized = NULL;
 	bitmap->rowstride = rowstride;
-	bitmap_modified( bitmap );
-	return( bitmap );
+	bitmap_modified(bitmap);
+	return (bitmap);
 }
 
 
@@ -207,10 +223,10 @@ static unsigned char *bitmap_get_buffer(void *bitmap)
 /* exported interface documented in atari/bitmap.h */
 size_t atari_bitmap_buffer_size(void *bitmap)
 {
-	struct bitmap * bm = bitmap;
-	if( bm == NULL )
+	struct bitmap *bm = bitmap;
+	if (bm == NULL)
 		return 0;
-	return( bm->rowstride * bm->height );
+	return (bm->rowstride * bm->height);
 }
 
 
@@ -237,11 +253,11 @@ void atari_bitmap_destroy(void *bitmap)
 		return;
 	}
 
-	if( bm->resized != NULL ) {
+	if (bm->resized != NULL) {
 		atari_bitmap_destroy(bm->resized);
 	}
-	if( bm->converted && ( bm->native.fd_addr != bm->pixdata ) ) {
-		free( bm->native.fd_addr );
+	if (bm->converted && (bm->native.fd_addr != bm->pixdata)) {
+		free(bm->native.fd_addr);
 	}
 	free(bm->pixdata);
 	free(bm);
@@ -258,14 +274,17 @@ static void bitmap_set_opaque(void *bitmap, bool opaque)
 {
 	struct bitmap *bm = bitmap;
 
-    if (bitmap == NULL) {
+	if (bitmap == NULL) {
 		NSLOG(netsurf, INFO, "NULL bitmap!");
 		return;
 	}
 
-	NSLOG(netsurf, INFO, "setting bitmap %p to %s", bm,
-              opaque ? "opaque" : "transparent");
-    bm->opaque = opaque;
+	NSLOG(netsurf,
+	      INFO,
+	      "setting bitmap %p to %s",
+	      bm,
+	      opaque ? "opaque" : "transparent");
+	bm->opaque = opaque;
 }
 
 
@@ -274,10 +293,10 @@ bool atari_bitmap_get_opaque(void *bitmap)
 {
 	struct bitmap *bm = bitmap;
 
-        if (bitmap == NULL) {
-                NSLOG(netsurf, INFO, "NULL bitmap!");
-                return false;
-        }
+	if (bitmap == NULL) {
+		NSLOG(netsurf, INFO, "NULL bitmap!");
+		return false;
+	}
 
 	return bm->opaque;
 }
@@ -293,7 +312,7 @@ int atari_bitmap_get_width(void *bitmap)
 		return 0;
 	}
 
-	return(bm->width);
+	return (bm->width);
 }
 
 
@@ -306,25 +325,28 @@ int atari_bitmap_get_height(void *bitmap)
 		NSLOG(netsurf, INFO, "NULL bitmap!");
 		return 0;
 	}
-	return(bm->height);
+	return (bm->height);
 }
 
 /* exported interface documented in atari/bitmap.h */
-bool atari_bitmap_resize(struct bitmap *img, HermesHandle hermes_h,
-		HermesFormat *fmt, int nw, int nh)
+bool atari_bitmap_resize(struct bitmap *img,
+			 HermesHandle hermes_h,
+			 HermesFormat *fmt,
+			 int nw,
+			 int nh)
 {
 	enum gui_bitmap_flags flags = 0;
 	short bpp = img->bpp;
-	int stride = atari_bitmap_get_rowstride( img );
+	int stride = atari_bitmap_get_rowstride(img);
 	int err;
 
-	if( img->resized != NULL ) {
-		if( img->resized->width != nw || img->resized->height != nh ) {
-			atari_bitmap_destroy( img->resized );
+	if (img->resized != NULL) {
+		if (img->resized->width != nw || img->resized->height != nh) {
+			atari_bitmap_destroy(img->resized);
 			img->resized = NULL;
 		} else {
 			/* the bitmap is already resized */
-			return(true);
+			return (true);
 		}
 	}
 
@@ -332,45 +354,46 @@ bool atari_bitmap_resize(struct bitmap *img, HermesHandle hermes_h,
 	if (img->opaque == true) {
 		flags |= BITMAP_OPAQUE;
 	}
-	img->resized = atari_bitmap_create_ex( nw, nh, bpp, nw*bpp, flags, NULL );
-	if( img->resized == NULL ) {
-			printf("W: %d, H: %d, bpp: %d\n", nw, nh, bpp);
-			assert(img->resized);
-			return(false);
+	img->resized = atari_bitmap_create_ex(
+		nw, nh, bpp, nw * bpp, flags, NULL);
+	if (img->resized == NULL) {
+		printf("W: %d, H: %d, bpp: %d\n", nw, nh, bpp);
+		assert(img->resized);
+		return (false);
 	}
 
 	/* allocate an converter, only for resizing */
-	err = Hermes_ConverterRequest( hermes_h,
-			fmt,
-			fmt
-	);
-	if( err == 0 ) {
-		return(false);
+	err = Hermes_ConverterRequest(hermes_h, fmt, fmt);
+	if (err == 0) {
+		return (false);
 	}
 
-	err = Hermes_ConverterCopy( hermes_h,
+	err = Hermes_ConverterCopy(
+		hermes_h,
 		img->pixdata,
-		0,		/* x src coord of top left in pixel coords */
-		0,		/* y src coord of top left in pixel coords */
-		atari_bitmap_get_width( img ),
-		atari_bitmap_get_height( img ),
-		stride, 	/* stride as bytes */
+		0, /* x src coord of top left in pixel coords */
+		0, /* y src coord of top left in pixel coords */
+		atari_bitmap_get_width(img),
+		atari_bitmap_get_height(img),
+		stride, /* stride as bytes */
 		img->resized->pixdata,
-		0,		/* x dst coord of top left in pixel coords */
-		0,		/* y dst coord of top left in pixel coords */
-		nw, nh,
+		0, /* x dst coord of top left in pixel coords */
+		0, /* y dst coord of top left in pixel coords */
+		nw,
+		nh,
 		atari_bitmap_get_rowstride(img->resized) /* stride as bytes */
 	);
-	if( err == 0 ) {
-		atari_bitmap_destroy( img->resized );
+	if (err == 0) {
+		atari_bitmap_destroy(img->resized);
 		img->resized = NULL;
-		return(false);
+		return (false);
 	}
 
-	return(true);
+	return (true);
 }
 
-static nserror bitmap_render(struct bitmap *bitmap, struct hlcache_handle *content)
+static nserror
+bitmap_render(struct bitmap *bitmap, struct hlcache_handle *content)
 {
 	return NSERROR_NOT_IMPLEMENTED;
 }

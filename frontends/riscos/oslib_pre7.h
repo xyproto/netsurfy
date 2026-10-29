@@ -29,14 +29,15 @@
 /**
  * After OSLib 6.90, there was a rename of colourtrans defines in order
  * to avoid namespace clashes:
- *   svn diff -c 238 https://ro-oslib.svn.sourceforge.net/svnroot/ro-oslib/trunk/\!OSLib/Source/Core/oslib/ColourTrans.swi
+ *   svn diff -c 238
+ * https://ro-oslib.svn.sourceforge.net/svnroot/ro-oslib/trunk/\!OSLib/Source/Core/oslib/ColourTrans.swi
  * Foresee some backwards compatibility until we've switched to OSLib 7.
-*/
+ */
 #ifndef colourtrans_SET_BG_GCOL
-# define colourtrans_SET_BG_GCOL colourtrans_SET_BG
+#define colourtrans_SET_BG_GCOL colourtrans_SET_BG
 #endif
 #ifndef colourtrans_USE_ECFS_GCOL
-# define colourtrans_USE_ECFS_GCOL colourtrans_USE_ECFS
+#define colourtrans_USE_ECFS_GCOL colourtrans_USE_ECFS
 #endif
 
 #endif

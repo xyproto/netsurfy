@@ -35,52 +35,64 @@
 bool ami_utf8_is_ascii(const char *string, size_t length)
 {
 	size_t l = 0;
-	
-	if(length <= 0) return true;
 
-	while(++l < length){
-		if(string[l] & 0x80) return false;
+	if (length <= 0)
+		return true;
+
+	while (++l < length) {
+		if (string[l] & 0x80)
+			return false;
 	}
 
 	return true;
 }
 
-static nserror ami_utf8_codesets(const char *string, size_t len, char **result, bool to_local)
+static nserror
+ami_utf8_codesets(const char *string, size_t len, char **result, bool to_local)
 {
 	char *out;
-	ULONG utf8_tag = CSA_SourceCodeset, local_tag = CSA_DestCodeset, len_tag = CSA_SourceLen;
+	ULONG utf8_tag = CSA_SourceCodeset, local_tag = CSA_DestCodeset,
+	      len_tag = CSA_SourceLen;
 	static struct codeset *utf8_cs = NULL;
 	static struct codeset *local_cs = NULL;
 
-	if(local_cs == NULL) local_cs = CodesetsFind(NULL,
+	if (local_cs == NULL)
+		local_cs = CodesetsFind(NULL,
 #ifdef __amigaos4__
-						CSA_MIBenum, nsoption_int(local_codeset),
+					CSA_MIBenum,
+					nsoption_int(local_codeset),
 #else
-						NULL,
+					NULL,
 #endif
 					TAG_DONE);
 
-     if(utf8_cs == NULL) utf8_cs = CodesetsFind(NULL,
-                           CSA_MIBenum, CS_MIBENUM_UTF_8,
-                           TAG_DONE);
+	if (utf8_cs == NULL)
+		utf8_cs = CodesetsFind(
+			NULL, CSA_MIBenum, CS_MIBENUM_UTF_8, TAG_DONE);
 
-	if(to_local == false) {
+	if (to_local == false) {
 		local_tag = CSA_SourceCodeset;
 		utf8_tag = CSA_DestCodeset;
 	}
 
-	if(len == 0) len_tag = TAG_IGNORE;
+	if (len == 0)
+		len_tag = TAG_IGNORE;
 
-	out = CodesetsConvertStr(CSA_Source, string,
-						len_tag, len,
+	out = CodesetsConvertStr(CSA_Source,
+				 string,
+				 len_tag,
+				 len,
 #ifdef __amigaos4__
-						local_tag, local_cs,
+				 local_tag,
+				 local_cs,
 #endif
-						utf8_tag, utf8_cs,
-						CSA_MapForeignChars, TRUE,
-						TAG_DONE);
+				 utf8_tag,
+				 utf8_cs,
+				 CSA_MapForeignChars,
+				 TRUE,
+				 TAG_DONE);
 
-	if(out != NULL) {
+	if (out != NULL) {
 		*result = strdup(out);
 		CodesetsFreeA(out, NULL);
 	} else {
@@ -92,8 +104,12 @@ static nserror ami_utf8_codesets(const char *string, size_t len, char **result, 
 
 nserror utf8_from_local_encoding(const char *string, size_t len, char **result)
 {
-	if(__builtin_expect((CodesetsBase == NULL), 0)) {
-		return utf8_from_enc(string, nsoption_charp(local_charset), len, result, NULL);
+	if (__builtin_expect((CodesetsBase == NULL), 0)) {
+		return utf8_from_enc(string,
+				     nsoption_charp(local_charset),
+				     len,
+				     result,
+				     NULL);
 	} else {
 		return ami_utf8_codesets(string, len, result, false);
 	}
@@ -102,15 +118,16 @@ nserror utf8_from_local_encoding(const char *string, size_t len, char **result)
 nserror utf8_to_local_encoding(const char *string, size_t len, char **result)
 {
 	/* If it is wholly ASCII then no conversion required */
-	if(ami_utf8_is_ascii(string, len)) {
+	if (ami_utf8_is_ascii(string, len)) {
 		*result = strndup(string, len);
 		return NSERROR_OK;
 	}
 
-	if(__builtin_expect((CodesetsBase == NULL), 0)) {
+	if (__builtin_expect((CodesetsBase == NULL), 0)) {
 		nserror err = NSERROR_NOMEM;
-		char *local_charset = ASPrintf("%s//IGNORE", nsoption_charp(local_charset));
-		if(local_charset) {
+		char *local_charset = ASPrintf("%s//IGNORE",
+					       nsoption_charp(local_charset));
+		if (local_charset) {
 			err = utf8_to_enc(string, local_charset, len, result);
 			FreeVec(local_charset);
 		}
@@ -122,13 +139,15 @@ nserror utf8_to_local_encoding(const char *string, size_t len, char **result)
 
 void ami_utf8_free(char *ptr)
 {
-	if(ptr) free(ptr);
+	if (ptr)
+		free(ptr);
 }
 
 char *ami_utf8_easy(const char *string)
 {
 	char *localtext;
-	if(utf8_to_local_encoding(string, strlen(string), &localtext) == NSERROR_OK) {
+	if (utf8_to_local_encoding(string, strlen(string), &localtext) ==
+	    NSERROR_OK) {
 		return localtext;
 	} else {
 		return strdup(string);
@@ -139,7 +158,8 @@ char *ami_to_utf8_easy(const char *string)
 {
 	char *localtext;
 
-	if(utf8_from_local_encoding(string, strlen(string), &localtext) == NSERROR_OK) {
+	if (utf8_from_local_encoding(string, strlen(string), &localtext) ==
+	    NSERROR_OK) {
 		return localtext;
 	} else {
 		return strdup(string);
@@ -152,4 +172,3 @@ static struct gui_utf8_table utf8_table = {
 };
 
 struct gui_utf8_table *amiga_utf8_table = &utf8_table;
-

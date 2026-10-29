@@ -38,16 +38,17 @@ struct s_search_form_session {
 	struct s_search_form_state state;
 };
 
-typedef struct s_search_form_session * SEARCH_FORM_SESSION;
+typedef struct s_search_form_session *SEARCH_FORM_SESSION;
 
-struct s_search_form_session * nsatari_search_session_create(OBJECT * obj,
-		struct gui_window *gw);
+struct s_search_form_session *
+nsatari_search_session_create(OBJECT *obj, struct gui_window *gw);
 
 extern struct gui_search_table *atari_search_table;
 
 void nsatari_search_session_destroy(struct s_search_form_session *s);
-void nsatari_search_perform(struct s_search_form_session *s, OBJECT *obj,
-		search_flags_t f);
-void nsatari_search_restore_form( struct s_search_form_session *s, OBJECT *obj);
+void nsatari_search_perform(struct s_search_form_session *s,
+			    OBJECT *obj,
+			    search_flags_t f);
+void nsatari_search_restore_form(struct s_search_form_session *s, OBJECT *obj);
 
 #endif

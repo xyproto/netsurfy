@@ -50,7 +50,6 @@ struct nsgtk_local_history_window {
 static struct nsgtk_local_history_window *local_history_window = NULL;
 
 
-
 /**
  * callback for mouse action on local history window
  *
@@ -60,10 +59,10 @@ static struct nsgtk_local_history_window *local_history_window = NULL;
  * \param y location of event
  * \return NSERROR_OK on success otherwise apropriate error code
  */
-static nserror
-nsgtk_local_history_mouse(struct nsgtk_corewindow *nsgtk_cw,
-		    browser_mouse_state mouse_state,
-		    int x, int y)
+static nserror nsgtk_local_history_mouse(struct nsgtk_corewindow *nsgtk_cw,
+					 browser_mouse_state mouse_state,
+					 int x,
+					 int y)
 {
 	struct nsgtk_local_history_window *lhw;
 	/* technically degenerate container of */
@@ -106,11 +105,9 @@ nsgtk_local_history_key(struct nsgtk_corewindow *nsgtk_cw, uint32_t nskey)
 static nserror
 nsgtk_local_history_draw(struct nsgtk_corewindow *nsgtk_cw, struct rect *r)
 {
-	struct redraw_context ctx = {
-		.interactive = true,
-		.background_images = true,
-		.plot = &nsgtk_plotters
-	};
+	struct redraw_context ctx = {.interactive = true,
+				     .background_images = true,
+				     .plot = &nsgtk_plotters};
 	struct nsgtk_local_history_window *lhw;
 
 	/* technically degenerate container of */
@@ -155,19 +152,17 @@ nsgtk_local_history_init(struct browser_window *bw,
 	}
 
 
-	ncwin->wnd = GTK_WIDGET(gtk_builder_get_object(ncwin->builder,
-						       "wndHistory"));
+	ncwin->wnd = GTK_WIDGET(
+		gtk_builder_get_object(ncwin->builder, "wndHistory"));
 	/* keep the popover while it is moved between toolbars */
 	g_object_ref_sink(ncwin->wnd);
 
 
 	ncwin->core.scrolled = GTK_SCROLLED_WINDOW(
-		gtk_builder_get_object(ncwin->builder,
-				       "HistoryScrolled"));
+		gtk_builder_get_object(ncwin->builder, "HistoryScrolled"));
 
 	ncwin->core.drawing_area = GTK_DRAWING_AREA(
-		gtk_builder_get_object(ncwin->builder,
-				       "HistoryDrawingArea"));
+		gtk_builder_get_object(ncwin->builder, "HistoryDrawingArea"));
 
 	ncwin->core.draw = nsgtk_local_history_draw;
 	ncwin->core.key = nsgtk_local_history_key;
@@ -194,8 +189,8 @@ nsgtk_local_history_init(struct browser_window *bw,
 
 
 /* exported function documented gtk/history.h */
-nserror nsgtk_local_history_present(GtkWidget *anchor,
-				    struct browser_window *bw)
+nserror
+nsgtk_local_history_present(GtkWidget *anchor, struct browser_window *bw)
 {
 	nserror res;
 	GtkWidget *toplevel;
@@ -223,7 +218,8 @@ nserror nsgtk_local_history_present(GtkWidget *anchor,
 		}
 
 		gtk_popover_popup(GTK_POPOVER(wnd));
-		gtk_widget_grab_focus(GTK_WIDGET(local_history_window->core.drawing_area));
+		gtk_widget_grab_focus(
+			GTK_WIDGET(local_history_window->core.drawing_area));
 
 		local_history_scroll_to_cursor(local_history_window->session);
 	}
@@ -269,5 +265,4 @@ nserror nsgtk_local_history_destroy(void)
 	}
 
 	return res;
-
 }

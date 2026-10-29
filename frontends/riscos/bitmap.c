@@ -106,7 +106,7 @@ static bool bitmap_initialise(struct bitmap *bitmap)
 	sprite_area->used = area_size;
 
 	/* sprite control block */
-	sprite = (osspriteop_header *) (sprite_area + 1);
+	sprite = (osspriteop_header *)(sprite_area + 1);
 	sprite->size = area_size - 16;
 	memset(sprite->name, 0x00, 12);
 	strncpy(sprite->name, "bitmap", 12);
@@ -144,7 +144,7 @@ void *riscos_bitmap_create(int width, int height, enum gui_bitmap_flags flags)
 /* exported interface documented in riscos/bitmap.h */
 unsigned char *riscos_bitmap_get_buffer(void *vbitmap)
 {
-	struct bitmap *bitmap = (struct bitmap *) vbitmap;
+	struct bitmap *bitmap = (struct bitmap *)vbitmap;
 	assert(bitmap);
 
 	/* dynamically create the buffer */
@@ -155,7 +155,7 @@ unsigned char *riscos_bitmap_get_buffer(void *vbitmap)
 
 	/* image data area should exist */
 	if (bitmap->sprite_area)
-		return ((unsigned char *) (bitmap->sprite_area)) + 16 + 44;
+		return ((unsigned char *)(bitmap->sprite_area)) + 16 + 44;
 
 	return NULL;
 }
@@ -169,7 +169,7 @@ unsigned char *riscos_bitmap_get_buffer(void *vbitmap)
  */
 static void bitmap_set_opaque(void *vbitmap, bool opaque)
 {
-	struct bitmap *bitmap = (struct bitmap *) vbitmap;
+	struct bitmap *bitmap = (struct bitmap *)vbitmap;
 	assert(bitmap);
 
 	bitmap->opaque = opaque;
@@ -184,7 +184,7 @@ static void bitmap_set_opaque(void *vbitmap, bool opaque)
  */
 static size_t bitmap_get_rowstride(void *vbitmap)
 {
-	struct bitmap *bitmap = (struct bitmap *) vbitmap;
+	struct bitmap *bitmap = (struct bitmap *)vbitmap;
 	return bitmap->width * 4;
 }
 
@@ -192,7 +192,7 @@ static size_t bitmap_get_rowstride(void *vbitmap)
 /* exported interface documented in riscos/bitmap.h */
 bool riscos_bitmap_get_opaque(void *vbitmap)
 {
-	struct bitmap *bitmap = (struct bitmap *) vbitmap;
+	struct bitmap *bitmap = (struct bitmap *)vbitmap;
 	assert(bitmap);
 	return bitmap->opaque;
 }
@@ -201,7 +201,7 @@ bool riscos_bitmap_get_opaque(void *vbitmap)
 /* exported interface documented in riscos/bitmap.h */
 void riscos_bitmap_destroy(void *vbitmap)
 {
-	struct bitmap *bitmap = (struct bitmap *) vbitmap;
+	struct bitmap *bitmap = (struct bitmap *)vbitmap;
 
 	assert(bitmap);
 
@@ -217,7 +217,7 @@ void riscos_bitmap_destroy(void *vbitmap)
 /* exported interface documented in riscos/bitmap.h */
 bool riscos_bitmap_save(void *vbitmap, const char *path, unsigned flags)
 {
-	struct bitmap *bitmap = (struct bitmap *) vbitmap;
+	struct bitmap *bitmap = (struct bitmap *)vbitmap;
 	os_error *error;
 
 	if (bitmap == NULL) {
@@ -233,9 +233,11 @@ bool riscos_bitmap_save(void *vbitmap, const char *path, unsigned flags)
 
 	if (riscos_bitmap_get_opaque(bitmap)) {
 		error = xosspriteop_save_sprite_file(osspriteop_USER_AREA,
-				(bitmap->sprite_area), path);
+						     (bitmap->sprite_area),
+						     path);
 		if (error) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xosspriteop_save_sprite_file: 0x%x: %s",
 			      error->errnum,
 			      error->errmess);
@@ -248,7 +250,7 @@ bool riscos_bitmap_save(void *vbitmap, const char *path, unsigned flags)
 		 * format to either a bi-level mask or a Select-style full
 		 * alpha channel */
 		osspriteop_area *area = bitmap->sprite_area;
-		osspriteop_header *hdr = (void *) ((char *) area + area->first);
+		osspriteop_header *hdr = (void *)((char *)area + area->first);
 		unsigned width = hdr->width + 1, height = hdr->height + 1;
 		unsigned image_size = height * width * 4;
 		unsigned char *chunk_buf;
@@ -256,13 +258,13 @@ bool riscos_bitmap_save(void *vbitmap, const char *path, unsigned flags)
 		unsigned mask_size;
 		size_t chunk_pix;
 		struct {
-			osspriteop_area   area;
+			osspriteop_area area;
 			osspriteop_header hdr;
 		} file_hdr;
 		os_fw fw;
 
 		/* we only support 32bpp sprites */
-		if ((((unsigned)hdr->mode >> 27)&15) != 6) {
+		if ((((unsigned)hdr->mode >> 27) & 15) != 6) {
 			assert(!"Unsupported sprite format in bitmap_save");
 			return false;
 		}
@@ -274,18 +276,20 @@ bool riscos_bitmap_save(void *vbitmap, const char *path, unsigned flags)
 		}
 
 		file_hdr.area = *area;
-		file_hdr.hdr  = *hdr;
+		file_hdr.hdr = *hdr;
 
 		if (flags & BITMAP_SAVE_FULL_ALPHA) {
 			mask_size = ((width + 3) & ~3) * height;
 			chunk_pix = SAVE_CHUNK_SIZE;
-			file_hdr.hdr.mode = (os_mode)((unsigned)file_hdr.hdr.mode
-					| (1U<<31));
+			file_hdr.hdr.mode =
+				(os_mode)((unsigned)file_hdr.hdr.mode |
+					  (1U << 31));
 		} else {
-			mask_size = (((width + 31) & ~31)/8) * height;
-			chunk_pix = SAVE_CHUNK_SIZE<<3;
-			file_hdr.hdr.mode = (os_mode)((unsigned)file_hdr.hdr.mode
-					& ~(1U<<31));
+			mask_size = (((width + 31) & ~31) / 8) * height;
+			chunk_pix = SAVE_CHUNK_SIZE << 3;
+			file_hdr.hdr.mode =
+				(os_mode)((unsigned)file_hdr.hdr.mode &
+					  ~(1U << 31));
 		}
 
 		file_hdr.area.sprite_count = 1;
@@ -298,23 +302,29 @@ bool riscos_bitmap_save(void *vbitmap, const char *path, unsigned flags)
 
 		error = xosfind_openoutw(0, path, NULL, &fw);
 		if (error) {
-			NSLOG(netsurf, INFO, "xosfind_openoutw: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xosfind_openoutw: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			free(chunk_buf);
 			ro_warn_user("SaveError", error->errmess);
 			return false;
 		}
 
-		p = (void *) ((char *) hdr + hdr->image);
+		p = (void *)((char *)hdr + hdr->image);
 
 		/* write out the area header, sprite header and image data */
-		error = xosgbpb_writew(fw, (byte*)&file_hdr + 4,
-				sizeof(file_hdr)-4, NULL);
+		error = xosgbpb_writew(
+			fw, (byte *)&file_hdr + 4, sizeof(file_hdr) - 4, NULL);
 		if (!error)
-			error = xosgbpb_writew(fw, (byte*)p, image_size, NULL);
+			error = xosgbpb_writew(fw, (byte *)p, image_size, NULL);
 		if (error) {
-			NSLOG(netsurf, INFO, "xosgbpb_writew: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xosgbpb_writew: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			free(chunk_buf);
 			xosfind_closew(fw);
 			ro_warn_user("SaveError", error->errmess);
@@ -322,25 +332,26 @@ bool riscos_bitmap_save(void *vbitmap, const char *path, unsigned flags)
 		}
 
 		/* then write out the mask data in chunks */
-		eip = p + (width * height);  /* end of image */
-		elp = p + width;  /* end of line */
+		eip = p + (width * height); /* end of image */
+		elp = p + width; /* end of line */
 
 		while (p < eip) {
 			unsigned char *dp = chunk_buf;
 			unsigned *ep = p + chunk_pix;
-			if (ep > elp) ep = elp;
+			if (ep > elp)
+				ep = elp;
 
 			if (flags & BITMAP_SAVE_FULL_ALPHA) {
 				while (p < ep) {
-					*dp++ = ((unsigned char*)p)[3];
+					*dp++ = ((unsigned char *)p)[3];
 					p++;
 				}
-			}
-			else {
+			} else {
 				unsigned char mb = 0;
 				int msh = 0;
 				while (p < ep) {
-					if (((unsigned char*)p)[3]) mb |= (1 << msh);
+					if (((unsigned char *)p)[3])
+						mb |= (1 << msh);
 					if (++msh >= 8) {
 						*dp++ = mb;
 						msh = 0;
@@ -348,18 +359,22 @@ bool riscos_bitmap_save(void *vbitmap, const char *path, unsigned flags)
 					}
 					p++;
 				}
-				if (msh > 0) *dp++ = mb;
+				if (msh > 0)
+					*dp++ = mb;
 			}
 
-			if (p >= elp) {  /* end of line yet? */
+			if (p >= elp) { /* end of line yet? */
 				/* align to word boundary */
-				while ((int)dp & 3) *dp++ = 0;
+				while ((int)dp & 3)
+					*dp++ = 0;
 				/* advance end of line pointer */
 				elp += width;
 			}
-			error = xosgbpb_writew(fw, (byte*)chunk_buf, dp-chunk_buf, NULL);
+			error = xosgbpb_writew(
+				fw, (byte *)chunk_buf, dp - chunk_buf, NULL);
 			if (error) {
-				NSLOG(netsurf, INFO,
+				NSLOG(netsurf,
+				      INFO,
 				      "xosgbpb_writew: 0x%x: %s",
 				      error->errnum,
 				      error->errmess);
@@ -372,15 +387,21 @@ bool riscos_bitmap_save(void *vbitmap, const char *path, unsigned flags)
 
 		error = xosfind_closew(fw);
 		if (error) {
-			NSLOG(netsurf, INFO, "xosfind_closew: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xosfind_closew: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("SaveError", error->errmess);
 		}
 
 		error = xosfile_set_type(path, osfile_TYPE_SPRITE);
 		if (error) {
-			NSLOG(netsurf, INFO, "xosfile_set_type: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xosfile_set_type: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("SaveError", error->errmess);
 		}
 
@@ -409,7 +430,7 @@ static void bitmap_modified(void *vbitmap)
  */
 static int bitmap_get_width(void *vbitmap)
 {
-	struct bitmap *bitmap = (struct bitmap *) vbitmap;
+	struct bitmap *bitmap = (struct bitmap *)vbitmap;
 	return bitmap->width;
 }
 
@@ -422,7 +443,7 @@ static int bitmap_get_width(void *vbitmap)
  */
 static int bitmap_get_height(void *vbitmap)
 {
-	struct bitmap *bitmap = (struct bitmap *) vbitmap;
+	struct bitmap *bitmap = (struct bitmap *)vbitmap;
 	return bitmap->height;
 }
 
@@ -448,12 +469,18 @@ void riscos_bitmap_overlay_sprite(struct bitmap *bitmap,
 		alpha = true;
 
 	error = xosspriteop_read_sprite_info(osspriteop_PTR,
-			(osspriteop_area *)0x100,
-			(osspriteop_id)s,
-			&w, &h, NULL, NULL);
+					     (osspriteop_area *)0x100,
+					     (osspriteop_id)s,
+					     &w,
+					     &h,
+					     NULL,
+					     NULL);
 	if (error) {
-		NSLOG(netsurf, INFO, "xosspriteop_read_sprite_info: 0x%x:%s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xosspriteop_read_sprite_info: 0x%x:%s",
+		      error->errnum,
+		      error->errmess);
 		return;
 	}
 	sp_offset = ((s->width + 1) * 4) - w;
@@ -465,17 +492,17 @@ void riscos_bitmap_overlay_sprite(struct bitmap *bitmap,
 
 	dp_offset = bitmap_get_rowstride(bitmap) / 4;
 
-	dp = (void*)riscos_bitmap_get_buffer(bitmap);
+	dp = (void *)riscos_bitmap_get_buffer(bitmap);
 	if (!dp)
 		return;
-	sp = (byte*)s + s->image;
-	mp = (byte*)s + s->mask;
+	sp = (byte *)s + s->image;
+	mp = (byte *)s + s->mask;
 
 	sp += s->left_bit / 8;
 	mp += s->left_bit / 8;
 
 	if (s->image > (int)sizeof(*s))
-		palette = (os_colour*)(s + 1);
+		palette = (os_colour *)(s + 1);
 	else
 		palette = default_palette8;
 
@@ -491,7 +518,7 @@ void riscos_bitmap_overlay_sprite(struct bitmap *bitmap,
 	 * show through */
 	for (y = 0; y < h; y++) {
 		unsigned *sdp = dp;
-		for(x = 0; x < w; x++) {
+		for (x = 0; x < w; x++) {
 			os_colour d = ((unsigned)palette[(*sp) << 1]) >> 8;
 			if (*sp++ == OVERLAY_INDEX)
 				d = *dp;
@@ -526,12 +553,11 @@ static osspriteop_area *thumbnail_create_8bpp(struct bitmap *bitmap)
 	unsigned area_size;
 
 	/* clone the sprite */
-	area_size = sizeof(osspriteop_area) +
-			sizeof(osspriteop_header) +
-			image_size +
-			2048;
+	area_size = sizeof(osspriteop_area) + sizeof(osspriteop_header) +
+		    image_size + 2048;
 
-	if (!opaque) area_size += image_size;
+	if (!opaque)
+		area_size += image_size;
 
 	sprite_area = (osspriteop_area *)malloc(area_size);
 	if (!sprite_area) {
@@ -553,15 +579,18 @@ static osspriteop_area *thumbnail_create_8bpp(struct bitmap *bitmap)
 	sprite_header->width = ((bitmap->width + 3) >> 2) - 1;
 	sprite_header->image = sizeof(osspriteop_header) + 2048;
 	sprite_header->mask = sizeof(osspriteop_header) + 2048;
-	if (!opaque) sprite_header->mask += image_size;
+	if (!opaque)
+		sprite_header->mask += image_size;
 
 	/* create the palette. we don't read the necessary size like
 	 * we really should as we know it's going to have 256 entries
 	 * of 8 bytes = 2048. */
 	xcolourtrans_read_palette((osspriteop_area *)os_MODE8BPP90X90,
-			(osspriteop_id)0,
-			(os_palette *)(sprite_header + 1), 2048,
-			(colourtrans_palette_flags)(1 << 1), 0);
+				  (osspriteop_id)0,
+				  (os_palette *)(sprite_header + 1),
+				  2048,
+				  (colourtrans_palette_flags)(1 << 1),
+				  0);
 	return sprite_area;
 }
 
@@ -569,7 +598,7 @@ static osspriteop_area *thumbnail_create_8bpp(struct bitmap *bitmap)
 /**
  * Switches output to the specified sprite and returns the previous context.
  */
-static struct thumbnail_save_area*
+static struct thumbnail_save_area *
 thumbnail_switch_output(osspriteop_area *sprite_area,
 			osspriteop_header *sprite_header)
 {
@@ -578,11 +607,14 @@ thumbnail_switch_output(osspriteop_area *sprite_area,
 
 	/* create a save area */
 	save_area = calloc(sizeof(struct thumbnail_save_area), 1);
-	if (save_area == NULL) return NULL;
+	if (save_area == NULL)
+		return NULL;
 
 	/* allocate OS_SpriteOp save area */
-	if (xosspriteop_read_save_area_size(osspriteop_PTR, sprite_area,
-			(osspriteop_id)sprite_header, &size)) {
+	if (xosspriteop_read_save_area_size(osspriteop_PTR,
+					    sprite_area,
+					    (osspriteop_id)sprite_header,
+					    &size)) {
 		free(save_area);
 		return NULL;
 	}
@@ -596,10 +628,14 @@ thumbnail_switch_output(osspriteop_area *sprite_area,
 	save_area->save_area->a[0] = 0;
 
 	/* switch output to sprite */
-	if (xosspriteop_switch_output_to_sprite(osspriteop_PTR, sprite_area,
-			(osspriteop_id)sprite_header, save_area->save_area,
-			0, &save_area->context1, &save_area->context2,
-			&save_area->context3)) {
+	if (xosspriteop_switch_output_to_sprite(osspriteop_PTR,
+						sprite_area,
+						(osspriteop_id)sprite_header,
+						save_area->save_area,
+						0,
+						&save_area->context1,
+						&save_area->context2,
+						&save_area->context3)) {
 		free(save_area->save_area);
 		free(save_area);
 		return NULL;
@@ -614,11 +650,15 @@ thumbnail_switch_output(osspriteop_area *sprite_area,
 static void thumbnail_restore_output(struct thumbnail_save_area *save_area)
 {
 	/* we don't care if we err, as there's nothing we can do about it */
-	xosspriteop_switch_output_to_sprite(osspriteop_PTR,
-			(osspriteop_area *)save_area->context1,
-			(osspriteop_id)save_area->context2,
-			(osspriteop_save_area *)save_area->context3,
-			0, 0, 0, 0);
+	xosspriteop_switch_output_to_sprite(
+		osspriteop_PTR,
+		(osspriteop_area *)save_area->context1,
+		(osspriteop_id)save_area->context2,
+		(osspriteop_save_area *)save_area->context3,
+		0,
+		0,
+		0,
+		0);
 	free(save_area->save_area);
 	free(save_area);
 }
@@ -649,28 +689,30 @@ osspriteop_area *riscos_bitmap_convert_8bpp(struct bitmap *bitmap)
 			free(sprite_area);
 		return false;
 	}
-	_swix(Tinct_Plot, _IN(2) | _IN(3) | _IN(4) | _IN(7),
-			(osspriteop_header *)(bitmap->sprite_area + 1),
-			0, 0,
-			tinct_ERROR_DIFFUSE);
+	_swix(Tinct_Plot,
+	      _IN(2) | _IN(3) | _IN(4) | _IN(7),
+	      (osspriteop_header *)(bitmap->sprite_area + 1),
+	      0,
+	      0,
+	      tinct_ERROR_DIFFUSE);
 	thumbnail_restore_output(save_area);
 
 	if (sprite_header->image != sprite_header->mask) {
 		/* build the sprite mask from the alpha channel */
 		void *buf = riscos_bitmap_get_buffer(bitmap);
-		unsigned *dp = (unsigned *) buf;
+		unsigned *dp = (unsigned *)buf;
 		if (!dp)
 			return sprite_area;
 		int w = bitmap_get_width(bitmap);
 		int h = bitmap_get_height(bitmap);
 		int dp_offset = bitmap_get_rowstride(bitmap) / 4 - w;
 		int mp_offset = ((sprite_header->width + 1) * 4) - w;
-		byte *mp = (byte*)sprite_header + sprite_header->mask;
+		byte *mp = (byte *)sprite_header + sprite_header->mask;
 		bool alpha = ((unsigned)sprite_header->mode & 0x80000000U) != 0;
 
 		while (h-- > 0) {
 			int x = 0;
-			for(x = 0; x < w; x++) {
+			for (x = 0; x < w; x++) {
 				unsigned d = *dp++;
 				if (alpha)
 					*mp++ = (d >> 24) ^ 0xff;
@@ -686,8 +728,6 @@ osspriteop_area *riscos_bitmap_convert_8bpp(struct bitmap *bitmap)
 }
 
 
-
-
 /**
  * Check to see whether 32bpp sprites are available.
  *
@@ -700,10 +740,11 @@ static void thumbnail_test(void)
 	osspriteop_area *sprite_area;
 
 	/* try to create a 1x1 32bpp sprite */
-	area_size = sizeof(osspriteop_area) +
-			sizeof(osspriteop_header) + sizeof(int);
+	area_size = sizeof(osspriteop_area) + sizeof(osspriteop_header) +
+		    sizeof(int);
 	if ((sprite_area = (osspriteop_area *)malloc(area_size)) == NULL) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "Insufficient memory to perform sprite test.");
 		return;
 	}
@@ -711,8 +752,13 @@ static void thumbnail_test(void)
 	sprite_area->sprite_count = 0;
 	sprite_area->first = 16;
 	sprite_area->used = 16;
-	if (xosspriteop_create_sprite(osspriteop_NAME, sprite_area,
-			"test",	false, 1, 1, (os_mode)tinct_SPRITE_MODE))
+	if (xosspriteop_create_sprite(osspriteop_NAME,
+				      sprite_area,
+				      "test",
+				      false,
+				      1,
+				      1,
+				      (os_mode)tinct_SPRITE_MODE))
 		thumbnail_32bpp_available = 0;
 	else
 		thumbnail_32bpp_available = 1;
@@ -721,17 +767,15 @@ static void thumbnail_test(void)
 
 
 /* exported interface documented in riscos/bitmap.h */
-nserror riscos_bitmap_render(struct bitmap *bitmap,
-			     struct hlcache_handle *content)
+nserror
+riscos_bitmap_render(struct bitmap *bitmap, struct hlcache_handle *content)
 {
 	struct thumbnail_save_area *save_area;
 	osspriteop_area *sprite_area = NULL;
 	osspriteop_header *sprite_header = NULL;
-	struct redraw_context ctx = {
-		.interactive = false,
-		.background_images = true,
-		.plot = &ro_plotters
-	};
+	struct redraw_context ctx = {.interactive = false,
+				     .background_images = true,
+				     .plot = &ro_plotters};
 
 	assert(content);
 	assert(bitmap);
@@ -771,8 +815,10 @@ nserror riscos_bitmap_render(struct bitmap *bitmap,
 		return false;
 	}
 	rufl_invalidate_cache();
-	colourtrans_set_gcol(os_COLOUR_WHITE, colourtrans_SET_BG_GCOL,
-			os_ACTION_OVERWRITE, 0);
+	colourtrans_set_gcol(os_COLOUR_WHITE,
+			     colourtrans_SET_BG_GCOL,
+			     os_ACTION_OVERWRITE,
+			     0);
 
 	/* render the content */
 	content_scaled_redraw(content, bitmap->width, bitmap->height, &ctx);
@@ -789,9 +835,10 @@ nserror riscos_bitmap_render(struct bitmap *bitmap,
 			free(sprite_area);
 			return false;
 		}
-		error = _swix(Tinct_ConvertSprite, _INR(2,3),
-				sprite_header,
-				(osspriteop_header *)(bitmap->sprite_area + 1));
+		error = _swix(Tinct_ConvertSprite,
+			      _INR(2, 3),
+			      sprite_header,
+			      (osspriteop_header *)(bitmap->sprite_area + 1));
 		free(sprite_area);
 		if (error)
 			return false;

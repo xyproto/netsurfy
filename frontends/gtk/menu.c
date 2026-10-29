@@ -34,52 +34,52 @@ static const struct {
 	const char *key;
 	const char *action;
 } shortcuts[] = {
-	{ "gtkNewWindow", "win.newwindow" },
-	{ "gtkNewTab", "win.newtab" },
-	{ "gtkOpenFile", "win.openfile" },
-	{ "gtkCloseWindow", "win.closewindow" },
-	{ "gtkSavePage", "win.savepage" },
-	{ "gtkPlainText", "win.plaintext" },
-	{ "gtkPDF", "win.pdf" },
-	{ "gtkPrintPreview", "win.printpreview" },
-	{ "gtkPrint", "win.print" },
-	{ "gtkQuitMenu", "win.quit" },
-	{ "gtkCut", "win.cut" },
-	{ "gtkCopy", "win.copy" },
-	{ "gtkPaste", "win.paste" },
-	{ "gtkDelete", "win.delete" },
-	{ "gtkSelectAll", "win.selectall" },
-	{ "gtkFind", "win.find" },
-	{ "gtkPreferences", "win.preferences" },
-	{ "gtkZoomPlus", "win.zoomplus" },
-	{ "gtkZoomNormal", "win.zoomnormal" },
-	{ "gtkZoomMinus", "win.zoomminus" },
-	{ "gtkFullScreen", "win.fullscreen" },
-	{ "gtkCustomize", "win.cutomize" },
-	{ "gtkNextTab", "win.nexttab" },
-	{ "gtkPrevTab", "win.prevtab" },
-	{ "gtkCloseTab", "win.closetab" },
-	{ "gtkSaveWindowSize", "win.savewindowsize" },
-	{ "gtkBack", "win.back" },
-	{ "gtkForward", "win.forward" },
-	{ "gtkStop", "win.stop" },
-	{ "gtkReload", "win.reload" },
-	{ "gtkHome", "win.home" },
-	{ "gtkLocalHistory", "win.localhistory" },
-	{ "gtkGlobalHistory", "win.globalhistory" },
-	{ "gtkAddBookMarks", "win.addbookmarks" },
-	{ "gtkShowBookMarks", "win.showbookmarks" },
-	{ "gtkOpenLocation", "win.openlocation" },
-	{ "gtkDownloads", "win.downloads" },
-	{ "gtkShowCookies", "win.showcookies" },
-	{ "gtkPageSource", "win.viewsource" },
-	{ "gtkToggleDebugging", "win.toggledebugging" },
-	{ "gtkDebugBoxTree", "win.debugboxtree" },
-	{ "gtkDebugDomTree", "win.debugdomtree" },
-	{ "gtkContents", "win.contents" },
-	{ "gtkGuide", "win.guide" },
-	{ "gtkUserInformation", "win.info" },
-	{ "gtkAbout", "win.about" },
+	{"gtkNewWindow", "win.newwindow"},
+	{"gtkNewTab", "win.newtab"},
+	{"gtkOpenFile", "win.openfile"},
+	{"gtkCloseWindow", "win.closewindow"},
+	{"gtkSavePage", "win.savepage"},
+	{"gtkPlainText", "win.plaintext"},
+	{"gtkPDF", "win.pdf"},
+	{"gtkPrintPreview", "win.printpreview"},
+	{"gtkPrint", "win.print"},
+	{"gtkQuitMenu", "win.quit"},
+	{"gtkCut", "win.cut"},
+	{"gtkCopy", "win.copy"},
+	{"gtkPaste", "win.paste"},
+	{"gtkDelete", "win.delete"},
+	{"gtkSelectAll", "win.selectall"},
+	{"gtkFind", "win.find"},
+	{"gtkPreferences", "win.preferences"},
+	{"gtkZoomPlus", "win.zoomplus"},
+	{"gtkZoomNormal", "win.zoomnormal"},
+	{"gtkZoomMinus", "win.zoomminus"},
+	{"gtkFullScreen", "win.fullscreen"},
+	{"gtkCustomize", "win.cutomize"},
+	{"gtkNextTab", "win.nexttab"},
+	{"gtkPrevTab", "win.prevtab"},
+	{"gtkCloseTab", "win.closetab"},
+	{"gtkSaveWindowSize", "win.savewindowsize"},
+	{"gtkBack", "win.back"},
+	{"gtkForward", "win.forward"},
+	{"gtkStop", "win.stop"},
+	{"gtkReload", "win.reload"},
+	{"gtkHome", "win.home"},
+	{"gtkLocalHistory", "win.localhistory"},
+	{"gtkGlobalHistory", "win.globalhistory"},
+	{"gtkAddBookMarks", "win.addbookmarks"},
+	{"gtkShowBookMarks", "win.showbookmarks"},
+	{"gtkOpenLocation", "win.openlocation"},
+	{"gtkDownloads", "win.downloads"},
+	{"gtkShowCookies", "win.showcookies"},
+	{"gtkPageSource", "win.viewsource"},
+	{"gtkToggleDebugging", "win.toggledebugging"},
+	{"gtkDebugBoxTree", "win.debugboxtree"},
+	{"gtkDebugDomTree", "win.debugdomtree"},
+	{"gtkContents", "win.contents"},
+	{"gtkGuide", "win.guide"},
+	{"gtkUserInformation", "win.info"},
+	{"gtkAbout", "win.about"},
 };
 
 static void add_item(GMenu *menu, const char *key, const char *action)
@@ -343,7 +343,8 @@ void nsgtk_menu_add_shortcuts(GtkWidget *window)
 	gtk_shortcut_controller_set_scope(GTK_SHORTCUT_CONTROLLER(controller),
 					  GTK_SHORTCUT_SCOPE_LOCAL);
 	for (idx = 0; idx < G_N_ELEMENTS(shortcuts); idx++) {
-		const char *accel = nsgtk_accelerator_get_desc(shortcuts[idx].key);
+		const char *accel = nsgtk_accelerator_get_desc(
+			shortcuts[idx].key);
 		GtkShortcutTrigger *trigger;
 
 		if (accel == NULL) {
@@ -355,7 +356,9 @@ void nsgtk_menu_add_shortcuts(GtkWidget *window)
 		}
 		gtk_shortcut_controller_add_shortcut(
 			GTK_SHORTCUT_CONTROLLER(controller),
-			gtk_shortcut_new(trigger, gtk_named_action_new(shortcuts[idx].action)));
+			gtk_shortcut_new(trigger,
+					 gtk_named_action_new(
+						 shortcuts[idx].action)));
 	}
 	gtk_widget_add_controller(window, controller);
 }

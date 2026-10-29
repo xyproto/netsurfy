@@ -49,7 +49,9 @@
  */
 GdkTexture *nsgtk_texture_new_for_pixbuf(GdkPixbuf *pixbuf);
 
-void nsgtk_widget_set_alignment(GtkWidget *widget, GtkAlign halign, GtkAlign valign);
+void nsgtk_widget_set_alignment(GtkWidget *widget,
+				GtkAlign halign,
+				GtkAlign valign);
 
 void nsgtk_widget_set_margins(GtkWidget *widget, gint hmargin, gint vmargin);
 
@@ -63,7 +65,11 @@ void nsgtk_widget_get_allocation(GtkWidget *widget, GtkAllocation *allocation);
  *
  * The colour components are 16 bit values as in GdkRGBA times 65535.
  */
-void nsgtk_widget_override_background_color(GtkWidget *widget, uint16_t a, uint16_t r, uint16_t g, uint16_t b);
+void nsgtk_widget_override_background_color(GtkWidget *widget,
+					    uint16_t a,
+					    uint16_t r,
+					    uint16_t g,
+					    uint16_t b);
 
 /**
  * Create an image widget showing a named icon.
@@ -83,7 +89,9 @@ void nsgtk_image_set_from_pixbuf(GtkImage *image, GdkPixbuf *pixbuf);
 /**
  * Set an entry icon from a pixbuf.
  */
-void nsgtk_entry_set_icon_from_pixbuf(GtkWidget *entry, GtkEntryIconPosition icon_pos, GdkPixbuf *pixbuf);
+void nsgtk_entry_set_icon_from_pixbuf(GtkWidget *entry,
+				      GtkEntryIconPosition icon_pos,
+				      GdkPixbuf *pixbuf);
 
 /**
  * Set the content of a button according to a toolbar button type option.
@@ -94,7 +102,10 @@ void nsgtk_entry_set_icon_from_pixbuf(GtkWidget *entry, GtkEntryIconPosition ico
  * \param button_type 1 for small icons, 2 for large icons, 3 for large
  *                    icons with text and 4 for text only
  */
-void nsgtk_button_set_style(GtkButton *button, const char *icon_name, const char *label, int button_type);
+void nsgtk_button_set_style(GtkButton *button,
+			    const char *icon_name,
+			    const char *label,
+			    int button_type);
 
 /**
  * Open a URI with the default handler for its scheme.
@@ -109,7 +120,10 @@ void nsgtk_show_uri(GtkWindow *parent, const gchar *uri);
  * \param handler The handler, a function taking a widget and the data
  * \param data The data passed to the handler
  */
-void nsgtk_action_map_add_menu_action(GActionMap *map, const char *name, GCallback handler, gpointer data);
+void nsgtk_action_map_add_menu_action(GActionMap *map,
+				      const char *name,
+				      GCallback handler,
+				      gpointer data);
 
 /**
  * Ask the user for a file name to save to.
@@ -124,7 +138,12 @@ void nsgtk_action_map_add_menu_action(GActionMap *map, const char *name, GCallba
  * \param callback The function called with the chosen file name
  * \param pw The context passed to the callback
  */
-void nsgtk_save_file_dialog(GtkWindow *parent, const char *title, const char *folder, const char *name, void (*callback)(const char *filename, void *pw), void *pw);
+void nsgtk_save_file_dialog(GtkWindow *parent,
+			    const char *title,
+			    const char *folder,
+			    const char *name,
+			    void (*callback)(const char *filename, void *pw),
+			    void *pw);
 
 /**
  * Ask the user for a file to open.
@@ -135,7 +154,11 @@ void nsgtk_save_file_dialog(GtkWindow *parent, const char *title, const char *fo
  * \param callback The function called with the chosen file name
  * \param pw The context passed to the callback
  */
-void nsgtk_open_file_dialog(GtkWindow *parent, const char *title, const char *folder, void (*callback)(const char *filename, void *pw), void *pw);
+void nsgtk_open_file_dialog(GtkWindow *parent,
+			    const char *title,
+			    const char *folder,
+			    void (*callback)(const char *filename, void *pw),
+			    void *pw);
 
 /**
  * Ask the user a question and wait for the answer.
@@ -148,7 +171,12 @@ void nsgtk_open_file_dialog(GtkWindow *parent, const char *title, const char *fo
  * \param default_button The button activated by the return key
  * \return The index of the chosen button
  */
-int nsgtk_alert_choose(GtkWindow *parent, const char *message, const char *detail, const char *const *buttons, int cancel_button, int default_button);
+int nsgtk_alert_choose(GtkWindow *parent,
+		       const char *message,
+		       const char *detail,
+		       const char *const *buttons,
+		       int cancel_button,
+		       int default_button);
 
 /**
  * Ask the user for a file name to save to and wait for the answer.
@@ -159,8 +187,13 @@ int nsgtk_alert_choose(GtkWindow *parent, const char *message, const char *detai
  * \param name The initial file name or NULL
  * \return The chosen file name to be freed with g_free or NULL
  */
-char *nsgtk_save_file_choose(GtkWindow *parent, const char *title, const char *folder, const char *name);
+char *nsgtk_save_file_choose(GtkWindow *parent,
+			     const char *title,
+			     const char *folder,
+			     const char *name);
 
-guint nsgtk_builder_add_from_resource(GtkBuilder *builder, const gchar *resource_path, GError **error);
+guint nsgtk_builder_add_from_resource(GtkBuilder *builder,
+				      const gchar *resource_path,
+				      GError **error);
 
 #endif /* NETSURF_GTK_COMPAT_H */

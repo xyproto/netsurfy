@@ -99,8 +99,8 @@
 #endif
 
 #ifndef wimp_WINDOW_GIVE_SHADED_ICON_INFO
-	/* RISC OS 5+. Requires OSLib trunk. */
-#define wimp_WINDOW_GIVE_SHADED_ICON_INFO ((wimp_extra_window_flags) 0x10u)
+/* RISC OS 5+. Requires OSLib trunk. */
+#define wimp_WINDOW_GIVE_SHADED_ICON_INFO ((wimp_extra_window_flags)0x10u)
 #endif
 
 #define SCROLL_VISIBLE_PADDING 32
@@ -119,30 +119,42 @@ static bool mouse_drag_select;
 static bool mouse_drag_adjust;
 
 /** List of all browser windows. */
-static struct gui_window	*window_list = 0;
+static struct gui_window *window_list = 0;
 /** GUI window which is being redrawn. Valid only during redraw. */
-struct gui_window		*ro_gui_current_redraw_gui;
+struct gui_window *ro_gui_current_redraw_gui;
 /** Form control which gui_form_select_menu is for. */
-static struct form_control	*gui_form_select_control;
+static struct form_control *gui_form_select_control;
 /** The browser window menu handle. */
-static wimp_menu		*ro_gui_browser_window_menu = NULL;
+static wimp_menu *ro_gui_browser_window_menu = NULL;
 /** Menu of options for form select controls. */
-static wimp_menu		*gui_form_select_menu = NULL;
+static wimp_menu *gui_form_select_menu = NULL;
 /** Main content object under menu, or 0 if none. */
-static struct hlcache_handle		*current_menu_main = 0;
+static struct hlcache_handle *current_menu_main = 0;
 /** Object under menu, or 0 if no object. */
-static struct hlcache_handle		*current_menu_object = 0;
+static struct hlcache_handle *current_menu_object = 0;
 /** URL of link under menu, or 0 if no link. */
-static nsurl			*current_menu_url = 0;
+static nsurl *current_menu_url = 0;
 
-static float scale_snap_to[] = {0.10, 0.125, 0.25, 0.333, 0.5, 0.75,
+static float scale_snap_to[] = {0.10,
+				0.125,
+				0.25,
+				0.333,
+				0.5,
+				0.75,
 				1.0,
-				1.5, 2.0, 3.0, 4.0, 6.0, 8.0, 12.0, 16.0};
+				1.5,
+				2.0,
+				3.0,
+				4.0,
+				6.0,
+				8.0,
+				12.0,
+				16.0};
 #define SCALE_SNAP_TO_SIZE (sizeof scale_snap_to) / (sizeof(float))
 
 /** An entry in ro_gui_pointer_table. */
 struct ro_gui_pointer_entry {
-	bool wimp_area;  /** The pointer is in the Wimp's sprite area. */
+	bool wimp_area; /** The pointer is in the Wimp's sprite area. */
 	char sprite_name[16];
 	int xactive;
 	int yactive;
@@ -152,25 +164,16 @@ struct ro_gui_pointer_entry {
  * Map from gui_pointer_shape to pointer sprite data. Must be ordered as
  * enum gui_pointer_shape. */
 struct ro_gui_pointer_entry ro_gui_pointer_table[] = {
-	{ true, "ptr_default", 0, 0 },
-	{ false, "ptr_point", 6, 0 },
-	{ false, "ptr_caret", 4, 9 },
-	{ false, "ptr_menu", 6, 4 },
-	{ false, "ptr_ud", 6, 7 },
-	{ false, "ptr_ud", 6, 7 },
-	{ false, "ptr_lr", 7, 6 },
-	{ false, "ptr_lr", 7, 6 },
-	{ false, "ptr_ld", 7, 7 },
-	{ false, "ptr_ld", 7, 7 },
-	{ false, "ptr_rd", 7, 7 },
-	{ false, "ptr_rd", 6, 7 },
-	{ false, "ptr_cross", 7, 7 },
-	{ false, "ptr_move", 8, 0 },
-	{ false, "ptr_wait", 7, 10 },
-	{ false, "ptr_help", 0, 0 },
-	{ false, "ptr_nodrop", 0, 0 },
-	{ false, "ptr_nt_allwd", 10, 10 },
-	{ false, "ptr_progress", 0, 0 },
+	{true, "ptr_default", 0, 0},   {false, "ptr_point", 6, 0},
+	{false, "ptr_caret", 4, 9},    {false, "ptr_menu", 6, 4},
+	{false, "ptr_ud", 6, 7},       {false, "ptr_ud", 6, 7},
+	{false, "ptr_lr", 7, 6},       {false, "ptr_lr", 7, 6},
+	{false, "ptr_ld", 7, 7},       {false, "ptr_ld", 7, 7},
+	{false, "ptr_rd", 7, 7},       {false, "ptr_rd", 6, 7},
+	{false, "ptr_cross", 7, 7},    {false, "ptr_move", 8, 0},
+	{false, "ptr_wait", 7, 10},    {false, "ptr_help", 0, 0},
+	{false, "ptr_nodrop", 0, 0},   {false, "ptr_nt_allwd", 10, 10},
+	{false, "ptr_progress", 0, 0},
 };
 
 struct update_box {
@@ -196,20 +199,22 @@ struct update_box *pending_updates;
  * \param height height of caret
  * \param clip clip rectangle, or NULL if none
  */
-static void
-gui_window_place_caret(struct gui_window *g,
-		       int x,
-		       int y,
-		       int height,
-		       const struct rect *clip)
+static void gui_window_place_caret(struct gui_window *g,
+				   int x,
+				   int y,
+				   int height,
+				   const struct rect *clip)
 {
 	os_error *error;
 
-	error = xwimp_set_caret_position(g->window, -1,
-			x * 2, -(y + height) * 2, height * 2, -1);
+	error = xwimp_set_caret_position(
+		g->window, -1, x * 2, -(y + height) * 2, height * 2, -1);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_set_caret_position: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_set_caret_position: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 	}
 }
@@ -238,7 +243,8 @@ static void gui_window_set_extent(struct gui_window *g, int width, int height)
 		state.w = g->window;
 		error = xwimp_get_window_state(&state);
 		if (error) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xwimp_get_window_state: 0x%x: %s",
 			      error->errnum,
 			      error->errmess);
@@ -269,11 +275,14 @@ static void gui_window_set_extent(struct gui_window *g, int width, int height)
 		width = max(width, w * 2);
 		height = max(height, h * 2);
 	}
-	os_box extent = { 0, -height, width, toolbar_height };
+	os_box extent = {0, -height, width, toolbar_height};
 	error = xwimp_set_extent(g->window, &extent);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_set_extent: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_set_extent: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
@@ -316,8 +325,11 @@ static void ro_gui_window_open(wimp_open *open)
 	state.w = g->window;
 	error = xwimp_get_window_state_and_nesting(&state, &parent, &linkage);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_window_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_window_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
@@ -394,15 +406,14 @@ static void ro_gui_window_open(wimp_open *open)
 	if (have_content &&
 	    (g->old_width != width || g->old_height != height)) {
 		/* Ctrl-resize of a top-level window scales the content size */
-		if ((g->old_width > 0) &&
-		    (g->old_width != width) &&
+		if ((g->old_width > 0) && (g->old_width != width) &&
 		    (ro_gui_ctrl_pressed())) {
-			new_scale = (browser_window_get_scale(g->bw) * width) / g->old_width;
+			new_scale = (browser_window_get_scale(g->bw) * width) /
+				    g->old_width;
 		}
 		browser_window_schedule_reformat(g->bw);
 	}
-	if (g->update_extent ||
-	    g->old_width != width ||
+	if (g->update_extent || g->old_width != width ||
 	    g->old_height != height) {
 		g->old_width = width;
 		g->old_height = height;
@@ -425,8 +436,11 @@ static void ro_gui_window_open(wimp_open *open)
 
 	error = xwimp_open_window_nested_with_flags(&state, parent, linkage);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_open_window: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_open_window: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
@@ -465,7 +479,8 @@ static void gui_window_update_extent(struct gui_window *g)
 	info.w = g->window;
 	error = xwimp_get_window_info_header_only(&info);
 	if (error) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "xwimp_get_window_info_header_only: 0x%x: %s",
 		      error->errnum,
 		      error->errmess);
@@ -496,7 +511,7 @@ static void gui_window_update_extent(struct gui_window *g)
  */
 static void ro_gui_window_update_theme(void *data, bool ok)
 {
-	struct gui_window *g = (struct gui_window *) data;
+	struct gui_window *g = (struct gui_window *)data;
 
 	if (g != NULL && g->toolbar != NULL) {
 		if (ok) {
@@ -516,7 +531,7 @@ static void ro_gui_window_update_theme(void *data, bool ok)
  */
 static void ro_gui_window_update_toolbar(void *data)
 {
-	struct gui_window *g = (struct gui_window *) data;
+	struct gui_window *g = (struct gui_window *)data;
 
 	if (g != NULL) {
 		gui_window_update_extent(g);
@@ -535,8 +550,8 @@ static void ro_gui_window_update_toolbar(void *data)
  */
 static void ro_gui_window_update_toolbar_buttons(struct gui_window *g)
 {
-	struct browser_window	*bw;
-	struct toolbar		*toolbar;
+	struct browser_window *bw;
+	struct toolbar *toolbar;
 
 	if (g == NULL || g->toolbar == NULL)
 		return;
@@ -544,32 +559,43 @@ static void ro_gui_window_update_toolbar_buttons(struct gui_window *g)
 	bw = g->bw;
 	toolbar = g->toolbar;
 
-	ro_toolbar_set_button_shaded_state(toolbar, TOOLBAR_BUTTON_RELOAD,
-			!browser_window_reload_available(bw));
+	ro_toolbar_set_button_shaded_state(toolbar,
+					   TOOLBAR_BUTTON_RELOAD,
+					   !browser_window_reload_available(
+						   bw));
 
-	ro_toolbar_set_button_shaded_state(toolbar, TOOLBAR_BUTTON_STOP,
-			!browser_window_stop_available(bw));
+	ro_toolbar_set_button_shaded_state(toolbar,
+					   TOOLBAR_BUTTON_STOP,
+					   !browser_window_stop_available(bw));
 
-	ro_toolbar_set_button_shaded_state(toolbar, TOOLBAR_BUTTON_BACK,
-			!browser_window_back_available(bw));
+	ro_toolbar_set_button_shaded_state(toolbar,
+					   TOOLBAR_BUTTON_BACK,
+					   !browser_window_back_available(bw));
 
-	ro_toolbar_set_button_shaded_state(toolbar, TOOLBAR_BUTTON_FORWARD,
-			!browser_window_forward_available(bw));
+	ro_toolbar_set_button_shaded_state(toolbar,
+					   TOOLBAR_BUTTON_FORWARD,
+					   !browser_window_forward_available(
+						   bw));
 
-	ro_toolbar_set_button_shaded_state(toolbar, TOOLBAR_BUTTON_UP,
-			!browser_window_up_available(bw));
+	ro_toolbar_set_button_shaded_state(toolbar,
+					   TOOLBAR_BUTTON_UP,
+					   !browser_window_up_available(bw));
 
-	ro_toolbar_set_button_shaded_state(toolbar, TOOLBAR_BUTTON_SEARCH,
-			!browser_window_can_search(bw));
+	ro_toolbar_set_button_shaded_state(toolbar,
+					   TOOLBAR_BUTTON_SEARCH,
+					   !browser_window_can_search(bw));
 
-	ro_toolbar_set_button_shaded_state(toolbar, TOOLBAR_BUTTON_SCALE,
-			!browser_window_has_content(bw));
+	ro_toolbar_set_button_shaded_state(toolbar,
+					   TOOLBAR_BUTTON_SCALE,
+					   !browser_window_has_content(bw));
 
-	ro_toolbar_set_button_shaded_state(toolbar, TOOLBAR_BUTTON_PRINT,
-			!browser_window_has_content(bw));
+	ro_toolbar_set_button_shaded_state(toolbar,
+					   TOOLBAR_BUTTON_PRINT,
+					   !browser_window_has_content(bw));
 
-	ro_toolbar_set_button_shaded_state(toolbar, TOOLBAR_BUTTON_SAVE_SOURCE,
-			!browser_window_has_content(bw));
+	ro_toolbar_set_button_shaded_state(toolbar,
+					   TOOLBAR_BUTTON_SAVE_SOURCE,
+					   !browser_window_has_content(bw));
 
 	ro_toolbar_update_urlsuggest(toolbar);
 }
@@ -585,7 +611,7 @@ static void ro_gui_window_action_add_bookmark(struct gui_window *g)
 	nsurl *url;
 
 	if (g == NULL || g->bw == NULL || g->toolbar == NULL ||
-			browser_window_has_content(g->bw) == false)
+	    browser_window_has_content(g->bw) == false)
 		return;
 
 	url = browser_window_access_url(g->bw);
@@ -605,7 +631,7 @@ static void ro_gui_window_action_remove_bookmark(struct gui_window *g)
 	nsurl *url;
 
 	if (g == NULL || g->bw == NULL || g->toolbar == NULL ||
-			browser_window_has_content(g->bw) == false)
+	    browser_window_has_content(g->bw) == false)
 		return;
 
 	url = browser_window_access_url(g->bw);
@@ -656,12 +682,12 @@ static void ro_gui_window_action_home(struct gui_window *g)
 	error = nsurl_create(addr, &url);
 	if (error == NSERROR_OK) {
 		error = browser_window_navigate(g->bw,
-					url,
-					NULL,
-					BW_NAVIGATE_HISTORY,
-					NULL,
-					NULL,
-					NULL);
+						url,
+						NULL,
+						BW_NAVIGATE_HISTORY,
+						NULL,
+						NULL,
+						NULL);
 		nsurl_unref(url);
 	}
 	if (error != NSERROR_OK) {
@@ -768,25 +794,28 @@ static void ro_gui_window_prepare_pageinfo(struct gui_window *g)
 
 	if (content_get_type(h) == CONTENT_HTML) {
 		if (content_get_encoding(h, CONTENT_ENCODING_NORMAL)) {
-			snprintf(enc_buf, sizeof enc_buf, "%s (%s)",
-				 content_get_encoding(h, CONTENT_ENCODING_NORMAL),
-				 content_get_encoding(h, CONTENT_ENCODING_SOURCE));
+			snprintf(enc_buf,
+				 sizeof enc_buf,
+				 "%s (%s)",
+				 content_get_encoding(h,
+						      CONTENT_ENCODING_NORMAL),
+				 content_get_encoding(h,
+						      CONTENT_ENCODING_SOURCE));
 			enc = enc_buf;
 		} else {
 			enc = messages_get("EncodingUnk");
 		}
 	}
 
-	ro_gui_set_icon_string(dialog_pageinfo, ICON_PAGEINFO_ICON,
-			icon, true);
-	ro_gui_set_icon_string(dialog_pageinfo, ICON_PAGEINFO_TITLE,
-			title, true);
-	ro_gui_set_icon_string(dialog_pageinfo, ICON_PAGEINFO_URL,
-			url, true);
-	ro_gui_set_icon_string(dialog_pageinfo, ICON_PAGEINFO_ENC,
-			enc, true);
-	ro_gui_set_icon_string(dialog_pageinfo, ICON_PAGEINFO_TYPE,
-			lwc_string_data(mime), true);
+	ro_gui_set_icon_string(dialog_pageinfo, ICON_PAGEINFO_ICON, icon, true);
+	ro_gui_set_icon_string(
+		dialog_pageinfo, ICON_PAGEINFO_TITLE, title, true);
+	ro_gui_set_icon_string(dialog_pageinfo, ICON_PAGEINFO_URL, url, true);
+	ro_gui_set_icon_string(dialog_pageinfo, ICON_PAGEINFO_ENC, enc, true);
+	ro_gui_set_icon_string(dialog_pageinfo,
+			       ICON_PAGEINFO_TYPE,
+			       lwc_string_data(mime),
+			       true);
 
 	lwc_string_unref(mime);
 }
@@ -800,7 +829,7 @@ static void ro_gui_window_prepare_pageinfo(struct gui_window *g)
 static void ro_gui_window_action_page_info(struct gui_window *g)
 {
 	if (g == NULL || g->bw == NULL ||
-			browser_window_has_content(g->bw) == false)
+	    browser_window_has_content(g->bw) == false)
 		return;
 
 	ro_gui_window_prepare_pageinfo(g);
@@ -818,10 +847,9 @@ static void ro_gui_window_action_page_info(struct gui_window *g)
  * \param action_type The action type to be handled.
  * \param action The action to process.
  */
-static void
-ro_gui_window_toolbar_click(void *data,
-			    toolbar_action_type action_type,
-			    union toolbar_action action)
+static void ro_gui_window_toolbar_click(void *data,
+					toolbar_action_type action_type,
+					union toolbar_action action)
 {
 	struct gui_window *g = data;
 	nserror err;
@@ -833,8 +861,7 @@ ro_gui_window_toolbar_click(void *data,
 	if (action_type == TOOLBAR_ACTION_URL) {
 		switch (action.url) {
 		case TOOLBAR_URL_DRAG_URL:
-		case TOOLBAR_URL_DRAG_FAVICON:
-		{
+		case TOOLBAR_URL_DRAG_FAVICON: {
 			gui_save_type save_type;
 			nserror err;
 			nsurl *url;
@@ -854,12 +881,13 @@ ro_gui_window_toolbar_click(void *data,
 					browser_window_access_url(g->bw));
 			}
 
-			ro_gui_drag_save_link(save_type, url,
-					browser_window_get_title(g->bw), g);
+			ro_gui_drag_save_link(save_type,
+					      url,
+					      browser_window_get_title(g->bw),
+					      g);
 
 			nsurl_unref(url);
-		}
-			break;
+		} break;
 
 		case TOOLBAR_URL_SELECT_HOTLIST:
 			ro_gui_window_action_add_bookmark(g);
@@ -1009,9 +1037,13 @@ static void ro_gui_window_launch_url(struct gui_window *g, const char *url_s)
 	} else {
 		ro_gui_window_set_url(g, url);
 
-		browser_window_navigate(g->bw, url,
-				NULL, BW_NAVIGATE_HISTORY,
-				NULL, NULL, NULL);
+		browser_window_navigate(g->bw,
+					url,
+					NULL,
+					BW_NAVIGATE_HISTORY,
+					NULL,
+					NULL,
+					NULL);
 		nsurl_unref(url);
 	}
 }
@@ -1030,8 +1062,10 @@ static void ro_gui_window_action_new_window(struct gui_window *g)
 		return;
 
 	error = browser_window_create(BW_CREATE_CLONE,
-			browser_window_access_url(g->bw),
-			NULL, g->bw, NULL);
+				      browser_window_access_url(g->bw),
+				      NULL,
+				      g->bw,
+				      NULL);
 
 	if (error != NSERROR_OK) {
 		ro_warn_user(messages_get_errorcode(error), 0);
@@ -1053,20 +1087,19 @@ static void ro_gui_window_action_new_window(struct gui_window *g)
  * \param scroll_x The X scroll step to be applied.
  * \param scroll_y The Y scroll step to be applied.
  */
-static void
-ro_gui_window_scroll_action(struct gui_window *g,
-			    wimp_scroll_direction scroll_x,
-			    wimp_scroll_direction scroll_y)
+static void ro_gui_window_scroll_action(struct gui_window *g,
+					wimp_scroll_direction scroll_x,
+					wimp_scroll_direction scroll_y)
 {
-	int			visible_x, visible_y;
-	int			step_x = 0, step_y = 0;
-	int			toolbar_y;
-	wimp_window_state	state;
-	wimp_pointer		pointer;
-	os_error		*error;
-	os_coord		pos;
-	bool			handled = false;
-	struct toolbar		*toolbar;
+	int visible_x, visible_y;
+	int step_x = 0, step_y = 0;
+	int toolbar_y;
+	wimp_window_state state;
+	wimp_pointer pointer;
+	os_error *error;
+	os_coord pos;
+	bool handled = false;
+	struct toolbar *toolbar;
 
 	if (g == NULL)
 		return;
@@ -1076,8 +1109,11 @@ ro_gui_window_scroll_action(struct gui_window *g,
 	state.w = g->window;
 	error = xwimp_get_window_state(&state);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_window_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_window_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		return;
 	}
 
@@ -1091,8 +1127,11 @@ ro_gui_window_scroll_action(struct gui_window *g,
 
 	error = xwimp_get_pointer_info(&pointer);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_pointer_info 0x%x : %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_pointer_info 0x%x : %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
@@ -1164,11 +1203,8 @@ ro_gui_window_scroll_action(struct gui_window *g,
 
 	if (pointer.w == g->window &&
 	    ro_gui_window_to_window_pos(g, pointer.pos.x, pointer.pos.y, &pos))
-		handled = browser_window_scroll_at_point(g->bw,
-							 pos.x,
-							 pos.y,
-							 step_x,
-							 step_y);
+		handled = browser_window_scroll_at_point(
+			g->bw, pos.x, pos.y, step_x, step_y);
 
 	/* If the core didn't do the scrolling, handle it via the Wimp.
 	 * Windows which contain frames can only be scrolled by the core,
@@ -1212,10 +1248,13 @@ ro_gui_window_scroll_action(struct gui_window *g,
 			break;
 		}
 
-		error = xwimp_open_window((wimp_open *) &state);
+		error = xwimp_open_window((wimp_open *)&state);
 		if (error) {
-			NSLOG(netsurf, INFO, "xwimp_open_window: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_open_window: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 		}
 	}
 }
@@ -1279,27 +1318,29 @@ static bool handle_local_keypress_scale(struct gui_window *gw, uint32_t c)
  * \param is_toolbar true if the keypress is from a toolbar else false.
  * \return true if the keypress was claimed; else false.
  */
-static bool
-ro_gui_window_handle_local_keypress(struct gui_window *g,
-				    wimp_key *key,
-				    bool is_toolbar)
+static bool ro_gui_window_handle_local_keypress(struct gui_window *g,
+						wimp_key *key,
+						bool is_toolbar)
 {
 	struct browser_window_features cont;
-	os_error			*ro_error;
-	wimp_pointer			pointer;
-	os_coord			pos;
-	uint32_t			c = (uint32_t) key->c;
-	wimp_scroll_direction		xscroll = wimp_SCROLL_NONE;
-	wimp_scroll_direction		yscroll = wimp_SCROLL_NONE;
-	nsurl				*url;
+	os_error *ro_error;
+	wimp_pointer pointer;
+	os_coord pos;
+	uint32_t c = (uint32_t)key->c;
+	wimp_scroll_direction xscroll = wimp_SCROLL_NONE;
+	wimp_scroll_direction yscroll = wimp_SCROLL_NONE;
+	nsurl *url;
 
 	if (g == NULL)
 		return false;
 
 	ro_error = xwimp_get_pointer_info(&pointer);
 	if (ro_error) {
-		NSLOG(netsurf, INFO, "xwimp_get_pointer_info: 0x%x: %s\n",
-		      ro_error->errnum, ro_error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_pointer_info: 0x%x: %s\n",
+		      ro_error->errnum,
+		      ro_error->errmess);
 		ro_warn_user("WimpError", ro_error->errmess);
 		return false;
 	}
@@ -1310,17 +1351,13 @@ ro_gui_window_handle_local_keypress(struct gui_window *g,
 	browser_window_get_features(g->bw, pos.x, pos.y, &cont);
 
 	switch (c) {
-	case IS_WIMP_KEY + wimp_KEY_F1:	/* Help. */
+	case IS_WIMP_KEY + wimp_KEY_F1: /* Help. */
 	{
 		nserror error = nsurl_create(
-				"https://www.netsurf-browser.org/documentation/",
-				&url);
+			"https://www.netsurf-browser.org/documentation/", &url);
 		if (error == NSERROR_OK) {
-			error = browser_window_create(BW_CREATE_HISTORY,
-					url,
-					NULL,
-					NULL,
-					NULL);
+			error = browser_window_create(
+				BW_CREATE_HISTORY, url, NULL, NULL, NULL);
 			nsurl_unref(url);
 		}
 		if (error != NSERROR_OK) {
@@ -1348,7 +1385,7 @@ ro_gui_window_handle_local_keypress(struct gui_window *g,
 		browser_window_destroy(g->bw);
 		return true;
 
-	case 19:		/* Ctrl + S */
+	case 19: /* Ctrl + S */
 	case IS_WIMP_KEY + wimp_KEY_F3:
 		ro_gui_window_action_save(g, GUI_SAVE_SOURCE);
 		return true;
@@ -1365,27 +1402,27 @@ ro_gui_window_handle_local_keypress(struct gui_window *g,
 		ro_gui_window_action_save(g, GUI_SAVE_DRAW);
 		return true;
 
-	case 6:			/* Ctrl + F */
-	case IS_WIMP_KEY + wimp_KEY_F4:	/* Search */
+	case 6: /* Ctrl + F */
+	case IS_WIMP_KEY + wimp_KEY_F4: /* Search */
 		ro_gui_window_action_search(g);
 		return true;
 
-	case IS_WIMP_KEY + wimp_KEY_F5:	/* Reload */
+	case IS_WIMP_KEY + wimp_KEY_F5: /* Reload */
 		if (g->bw != NULL)
 			browser_window_reload(g->bw, false);
 		return true;
 
-	case 18:		/* Ctrl+R (Full reload) */
+	case 18: /* Ctrl+R (Full reload) */
 	case IS_WIMP_KEY + wimp_KEY_CONTROL + wimp_KEY_F5:
 		if (g->bw != NULL)
 			browser_window_reload(g->bw, true);
 		return true;
 
-	case IS_WIMP_KEY + wimp_KEY_F6:	/* Hotlist */
+	case IS_WIMP_KEY + wimp_KEY_F6: /* Hotlist */
 		ro_gui_hotlist_present();
 		return true;
 
-	case IS_WIMP_KEY + wimp_KEY_F7:	/* Show local history */
+	case IS_WIMP_KEY + wimp_KEY_F7: /* Show local history */
 		ro_gui_window_action_local_history(g);
 		return true;
 
@@ -1394,9 +1431,10 @@ ro_gui_window_handle_local_keypress(struct gui_window *g,
 		ro_gui_global_history_present();
 		return true;
 
-	case IS_WIMP_KEY + wimp_KEY_F8:	/* View source */
-		ro_gui_view_source((cont.main != NULL) ? cont.main :
-				browser_window_get_content(g->bw));
+	case IS_WIMP_KEY + wimp_KEY_F8: /* View source */
+		ro_gui_view_source((cont.main != NULL)
+					   ? cont.main
+					   : browser_window_get_content(g->bw));
 		return true;
 
 	case IS_WIMP_KEY + wimp_KEY_F9:
@@ -1412,7 +1450,7 @@ ro_gui_window_handle_local_keypress(struct gui_window *g,
 		talloc_report_full(0, stderr);
 		return true;
 
-	case IS_WIMP_KEY + wimp_KEY_F11:	/* Zoom */
+	case IS_WIMP_KEY + wimp_KEY_F11: /* Zoom */
 		ro_gui_window_action_zoom(g);
 		return true;
 
@@ -1441,12 +1479,12 @@ ro_gui_window_handle_local_keypress(struct gui_window *g,
 			browser_window_stop(g->bw);
 		return true;
 
-	case 14:	/* CTRL+N */
+	case 14: /* CTRL+N */
 		ro_gui_window_action_new_window(g);
 		return true;
 
-	case 17:       /* CTRL+Q (Zoom out) */
-	case 23:       /* CTRL+W (Zoom in) */
+	case 17: /* CTRL+Q (Zoom out) */
+	case 23: /* CTRL+W (Zoom in) */
 		if (browser_window_has_content(g->bw) == true) {
 			return handle_local_keypress_scale(g, c);
 		}
@@ -1528,7 +1566,7 @@ ro_gui_window_handle_local_keypress(struct gui_window *g,
  */
 static bool ro_gui_window_toolbar_keypress(void *data, wimp_key *key)
 {
-	struct gui_window *g = (struct gui_window *) data;
+	struct gui_window *g = (struct gui_window *)data;
 
 	if (g != NULL) {
 		return ro_gui_window_handle_local_keypress(g, key, true);
@@ -1560,11 +1598,10 @@ static void ro_gui_window_save_toolbar_buttons(void *data, char *config)
 static const struct toolbar_callbacks ro_gui_window_toolbar_callbacks = {
 	ro_gui_window_update_theme,
 	ro_gui_window_update_toolbar,
-	(void (*)(void *)) ro_gui_window_update_toolbar_buttons,
+	(void (*)(void *))ro_gui_window_update_toolbar_buttons,
 	ro_gui_window_toolbar_click,
 	ro_gui_window_toolbar_keypress,
-	ro_gui_window_save_toolbar_buttons
-};
+	ro_gui_window_save_toolbar_buttons};
 
 
 /**
@@ -1584,8 +1621,11 @@ static void ro_gui_window_close(wimp_w w)
 
 	error = xwimp_get_pointer_info(&pointer);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_pointer_info: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_pointer_info: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
@@ -1603,8 +1643,9 @@ static void ro_gui_window_close(wimp_w w)
 			temp_name = malloc(strlen(filename) + 32);
 			if (temp_name) {
 				char *r;
-				sprintf(temp_name, "Filer_OpenDir %s",
-						filename);
+				sprintf(temp_name,
+					"Filer_OpenDir %s",
+					filename);
 				r = temp_name + strlen(temp_name);
 				while (r > temp_name) {
 					if (*r == '.') {
@@ -1615,11 +1656,13 @@ static void ro_gui_window_close(wimp_w w)
 				}
 				error = xos_cli(temp_name);
 				if (error) {
-					NSLOG(netsurf, INFO,
+					NSLOG(netsurf,
+					      INFO,
 					      "xos_cli: 0x%x: %s",
 					      error->errnum,
 					      error->errmess);
-					ro_warn_user("MiscError", error->errmess);
+					ro_warn_user("MiscError",
+						     error->errmess);
 					return;
 				}
 				free(temp_name);
@@ -1647,16 +1690,13 @@ static void ro_gui_window_close(wimp_w w)
  * \param[in] wimp_rect   The area of gui_win to render into.
  * \param[in] use_buffer  Whether to use buffered rendering.
  */
-static inline void ro_gui_window__redraw_rect(
-		const struct gui_window *gui_win,
-		const wimp_draw *wimp_rect,
-		bool use_buffer)
+static inline void ro_gui_window__redraw_rect(const struct gui_window *gui_win,
+					      const wimp_draw *wimp_rect,
+					      bool use_buffer)
 {
-	struct redraw_context ctx = {
-		.interactive = true,
-		.background_images = true,
-		.plot = &ro_plotters
-	};
+	struct redraw_context ctx = {.interactive = true,
+				     .background_images = true,
+				     .plot = &ro_plotters};
 	struct rect clip;
 
 	/* OS's redraw request coordinates are in screen coordinates,
@@ -1676,8 +1716,8 @@ static inline void ro_gui_window__redraw_rect(
 	/* Convert OS redraw rectangle request coordinates into NetSurf
 	 * coordinates. NetSurf coordinates have origin at top left of
 	 * document and units are in px. */
-	clip.x0 = (ro_plot_clip_rect.x0    ) / 2; /* left   */
-	clip.y0 = (ro_plot_clip_rect.y1    ) / 2; /* top    */
+	clip.x0 = (ro_plot_clip_rect.x0) / 2; /* left   */
+	clip.y0 = (ro_plot_clip_rect.y1) / 2; /* top    */
 	clip.x1 = (ro_plot_clip_rect.x1 + 1) / 2; /* right  */
 	clip.y1 = (ro_plot_clip_rect.y0 + 1) / 2; /* bottom */
 
@@ -1716,13 +1756,18 @@ static void ro_gui_window_redraw(wimp_draw *redraw)
 
 	error = xwimp_redraw_window(redraw, &more);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_redraw_window: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_redraw_window: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
 	while (more) {
-		ro_gui_window__redraw_rect(g, redraw,
+		ro_gui_window__redraw_rect(
+			g,
+			redraw,
 			ro_gui_current_redraw_gui->option.buffer_everything);
 
 		/* Check to see if there are more rectangles to draw and
@@ -1733,11 +1778,14 @@ static void ro_gui_window_redraw(wimp_draw *redraw)
 		   doesn't actually stop anything working, so we mask it out
 		   for now until a better fix is found. This appears to be a
 		   bug in RISC OS. */
-		if (error && !(ro_gui_current_redraw_gui->
-				option.buffer_everything &&
-				error->errnum == error_WIMP_GET_RECT)) {
-			NSLOG(netsurf, INFO, "xwimp_get_rectangle: 0x%x: %s",
-			      error->errnum, error->errmess);
+		if (error &&
+		    !(ro_gui_current_redraw_gui->option.buffer_everything &&
+		      error->errnum == error_WIMP_GET_RECT)) {
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_get_rectangle: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 			ro_gui_current_redraw_gui = NULL;
 			return;
@@ -1771,16 +1819,16 @@ static void ro_gui_window_scroll(wimp_scroll *scroll)
 	cscale = browser_window_get_scale(g->bw);
 
 	if (scroll->ymin & 3) {
-		inc = 0.02;  /* RO5 sends the msg 5 times;
-			      * don't ask me why
-			      *
-			      * @todo this is liable to break if
-			      * HID is configured optimally for
-			      * frame scrolling. *5 appears to be
-			      * an artifact of non-HID mode scrolling.
-			      */
+		inc = 0.02; /* RO5 sends the msg 5 times;
+			     * don't ask me why
+			     *
+			     * @todo this is liable to break if
+			     * HID is configured optimally for
+			     * frame scrolling. *5 appears to be
+			     * an artifact of non-HID mode scrolling.
+			     */
 	} else {
-		inc = (1 << (ABS(scroll->ymin)>>2)) / 20.0F;
+		inc = (1 << (ABS(scroll->ymin) >> 2)) / 20.0F;
 	}
 
 	if (scroll->ymin > 0) {
@@ -1845,17 +1893,16 @@ static void ro_gui_window_pointer_entering(wimp_entering *entering)
 static bool ro_gui_window_keypress(wimp_key *key)
 {
 	struct gui_window *g;
-	uint32_t c = (uint32_t) key->c;
+	uint32_t c = (uint32_t)key->c;
 
-	g = (struct gui_window *) ro_gui_wimp_event_get_user_data(key->w);
+	g = (struct gui_window *)ro_gui_wimp_event_get_user_data(key->w);
 	if (g == NULL) {
 		return false;
 	}
 
 	/* First send the key to the browser window, eg. form fields. */
 
-	if ((unsigned)c < 0x20 ||
-	    (0x7f <= c && c <= 0x9f) ||
+	if ((unsigned)c < 0x20 || (0x7f <= c && c <= 0x9f) ||
 	    (c & IS_WIMP_KEY)) {
 		/* Munge control keys into unused control chars */
 		/* We can't map onto 1->26 (reserved for ctrl+<qwerty>
@@ -1896,7 +1943,7 @@ static bool ro_gui_window_keypress(wimp_key *key)
 			break;
 
 		case wimp_KEY_SHIFT | wimp_KEY_LEFT:
-			c = NS_KEY_WORD_LEFT ;
+			c = NS_KEY_WORD_LEFT;
 			break;
 
 		case wimp_KEY_SHIFT | wimp_KEY_RIGHT:
@@ -1983,7 +2030,7 @@ static bool ro_gui_window_click(wimp_pointer *pointer)
 		return false;
 	}
 
-	g = (struct gui_window *) ro_gui_wimp_event_get_user_data(pointer->w);
+	g = (struct gui_window *)ro_gui_wimp_event_get_user_data(pointer->w);
 
 	/* try to close url-completion */
 	ro_gui_url_complete_close();
@@ -1992,11 +2039,14 @@ static bool ro_gui_window_click(wimp_pointer *pointer)
 	if (pointer->buttons & (wimp_SINGLE_SELECT | wimp_SINGLE_ADJUST))
 		gui_window_place_caret(g, -100, -100, 0, NULL);
 
-	if (ro_gui_window_to_window_pos(g, pointer->pos.x, pointer->pos.y, &pos)) {
-		browser_window_mouse_click(g->bw,
-				ro_gui_mouse_click_state(pointer->buttons,
-				wimp_BUTTON_DOUBLE_CLICK_DRAG),
-				pos.x, pos.y);
+	if (ro_gui_window_to_window_pos(
+		    g, pointer->pos.x, pointer->pos.y, &pos)) {
+		browser_window_mouse_click(
+			g->bw,
+			ro_gui_mouse_click_state(pointer->buttons,
+						 wimp_BUTTON_DOUBLE_CLICK_DRAG),
+			pos.x,
+			pos.y);
 	}
 
 	return true;
@@ -2012,9 +2062,8 @@ static bool ro_gui_window_click(wimp_pointer *pointer)
  * \param control  The form control needing a menu.
  * \return true if the menu is OK to be opened; else false.
  */
-static bool
-ro_gui_window_prepare_form_select_menu(struct gui_window *g,
-				       struct form_control *control)
+static bool ro_gui_window_prepare_form_select_menu(struct gui_window *g,
+						   struct form_control *control)
 {
 	unsigned int item, entries;
 	char *text_convert, *temp;
@@ -2040,11 +2089,11 @@ ro_gui_window_prepare_form_select_menu(struct gui_window *g,
 
 	/* free riscos menu if there already is one */
 	if ((gui_form_select_menu) && (control != gui_form_select_control)) {
-		for (item = 0; ; item++) {
-			free(gui_form_select_menu->entries[item].data.
-					indirected_text.text);
+		for (item = 0;; item++) {
+			free(gui_form_select_menu->entries[item]
+				     .data.indirected_text.text);
 			if (gui_form_select_menu->entries[item].menu_flags &
-					wimp_MENU_LAST)
+			    wimp_MENU_LAST)
 				break;
 		}
 		free(gui_form_select_menu->title_data.indirected_text.text);
@@ -2061,8 +2110,9 @@ ro_gui_window_prepare_form_select_menu(struct gui_window *g,
 			ro_gui_menu_destroy();
 			return false;
 		}
-		err = utf8_to_local_encoding(messages_get("SelectMenu"), 0,
-				&text_convert);
+		err = utf8_to_local_encoding(messages_get("SelectMenu"),
+					     0,
+					     &text_convert);
 		if (err != NSERROR_OK) {
 			/* badenc should never happen */
 			assert(err != NSERROR_BAD_ENCODING);
@@ -2072,7 +2122,7 @@ ro_gui_window_prepare_form_select_menu(struct gui_window *g,
 			return false;
 		}
 		gui_form_select_menu->title_data.indirected_text.text =
-				text_convert;
+			text_convert;
 		ro_gui_menu_init_structure(gui_form_select_menu, entries);
 	}
 
@@ -2082,7 +2132,7 @@ ro_gui_window_prepare_form_select_menu(struct gui_window *g,
 		gui_form_select_menu->entries[item].menu_flags = 0;
 		if (option->selected)
 			gui_form_select_menu->entries[item].menu_flags =
-					wimp_MENU_TICKED;
+				wimp_MENU_TICKED;
 		if (!reopen) {
 
 			/* convert spaces to hard spaces to stop things
@@ -2098,8 +2148,7 @@ ro_gui_window_prepare_form_select_menu(struct gui_window *g,
 				return false;
 			}
 
-			err = utf8_to_local_encoding(temp,
-				0, &text_convert);
+			err = utf8_to_local_encoding(temp, 0, &text_convert);
 			if (err != NSERROR_OK) {
 				/* A bad encoding should never happen,
 				 * so assert this */
@@ -2112,16 +2161,18 @@ ro_gui_window_prepare_form_select_menu(struct gui_window *g,
 
 			free(temp);
 
-			gui_form_select_menu->entries[item].data.indirected_text.text =
-					text_convert;
-			gui_form_select_menu->entries[item].data.indirected_text.size =
-					strlen(gui_form_select_menu->entries[item].
-					data.indirected_text.text) + 1;
+			gui_form_select_menu->entries[item]
+				.data.indirected_text.text = text_convert;
+			gui_form_select_menu->entries[item]
+				.data.indirected_text.size =
+				strlen(gui_form_select_menu->entries[item]
+					       .data.indirected_text.text) +
+				1;
 		}
 	}
 
 	gui_form_select_menu->entries[0].menu_flags |=
-			wimp_MENU_TITLE_INDIRECTED;
+		wimp_MENU_TITLE_INDIRECTED;
 	gui_form_select_menu->entries[item - 1].menu_flags |= wimp_MENU_LAST;
 
 	return true;
@@ -2140,10 +2191,9 @@ ro_gui_window_prepare_form_select_menu(struct gui_window *g,
  * \param export_sprite true on exit if a sprite would be possible.
  * \return true if valid data is returned; else false.
  */
-static bool
-ro_gui_window_content_export_types(struct hlcache_handle *h,
-				   bool *export_draw,
-				   bool *export_sprite)
+static bool ro_gui_window_content_export_types(struct hlcache_handle *h,
+					       bool *export_draw,
+					       bool *export_sprite)
 {
 	bool found_type = false;
 
@@ -2191,21 +2241,20 @@ ro_gui_window_content_export_types(struct hlcache_handle *h,
  *		    NULL for an Adjust click.
  * \return true if the event was handled; else false.
  */
-static bool
-ro_gui_window_menu_prepare(wimp_w w,
-			   wimp_i i,
-			   wimp_menu *menu,
-			   wimp_pointer *pointer)
+static bool ro_gui_window_menu_prepare(wimp_w w,
+				       wimp_i i,
+				       wimp_menu *menu,
+				       wimp_pointer *pointer)
 {
-	struct gui_window	*g;
-	struct browser_window	*bw;
-	struct toolbar		*toolbar;
+	struct gui_window *g;
+	struct browser_window *bw;
+	struct toolbar *toolbar;
 	struct browser_window_features cont;
-	bool			export_sprite, export_draw, have_content;
-	os_coord		pos;
-	browser_editor_flags	editor_flags;
+	bool export_sprite, export_draw, have_content;
+	os_coord pos;
+	browser_editor_flags editor_flags;
 
-	g = (struct gui_window *) ro_gui_wimp_event_get_user_data(w);
+	g = (struct gui_window *)ro_gui_wimp_event_get_user_data(w);
 	toolbar = g->toolbar;
 	bw = g->bw;
 	have_content = browser_window_has_content(g->bw);
@@ -2216,8 +2265,8 @@ ro_gui_window_menu_prepare(wimp_w w,
 	 */
 
 	if (menu == gui_form_select_menu) {
-		return ro_gui_window_prepare_form_select_menu(g,
-				gui_form_select_control);
+		return ro_gui_window_prepare_form_select_menu(
+			g, gui_form_select_control);
 	}
 
 	if (menu != ro_gui_browser_window_menu) {
@@ -2234,9 +2283,9 @@ ro_gui_window_menu_prepare(wimp_w w,
 		current_menu_object = NULL;
 		current_menu_url = NULL;
 
-		if (ro_gui_window_to_window_pos(g, pointer->pos.x,
-				pointer->pos.y, &pos)) {
-			browser_window_get_features(bw,	pos.x, pos.y, &cont);
+		if (ro_gui_window_to_window_pos(
+			    g, pointer->pos.x, pointer->pos.y, &pos)) {
+			browser_window_get_features(bw, pos.x, pos.y, &cont);
 
 			current_menu_main = cont.main;
 			current_menu_object = cont.object;
@@ -2250,30 +2299,39 @@ ro_gui_window_menu_prepare(wimp_w w,
 
 	/* Toolbar (Sub)Menu */
 
-	ro_gui_menu_set_entry_shaded(menu, TOOLBAR_BUTTONS,
-			ro_toolbar_menu_option_shade(toolbar));
-	ro_gui_menu_set_entry_ticked(menu, TOOLBAR_BUTTONS,
-			ro_toolbar_menu_buttons_tick(toolbar));
+	ro_gui_menu_set_entry_shaded(menu,
+				     TOOLBAR_BUTTONS,
+				     ro_toolbar_menu_option_shade(toolbar));
+	ro_gui_menu_set_entry_ticked(menu,
+				     TOOLBAR_BUTTONS,
+				     ro_toolbar_menu_buttons_tick(toolbar));
 
-	ro_gui_menu_set_entry_shaded(menu, TOOLBAR_ADDRESS_BAR,
-			ro_toolbar_menu_edit_shade(toolbar));
-	ro_gui_menu_set_entry_ticked(menu, TOOLBAR_ADDRESS_BAR,
-			ro_toolbar_menu_url_tick(toolbar));
+	ro_gui_menu_set_entry_shaded(menu,
+				     TOOLBAR_ADDRESS_BAR,
+				     ro_toolbar_menu_edit_shade(toolbar));
+	ro_gui_menu_set_entry_ticked(menu,
+				     TOOLBAR_ADDRESS_BAR,
+				     ro_toolbar_menu_url_tick(toolbar));
 
-	ro_gui_menu_set_entry_shaded(menu, TOOLBAR_THROBBER,
-			ro_toolbar_menu_edit_shade(toolbar));
-	ro_gui_menu_set_entry_ticked(menu, TOOLBAR_THROBBER,
-			ro_toolbar_menu_throbber_tick(toolbar));
+	ro_gui_menu_set_entry_shaded(menu,
+				     TOOLBAR_THROBBER,
+				     ro_toolbar_menu_edit_shade(toolbar));
+	ro_gui_menu_set_entry_ticked(menu,
+				     TOOLBAR_THROBBER,
+				     ro_toolbar_menu_throbber_tick(toolbar));
 
-	ro_gui_menu_set_entry_shaded(menu, TOOLBAR_EDIT,
-			ro_toolbar_menu_edit_shade(toolbar));
-	ro_gui_menu_set_entry_ticked(menu, TOOLBAR_EDIT,
-			ro_toolbar_menu_edit_tick(toolbar));
+	ro_gui_menu_set_entry_shaded(menu,
+				     TOOLBAR_EDIT,
+				     ro_toolbar_menu_edit_shade(toolbar));
+	ro_gui_menu_set_entry_ticked(menu,
+				     TOOLBAR_EDIT,
+				     ro_toolbar_menu_edit_tick(toolbar));
 
 	/* Page Submenu */
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_PAGE,
-			!browser_window_can_search(bw));
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_PAGE,
+				     !browser_window_can_search(bw));
 
 	ro_gui_menu_set_entry_shaded(menu, BROWSER_PAGE_INFO, !have_content);
 
@@ -2281,173 +2339,219 @@ ro_gui_window_menu_prepare(wimp_w w,
 
 	ro_gui_menu_set_entry_shaded(menu, BROWSER_NEW_WINDOW, !have_content);
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_FIND_TEXT,
-			!browser_window_can_search(bw));
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_FIND_TEXT,
+				     !browser_window_can_search(bw));
 
 
 	ro_gui_menu_set_entry_shaded(menu, BROWSER_VIEW_SOURCE, !have_content);
 
 	ro_gui_menu_set_entry_shaded(menu, BROWSER_SAVE_URL_URI, !have_content);
 	ro_gui_menu_set_entry_shaded(menu, BROWSER_SAVE_URL_URL, !have_content);
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_SAVE_URL_TEXT,
-			!have_content);
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_SAVE_URL_TEXT,
+				     !have_content);
 
 	ro_gui_menu_set_entry_shaded(menu, BROWSER_SAVE, !have_content);
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_SAVE_COMPLETE,
-			!have_content);
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_SAVE_COMPLETE,
+				     !have_content);
 	ro_gui_menu_set_entry_shaded(menu, BROWSER_EXPORT_DRAW, !have_content);
 	ro_gui_menu_set_entry_shaded(menu, BROWSER_EXPORT_PDF, !have_content);
 	ro_gui_menu_set_entry_shaded(menu, BROWSER_EXPORT_TEXT, !have_content);
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_LINK_SAVE_URI,
-			!current_menu_url);
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_LINK_SAVE_URL,
-			!current_menu_url);
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_LINK_SAVE_TEXT,
-			!current_menu_url);
-
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_LINK_SAVE_URI,
+				     !current_menu_url);
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_LINK_SAVE_URL,
+				     !current_menu_url);
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_LINK_SAVE_TEXT,
+				     !current_menu_url);
 
 
 	/* Object Submenu */
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_OBJECT,
-			current_menu_object == NULL &&
-			current_menu_url == NULL);
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_OBJECT,
+				     current_menu_object == NULL &&
+					     current_menu_url == NULL);
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_OBJECT_LINK,
-			current_menu_url == NULL);
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_OBJECT_LINK,
+				     current_menu_url == NULL);
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_OBJECT_INFO,
-			current_menu_object == NULL);
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_OBJECT_RELOAD,
-			current_menu_object == NULL);
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_OBJECT_OBJECT,
-			current_menu_object == NULL);
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_OBJECT_INFO,
+				     current_menu_object == NULL);
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_OBJECT_RELOAD,
+				     current_menu_object == NULL);
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_OBJECT_OBJECT,
+				     current_menu_object == NULL);
 
 	ro_gui_menu_set_entry_shaded(menu, BROWSER_OBJECT_PRINT, true);
-			/* Not yet implemented */
+	/* Not yet implemented */
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_OBJECT_SAVE,
-			current_menu_object == NULL);
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_OBJECT_SAVE,
+				     current_menu_object == NULL);
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_OBJECT_SAVE_URL_URI,
-			current_menu_object == NULL);
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_OBJECT_SAVE_URL_URL,
-			current_menu_object == NULL);
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_OBJECT_SAVE_URL_TEXT,
-			current_menu_object == NULL);
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_OBJECT_SAVE_URL_URI,
+				     current_menu_object == NULL);
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_OBJECT_SAVE_URL_URL,
+				     current_menu_object == NULL);
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_OBJECT_SAVE_URL_TEXT,
+				     current_menu_object == NULL);
 
 	if (current_menu_object != NULL) {
 		ro_gui_window_content_export_types(current_menu_object,
-				&export_draw, &export_sprite);
+						   &export_draw,
+						   &export_sprite);
 	} else {
-		ro_gui_window_content_export_types(
-				browser_window_get_content(bw),
-				&export_draw, &export_sprite);
+		ro_gui_window_content_export_types(browser_window_get_content(
+							   bw),
+						   &export_draw,
+						   &export_sprite);
 	}
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_OBJECT_EXPORT,
-			(!have_content && current_menu_object == NULL)
-				|| !(export_sprite || export_draw));
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_OBJECT_EXPORT,
+				     (!have_content &&
+				      current_menu_object == NULL) ||
+					     !(export_sprite || export_draw));
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_OBJECT_EXPORT_SPRITE,
-			(!have_content && current_menu_object == NULL)
-				|| !export_sprite);
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_OBJECT_EXPORT_SPRITE,
+				     (!have_content &&
+				      current_menu_object == NULL) ||
+					     !export_sprite);
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_OBJECT_EXPORT_DRAW,
-			(!have_content && current_menu_object == NULL)
-				|| !export_draw);
+	ro_gui_menu_set_entry_shaded(
+		menu,
+		BROWSER_OBJECT_EXPORT_DRAW,
+		(!have_content && current_menu_object == NULL) || !export_draw);
 
 
 	/* Selection Submenu */
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_SELECTION,
-			!browser_window_can_select(bw));
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_SELECTION,
+				     !browser_window_can_select(bw));
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_SELECTION_SAVE,
-			~editor_flags & BW_EDITOR_CAN_COPY);
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_SELECTION_SAVE,
+				     ~editor_flags & BW_EDITOR_CAN_COPY);
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_SELECTION_COPY,
-			~editor_flags & BW_EDITOR_CAN_COPY);
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_SELECTION_COPY,
+				     ~editor_flags & BW_EDITOR_CAN_COPY);
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_SELECTION_CUT,
-			~editor_flags & BW_EDITOR_CAN_CUT);
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_SELECTION_CUT,
+				     ~editor_flags & BW_EDITOR_CAN_CUT);
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_SELECTION_PASTE,
-			~editor_flags & BW_EDITOR_CAN_PASTE);
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_SELECTION_PASTE,
+				     ~editor_flags & BW_EDITOR_CAN_PASTE);
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_SELECTION_CLEAR,
-			~editor_flags & BW_EDITOR_CAN_COPY);
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_SELECTION_CLEAR,
+				     ~editor_flags & BW_EDITOR_CAN_COPY);
 
 
 	/* Navigate Submenu */
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_NAVIGATE_BACK,
-			!browser_window_back_available(bw));
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_NAVIGATE_BACK,
+				     !browser_window_back_available(bw));
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_NAVIGATE_FORWARD,
-			!browser_window_forward_available(bw));
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_NAVIGATE_FORWARD,
+				     !browser_window_forward_available(bw));
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_NAVIGATE_RELOAD_ALL,
-			!browser_window_reload_available(bw));
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_NAVIGATE_RELOAD_ALL,
+				     !browser_window_reload_available(bw));
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_NAVIGATE_STOP,
-			!browser_window_stop_available(bw));
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_NAVIGATE_STOP,
+				     !browser_window_stop_available(bw));
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_NAVIGATE_UP,
-			!browser_window_up_available(bw));
-
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_NAVIGATE_UP,
+				     !browser_window_up_available(bw));
 
 
 	/* View Submenu */
 
-	ro_gui_menu_set_entry_ticked(menu, BROWSER_IMAGES_FOREGROUND,
-			g != NULL && nsoption_bool(foreground_images));
+	ro_gui_menu_set_entry_ticked(menu,
+				     BROWSER_IMAGES_FOREGROUND,
+				     g != NULL &&
+					     nsoption_bool(foreground_images));
 
-	ro_gui_menu_set_entry_ticked(menu, BROWSER_IMAGES_BACKGROUND,
-			g != NULL && nsoption_bool(background_images));
+	ro_gui_menu_set_entry_ticked(menu,
+				     BROWSER_IMAGES_BACKGROUND,
+				     g != NULL &&
+					     nsoption_bool(background_images));
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_BUFFER_ANIMS,
-			g == NULL || g->option.buffer_everything);
-	ro_gui_menu_set_entry_ticked(menu, BROWSER_BUFFER_ANIMS,
-			g != NULL &&
-			(g->option.buffer_animations ||
-			g->option.buffer_everything));
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_BUFFER_ANIMS,
+				     g == NULL || g->option.buffer_everything);
+	ro_gui_menu_set_entry_ticked(menu,
+				     BROWSER_BUFFER_ANIMS,
+				     g != NULL &&
+					     (g->option.buffer_animations ||
+					      g->option.buffer_everything));
 
 	ro_gui_menu_set_entry_shaded(menu, BROWSER_BUFFER_ALL, g == NULL);
-	ro_gui_menu_set_entry_ticked(menu, BROWSER_BUFFER_ALL,
-			g != NULL && g->option.buffer_everything);
+	ro_gui_menu_set_entry_ticked(menu,
+				     BROWSER_BUFFER_ALL,
+				     g != NULL && g->option.buffer_everything);
 
 	ro_gui_menu_set_entry_shaded(menu, BROWSER_SCALE_VIEW, !have_content);
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_WINDOW_STAGGER,
-			nsoption_int(window_screen_width) == 0);
-	ro_gui_menu_set_entry_ticked(menu, BROWSER_WINDOW_STAGGER,
-			((nsoption_int(window_screen_width) == 0) ||
-			 nsoption_bool(window_stagger)));
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_WINDOW_STAGGER,
+				     nsoption_int(window_screen_width) == 0);
+	ro_gui_menu_set_entry_ticked(menu,
+				     BROWSER_WINDOW_STAGGER,
+				     ((nsoption_int(window_screen_width) ==
+				       0) ||
+				      nsoption_bool(window_stagger)));
 
-	ro_gui_menu_set_entry_ticked(menu, BROWSER_WINDOW_COPY,
-			nsoption_bool(window_size_clone));
+	ro_gui_menu_set_entry_ticked(menu,
+				     BROWSER_WINDOW_COPY,
+				     nsoption_bool(window_size_clone));
 
-	ro_gui_menu_set_entry_shaded(menu, BROWSER_WINDOW_RESET,
-			nsoption_int(window_screen_width) == 0);
+	ro_gui_menu_set_entry_shaded(menu,
+				     BROWSER_WINDOW_RESET,
+				     nsoption_int(window_screen_width) == 0);
 
 
 	/* Utilities Submenu */
 
 	ro_gui_menu_set_entry_shaded(menu, HOTLIST_ADD_URL, !have_content);
 
-	ro_gui_menu_set_entry_shaded(menu, HISTORY_SHOW_LOCAL,
-			(bw == NULL ||
-			!(have_content || browser_window_back_available(bw) ||
-			browser_window_forward_available(bw))));
+	ro_gui_menu_set_entry_shaded(menu,
+				     HISTORY_SHOW_LOCAL,
+				     (bw == NULL ||
+				      !(have_content ||
+					browser_window_back_available(bw) ||
+					browser_window_forward_available(bw))));
 
 
 	/* Help Submenu */
 
-	ro_gui_menu_set_entry_ticked(menu, HELP_LAUNCH_INTERACTIVE,
-			ro_gui_interactive_help_available() &&
-				     nsoption_bool(interactive_help));
+	ro_gui_menu_set_entry_ticked(menu,
+				     HELP_LAUNCH_INTERACTIVE,
+				     ro_gui_interactive_help_available() &&
+					     nsoption_bool(interactive_help));
 
 	return true;
 }
@@ -2459,9 +2563,8 @@ ro_gui_window_menu_prepare(wimp_w w,
  * \param g The browser window affected by the menu.
  * \param selection The menu selection.
  */
-static void
-ro_gui_window_process_form_select_menu(struct gui_window *g,
-				       wimp_selection *selection)
+static void ro_gui_window_process_form_select_menu(struct gui_window *g,
+						   wimp_selection *selection)
 {
 	assert(g != NULL);
 
@@ -2478,16 +2581,15 @@ ro_gui_window_process_form_select_menu(struct gui_window *g,
  * \param object the object for which information is to be displayed
  * \param target_url corresponding url, if any
  */
-static void
-ro_gui_window_prepare_objectinfo(struct hlcache_handle *object,
-				 nsurl *target_url)
+static void ro_gui_window_prepare_objectinfo(struct hlcache_handle *object,
+					     nsurl *target_url)
 {
 	char icon_buf[20] = "file_xxx";
 	const char *url;
 	lwc_string *mime;
 	const char *target = "-";
 
-	sprintf(icon_buf, "file_%.3x",ro_content_filetype(object));
+	sprintf(icon_buf, "file_%.3x", ro_content_filetype(object));
 	if (!ro_gui_wimp_sprite_exists(icon_buf)) {
 		sprintf(icon_buf, "file_xxx");
 	}
@@ -2502,14 +2604,13 @@ ro_gui_window_prepare_objectinfo(struct hlcache_handle *object,
 		target = nsurl_access(target_url);
 	}
 
-	ro_gui_set_icon_string(dialog_objinfo, ICON_OBJINFO_ICON,
-			icon_buf, true);
-	ro_gui_set_icon_string(dialog_objinfo, ICON_OBJINFO_URL,
-			url, true);
-	ro_gui_set_icon_string(dialog_objinfo, ICON_OBJINFO_TARGET,
-			target, true);
-	ro_gui_set_icon_string(dialog_objinfo, ICON_OBJINFO_TYPE,
-			lwc_string_data(mime), true);
+	ro_gui_set_icon_string(
+		dialog_objinfo, ICON_OBJINFO_ICON, icon_buf, true);
+	ro_gui_set_icon_string(dialog_objinfo, ICON_OBJINFO_URL, url, true);
+	ro_gui_set_icon_string(
+		dialog_objinfo, ICON_OBJINFO_TARGET, target, true);
+	ro_gui_set_icon_string(
+		dialog_objinfo, ICON_OBJINFO_TYPE, lwc_string_data(mime), true);
 
 	lwc_string_unref(mime);
 }
@@ -2538,12 +2639,11 @@ static void ro_gui_window_paste_cb(void *pw)
  * \param action The selected menu action.
  * \return true if action accepted; else false.
  */
-static bool
-ro_gui_window_menu_select(wimp_w w,
-			  wimp_i i,
-			  wimp_menu *menu,
-			  wimp_selection *selection,
-			  menu_action action)
+static bool ro_gui_window_menu_select(wimp_w w,
+				      wimp_i i,
+				      wimp_menu *menu,
+				      wimp_selection *selection,
+				      menu_action action)
 {
 	struct gui_window *g;
 	struct browser_window *bw;
@@ -2553,7 +2653,7 @@ ro_gui_window_menu_select(wimp_w w,
 	nsurl *url;
 	nserror error = NSERROR_OK;
 
-	g = (struct gui_window *) ro_gui_wimp_event_get_user_data(w);
+	g = (struct gui_window *)ro_gui_wimp_event_get_user_data(w);
 	toolbar = g->toolbar;
 	bw = g->bw;
 	h = browser_window_get_content(bw);
@@ -2575,37 +2675,33 @@ ro_gui_window_menu_select(wimp_w w,
 
 		/* help actions */
 	case HELP_OPEN_CONTENTS:
-		error = nsurl_create("https://www.netsurf-browser.org/documentation/", &url);
+		error = nsurl_create(
+			"https://www.netsurf-browser.org/documentation/", &url);
 		if (error == NSERROR_OK) {
-			error = browser_window_create(BW_CREATE_HISTORY,
-						      url,
-						      NULL,
-						      NULL,
-						      NULL);
+			error = browser_window_create(
+				BW_CREATE_HISTORY, url, NULL, NULL, NULL);
 			nsurl_unref(url);
 		}
 		break;
 
 	case HELP_OPEN_GUIDE:
-		error = nsurl_create("https://www.netsurf-browser.org/documentation/guide", &url);
+		error = nsurl_create(
+			"https://www.netsurf-browser.org/documentation/guide",
+			&url);
 		if (error == NSERROR_OK) {
-			error = browser_window_create(BW_CREATE_HISTORY,
-						      url,
-						      NULL,
-						      NULL,
-						      NULL);
+			error = browser_window_create(
+				BW_CREATE_HISTORY, url, NULL, NULL, NULL);
 			nsurl_unref(url);
 		}
 		break;
 
 	case HELP_OPEN_INFORMATION:
-		error = nsurl_create("https://www.netsurf-browser.org/documentation/info", &url);
+		error = nsurl_create(
+			"https://www.netsurf-browser.org/documentation/info",
+			&url);
 		if (error == NSERROR_OK) {
-			error = browser_window_create(BW_CREATE_HISTORY,
-						      url,
-						      NULL,
-						      NULL,
-						      NULL);
+			error = browser_window_create(
+				BW_CREATE_HISTORY, url, NULL, NULL, NULL);
 			nsurl_unref(url);
 		}
 		break;
@@ -2613,11 +2709,8 @@ ro_gui_window_menu_select(wimp_w w,
 	case HELP_OPEN_CREDITS:
 		error = nsurl_create("about:credits", &url);
 		if (error == NSERROR_OK) {
-			error = browser_window_create(BW_CREATE_HISTORY,
-						      url,
-						      NULL,
-						      NULL,
-						      NULL);
+			error = browser_window_create(
+				BW_CREATE_HISTORY, url, NULL, NULL, NULL);
 			nsurl_unref(url);
 		}
 		break;
@@ -2625,11 +2718,8 @@ ro_gui_window_menu_select(wimp_w w,
 	case HELP_OPEN_LICENCE:
 		error = nsurl_create("about:licence", &url);
 		if (error == NSERROR_OK) {
-			error = browser_window_create(BW_CREATE_HISTORY,
-						      url,
-						      NULL,
-						      NULL,
-						      NULL);
+			error = browser_window_create(
+				BW_CREATE_HISTORY, url, NULL, NULL, NULL);
 			nsurl_unref(url);
 		}
 		break;
@@ -2926,7 +3016,8 @@ ro_gui_window_menu_select(wimp_w w,
 			state.w = w;
 			oserror = xwimp_get_window_state(&state);
 			if (oserror) {
-				NSLOG(netsurf, INFO,
+				NSLOG(netsurf,
+				      INFO,
 				      "xwimp_get_window_state: 0x%x: %s",
 				      oserror->errnum,
 				      oserror->errmess);
@@ -2960,20 +3051,20 @@ ro_gui_window_menu_select(wimp_w w,
 		/* toolbar actions */
 	case TOOLBAR_BUTTONS:
 		assert(toolbar);
-		ro_toolbar_set_display_buttons(toolbar,
-					       !ro_toolbar_get_display_buttons(toolbar));
+		ro_toolbar_set_display_buttons(
+			toolbar, !ro_toolbar_get_display_buttons(toolbar));
 		break;
 	case TOOLBAR_ADDRESS_BAR:
 		assert(toolbar);
-		ro_toolbar_set_display_url(toolbar,
-					   !ro_toolbar_get_display_url(toolbar));
+		ro_toolbar_set_display_url(
+			toolbar, !ro_toolbar_get_display_url(toolbar));
 		if (ro_toolbar_get_display_url(toolbar))
 			ro_toolbar_take_caret(toolbar);
 		break;
 	case TOOLBAR_THROBBER:
 		assert(toolbar);
-		ro_toolbar_set_display_throbber(toolbar,
-						!ro_toolbar_get_display_throbber(toolbar));
+		ro_toolbar_set_display_throbber(
+			toolbar, !ro_toolbar_get_display_throbber(toolbar));
 		break;
 	case TOOLBAR_EDIT:
 		assert(toolbar);
@@ -3001,12 +3092,11 @@ ro_gui_window_menu_select(wimp_w w,
  * \param selection The wimp menu selection data.
  * \param action The selected menu action.
  */
-static void
-ro_gui_window_menu_warning(wimp_w w,
-			   wimp_i i,
-			   wimp_menu *menu,
-			   wimp_selection *selection,
-			   menu_action action)
+static void ro_gui_window_menu_warning(wimp_w w,
+				       wimp_i i,
+				       wimp_menu *menu,
+				       wimp_selection *selection,
+				       menu_action action)
 {
 	struct gui_window *g;
 	struct hlcache_handle *h;
@@ -3016,7 +3106,7 @@ ro_gui_window_menu_warning(wimp_w w,
 		return;
 	}
 
-	g = (struct gui_window *) ro_gui_wimp_event_get_user_data(w);
+	g = (struct gui_window *)ro_gui_wimp_event_get_user_data(w);
 	h = browser_window_get_content(g->bw);
 
 	switch (action) {
@@ -3027,9 +3117,8 @@ ro_gui_window_menu_warning(wimp_w w,
 		break;
 
 	case BROWSER_FIND_TEXT:
-		if (h != NULL &&
-		    (content_get_type(h) == CONTENT_HTML ||
-		     content_get_type(h) == CONTENT_TEXTPLAIN)) {
+		if (h != NULL && (content_get_type(h) == CONTENT_HTML ||
+				  content_get_type(h) == CONTENT_TEXTPLAIN)) {
 			ro_gui_search_prepare(g->bw);
 		}
 		break;
@@ -3065,64 +3154,80 @@ ro_gui_window_menu_warning(wimp_w w,
 
 	case BROWSER_SELECTION_SAVE:
 		if (browser_window_get_editor_flags(g->bw) & BW_EDITOR_CAN_COPY)
-			ro_gui_save_prepare(GUI_SAVE_TEXT_SELECTION, NULL,
-					browser_window_get_selection(g->bw),
-					NULL, NULL);
+			ro_gui_save_prepare(GUI_SAVE_TEXT_SELECTION,
+					    NULL,
+					    browser_window_get_selection(g->bw),
+					    NULL,
+					    NULL);
 		break;
 
 	case BROWSER_SAVE_URL_URI:
 		if (h != NULL)
-			ro_gui_save_prepare(GUI_SAVE_LINK_URI, NULL, NULL,
-					hlcache_handle_get_url(h),
-					content_get_title(h));
+			ro_gui_save_prepare(GUI_SAVE_LINK_URI,
+					    NULL,
+					    NULL,
+					    hlcache_handle_get_url(h),
+					    content_get_title(h));
 		break;
 
 	case BROWSER_SAVE_URL_URL:
 		if (h != NULL)
-			ro_gui_save_prepare(GUI_SAVE_LINK_URL, NULL, NULL,
-					hlcache_handle_get_url(h),
-					content_get_title(h));
+			ro_gui_save_prepare(GUI_SAVE_LINK_URL,
+					    NULL,
+					    NULL,
+					    hlcache_handle_get_url(h),
+					    content_get_title(h));
 		break;
 
 	case BROWSER_SAVE_URL_TEXT:
 		if (h != NULL)
-			ro_gui_save_prepare(GUI_SAVE_LINK_TEXT, NULL, NULL,
-					hlcache_handle_get_url(h),
-					content_get_title(h));
+			ro_gui_save_prepare(GUI_SAVE_LINK_TEXT,
+					    NULL,
+					    NULL,
+					    hlcache_handle_get_url(h),
+					    content_get_title(h));
 		break;
 
 	case BROWSER_OBJECT_SAVE_URL_URI:
 		if (current_menu_object != NULL)
-			ro_gui_save_prepare(GUI_SAVE_LINK_URI, NULL, NULL,
-					hlcache_handle_get_url(
-							current_menu_object),
-					content_get_title(current_menu_object));
+			ro_gui_save_prepare(
+				GUI_SAVE_LINK_URI,
+				NULL,
+				NULL,
+				hlcache_handle_get_url(current_menu_object),
+				content_get_title(current_menu_object));
 		break;
 
 	case BROWSER_OBJECT_SAVE_URL_URL:
 		if (current_menu_object != NULL)
-			ro_gui_save_prepare(GUI_SAVE_LINK_URL, NULL, NULL,
-					hlcache_handle_get_url(
-							current_menu_object),
-					content_get_title(current_menu_object));
+			ro_gui_save_prepare(
+				GUI_SAVE_LINK_URL,
+				NULL,
+				NULL,
+				hlcache_handle_get_url(current_menu_object),
+				content_get_title(current_menu_object));
 		break;
 
 	case BROWSER_OBJECT_SAVE_URL_TEXT:
 		if (current_menu_object != NULL)
-			ro_gui_save_prepare(GUI_SAVE_LINK_TEXT, NULL, NULL,
-					hlcache_handle_get_url(
-							current_menu_object),
-					content_get_title(current_menu_object));
+			ro_gui_save_prepare(
+				GUI_SAVE_LINK_TEXT,
+				NULL,
+				NULL,
+				hlcache_handle_get_url(current_menu_object),
+				content_get_title(current_menu_object));
 		break;
 
 	case BROWSER_SAVE:
 		if (h != NULL)
-			ro_gui_save_prepare(GUI_SAVE_SOURCE, h, NULL, NULL, NULL);
+			ro_gui_save_prepare(
+				GUI_SAVE_SOURCE, h, NULL, NULL, NULL);
 		break;
 
 	case BROWSER_SAVE_COMPLETE:
 		if (h != NULL)
-			ro_gui_save_prepare(GUI_SAVE_COMPLETE, h, NULL, NULL, NULL);
+			ro_gui_save_prepare(
+				GUI_SAVE_COMPLETE, h, NULL, NULL, NULL);
 		break;
 
 	case BROWSER_EXPORT_DRAW:
@@ -3142,55 +3247,76 @@ ro_gui_window_menu_warning(wimp_w w,
 
 	case BROWSER_LINK_SAVE_URI:
 		if (current_menu_url != NULL)
-			ro_gui_save_prepare(GUI_SAVE_LINK_URI, NULL, NULL,
-					current_menu_url, NULL);
+			ro_gui_save_prepare(GUI_SAVE_LINK_URI,
+					    NULL,
+					    NULL,
+					    current_menu_url,
+					    NULL);
 		break;
 
 	case BROWSER_LINK_SAVE_URL:
 		if (current_menu_url != NULL)
-			ro_gui_save_prepare(GUI_SAVE_LINK_URL, NULL, NULL,
-					current_menu_url, NULL);
+			ro_gui_save_prepare(GUI_SAVE_LINK_URL,
+					    NULL,
+					    NULL,
+					    current_menu_url,
+					    NULL);
 		break;
 
 	case BROWSER_LINK_SAVE_TEXT:
 		if (current_menu_url != NULL)
-			ro_gui_save_prepare(GUI_SAVE_LINK_TEXT, NULL, NULL,
-					current_menu_url, NULL);
+			ro_gui_save_prepare(GUI_SAVE_LINK_TEXT,
+					    NULL,
+					    NULL,
+					    current_menu_url,
+					    NULL);
 		break;
 
 	case BROWSER_OBJECT_EXPORT_SPRITE:
 		if (current_menu_object != NULL) {
 			ro_gui_window_content_export_types(current_menu_object,
-					NULL, &export);
+							   NULL,
+							   &export);
 
 			if (export)
 				ro_gui_save_prepare(GUI_SAVE_OBJECT_NATIVE,
-						current_menu_object,
-						NULL, NULL, NULL);
+						    current_menu_object,
+						    NULL,
+						    NULL,
+						    NULL);
 		} else if (h != NULL) {
 			ro_gui_window_content_export_types(h, NULL, &export);
 
 			if (export)
 				ro_gui_save_prepare(GUI_SAVE_OBJECT_NATIVE,
-						h, NULL, NULL, NULL);
+						    h,
+						    NULL,
+						    NULL,
+						    NULL);
 		}
 		break;
 
 	case BROWSER_OBJECT_EXPORT_DRAW:
 		if (current_menu_object != NULL) {
 			ro_gui_window_content_export_types(current_menu_object,
-					&export, NULL);
+							   &export,
+							   NULL);
 
 			if (export)
 				ro_gui_save_prepare(GUI_SAVE_OBJECT_NATIVE,
-						current_menu_object,
-						NULL, NULL, NULL);
+						    current_menu_object,
+						    NULL,
+						    NULL,
+						    NULL);
 		} else if (h != NULL) {
 			ro_gui_window_content_export_types(h, &export, NULL);
 
 			if (export)
 				ro_gui_save_prepare(GUI_SAVE_OBJECT_NATIVE,
-						h, NULL, NULL, NULL);
+						    h,
+						    NULL,
+						    NULL,
+						    NULL);
 		}
 		break;
 
@@ -3224,40 +3350,43 @@ static void ro_gui_window_menu_close(wimp_w w, wimp_i i, wimp_menu *menu)
  * \param new_gui the new gui window
  * \param old_gui the gui window to clone from, or NULL for default
  */
-static void
-ro_gui_window_clone_options(struct gui_window *new_gui,
-			    struct gui_window *old_gui)
+static void ro_gui_window_clone_options(struct gui_window *new_gui,
+					struct gui_window *old_gui)
 {
 	assert(new_gui);
 
 	/*	Clone the basic options
-	*/
+	 */
 	if (!old_gui) {
-		new_gui->option.buffer_animations = nsoption_bool(buffer_animations);
-		new_gui->option.buffer_everything = nsoption_bool(buffer_everything);
+		new_gui->option.buffer_animations = nsoption_bool(
+			buffer_animations);
+		new_gui->option.buffer_everything = nsoption_bool(
+			buffer_everything);
 	} else {
 		new_gui->option = old_gui->option;
 	}
 
 	/*	Set up the toolbar
-	*/
+	 */
 	if (new_gui->toolbar) {
-		ro_toolbar_set_display_buttons(new_gui->toolbar,
-					       nsoption_bool(toolbar_show_buttons));
+		ro_toolbar_set_display_buttons(
+			new_gui->toolbar, nsoption_bool(toolbar_show_buttons));
 		ro_toolbar_set_display_url(new_gui->toolbar,
 					   nsoption_bool(toolbar_show_address));
-		ro_toolbar_set_display_throbber(new_gui->toolbar,
-						nsoption_bool(toolbar_show_throbber));
+		ro_toolbar_set_display_throbber(
+			new_gui->toolbar, nsoption_bool(toolbar_show_throbber));
 		if ((old_gui) && (old_gui->toolbar)) {
-			ro_toolbar_set_display_buttons(new_gui->toolbar,
-					ro_toolbar_get_display_buttons(
-						old_gui->toolbar));
+			ro_toolbar_set_display_buttons(
+				new_gui->toolbar,
+				ro_toolbar_get_display_buttons(
+					old_gui->toolbar));
 			ro_toolbar_set_display_url(new_gui->toolbar,
-					ro_toolbar_get_display_url(
-						old_gui->toolbar));
-			ro_toolbar_set_display_throbber(new_gui->toolbar,
-					ro_toolbar_get_display_throbber(
-						old_gui->toolbar));
+						   ro_toolbar_get_display_url(
+							   old_gui->toolbar));
+			ro_toolbar_set_display_throbber(
+				new_gui->toolbar,
+				ro_toolbar_get_display_throbber(
+					old_gui->toolbar));
 			ro_toolbar_process(new_gui->toolbar, -1, true);
 		}
 	}
@@ -3273,8 +3402,8 @@ ro_gui_window_clone_options(struct gui_window *new_gui,
  * \return gui window, or NULL on error
  */
 static struct gui_window *gui_window_create(struct browser_window *bw,
-		struct gui_window *existing,
-		gui_window_create_flags flags)
+					    struct gui_window *existing,
+					    gui_window_create_flags flags)
 {
 	int screen_width, screen_height;
 	static int window_count = 2;
@@ -3300,13 +3429,13 @@ static struct gui_window *gui_window_create(struct browser_window *bw,
 	g->iconise_icon = -1;
 
 	/* Set the window position */
-	if (existing != NULL &&
-			flags & GW_CREATE_CLONE &&
-			nsoption_bool(window_size_clone)) {
+	if (existing != NULL && flags & GW_CREATE_CLONE &&
+	    nsoption_bool(window_size_clone)) {
 		state.w = existing->window;
 		error = xwimp_get_window_state(&state);
 		if (error) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xwimp_get_window_state: 0x%x: %s",
 			      error->errnum,
 			      error->errmess);
@@ -3325,20 +3454,20 @@ static struct gui_window *gui_window_create(struct browser_window *bw,
 		if ((nsoption_int(window_screen_width) != 0) &&
 		    (nsoption_int(window_screen_height) != 0)) {
 			win_width = (nsoption_int(window_width) *
-					screen_width) /
-					nsoption_int(window_screen_width);
+				     screen_width) /
+				    nsoption_int(window_screen_width);
 			win_height = (nsoption_int(window_height) *
-					screen_height) /
-					nsoption_int(window_screen_height);
+				      screen_height) /
+				     nsoption_int(window_screen_height);
 			window.visible.x0 = (nsoption_int(window_x) *
-					screen_width) /
-					nsoption_int(window_screen_width);
+					     screen_width) /
+					    nsoption_int(window_screen_width);
 			window.visible.y0 = (nsoption_int(window_y) *
-					screen_height) /
-					nsoption_int(window_screen_height);
+					     screen_height) /
+					    nsoption_int(window_screen_height);
 			if (nsoption_bool(window_stagger)) {
 				window.visible.y0 += 96 -
-						(48 * (window_count % 5));
+						     (48 * (window_count % 5));
 			}
 			open_centred = false;
 			if (win_width < 100)
@@ -3347,8 +3476,8 @@ static struct gui_window *gui_window_create(struct browser_window *bw,
 				win_height = 100;
 		} else {
 
-		       /* Base how we define the window height/width
-			  on the compile time options set */
+			/* Base how we define the window height/width
+			   on the compile time options set */
 			win_width = screen_width * 3 / 4;
 			if (1600 < win_width)
 				win_width = 1600;
@@ -3356,23 +3485,21 @@ static struct gui_window *gui_window_create(struct browser_window *bw,
 
 			window.visible.x0 = (screen_width - win_width) / 2;
 			window.visible.y0 = ((screen_height - win_height) / 2) +
-					96 - (48 * (window_count % 5));
+					    96 - (48 * (window_count % 5));
 		}
 		window.visible.x1 = window.visible.x0 + win_width;
 		window.visible.y1 = window.visible.y0 + win_height;
 	}
 
-	/* General flags for a non-movable, non-resizable, no-title bar window */
+	/* General flags for a non-movable, non-resizable, no-title bar window
+	 */
 	window.xscroll = 0;
 	window.yscroll = 0;
 	window.next = wimp_TOP;
-	window.flags =	wimp_WINDOW_MOVEABLE |
-			wimp_WINDOW_NEW_FORMAT |
-			wimp_WINDOW_VSCROLL |
-			wimp_WINDOW_HSCROLL |
-			wimp_WINDOW_IGNORE_XEXTENT |
-			wimp_WINDOW_IGNORE_YEXTENT |
-			wimp_WINDOW_SCROLL_REPEAT;
+	window.flags = wimp_WINDOW_MOVEABLE | wimp_WINDOW_NEW_FORMAT |
+		       wimp_WINDOW_VSCROLL | wimp_WINDOW_HSCROLL |
+		       wimp_WINDOW_IGNORE_XEXTENT | wimp_WINDOW_IGNORE_YEXTENT |
+		       wimp_WINDOW_SCROLL_REPEAT;
 	window.title_fg = wimp_COLOUR_BLACK;
 	window.title_bg = wimp_COLOUR_LIGHT_GREY;
 	window.work_fg = wimp_COLOUR_LIGHT_GREY;
@@ -3381,29 +3508,26 @@ static struct gui_window *gui_window_create(struct browser_window *bw,
 	window.scroll_inner = wimp_COLOUR_MID_LIGHT_GREY;
 	window.highlight_bg = wimp_COLOUR_CREAM;
 	window.extra_flags = wimp_WINDOW_USE_EXTENDED_SCROLL_REQUEST |
-			wimp_WINDOW_GIVE_SHADED_ICON_INFO;
+			     wimp_WINDOW_GIVE_SHADED_ICON_INFO;
 	window.extent.x0 = 0;
 	window.extent.y0 = -(window.visible.y1 - window.visible.y0);
 	window.extent.x1 = window.visible.x1 - window.visible.x0;
 	window.extent.y1 = 0;
-	window.title_flags = wimp_ICON_TEXT |
-			wimp_ICON_INDIRECTED |
-			wimp_ICON_HCENTRED;
-	window.work_flags = wimp_BUTTON_DOUBLE_CLICK_DRAG <<
-			wimp_ICON_BUTTON_TYPE_SHIFT;
+	window.title_flags = wimp_ICON_TEXT | wimp_ICON_INDIRECTED |
+			     wimp_ICON_HCENTRED;
+	window.work_flags = wimp_BUTTON_DOUBLE_CLICK_DRAG
+			    << wimp_ICON_BUTTON_TYPE_SHIFT;
 	window.sprite_area = wimpspriteop_AREA;
 	window.xmin = 1;
 	window.ymin = 1;
 	window.title_data.indirected_text.text = g->title;
-	window.title_data.indirected_text.validation = (char *) -1;
+	window.title_data.indirected_text.validation = (char *)-1;
 	window.title_data.indirected_text.size = 255;
 	window.icon_count = 0;
 
 	/* Add in flags */
-	window.flags |=	wimp_WINDOW_SIZE_ICON |
-			wimp_WINDOW_BACK_ICON |
-			wimp_WINDOW_CLOSE_ICON |
-			wimp_WINDOW_TITLE_ICON |
+	window.flags |= wimp_WINDOW_SIZE_ICON | wimp_WINDOW_BACK_ICON |
+			wimp_WINDOW_CLOSE_ICON | wimp_WINDOW_TITLE_ICON |
 			wimp_WINDOW_TOGGLE_ICON;
 
 	if (open_centred) {
@@ -3413,8 +3537,11 @@ static struct gui_window *gui_window_create(struct browser_window *bw,
 
 	error = xwimp_create_window(&window, &g->window);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_create_window: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_create_window: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		free(g);
 		return 0;
@@ -3429,15 +3556,18 @@ static struct gui_window *gui_window_create(struct browser_window *bw,
 	window_count++;
 
 	/* Add in a toolbar and status bar */
-	g->status_bar = ro_gui_status_bar_create(g->window,
-						 nsoption_int(toolbar_status_size));
-	g->toolbar = ro_toolbar_create(NULL, g->window,
-			THEME_STYLE_BROWSER_TOOLBAR, TOOLBAR_FLAGS_NONE,
-			&ro_gui_window_toolbar_callbacks, g,
-			"HelpToolbar");
+	g->status_bar = ro_gui_status_bar_create(
+		g->window, nsoption_int(toolbar_status_size));
+	g->toolbar = ro_toolbar_create(NULL,
+				       g->window,
+				       THEME_STYLE_BROWSER_TOOLBAR,
+				       TOOLBAR_FLAGS_NONE,
+				       &ro_gui_window_toolbar_callbacks,
+				       g,
+				       "HelpToolbar");
 	if (g->toolbar != NULL) {
 		ro_toolbar_add_buttons(g->toolbar,
-				brower_toolbar_buttons,
+				       brower_toolbar_buttons,
 				       nsoption_charp(toolbar_browser));
 		ro_toolbar_add_url(g->toolbar);
 		ro_toolbar_add_throbber(g->toolbar);
@@ -3449,31 +3579,26 @@ static struct gui_window *gui_window_create(struct browser_window *bw,
 	 * be set first!
 	 */
 	ro_gui_wimp_event_set_user_data(g->window, g);
-	ro_gui_wimp_event_register_open_window(g->window,
-			ro_gui_window_open);
-	ro_gui_wimp_event_register_close_window(g->window,
-			ro_gui_window_close);
+	ro_gui_wimp_event_register_open_window(g->window, ro_gui_window_open);
+	ro_gui_wimp_event_register_close_window(g->window, ro_gui_window_close);
 	ro_gui_wimp_event_register_redraw_window(g->window,
-			ro_gui_window_redraw);
+						 ro_gui_window_redraw);
 	ro_gui_wimp_event_register_scroll_window(g->window,
-			ro_gui_window_scroll);
-	ro_gui_wimp_event_register_pointer_entering_window(g->window,
-			ro_gui_window_pointer_entering);
-	ro_gui_wimp_event_register_keypress(g->window,
-			ro_gui_window_keypress);
-	ro_gui_wimp_event_register_mouse_click(g->window,
-			ro_gui_window_click);
-	ro_gui_wimp_event_register_menu(g->window,
-			ro_gui_browser_window_menu,
-			true, false);
+						 ro_gui_window_scroll);
+	ro_gui_wimp_event_register_pointer_entering_window(
+		g->window, ro_gui_window_pointer_entering);
+	ro_gui_wimp_event_register_keypress(g->window, ro_gui_window_keypress);
+	ro_gui_wimp_event_register_mouse_click(g->window, ro_gui_window_click);
+	ro_gui_wimp_event_register_menu(
+		g->window, ro_gui_browser_window_menu, true, false);
 	ro_gui_wimp_event_register_menu_prepare(g->window,
-			ro_gui_window_menu_prepare);
+						ro_gui_window_menu_prepare);
 	ro_gui_wimp_event_register_menu_selection(g->window,
-			ro_gui_window_menu_select);
+						  ro_gui_window_menu_select);
 	ro_gui_wimp_event_register_menu_warning(g->window,
-			ro_gui_window_menu_warning);
+						ro_gui_window_menu_warning);
 	ro_gui_wimp_event_register_menu_close(g->window,
-			ro_gui_window_menu_close);
+					      ro_gui_window_menu_close);
 
 	/* Set the window options */
 	ro_gui_window_clone_options(g, existing);
@@ -3483,8 +3608,11 @@ static struct gui_window *gui_window_create(struct browser_window *bw,
 	state.w = g->window;
 	error = xwimp_get_window_state(&state);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_window_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_window_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return g;
 	}
@@ -3560,8 +3688,11 @@ static void gui_window_destroy(struct gui_window *g)
 	/* delete window */
 	error = xwimp_delete_window(w);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_delete_window: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_delete_window: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 	}
 	ro_gui_wimp_event_finalise(w);
@@ -3588,15 +3719,21 @@ static void gui_window_set_title(struct gui_window *g, const char *title)
 		int scale_disp = scale * 100;
 
 		if (ABS((float)scale_disp - scale * 100) >= 0.05) {
-			snprintf(g->title, sizeof g->title, "%s (%.1f%%)",
-					title, scale * 100);
+			snprintf(g->title,
+				 sizeof g->title,
+				 "%s (%.1f%%)",
+				 title,
+				 scale * 100);
 		} else {
-			snprintf(g->title, sizeof g->title, "%s (%i%%)",
-					title, scale_disp);
+			snprintf(g->title,
+				 sizeof g->title,
+				 "%s (%i%%)",
+				 title,
+				 scale_disp);
 		}
 	} else {
 		strncpy(g->title, title, sizeof(g->title) - 1);
-		g->title[sizeof(g->title)-1] = 0;
+		g->title[sizeof(g->title) - 1] = 0;
 	}
 
 	ro_gui_set_window_title(g->window, g->title);
@@ -3622,8 +3759,11 @@ static bool gui_window_get_scroll(struct gui_window *g, int *sx, int *sy)
 	state.w = g->window;
 	error = xwimp_get_window_state(&state);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_window_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_window_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return false;
 	}
@@ -3659,8 +3799,11 @@ gui_window_set_scroll(struct gui_window *g, const struct rect *rect)
 	state.w = g->window;
 	error = xwimp_get_window_state(&state);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_window_state: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_window_state: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return NSERROR_BAD_PARAMETER;
 	}
@@ -3680,10 +3823,10 @@ gui_window_set_scroll(struct gui_window *g, const struct rect *rect)
 		int padding_available;
 		int correction;
 
-		x0 = rect->x0 * 2 ;
-		y0 = rect->y0 * 2 ;
-		x1 = rect->x1 * 2 ;
-		y1 = rect->y1 * 2 ;
+		x0 = rect->x0 * 2;
+		y0 = rect->y0 * 2;
+		x1 = rect->x1 * 2;
+		y1 = rect->y1 * 2;
 
 		cx0 = state.xscroll;
 		cy0 = -state.yscroll + toolbar_height;
@@ -3706,7 +3849,8 @@ gui_window_set_scroll(struct gui_window *g, const struct rect *rect)
 			cy0 = y0;
 		}
 
-		/* try to give a SCROLL_VISIBLE_PADDING border of space around us */
+		/* try to give a SCROLL_VISIBLE_PADDING border of space around
+		 * us */
 		padding_available = (width - x1 + x0) / 2;
 		if (padding_available > 0) {
 			if (padding_available > SCROLL_VISIBLE_PADDING) {
@@ -3846,8 +3990,11 @@ static void gui_window_remove_caret(struct gui_window *g)
 
 	error = xwimp_get_caret_position(&caret);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_caret_position: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_caret_position: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
@@ -3884,36 +4031,45 @@ static void ro_gui_window_scroll_end(wimp_dragged *drag, void *data)
 	wimp_pointer pointer;
 	os_error *error;
 	os_coord pos;
-	struct gui_window *g = (struct gui_window *) data;
+	struct gui_window *g = (struct gui_window *)data;
 
 	if (!g)
 		return;
 
-	error = xwimp_drag_box((wimp_drag*)-1);
+	error = xwimp_drag_box((wimp_drag *)-1);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_drag_box: 0x%x : %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_drag_box: 0x%x : %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 	}
 
 	error = xwimp_get_pointer_info(&pointer);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_pointer_info 0x%x : %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_pointer_info 0x%x : %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return;
 	}
 
-	error = xwimpspriteop_set_pointer_shape("ptr_default", 0x31, 0, 0, 0, 0);
+	error = xwimpspriteop_set_pointer_shape(
+		"ptr_default", 0x31, 0, 0, 0, 0);
 	if (error) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "xwimpspriteop_set_pointer_shape: 0x%x: %s",
 		      error->errnum,
 		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 	}
 
-	if (ro_gui_window_to_window_pos(g, drag->final.x0, drag->final.y0, &pos)) {
+	if (ro_gui_window_to_window_pos(
+		    g, drag->final.x0, drag->final.y0, &pos)) {
 		browser_window_mouse_track(g->bw, 0, pos.x, pos.y);
 	}
 }
@@ -3935,29 +4091,37 @@ static bool gui_window_scroll_start(struct gui_window *g)
 
 	error = xwimp_get_pointer_info(&pointer);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_pointer_info 0x%x : %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_pointer_info 0x%x : %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return false;
 	}
 
 	info.w = g->window;
-	error = xwimp_get_window_info_header_only((wimp_window_info*)&info);
+	error = xwimp_get_window_info_header_only((wimp_window_info *)&info);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_window_state: 0x%x : %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_window_state: 0x%x : %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return false;
 	}
 
-	width  = info.extent.x1 - info.extent.x0;
+	width = info.extent.x1 - info.extent.x0;
 	height = info.extent.y1 - info.extent.y0;
 
 	drag.type = wimp_DRAG_USER_POINT;
 	drag.bbox.x1 = pointer.pos.x + info.xscroll;
 	drag.bbox.y0 = pointer.pos.y + info.yscroll;
-	drag.bbox.x0 = drag.bbox.x1 - (width  - (info.visible.x1 - info.visible.x0));
-	drag.bbox.y1 = drag.bbox.y0 + (height - (info.visible.y1 - info.visible.y0));
+	drag.bbox.x0 = drag.bbox.x1 -
+		       (width - (info.visible.x1 - info.visible.x0));
+	drag.bbox.y1 = drag.bbox.y0 +
+		       (height - (info.visible.y1 - info.visible.y0));
 
 	if (g->toolbar) {
 		int tbar_height = ro_toolbar_full_height(g->toolbar);
@@ -3967,14 +4131,17 @@ static bool gui_window_scroll_start(struct gui_window *g)
 
 	error = xwimp_drag_box(&drag);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_drag_box: 0x%x : %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_drag_box: 0x%x : %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return false;
 	}
 
-	ro_mouse_drag_start(ro_gui_window_scroll_end, ro_gui_window_mouse_at,
-			NULL, g);
+	ro_mouse_drag_start(
+		ro_gui_window_scroll_end, ro_gui_window_mouse_at, NULL, g);
 	return true;
 }
 
@@ -3987,10 +4154,9 @@ static bool gui_window_scroll_start(struct gui_window *g)
  * \param  rect rectangle to constrain pointer to (relative to drag start coord)
  * \return true iff succesful
  */
-static bool
-gui_window_drag_start(struct gui_window *g,
-		      gui_drag_type type,
-		      const struct rect *rect)
+static bool gui_window_drag_start(struct gui_window *g,
+				  gui_drag_type type,
+				  const struct rect *rect)
 {
 	wimp_pointer pointer;
 	wimp_drag drag;
@@ -4001,7 +4167,8 @@ gui_window_drag_start(struct gui_window *g,
 		 * duration */
 		os_error *error = xwimp_get_pointer_info(&pointer);
 		if (error) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xwimp_get_pointer_info 0x%x : %s",
 			      error->errnum,
 			      error->errmess);
@@ -4010,19 +4177,18 @@ gui_window_drag_start(struct gui_window *g,
 		}
 
 		drag.type = wimp_DRAG_USER_POINT;
-		drag.bbox.x0 = pointer.pos.x +
-				(int)(rect->x0 * 2 * scale);
-		drag.bbox.y0 = pointer.pos.y +
-				(int)(rect->y0 * 2 * scale);
-		drag.bbox.x1 = pointer.pos.x +
-				(int)(rect->x1 * 2 * scale);
-		drag.bbox.y1 = pointer.pos.y +
-				(int)(rect->y1 * 2 * scale);
+		drag.bbox.x0 = pointer.pos.x + (int)(rect->x0 * 2 * scale);
+		drag.bbox.y0 = pointer.pos.y + (int)(rect->y0 * 2 * scale);
+		drag.bbox.x1 = pointer.pos.x + (int)(rect->x1 * 2 * scale);
+		drag.bbox.y1 = pointer.pos.y + (int)(rect->y1 * 2 * scale);
 
 		error = xwimp_drag_box(&drag);
 		if (error) {
-			NSLOG(netsurf, INFO, "xwimp_drag_box: 0x%x : %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_drag_box: 0x%x : %s",
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 			return false;
 		}
@@ -4033,7 +4199,8 @@ gui_window_drag_start(struct gui_window *g,
 		/* Dragging a core scrollbar */
 		ro_mouse_drag_start(ro_gui_window_scroll_end,
 				    ro_gui_window_mouse_at,
-				    NULL, g);
+				    NULL,
+				    g);
 		break;
 
 	default:
@@ -4067,12 +4234,11 @@ gui_window_save_link(struct gui_window *g, nsurl *url, const char *title)
  * \param  g	    gui window containing form control
  * \param  control  form control of type GADGET_SELECT
  */
-static void
-gui_window_create_form_select_menu(struct gui_window *g,
-				   struct form_control *control)
+static void gui_window_create_form_select_menu(struct gui_window *g,
+					       struct form_control *control)
 {
-	os_error	*error;
-	wimp_pointer	pointer;
+	os_error *error;
+	wimp_pointer pointer;
 
 	/* The first time the menu is opened, control bypasses the normal
 	 * Menu Prepare event and so we prepare here.  On any re-opens,
@@ -4085,16 +4251,19 @@ gui_window_create_form_select_menu(struct gui_window *g,
 
 	error = xwimp_get_pointer_info(&pointer);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_pointer_info: 0x%x: %s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_pointer_info: 0x%x: %s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		ro_gui_menu_destroy();
 		return;
 	}
 
 	gui_form_select_control = control;
-	ro_gui_menu_create(gui_form_select_menu,
-			pointer.pos.x, pointer.pos.y, g->window);
+	ro_gui_menu_create(
+		gui_form_select_menu, pointer.pos.x, pointer.pos.y, g->window);
 }
 
 
@@ -4116,13 +4285,16 @@ ro_gui_window_import_text(struct gui_window *g, const char *filename)
 	const char *ep;
 	char *p;
 
-	error = xosfile_read_stamped(filename, &obj_type, NULL, NULL,
-			&size, NULL, NULL);
+	error = xosfile_read_stamped(
+		filename, &obj_type, NULL, NULL, &size, NULL, NULL);
 	if (error) {
-		NSLOG(netsurf, INFO, "xosfile_read_stamped: 0x%x:%s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xosfile_read_stamped: 0x%x:%s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("FileError", error->errmess);
-		return true;  /* was for us, but it didn't work! */
+		return true; /* was for us, but it didn't work! */
 	}
 
 	/* Allocate one byte more than needed to ensure that the buffer is
@@ -4135,12 +4307,15 @@ ro_gui_window_import_text(struct gui_window *g, const char *filename)
 		return true;
 	}
 
-	error = xosfile_load_stamped(filename, (byte*)buf,
-			NULL, NULL, NULL, NULL, NULL);
+	error = xosfile_load_stamped(
+		filename, (byte *)buf, NULL, NULL, NULL, NULL, NULL);
 
 	if (error) {
-		NSLOG(netsurf, INFO, "xosfile_load_stamped: 0x%x:%s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xosfile_load_stamped: 0x%x:%s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("LoadError", error->errmess);
 		free(buf);
 		return true;
@@ -4161,7 +4336,8 @@ ro_gui_window_import_text(struct gui_window *g, const char *filename)
 	p = utf8_buf;
 
 	/* skip leading whitespace */
-	while (isspace(*p)) p++;
+	while (isspace(*p))
+		p++;
 
 	sp = p;
 	while (*p && *p != '\r' && *p != '\n')
@@ -4252,7 +4428,7 @@ static struct gui_window_table window_table = {
 
 	/* from save */
 	.drag_save_object = gui_drag_save_object,
-	.drag_save_selection =gui_drag_save_selection,
+	.drag_save_selection = gui_drag_save_selection,
 };
 
 struct gui_window_table *riscos_window_table = &window_table;
@@ -4264,105 +4440,122 @@ void ro_gui_window_initialise(void)
 	/* Build the browser window menu. */
 
 	static const struct ns_menu browser_definition = {
-		"NetSurf", {
-			{ "Page", BROWSER_PAGE, 0 },
-			{ "Page.PageInfo",BROWSER_PAGE_INFO, &dialog_pageinfo },
-			{ "Page.Save", BROWSER_SAVE, &dialog_saveas },
-			{ "Page.SaveComp", BROWSER_SAVE_COMPLETE, &dialog_saveas },
-			{ "Page.Export", NO_ACTION, 0 },
+		"NetSurf",
+		{{"Page", BROWSER_PAGE, 0},
+		 {"Page.PageInfo", BROWSER_PAGE_INFO, &dialog_pageinfo},
+		 {"Page.Save", BROWSER_SAVE, &dialog_saveas},
+		 {"Page.SaveComp", BROWSER_SAVE_COMPLETE, &dialog_saveas},
+		 {"Page.Export", NO_ACTION, 0},
 #ifdef WITH_DRAW_EXPORT
-			{ "Page.Export.Draw", BROWSER_EXPORT_DRAW, &dialog_saveas },
+		 {"Page.Export.Draw", BROWSER_EXPORT_DRAW, &dialog_saveas},
 #endif
 #ifdef WITH_PDF_EXPORT
-			{ "Page.Export.PDF", BROWSER_EXPORT_PDF, &dialog_saveas },
+		 {"Page.Export.PDF", BROWSER_EXPORT_PDF, &dialog_saveas},
 #endif
-			{ "Page.Export.Text", BROWSER_EXPORT_TEXT, &dialog_saveas },
-			{ "Page.SaveURL", NO_ACTION, 0 },
-			{ "Page.SaveURL.URI", BROWSER_SAVE_URL_URI, &dialog_saveas },
-			{ "Page.SaveURL.URL", BROWSER_SAVE_URL_URL, &dialog_saveas },
-			{ "Page.SaveURL.LinkText", BROWSER_SAVE_URL_TEXT, &dialog_saveas },
-			{ "_Page.Print", BROWSER_PRINT, &dialog_print },
-			{ "Page.NewWindow", BROWSER_NEW_WINDOW, 0 },
-			{ "Page.FindText", BROWSER_FIND_TEXT, &dialog_search },
-			{ "Page.ViewSrc", BROWSER_VIEW_SOURCE, 0 },
-			{ "Object", BROWSER_OBJECT, 0 },
-			{ "Object.Object", BROWSER_OBJECT_OBJECT, 0 },
-			{ "Object.Object.ObjInfo", BROWSER_OBJECT_INFO, &dialog_objinfo },
-			{ "Object.Object.ObjSave", BROWSER_OBJECT_SAVE, &dialog_saveas },
-			{ "Object.Object.Export", BROWSER_OBJECT_EXPORT, 0 },
-			{ "Object.Object.Export.Sprite", BROWSER_OBJECT_EXPORT_SPRITE, &dialog_saveas },
+		 {"Page.Export.Text", BROWSER_EXPORT_TEXT, &dialog_saveas},
+		 {"Page.SaveURL", NO_ACTION, 0},
+		 {"Page.SaveURL.URI", BROWSER_SAVE_URL_URI, &dialog_saveas},
+		 {"Page.SaveURL.URL", BROWSER_SAVE_URL_URL, &dialog_saveas},
+		 {"Page.SaveURL.LinkText",
+		  BROWSER_SAVE_URL_TEXT,
+		  &dialog_saveas},
+		 {"_Page.Print", BROWSER_PRINT, &dialog_print},
+		 {"Page.NewWindow", BROWSER_NEW_WINDOW, 0},
+		 {"Page.FindText", BROWSER_FIND_TEXT, &dialog_search},
+		 {"Page.ViewSrc", BROWSER_VIEW_SOURCE, 0},
+		 {"Object", BROWSER_OBJECT, 0},
+		 {"Object.Object", BROWSER_OBJECT_OBJECT, 0},
+		 {"Object.Object.ObjInfo",
+		  BROWSER_OBJECT_INFO,
+		  &dialog_objinfo},
+		 {"Object.Object.ObjSave", BROWSER_OBJECT_SAVE, &dialog_saveas},
+		 {"Object.Object.Export", BROWSER_OBJECT_EXPORT, 0},
+		 {"Object.Object.Export.Sprite",
+		  BROWSER_OBJECT_EXPORT_SPRITE,
+		  &dialog_saveas},
 #ifdef WITH_DRAW_EXPORT
-			{ "Object.Object.Export.ObjDraw", BROWSER_OBJECT_EXPORT_DRAW, &dialog_saveas },
+		 {"Object.Object.Export.ObjDraw",
+		  BROWSER_OBJECT_EXPORT_DRAW,
+		  &dialog_saveas},
 #endif
-			{ "Object.Object.SaveURL", NO_ACTION, 0 },
-			{ "Object.Object.SaveURL.URI", BROWSER_OBJECT_SAVE_URL_URI, &dialog_saveas },
-			{ "Object.Object.SaveURL.URL", BROWSER_OBJECT_SAVE_URL_URL, &dialog_saveas },
-			{ "Object.Object.SaveURL.LinkText", BROWSER_OBJECT_SAVE_URL_TEXT, &dialog_saveas },
-			{ "Object.Object.ObjPrint", BROWSER_OBJECT_PRINT, 0 },
-			{ "Object.Object.ObjReload", BROWSER_OBJECT_RELOAD, 0 },
-			{ "Object.Link", BROWSER_OBJECT_LINK, 0 },
-			{ "Object.Link.LinkSave", BROWSER_LINK_SAVE, 0 },
-			{ "Object.Link.LinkSave.URI", BROWSER_LINK_SAVE_URI, &dialog_saveas },
-			{ "Object.Link.LinkSave.URL", BROWSER_LINK_SAVE_URL, &dialog_saveas },
-			{ "Object.Link.LinkSave.LinkText", BROWSER_LINK_SAVE_TEXT, &dialog_saveas },
-			{ "_Object.Link.LinkDload", BROWSER_LINK_DOWNLOAD, 0 },
-			{ "Object.Link.LinkNew", BROWSER_LINK_NEW_WINDOW, 0 },
-			{ "Selection", BROWSER_SELECTION, 0 },
-			{ "_Selection.SelSave", BROWSER_SELECTION_SAVE, &dialog_saveas },
-			{ "Selection.Copy", BROWSER_SELECTION_COPY, 0 },
-			{ "Selection.Cut", BROWSER_SELECTION_CUT, 0 },
-			{ "_Selection.Paste", BROWSER_SELECTION_PASTE, 0 },
-			{ "Selection.Clear", BROWSER_SELECTION_CLEAR, 0 },
-			{ "Selection.SelectAll", BROWSER_SELECTION_ALL, 0 },
-			{ "Navigate", NO_ACTION, 0 },
-			{ "Navigate.Home", BROWSER_NAVIGATE_HOME, 0 },
-			{ "Navigate.Back", BROWSER_NAVIGATE_BACK, 0 },
-			{ "Navigate.Forward", BROWSER_NAVIGATE_FORWARD, 0 },
-			{ "_Navigate.UpLevel", BROWSER_NAVIGATE_UP, 0 },
-			{ "Navigate.Reload", BROWSER_NAVIGATE_RELOAD_ALL, 0 },
-			{ "Navigate.Stop", BROWSER_NAVIGATE_STOP, 0 },
-			{ "View", NO_ACTION, 0 },
-			{ "View.ScaleView", BROWSER_SCALE_VIEW, &dialog_zoom },
-			{ "View.Images", NO_ACTION, 0 },
-			{ "View.Images.ForeImg", BROWSER_IMAGES_FOREGROUND, 0 },
-			{ "View.Images.BackImg", BROWSER_IMAGES_BACKGROUND, 0 },
-			{ "View.Toolbars", NO_ACTION, 0 },
-			{ "View.Toolbars.ToolButtons", TOOLBAR_BUTTONS, 0 },
-			{ "View.Toolbars.ToolAddress", TOOLBAR_ADDRESS_BAR, 0 },
-			{ "_View.Toolbars.ToolThrob", TOOLBAR_THROBBER, 0 },
-			{ "View.Toolbars.EditToolbar", TOOLBAR_EDIT, 0 },
-			{ "_View.Render", NO_ACTION, 0 },
-			{ "View.Render.RenderAnims", BROWSER_BUFFER_ANIMS, 0 },
-			{ "View.Render.RenderAll", BROWSER_BUFFER_ALL, 0 },
-			{ "_View.OptDefault", BROWSER_SAVE_VIEW, 0 },
-			{ "View.Window", NO_ACTION, 0 },
-			{ "View.Window.WindowSave", BROWSER_WINDOW_DEFAULT, 0 },
-			{ "View.Window.WindowStagr", BROWSER_WINDOW_STAGGER, 0 },
-			{ "_View.Window.WindowSize", BROWSER_WINDOW_COPY, 0 },
-			{ "View.Window.WindowReset", BROWSER_WINDOW_RESET, 0 },
-			{ "Utilities", NO_ACTION, 0 },
-			{ "Utilities.Hotlist", HOTLIST_SHOW, 0 },
-			{ "Utilities.Hotlist.HotlistAdd", HOTLIST_ADD_URL, 0 },
-			{ "Utilities.Hotlist.HotlistShow", HOTLIST_SHOW, 0 },
-			{ "Utilities.History", HISTORY_SHOW_GLOBAL, 0 },
-			{ "Utilities.History.HistLocal", HISTORY_SHOW_LOCAL, 0 },
-			{ "Utilities.History.HistGlobal", HISTORY_SHOW_GLOBAL, 0 },
-			{ "Utilities.Cookies", COOKIES_SHOW, 0 },
-			{ "Utilities.Cookies.ShowCookies", COOKIES_SHOW, 0 },
-			{ "Utilities.Cookies.DeleteCookies", COOKIES_DELETE, 0 },
-			{ "Help", HELP_OPEN_CONTENTS, 0 },
-			{ "Help.HelpContent", HELP_OPEN_CONTENTS, 0 },
-			{ "Help.HelpGuide", HELP_OPEN_GUIDE, 0 },
-			{ "_Help.HelpInfo", HELP_OPEN_INFORMATION, 0 },
-			{ "Help.HelpCredits", HELP_OPEN_CREDITS, 0 },
-			{ "_Help.HelpLicence", HELP_OPEN_LICENCE, 0 },
-			{ "Help.HelpInter", HELP_LAUNCH_INTERACTIVE, 0 },
-			{NULL, 0, 0}
-		}
-	};
-	ro_gui_browser_window_menu =
-			ro_gui_menu_define_menu(&browser_definition);
-
+		 {"Object.Object.SaveURL", NO_ACTION, 0},
+		 {"Object.Object.SaveURL.URI",
+		  BROWSER_OBJECT_SAVE_URL_URI,
+		  &dialog_saveas},
+		 {"Object.Object.SaveURL.URL",
+		  BROWSER_OBJECT_SAVE_URL_URL,
+		  &dialog_saveas},
+		 {"Object.Object.SaveURL.LinkText",
+		  BROWSER_OBJECT_SAVE_URL_TEXT,
+		  &dialog_saveas},
+		 {"Object.Object.ObjPrint", BROWSER_OBJECT_PRINT, 0},
+		 {"Object.Object.ObjReload", BROWSER_OBJECT_RELOAD, 0},
+		 {"Object.Link", BROWSER_OBJECT_LINK, 0},
+		 {"Object.Link.LinkSave", BROWSER_LINK_SAVE, 0},
+		 {"Object.Link.LinkSave.URI",
+		  BROWSER_LINK_SAVE_URI,
+		  &dialog_saveas},
+		 {"Object.Link.LinkSave.URL",
+		  BROWSER_LINK_SAVE_URL,
+		  &dialog_saveas},
+		 {"Object.Link.LinkSave.LinkText",
+		  BROWSER_LINK_SAVE_TEXT,
+		  &dialog_saveas},
+		 {"_Object.Link.LinkDload", BROWSER_LINK_DOWNLOAD, 0},
+		 {"Object.Link.LinkNew", BROWSER_LINK_NEW_WINDOW, 0},
+		 {"Selection", BROWSER_SELECTION, 0},
+		 {"_Selection.SelSave", BROWSER_SELECTION_SAVE, &dialog_saveas},
+		 {"Selection.Copy", BROWSER_SELECTION_COPY, 0},
+		 {"Selection.Cut", BROWSER_SELECTION_CUT, 0},
+		 {"_Selection.Paste", BROWSER_SELECTION_PASTE, 0},
+		 {"Selection.Clear", BROWSER_SELECTION_CLEAR, 0},
+		 {"Selection.SelectAll", BROWSER_SELECTION_ALL, 0},
+		 {"Navigate", NO_ACTION, 0},
+		 {"Navigate.Home", BROWSER_NAVIGATE_HOME, 0},
+		 {"Navigate.Back", BROWSER_NAVIGATE_BACK, 0},
+		 {"Navigate.Forward", BROWSER_NAVIGATE_FORWARD, 0},
+		 {"_Navigate.UpLevel", BROWSER_NAVIGATE_UP, 0},
+		 {"Navigate.Reload", BROWSER_NAVIGATE_RELOAD_ALL, 0},
+		 {"Navigate.Stop", BROWSER_NAVIGATE_STOP, 0},
+		 {"View", NO_ACTION, 0},
+		 {"View.ScaleView", BROWSER_SCALE_VIEW, &dialog_zoom},
+		 {"View.Images", NO_ACTION, 0},
+		 {"View.Images.ForeImg", BROWSER_IMAGES_FOREGROUND, 0},
+		 {"View.Images.BackImg", BROWSER_IMAGES_BACKGROUND, 0},
+		 {"View.Toolbars", NO_ACTION, 0},
+		 {"View.Toolbars.ToolButtons", TOOLBAR_BUTTONS, 0},
+		 {"View.Toolbars.ToolAddress", TOOLBAR_ADDRESS_BAR, 0},
+		 {"_View.Toolbars.ToolThrob", TOOLBAR_THROBBER, 0},
+		 {"View.Toolbars.EditToolbar", TOOLBAR_EDIT, 0},
+		 {"_View.Render", NO_ACTION, 0},
+		 {"View.Render.RenderAnims", BROWSER_BUFFER_ANIMS, 0},
+		 {"View.Render.RenderAll", BROWSER_BUFFER_ALL, 0},
+		 {"_View.OptDefault", BROWSER_SAVE_VIEW, 0},
+		 {"View.Window", NO_ACTION, 0},
+		 {"View.Window.WindowSave", BROWSER_WINDOW_DEFAULT, 0},
+		 {"View.Window.WindowStagr", BROWSER_WINDOW_STAGGER, 0},
+		 {"_View.Window.WindowSize", BROWSER_WINDOW_COPY, 0},
+		 {"View.Window.WindowReset", BROWSER_WINDOW_RESET, 0},
+		 {"Utilities", NO_ACTION, 0},
+		 {"Utilities.Hotlist", HOTLIST_SHOW, 0},
+		 {"Utilities.Hotlist.HotlistAdd", HOTLIST_ADD_URL, 0},
+		 {"Utilities.Hotlist.HotlistShow", HOTLIST_SHOW, 0},
+		 {"Utilities.History", HISTORY_SHOW_GLOBAL, 0},
+		 {"Utilities.History.HistLocal", HISTORY_SHOW_LOCAL, 0},
+		 {"Utilities.History.HistGlobal", HISTORY_SHOW_GLOBAL, 0},
+		 {"Utilities.Cookies", COOKIES_SHOW, 0},
+		 {"Utilities.Cookies.ShowCookies", COOKIES_SHOW, 0},
+		 {"Utilities.Cookies.DeleteCookies", COOKIES_DELETE, 0},
+		 {"Help", HELP_OPEN_CONTENTS, 0},
+		 {"Help.HelpContent", HELP_OPEN_CONTENTS, 0},
+		 {"Help.HelpGuide", HELP_OPEN_GUIDE, 0},
+		 {"_Help.HelpInfo", HELP_OPEN_INFORMATION, 0},
+		 {"Help.HelpCredits", HELP_OPEN_CREDITS, 0},
+		 {"_Help.HelpLicence", HELP_OPEN_LICENCE, 0},
+		 {"Help.HelpInter", HELP_LAUNCH_INTERACTIVE, 0},
+		 {NULL, 0, 0}}};
+	ro_gui_browser_window_menu = ro_gui_menu_define_menu(
+		&browser_definition);
 }
 
 
@@ -4382,7 +4575,8 @@ ro_gui_window_invalidate_area(struct gui_window *g, const struct rect *rect)
 		info.w = g->window;
 		error = xwimp_get_window_info_header_only(&info);
 		if (error) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xwimp_get_window_info_header_only: 0x%x: %s",
 			      error->errnum,
 			      error->errmess);
@@ -4391,23 +4585,28 @@ ro_gui_window_invalidate_area(struct gui_window *g, const struct rect *rect)
 		}
 
 		error = xwimp_force_redraw(g->window,
-					   info.extent.x0, info.extent.y0,
-					   info.extent.x1, info.extent.y1);
+					   info.extent.x0,
+					   info.extent.y0,
+					   info.extent.x1,
+					   info.extent.y1);
 		if (error) {
-			NSLOG(netsurf, INFO, "xwimp_force_redraw: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_force_redraw: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 			return NSERROR_INVALID;
 		}
 		return NSERROR_OK;
 	}
 
-	x0 = floorf(rect->x0 * 2 );
-	y0 = -ceilf(rect->y1 * 2 );
-	x1 = ceilf(rect->x1 * 2 ) + 1;
-	y1 = -floorf(rect->y0 * 2 ) + 1;
-	use_buffer =
-		(g->option.buffer_everything || g->option.buffer_animations);
+	x0 = floorf(rect->x0 * 2);
+	y0 = -ceilf(rect->y1 * 2);
+	x1 = ceilf(rect->x1 * 2) + 1;
+	y1 = -floorf(rect->y0 * 2) + 1;
+	use_buffer = (g->option.buffer_everything ||
+		      g->option.buffer_animations);
 
 	/* try to optimise buffered redraws */
 	if (use_buffer) {
@@ -4454,11 +4653,15 @@ nserror ro_gui_window_set_url(struct gui_window *g, nsurl *url)
 
 	if (g->toolbar) {
 		if (nsoption_bool(display_decoded_idn) == true) {
-			if (nsurl_get_utf8(url, &idn_url_s, &idn_url_l) != NSERROR_OK)
+			if (nsurl_get_utf8(url, &idn_url_s, &idn_url_l) !=
+			    NSERROR_OK)
 				idn_url_s = NULL;
 		}
 
-		ro_toolbar_set_url(g->toolbar, idn_url_s ? idn_url_s : nsurl_access(url), true, false);
+		ro_toolbar_set_url(g->toolbar,
+				   idn_url_s ? idn_url_s : nsurl_access(url),
+				   true,
+				   false);
 
 		if (idn_url_s)
 			free(idn_url_s);
@@ -4487,12 +4690,15 @@ bool ro_gui_window_dataload(struct gui_window *g, wimp_message *message)
 	if (0x1000 <= message->data.data_xfer.file_type)
 		return false;
 
-	if (!ro_gui_window_to_window_pos(g, message->data.data_xfer.pos.x,
-			message->data.data_xfer.pos.y, &pos))
+	if (!ro_gui_window_to_window_pos(g,
+					 message->data.data_xfer.pos.x,
+					 message->data.data_xfer.pos.y,
+					 &pos))
 		return false;
 
-	if (browser_window_drop_file_at_point(g->bw, pos.x, pos.y,
-			message->data.data_xfer.file_name) == false)
+	if (browser_window_drop_file_at_point(
+		    g->bw, pos.x, pos.y, message->data.data_xfer.file_name) ==
+	    false)
 		return false;
 
 	/* send DataLoadAck */
@@ -4500,8 +4706,11 @@ bool ro_gui_window_dataload(struct gui_window *g, wimp_message *message)
 	message->your_ref = message->my_ref;
 	error = xwimp_send_message(wimp_USER_MESSAGE, message, message->sender);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_send_message: 0x%x: %s\n",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_send_message: 0x%x: %s\n",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 	}
 
@@ -4513,9 +4722,10 @@ bool ro_gui_window_dataload(struct gui_window *g, wimp_message *message)
 void ro_gui_window_mouse_at(wimp_pointer *pointer, void *data)
 {
 	os_coord pos;
-	struct gui_window *g = (struct gui_window *) data;
+	struct gui_window *g = (struct gui_window *)data;
 
-	if (ro_gui_window_to_window_pos(g, pointer->pos.x, pointer->pos.y, &pos)) {
+	if (ro_gui_window_to_window_pos(
+		    g, pointer->pos.x, pointer->pos.y, &pos)) {
 		browser_window_mouse_track(
 			g->bw,
 			ro_gui_mouse_drag_state(pointer->buttons,
@@ -4527,8 +4737,8 @@ void ro_gui_window_mouse_at(wimp_pointer *pointer, void *data)
 
 
 /* exported interface documented in riscos/window.h */
-void
-ro_gui_window_iconise(struct gui_window *g, wimp_full_message_window_info *wi)
+void ro_gui_window_iconise(struct gui_window *g,
+			   wimp_full_message_window_info *wi)
 {
 	/* sadly there is no 'legal' way to get the sprite into
 	 * the Wimp sprite pool other than via a filing system */
@@ -4546,17 +4756,22 @@ ro_gui_window_iconise(struct gui_window *g, wimp_full_message_window_info *wi)
 	assert(bw);
 
 	h = browser_window_get_content(bw);
-	if (!h) return;
+	if (!h)
+		return;
 
 	/* if an overlay sprite is defined, locate it and gets its dimensions
 	 * so that we can produce a thumbnail with the same dimensions */
 	if (!ro_gui_wimp_get_sprite("ic_netsfxx", &overlay)) {
 		error = xosspriteop_read_sprite_info(osspriteop_PTR,
-				(osspriteop_area *)0x100,
-				(osspriteop_id)overlay, &width, &height, NULL,
-				NULL);
+						     (osspriteop_area *)0x100,
+						     (osspriteop_id)overlay,
+						     &width,
+						     &height,
+						     NULL,
+						     NULL);
 		if (error) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xosspriteop_read_sprite_info: 0x%x: %s",
 			      error->errnum,
 			      error->errmess);
@@ -4569,8 +4784,9 @@ ro_gui_window_iconise(struct gui_window *g, wimp_full_message_window_info *wi)
 	}
 
 	/* create the thumbnail sprite */
-	bitmap = riscos_bitmap_create(width, height,
-			BITMAP_OPAQUE | BITMAP_CLEAR);
+	bitmap = riscos_bitmap_create(width,
+				      height,
+				      BITMAP_OPAQUE | BITMAP_CLEAR);
 	if (!bitmap) {
 		NSLOG(netsurf, INFO, "Thumbnail initialisation failed.");
 		return;
@@ -4592,7 +4808,7 @@ ro_gui_window_iconise(struct gui_window *g, wimp_full_message_window_info *wi)
 		if ((unsigned)++id >= NOF_ELEMENTS(iconise_used)) {
 			id = iconise_next;
 			if ((unsigned)++iconise_next >=
-					NOF_ELEMENTS(iconise_used))
+			    NOF_ELEMENTS(iconise_used))
 				iconise_next = 0;
 			break;
 		}
@@ -4601,10 +4817,14 @@ ro_gui_window_iconise(struct gui_window *g, wimp_full_message_window_info *wi)
 	len = sprintf(sprite_header->name, "ic_netsf%.2d", id);
 
 	error = xosspriteop_save_sprite_file(osspriteop_USER_AREA,
-			area, temp_fname);
+					     area,
+					     temp_fname);
 	if (error) {
-		NSLOG(netsurf, INFO, "xosspriteop_save_sprite_file: 0x%x:%s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xosspriteop_save_sprite_file: 0x%x:%s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("MiscError", error->errmess);
 		free(area);
 		return;
@@ -4612,7 +4832,8 @@ ro_gui_window_iconise(struct gui_window *g, wimp_full_message_window_info *wi)
 
 	error = xwimpspriteop_merge_sprite_file(temp_fname);
 	if (error) {
-		NSLOG(netsurf, INFO,
+		NSLOG(netsurf,
+		      INFO,
 		      "xwimpspriteop_merge_sprite_file: 0x%x:%s",
 		      error->errnum,
 		      error->errmess);
@@ -4630,21 +4851,24 @@ ro_gui_window_iconise(struct gui_window *g, wimp_full_message_window_info *wi)
 		/* work around bug in Pinboard where it will fail to display
 		 * the icon if the text is very wide */
 		if (strlen(wi->title) > 10)
-			wi->title[10] = '\0';	/* pinboard does this anyway */
+			wi->title[10] = '\0'; /* pinboard does this anyway */
 		while (wimptextop_string_width(wi->title, 0) > 182)
 			wi->title[strlen(wi->title) - 1] = '\0';
 	}
 
 	wi->size = sizeof(wimp_full_message_window_info);
 	wi->your_ref = wi->my_ref;
-	error = xwimp_send_message(wimp_USER_MESSAGE, (wimp_message*)wi,
-			wi->sender);
+	error = xwimp_send_message(wimp_USER_MESSAGE,
+				   (wimp_message *)wi,
+				   wi->sender);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_send_message: 0x%x:%s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_send_message: 0x%x:%s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
-	}
-	else {
+	} else {
 		g->iconise_icon = id;
 		iconise_used[id] = true;
 	}
@@ -4657,17 +4881,18 @@ ro_gui_window_iconise(struct gui_window *g, wimp_full_message_window_info *wi)
 bool ro_gui_toolbar_dataload(struct gui_window *g, wimp_message *message)
 {
 	if (message->data.data_xfer.file_type == osfile_TYPE_TEXT &&
-			ro_gui_window_import_text(g,
-					message->data.data_xfer.file_name)) {
+	    ro_gui_window_import_text(g, message->data.data_xfer.file_name)) {
 		os_error *error;
 
 		/* send DataLoadAck */
 		message->action = message_DATA_LOAD_ACK;
 		message->your_ref = message->my_ref;
-		error = xwimp_send_message(wimp_USER_MESSAGE, message,
-				message->sender);
+		error = xwimp_send_message(wimp_USER_MESSAGE,
+					   message,
+					   message->sender);
 		if (error) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xwimp_send_message: 0x%x: %s\n",
 			      error->errnum,
 			      error->errmess);
@@ -4720,8 +4945,11 @@ void ro_gui_window_update_boxes(void)
 
 		error = xwimp_update_window(&update, &more);
 		if (error) {
-			NSLOG(netsurf, INFO, "xwimp_update_window: 0x%x: %s",
-			      error->errnum, error->errmess);
+			NSLOG(netsurf,
+			      INFO,
+			      "xwimp_update_window: 0x%x: %s",
+			      error->errnum,
+			      error->errmess);
 			ro_warn_user("WimpError", error->errmess);
 			continue;
 		}
@@ -4739,8 +4967,9 @@ void ro_gui_window_update_boxes(void)
 			 * so we mask it out for now until a better fix is
 			 * found. This appears to be a bug in RISC OS. */
 			if (error && !(use_buffer &&
-					error->errnum == error_WIMP_GET_RECT)) {
-				NSLOG(netsurf, INFO,
+				       error->errnum == error_WIMP_GET_RECT)) {
+				NSLOG(netsurf,
+				      INFO,
 				      "xwimp_get_rectangle: 0x%x: %s",
 				      error->errnum,
 				      error->errmess);
@@ -4810,7 +5039,8 @@ void ro_gui_window_default_options(struct gui_window *gui)
 		nsoption_set_bool(toolbar_show_address,
 				  ro_toolbar_get_display_url(gui->toolbar));
 		nsoption_set_bool(toolbar_show_throbber,
-				  ro_toolbar_get_display_throbber(gui->toolbar));
+				  ro_toolbar_get_display_throbber(
+					  gui->toolbar));
 	}
 	if (gui->status_bar != NULL) {
 		nsoption_set_int(toolbar_status_size,
@@ -4835,9 +5065,9 @@ struct gui_window *ro_gui_window_lookup(wimp_w window)
 /* exported interface documented in riscos/window.h */
 struct gui_window *ro_gui_toolbar_lookup(wimp_w window)
 {
-	struct gui_window	*g = NULL;
-	struct toolbar		*toolbar;
-	wimp_w			parent;
+	struct gui_window *g = NULL;
+	struct toolbar *toolbar;
+	wimp_w parent;
 
 	toolbar = ro_toolbar_window_lookup(window);
 
@@ -4851,8 +5081,10 @@ struct gui_window *ro_gui_toolbar_lookup(wimp_w window)
 
 
 /* exported interface documented in riscos/window.h */
-bool
-ro_gui_window_to_window_pos(struct gui_window *g, int x, int y, os_coord *pos)
+bool ro_gui_window_to_window_pos(struct gui_window *g,
+				 int x,
+				 int y,
+				 os_coord *pos)
 {
 	wimp_window_state state;
 	os_error *error;
@@ -4862,13 +5094,16 @@ ro_gui_window_to_window_pos(struct gui_window *g, int x, int y, os_coord *pos)
 	state.w = g->window;
 	error = xwimp_get_window_state(&state);
 	if (error) {
-		NSLOG(netsurf, INFO, "xwimp_get_window_state: 0x%x:%s",
-		      error->errnum, error->errmess);
+		NSLOG(netsurf,
+		      INFO,
+		      "xwimp_get_window_state: 0x%x:%s",
+		      error->errnum,
+		      error->errmess);
 		ro_warn_user("WimpError", error->errmess);
 		return false;
 	}
-	pos->x = (x - (state.visible.x0 - state.xscroll)) / 2 ;
-	pos->y = ((state.visible.y1 - state.yscroll) - y) / 2 ;
+	pos->x = (x - (state.visible.x0 - state.xscroll)) / 2;
+	pos->y = ((state.visible.y1 - state.yscroll) - y) / 2;
 	return true;
 }
 
@@ -4913,19 +5148,19 @@ ro_gui_mouse_click_state(wimp_mouse_state buttons, wimp_icon_flags type)
 		if (buttons & (wimp_DOUBLE_SELECT)) {
 			/* Select double click */
 			state |= BROWSER_MOUSE_PRESS_1 | BROWSER_MOUSE_CLICK_1 |
-					BROWSER_MOUSE_DOUBLE_CLICK;
+				 BROWSER_MOUSE_DOUBLE_CLICK;
 		} else if (buttons & (wimp_DOUBLE_ADJUST)) {
 			/* Adjust double click */
 			state |= BROWSER_MOUSE_PRESS_2 | BROWSER_MOUSE_CLICK_2 |
-					BROWSER_MOUSE_DOUBLE_CLICK;
+				 BROWSER_MOUSE_DOUBLE_CLICK;
 		}
 
 		/* Need to consider what we have and decide whether to fire
 		 * triple click instead */
-		if ((state == (BROWSER_MOUSE_PRESS_1 |
-				BROWSER_MOUSE_CLICK_1)) ||
-		    (state == (BROWSER_MOUSE_PRESS_2 |
-				BROWSER_MOUSE_CLICK_2))) {
+		if ((state ==
+		     (BROWSER_MOUSE_PRESS_1 | BROWSER_MOUSE_CLICK_1)) ||
+		    (state ==
+		     (BROWSER_MOUSE_PRESS_2 | BROWSER_MOUSE_CLICK_2))) {
 			/* WIMP told us single click, but maybe we want to call
 			 * it a triple click */
 
@@ -4947,12 +5182,12 @@ ro_gui_mouse_click_state(wimp_mouse_state buttons, wimp_icon_flags type)
 				/* Single click */
 				last_click.type = CLICK_SINGLE;
 			}
-		} else if ((state == (BROWSER_MOUSE_PRESS_1 |
-					BROWSER_MOUSE_CLICK_1 |
-					BROWSER_MOUSE_DOUBLE_CLICK)) ||
-			   (state == (BROWSER_MOUSE_PRESS_2 |
-					BROWSER_MOUSE_CLICK_2 |
-					BROWSER_MOUSE_DOUBLE_CLICK))) {
+		} else if ((state ==
+			    (BROWSER_MOUSE_PRESS_1 | BROWSER_MOUSE_CLICK_1 |
+			     BROWSER_MOUSE_DOUBLE_CLICK)) ||
+			   (state ==
+			    (BROWSER_MOUSE_PRESS_2 | BROWSER_MOUSE_CLICK_2 |
+			     BROWSER_MOUSE_DOUBLE_CLICK))) {
 			/* Wimp told us double click, but we may want to
 			 * call it single click */
 
@@ -4982,9 +5217,12 @@ ro_gui_mouse_click_state(wimp_mouse_state buttons, wimp_icon_flags type)
 	}
 
 	/* Set modifier key state */
-	if (ro_gui_shift_pressed()) state |= BROWSER_MOUSE_MOD_1;
-	if (ro_gui_ctrl_pressed())  state |= BROWSER_MOUSE_MOD_2;
-	if (ro_gui_alt_pressed())   state |= BROWSER_MOUSE_MOD_3;
+	if (ro_gui_shift_pressed())
+		state |= BROWSER_MOUSE_MOD_1;
+	if (ro_gui_ctrl_pressed())
+		state |= BROWSER_MOUSE_MOD_2;
+	if (ro_gui_alt_pressed())
+		state |= BROWSER_MOUSE_MOD_3;
 
 	return state;
 }
@@ -5012,9 +5250,12 @@ ro_gui_mouse_drag_state(wimp_mouse_state buttons, wimp_icon_flags type)
 	}
 
 	/* Set modifier key state */
-	if (ro_gui_shift_pressed()) state |= BROWSER_MOUSE_MOD_1;
-	if (ro_gui_ctrl_pressed())  state |= BROWSER_MOUSE_MOD_2;
-	if (ro_gui_alt_pressed())   state |= BROWSER_MOUSE_MOD_3;
+	if (ro_gui_shift_pressed())
+		state |= BROWSER_MOUSE_MOD_1;
+	if (ro_gui_ctrl_pressed())
+		state |= BROWSER_MOUSE_MOD_2;
+	if (ro_gui_alt_pressed())
+		state |= BROWSER_MOUSE_MOD_3;
 
 	return state;
 }
@@ -5057,17 +5298,22 @@ void gui_window_set_pointer(struct gui_window *g, gui_pointer_shape shape)
 	if (shape == curr_pointer)
 		return;
 
-	assert(shape < sizeof ro_gui_pointer_table /
-			sizeof ro_gui_pointer_table[0]);
+	assert(shape <
+	       sizeof ro_gui_pointer_table / sizeof ro_gui_pointer_table[0]);
 
 	entry = &ro_gui_pointer_table[shape];
 
 	if (entry->wimp_area) {
 		/* pointer in the Wimp's sprite area */
 		error = xwimpspriteop_set_pointer_shape(entry->sprite_name,
-				1, entry->xactive, entry->yactive, 0, 0);
+							1,
+							entry->xactive,
+							entry->yactive,
+							0,
+							0);
 		if (error) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xwimpspriteop_set_pointer_shape: 0x%x: %s",
 			      error->errnum,
 			      error->errmess);
@@ -5075,12 +5321,18 @@ void gui_window_set_pointer(struct gui_window *g, gui_pointer_shape shape)
 		}
 	} else {
 		/* pointer in our own sprite area */
-		error = xosspriteop_set_pointer_shape(osspriteop_USER_AREA,
-				gui_sprites,
-				(osspriteop_id) entry->sprite_name,
-				1, entry->xactive, entry->yactive, 0, 0);
+		error = xosspriteop_set_pointer_shape(
+			osspriteop_USER_AREA,
+			gui_sprites,
+			(osspriteop_id)entry->sprite_name,
+			1,
+			entry->xactive,
+			entry->yactive,
+			0,
+			0);
 		if (error) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurf,
+			      INFO,
 			      "xosspriteop_set_pointer_shape: 0x%x: %s",
 			      error->errnum,
 			      error->errmess);

@@ -19,8 +19,8 @@
 #ifndef NETSURF_FB_FONT_FREETYPE_H
 #define NETSURF_FB_FONT_FREETYPE_H
 
-#include <ft2build.h>  
-#include FT_FREETYPE_H 
+#include <ft2build.h>
+#include FT_FREETYPE_H
 #include FT_GLYPH_H
 
 extern int ft_load_type;

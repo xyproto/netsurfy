@@ -25,4 +25,3 @@ nserror ami_nsoption_write(void);
 nserror ami_nsoption_set_location(const char *current_user_dir);
 void ami_nsoption_free(void);
 #endif
-
