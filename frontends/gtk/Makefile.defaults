@@ -11,7 +11,7 @@ NETSURFY_GTK_BIN := $(PREFIX)/bin/
 
 # Enable NetSurfy's use of librsvg in conjunction with Cairo to display SVGs
 # Valid options: YES, NO, AUTO
-NETSURFY_USE_RSVG := AUTO
+NETSURFY_USE_RSVG := NO
 
 # Enable NetSurfy's use of libsvgtiny for displaying SVGs
 # Valid options: YES, NO, AUTO

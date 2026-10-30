@@ -53,7 +53,7 @@ NETSURFY_USE_JPEG := YES
 
 # Enable NetSurfy's use of libjxl for displaying JPEGXLs
 # Valid options: YES, NO, AUTO				  (highly recommended)
-NETSURFY_USE_JPEGXL := AUTO
+NETSURFY_USE_JPEGXL := NO
 
 # Enable NetSurfy's use of libpng for displaying PNGs.
 # Valid options: YES, NO, AUTO	                          (highly recommended)
@@ -109,10 +109,10 @@ NETSURFY_STRIP_BINARY := NO
 # replacement is OS, the next two are major/minor version.
 # Note that the "Mozilla/5.0" prefix is a requirement to enable modern
 # web standards on many websites. It should not be removed or modified.
-NETSURFY_UA_FORMAT_STRING := "Mozilla/5.0 (%s) NetSurfy/%d.%d"
+NETSURFY_UA_FORMAT_STRING := "Mozilla/5.0 (Arch Linux; %s) NetSurfy/%d.%d"
 
 # Default home page, if one is not defined by the user.
-NETSURFY_HOMEPAGE := "https://duckduckgo.com"
+NETSURFY_HOMEPAGE := "https://duckduckgo.com/"
 
 # Enable building the source object cache filesystem based backing store.
 # implementation.
@@ -131,7 +131,9 @@ CFLAGS :=
 CXXFLAGS :=
 
 # Default installation/execution prefix
-PREFIX ?= /usr/local
+PREFIX ?= /usr
+
+export HOSTNAME ?= archlinux
 
 
 # ----------------------------------------------------------------------------
