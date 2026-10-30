@@ -1,13 +1,13 @@
 /*
  * Copyright 2008, 2014 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -34,14 +34,14 @@
 #include "utils/filepath.h"
 #include "utils/log.h"
 #include "utils/messages.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/keypress.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/keypress.h"
 #include "desktop/browser_history.h"
-#include "netsurf/plotters.h"
-#include "netsurf/window.h"
-#include "netsurf/misc.h"
-#include "netsurf/netsurf.h"
-#include "netsurf/cookie_db.h"
+#include "netsurfy/plotters.h"
+#include "netsurfy/window.h"
+#include "netsurfy/misc.h"
+#include "netsurfy/netsurfy.h"
+#include "netsurfy/cookie_db.h"
 #include "content/fetch.h"
 
 #include "framebuffer/gui.h"
@@ -118,7 +118,7 @@ static void die(const char *error)
  */
 static nserror fb_warn_user(const char *warning, const char *detail)
 {
-	NSLOG(netsurf, INFO, "%s %s", warning, detail);
+	NSLOG(netsurfy, INFO, "%s %s", warning, detail);
 	return NSERROR_OK;
 }
 
@@ -150,7 +150,7 @@ static void widget_scroll_y(struct gui_window *gw, int y, bool abs)
 	int content_width, content_height;
 	int height;
 
-	NSLOG(netsurf, DEEPDEBUG, "window scroll");
+	NSLOG(netsurfy, DEEPDEBUG, "window scroll");
 	if (abs) {
 		bwidget->pany = y - bwidget->scrolly;
 	} else {
@@ -232,7 +232,7 @@ static void fb_pan(fbtk_widget_t *widget,
 	height = fbtk_get_height(widget);
 	width = fbtk_get_width(widget);
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "panning %d, %d",
 	      bwidget->panx,
@@ -406,7 +406,7 @@ fb_browser_window_redraw(fbtk_widget_t *widget, fbtk_callback_info *cbi)
 
 	bwidget = fbtk_get_userpw(widget);
 	if (bwidget == NULL) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "browser widget from widget %p was null",
 		      widget);
@@ -476,7 +476,7 @@ static bool process_cmdline(int argc, char **argv)
 	static struct option long_options[] = {
 		{0, 0, 0, 0}}; /* no long options */
 
-	NSLOG(netsurf, INFO, "argc %d, argv %p", argc, argv);
+	NSLOG(netsurfy, INFO, "argc %d, argv %p", argc, argv);
 
 	nsfb_enumerate_surface_types(framebuffer_pick_default_fename, NULL);
 
@@ -495,7 +495,7 @@ static bool process_cmdline(int argc, char **argv)
 	    (nsoption_charp(homepage_url)[0] != '\0')) {
 		feurl = nsoption_charp(homepage_url);
 	} else {
-		feurl = NETSURF_HOMEPAGE;
+		feurl = NETSURFY_HOMEPAGE;
 	}
 
 	while ((opt = getopt_long(
@@ -582,12 +582,12 @@ static nserror set_defaults(struct nsoption_s *defaults)
 	};
 
 	/* Set defaults for absent option strings */
-	nsoption_setnull_charp(cookie_file, strdup("~/.netsurf/Cookies"));
-	nsoption_setnull_charp(cookie_jar, strdup("~/.netsurf/Cookies"));
+	nsoption_setnull_charp(cookie_file, strdup("~/.netsurfy/Cookies"));
+	nsoption_setnull_charp(cookie_jar, strdup("~/.netsurfy/Cookies"));
 
 	if (nsoption_charp(cookie_file) == NULL ||
 	    nsoption_charp(cookie_jar) == NULL) {
-		NSLOG(netsurf, INFO, "Failed initialising cookie options");
+		NSLOG(netsurfy, INFO, "Failed initialising cookie options");
 		return NSERROR_BAD_PARAMETER;
 	}
 
@@ -640,7 +640,7 @@ static void framebuffer_run(void)
 
 static void gui_quit(void)
 {
-	NSLOG(netsurf, INFO, "gui_quit");
+	NSLOG(netsurfy, INFO, "gui_quit");
 
 	urldb_save_cookies(nsoption_charp(cookie_jar));
 
@@ -666,7 +666,7 @@ fb_browser_window_click(fbtk_widget_t *widget, fbtk_callback_info *cbi)
 	    cbi->event->type != NSFB_EVENT_KEY_UP)
 		return 0;
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "browser window clicked at %d,%d",
 	      cbi->x,
@@ -852,7 +852,7 @@ fb_browser_window_input(fbtk_widget_t *widget, fbtk_callback_info *cbi)
 	static fbtk_modifier_type modifier = FBTK_MOD_CLEAR;
 	int ucs4 = -1;
 
-	NSLOG(netsurf, INFO, "got value %d", cbi->event->value.keycode);
+	NSLOG(netsurfy, INFO, "got value %d", cbi->event->value.keycode);
 
 	switch (cbi->event->type) {
 	case NSFB_EVENT_KEY_DOWN:
@@ -1243,7 +1243,7 @@ static fbtk_widget_t *create_toolbar(struct gui_window *gw,
 		toolbar_layout = NSFB_TOOLBAR_DEFAULT_LAYOUT;
 	}
 
-	NSLOG(netsurf, INFO, "Using toolbar layout %s", toolbar_layout);
+	NSLOG(netsurfy, INFO, "Using toolbar layout %s", toolbar_layout);
 
 	itmtype = toolbar_layout;
 
@@ -1272,7 +1272,7 @@ static fbtk_widget_t *create_toolbar(struct gui_window *gw,
 	 */
 	while ((itmtype >= toolbar_layout) && (*itmtype != 0) && (xdir != 0)) {
 
-		NSLOG(netsurf, INFO, "toolbar adding %c", *itmtype);
+		NSLOG(netsurfy, INFO, "toolbar adding %c", *itmtype);
 
 
 		switch (*itmtype) {
@@ -1416,7 +1416,7 @@ static fbtk_widget_t *create_toolbar(struct gui_window *gw,
 		default:
 			widget = NULL;
 			xdir = 0;
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "Unknown element %c in toolbar layout",
 			      *itmtype);
@@ -1427,7 +1427,7 @@ static fbtk_widget_t *create_toolbar(struct gui_window *gw,
 			xpos += (xdir * (fbtk_get_width(widget) + padding));
 		}
 
-		NSLOG(netsurf, INFO, "xpos is %d", xpos);
+		NSLOG(netsurfy, INFO, "xpos is %d", xpos);
 
 		itmtype += xdir;
 	}
@@ -1646,7 +1646,7 @@ create_normal_browser_window(struct gui_window *gw, int furniture_width)
 	int statusbar_width = 0;
 	int toolbar_height = nsoption_int(fb_toolbar_size);
 
-	NSLOG(netsurf, INFO, "Normal window");
+	NSLOG(netsurfy, INFO, "Normal window");
 
 	gw->window = fbtk_create_window(fbtk, 0, 0, 0, 0, 0);
 
@@ -1681,7 +1681,7 @@ create_normal_browser_window(struct gui_window *gw, int furniture_width)
 	fbtk_set_handler(
 		gw->status, FBTK_CBT_POINTERENTER, set_ptr_default_move, NULL);
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "status bar %p at %d,%d",
 	      gw->status,
@@ -1883,7 +1883,7 @@ static void gui_window_destroy(struct gui_window *gw)
 /**
  * Invalidates an area of a framebuffer browser window
  *
- * \param g The netsurf window being invalidated.
+ * \param g The netsurfy window being invalidated.
  * \param rect area to redraw or NULL for the entire window area
  * \return NSERROR_OK on success or appropriate error code
  */
@@ -2199,7 +2199,7 @@ int main(int argc, char **argv)
 	nsurl *url;
 	nserror ret;
 	nsfb_t *nsfb;
-	struct netsurf_table framebuffer_table = {
+	struct netsurfy_table framebuffer_table = {
 		.misc = &framebuffer_misc_table,
 		.window = &framebuffer_window_table,
 		.corewindow = framebuffer_core_window_table,
@@ -2210,13 +2210,13 @@ int main(int argc, char **argv)
 		.layout = framebuffer_layout_table,
 	};
 
-	ret = netsurf_register(&framebuffer_table);
+	ret = netsurfy_register(&framebuffer_table);
 	if (ret != NSERROR_OK) {
-		die("NetSurf operation table failed registration");
+		die("NetSurfy operation table failed registration");
 	}
 
-	respaths = fb_init_resource_path(NETSURF_FB_RESPATH
-					 ":" NETSURF_FB_FONTPATH);
+	respaths = fb_init_resource_path(NETSURFY_FB_RESPATH
+					 ":" NETSURFY_FB_FONTPATH);
 
 	/* initialise logging. Not fatal if it fails but not much we
 	 * can do about it either.
@@ -2242,9 +2242,9 @@ int main(int argc, char **argv)
 	}
 
 	/* common initialisation */
-	ret = netsurf_init(NULL);
+	ret = netsurfy_init(NULL);
 	if (ret != NSERROR_OK) {
-		die("NetSurf failed to initialise");
+		die("NetSurfy failed to initialise");
 	}
 
 	/* Override, since we have no support for non-core SELECT menu */
@@ -2270,7 +2270,7 @@ int main(int argc, char **argv)
 
 	/* create an initial browser window */
 
-	NSLOG(netsurf, INFO, "calling browser_window_create");
+	NSLOG(netsurfy, INFO, "calling browser_window_create");
 
 	ret = nsurl_create(feurl, &url);
 	if (ret == NSERROR_OK) {
@@ -2286,10 +2286,10 @@ int main(int argc, char **argv)
 		browser_window_destroy(bw);
 	}
 
-	netsurf_exit();
+	netsurfy_exit();
 
 	if (fb_font_finalise() == false)
-		NSLOG(netsurf, INFO, "Font finalisation failed.");
+		NSLOG(netsurfy, INFO, "Font finalisation failed.");
 
 	/* finalise options */
 	nsoption_finalise(nsoptions, nsoptions_default);

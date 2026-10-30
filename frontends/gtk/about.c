@@ -1,13 +1,13 @@
 /*
  * Copyright 2014 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -28,7 +28,7 @@
 #include "utils/messages.h"
 #include "utils/nsoption.h"
 #include "utils/nsurl.h"
-#include "netsurf/browser_window.h"
+#include "netsurfy/browser_window.h"
 #include "desktop/version.h"
 
 #include "gtk/warn.h"
@@ -100,7 +100,7 @@ void nsgtk_about_dialog_init(GtkWindow *parent)
 
 	/* Create the dialog */
 	dialog = gtk_window_new();
-	gtk_window_set_title(GTK_WINDOW(dialog), "About NetSurf");
+	gtk_window_set_title(GTK_WINDOW(dialog), "About NetSurfy");
 	gtk_window_set_transient_for(GTK_WINDOW(dialog), parent);
 	gtk_window_set_destroy_with_parent(GTK_WINDOW(dialog), TRUE);
 	gtk_window_set_resizable(GTK_WINDOW(dialog), FALSE);
@@ -109,8 +109,8 @@ void nsgtk_about_dialog_init(GtkWindow *parent)
 	nsgtk_widget_set_margins(vbox, 12, 12);
 	gtk_window_set_child(GTK_WINDOW(dialog), vbox);
 
-	/* NetSurf icon */
-	if (nsgdk_pixbuf_new_from_resname("netsurf.xpm", &pixbuf) ==
+	/* NetSurfy icon */
+	if (nsgdk_pixbuf_new_from_resname("netsurfy.xpm", &pixbuf) ==
 	    NSERROR_OK) {
 		GtkWidget *image;
 
@@ -124,8 +124,8 @@ void nsgtk_about_dialog_init(GtkWindow *parent)
 	/* version string */
 	label = gtk_label_new(NULL);
 	name_string = g_markup_printf_escaped(
-		"<span size=\"xx-large\" weight=\"bold\">NetSurf %s</span>",
-		netsurf_version);
+		"<span size=\"xx-large\" weight=\"bold\">NetSurfy %s</span>",
+		netsurfy_version);
 	gtk_label_set_markup(GTK_LABEL(label), name_string);
 	g_free(name_string);
 	gtk_label_set_selectable(GTK_LABEL(label), TRUE);
@@ -138,7 +138,7 @@ void nsgtk_about_dialog_init(GtkWindow *parent)
 	gtk_label_set_wrap(GTK_LABEL(label), TRUE);
 	gtk_box_append(GTK_BOX(vbox), label);
 
-	label = gtk_label_new(messages_get("NetSurfCopyright"));
+	label = gtk_label_new(messages_get("NetSurfyCopyright"));
 	gtk_label_set_selectable(GTK_LABEL(label), TRUE);
 	gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_CENTER);
 	gtk_box_append(GTK_BOX(vbox), label);

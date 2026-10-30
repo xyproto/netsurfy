@@ -1,13 +1,13 @@
 /*
  * Copyright 2020 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf.
+ * This file is part of NetSurfy.
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -29,8 +29,8 @@
 #include "utils/errors.h"
 #include "utils/log.h"
 #include "utils/messages.h"
-#include "netsurf/inttypes.h"
-#include "netsurf/ssl_certs.h"
+#include "netsurfy/inttypes.h"
+#include "netsurfy/ssl_certs.h"
 
 #include "private.h"
 #include "certificate.h"
@@ -385,13 +385,13 @@ static nserror xname_to_info(X509_NAME *xname, struct ns_cert_name *iname)
 		}
 		if (field != NULL) {
 			*field = strdup((const char *)value_str);
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      DEEPDEBUG,
 			      "NID:%d value: %s",
 			      name_nid,
 			      *field);
 		} else {
-			NSLOG(netsurf, DEEPDEBUG, "NID:%d", name_nid);
+			NSLOG(netsurfy, DEEPDEBUG, "NID:%d", name_nid);
 		}
 	}
 
@@ -411,7 +411,7 @@ static nserror xname_to_info(X509_NAME *xname, struct ns_cert_name *iname)
 /**
  * duplicate a hex formatted string inserting the colons
  *
- * \todo only uses html entity as separator because netsurfs line breaking
+ * \todo only uses html entity as separator because netsurfys line breaking
  *       fails otherwise.
  */
 static char *hexdup(const char *hex)
@@ -447,7 +447,7 @@ static char *hexdup(const char *hex)
 /**
  * create a hex formatted string inserting the colons from binary data
  *
- * \todo only uses html entity as separator because netsurfs line breaking
+ * \todo only uses html entity as separator because netsurfys line breaking
  *       fails otherwise.
  */
 static char *bindup(unsigned char *bin, unsigned int binlen)
@@ -1250,7 +1250,7 @@ bool fetch_about_certificate_handler(struct fetch_about_context *ctx)
 	res = fetch_about_ssenddataf(
 		ctx,
 		"<html>\n<head>\n"
-		"<title>NetSurf Browser Certificate Viewer</title>\n"
+		"<title>NetSurfy Browser Certificate Viewer</title>\n"
 		"<link rel=\"stylesheet\" type=\"text/css\" "
 		"href=\"resource:internal.css\">\n"
 		"</head>\n"

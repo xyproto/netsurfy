@@ -1,13 +1,13 @@
 /*
  * Copyright 2011 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -21,8 +21,8 @@
  * Interface to browser frames.
  */
 
-#ifndef _NETSURF_DESKTOP_FRAME_TYPES_H_
-#define _NETSURF_DESKTOP_FRAME_TYPES_H_
+#ifndef _NETSURFY_DESKTOP_FRAME_TYPES_H_
+#define _NETSURFY_DESKTOP_FRAME_TYPES_H_
 
 struct frame_dimension {
 	float value;

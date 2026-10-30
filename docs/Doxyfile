@@ -32,7 +32,7 @@ DOXYFILE_ENCODING      = UTF-8
 # title of most generated pages and in a few other places.
 # The default value is: My Project.
 
-PROJECT_NAME           = "NetSurf"
+PROJECT_NAME           = "NetSurfy"
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. This
 # could be handy for archiving the generated documentation or if some version
@@ -793,8 +793,6 @@ WARN_LOGFILE           =
 INPUT                  = docs \
                          docs/env.sh \
                          docs/UnimplementedJavascript.md \
-                         frontends/amiga \
-                         frontends/amiga/stringview \
                          frontends/atari \
                          frontends/atari/plot \
                          frontends/beos \
@@ -802,14 +800,8 @@ INPUT                  = docs \
                          frontends/framebuffer/fbtk \
                          frontends/gtk \
                          frontends/monkey \
-                         frontends/riscos \
-                         frontends/riscos/configure \
-                         frontends/riscos/gui \
-                         frontends/riscos/content-handlers \
-                         frontends/riscos/templates \
-                         frontends/riscos/scripts \
                          frontends/windows \
-                         include/netsurf \
+                         include/netsurfy \
                          desktop \
                          content \
                          content/fetchers \

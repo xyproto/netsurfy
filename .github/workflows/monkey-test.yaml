@@ -62,7 +62,7 @@ jobs:
       run: |
           find . -type f -name Makefile | xargs sed -i 's/-Werror//'
 
-    - name: Build NetSurf Monkey
+    - name: Build NetSurfy Monkey
       run: |
           export TARGET_WORKSPACE="$(pwd)/projects"
           source docs/env.sh

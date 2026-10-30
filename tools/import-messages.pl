@@ -23,7 +23,7 @@
 =head1
 
 Take a single-language messages file and merge it back in to the
-NetSurf master messaged (i10n) file.
+NetSurfy master messaged (i10n) file.
 
 =cut
 
@@ -237,7 +237,7 @@ sub parser ()
 }
 
 {
-    package msgfmt::messages; # native netsurf format
+    package msgfmt::messages; # native netsurfy format
 
     sub parse
     {

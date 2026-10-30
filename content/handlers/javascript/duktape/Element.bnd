@@ -2,7 +2,7 @@
  *
  * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
  * Released under the terms of the MIT License,
  *         http://www.opensource.org/licenses/mit-license
@@ -184,7 +184,7 @@ getter Element::childElementCount()
 			element = NULL;
 		}
 	}
-	NSLOG(netsurf, INFO, "I found %u of them", jsret);
+	NSLOG(netsurfy, INFO, "I found %u of them", jsret);
 	duk_push_uint(ctx, jsret);
 	return 1;
 %}
@@ -458,18 +458,18 @@ setter Element::innerHTML()
 						  &parser,
 						  &fragment);
 	if (error != DOM_HUBBUB_OK) {
-		NSLOG(netsurf, ERROR, "Unable to create fragment parser!");
+		NSLOG(netsurfy, ERROR, "Unable to create fragment parser!");
 		goto out;
 	}
 
 	error = dom_hubbub_parser_parse_chunk(parser, (const uint8_t*)s, size);
 	if (error != DOM_HUBBUB_OK) {
-		NSLOG(netsurf, ERROR, "Unable to parse HTML chunk");
+		NSLOG(netsurfy, ERROR, "Unable to parse HTML chunk");
 		goto out;
 	}
 	error = dom_hubbub_parser_completed(parser);
 	if (error != DOM_HUBBUB_OK) {
-		NSLOG(netsurf, ERROR, "Unable to complete parser");
+		NSLOG(netsurfy, ERROR, "Unable to complete parser");
 		goto out;
 	}
 

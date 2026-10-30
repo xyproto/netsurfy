@@ -3,13 +3,13 @@
  *
  * Framebuffer windowing toolkit scrollbar widgets
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -28,7 +28,7 @@
 #include <libnsfb_cursor.h>
 
 #include "utils/log.h"
-#include "netsurf/browser_window.h"
+#include "netsurfy/browser_window.h"
 
 #include "framebuffer/gui.h"
 #include "framebuffer/fbtk.h"
@@ -351,7 +351,7 @@ static int hscroll_redraw(fbtk_widget_t *widget, fbtk_callback_info *cbi)
 		hpos = 0;
 	}
 
-	NSLOG(netsurf, INFO, "hscroll %d", hscroll);
+	NSLOG(netsurfy, INFO, "hscroll %d", hscroll);
 
 	rect.x0 = bbox.x0 + 3 + hpos;
 	rect.y0 = bbox.y0 + 5;
@@ -378,7 +378,7 @@ static int hscrolll_click(fbtk_widget_t *widget, fbtk_callback_info *cbi)
 		newpos = scrollw->u.scroll.minimum;
 
 	if (newpos == scrollw->u.scroll.position) {
-		NSLOG(netsurf, INFO, "horiz scroll was the same %d", newpos);
+		NSLOG(netsurfy, INFO, "horiz scroll was the same %d", newpos);
 		return 0;
 	}
 

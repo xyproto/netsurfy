@@ -1,13 +1,13 @@
 /*
  * Copyright 2020 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf.
+ * This file is part of NetSurfy.
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -21,8 +21,8 @@
  * about scheme query privacy handler interface
  */
 
-#ifndef NETSURF_CONTENT_FETCHERS_ABOUT_QUERY_PRIVACY_H
-#define NETSURF_CONTENT_FETCHERS_ABOUT_QUERY_PRIVACY_H
+#ifndef NETSURFY_CONTENT_FETCHERS_ABOUT_QUERY_PRIVACY_H
+#define NETSURFY_CONTENT_FETCHERS_ABOUT_QUERY_PRIVACY_H
 
 /**
  * Handler to generate about scheme query privacy page.

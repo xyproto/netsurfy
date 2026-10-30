@@ -1,13 +1,13 @@
 /*
  * Copyright 2013 Ole Loots <ole@monochrom.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -33,10 +33,10 @@
 #include "utils/nsoption.h"
 #include "utils/log.h"
 #include "utils/utils.h"
-#include "netsurf/plot_style.h"
+#include "netsurfy/plot_style.h"
 
 #include "atari/gui.h"
-#include "atari/res/netsurf.rsh"
+#include "atari/res/netsurfy.rsh"
 #include "atari/settings.h"
 #include "atari/deskmenu.h"
 #include "atari/misc.h"
@@ -171,7 +171,7 @@ static char **read_locales(void)
 		atari_warn_user("Failed to load locales: %s", buf);
 		return (NULL);
 	} else {
-		NSLOG(netsurf, INFO, "Reading locales from: %s...", buf);
+		NSLOG(netsurfy, INFO, "Reading locales from: %s...", buf);
 	}
 
 	/* Count items: */
@@ -207,7 +207,7 @@ static void save_settings(void)
 	nsoption_write((const char *)&options, NULL, NULL);
 	nsoption_read((const char *)&options, NULL);
 	close_settings();
-	form_alert(1, "[1][Some options require an netsurf restart!][OK]");
+	form_alert(1, "[1][Some options require an netsurfy restart!][OK]");
 	deskmenu_update();
 }
 
@@ -1015,11 +1015,11 @@ void open_settings(void)
 
 void close_settings(void)
 {
-	NSLOG(netsurf, INFO, "closing");
+	NSLOG(netsurfy, INFO, "closing");
 	gemtk_wm_remove(settings_guiwin);
 	settings_guiwin = NULL;
 	wind_close(h_aes_win);
 	wind_delete(h_aes_win);
 	h_aes_win = 0;
-	NSLOG(netsurf, INFO, "Done");
+	NSLOG(netsurfy, INFO, "Done");
 }

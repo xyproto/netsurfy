@@ -2,13 +2,13 @@
  * Copyright 2008 Daniel Silverstone <dsilvers@netsurf-browser.org>
  * Copyright 2009 Mark Benjamin <netsurf-browser.org.MarkBenjamin@dfgh.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -82,9 +82,9 @@ static char *realpath(const char *path, char *resolved_path)
 /**
  * Locate a shared resource file by searching known places in order.
  *
- * Search order is: ~/.netsurf/, $NETSURFRES/ (where NETSURFRES is an
+ * Search order is: ~/.netsurfy/, $NETSURFYRES/ (where NETSURFYRES is an
  * environment variable), then the path specified in
- * NETSURF_WINDOWS_RESPATH in the Makefile then .\\res\\ [windows paths]
+ * NETSURFY_WINDOWS_RESPATH in the Makefile then .\\res\\ [windows paths]
  *
  * \param  buf      buffer to write to.  must be at least PATH_MAX chars
  * \param  filename file to look for
@@ -98,15 +98,15 @@ char *nsws_find_resource(char *buf, const char *filename, const char *def)
 	char t[PATH_MAX];
 
 	if (cdir != NULL) {
-		NSLOG(netsurf, INFO, "Found Home %s", cdir);
+		NSLOG(netsurfy, INFO, "Found Home %s", cdir);
 		strcpy(t, cdir);
-		strcat(t, "/.netsurf/");
+		strcat(t, "/.netsurfy/");
 		strcat(t, filename);
 		if ((realpath(t, buf) != NULL) && (access(buf, R_OK) == 0))
 			return buf;
 	}
 
-	cdir = getenv("NETSURFRES");
+	cdir = getenv("NETSURFYRES");
 
 	if (cdir != NULL) {
 		if (realpath(cdir, buf) != NULL) {
@@ -117,7 +117,7 @@ char *nsws_find_resource(char *buf, const char *filename, const char *def)
 		}
 	}
 
-	strcpy(t, NETSURF_WINDOWS_RESPATH);
+	strcpy(t, NETSURFY_WINDOWS_RESPATH);
 	strcat(t, filename);
 	if ((realpath(t, buf) != NULL) && (access(buf, R_OK) == 0))
 		return buf;
@@ -125,7 +125,7 @@ char *nsws_find_resource(char *buf, const char *filename, const char *def)
 	getcwd(t, PATH_MAX - SLEN("\\res\\") - strlen(filename));
 	strcat(t, "\\res\\");
 	strcat(t, filename);
-	NSLOG(netsurf, INFO, "looking in %s", t);
+	NSLOG(netsurfy, INFO, "looking in %s", t);
 	if ((realpath(t, buf) != NULL) && (access(buf, R_OK) == 0))
 		return buf;
 

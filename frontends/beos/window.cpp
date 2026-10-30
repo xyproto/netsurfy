@@ -3,13 +3,13 @@
  * Copyright 2006 Daniel Silverstone <dsilvers@digital-scurf.org>
  * Copyright 2006 Rob Kendrick <rjek@rjek.com>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -40,15 +40,15 @@ extern "C" {
 #include "utils/utf8.h"
 #include "utils/utils.h"
 #include "utils/nsurl.h"
-#include "netsurf/inttypes.h"
-#include "netsurf/content_type.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/mouse.h"
-#include "netsurf/plotters.h"
-#include "netsurf/window.h"
-#include "netsurf/clipboard.h"
-#include "netsurf/url_db.h"
-#include "netsurf/keypress.h"
+#include "netsurfy/inttypes.h"
+#include "netsurfy/content_type.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/mouse.h"
+#include "netsurfy/plotters.h"
+#include "netsurfy/window.h"
+#include "netsurfy/clipboard.h"
+#include "netsurfy/url_db.h"
+#include "netsurfy/keypress.h"
 }
 
 #include "beos/about.h"
@@ -347,7 +347,7 @@ static struct gui_window *gui_window_create(struct browser_window *bw,
 		return 0;
 	}
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Creating gui window %p for browser window %p",
 	      g,
@@ -433,14 +433,14 @@ void nsbeos_dispatch_event(BMessage *message)
 		continue;
 
 	if (gui && gui != z) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "discarding event for destroyed gui_window");
 		delete message;
 		return;
 	}
 	if (scaffold && (!y || scaffold != y->scaffold)) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "discarding event for destroyed scaffolding");
 		delete message;
@@ -449,13 +449,13 @@ void nsbeos_dispatch_event(BMessage *message)
 
 	// messages for top-level
 	if (scaffold) {
-		NSLOG(netsurf, INFO, "dispatching to top-level");
+		NSLOG(netsurfy, INFO, "dispatching to top-level");
 		nsbeos_scaffolding_dispatch_event(scaffold, message);
 		delete message;
 		return;
 	}
 
-	NSLOG(netsurf, DEEPDEBUG, "processing message");
+	NSLOG(netsurfy, DEEPDEBUG, "processing message");
 	switch (message->what) {
 	case B_QUIT_REQUESTED:
 		// from the BApplication
@@ -782,7 +782,7 @@ void nsbeos_window_keypress_event(BView *view, gui_window *g, BMessage *event)
 	if (!numbytes)
 		numbytes = strlen(bytes);
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "mods 0x%08" PRIx32 " key %" PRIu32 " raw %" PRIu32 " byte[0] %d",
 	      mods,
@@ -983,10 +983,10 @@ static void gui_window_destroy(struct gui_window *g)
 		g->next->prev = g->prev;
 
 
-	NSLOG(netsurf, INFO, "Destroying gui_window %p", g);
+	NSLOG(netsurfy, INFO, "Destroying gui_window %p", g);
 	assert(g != NULL);
 	assert(g->bw != NULL);
-	NSLOG(netsurf, INFO, "     Scaffolding: %p", g->scaffold);
+	NSLOG(netsurfy, INFO, "     Scaffolding: %p", g->scaffold);
 
 	if (g->view == NULL)
 		return;
@@ -1033,7 +1033,7 @@ void nsbeos_redraw_caret(struct gui_window *g)
 /**
  * Invalidate an area of a beos browser window
  *
- * \param g The netsurf window being invalidated.
+ * \param g The netsurfy window being invalidated.
  * \param rect area to redraw or NULL for entrire window area.
  * \return NSERROR_OK or appropriate error code.
  */
@@ -1142,7 +1142,7 @@ static void gui_window_update_extent(struct gui_window *g)
 	x_max -= g->view->Bounds().Width() + 1;
 	y_max -= g->view->Bounds().Height() + 1;
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "x_max = %d y_max = %d x_prop = %f y_prop = %f\n",
 	      x_max,

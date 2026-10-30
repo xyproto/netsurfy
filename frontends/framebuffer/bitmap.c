@@ -1,13 +1,13 @@
 /*
  * Copyright 2008 Vincent Sanders <vince@simtec.co.uk>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -30,9 +30,9 @@
 
 #include "utils/log.h"
 #include "utils/utils.h"
-#include "netsurf/bitmap.h"
-#include "netsurf/plotters.h"
-#include "netsurf/content.h"
+#include "netsurfy/bitmap.h"
+#include "netsurfy/plotters.h"
+#include "netsurfy/content.h"
 
 #include "framebuffer/gui.h"
 #include "framebuffer/fbtk.h"
@@ -223,7 +223,7 @@ bitmap_render(struct bitmap *bitmap, struct hlcache_handle *content)
 
 	nsfb_get_geometry(tbm, &width, &height, NULL);
 
-	NSLOG(netsurf, INFO, "width %d, height %d", width, height);
+	NSLOG(netsurfy, INFO, "width %d, height %d", width, height);
 
 	/* Calculate size of buffer to render the content into */
 	/* We get the width from the largest of the bitmap width and the content

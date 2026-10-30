@@ -2,13 +2,13 @@
  * Copyright 2008 François Revol <mmu_man@users.sourceforge.net>
  * Copyright 2008 Rob Kendrick <rjek@netsurf-browser.org>
  *
- * This file is part of NetSurf.
+ * This file is part of NetSurfy.
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -42,7 +42,7 @@ extern "C" {
 #include "utils/messages.h"
 #include "utils/utils.h"
 #include "utils/ring.h"
-#include "netsurf/inttypes.h"
+#include "netsurfy/inttypes.h"
 #include "content/fetch.h"
 #include "content/fetchers.h"
 }
@@ -72,7 +72,7 @@ BResources *gAppResources = NULL;
 
 static bool fetch_rsrc_initialise(lwc_string *scheme)
 {
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "fetch_rsrc_initialise called for %s",
 	      lwc_string_data(scheme));
@@ -81,7 +81,7 @@ static bool fetch_rsrc_initialise(lwc_string *scheme)
 
 static void fetch_rsrc_finalise(lwc_string *scheme)
 {
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "fetch_rsrc_finalise called for %s",
 	      lwc_string_data(scheme));
@@ -172,7 +172,7 @@ static bool fetch_rsrc_process(struct fetch_rsrc_context *c)
 	 *   rsrc://[TYPE][@NUM]/name[,mime]
 	 */
 
-	NSLOG(netsurf, INFO, "*** Processing %s", c->url);
+	NSLOG(netsurfy, INFO, "*** Processing %s", c->url);
 
 	if (strlen(c->url) < 7) {
 		/* 7 is the minimum possible length (rsrc://) */
@@ -209,14 +209,14 @@ static bool fetch_rsrc_process(struct fetch_rsrc_context *c)
 		uint8 c1, c2, c3, c4;
 		if (sscanf(params, "%c%c%c%c", &c1, &c2, &c3, &c4) > 3) {
 			type = c1 << 24 | c2 << 16 | c3 << 8 | c4;
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "fetch_rsrc: type:%4.4s\n",
 			      (char *)&type);
 		}
 	}
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "fetch_rsrc: 0x%08" PRIx32 ", %" PRId32 ", '%s'\n",
 	      type,
@@ -297,7 +297,7 @@ static void fetch_rsrc_poll(lwc_string *scheme)
 			char header[64];
 
 			fetch_set_http_code(c->parent_fetch, HTTP_RESPONSE_OK);
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "setting rsrc: MIME type to %s, length to %zd",
 			      c->mimetype,
@@ -336,7 +336,7 @@ static void fetch_rsrc_poll(lwc_string *scheme)
 				fetch_rsrc_send_callback(&msg, c);
 			}
 		} else {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "Processing of %s failed!",
 			      c->url);

@@ -2,13 +2,13 @@
  * Copyright 2008 Adam Blokus <adamblokus@gmail.com>
  * Copyright 2009 John Tytgat <joty@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -82,7 +82,7 @@ const struct font_functions haru_nsfont = {haru_nsfont_width,
 static void
 error_handler(HPDF_STATUS error_no, HPDF_STATUS detail_no, void *user_data)
 {
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "ERROR: in font_haru \n\terror_no=%x\n\tdetail_no=%d\n",
 	      (HPDF_UINT)error_no,
@@ -159,7 +159,7 @@ bool haru_nsfont_width(const plot_font_style_t *fstyle,
 	*width = width_real;
 
 #ifdef FONT_HARU_DEBUG
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Measuring string: %s ; Calculated width: %f %i",
 	      string_nt,
@@ -225,7 +225,7 @@ bool haru_nsfont_position_in_string(const plot_font_style_t *fstyle,
 	*actual_x = real_width;
 
 #ifdef FONT_HARU_DEBUG
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Position in string: %s at x: %i; Calculated position: %i",
 	      string_nt,
@@ -278,7 +278,7 @@ bool haru_nsfont_split(const plot_font_style_t *fstyle,
 		page, string_nt, x, HPDF_TRUE, &real_width);
 
 #ifdef FONT_HARU_DEBUG
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Splitting string: %s for width: %i ; Calculated position: %i Calculated real_width: %f",
 	      string_nt,
@@ -367,7 +367,7 @@ bool haru_nsfont_apply_style(const plot_font_style_t *fstyle,
 		strcat(font_name, "-Roman");
 
 #ifdef FONT_HARU_DEBUG
-	NSLOG(netsurf, INFO, "Setting font: %s", font_name);
+	NSLOG(netsurfy, INFO, "Setting font: %s", font_name);
 #endif
 
 	size = fstyle->size;

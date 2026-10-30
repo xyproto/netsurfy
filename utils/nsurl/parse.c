@@ -1,13 +1,13 @@
 /*
  * Copyright 2011 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -18,7 +18,7 @@
 
 /**
  * \file
- * NetSurf URL handling implementation.
+ * NetSurfy URL handling implementation.
  *
  * This is the common implementation of all URL handling within the
  * browser. This implementation is based upon RFC3986 although this has
@@ -38,7 +38,7 @@
 #include <string.h>
 #include <strings.h>
 
-#include "netsurf/inttypes.h"
+#include "netsurfy/inttypes.h"
 
 #include "utils/ascii.h"
 #include "utils/corestrings.h"
@@ -465,34 +465,34 @@ static void nsurl__get_string_markers(const char *const url_s,
 			marker.fragment = marker.end;
 	}
 
-	NSLOG(netsurf, DEEPDEBUG, "marker.start: %" PRIsizet, marker.start);
-	NSLOG(netsurf,
+	NSLOG(netsurfy, DEEPDEBUG, "marker.start: %" PRIsizet, marker.start);
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "marker.scheme_end: %" PRIsizet,
 	      marker.scheme_end);
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "marker.authority: %" PRIsizet,
 	      marker.authority);
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "marker.colon_first: %" PRIsizet,
 	      marker.colon_first);
-	NSLOG(netsurf, DEEPDEBUG, "marker.at: %" PRIsizet, marker.at);
-	NSLOG(netsurf,
+	NSLOG(netsurfy, DEEPDEBUG, "marker.at: %" PRIsizet, marker.at);
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "marker.colon_last: %" PRIsizet,
 	      marker.colon_last);
 
-	NSLOG(netsurf, DEEPDEBUG, "marker.path: %" PRIsizet, marker.path);
-	NSLOG(netsurf, DEEPDEBUG, "marker.query: %" PRIsizet, marker.query);
-	NSLOG(netsurf,
+	NSLOG(netsurfy, DEEPDEBUG, "marker.path: %" PRIsizet, marker.path);
+	NSLOG(netsurfy, DEEPDEBUG, "marker.query: %" PRIsizet, marker.query);
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "marker.fragment: %" PRIsizet,
 	      marker.fragment);
 
-	NSLOG(netsurf, DEEPDEBUG, "marker.end: %" PRIsizet, marker.end);
+	NSLOG(netsurfy, DEEPDEBUG, "marker.end: %" PRIsizet, marker.end);
 
 	/* Got all the URL components pegged out now */
 	*markers = marker;
@@ -512,8 +512,8 @@ static size_t nsurl__remove_dot_segments(char *path, char *output)
 	char *output_pos = output;
 
 	while (*path_pos != '\0') {
-		NSLOG(netsurf, DEEPDEBUG, " in:%s", path_pos);
-		NSLOG(netsurf,
+		NSLOG(netsurfy, DEEPDEBUG, " in:%s", path_pos);
+		NSLOG(netsurfy,
 		      DEEPDEBUG,
 		      "out:%.*s",
 		      (int)(output_pos - output),
@@ -624,13 +624,13 @@ static size_t nsurl__get_longest_section(struct url_markers *m)
 
 
 /**
- * Create the components of a NetSurf URL object for a section of a URL string
+ * Create the components of a NetSurfy URL object for a section of a URL string
  *
  * \param url_s		URL string
  * \param section	Sets which section of URL string is to be normalised
  * \param pegs		Set of markers delimiting the URL string's sections
  * \param pos_norm	A buffer large enough for the normalised string (*3 + 1)
- * \param url		A NetSurf URL object, to which components may be added
+ * \param url		A NetSurfy URL object, to which components may be added
  * \return NSERROR_OK on success, appropriate error otherwise
  *
  * The section of url_s is normalised appropriately.
@@ -919,7 +919,7 @@ static nserror nsurl__create_from_section(const char *const url_s,
 					flags |= NSURL_F_NO_PORT;
 				}
 
-				/* Add non-redundant ports to NetSurf URL */
+				/* Add non-redundant ports to NetSurfy URL */
 				sec_start = norm_start + colon - pegs->at +
 					    skip;
 				if (!(flags & NSURL_F_NO_PORT) &&
@@ -1016,7 +1016,7 @@ static nserror nsurl__create_from_section(const char *const url_s,
 /**
  * Get nsurl string info; total length, component lengths, & components present
  *
- * \param url		NetSurf URL components
+ * \param url		NetSurfy URL components
  * \param parts		Which parts of the URL are required in the string
  * \param url_l		Updated to total string length
  * \param lengths	Updated with individual component lengths
@@ -1132,7 +1132,7 @@ static void nsurl__get_string_data(const struct nsurl_components *url,
 /**
  * Copy url string into provided buffer
  *
- * \param url		NetSurf URL components
+ * \param url		NetSurfy URL components
  * \param url_s		Updated to contain the string
  * \param l		Individual component lengths
  * \param flags		String flags
@@ -1250,7 +1250,7 @@ nserror nsurl__components_to_string(const struct nsurl_components *components,
 /**
  * Calculate hash value
  *
- * \param url		NetSurf URL object to set hash value for
+ * \param url		NetSurfy URL object to set hash value for
  */
 void nsurl__calc_hash(nsurl *url)
 {
@@ -1323,7 +1323,7 @@ static nserror nsurl__check_host_valid(lwc_string *host)
 }
 
 /******************************************************************************
- * NetSurf URL Public API                                                     *
+ * NetSurfy URL Public API                                                     *
  ******************************************************************************/
 
 /* exported interface, documented in nsurl.h */
@@ -1352,7 +1352,7 @@ nserror nsurl_create(const char *const url_s, nsurl **url)
 	/* Set scheme type */
 	c.scheme_type = m.scheme_type;
 
-	/* Build NetSurf URL object from sections */
+	/* Build NetSurfy URL object from sections */
 	e |= nsurl__create_from_section(url_s, URL_SCHEME, &m, buff, &c);
 	e |= nsurl__create_from_section(url_s, URL_CREDENTIALS, &m, buff, &c);
 	e |= nsurl__create_from_section(url_s, URL_HOST, &m, buff, &c);
@@ -1432,7 +1432,7 @@ nserror nsurl_join(const nsurl *base, const char *rel, nsurl **joined)
 	assert(base != NULL);
 	assert(rel != NULL);
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "base: \"%s\", rel: \"%s\"",
 	      nsurl_access(base),

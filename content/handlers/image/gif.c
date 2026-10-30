@@ -3,13 +3,13 @@
  * Copyright 2004 Richard Wilson <not_ginger_matt@users.sourceforge.net>
  * Copyright 2008 Sean Fox <dyntryx@gmail.com>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -25,7 +25,7 @@
  *
  * All GIFs are dynamically decompressed using the routines that gifread.c
  * provides. Whilst this allows support for progressive decoding, it is
- * not implemented here as NetSurf currently does not provide such support.
+ * not implemented here as NetSurfy currently does not provide such support.
  *
  * [rjw] - Sun 4th April 2004
  */
@@ -43,9 +43,9 @@
 #include "utils/utils.h"
 #include "utils/messages.h"
 #include "utils/nsoption.h"
-#include "netsurf/misc.h"
-#include "netsurf/bitmap.h"
-#include "netsurf/content.h"
+#include "netsurfy/misc.h"
+#include "netsurfy/bitmap.h"
+#include "netsurfy/content.h"
 #include "content/llcache.h"
 #include "content/content.h"
 #include "content/content_protected.h"
@@ -247,7 +247,7 @@ static bool gif_convert(struct content *c)
 	/* Initialise the GIF */
 	gif_err = nsgif_data_scan(gif->gif, size, data);
 	if (gif_err != NSGIF_OK) {
-		NSLOG(netsurf, INFO, "nsgif scan: %s", nsgif_strerror(gif_err));
+		NSLOG(netsurfy, INFO, "nsgif scan: %s", nsgif_strerror(gif_err));
 		/* Not fatal unless we have no frames. */
 	}
 

@@ -1,13 +1,13 @@
 /*
  * Copyright 2016 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -67,8 +67,8 @@ static nserror gui_options_init_defaults(struct nsoption_s *defaults)
 {
 	/* Set defaults for absent option strings */
 	nsoption_setnull_charp(ca_bundle,
-			       strdup("NetSurf:Resources.ca-bundle"));
-	nsoption_setnull_charp(cookie_file, strdup("NetSurf:Cookies"));
+			       strdup("NetSurfy:Resources.ca-bundle"));
+	nsoption_setnull_charp(cookie_file, strdup("NetSurfy:Cookies"));
 	nsoption_setnull_charp(cookie_jar, strdup("Cookies"));
 
 	if (nsoption_charp(ca_bundle) == NULL ||
@@ -230,8 +230,8 @@ struct format_test_vec_s format_test_vec[] = {
 	 "<tr><th>http_proxy_host</th><td>string</td><td>default</td><td><span class=\"null-content\">NULL</span></td></tr>",
 	 "http_proxy_host:"},
 	{NSOPTION_cookie_file,
-	 "<tr><th>cookie_file</th><td>string</td><td>user</td><td>/home/vince/.netsurf/Cookies</td></tr>",
-	 "cookie_file:/home/vince/.netsurf/Cookies"},
+	 "<tr><th>cookie_file</th><td>string</td><td>user</td><td>/home/vince/.netsurfy/Cookies</td></tr>",
+	 "cookie_file:/home/vince/.netsurfy/Cookies"},
 	{NSOPTION_disc_cache_size,
 	 "<tr><th>disc_cache_size</th><td>unsigned integer</td><td>default</td><td>1073741824</td></tr>",
 	 "disc_cache_size:1073741824"},
@@ -354,7 +354,7 @@ START_TEST(nsoption_read_test)
 	ck_assert_int_eq(res, NSERROR_OK);
 
 	ck_assert(nsoption_charp(homepage_url) != NULL);
-	ck_assert_str_eq(nsoption_charp(homepage_url), "about:welcome");
+	ck_assert_str_eq(nsoption_charp(homepage_url), "https://duckduckgo.com");
 }
 END_TEST
 

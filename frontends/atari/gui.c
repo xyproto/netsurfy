@@ -1,13 +1,13 @@
 /*
  * Copyright 2010 <ole@monochrom.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -30,17 +30,17 @@
 #include "utils/messages.h"
 #include "utils/corestrings.h"
 #include "utils/nsoption.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/layout.h"
-#include "netsurf/window.h"
-#include "netsurf/clipboard.h"
-#include "netsurf/fetch.h"
-#include "netsurf/misc.h"
-#include "netsurf/netsurf.h"
-#include "netsurf/content.h"
-#include "netsurf/cookie_db.h"
-#include "netsurf/url_db.h"
-#include "netsurf/plotters.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/layout.h"
+#include "netsurfy/window.h"
+#include "netsurfy/clipboard.h"
+#include "netsurfy/fetch.h"
+#include "netsurfy/misc.h"
+#include "netsurfy/netsurfy.h"
+#include "netsurfy/content.h"
+#include "netsurfy/cookie_db.h"
+#include "netsurfy/url_db.h"
+#include "netsurfy/plotters.h"
 #include "content/backing_store.h"
 
 #include "atari/gemtk/gemtk.h"
@@ -55,7 +55,7 @@
 #include "atari/cookies.h"
 #include "atari/history.h"
 #include "atari/encoding.h"
-#include "atari/res/netsurf.rsh"
+#include "atari/res/netsurfy.rsh"
 #include "atari/plot/plot.h"
 #include "atari/clipboard.h"
 #include "atari/osspec.h"
@@ -139,11 +139,11 @@ static void atari_poll(void)
 	if (gemtk_wm_dispatch_event(
 		    &aes_event_in, &aes_event_out, aes_msg_out) == 0) {
 		if ((aes_event_out.emo_events & MU_MESAG) != 0) {
-			NSLOG(netsurf, INFO, "WM: %d\n", aes_msg_out[0]);
+			NSLOG(netsurfy, INFO, "WM: %d\n", aes_msg_out[0]);
 			switch (aes_msg_out[0]) {
 
 			case MN_SELECTED:
-				NSLOG(netsurf,
+				NSLOG(netsurfy,
 				      INFO,
 				      "Menu Item: %d\n",
 				      aes_msg_out[4]);
@@ -200,7 +200,7 @@ static struct gui_window *gui_window_create(struct browser_window *bw,
 					    gui_window_create_flags flags)
 {
 	struct gui_window *gw = NULL;
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "gw: %p, BW: %p, existing %p, flags: %d\n",
 	      gw,
@@ -212,7 +212,7 @@ static struct gui_window *gui_window_create(struct browser_window *bw,
 	if (gw == NULL)
 		return NULL;
 
-	NSLOG(netsurf, INFO, "new window: %p, bw: %p\n", gw, bw);
+	NSLOG(netsurfy, INFO, "new window: %p, bw: %p\n", gw, bw);
 	window_create(gw,
 		      bw,
 		      existing,
@@ -266,7 +266,7 @@ void gui_window_destroy(struct gui_window *gw)
 	if (gw == NULL)
 		return;
 
-	NSLOG(netsurf, INFO, "%s\n", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s\n", __FUNCTION__);
 
 	if (input_window == gw) {
 		gui_set_input_gui_window(NULL);
@@ -453,7 +453,7 @@ gui_window_set_scroll(struct gui_window *gw, const struct rect *rect)
 		return NSERROR_BAD_PARAMETER;
 	}
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "scroll (gui_window: %p) %d, %d\n",
 	      gw,
@@ -785,7 +785,7 @@ static void gui_set_clipboard(const char *buffer,
 
 void gui_set_input_gui_window(struct gui_window *gw)
 {
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Setting input window from: %p to %p\n",
 	      input_window,
@@ -800,7 +800,7 @@ struct gui_window *gui_get_input_window(void)
 
 static void gui_quit(void)
 {
-	NSLOG(netsurf, INFO, "quitting");
+	NSLOG(netsurfy, INFO, "quitting");
 
 	struct gui_window *gw = window_list;
 	struct gui_window *tmp = window_list;
@@ -829,9 +829,9 @@ static void gui_quit(void)
 
 	rsrc_free();
 
-	NSLOG(netsurf, INFO, "Shutting down plotter");
+	NSLOG(netsurfy, INFO, "Shutting down plotter");
 	plot_finalise();
-	NSLOG(netsurf, INFO, "done");
+	NSLOG(netsurfy, INFO, "done");
 }
 
 /**
@@ -842,7 +842,7 @@ static bool process_cmdline(int argc, char **argv)
 	int opt;
 	bool set_default_dimensions = true;
 
-	NSLOG(netsurf, INFO, "argc %d, argv %p", argc, argv);
+	NSLOG(netsurfy, INFO, "argc %d, argv %p", argc, argv);
 
 	if ((nsoption_int(window_width) != 0) &&
 	    (nsoption_int(window_height) != 0)) {
@@ -878,7 +878,7 @@ static bool process_cmdline(int argc, char **argv)
 	if (nsoption_charp(homepage_url) != NULL)
 		option_homepage_url = nsoption_charp(homepage_url);
 	else
-		option_homepage_url = NETSURF_HOMEPAGE;
+		option_homepage_url = NETSURFY_HOMEPAGE;
 
 	while ((opt = getopt(argc, argv, "w:h:")) != -1) {
 		switch (opt) {
@@ -919,7 +919,7 @@ static nsurl *gui_get_resource_url(const char *path)
 
 	atari_find_resource((char *)&buf, path, path);
 
-	netsurf_path_to_nsurl(buf, &url);
+	netsurfy_path_to_nsurl(buf, &url);
 
 	return url;
 }
@@ -935,13 +935,13 @@ static nserror set_defaults(struct nsoption_s *defaults)
 	/* Set defaults for absent option strings */
 	nsoption_setnull_charp(cookie_file, strdup("cookies"));
 	if (nsoption_charp(cookie_file) == NULL) {
-		NSLOG(netsurf, INFO, "Failed initialising string options");
+		NSLOG(netsurfy, INFO, "Failed initialising string options");
 		return NSERROR_BAD_PARAMETER;
 	}
 	return NSERROR_OK;
 }
 
-static char *theapp = (char *)"NetSurf";
+static char *theapp = (char *)"NetSurfy";
 
 /**
  * Initialise atari gui.
@@ -951,8 +951,8 @@ static void gui_init(int argc, char **argv)
 	char buf[PATH_MAX];
 	OBJECT *cursors;
 
-	atari_find_resource(buf, "netsurf.rsc", "./res/netsurf.rsc");
-	NSLOG(netsurf, INFO, "Using RSC file: %s ", (char *)&buf);
+	atari_find_resource(buf, "netsurfy.rsc", "./res/netsurfy.rsc");
+	NSLOG(netsurfy, INFO, "Using RSC file: %s ", (char *)&buf);
 	if (rsrc_load(buf) == 0) {
 
 		char msg[1024];
@@ -1005,10 +1005,10 @@ static void gui_init(int argc, char **argv)
 		      cursors,
 		      &gem_cursors.help);
 
-	NSLOG(netsurf, INFO, "Enabling core select menu");
+	NSLOG(netsurfy, INFO, "Enabling core select menu");
 	nsoption_set_bool(core_select_menu, true);
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Loading url.db from: %s",
 	      nsoption_charp(url_file));
@@ -1016,7 +1016,7 @@ static void gui_init(int argc, char **argv)
 		urldb_load(nsoption_charp(url_file));
 	}
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Loading cookies from: %s",
 	      nsoption_charp(cookie_file));
@@ -1027,10 +1027,10 @@ static void gui_init(int argc, char **argv)
 	if (process_cmdline(argc, argv) != true)
 		die("unable to process command line.\n");
 
-	NSLOG(netsurf, INFO, "Initializing NKC...");
+	NSLOG(netsurfy, INFO, "Initializing NKC...");
 	nkc_init();
 
-	NSLOG(netsurf, INFO, "Initializing plotters...");
+	NSLOG(netsurfy, INFO, "Initializing plotters...");
 	struct redraw_context ctx = {.interactive = true,
 				     .background_images = true,
 				     .plot = &atari_plotters};
@@ -1044,7 +1044,7 @@ static void gui_init(int argc, char **argv)
 	deskmenu_init();
 	menu_register(-1, theapp);
 	if (sys_type() & (SYS_MAGIC | SYS_NAES | SYS_XAAES)) {
-		menu_register(_AESapid, (char *)"  NetSurf ");
+		menu_register(_AESapid, (char *)"  NetSurfy ");
 	}
 	gemtk_wm_init();
 
@@ -1148,7 +1148,7 @@ int main(int argc, char **argv)
 	nsurl *url;
 	nserror ret;
 
-	struct netsurf_table atari_table = {
+	struct netsurfy_table atari_table = {
 		.misc = &atari_misc_table,
 		.window = &atari_window_table,
 		.corewindow = atari_core_window_table,
@@ -1162,9 +1162,9 @@ int main(int argc, char **argv)
 		.bitmap = atari_bitmap_table,
 		.layout = atari_layout_table};
 
-	ret = netsurf_register(&atari_table);
+	ret = netsurfy_register(&atari_table);
 	if (ret != NSERROR_OK) {
-		die("NetSurf operation table failed registration");
+		die("NetSurfy operation table failed registration");
 	}
 
 	/** @todo logging file descriptor update belongs in a nslog_init
@@ -1202,18 +1202,18 @@ int main(int argc, char **argv)
 	ret = messages_add_from_file(messages);
 
 	/* common initialisation */
-	NSLOG(netsurf, INFO, "Initialising core...");
-	ret = netsurf_init(store);
+	NSLOG(netsurfy, INFO, "Initialising core...");
+	ret = netsurfy_init(store);
 	if (ret != NSERROR_OK) {
-		die("NetSurf failed to initialise");
+		die("NetSurfy failed to initialise");
 	}
 
-	NSLOG(netsurf, INFO, "Initializing GUI...");
+	NSLOG(netsurfy, INFO, "Initializing GUI...");
 	gui_init(argc, argv);
 
 	graf_mouse(ARROW, NULL);
 
-	NSLOG(netsurf, INFO, "Creating initial browser window...");
+	NSLOG(netsurfy, INFO, "Creating initial browser window...");
 	addr = option_homepage_url;
 	if (strncmp(addr, "file://", 7) && strncmp(addr, "http://", 7)) {
 		if (stat(addr, &stat_buf) == 0) {
@@ -1232,13 +1232,13 @@ int main(int argc, char **argv)
 	if (ret != NSERROR_OK) {
 		atari_warn_user(messages_get_errorcode(ret), 0);
 	} else {
-		NSLOG(netsurf, INFO, "Entering Atari event mainloop...");
+		NSLOG(netsurfy, INFO, "Entering Atari event mainloop...");
 		while (!atari_quit) {
 			atari_poll();
 		}
 	}
 
-	netsurf_exit();
+	netsurfy_exit();
 
 	free(file_url);
 
@@ -1246,7 +1246,7 @@ int main(int argc, char **argv)
 	fclose(stdout);
 	fclose(stderr);
 #endif
-	NSLOG(netsurf, INFO, "exit_gem");
+	NSLOG(netsurfy, INFO, "exit_gem");
 
 	/* finalise logging */
 	nslog_finalise();

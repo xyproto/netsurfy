@@ -1,13 +1,13 @@
 /*
  * Copyright 2004 John M Bell <jmb202@ecs.soton.ac.uk>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -246,18 +246,18 @@ void imagemap_dump(html_content *c)
 
 		map = c->imagemaps[i];
 		while (map != NULL) {
-			NSLOG(netsurf, INFO, "Imagemap: %s", map->key);
+			NSLOG(netsurfy, INFO, "Imagemap: %s", map->key);
 
 			for (entry = map->list; entry; entry = entry->next) {
 				switch (entry->type) {
 				case IMAGEMAP_DEFAULT:
-					NSLOG(netsurf,
+					NSLOG(netsurfy,
 					      INFO,
 					      "\tDefault: %s",
 					      nsurl_access(entry->url));
 					break;
 				case IMAGEMAP_RECT:
-					NSLOG(netsurf,
+					NSLOG(netsurfy,
 					      INFO,
 					      "\tRectangle: %s: [(%d,%d),(%d,%d)]",
 					      nsurl_access(entry->url),
@@ -267,7 +267,7 @@ void imagemap_dump(html_content *c)
 					      entry->bounds.rect.y1);
 					break;
 				case IMAGEMAP_CIRCLE:
-					NSLOG(netsurf,
+					NSLOG(netsurfy,
 					      INFO,
 					      "\tCircle: %s: [(%d,%d),%d]",
 					      nsurl_access(entry->url),
@@ -276,7 +276,7 @@ void imagemap_dump(html_content *c)
 					      entry->bounds.circle.r);
 					break;
 				case IMAGEMAP_POLY:
-					NSLOG(netsurf,
+					NSLOG(netsurfy,
 					      INFO,
 					      "\tPolygon: %s:",
 					      nsurl_access(entry->url));

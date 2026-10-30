@@ -1,13 +1,13 @@
 /*
  * Copyright 2017 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -27,8 +27,8 @@
 
 #include "utils/log.h"
 #include "utils/nsoption.h"
-#include "netsurf/keypress.h"
-#include "netsurf/plotters.h"
+#include "netsurfy/keypress.h"
+#include "netsurfy/plotters.h"
 #include "desktop/local_history.h"
 
 #include "windows/plot.h"
@@ -48,7 +48,7 @@ static struct nsw32_local_history_window *local_history_window = NULL;
  * callback for keypress on local_history window
  *
  * \param nsw32_cw The nsw32 core window structure.
- * \param nskey The netsurf key code
+ * \param nskey The netsurfy key code
  * \return NSERROR_OK on success otherwise apropriate error code
  */
 static nserror
@@ -68,7 +68,7 @@ nsw32_local_history_key(struct nsw32_corewindow *nsw32_cw, uint32_t nskey)
  * callback for mouse action on local_history window
  *
  * \param nsw32_cw The nsw32 core window structure.
- * \param mouse_state netsurf mouse state on event
+ * \param mouse_state netsurfy mouse state on event
  * \param x location of event
  * \param y location of event
  * \return NSERROR_OK on success otherwise apropriate error code
@@ -144,7 +144,7 @@ nsw32_local_history_init(HINSTANCE hInstance,
 		return NSERROR_NOMEM;
 	}
 
-	ncwin->core.title = "NetSurf Local History";
+	ncwin->core.title = "NetSurfy Local History";
 	ncwin->core.draw = nsw32_local_history_draw;
 	ncwin->core.key = nsw32_local_history_key;
 	ncwin->core.mouse = nsw32_local_history_mouse;

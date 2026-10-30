@@ -1,13 +1,13 @@
 /*
  * Copyright 2011 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -17,17 +17,17 @@
  */
 
 /** \file
- * NetSurf URL handling (interface).
+ * NetSurfy URL handling (interface).
  */
 
-#ifndef _NETSURF_UTILS_NSURL_H_
-#define _NETSURF_UTILS_NSURL_H_
+#ifndef _NETSURFY_UTILS_NSURL_H_
+#define _NETSURFY_UTILS_NSURL_H_
 
 #include <libwapcaplet/libwapcaplet.h>
 #include "utils/errors.h"
 
 
-/** NetSurf URL object */
+/** NetSurfy URL object */
 typedef struct nsurl nsurl;
 
 /** A type for URL schemes */
@@ -59,10 +59,10 @@ typedef enum nsurl_component {
 
 
 /**
- * Create a NetSurf URL object from a URL string
+ * Create a NetSurfy URL object from a URL string
  *
- * \param url_s	  String to create NetSurf URL from
- * \param url	  Returns a NetSurf URL
+ * \param url_s	  String to create NetSurfy URL from
+ * \param url	  Returns a NetSurfy URL
  * \return NSERROR_OK on success, appropriate error otherwise
  *
  * If return value != NSERROR_OK, nothing will be returned in url.
@@ -74,22 +74,22 @@ nserror nsurl_create(const char *const url_s, nsurl **url);
 
 
 /**
- * Increment the reference count to a NetSurf URL object
+ * Increment the reference count to a NetSurfy URL object
  *
- * \param url	  NetSurf URL to create another reference to
- * \return The NetSurf URL pointer to use as the copy
+ * \param url	  NetSurfy URL to create another reference to
+ * \return The NetSurfy URL pointer to use as the copy
  *
- * Use this when copying a NetSurf URL into a persistent data structure.
+ * Use this when copying a NetSurfy URL into a persistent data structure.
  */
 nsurl *nsurl_ref(nsurl *url);
 
 
 /**
- * Drop a reference to a NetSurf URL object
+ * Drop a reference to a NetSurfy URL object
  *
- * \param url	  NetSurf URL to drop reference to
+ * \param url	  NetSurfy URL to drop reference to
  *
- * When the reference count reaches zero then the NetSurf URL will be destroyed
+ * When the reference count reaches zero then the NetSurfy URL will be destroyed
  */
 void nsurl_unref(nsurl *url);
 
@@ -97,8 +97,8 @@ void nsurl_unref(nsurl *url);
 /**
  * Compare two URLs
  *
- * \param url1	  First NetSurf URL
- * \param url2	  Second NetSurf URL
+ * \param url1	  First NetSurfy URL
+ * \param url2	  Second NetSurfy URL
  * \param parts	  The URL components to be compared
  * \return true on match else false
  *
@@ -107,9 +107,9 @@ bool nsurl_compare(const nsurl *url1, const nsurl *url2, nsurl_component parts);
 
 
 /**
- * Get URL (section) as a string, from a NetSurf URL object
+ * Get URL (section) as a string, from a NetSurfy URL object
  *
- * \param url	  NetSurf URL
+ * \param url	  NetSurfy URL
  * \param parts	  The required URL components.
  * \param url_s	  Returns a url string
  * \param url_l	  Returns length of url_s
@@ -133,9 +133,9 @@ nsurl_get(const nsurl *url, nsurl_component parts, char **url_s, size_t *url_l);
 
 
 /**
- * Get part of a URL as a lwc_string, from a NetSurf URL object
+ * Get part of a URL as a lwc_string, from a NetSurfy URL object
  *
- * \param url	  NetSurf URL object
+ * \param url	  NetSurfy URL object
  * \param part	  The URL component required
  * \return the required component as an lwc_string, or NULL
  *
@@ -156,9 +156,9 @@ lwc_string *nsurl_get_component(const nsurl *url, nsurl_component part);
 
 
 /**
- * Get the scheme type from a NetSurf URL object
+ * Get the scheme type from a NetSurfy URL object
  *
- * \param url   NetSurf URL object
+ * \param url   NetSurfy URL object
  * \return The URL scheme type.
  */
 enum nsurl_scheme_type nsurl_get_scheme_type(const nsurl *url);
@@ -167,7 +167,7 @@ enum nsurl_scheme_type nsurl_get_scheme_type(const nsurl *url);
 /**
  * Enquire about the existence of componenets in a given URL
  *
- * \param url	  NetSurf URL object
+ * \param url	  NetSurfy URL object
  * \param part	  The URL components confirm existence of
  * \return true iff the component in question exists in url
  *
@@ -186,13 +186,13 @@ bool nsurl_has_component(const nsurl *url, nsurl_component part);
 
 
 /**
- * Access a NetSurf URL object as a string
+ * Access a NetSurfy URL object as a string
  *
- * \param url	  NetSurf URL to retrieve a string pointer for.
+ * \param url	  NetSurfy URL to retrieve a string pointer for.
  * \return the required string
  *
- * The returned string is owned by the NetSurf URL object.  It will die
- * with the NetSurf URL object.  Keep a reference to the URL if you need it.
+ * The returned string is owned by the NetSurfy URL object.  It will die
+ * with the NetSurfy URL object.  Keep a reference to the URL if you need it.
  *
  * The returned string has a trailing '\0'.
  */
@@ -202,15 +202,15 @@ const char *nsurl_access(const nsurl *url);
 /**
  * Variant of \ref nsurl_access for logging.
  *
- * \param url	  NetSurf URL to retrieve a string pointer for.
+ * \param url	  NetSurfy URL to retrieve a string pointer for.
  * \return the required string
  *
  * This will not necessarily return the actual nsurl's URL, but something
  * that is suitable for recording to logs.  E.g. URLs with the `data` scheme
  * will return a simple place holder, to avoid repeatedly dumping loads of data.
  *
- * The returned string is owned by the NetSurf URL object.  It will die
- * with the NetSurf URL object.  Keep a reference to the URL if you need it.
+ * The returned string is owned by the NetSurfy URL object.  It will die
+ * with the NetSurfy URL object.  Keep a reference to the URL if you need it.
  *
  * The returned string has a trailing '\0'.
  */
@@ -218,9 +218,9 @@ const char *nsurl_access_log(const nsurl *url);
 
 
 /**
- * Get a UTF-8 string (for human readable IDNs) from a NetSurf URL object
+ * Get a UTF-8 string (for human readable IDNs) from a NetSurfy URL object
  *
- * \param url	  NetSurf URL object
+ * \param url	  NetSurfy URL object
  * \param url_s	  Returns a url string
  * \param url_l	  Returns length of url_s
  * \return NSERROR_OK on success, appropriate error otherwise
@@ -238,11 +238,11 @@ nserror nsurl_get_utf8(const nsurl *url, char **url_s, size_t *url_l);
 /**
  * Access a URL's path leaf as a string
  *
- * \param url	  NetSurf URL to retrieve a string pointer for.
+ * \param url	  NetSurfy URL to retrieve a string pointer for.
  * \return the required string
  *
- * The returned string is owned by the NetSurf URL object.  It will die
- * with the NetSurf URL object.  Keep a reference to the URL if you need it.
+ * The returned string is owned by the NetSurfy URL object.  It will die
+ * with the NetSurfy URL object.  Keep a reference to the URL if you need it.
  *
  * The returned string has a trailing '\0'.
  */
@@ -250,9 +250,9 @@ const char *nsurl_access_leaf(const nsurl *url);
 
 
 /**
- * Find the length of a NetSurf URL object's URL, as returned by nsurl_access
+ * Find the length of a NetSurfy URL object's URL, as returned by nsurl_access
  *
- * \param url	  NetSurf URL to find length of.
+ * \param url	  NetSurfy URL to find length of.
  * \return the required string
  *
  * The returned length excludes the trailing '\0'.
@@ -263,18 +263,18 @@ size_t nsurl_length(const nsurl *url);
 /**
  * Get a URL's hash value
  *
- * \param url	  NetSurf URL get hash value for.
+ * \param url	  NetSurfy URL get hash value for.
  * \return the hash value
  */
 uint32_t nsurl_hash(const nsurl *url);
 
 
 /**
- * Join a base url to a relative link part, creating a new NetSurf URL object
+ * Join a base url to a relative link part, creating a new NetSurfy URL object
  *
- * \param base	  NetSurf URL containing the base to join rel to
+ * \param base	  NetSurfy URL containing the base to join rel to
  * \param rel	  String containing the relative link part
- * \param joined  Returns joined NetSurf URL
+ * \param joined  Returns joined NetSurfy URL
  * \return NSERROR_OK on success, appropriate error otherwise
  *
  * If return value != NSERROR_OK, nothing will be returned in join.
@@ -286,10 +286,10 @@ nserror nsurl_join(const nsurl *base, const char *rel, nsurl **joined);
 
 
 /**
- * Create a NetSurf URL object without a fragment from a NetSurf URL
+ * Create a NetSurfy URL object without a fragment from a NetSurfy URL
  *
- * \param url	  NetSurf URL to create new NetSurf URL from
- * \param no_frag Returns new NetSurf URL without fragment
+ * \param url	  NetSurfy URL to create new NetSurfy URL from
+ * \param no_frag Returns new NetSurfy URL without fragment
  * \return NSERROR_OK on success, appropriate error otherwise
  *
  * If return value != NSERROR_OK, nothing will be returned in no_frag.
@@ -301,11 +301,11 @@ nserror nsurl_defragment(const nsurl *url, nsurl **no_frag);
 
 
 /**
- * Create a NetSurf URL object, adding a fragment to an existing URL object
+ * Create a NetSurfy URL object, adding a fragment to an existing URL object
  *
- * \param url	  NetSurf URL to create new NetSurf URL from
+ * \param url	  NetSurfy URL to create new NetSurfy URL from
  * \param frag	  Fragment to add
- * \param new_url Returns new NetSurf URL without fragment
+ * \param new_url Returns new NetSurfy URL without fragment
  * \return NSERROR_OK on success, appropriate error otherwise
  *
  * If return value != NSERROR_OK, nothing will be returned in new_url.
@@ -319,11 +319,11 @@ nserror nsurl_refragment(const nsurl *url, lwc_string *frag, nsurl **new_url);
 
 
 /**
- * Create a NetSurf URL object, with query string replaced
+ * Create a NetSurfy URL object, with query string replaced
  *
- * \param url	  NetSurf URL to create new NetSurf URL from
+ * \param url	  NetSurfy URL to create new NetSurfy URL from
  * \param query	  Query string to use
- * \param new_url Returns new NetSurf URL with query string provided
+ * \param new_url Returns new NetSurfy URL with query string provided
  * \return NSERROR_OK on success, appropriate error otherwise
  *
  * If return value != NSERROR_OK, nothing will be returned in new_url.
@@ -341,11 +341,11 @@ nsurl_replace_query(const nsurl *url, const char *query, nsurl **new_url);
 
 
 /**
- * Create a NetSurf URL object, with scheme replaced
+ * Create a NetSurfy URL object, with scheme replaced
  *
- * \param url	  NetSurf URL to create new NetSurf URL from
+ * \param url	  NetSurfy URL to create new NetSurfy URL from
  * \param scheme  Scheme to use
- * \param new_url Returns new NetSurf URL with scheme provided
+ * \param new_url Returns new NetSurfy URL with scheme provided
  * \return NSERROR_OK on success, appropriate error otherwise
  *
  * If return value != NSERROR_OK, nothing will be returned in new_url.
@@ -362,7 +362,7 @@ nsurl_replace_scheme(const nsurl *url, lwc_string *scheme, nsurl **new_url);
 /**
  * Attempt to find a nice filename for a URL.
  *
- * \param url		A NetSurf URL object to create a filename from
+ * \param url		A NetSurfy URL object to create a filename from
  * \param result	Updated to caller-owned string with filename
  * \param remove_extensions  remove any extensions from the filename
  * \return NSERROR_OK on success, appropriate error otherwise
@@ -373,10 +373,10 @@ nserror nsurl_nice(const nsurl *url, char **result, bool remove_extensions);
 
 
 /**
- * Create a NetSurf URL object for URL with parent location of an existing URL.
+ * Create a NetSurfy URL object for URL with parent location of an existing URL.
  *
- * \param url	  NetSurf URL to create new NetSurf URL from
- * \param new_url Returns new NetSurf URL with parent URL path
+ * \param url	  NetSurfy URL to create new NetSurfy URL from
+ * \param new_url Returns new NetSurfy URL with parent URL path
  * \return NSERROR_OK on success, appropriate error otherwise
  *
  * If return value != NSERROR_OK, nothing will be returned in new_url.
@@ -389,12 +389,12 @@ nserror nsurl_nice(const nsurl *url, char **result, bool remove_extensions);
 nserror nsurl_parent(const nsurl *url, nsurl **new_url);
 
 /**
- * Dump a NetSurf URL's internal components to stderr
+ * Dump a NetSurfy URL's internal components to stderr
  *
  * This is helper functionality for developers, and shouldn't be called
  * generally.
  *
- * \param url	The NetSurf URL to dump components of
+ * \param url	The NetSurfy URL to dump components of
  */
 void nsurl_dump(const nsurl *url);
 

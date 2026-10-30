@@ -1,13 +1,13 @@
 /*
  * Copyright 2014 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -43,7 +43,7 @@
 #include <stdlib.h>
 #include <nsutils/unistd.h>
 
-#include "netsurf/inttypes.h"
+#include "netsurfy/inttypes.h"
 #include "utils/filepath.h"
 #include "utils/file.h"
 #include "utils/nsurl.h"
@@ -51,7 +51,7 @@
 #include "utils/messages.h"
 #include "utils/hashmap.h"
 #include "desktop/gui_internal.h"
-#include "netsurf/misc.h"
+#include "netsurfy/misc.h"
 
 #include "content/backing_store.h"
 
@@ -380,7 +380,7 @@ store_fname(struct store_state *state, entry_ident_t ident, int elem_idx)
 	switch (elem_idx) {
 	case ENTRY_ELEM_DATA:
 	case ENTRY_ELEM_META:
-		netsurf_mkpath(&fname,
+		netsurfy_mkpath(&fname,
 			       NULL,
 			       8,
 			       state->path,
@@ -395,7 +395,7 @@ store_fname(struct store_state *state, entry_ident_t ident, int elem_idx)
 
 	case (ENTRY_ELEM_COUNT + ENTRY_ELEM_META):
 	case (ENTRY_ELEM_COUNT + ENTRY_ELEM_DATA):
-		netsurf_mkpath(
+		netsurfy_mkpath(
 			&fname, NULL, 3, state->path, b32u_d[0], b32u_d[1]);
 		break;
 
@@ -475,25 +475,25 @@ invalidate_entry(struct store_state *state, struct store_entry *bse)
 		 * This entry cannot be immediately removed as it has
 		 * associated allocation so wait for allocation release.
 		 */
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      DEBUG,
 		      "invalidating entry with referenced allocation");
 		return NSERROR_OK;
 	}
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      VERBOSE,
 	      "Removing entry for %s",
 	      nsurl_access(bse->url));
 
 	ret = invalidate_element(state, bse, ENTRY_ELEM_META);
 	if (ret != NSERROR_OK) {
-		NSLOG(netsurf, ERROR, "Error invalidating metadata element");
+		NSLOG(netsurfy, ERROR, "Error invalidating metadata element");
 	}
 
 	ret = invalidate_element(state, bse, ENTRY_ELEM_DATA);
 	if (ret != NSERROR_OK) {
-		NSLOG(netsurf, ERROR, "Error invalidating data element");
+		NSLOG(netsurfy, ERROR, "Error invalidating data element");
 	}
 
 	/* As our final act we remove bse from the cache */
@@ -593,7 +593,7 @@ static nserror store_evict(struct store_state *state)
 		return NSERROR_OK;
 	}
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Evicting entries to reduce %" PRIu64 " by %" PRIsizet,
 	      state->total_alloc,
@@ -609,7 +609,7 @@ static nserror store_evict(struct store_state *state)
 
 	if (hashmap_iterate(
 		    state->entries, entry_eviction_iterator_cb, &estate)) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      WARNING,
 		      "Unexpected termination of eviction iterator");
 		free(estate.elist);
@@ -617,7 +617,7 @@ static nserror store_evict(struct store_state *state)
 	}
 
 	if (old_count != estate.ent_count) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      WARNING,
 		      "Incorrect entry count after eviction iterator");
 		free(estate.elist);
@@ -649,7 +649,7 @@ static nserror store_evict(struct store_state *state)
 
 	free(estate.elist);
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "removed %" PRIsizet " in %" PRIsizet " entries, %" PRIu64
 	      " remaining in %" PRIsizet " entries",
@@ -722,7 +722,7 @@ static nserror write_entries(struct store_state *state)
 		return NSERROR_OK;
 	}
 
-	ret = netsurf_mkpath(&tname, NULL, 2, state->path, "t" ENTRIES_FNAME);
+	ret = netsurfy_mkpath(&tname, NULL, 2, state->path, "t" ENTRIES_FNAME);
 	if (ret != NSERROR_OK) {
 		return ret;
 	}
@@ -745,7 +745,7 @@ static nserror write_entries(struct store_state *state)
 
 	close(weistate.fd);
 
-	ret = netsurf_mkpath(&fname, NULL, 2, state->path, ENTRIES_FNAME);
+	ret = netsurfy_mkpath(&fname, NULL, 2, state->path, ENTRIES_FNAME);
 	if (ret != NSERROR_OK) {
 		unlink(tname);
 		free(tname);
@@ -761,7 +761,7 @@ static nserror write_entries(struct store_state *state)
 		return NSERROR_SAVE_FAILED;
 	}
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Wrote out %" PRIsizet " entries",
 	      weistate.written);
@@ -794,7 +794,7 @@ static nserror write_blocks(struct store_state *state)
 		return NSERROR_OK;
 	}
 
-	ret = netsurf_mkpath(&tname, NULL, 2, state->path, "t" BLOCKS_FNAME);
+	ret = netsurfy_mkpath(&tname, NULL, 2, state->path, "t" BLOCKS_FNAME);
 	if (ret != NSERROR_OK) {
 		return ret;
 	}
@@ -814,7 +814,7 @@ static nserror write_blocks(struct store_state *state)
 				   &state->blocks[elem_idx][bfidx].use_map[0],
 				   BLOCK_USE_MAP_SIZE);
 			if (wr != BLOCK_USE_MAP_SIZE) {
-				NSLOG(netsurf,
+				NSLOG(netsurfy,
 				      DEBUG,
 				      "writing block file %d use index on file number %d failed",
 				      elem_idx,
@@ -834,7 +834,7 @@ wr_err:
 		return NSERROR_SAVE_FAILED;
 	}
 
-	ret = netsurf_mkpath(&fname, NULL, 2, state->path, BLOCKS_FNAME);
+	ret = netsurfy_mkpath(&fname, NULL, 2, state->path, BLOCKS_FNAME);
 	if (ret != NSERROR_OK) {
 		unlink(tname);
 		free(tname);
@@ -874,7 +874,7 @@ static nserror set_block_extents(struct store_state *state)
 		return NSERROR_OK;
 	}
 
-	NSLOG(netsurf, DEBUG, "Starting");
+	NSLOG(netsurfy, DEBUG, "Starting");
 	for (elem_idx = 0; elem_idx < ENTRY_ELEM_COUNT; elem_idx++) {
 		for (bfidx = 0; bfidx < BLOCK_FILE_COUNT; bfidx++) {
 			if (state->blocks[elem_idx][bfidx].fd != -1) {
@@ -884,7 +884,7 @@ static nserror set_block_extents(struct store_state *state)
 					1U << (log2_block_size[elem_idx] +
 					       BLOCK_ENTRY_COUNT));
 				if (ftr == -1) {
-					NSLOG(netsurf,
+					NSLOG(netsurfy,
 					      ERROR,
 					      "Truncate failed errno:%d",
 					      errno);
@@ -892,7 +892,7 @@ static nserror set_block_extents(struct store_state *state)
 			}
 		}
 	}
-	NSLOG(netsurf, DEBUG, "Complete");
+	NSLOG(netsurfy, DEBUG, "Complete");
 
 	state->blocks_opened = false;
 
@@ -1015,7 +1015,7 @@ static nserror set_store_entry(struct store_state *state,
 	nserror ret;
 	struct store_entry_element *elem;
 
-	NSLOG(netsurf, DEBUG, "url:%s", nsurl_access(url));
+	NSLOG(netsurfy, DEBUG, "url:%s", nsurl_access(url));
 
 	/* evict entries as required and ensure there is at least one
 	 * new entry available.
@@ -1042,7 +1042,7 @@ static nserror set_store_entry(struct store_state *state,
 		/* this entry cannot be removed as it has associated
 		 * allocation.
 		 */
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      ERROR,
 		      "attempt to overwrite entry with in use data");
 		return NSERROR_PERMISSION;
@@ -1101,15 +1101,15 @@ static int store_open(struct store_state *state,
 
 	fname = store_fname(state, ident, elem_idx);
 	if (fname == NULL) {
-		NSLOG(netsurf, ERROR, "filename error");
+		NSLOG(netsurfy, ERROR, "filename error");
 		return -1;
 	}
 
 	/* ensure all path elements to file exist if creating file */
 	if (openflags & O_CREAT) {
-		ret = netsurf_mkdir_all(fname);
+		ret = netsurfy_mkdir_all(fname);
 		if (ret != NSERROR_OK) {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      WARNING,
 			      "file path \"%s\" could not be created",
 			      fname);
@@ -1118,7 +1118,7 @@ static int store_open(struct store_state *state,
 		}
 	}
 
-	NSLOG(netsurf, DEBUG, "opening %s", fname);
+	NSLOG(netsurfy, DEBUG, "opening %s", fname);
 	fd = open(fname, openflags, S_IRUSR | S_IWUSR);
 
 	free(fname);
@@ -1138,7 +1138,7 @@ static nserror unlink_entries(struct store_state *state)
 	char *fname = NULL;
 	nserror ret;
 
-	ret = netsurf_mkpath(&fname, NULL, 2, state->path, ENTRIES_FNAME);
+	ret = netsurfy_mkpath(&fname, NULL, 2, state->path, ENTRIES_FNAME);
 	if (ret != NSERROR_OK) {
 		return ret;
 	}
@@ -1165,7 +1165,7 @@ static nserror read_entries(struct store_state *state)
 	struct store_entry *ent;
 	int fd;
 
-	ret = netsurf_mkpath(&fname, NULL, 2, state->path, ENTRIES_FNAME);
+	ret = netsurfy_mkpath(&fname, NULL, 2, state->path, ENTRIES_FNAME);
 	if (ret != NSERROR_OK) {
 		return ret;
 	}
@@ -1219,7 +1219,7 @@ static nserror read_entries(struct store_state *state)
 			}
 			ent->url = nsurl; /* It already owns a ref */
 			nsurl_unref(nsurl);
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      DEBUG,
 			      "Successfully read entry for %s",
 			      nsurl_access(ent->url));
@@ -1237,7 +1237,7 @@ static nserror read_entries(struct store_state *state)
 		close(fd);
 	}
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Read %" PRIsizet " entries from cache",
 	      read_entries);
@@ -1262,12 +1262,12 @@ static nserror read_blocks(struct store_state *state)
 	char *fname = NULL;
 	nserror ret;
 
-	ret = netsurf_mkpath(&fname, NULL, 2, state->path, BLOCKS_FNAME);
+	ret = netsurfy_mkpath(&fname, NULL, 2, state->path, BLOCKS_FNAME);
 	if (ret != NSERROR_OK) {
 		return ret;
 	}
 
-	NSLOG(netsurf, INFO, "Initialising block use map from %s", fname);
+	NSLOG(netsurfy, INFO, "Initialising block use map from %s", fname);
 
 	fd = open(fname, O_RDWR);
 	free(fname);
@@ -1280,7 +1280,7 @@ static nserror read_blocks(struct store_state *state)
 						   .use_map[0],
 					  BLOCK_USE_MAP_SIZE);
 				if (rd <= 0) {
-					NSLOG(netsurf,
+					NSLOG(netsurfy,
 					      ERROR,
 					      "reading block file %d use index on file number %d failed",
 					      elem_idx,
@@ -1293,7 +1293,7 @@ static nserror read_blocks(struct store_state *state)
 		close(fd);
 
 	} else {
-		NSLOG(netsurf, INFO, "Initialising block use map to defaults");
+		NSLOG(netsurfy, INFO, "Initialising block use map to defaults");
 		/* ensure block 0 (invalid sentinel) is skipped */
 		state->blocks[ENTRY_ELEM_DATA][0].use_map[0] = 1;
 		state->blocks[ENTRY_ELEM_META][0].use_map[0] = 1;
@@ -1320,7 +1320,7 @@ static nserror write_cache_tag(struct store_state *state)
 	nserror ret;
 	char *fname = NULL;
 
-	ret = netsurf_mkpath(&fname, NULL, 2, state->path, "CACHEDIR.TAG");
+	ret = netsurfy_mkpath(&fname, NULL, 2, state->path, "CACHEDIR.TAG");
 	if (ret != NSERROR_OK) {
 		return ret;
 	}
@@ -1335,7 +1335,7 @@ static nserror write_cache_tag(struct store_state *state)
 
 	fprintf(fcachetag,
 		"Signature: 8a477f597d28d172789f06886806bc55\n"
-		"# This file is a cache directory tag created by NetSurf.\n"
+		"# This file is a cache directory tag created by NetSurfy.\n"
 		"# For information about cache directory tags, see:\n"
 		"#	http://www.brynosaurus.com/cachedir/\n");
 
@@ -1356,14 +1356,14 @@ static nserror write_control(struct store_state *state)
 	nserror ret;
 	char *fname = NULL;
 
-	ret = netsurf_mkpath(&fname, NULL, 2, state->path, "control");
+	ret = netsurfy_mkpath(&fname, NULL, 2, state->path, "control");
 	if (ret != NSERROR_OK) {
 		return ret;
 	}
 
-	NSLOG(netsurf, INFO, "writing control file \"%s\"", fname);
+	NSLOG(netsurfy, INFO, "writing control file \"%s\"", fname);
 
-	ret = netsurf_mkdir_all(fname);
+	ret = netsurfy_mkdir_all(fname);
 	if (ret != NSERROR_OK) {
 		free(fname);
 		return ret;
@@ -1398,12 +1398,12 @@ static nserror read_control(struct store_state *state)
 	unsigned int ctrlversion;
 	char *fname = NULL;
 
-	ret = netsurf_mkpath(&fname, NULL, 2, state->path, "control");
+	ret = netsurfy_mkpath(&fname, NULL, 2, state->path, "control");
 	if (ret != NSERROR_OK) {
 		return ret;
 	}
 
-	NSLOG(netsurf, INFO, "opening control file \"%s\"", fname);
+	NSLOG(netsurfy, INFO, "opening control file \"%s\"", fname);
 
 	fcontrol = fopen(fname, "rb");
 
@@ -1487,29 +1487,29 @@ static nserror initialise(const struct llcache_store_parameters *parameters)
 	ret = read_control(newstate);
 	if (ret != NSERROR_OK) {
 		if (ret == NSERROR_NOT_FOUND) {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "cache control file not found, making fresh");
 		} else {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      ERROR,
 			      "read control failed %s",
 			      messages_get_errorcode(ret));
-			ret = netsurf_recursive_rm(newstate->path);
+			ret = netsurfy_recursive_rm(newstate->path);
 			if (ret != NSERROR_OK) {
-				NSLOG(netsurf,
+				NSLOG(netsurfy,
 				      WARNING,
 				      "Error `%s` while removing `%s`",
 				      messages_get_errorcode(ret),
 				      newstate->path);
-				NSLOG(netsurf,
+				NSLOG(netsurfy,
 				      WARNING,
 				      "Unable to clean up partial cache state.");
-				NSLOG(netsurf,
+				NSLOG(netsurfy,
 				      WARNING,
 				      "Funky behaviour may ensue.");
 			} else {
-				NSLOG(netsurf,
+				NSLOG(netsurfy,
 				      INFO,
 				      "Successfully removed old cache from `%s`",
 				      newstate->path);
@@ -1549,15 +1549,15 @@ static nserror initialise(const struct llcache_store_parameters *parameters)
 
 	storestate = newstate;
 
-	NSLOG(netsurf, INFO, "FS backing store init successful");
+	NSLOG(netsurfy, INFO, "FS backing store init successful");
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "path:%s limit:%" PRIsizet " hyst:%" PRIsizet,
 	      newstate->path,
 	      newstate->limit,
 	      newstate->hysteresis);
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Using %" PRIu64 "/%" PRIsizet,
 	      newstate->total_alloc,
@@ -1601,7 +1601,7 @@ static nserror finalise(void)
 
 		/* avoid division by zero */
 		if (op_count > 0) {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "Cache total/hit/miss/fail (counts) %d/%" PRIsizet
 			      "/%" PRIsizet "/%d (100%%/%" PRIsizet
@@ -1653,7 +1653,7 @@ static nserror store_write_block(struct store_state *state,
 			elem_idx + ENTRY_ELEM_COUNT,
 			O_CREAT | O_RDWR);
 		if (state->blocks[elem_idx][bf].fd == -1) {
-			NSLOG(netsurf, ERROR, "Open failed errno %d", errno);
+			NSLOG(netsurfy, ERROR, "Open failed errno %d", errno);
 			return NSERROR_SAVE_FAILED;
 		}
 
@@ -1668,7 +1668,7 @@ static nserror store_write_block(struct store_state *state,
 			bse->elem[elem_idx].size,
 			offst);
 	if (wr != (ssize_t)bse->elem[elem_idx].size) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      ERROR,
 		      "Write failed %" PRIssizet " of %" PRId32
 		      " bytes from %p at %" PRIsizet " block %" PRIu16
@@ -1682,7 +1682,7 @@ static nserror store_write_block(struct store_state *state,
 		return NSERROR_SAVE_FAILED;
 	}
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Wrote %" PRIssizet " bytes from %p at %" PRIsizet " block %d",
 	      wr,
@@ -1713,7 +1713,7 @@ static nserror store_write_file(struct store_state *state,
 		state, nsurl_hash(bse->url), elem_idx, O_CREAT | O_WRONLY);
 	if (fd < 0) {
 		perror("");
-		NSLOG(netsurf, ERROR, "Open failed %d errno %d", fd, errno);
+		NSLOG(netsurfy, ERROR, "Open failed %d errno %d", fd, errno);
 		return NSERROR_SAVE_FAILED;
 	}
 
@@ -1722,7 +1722,7 @@ static nserror store_write_file(struct store_state *state,
 
 	close(fd);
 	if (wr != (ssize_t)bse->elem[elem_idx].size) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      ERROR,
 		      "Write failed %" PRIssizet " of %" PRId32
 		      " bytes from %p errno %d",
@@ -1735,7 +1735,7 @@ static nserror store_write_file(struct store_state *state,
 		return NSERROR_SAVE_FAILED;
 	}
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      VERBOSE,
 	      "Wrote %" PRIssizet " bytes from %p",
 	      wr,
@@ -1779,7 +1779,7 @@ static nserror store(nsurl *url,
 	/* set the store entry up */
 	ret = set_store_entry(storestate, url, elem_idx, data, datalen, &bse);
 	if (ret != NSERROR_OK) {
-		NSLOG(netsurf, ERROR, "store entry setting failed");
+		NSLOG(netsurfy, ERROR, "store entry setting failed");
 		return ret;
 	}
 
@@ -1802,7 +1802,7 @@ static nserror entry_release_alloc(struct store_entry_element *elem)
 	if ((elem->flags & ENTRY_ELEM_FLAG_HEAP) != 0) {
 		elem->ref--;
 		if (elem->ref == 0) {
-			NSLOG(netsurf, DEEPDEBUG, "freeing %p", elem->data);
+			NSLOG(netsurfy, DEEPDEBUG, "freeing %p", elem->data);
 			free(elem->data);
 			elem->flags &= ~ENTRY_ELEM_FLAG_HEAP;
 		}
@@ -1840,7 +1840,7 @@ static nserror store_read_block(struct store_state *state,
 			elem_idx + ENTRY_ELEM_COUNT,
 			O_CREAT | O_RDWR);
 		if (state->blocks[elem_idx][bf].fd == -1) {
-			NSLOG(netsurf, ERROR, "Open failed errno %d", errno);
+			NSLOG(netsurfy, ERROR, "Open failed errno %d", errno);
 			return NSERROR_SAVE_FAILED;
 		}
 
@@ -1855,7 +1855,7 @@ static nserror store_read_block(struct store_state *state,
 		       bse->elem[elem_idx].size,
 		       offst);
 	if (rd != (ssize_t)bse->elem[elem_idx].size) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      ERROR,
 		      "Failed reading %" PRIssizet " of %" PRId32
 		      " bytes into %p from %" PRIsizet " block %" PRIu16
@@ -1869,7 +1869,7 @@ static nserror store_read_block(struct store_state *state,
 		return NSERROR_SAVE_FAILED;
 	}
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "Read %" PRIssizet " bytes into %p from %" PRIsizet " block %d",
 	      rd,
@@ -1900,7 +1900,7 @@ static nserror store_read_file(struct store_state *state,
 	/* separate file in backing store */
 	fd = store_open(storestate, nsurl_hash(bse->url), elem_idx, O_RDONLY);
 	if (fd < 0) {
-		NSLOG(netsurf, ERROR, "Open failed %d errno %d", fd, errno);
+		NSLOG(netsurfy, ERROR, "Open failed %d errno %d", fd, errno);
 		/** @todo should this invalidate the entry? */
 		return NSERROR_NOT_FOUND;
 	}
@@ -1910,7 +1910,7 @@ static nserror store_read_file(struct store_state *state,
 			  bse->elem[elem_idx].data + tot,
 			  bse->elem[elem_idx].size - tot);
 		if (rd <= 0) {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      ERROR,
 			      "read error returned %" PRIssizet " errno %d",
 			      rd,
@@ -1923,7 +1923,7 @@ static nserror store_read_file(struct store_state *state,
 
 	close(fd);
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "Read %" PRIsizet " bytes into %p",
 	      tot,
@@ -1959,7 +1959,7 @@ static nserror fetch(nsurl *url,
 	/* fetch store entry */
 	ret = get_store_entry(storestate, url, &bse);
 	if (ret != NSERROR_OK) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      DEBUG,
 		      "Entry for %s not found",
 		      nsurl_access(url));
@@ -1968,7 +1968,7 @@ static nserror fetch(nsurl *url,
 	}
 	storestate->hit_count++;
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEBUG,
 	      "retrieving cache data for url:%s",
 	      nsurl_access(url));
@@ -1986,7 +1986,7 @@ static nserror fetch(nsurl *url,
 		/* use the existing allocation and bump the ref count. */
 		elem->ref++;
 
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      DEEPDEBUG,
 		      "Using existing entry (%p) allocation %p refs:%d",
 		      bse,
@@ -1997,12 +1997,12 @@ static nserror fetch(nsurl *url,
 		/* allocate from the heap */
 		elem->data = malloc(elem->size);
 		if (elem->data == NULL) {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      ERROR,
 			      "Failed to create new heap allocation");
 			return NSERROR_NOMEM;
 		}
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      DEEPDEBUG,
 		      "Created new heap allocation %p",
 		      elem->data);
@@ -2054,7 +2054,7 @@ static nserror release(nsurl *url, enum backing_store_flags bsflags)
 
 	ret = get_store_entry(storestate, url, &bse);
 	if (ret != NSERROR_OK) {
-		NSLOG(netsurf, WARNING, "entry not found");
+		NSLOG(netsurfy, WARNING, "entry not found");
 		return ret;
 	}
 

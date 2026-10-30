@@ -34,7 +34,7 @@
 #
 # either PREFIX or JENKINS_HOME
 
-COVERITY_PROJECT="NetSurf+Browser"
+COVERITY_PROJECT="NetSurfy+Browser"
 
 # build gtk2, framebuffer and monkey frontend by default
 TARGETS="gtk2 framebuffer monkey"

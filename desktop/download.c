@@ -1,13 +1,13 @@
 /*
  * Copyright 2010 John-Mark Bell <jmb@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -31,7 +31,7 @@
 #include "utils/utils.h"
 #include "utils/log.h"
 #include "desktop/download.h"
-#include "netsurf/download.h"
+#include "netsurfy/download.h"
 #include "desktop/gui_internal.h"
 
 /**

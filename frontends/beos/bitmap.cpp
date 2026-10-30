@@ -1,13 +1,13 @@
 /*
  * Copyright 2008 François Revol <mmu_man@users.sourceforge.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -38,11 +38,11 @@
 
 extern "C" {
 #include "utils/log.h"
-#include "netsurf/plotters.h"
-#include "netsurf/content_type.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/bitmap.h"
-#include "netsurf/content.h"
+#include "netsurfy/plotters.h"
+#include "netsurfy/content_type.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/bitmap.h"
+#include "netsurfy/content.h"
 }
 
 #include "beos/bitmap.h"
@@ -53,7 +53,7 @@ extern "C" {
 
 struct bitmap {
 	BBitmap *primary;
-	BBitmap *shadow; // in NetSurf's ABGR order
+	BBitmap *shadow; // in NetSurfy's ABGR order
 	BBitmap *pretile_x;
 	BBitmap *pretile_y;
 	BBitmap *pretile_xy;
@@ -68,7 +68,7 @@ struct bitmap {
 
 
 /**
- * Convert to BeOS RGBA32_LITTLE (strictly BGRA) from NetSurf's favoured ABGR
+ * Convert to BeOS RGBA32_LITTLE (strictly BGRA) from NetSurfy's favoured ABGR
  * format.
  *
  * Copies the converted data elsewhere.  Operation is rotate left 8 bits.
@@ -330,7 +330,7 @@ BBitmap *nsbeos_bitmap_get_pretile_x(struct bitmap *bitmap)
 	if (!bitmap->pretile_x) {
 		int width = bitmap->primary->Bounds().Width() + 1;
 		int xmult = (MIN_PRETILE_WIDTH + width - 1) / width;
-		NSLOG(netsurf, INFO, "Pretiling %p for X*%d", bitmap, xmult);
+		NSLOG(netsurfy, INFO, "Pretiling %p for X*%d", bitmap, xmult);
 		bitmap->pretile_x = nsbeos_bitmap_generate_pretile(
 			bitmap->primary, xmult, 1);
 	}
@@ -348,7 +348,7 @@ BBitmap *nsbeos_bitmap_get_pretile_y(struct bitmap *bitmap)
 	if (!bitmap->pretile_y) {
 		int height = bitmap->primary->Bounds().Height() + 1;
 		int ymult = (MIN_PRETILE_HEIGHT + height - 1) / height;
-		NSLOG(netsurf, INFO, "Pretiling %p for Y*%d", bitmap, ymult);
+		NSLOG(netsurfy, INFO, "Pretiling %p for Y*%d", bitmap, ymult);
 		bitmap->pretile_y = nsbeos_bitmap_generate_pretile(
 			bitmap->primary, 1, ymult);
 	}
@@ -368,7 +368,7 @@ BBitmap *nsbeos_bitmap_get_pretile_xy(struct bitmap *bitmap)
 		int height = bitmap->primary->Bounds().Height() + 1;
 		int xmult = (MIN_PRETILE_WIDTH + width - 1) / width;
 		int ymult = (MIN_PRETILE_HEIGHT + height - 1) / height;
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Pretiling %p for X*%d Y*%d",
 		      bitmap,

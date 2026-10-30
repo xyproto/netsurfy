@@ -2,13 +2,13 @@
  * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
  * Copyright 2013 Rob Kendrick <rjek@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -86,8 +86,8 @@ START_TEST(bloom_create_test)
 	b = bloom_create(BLOOM_SIZE);
 	ck_assert(b != NULL);
 
-	bloom_insert_str(b, "NetSurf", 7);
-	ck_assert(bloom_search_str(b, "NetSurf", 7));
+	bloom_insert_str(b, "NetSurfy", 7);
+	ck_assert(bloom_search_str(b, "NetSurfy", 7));
 	ck_assert(!bloom_search_str(b, "NotSurf", 7));
 
 	ck_assert(bloom_items(b) == 1);

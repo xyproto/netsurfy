@@ -1,4 +1,4 @@
-/* Polyfiller for Duktape for NetSurf
+/* Polyfiller for Duktape for NetSurfy
  *
  * This JavaScript will be loaded into heaps before the generics
  *

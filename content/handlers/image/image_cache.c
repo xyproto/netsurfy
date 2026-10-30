@@ -1,13 +1,13 @@
 /*
  * Copyright 2011 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -27,11 +27,11 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "netsurf/inttypes.h"
+#include "netsurfy/inttypes.h"
 #include "utils/utils.h"
 #include "utils/log.h"
-#include "netsurf/misc.h"
-#include "netsurf/bitmap.h"
+#include "netsurfy/misc.h"
+#include "netsurfy/bitmap.h"
 #include "content/llcache.h"
 #include "content/content_protected.h"
 #include "desktop/gui_internal.h"
@@ -256,7 +256,7 @@ static void image_cache__free_bitmap(struct image_cache_entry_s *centry)
 {
 	if (centry->bitmap != NULL) {
 #ifdef IMAGE_CACHE_VERBOSE
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Freeing bitmap %p size %d age %d redraw count %d",
 		      centry->bitmap,
@@ -282,7 +282,7 @@ static void image_cache__free_bitmap(struct image_cache_entry_s *centry)
 static void image_cache__free_entry(struct image_cache_entry_s *centry)
 {
 #ifdef IMAGE_CACHE_VERBOSE
-	NSLOG(netsurf, INFO, "freeing %p ", centry);
+	NSLOG(netsurfy, INFO, "freeing %p ", centry);
 #endif
 
 	if (centry->redraw_count == 0) {
@@ -333,7 +333,7 @@ static void image_cache__background_update(void *p)
 	icache->current_age += icache->params.bg_clean_time;
 
 #ifdef IMAGE_CACHE_VERBOSE
-	NSLOG(netsurf, INFO, "Cache age %ds", icache->current_age / 1000);
+	NSLOG(netsurfy, INFO, "Cache age %ds", icache->current_age / 1000);
 #endif
 
 	image_cache__clean(icache);
@@ -385,7 +385,7 @@ bool image_cache_speculate(struct content *c)
 	if ((image_cache->total_bitmap_size < image_cache->params.limit) &&
 	    (c->size <= image_cache->params.speculative_small)) {
 #ifdef IMAGE_CACHE_VERBOSE
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "content size (%d) is smaller than minimum (%d)",
 		      c->size,
@@ -395,7 +395,7 @@ bool image_cache_speculate(struct content *c)
 	}
 
 #ifdef IMAGE_CACHE_VERBOSE
-	NSLOG(netsurf, INFO, "returning %d", decision);
+	NSLOG(netsurfy, INFO, "returning %d", decision);
 #endif
 	return decision;
 }
@@ -428,7 +428,7 @@ image_cache_init(const struct image_cache_parameters *image_cache_parameters)
 			     image_cache__background_update,
 			     image_cache);
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Image cache initialised with a limit of %" PRIsizet
 	      " hysteresis of %" PRIsizet,
@@ -446,7 +446,7 @@ nserror image_cache_fini(void)
 
 	guit->misc->schedule(-1, image_cache__background_update, image_cache);
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Size at finish %" PRIsizet " (in %d)",
 	      image_cache->total_bitmap_size,
@@ -462,13 +462,13 @@ nserror image_cache_fini(void)
 	op_size = image_cache->hit_size + image_cache->miss_size +
 		  image_cache->fail_size;
 
-	NSLOG(netsurf, INFO, "Age %ds", image_cache->current_age / 1000);
-	NSLOG(netsurf,
+	NSLOG(netsurfy, INFO, "Age %ds", image_cache->current_age / 1000);
+	NSLOG(netsurfy,
 	      INFO,
 	      "Peak size %" PRIsizet " (in %d)",
 	      image_cache->max_bitmap_size,
 	      image_cache->max_bitmap_size_count);
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Peak image count %d (size %" PRIsizet ")",
 	      image_cache->max_bitmap_count,
@@ -476,7 +476,7 @@ nserror image_cache_fini(void)
 
 	if ((op_count > 0) && (op_size > 0)) {
 
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Cache total/hit/miss/fail (counts) %d/%d/%d/%d (100%%/%d%%/%d%%/%d%%)",
 		      op_count,
@@ -486,7 +486,7 @@ nserror image_cache_fini(void)
 		      (image_cache->hit_count * 100) / op_count,
 		      (image_cache->miss_count * 100) / op_count,
 		      (image_cache->fail_count * 100) / op_count);
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Cache total/hit/miss/fail (size) %" PRIu64 "/%" PRIu64
 		      "/%" PRIu64 "/%" PRIu64 " (100%%/%" PRId64 "%%/%" PRId64
@@ -500,19 +500,19 @@ nserror image_cache_fini(void)
 		      (image_cache->fail_size * 100) / op_size);
 	}
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Total images never rendered: %d (includes %d that were converted)",
 	      image_cache->total_unrendered,
 	      image_cache->specultive_miss_count);
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Total number of excessive conversions: %d (from %d images converted more than once)",
 	      image_cache->total_extra_conversions,
 	      image_cache->total_extra_conversions_count);
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Bitmap of size %d had most (%d) conversions",
 	      image_cache->peak_conversions_size,
@@ -548,7 +548,7 @@ nserror image_cache_add(struct content *content,
 		centry->bitmap_size = content->width * content->height * 4llu;
 	}
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "centry %p, content %p, bitmap %p",
 	      centry,
@@ -591,7 +591,7 @@ nserror image_cache_remove(struct content *content)
 	/* get the cache entry */
 	centry = image_cache__find(content);
 	if (centry == NULL) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Could not find cache entry for content (%p)",
 		      content);
@@ -867,7 +867,7 @@ bool image_cache_redraw(struct content *c,
 	/* get the cache entry */
 	centry = image_cache__find(c);
 	if (centry == NULL) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Could not find cache entry for content (%p)",
 		      c);
@@ -909,7 +909,7 @@ void image_cache_destroy(struct content *content)
 	/* get the cache entry */
 	centry = image_cache__find(content);
 	if (centry == NULL) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Could not find cache entry for content (%p)",
 		      content);

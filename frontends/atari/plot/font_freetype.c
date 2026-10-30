@@ -2,13 +2,13 @@
  * Copyright 2005 James Bursa <bursa@users.sourceforge.net>
  *           2008 Vincent Sanders <vince@simtec.co.uk>
  *           2011 Ole Loots <ole@monochrom.net>
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -24,9 +24,9 @@
 
 #include "utils/log.h"
 #include "utils/nsoption.h"
-#include "netsurf/mouse.h"
-#include "netsurf/bitmap.h"
-#include "netsurf/plot_style.h"
+#include "netsurfy/mouse.h"
+#include "netsurfy/bitmap.h"
+#include "netsurfy/plot_style.h"
 
 #include "atari/gui.h"
 #include "atari/bitmap.h"
@@ -180,11 +180,11 @@ static FT_Error ft_face_requester(FTC_FaceID face_id,
 
 	error = FT_New_Face(library, ft_face->fontfile, ft_face->index, face);
 	if (error) {
-		NSLOG(netsurf, INFO, "Could not find font (code %d)\n", error);
+		NSLOG(netsurfy, INFO, "Could not find font (code %d)\n", error);
 	} else {
 		error = FT_Select_Charmap(*face, FT_ENCODING_UNICODE);
 		if (error) {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "Could not select charmap (code %d)\n",
 			      error);
@@ -198,7 +198,7 @@ static FT_Error ft_face_requester(FTC_FaceID face_id,
 			}
 		}
 	}
-	NSLOG(netsurf, INFO, "Loaded face from %s\n", ft_face->fontfile);
+	NSLOG(netsurfy, INFO, "Loaded face from %s\n", ft_face->fontfile);
 	return error;
 }
 
@@ -220,7 +220,7 @@ ft_new_face(const char *option, const char *resname, const char *fontfile)
 	}
 	error = FTC_Manager_LookupFace(ft_cmanager, (FTC_FaceID)newf, &aface);
 	if (error) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Could not find font face %s (code %d)\n",
 		      fontfile,
@@ -327,7 +327,7 @@ static bool ft_font_init(void)
 	/* freetype library initialise */
 	error = FT_Init_FreeType(&library);
 	if (error) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Freetype could not initialised (code %d)\n",
 		      error);
@@ -349,7 +349,7 @@ static bool ft_font_init(void)
 				NULL,
 				&ft_cmanager);
 	if (error) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Freetype could not initialise cache manager (code %d)\n",
 		      error);
@@ -370,7 +370,7 @@ static bool ft_font_init(void)
 		FONT_RESOURCE_PATH "ss.ttf",
 		FONT_PKG_PATH FONT_FILE_SANS);
 	if (font_faces[FONT_FACE_SANS_SERIF] == NULL) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Could not find default font (code %d)\n",
 		      error);
@@ -760,7 +760,7 @@ int ctor_font_plotter_freetype(FONT_PLOTTER self)
 		self->draw_glyph = draw_glyph8;
 	}
 
-	NSLOG(netsurf, INFO, "%s: %s\n", (char *)__FILE__, __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s: %s\n", (char *)__FILE__, __FUNCTION__);
 	if (!init) {
 		ft_font_init();
 		fontbmp = atari_bitmap_create(48, 48, 0);

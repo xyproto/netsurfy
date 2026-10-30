@@ -1,13 +1,13 @@
 /*
  * Copyright 2011 John-Mark Bell <jmb@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -19,11 +19,11 @@
 /** \file
  * The image content handler intermediate image cache.
  *
- * This cache allows netsurf to use a generic intermediate bitmap
+ * This cache allows netsurfy to use a generic intermediate bitmap
  * format without keeping the
  * intermediate representation in memory.
  *
- * The bitmap structure is opaque to the rest of netsurf and is
+ * The bitmap structure is opaque to the rest of netsurfy and is
  * controlled by the platform-specific code (see image/bitmap.h for
  * detials). All image content handlers convert into this format and
  * pass it to the plot functions for display,
@@ -34,11 +34,11 @@
  * content handler complete control.
  */
 
-#ifndef NETSURF_IMAGE_IMAGE_CACHE_H_
-#define NETSURF_IMAGE_IMAGE_CACHE_H_
+#ifndef NETSURFY_IMAGE_IMAGE_CACHE_H_
+#define NETSURFY_IMAGE_IMAGE_CACHE_H_
 
 #include "utils/errors.h"
-#include "netsurf/content_type.h"
+#include "netsurfy/content_type.h"
 
 struct content;
 struct content_redraw_data;
@@ -74,7 +74,7 @@ nserror image_cache_fini(void);
  * @param bitmap A bitmap representing the already converted content or NULL.
  * @param convert A function pointer to convert the content into a bitmap or
  * NULL.
- * @return A netsurf error code.
+ * @return A netsurfy error code.
  */
 nserror image_cache_add(struct content *content,
 			struct bitmap *bitmap,

@@ -1,7 +1,7 @@
 #
-# Makefile for NetSurf Framebuffer frontend
+# Makefile for NetSurfy Framebuffer frontend
 #
-# This file is part of NetSurf 
+# This file is part of NetSurfy 
 #
 # ----------------------------------------------------------------------------
 # Framebuffer flag setup (using pkg-config)
@@ -11,36 +11,36 @@ CFLAGS += -std=c99 -g \
 	  -Dnsframebuffer -Dsmall
 
 #resource path
-CFLAGS += '-DNETSURF_FB_RESPATH="$(NETSURF_FB_RESPATH)"'
+CFLAGS += '-DNETSURFY_FB_RESPATH="$(NETSURFY_FB_RESPATH)"'
 
 # compile time font locations
-CFLAGS += '-DNETSURF_FB_FONTPATH="$(NETSURF_FB_FONTPATH)"'
-CFLAGS += '-DNETSURF_FB_FONT_SANS_SERIF="$(NETSURF_FB_FONT_SANS_SERIF)"'
-CFLAGS += '-DNETSURF_FB_FONT_SANS_SERIF_BOLD="$(NETSURF_FB_FONT_SANS_SERIF_BOLD)"'
-CFLAGS += '-DNETSURF_FB_FONT_SANS_SERIF_ITALIC="$(NETSURF_FB_FONT_SANS_SERIF_ITALIC)"'
-CFLAGS += '-DNETSURF_FB_FONT_SANS_SERIF_ITALIC_BOLD="$(NETSURF_FB_FONT_SANS_SERIF_ITALIC_BOLD)"'
-CFLAGS += '-DNETSURF_FB_FONT_SERIF="$(NETSURF_FB_FONT_SERIF)"'
-CFLAGS += '-DNETSURF_FB_FONT_SERIF_BOLD="$(NETSURF_FB_FONT_SERIF_BOLD)"'
-CFLAGS += '-DNETSURF_FB_FONT_MONOSPACE="$(NETSURF_FB_FONT_MONOSPACE)"'
-CFLAGS += '-DNETSURF_FB_FONT_MONOSPACE_BOLD="$(NETSURF_FB_FONT_MONOSPACE_BOLD)"'
-CFLAGS += '-DNETSURF_FB_FONT_CURSIVE="$(NETSURF_FB_FONT_CURSIVE)"'
-CFLAGS += '-DNETSURF_FB_FONT_FANTASY="$(NETSURF_FB_FONT_FANTASY)"'
+CFLAGS += '-DNETSURFY_FB_FONTPATH="$(NETSURFY_FB_FONTPATH)"'
+CFLAGS += '-DNETSURFY_FB_FONT_SANS_SERIF="$(NETSURFY_FB_FONT_SANS_SERIF)"'
+CFLAGS += '-DNETSURFY_FB_FONT_SANS_SERIF_BOLD="$(NETSURFY_FB_FONT_SANS_SERIF_BOLD)"'
+CFLAGS += '-DNETSURFY_FB_FONT_SANS_SERIF_ITALIC="$(NETSURFY_FB_FONT_SANS_SERIF_ITALIC)"'
+CFLAGS += '-DNETSURFY_FB_FONT_SANS_SERIF_ITALIC_BOLD="$(NETSURFY_FB_FONT_SANS_SERIF_ITALIC_BOLD)"'
+CFLAGS += '-DNETSURFY_FB_FONT_SERIF="$(NETSURFY_FB_FONT_SERIF)"'
+CFLAGS += '-DNETSURFY_FB_FONT_SERIF_BOLD="$(NETSURFY_FB_FONT_SERIF_BOLD)"'
+CFLAGS += '-DNETSURFY_FB_FONT_MONOSPACE="$(NETSURFY_FB_FONT_MONOSPACE)"'
+CFLAGS += '-DNETSURFY_FB_FONT_MONOSPACE_BOLD="$(NETSURFY_FB_FONT_MONOSPACE_BOLD)"'
+CFLAGS += '-DNETSURFY_FB_FONT_CURSIVE="$(NETSURFY_FB_FONT_CURSIVE)"'
+CFLAGS += '-DNETSURFY_FB_FONT_FANTASY="$(NETSURFY_FB_FONT_FANTASY)"'
 
 LDFLAGS += -lm
 
 # freetype is optional but older versions do not use pkg-config
-ifeq ($(NETSURF_FB_FONTLIB),freetype)
-  NETSURF_USE_FREETYPE2 := AUTO
-  NETSURF_FEATURE_FREETYPE2_CFLAGS := -DFB_USE_FREETYPE
+ifeq ($(NETSURFY_FB_FONTLIB),freetype)
+  NETSURFY_USE_FREETYPE2 := AUTO
+  NETSURFY_FEATURE_FREETYPE2_CFLAGS := -DFB_USE_FREETYPE
 
   $(eval $(call pkg_config_find_and_add_enabled,FREETYPE2,freetype2,freetype2))
 
   # try and use non pkg-config method
-  ifeq ($(NETSURF_USE_FREETYPE2),NO)
+  ifeq ($(NETSURFY_USE_FREETYPE2),NO)
     FREETYPE_CONFIG_EXISTS := $(shell freetype-config --cflags >/dev/null && echo yes)
     ifeq ($(FREETYPE_CONFIG_EXISTS),yes)
-      NETSURF_USE_FREETYPE2 := YES
-      CFLAGS += $(shell freetype-config --cflags) $(NETSURF_FEATURE_FREETYPE2_CFLAGS)
+      NETSURFY_USE_FREETYPE2 := YES
+      CFLAGS += $(shell freetype-config --cflags) $(NETSURFY_FEATURE_FREETYPE2_CFLAGS)
       LDFLAGS += $(shell freetype-config --libs)
       $(info FT2.CNFG: freetype2 (freetype2)	enabled)
     else
@@ -165,7 +165,7 @@ endef
 
 S_FONTS :=
 
-$(eval $(foreach V,$(filter FB_FONT_$(NETSURF_FB_FONTLIB)_%,$(.VARIABLES)),$(call convert_font,$(FRONTEND_RESOURCES_DIR)/$($(V)),$(OBJROOT)/font-$(patsubst FB_FONT_$(NETSURF_FB_FONTLIB)_%,%,$(V)).c,$(OBJROOT)/font-$(patsubst FB_FONT_$(NETSURF_FB_FONTLIB)_%,%,$(V)).h,$(patsubst FB_FONT_$(NETSURF_FB_FONTLIB)_%,%,$(V)))))
+$(eval $(foreach V,$(filter FB_FONT_$(NETSURFY_FB_FONTLIB)_%,$(.VARIABLES)),$(call convert_font,$(FRONTEND_RESOURCES_DIR)/$($(V)),$(OBJROOT)/font-$(patsubst FB_FONT_$(NETSURFY_FB_FONTLIB)_%,%,$(V)).c,$(OBJROOT)/font-$(patsubst FB_FONT_$(NETSURFY_FB_FONTLIB)_%,%,$(V)).h,$(patsubst FB_FONT_$(NETSURFY_FB_FONTLIB)_%,%,$(V)))))
 
 # ----------------------------------------------------------------------------
 # Source file setup
@@ -179,7 +179,7 @@ S_FRONTEND := gui.c framebuffer.c schedule.c bitmap.c fetch.c	\
 S_FRAMEBUFFER_FBTK := fbtk.c event.c fill.c bitmap.c user.c window.c 	\
 	text.c scroll.c osk.c 
 
-S_FRONTEND += font_$(NETSURF_FB_FONTLIB).c
+S_FRONTEND += font_$(NETSURFY_FB_FONTLIB).c
 
 S_FRONTEND += $(addprefix fbtk/,$(S_FRAMEBUFFER_FBTK))
 
@@ -193,17 +193,17 @@ EXETARGET := nsfb
 # Install target
 # ----------------------------------------------------------------------------
 
-NETSURF_FRAMEBUFFER_RESOURCE_LIST := adblock.css credits.html	\
+NETSURFY_FRAMEBUFFER_RESOURCE_LIST := adblock.css credits.html	\
 	default.css internal.css licence.html			\
-	netsurf.png quirks.css welcome.html
+	netsurfy.png quirks.css
 
 install-framebuffer:
 	$(VQ)echo " INSTALL: $(DESTDIR)/$(PREFIX)"
-	$(Q)$(INSTALL) -d $(DESTDIR)/$(NETSURF_FRAMEBUFFER_BIN)
-	$(Q)$(INSTALL) -T $(EXETARGET) $(DESTDIR)/$(NETSURF_FRAMEBUFFER_BIN)/netsurf-fb
-	$(Q)$(INSTALL) -d $(DESTDIR)/$(NETSURF_FRAMEBUFFER_RESOURCES)
-	$(Q)for F in $(NETSURF_FRAMEBUFFER_RESOURCE_LIST); do $(INSTALL) -m 644 $(FRONTEND_RESOURCES_DIR)/$$F $(DESTDIR)/$(NETSURF_FRAMEBUFFER_RESOURCES); done
-	$(Q)$(INSTALL) -m 644 -T $(MESSAGES_TARGET)/en/Messages $(DESTDIR)/$(NETSURF_FRAMEBUFFER_RESOURCES)/Messages
+	$(Q)$(INSTALL) -d $(DESTDIR)/$(NETSURFY_FRAMEBUFFER_BIN)
+	$(Q)$(INSTALL) -T $(EXETARGET) $(DESTDIR)/$(NETSURFY_FRAMEBUFFER_BIN)/netsurfy-fb
+	$(Q)$(INSTALL) -d $(DESTDIR)/$(NETSURFY_FRAMEBUFFER_RESOURCES)
+	$(Q)for F in $(NETSURFY_FRAMEBUFFER_RESOURCE_LIST); do $(INSTALL) -m 644 $(FRONTEND_RESOURCES_DIR)/$$F $(DESTDIR)/$(NETSURFY_FRAMEBUFFER_RESOURCES); done
+	$(Q)$(INSTALL) -m 644 -T $(MESSAGES_TARGET)/en/Messages $(DESTDIR)/$(NETSURFY_FRAMEBUFFER_RESOURCES)/Messages
 
 # ----------------------------------------------------------------------------
 # Package target

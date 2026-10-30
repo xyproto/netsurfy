@@ -1,13 +1,13 @@
 /*
  * Copyright 2009 Mark Benjamin <netsurf-browser.org.MarkBenjamin@dfgh.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -65,15 +65,15 @@ static BOOL init_about_dialog(HWND hwnd)
 				   DEFAULT_PITCH | FF_SWISS,
 				   "Arial");
 		if (hFont != NULL) {
-			NSLOG(netsurf, INFO, "Setting font object");
+			NSLOG(netsurfy, INFO, "Setting font object");
 			SendMessage(dlg_itm, WM_SETFONT, (WPARAM)hFont, 0);
 		}
 
 		snprintf(ver_str,
 			 sizeof(ver_str),
 			 "%s %s",
-			 messages_get("NetSurf"),
-			 netsurf_version);
+			 messages_get("NetSurfy"),
+			 netsurfy_version);
 
 		SendMessage(dlg_itm, WM_SETTEXT, 0, (LPARAM)ver_str);
 	}
@@ -83,7 +83,7 @@ static BOOL init_about_dialog(HWND hwnd)
 		snprintf(ver_str,
 			 sizeof(ver_str),
 			 "%s",
-			 messages_get("NetSurfCopyright"));
+			 messages_get("NetSurfyCopyright"));
 
 		SendMessage(dlg_itm, WM_SETTEXT, 0, (LPARAM)ver_str);
 	}
@@ -103,7 +103,7 @@ static BOOL destroy_about_dialog(HWND hwnd)
 	if (dlg_itm != NULL) {
 		hFont = (HFONT)SendMessage(dlg_itm, WM_GETFONT, 0, 0);
 		if (hFont != NULL) {
-			NSLOG(netsurf, INFO, "Destroyed font object");
+			NSLOG(netsurfy, INFO, "Destroyed font object");
 			DeleteObject(hFont);
 		}
 	}
@@ -126,12 +126,12 @@ static BOOL CALLBACK nsws_about_event_callback(HWND hwnd,
 	case WM_COMMAND:
 		switch (LOWORD(wparam)) {
 		case IDOK:
-			NSLOG(netsurf, INFO, "OK clicked");
+			NSLOG(netsurfy, INFO, "OK clicked");
 			EndDialog(hwnd, IDOK);
 			break;
 
 		case IDCANCEL:
-			NSLOG(netsurf, INFO, "Cancel clicked");
+			NSLOG(netsurfy, INFO, "Cancel clicked");
 			EndDialog(hwnd, IDOK);
 			break;
 

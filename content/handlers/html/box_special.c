@@ -6,13 +6,13 @@
  * Copyright 2008 Michael Drake <tlsa@netsurf-browser.org>
  * Copyright 2020 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -38,7 +38,7 @@
 #include "utils/string.h"
 #include "utils/ascii.h"
 #include "utils/nsurl.h"
-#include "netsurf/plot_style.h"
+#include "netsurfy/plot_style.h"
 #include "css/hints.h"
 #include "desktop/frame_types.h"
 #include "content/content_factory.h"
@@ -992,7 +992,7 @@ static bool box_frameset(dom_node *n,
 	bool ok;
 
 	if (content->frameset) {
-		NSLOG(netsurf, INFO, "Error: multiple framesets in document.");
+		NSLOG(netsurfy, INFO, "Error: multiple framesets in document.");
 		/* Don't convert children */
 		if (convert_children)
 			*convert_children = false;

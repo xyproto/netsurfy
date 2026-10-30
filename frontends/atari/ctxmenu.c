@@ -1,13 +1,13 @@
 /*
  * Copyright 2010 Ole Loots <ole@monochrom.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -20,16 +20,16 @@
 #include "utils/messages.h"
 #include "utils/nsoption.h"
 #include "utils/nsurl.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/content.h"
-#include "netsurf/keypress.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/content.h"
+#include "netsurfy/keypress.h"
 
 #include "atari/gui.h"
 #include "atari/misc.h"
 #include "atari/rootwin.h"
 #include "atari/clipboard.h"
 #include "atari/gemtk/gemtk.h"
-#include "atari/res/netsurf.rsh"
+#include "atari/res/netsurfy.rsh"
 #include "atari/ctxmenu.h"
 
 
@@ -303,7 +303,7 @@ void context_popup(struct gui_window *gw, short x, short y)
 				/* the GEMDOS cmdline contains the length of the
 				   commandline in the first byte: */
 				cmdline[0] = (unsigned char)strlen(tempfile);
-				NSLOG(netsurf,
+				NSLOG(netsurfy,
 				      INFO,
 				      "Creating temporay source file: %s\n",
 				      tempfile);
@@ -331,7 +331,7 @@ void context_popup(struct gui_window *gw, short x, short y)
 				}
 
 			} else {
-				NSLOG(netsurf, INFO, "Invalid content!");
+				NSLOG(netsurfy, INFO, "Invalid content!");
 			}
 		} else {
 			form_alert(0, "[1][Set option \"atari_editor\".][OK]");

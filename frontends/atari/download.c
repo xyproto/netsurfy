@@ -1,13 +1,13 @@
 /*
  * Copyright 2010 Ole Loots <ole@monochrom.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -30,15 +30,15 @@
 #include "utils/messages.h"
 #include "utils/nsoption.h"
 #include "utils/string.h"
-#include "netsurf/inttypes.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/download.h"
+#include "netsurfy/inttypes.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/download.h"
 #include "desktop/save_complete.h"
 #include "desktop/download.h"
 
 #include "atari/gui.h"
 #include "atari/misc.h"
-#include "atari/res/netsurf.rsh"
+#include "atari/res/netsurfy.rsh"
 #include "atari/download.h"
 #include "atari/osspec.h"
 
@@ -199,7 +199,7 @@ static void on_close(struct gui_download_window *dw)
 
 static void gui_download_window_destroy(struct gui_download_window *gdw)
 {
-	NSLOG(netsurf, INFO, "gdw %p", gdw);
+	NSLOG(netsurfy, INFO, "gdw %p", gdw);
 
 	if (gdw->status == NSATARI_DOWNLOAD_WORKING) {
 		download_context_abort(gdw->ctx);
@@ -261,7 +261,7 @@ gui_download_window_create(download_context *ctx, struct gui_window *parent)
 	char alert[200];
 
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Creating download window for gui window: %p",
 	      parent);
@@ -346,7 +346,7 @@ gui_download_window_create(download_context *ctx, struct gui_window *parent)
 	gemtk_wm_set_toolbar_redraw_func(gdw->guiwin, toolbar_redraw_cb);
 
 	strncpy((char *)&gdw->lbl_file, filename, MAX_SLEN_LBL_FILE - 1);
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "created download: %s (total size: %d)",
 	      gdw->destination,
@@ -378,7 +378,7 @@ static nserror gui_download_window_data(struct gui_download_window *dw,
 	uint32_t tnow = clck / (CLOCKS_PER_SEC >> 3);
 	uint32_t sdiff = (clck / (CLOCKS_PER_SEC)) - dw->start;
 
-	NSLOG(netsurf, INFO, "dw %p", dw);
+	NSLOG(netsurfy, INFO, "dw %p", dw);
 
 	if (dw->abort == true) {
 		dw->status = NSATARI_DOWNLOAD_CANCELED;
@@ -434,7 +434,7 @@ static nserror gui_download_window_data(struct gui_download_window *dw,
 static void
 gui_download_window_error(struct gui_download_window *dw, const char *error_msg)
 {
-	NSLOG(netsurf, INFO, "%s", error_msg);
+	NSLOG(netsurfy, INFO, "%s", error_msg);
 
 	strncpy((char *)&dw->lbl_file, error_msg, MAX_SLEN_LBL_FILE - 1);
 	dw->status = NSATARI_DOWNLOAD_ERROR;
@@ -445,7 +445,7 @@ gui_download_window_error(struct gui_download_window *dw, const char *error_msg)
 
 static void gui_download_window_done(struct gui_download_window *dw)
 {
-	NSLOG(netsurf, INFO, "dw %p", dw);
+	NSLOG(netsurfy, INFO, "dw %p", dw);
 
 	// TODO: change abort to close
 	dw->status = NSATARI_DOWNLOAD_COMPLETE;

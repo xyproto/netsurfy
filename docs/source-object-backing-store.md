@@ -174,15 +174,13 @@ where ADDRESS_BITS is how long the address is in bits and ENTRY_BITS
 is how many entries the control file (and hence the while
 cache) may hold.
 
-## RISCOS values
-
 By limiting the ENTRY_BITS size to 14 (16,384 entries) the entries
 list is limited to 448kilobytes.
 
-The typical values for RISC OS would set ADDRESS_BITS to 18. This
-spreads the entries over 262144 hash values which uses 512 kilobytes
-for the index. Limiting the hash space like this reduces the
-effectiveness of the cache.
+The typical values for a system with limited memory would set
+ADDRESS_BITS to 18. This spreads the entries over 262144 hash values
+which uses 512 kilobytes for the index. Limiting the hash space like
+this reduces the effectiveness of the cache.
 
 A small ADDRESS_LENGTH causes a collision (two URLs with the same
 address) to happen roughly for every 2 ^ (ADDRESS_BITS / 2) = 2 ^ 9 =
@@ -204,7 +202,7 @@ but the index using some 8 Megabytes
 ### Example 1
 
 For a store with 1034 objects generated from a random navigation of
-pages linked from the about:welcome page.
+pages linked from the home page.
 
 Metadata total size is 593608 bytes an average of 574 bytes. The
 majority of the storage is used to hold the URLs and headers.

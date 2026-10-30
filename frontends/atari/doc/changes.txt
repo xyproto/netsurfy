@@ -5,17 +5,17 @@
         ===========================
 
 
- NetSurf 3.1
+ NetSurfy 3.1
 ========================================
 
-As there was no atari NetSurf 3.0 Release FreeMiNT, this Changelog contains
+As there was no atari NetSurfy 3.0 Release FreeMiNT, this Changelog contains
 the FreeMint specific changes from
-NetSurf 2.9-PL1 Release (Sunday, April 15 2012) to Netsurf 3.1 Release.
+NetSurfy 2.9-PL1 Release (Sunday, April 15 2012) to Netsurfy 3.1 Release.
 
 
  - Removed WinDom dependency (heavy GUI code change)
  - Implemented "paste clipboard" for toolbar URL textbox.
- - Implemented file drop on browser window handling when netsurf core
+ - Implemented file drop on browser window handling when netsurfy core
    ignores the file drop event.
  - Implemented basic browser window scaling
  - Integrated "search page" dialog into browser window
@@ -35,14 +35,14 @@ NetSurf 2.9-PL1 Release (Sunday, April 15 2012) to Netsurf 3.1 Release.
  - Fixed commandline filepath handling
 
 
- NetSurf 2.9
+ NetSurfy 2.9
 ========================================
  - Fixed redraw of rectangle outlines.
  - Fixed redraw of Hotlist, looks better now.
- - Use netsurfs textarea implementation for URL, to reduce code size.
+ - Use netsurfys textarea implementation for URL, to reduce code size.
  - Fixed several redraw glitches.
  - Added a context menu, offering some handy functions.
- - NetSurf core now supports frames & iframes.
+ - NetSurfy core now supports frames & iframes.
  - Debug rendering works now ( fixed redraw of rectangle outlines )
  - process commandline parameter w (width) / h (height) for default window size
  - improved mouse drag within treeview, browser win, toolbar.

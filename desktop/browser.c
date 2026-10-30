@@ -1,13 +1,13 @@
 /*
  * Copyright 2019 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -25,23 +25,23 @@
 #include "utils/errors.h"
 #include "utils/log.h"
 #include "utils/utils.h"
-#include "netsurf/browser.h"
+#include "netsurfy/browser.h"
 #include "css/utils.h"
 
-/* exported interface documented in netsurf/browser.h */
+/* exported interface documented in netsurfy/browser.h */
 nserror browser_set_dpi(int dpi)
 {
 	if (dpi < 72 || dpi > 250) {
 		int bad = dpi;
 		dpi = min(max(dpi, 72), 250);
-		NSLOG(netsurf, INFO, "Clamping invalid DPI %d to %d", bad, dpi);
+		NSLOG(netsurfy, INFO, "Clamping invalid DPI %d to %d", bad, dpi);
 	}
 	nscss_screen_dpi = INTTOFIX(dpi);
 
 	return NSERROR_OK;
 }
 
-/* exported interface documented in netsurf/browser.h */
+/* exported interface documented in netsurfy/browser.h */
 int browser_get_dpi(void)
 {
 	return FIXTOINT(nscss_screen_dpi);

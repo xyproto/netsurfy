@@ -2,13 +2,13 @@
  * Copyright 2004 James Bursa <bursa@users.sourceforge.net>
  * Copyright 2004 John M Bell <jmb202@ecs.soton.ac.uk>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -31,7 +31,7 @@
 #include "utils/utils.h"
 #include "utils/log.h"
 #include "utils/messages.h"
-#include "netsurf/bitmap.h"
+#include "netsurfy/bitmap.h"
 #include "content/llcache.h"
 #include "content/content.h"
 #include "content/content_protected.h"
@@ -142,14 +142,14 @@ static void nsjpeg_term_source(j_decompress_ptr cinfo)
 /**
  * Error output handler for JPEG library.
  *
- * This logs to NetSurf log instead of stderr.
+ * This logs to NetSurfy log instead of stderr.
  * Warnings only - fatal errors are trapped by nsjpeg_error_exit
  *                 and do not call the output handler.
  */
 static void nsjpeg_error_log(j_common_ptr cinfo)
 {
 	cinfo->err->format_message(cinfo, nsjpeg_error_buffer);
-	NSLOG(netsurf, INFO, "%s", nsjpeg_error_buffer);
+	NSLOG(netsurfy, INFO, "%s", nsjpeg_error_buffer);
 }
 
 
@@ -163,7 +163,7 @@ static void nsjpeg_error_exit(j_common_ptr cinfo)
 	jmp_buf *setjmp_buffer = (jmp_buf *)cinfo->client_data;
 
 	cinfo->err->format_message(cinfo, nsjpeg_error_buffer);
-	NSLOG(netsurf, INFO, "%s", nsjpeg_error_buffer);
+	NSLOG(netsurfy, INFO, "%s", nsjpeg_error_buffer);
 
 	longjmp(*setjmp_buffer, 1);
 }
@@ -225,7 +225,7 @@ static inline void nsjpeg__decode_rgb(struct jpeg_decompress_struct *cinfo,
 
 #if RGB_RED != 0 || RGB_GREEN != 1 || RGB_BLUE != 2 || RGB_PIXELSIZE != 4
 		/* Missmatch between configured libjpeg pixel format and
-		 * NetSurf pixel format.  Convert to RGBA */
+		 * NetSurfy pixel format.  Convert to RGBA */
 		for (int i = width - 1; 0 <= i; i--) {
 			int r = scanlines[0][i * RGB_PIXELSIZE + RGB_RED];
 			int g = scanlines[0][i * RGB_PIXELSIZE + RGB_GREEN];
@@ -326,7 +326,7 @@ static struct bitmap *jpeg_cache_convert(struct content *c)
 			cinfo.out_color_space = JCS_EXT_ABGR;
 			break;
 		default:
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      ERROR,
 			      "Unexpected bitmap format: %u",
 			      bitmap_fmt.layout);

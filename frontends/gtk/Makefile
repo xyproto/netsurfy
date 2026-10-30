@@ -1,15 +1,15 @@
 #
-# Makefile for NetSurf GTK target
+# Makefile for NetSurfy GTK target
 #
-# This file is part of NetSurf 
+# This file is part of NetSurfy 
 #
 # ----------------------------------------------------------------------------
 # GTK flag setup (using pkg-config)
 # ----------------------------------------------------------------------------
 
 # define additional CFLAGS and LDFLAGS requirements for pkg-configed libs here
-NETSURF_FEATURE_RSVG_CFLAGS := -DWITH_RSVG
-NETSURF_FEATURE_VIDEO_CFLAGS := -DWITH_VIDEO
+NETSURFY_FEATURE_RSVG_CFLAGS := -DWITH_RSVG
+NETSURFY_FEATURE_VIDEO_CFLAGS := -DWITH_VIDEO
 
 # determine if the rsvg library API version
 RSVG_API := $(shell $(PKG_CONFIG) --atleast-version=2.46 librsvg-2.0 && echo 246)
@@ -43,7 +43,7 @@ GTKCFLAGS := -std=c99 -Dgtk -Dnsgtk -g \
 		-D_BSD_SOURCE \
 		-D_DEFAULT_SOURCE \
 		-D_NETBSD_SOURCE \
-		-DGTK_RESPATH=\"$(NETSURF_GTK_RES_PATH)\"
+		-DGTK_RESPATH=\"$(NETSURFY_GTK_RES_PATH)\"
 
 # non optional pkg-configed libs
 $(eval $(call pkg_config_find_and_add,gtk4,GTK-4))
@@ -62,7 +62,7 @@ LDFLAGS += -lm
 NSGTK_RESOURCES_DIR := $(FRONTEND_RESOURCES_DIR)
 
 # The gtk binary target.
-EXETARGET := nsgtk$(NETSURF_GTK_MAJOR)
+EXETARGET := netsurfy
 
 # The filter and target for split messages
 MESSAGES_FILTER=gtk
@@ -94,32 +94,32 @@ S_RESOURCE :=
 #  than "knowing" the version but there does not appear to be a simple
 #  way to implement that.
 #
-NETSURF_FEATURE_GRESOURCE_AVAILABLE := $(shell $(PKG_CONFIG) --atleast-version=2.32 gmodule-2.0 && echo yes)
-ifneq (,$(filter $(NETSURF_USE_GRESOURCE),AUTO YES))
-ifeq ($(NETSURF_FEATURE_GRESOURCE_AVAILABLE),yes)
+NETSURFY_FEATURE_GRESOURCE_AVAILABLE := $(shell $(PKG_CONFIG) --atleast-version=2.32 gmodule-2.0 && echo yes)
+ifneq (,$(filter $(NETSURFY_USE_GRESOURCE),AUTO YES))
+ifeq ($(NETSURFY_FEATURE_GRESOURCE_AVAILABLE),yes)
 
 # Gresource use has been enabled
-NETSURF_FEATURE_GRESOURCE_ENABLED := yes
+NETSURFY_FEATURE_GRESOURCE_ENABLED := yes
 
 #resource compiler tool
 GLIB_COMPILE_RESOURCES := glib-compile-resources
 CFLAGS += -DWITH_GRESOURCE
 
-NETSURF_GRESOURCE_XML := $(NSGTK_RESOURCES_DIR)/netsurf.gresource.xml
+NETSURFY_GRESOURCE_XML := $(NSGTK_RESOURCES_DIR)/netsurfy.gresource.xml
 UI_GRESOURCE_XML := $(NSGTK_RESOURCES_DIR)/ui.gresource.xml
 MESSAGES_GRESOURCE_XML := $(NSGTK_RESOURCES_DIR)/messages.gresource.xml
 
-# generate the netsurf gresource source files
-$(OBJROOT)/netsurf_gresource.c: $(NETSURF_GRESOURCE_XML) $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir $(NSGTK_RESOURCES_DIR) --generate-dependencies $(NETSURF_GRESOURCE_XML))
+# generate the netsurfy gresource source files
+$(OBJROOT)/netsurfy_gresource.c: $(NETSURFY_GRESOURCE_XML) $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir $(NSGTK_RESOURCES_DIR) --generate-dependencies $(NETSURFY_GRESOURCE_XML))
 	$(VQ)echo "GRESORCE: $<"
 	$(Q)$(GLIB_COMPILE_RESOURCES) --generate-source --sourcedir $(NSGTK_RESOURCES_DIR) --target=$@ $<
 
-S_RESOURCE += $(OBJROOT)/netsurf_gresource.c
+S_RESOURCE += $(OBJROOT)/netsurfy_gresource.c
 
 # generate the ui gresource source files
-$(OBJROOT)/ui_gresource.c: $(UI_GRESOURCE_XML) $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir $(NSGTK_RESOURCES_DIR)/gtk$(NETSURF_GTK_MAJOR) --generate-dependencies $(UI_GRESOURCE_XML))
+$(OBJROOT)/ui_gresource.c: $(UI_GRESOURCE_XML) $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir $(NSGTK_RESOURCES_DIR)/gtk$(NETSURFY_GTK_MAJOR) --generate-dependencies $(UI_GRESOURCE_XML))
 	$(VQ)echo "GRESORCE: $<"
-	$(Q)$(GLIB_COMPILE_RESOURCES) --generate-source --sourcedir $(NSGTK_RESOURCES_DIR)/gtk$(NETSURF_GTK_MAJOR) --target=$@ $<
+	$(Q)$(GLIB_COMPILE_RESOURCES) --generate-source --sourcedir $(NSGTK_RESOURCES_DIR)/gtk$(NETSURFY_GTK_MAJOR) --target=$@ $<
 
 S_RESOURCE += $(OBJROOT)/ui_gresource.c
 
@@ -135,13 +135,13 @@ endif
 endif
 
 # Build pixbufs as inlines if enabled
-ifneq (,$(filter $(NETSURF_USE_INLINE_PIXBUF),AUTO YES))
-ifneq ($(NETSURF_FEATURE_GRESOURCE_ENABLED),yes)
+ifneq (,$(filter $(NETSURFY_USE_INLINE_PIXBUF),AUTO YES))
+ifneq ($(NETSURFY_FEATURE_GRESOURCE_ENABLED),yes)
 
 CFLAGS += -DWITH_BUILTIN_PIXBUF
 
 GTK_IMAGE_favicon := favicon.png
-GTK_IMAGE_netsurf := netsurf.xpm
+GTK_IMAGE_netsurfy := netsurfy.xpm
 GTK_IMAGE_menu_cursor := menu_cursor.png
 
 # 1: input file
@@ -188,22 +188,22 @@ SOURCES = $(S_COMMON) $(S_IMAGE) $(S_BROWSER) $(S_RESOURCE) $(S_FRONTEND)
 GTK_RESOURCES_LIST := \
 	languages SearchEngines ca-bundle.txt \
 	default.css adblock.css quirks.css internal.css \
-	credits.html licence.html welcome.html Messages \
-	default.ico favicon.png netsurf.png netsurf.xpm netsurf-16x16.xpm
+	credits.html licence.html Messages \
+	default.ico favicon.png netsurfy.png netsurfy.xpm netsurfy-16x16.xpm
 
 GTK_RESOURCES_LIST := \
 	$(addprefix $(NSGTK_RESOURCES_DIR)/, $(GTK_RESOURCES_LIST)) \
-	$(wildcard $(NSGTK_RESOURCES_DIR)/gtk$(NETSURF_GTK_MAJOR)/*.ui)
+	$(wildcard $(NSGTK_RESOURCES_DIR)/gtk$(NETSURFY_GTK_MAJOR)/*.ui)
 
 # translations with more than just Messages files
 GTK_TRANSLATIONS_HTML := de en fr it ja nl zh_CN
 
 # destination for installed resources is the first entry in the gtk resource path
-NSGTK_RESOURCES_DESTDIR := $(DESTDIR)$(word 1,$(subst :, ,$(NETSURF_GTK_RES_PATH)))
+NSGTK_RESOURCES_DESTDIR := $(DESTDIR)$(word 1,$(subst :, ,$(NETSURFY_GTK_RES_PATH)))
 
 install-gtk:
-	$(Q)$(MKDIR) -p $(DESTDIR)$(NETSURF_GTK_BIN)
-	$(Q)install $(EXETARGET) $(DESTDIR)$(NETSURF_GTK_BIN)netsurf-gtk$(SUBTARGET)
+	$(Q)$(MKDIR) -p $(DESTDIR)$(NETSURFY_GTK_BIN)
+	$(Q)install $(EXETARGET) $(DESTDIR)$(NETSURFY_GTK_BIN)netsurfy
 	$(Q)$(MKDIR) -p $(NSGTK_RESOURCES_DESTDIR)/icons
 	$(Q)install -m 0644 $(NSGTK_RESOURCES_DIR)/icons/*.png $(NSGTK_RESOURCES_DESTDIR)/icons
 	$(Q)$(MKDIR) -p $(NSGTK_RESOURCES_DESTDIR)/throbber

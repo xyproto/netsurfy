@@ -8,10 +8,7 @@
 #
 # Trivially, invoke as:
 #   make
-# to build native, or:
-#   make TARGET=riscos
-# to cross-build for RO.
-#
+# to build natively
 # Look at Makefile.config for configuration options.
 #
 # Best results obtained building on unix platforms cross compiling for others
@@ -139,8 +136,8 @@ LDFLAGS += -lz
 # define additional CFLAGS and LDFLAGS requirements for pkg-configed libs
 # We only need to define the ones where the feature name doesn't exactly
 # match the WITH_FEATURE flag
-NETSURF_FEATURE_NSSVG_CFLAGS := -DWITH_NS_SVG
-NETSURF_FEATURE_ROSPRITE_CFLAGS := -DWITH_NSSPRITE
+NETSURFY_FEATURE_NSSVG_CFLAGS := -DWITH_NS_SVG
+NETSURFY_FEATURE_ROSPRITE_CFLAGS := -DWITH_NSSPRITE
 
 # libcurl and openssl ordering matters as if libcurl requires ssl it
 #  needs to come first in link order to ensure its symbols can be
@@ -170,27 +167,27 @@ $(eval $(call pkg_config_find_and_add_enabled,NSLOG,libnslog,LOG))
 INCLUDE_DIRS :=. include $(OBJROOT)
 
 # export the user agent format
-CFLAGS += -DNETSURF_UA_FORMAT_STRING=\"$(NETSURF_UA_FORMAT_STRING)\"
-CXXFLAGS += -DNETSURF_UA_FORMAT_STRING=\"$(NETSURF_UA_FORMAT_STRING)\"
+CFLAGS += -DNETSURFY_UA_FORMAT_STRING=\"$(NETSURFY_UA_FORMAT_STRING)\"
+CXXFLAGS += -DNETSURFY_UA_FORMAT_STRING=\"$(NETSURFY_UA_FORMAT_STRING)\"
 
 # set the default homepage to use
-CFLAGS += -DNETSURF_HOMEPAGE=\"$(NETSURF_HOMEPAGE)\"
-CXXFLAGS += -DNETSURF_HOMEPAGE=\"$(NETSURF_HOMEPAGE)\"
+CFLAGS += -DNETSURFY_HOMEPAGE=\"$(NETSURFY_HOMEPAGE)\"
+CXXFLAGS += -DNETSURFY_HOMEPAGE=\"$(NETSURFY_HOMEPAGE)\"
 
 # set the logging level
-CFLAGS += -DNETSURF_LOG_LEVEL=$(NETSURF_LOG_LEVEL)
-CXXFLAGS += -DNETSURF_LOG_LEVEL=$(NETSURF_LOG_LEVEL)
+CFLAGS += -DNETSURFY_LOG_LEVEL=$(NETSURFY_LOG_LEVEL)
+CXXFLAGS += -DNETSURFY_LOG_LEVEL=$(NETSURFY_LOG_LEVEL)
 
 # If we're building the sanitize goal, override things
 ifneq ($(filter-out sanitize,$(MAKECMDGOALS)),$(MAKECMDGOALS))
-override NETSURF_USE_SANITIZER := YES
-override NETSURF_RECOVER_SANITIZERS := NO
+override NETSURFY_USE_SANITIZER := YES
+override NETSURFY_RECOVER_SANITIZERS := NO
 endif
 
 # If we're going to use the sanitizer set it up
-ifeq ($(NETSURF_USE_SANITIZER),YES)
+ifeq ($(NETSURFY_USE_SANITIZER),YES)
 SAN_FLAGS := -fsanitize=address -fsanitize=undefined
-ifeq ($(NETSURF_RECOVER_SANITIZERS),NO)
+ifeq ($(NETSURFY_RECOVER_SANITIZERS),NO)
 SAN_FLAGS += -fno-sanitize-recover
 endif
 else
@@ -201,11 +198,11 @@ CXXFLAGS += $(SAN_FLAGS)
 LDFLAGS += $(SAN_FLAGS)
 
 # and the logging filter
-CFLAGS += -DNETSURF_BUILTIN_LOG_FILTER=\"$(NETSURF_BUILTIN_LOG_FILTER)\"
-CXXFLAGS += -DNETSURF_BUILTIN_LOG_FILTER=\"$(NETSURF_BUILTIN_LOG_FILTER)\"
+CFLAGS += -DNETSURFY_BUILTIN_LOG_FILTER=\"$(NETSURFY_BUILTIN_LOG_FILTER)\"
+CXXFLAGS += -DNETSURFY_BUILTIN_LOG_FILTER=\"$(NETSURFY_BUILTIN_LOG_FILTER)\"
 # and the verbose logging filter
-CFLAGS += -DNETSURF_BUILTIN_VERBOSE_FILTER=\"$(NETSURF_BUILTIN_VERBOSE_FILTER)\"
-CXXFLAGS += -DNETSURF_BUILTIN_VERBOSE_FILTER=\"$(NETSURF_BUILTIN_VERBOSE_FILTER)\"
+CFLAGS += -DNETSURFY_BUILTIN_VERBOSE_FILTER=\"$(NETSURFY_BUILTIN_VERBOSE_FILTER)\"
+CXXFLAGS += -DNETSURFY_BUILTIN_VERBOSE_FILTER=\"$(NETSURFY_BUILTIN_VERBOSE_FILTER)\"
 
 # Determine if the C compiler supports statement expressions
 # This is needed to permit certain optimisations in our library headers
@@ -311,7 +308,7 @@ fmt:
 SOURCES := $(SOURCES)
 
 ifeq ($(SOURCES),)
-$(error Unable to build NetSurf, could not determine set of sources to build)
+$(error Unable to build NetSurfy, could not determine set of sources to build)
 endif
 
 OBJECTS := $(sort $(addprefix $(OBJROOT)/,$(subst /,_,$(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(patsubst %.m,%.o,$(patsubst %.s,%.o,$(SOURCES))))))))
@@ -321,22 +318,11 @@ IFLAGS = $(addprefix -I,$(INCLUDE_DIRS))
 
 $(EXETARGET): $(OBJECTS) $(RESOURCES) $(MESSAGES) tools/linktrace-to-depfile.pl
 	$(VQ)echo "    LINK: $(EXETARGET)"
-ifneq ($(TARGET),riscos)
 	$(Q)$(CC) -o $(EXETARGET) $(OBJECTS) $(LDFLAGS) > $(DEPROOT)/link-raw.d
-else
-	@# RISC OS targets are a bit special: we need to convert ELF -> AIF
-  ifeq ($(SUBTARGET),-aof)
-	$(Q)$(CC) -o $(EXETARGET) $(OBJECTS) $(LDFLAGS) > $(DEPROOT)/link-raw.d
-  else
-	$(Q)$(CXX) -o $(EXETARGET:,ff8=,e1f) $(OBJECTS) $(LDFLAGS) > $(DEPROOT)/link-raw.d
-	$(Q)$(ELF2AIF) $(EXETARGET:,ff8=,e1f) $(EXETARGET)
-	$(Q)$(RM) $(EXETARGET:,ff8=,e1f)
-  endif
-endif
 	$(VQ)echo "LINKDEPS: $(EXETARGET)"
 	$(Q)echo -n "$(EXETARGET) $(DEPROOT)/link.d: " > $(DEPROOT)/link.d
 	$(Q)$(PERL) tools/linktrace-to-depfile.pl < $(DEPROOT)/link-raw.d >> $(DEPROOT)/link.d
-ifeq ($(NETSURF_STRIP_BINARY),YES)
+ifeq ($(NETSURFY_STRIP_BINARY),YES)
 	$(VQ)echo "   STRIP: $(EXETARGET)"
 	$(Q)$(STRIP) $(EXETARGET)
 endif
@@ -346,8 +332,8 @@ ifeq ($(TARGET),beos)
 	$(VQ)echo "  SETVER: $(EXETARGET)"
 	$(Q)$(BEOS_SETVER) $(EXETARGET) \
                 -app $(VERSION_MAJ) $(VERSION_MIN) 0 d 0 \
-                -short "NetSurf $(VERSION_FULL)" \
-                -long "NetSurf $(VERSION_FULL) © 2003 - 2021 The NetSurf Developers"
+                -short "NetSurfy $(VERSION_FULL)" \
+                -long "NetSurfy $(VERSION_FULL) © 2003 - 2021 The NetSurfy Developers"
 	$(VQ)echo " MIMESET: $(EXETARGET)"
 	$(Q)$(BEOS_MIMESET) $(EXETARGET)
 endif

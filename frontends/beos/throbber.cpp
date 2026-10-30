@@ -1,13 +1,13 @@
 /*
  * Copyright 2008 François Revol <mmu_man@users.sourceforge.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -50,10 +50,10 @@ bool nsbeos_throbber_initialise_from_png(const int frames, ...)
 
 	if (frames < 2) {
 		/* we need at least two frames - one for idle, one for active */
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Insufficent number of frames in throbber animation!");
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "(called with %d frames, where 2 is a minimum.)",
 		      frames);
@@ -62,7 +62,7 @@ bool nsbeos_throbber_initialise_from_png(const int frames, ...)
 
 	BResources *res = get_app_resources();
 	if (res == NULL) {
-		NSLOG(netsurf, INFO, "Can't find resources for throbber!");
+		NSLOG(netsurfy, INFO, "Can't find resources for throbber!");
 		return false;
 	}
 
@@ -80,7 +80,7 @@ bool nsbeos_throbber_initialise_from_png(const int frames, ...)
 		data = res->LoadResource('data', fn, &size);
 		throb->framedata[i] = NULL;
 		if (!data) {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "Error when loading resource %s",
 			      fn);
@@ -90,7 +90,7 @@ bool nsbeos_throbber_initialise_from_png(const int frames, ...)
 		BMemoryIO mem(data, size);
 		throb->framedata[i] = BTranslationUtils::GetBitmap(&mem);
 		if (throb->framedata[i] == NULL) {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "Error when loading %s: GetBitmap() returned NULL",
 			      fn);

@@ -1,13 +1,13 @@
 /*
  * Copyright 2012 Ole Loots <ole@monochrom.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -31,10 +31,10 @@
 #include "utils/nsoption.h"
 #include "utils/nsurl.h"
 #include "utils/utf8.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/mouse.h"
-#include "netsurf/plotters.h"
-#include "netsurf/keypress.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/mouse.h"
+#include "netsurfy/plotters.h"
+#include "netsurfy/keypress.h"
 #include "desktop/browser_history.h"
 #include "desktop/hotlist.h"
 #include "desktop/textarea.h"
@@ -48,7 +48,7 @@
 #include "atari/misc.h"
 #include "atari/plot/plot.h"
 #include "cflib.h"
-#include "atari/res/netsurf.rsh"
+#include "atari/res/netsurfy.rsh"
 #include "atari/encoding.h"
 
 
@@ -252,7 +252,7 @@ struct s_toolbar *toolbar_create(struct s_gui_win_root *owner)
 	int i;
 	struct s_toolbar *t;
 
-	NSLOG(netsurf, INFO, "owner %p", owner);
+	NSLOG(netsurfy, INFO, "owner %p", owner);
 
 	assert(init == true);
 
@@ -310,7 +310,7 @@ struct s_toolbar *toolbar_create(struct s_gui_win_root *owner)
 	t->throbber.max_index = THROBBER_MAX_INDEX;
 	t->throbber.running = false;
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "created toolbar: %p, root: %p, textarea: %p, throbber: %p",
 	      t,
@@ -454,7 +454,7 @@ void toolbar_update_buttons(struct s_toolbar *tb,
 			    struct browser_window *bw,
 			    short button)
 {
-	NSLOG(netsurf, INFO, "tb %p", tb);
+	NSLOG(netsurfy, INFO, "tb %p", tb);
 
 	struct s_tb_button *bt;
 	bool enable = false;
@@ -577,7 +577,7 @@ void toolbar_set_dimensions(struct s_toolbar *tb, GRECT *area)
 
 void toolbar_set_url(struct s_toolbar *tb, const char *text)
 {
-	NSLOG(netsurf, INFO, "tb %p", tb);
+	NSLOG(netsurfy, INFO, "tb %p", tb);
 
 	textarea_set_text(tb->url.textarea, text);
 
@@ -662,7 +662,7 @@ bool toolbar_text_input(struct s_toolbar *tb, char *text)
 {
 	bool handled = true;
 
-	NSLOG(netsurf, INFO, "tb %p", tb);
+	NSLOG(netsurfy, INFO, "tb %p", tb);
 
 	return (handled);
 }
@@ -758,7 +758,7 @@ void toolbar_mouse_input(struct s_toolbar *tb, short obj, short button)
 	short mx, my, mb, kstat;
 	struct gui_window *gw;
 
-	NSLOG(netsurf, INFO, "tb %p", tb);
+	NSLOG(netsurfy, INFO, "tb %p", tb);
 
 
 	if (obj == TOOLBAR_AREA_URL) {
@@ -989,7 +989,7 @@ void toolbar_home_click(struct s_toolbar *tb)
 
 	use_url = nsoption_charp(homepage_url);
 	if (use_url == NULL || strlen(use_url) == 0) {
-		use_url = (char *)"about:welcome";
+		use_url = (char *)"https://duckduckgo.com";
 	}
 
 	if (nsurl_create(use_url, &url) != NSERROR_OK) {

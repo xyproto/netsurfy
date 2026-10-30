@@ -2,13 +2,13 @@
  * Copyright 2005 Adrian Lees <adrianl@users.sourceforge.net>
  * Copyright 2008 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -25,9 +25,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "netsurf/clipboard.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/window.h"
+#include "netsurfy/clipboard.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/window.h"
 #include "utils/utils.h"
 #include "content/content_protected.h"
 

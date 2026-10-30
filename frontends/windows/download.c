@@ -1,13 +1,13 @@
 /*
  * Copyright 2009 Mark Benjamin <netsurf-browser.org.MarkBenjamin@dfgh.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -36,7 +36,7 @@
 #include "utils/utils.h"
 #include "utils/string.h"
 #include "content/fetch.h"
-#include "netsurf/download.h"
+#include "netsurfy/download.h"
 #include "desktop/download.h"
 
 #include "windows/download.h"
@@ -266,7 +266,7 @@ gui_download_window_create(download_context *ctx, struct gui_window *gui)
 		strcat(destination, "/");
 	if (strlen(destination) + strlen(filename) < PATH_MAX - 1)
 		strcat(destination, filename);
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "download %s [%s] from %s to %s",
 	      filename,
@@ -332,7 +332,7 @@ static nserror gui_download_window_data(struct gui_download_window *w,
 	struct timeval val;
 	res = fwrite((void *)data, 1, size, w->file);
 	if (res != size)
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "file write error %d of %d",
 		      size - res,
@@ -351,7 +351,7 @@ static nserror gui_download_window_data(struct gui_download_window *w,
 static void
 gui_download_window_error(struct gui_download_window *w, const char *error_msg)
 {
-	NSLOG(netsurf, INFO, "error %s", error_msg);
+	NSLOG(netsurfy, INFO, "error %s", error_msg);
 }
 
 static void gui_download_window_done(struct gui_download_window *w)

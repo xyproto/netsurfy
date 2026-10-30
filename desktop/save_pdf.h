@@ -1,13 +1,13 @@
 /*
  * Copyright 2008 Adam Blokus <adamblokus@gmail.com>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -20,8 +20,8 @@
 	PDF Plotting
 */
 
-#ifndef NETSURF_PDF_PLOTTERS_H
-#define NETSURF_PDF_PLOTTERS_H
+#ifndef NETSURFY_PDF_PLOTTERS_H
+#define NETSURFY_PDF_PLOTTERS_H
 
 #include "desktop/print.h"
 
@@ -38,4 +38,4 @@ void pdf_end(void);
 
 nserror save_pdf(const char *path);
 
-#endif /*NETSURF_PDF_PLOTTERS_H*/
+#endif /*NETSURFY_PDF_PLOTTERS_H*/

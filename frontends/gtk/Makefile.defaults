@@ -2,41 +2,41 @@
 # GTK-specific options
 # ----------------------------------------------------------------------------
 
-# Where to search for NetSurf's resources after looking in ~/.netsurf and
-# $NETSURFRES.  It must have a trailing /
-NETSURF_GTK_RES_PATH := $(PREFIX)/share/netsurf/:./frontends/gtk/res/
+# Where to search for NetSurfy's resources after looking in ~/.netsurfy and
+# $NETSURFYRES.  It must have a trailing /
+NETSURFY_GTK_RES_PATH := $(PREFIX)/share/netsurfy/:./frontends/gtk/res/
 
-# Where to install the netsurf binary
-NETSURF_GTK_BIN := $(PREFIX)/bin/
+# Where to install the netsurfy binary
+NETSURFY_GTK_BIN := $(PREFIX)/bin/
 
-# Enable NetSurf's use of librsvg in conjunction with Cairo to display SVGs
+# Enable NetSurfy's use of librsvg in conjunction with Cairo to display SVGs
 # Valid options: YES, NO, AUTO
-NETSURF_USE_RSVG := AUTO
+NETSURFY_USE_RSVG := AUTO
 
-# Enable NetSurf's use of libsvgtiny for displaying SVGs
+# Enable NetSurfy's use of libsvgtiny for displaying SVGs
 # Valid options: YES, NO, AUTO
-NETSURF_USE_NSSVG := AUTO
+NETSURFY_USE_NSSVG := AUTO
 
-# Enable NetSurf's use of librosprite for displaying RISC OS Sprites
+# Enable NetSurfy's use of librosprite for displaying RISC OS Sprites
 # Valid options: YES, NO, AUTO
-NETSURF_USE_ROSPRITE := AUTO
+NETSURFY_USE_ROSPRITE := AUTO
 
 # Enable the use of GLib compiled in resource handling. This requires
 #  GLib 2.32 or later
 # Valid options: YES, NO, AUTO
-NETSURF_USE_GRESOURCE := AUTO
+NETSURFY_USE_GRESOURCE := AUTO
 
 # Enable the use of compiled in inline pixbuf. This is depricated
 #  since GLib 2.32. The automatic selection is disabled if GRESOURCE
 #  handling is enabled
 # Valid options: YES, NO, AUTO
-NETSURF_USE_INLINE_PIXBUF := AUTO
+NETSURFY_USE_INLINE_PIXBUF := AUTO
 
 # Enable building the source object cache filesystem based backing store.
-NETSURF_FS_BACKING_STORE := YES
+NETSURFY_FS_BACKING_STORE := YES
 
 # GTK version to build for
-NETSURF_GTK_MAJOR ?= 4
+NETSURFY_GTK_MAJOR ?= 4
 
 # Optimisation levels
 CFLAGS += -O2

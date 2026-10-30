@@ -1,13 +1,13 @@
 /*
  * Copyright 2021 Vincemt Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -18,7 +18,7 @@
 
 /**
  * \file
- * Implementation of netsurf miscellaneous operations table
+ * Implementation of netsurfy miscellaneous operations table
  */
 
 #include <string.h>
@@ -30,7 +30,7 @@
 #include "utils/log.h"
 #include "utils/messages.h"
 #include "utils/nsurl.h"
-#include "netsurf/misc.h"
+#include "netsurfy/misc.h"
 #include "desktop/save_pdf.h"
 
 #include "gtk/compat.h"
@@ -136,7 +136,7 @@ static void nsgtk_pdf_password(char **owner_pass, char **user_pass, char *path)
 
 	res = nsgtk_builder_new_from_resname("password", &password_builder);
 	if (res != NSERROR_OK) {
-		NSLOG(netsurf, INFO, "Password UI builder init failed");
+		NSLOG(netsurfy, INFO, "Password UI builder init failed");
 		return;
 	}
 

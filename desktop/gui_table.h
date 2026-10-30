@@ -1,13 +1,13 @@
 /*
  * Copyright 2014 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -21,11 +21,11 @@
  * top level interface table.
  *
  * \note This should probably not be included directly but rather
- * through netsurf.h or gui_internal.h
+ * through netsurfy.h or gui_internal.h
  */
 
-#ifndef _NETSURF_DESKTOP_GUI_TABLE_H_
-#define _NETSURF_DESKTOP_GUI_TABLE_H_
+#ifndef _NETSURFY_DESKTOP_GUI_TABLE_H_
+#define _NETSURFY_DESKTOP_GUI_TABLE_H_
 
 struct gui_misc_table;
 struct gui_window_table;
@@ -41,11 +41,11 @@ struct gui_bitmap_table;
 struct gui_layout_table;
 
 /**
- * NetSurf operation function table
+ * NetSurfy operation function table
  *
  * Function table implementing interface operations for the browser core.
  */
-struct netsurf_table {
+struct netsurfy_table {
 
 	/**
 	 * Browser table.

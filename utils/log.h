@@ -2,13 +2,13 @@
  * Copyright 2003 James Bursa <bursa@users.sourceforge.net>
  * Copyright 2004 John Tytgat <joty@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -17,8 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NETSURF_LOG_H
-#define NETSURF_LOG_H
+#ifndef NETSURFY_LOG_H
+#define NETSURFY_LOG_H
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -65,19 +65,19 @@ extern nserror nslog_set_filter(const char *filter);
 extern nserror nslog_set_filter_by_options(void);
 
 /* ensure a logging level is defined */
-#ifndef NETSURF_LOG_LEVEL
-#define NETSURF_LOG_LEVEL INFO
+#ifndef NETSURFY_LOG_LEVEL
+#define NETSURFY_LOG_LEVEL INFO
 #endif
 
 #define NSLOG_LVL(level) NSLOG_LEVEL_##level
 #define NSLOG_EVL(level) NSLOG_LVL(level)
-#define NSLOG_COMPILED_MIN_LEVEL NSLOG_EVL(NETSURF_LOG_LEVEL)
+#define NSLOG_COMPILED_MIN_LEVEL NSLOG_EVL(NETSURFY_LOG_LEVEL)
 
 #ifdef WITH_NSLOG
 
 #include <nslog/nslog.h>
 
-NSLOG_DECLARE_CATEGORY(netsurf);
+NSLOG_DECLARE_CATEGORY(netsurfy);
 NSLOG_DECLARE_CATEGORY(llcache);
 NSLOG_DECLARE_CATEGORY(fetch);
 NSLOG_DECLARE_CATEGORY(plot);

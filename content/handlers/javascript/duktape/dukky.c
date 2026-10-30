@@ -4,13 +4,13 @@
  * Copyright 2016 Michael Drake <tlsa@netsurf-browser.org>
  * Copyright 2016 John-Mark Bell <jmb@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -27,7 +27,7 @@
 #include <stdint.h>
 #include <nsutils/time.h>
 
-#include "netsurf/inttypes.h"
+#include "netsurfy/inttypes.h"
 #include "utils/utils.h"
 #include "utils/nsoption.h"
 #include "utils/log.h"
@@ -716,7 +716,7 @@ nserror js_newthread(jsheap *heap, void *win_priv, void *doc_priv, jsthread **th
 	duk_pop(CTX);
 	/* ... */
 
-	/* Now load the NetSurf table in */
+	/* Now load the NetSurfy table in */
 	/* ... */
 	duk_push_string(CTX, "generics.js");
 	/* ..., generics.js */
@@ -738,11 +738,11 @@ nserror js_newthread(jsheap *heap, void *win_priv, void *doc_priv, jsthread **th
 	/* ... */
 	duk_push_global_object(CTX);
 	/* ..., Win */
-	duk_get_prop_string(CTX, -1, "NetSurf");
-	/* ..., Win, NetSurf */
+	duk_get_prop_string(CTX, -1, "NetSurfy");
+	/* ..., Win, NetSurfy */
 	duk_put_global_string(CTX, GENERICS_MAGIC);
 	/* ..., Win */
-	duk_del_prop_string(CTX, -1, "NetSurf");
+	duk_del_prop_string(CTX, -1, "NetSurfy");
 	duk_pop(CTX);
 	/* ... */
 

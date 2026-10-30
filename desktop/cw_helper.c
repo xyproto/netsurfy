@@ -2,13 +2,13 @@
  * Copyright 2019 Daniel Silverstone <dsilvers@netsurf-browser.org>
  * Copyright 2019 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -24,9 +24,9 @@
  */
 
 #include "utils/errors.h"
-#include "netsurf/browser.h"
-#include "netsurf/core_window.h"
-#include "netsurf/types.h"
+#include "netsurfy/browser.h"
+#include "netsurfy/core_window.h"
+#include "netsurfy/types.h"
 #include "css/utils.h"
 #include "desktop/cw_helper.h"
 #include "desktop/gui_internal.h"

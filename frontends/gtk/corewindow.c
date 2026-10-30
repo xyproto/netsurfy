@@ -1,13 +1,13 @@
 /*
  * Copyright 2016 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -41,9 +41,9 @@
 #include "utils/log.h"
 #include "utils/messages.h"
 #include "utils/utf8.h"
-#include "netsurf/types.h"
-#include "netsurf/keypress.h"
-#include "netsurf/mouse.h"
+#include "netsurfy/types.h"
+#include "netsurfy/keypress.h"
+#include "netsurfy/mouse.h"
 
 #include "gtk/compat.h"
 #include "gtk/gui.h" /* just for gtk_gui_gdkkey_to_nskey */
@@ -51,10 +51,10 @@
 #include "gtk/corewindow.h"
 
 /**
- * Convert GDK mouse event to netsurf mouse state
+ * Convert GDK mouse event to netsurfy mouse state
  *
  * \param event The GDK mouse event to convert.
- * \return The netsurf mouse state.
+ * \return The netsurfy mouse state.
  */
 static browser_mouse_state
 nsgtk_cw_gdkbutton_to_nsstate(guint button, gint n_press, GdkModifierType state)
@@ -299,7 +299,7 @@ static void nsgtk_cw_motion_notify_event(GtkEventControllerMotion *controller,
  * Deal with keypress events not handled buy input method or callback
  *
  * \param nsgtk_cw nsgtk core window key event happened in.
- * \param nskey The netsurf keycode of the event.
+ * \param nskey The netsurfy keycode of the event.
  * \return NSERROR_OK on success otherwise an error code.
  */
 static nserror nsgtk_cw_key(struct nsgtk_corewindow *nsgtk_cw, uint32_t nskey)
@@ -414,14 +414,14 @@ static gboolean nsgtk_cw_keypress_event(GtkEventControllerKey *controller,
 	if (res == NSERROR_OK) {
 		return TRUE;
 	} else if (res != NSERROR_NOT_IMPLEMENTED) {
-		NSLOG(netsurf, INFO, "%s", messages_get_errorcode(res));
+		NSLOG(netsurfy, INFO, "%s", messages_get_errorcode(res));
 		return FALSE;
 	}
 
 	/* deal with unprocessed keypress */
 	res = nsgtk_cw_key(nsgtk_cw, nskey);
 	if (res != NSERROR_OK) {
-		NSLOG(netsurf, INFO, "%s", messages_get_errorcode(res));
+		NSLOG(netsurfy, INFO, "%s", messages_get_errorcode(res));
 		return FALSE;
 	}
 	return TRUE;

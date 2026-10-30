@@ -2,13 +2,13 @@
  * Copyright 2008 Adam Blokus <adamblokus@gmail.com>
  * Copyright 2009 John Tytgat <joty@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -60,9 +60,9 @@
 #include "utils/useragent.h"
 #include "content/hlcache.h"
 #include "utils/nsoption.h"
-#include "netsurf/bitmap.h"
+#include "netsurfy/bitmap.h"
 
-#include "netsurf/plotters.h"
+#include "netsurfy/plotters.h"
 #include "desktop/print.h"
 #include "desktop/printer.h"
 
@@ -194,7 +194,7 @@ bool pdf_plot_rectangle(int x0,
 {
 	DashPattern_e dash;
 #ifdef PDF_DEBUG
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "%d %d %d %d %f %X",
 	      x0,
@@ -297,7 +297,7 @@ bool pdf_plot_polygon(const int *p, unsigned int n, const plot_style_t *style)
 #ifdef PDF_DEBUG
 	int pmaxx = p[0], pmaxy = p[1];
 	int pminx = p[0], pminy = p[1];
-	NSLOG(netsurf, INFO, ".");
+	NSLOG(netsurfy, INFO, ".");
 #endif
 	if (n == 0)
 		return true;
@@ -322,7 +322,7 @@ bool pdf_plot_polygon(const int *p, unsigned int n, const plot_style_t *style)
 	}
 
 #ifdef PDF_DEBUG
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "%d %d %d %d %f",
 	      pminx,
@@ -342,7 +342,7 @@ bool pdf_plot_polygon(const int *p, unsigned int n, const plot_style_t *style)
 bool pdf_plot_clip(const struct rect *clip)
 {
 #ifdef PDF_DEBUG
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "%d %d %d %d",
 	      clip->x0,
@@ -371,7 +371,7 @@ bool pdf_plot_text(int x,
 		   const plot_font_style_t *fstyle)
 {
 #ifdef PDF_DEBUG
-	NSLOG(netsurf, INFO, ". %d %d %.*s", x, y, (int)length, text);
+	NSLOG(netsurfy, INFO, ". %d %d %.*s", x, y, (int)length, text);
 #endif
 	char *word;
 	HPDF_Font pdf_font;
@@ -407,7 +407,7 @@ bool pdf_plot_text(int x,
 bool pdf_plot_disc(int x, int y, int radius, const plot_style_t *style)
 {
 #ifdef PDF_DEBUG
-	NSLOG(netsurf, INFO, ".");
+	NSLOG(netsurfy, INFO, ".");
 #endif
 	if (style->fill_type != PLOT_OP_TYPE_NONE) {
 		apply_clip_and_mode(false,
@@ -445,7 +445,7 @@ bool pdf_plot_arc(int x,
 		  const plot_style_t *style)
 {
 #ifdef PDF_DEBUG
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "%d %d %d %d %d %X",
 	      x,
@@ -489,7 +489,7 @@ bool pdf_plot_bitmap_tile(int x,
 	HPDF_REAL max_width, max_height;
 
 #ifdef PDF_DEBUG
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "%d %d %d %d %p 0x%x",
 	      x,
@@ -580,7 +580,7 @@ HPDF_Image pdf_extract_image(struct bitmap *bitmap)
 						     img_height);
 		alpha_buffer = (unsigned char *)malloc(img_width * img_height);
 		if (rgb_buffer == NULL || alpha_buffer == NULL) {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "Not enough memory to create RGB buffer");
 			free(rgb_buffer);
@@ -724,7 +724,7 @@ bool pdf_plot_path(const float *p,
 	bool empty_path;
 
 #ifdef PDF_DEBUG
-	NSLOG(netsurf, INFO, ".");
+	NSLOG(netsurfy, INFO, ".");
 #endif
 
 	if (n == 0)
@@ -769,7 +769,7 @@ bool pdf_plot_path(const float *p,
 			i += 7;
 			empty_path = false;
 		} else {
-			NSLOG(netsurf, INFO, "bad path command %f", p[i]);
+			NSLOG(netsurfy, INFO, "bad path command %f", p[i]);
 			return false;
 		}
 	}
@@ -804,7 +804,7 @@ bool pdf_begin(struct print_settings *print_settings)
 		HPDF_Free(pdf_doc);
 	pdf_doc = HPDF_New(error_handler, NULL);
 	if (!pdf_doc) {
-		NSLOG(netsurf, INFO, "Error creating pdf_doc");
+		NSLOG(netsurfy, INFO, "Error creating pdf_doc");
 		return false;
 	}
 
@@ -828,7 +828,7 @@ bool pdf_begin(struct print_settings *print_settings)
 	pdf_page = NULL;
 
 #ifdef PDF_DEBUG
-	NSLOG(netsurf, INFO, "pdf_begin finishes");
+	NSLOG(netsurfy, INFO, "pdf_begin finishes");
 #endif
 	return true;
 }
@@ -837,7 +837,7 @@ bool pdf_begin(struct print_settings *print_settings)
 bool pdf_next_page(void)
 {
 #ifdef PDF_DEBUG
-	NSLOG(netsurf, INFO, "pdf_next_page begins");
+	NSLOG(netsurfy, INFO, "pdf_next_page begins");
 #endif
 	clip_update_needed = false;
 	if (pdf_page != NULL) {
@@ -873,7 +873,7 @@ bool pdf_next_page(void)
 	pdfw_gs_save(pdf_page);
 
 #ifdef PDF_DEBUG
-	NSLOG(netsurf, INFO, "%f %f", page_width, page_height);
+	NSLOG(netsurfy, INFO, "%f %f", page_width, page_height);
 #endif
 
 	return true;
@@ -883,7 +883,7 @@ bool pdf_next_page(void)
 void pdf_end(void)
 {
 #ifdef PDF_DEBUG
-	NSLOG(netsurf, INFO, "pdf_end begins");
+	NSLOG(netsurfy, INFO, "pdf_end begins");
 #endif
 	clip_update_needed = false;
 	if (pdf_page != NULL) {
@@ -912,7 +912,7 @@ void pdf_end(void)
 	else
 		save_pdf(settings->output);
 #ifdef PDF_DEBUG
-	NSLOG(netsurf, INFO, "pdf_end finishes");
+	NSLOG(netsurfy, INFO, "pdf_end finishes");
 #endif
 }
 
@@ -951,7 +951,7 @@ nserror save_pdf(const char *path)
 static void
 error_handler(HPDF_STATUS error_no, HPDF_STATUS detail_no, void *user_data)
 {
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "ERROR:\n\terror_no=%x\n\tdetail_no=%d\n",
 	      (HPDF_UINT)error_no,

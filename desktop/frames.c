@@ -1,13 +1,13 @@
 /*
  * Copyright 2006 Richard Wilson <info@tinct.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -31,7 +31,7 @@
 
 #include "utils/log.h"
 #include "utils/utils.h"
-#include "netsurf/content.h"
+#include "netsurfy/content.h"
 #include "content/hlcache.h"
 #include "html/html.h"
 #include "html/box.h"
@@ -646,12 +646,12 @@ browser_window_create_frameset_internal(struct browser_window *bw,
 			window->parent = bw;
 
 			if (window->name)
-				NSLOG(netsurf,
+				NSLOG(netsurfy,
 				      INFO,
 				      "Created frame '%s'",
 				      window->name);
 			else
-				NSLOG(netsurf, INFO, "Created frame (unnamed)");
+				NSLOG(netsurfy, INFO, "Created frame (unnamed)");
 		}
 	}
 

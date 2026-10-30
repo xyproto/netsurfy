@@ -1,13 +1,13 @@
 /*
  * Copyright 2012 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -33,7 +33,7 @@
 #include "utils/corestrings.h"
 #include "utils/log.h"
 #include "utils/messages.h"
-#include "netsurf/content.h"
+#include "netsurfy/content.h"
 #include "javascript/js.h"
 #include "content/content_protected.h"
 #include "content/content_factory.h"
@@ -184,18 +184,18 @@ static nserror convert_script_async_cb(hlcache_handle *script,
 		break;
 
 	case CONTENT_MSG_DONE:
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "script %d done '%s'",
 		      i,
 		      nsurl_access(hlcache_handle_get_url(script)));
 		parent->base.active--;
-		NSLOG(netsurf, INFO, "%d fetches active", parent->base.active);
+		NSLOG(netsurfy, INFO, "%d fetches active", parent->base.active);
 
 		break;
 
 	case CONTENT_MSG_ERROR:
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "script %s failed: %s",
 		      nsurl_access(hlcache_handle_get_url(script)),
@@ -204,7 +204,7 @@ static nserror convert_script_async_cb(hlcache_handle *script,
 		hlcache_handle_release(script);
 		s->data.handle = NULL;
 		parent->base.active--;
-		NSLOG(netsurf, INFO, "%d fetches active", parent->base.active);
+		NSLOG(netsurfy, INFO, "%d fetches active", parent->base.active);
 
 		break;
 
@@ -251,18 +251,18 @@ static nserror convert_script_defer_cb(hlcache_handle *script,
 	switch (event->type) {
 
 	case CONTENT_MSG_DONE:
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "script %d done '%s'",
 		      i,
 		      nsurl_access(hlcache_handle_get_url(script)));
 		parent->base.active--;
-		NSLOG(netsurf, INFO, "%d fetches active", parent->base.active);
+		NSLOG(netsurfy, INFO, "%d fetches active", parent->base.active);
 
 		break;
 
 	case CONTENT_MSG_ERROR:
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "script %s failed: %s",
 		      nsurl_access(hlcache_handle_get_url(script)),
@@ -271,7 +271,7 @@ static nserror convert_script_defer_cb(hlcache_handle *script,
 		hlcache_handle_release(script);
 		s->data.handle = NULL;
 		parent->base.active--;
-		NSLOG(netsurf, INFO, "%d fetches active", parent->base.active);
+		NSLOG(netsurfy, INFO, "%d fetches active", parent->base.active);
 
 		break;
 
@@ -321,13 +321,13 @@ static nserror convert_script_sync_cb(hlcache_handle *script,
 
 	switch (event->type) {
 	case CONTENT_MSG_DONE:
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "script %d done '%s'",
 		      i,
 		      nsurl_access(hlcache_handle_get_url(script)));
 		parent->base.active--;
-		NSLOG(netsurf, INFO, "%d fetches active", parent->base.active);
+		NSLOG(netsurfy, INFO, "%d fetches active", parent->base.active);
 
 		s->already_started = true;
 
@@ -350,7 +350,7 @@ static nserror convert_script_sync_cb(hlcache_handle *script,
 		if (parent->parser != NULL && active_sync_scripts == 0) {
 			err = dom_hubbub_parser_pause(parent->parser, false);
 			if (err != DOM_HUBBUB_OK) {
-				NSLOG(netsurf,
+				NSLOG(netsurfy,
 				      INFO,
 				      "unpause returned 0x%x",
 				      err);
@@ -360,7 +360,7 @@ static nserror convert_script_sync_cb(hlcache_handle *script,
 		break;
 
 	case CONTENT_MSG_ERROR:
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "script %s failed: %s",
 		      nsurl_access(hlcache_handle_get_url(script)),
@@ -370,7 +370,7 @@ static nserror convert_script_sync_cb(hlcache_handle *script,
 		s->data.handle = NULL;
 		parent->base.active--;
 
-		NSLOG(netsurf, INFO, "%d fetches active", parent->base.active);
+		NSLOG(netsurfy, INFO, "%d fetches active", parent->base.active);
 
 		s->already_started = true;
 
@@ -378,7 +378,7 @@ static nserror convert_script_sync_cb(hlcache_handle *script,
 		if (parent->parser != NULL && active_sync_scripts == 0) {
 			err = dom_hubbub_parser_pause(parent->parser, false);
 			if (err != DOM_HUBBUB_OK) {
-				NSLOG(netsurf,
+				NSLOG(netsurfy,
 				      INFO,
 				      "unpause returned 0x%x",
 				      err);
@@ -427,7 +427,7 @@ static dom_hubbub_error exec_src_script(html_content *c,
 		return DOM_HUBBUB_NOMEM;
 	}
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "script %i '%s'",
 	      c->scripts_count,
@@ -516,11 +516,11 @@ static dom_hubbub_error exec_src_script(html_content *c,
 		 */
 		/* mark duff script fetch as already started */
 		nscript->already_started = true;
-		NSLOG(netsurf, INFO, "Fetch failed with error %d", ns_error);
+		NSLOG(netsurfy, INFO, "Fetch failed with error %d", ns_error);
 	} else {
 		/* update base content active fetch count */
 		c->base.active++;
-		NSLOG(netsurf, INFO, "%d fetches active", c->base.active);
+		NSLOG(netsurfy, INFO, "%d fetches active", c->base.active);
 
 		switch (script_type) {
 		case HTML_SCRIPT_SYNC:
@@ -608,14 +608,14 @@ dom_hubbub_error html_process_script(void *ctx, dom_node *node)
 
 		msg_data.jsthread = &c->jsthread;
 		content_broadcast(&c->base, CONTENT_MSG_GETTHREAD, &msg_data);
-		NSLOG(netsurf, INFO, "javascript context %p ", c->jsthread);
+		NSLOG(netsurfy, INFO, "javascript context %p ", c->jsthread);
 		if (c->jsthread == NULL) {
 			/* no context and it could not be created, abort */
 			return DOM_HUBBUB_OK;
 		}
 	}
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "content %p parser %p node %p",
 	      c,

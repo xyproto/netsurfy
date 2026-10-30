@@ -1,13 +1,13 @@
 /*
  * Copyright 2014 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -29,7 +29,7 @@
 #include "utils/log.h"
 #include "utils/filepath.h"
 #include "utils/file.h"
-#include "netsurf/fetch.h"
+#include "netsurfy/fetch.h"
 
 #include "framebuffer/findfile.h"
 #include "framebuffer/fetch.h"
@@ -54,7 +54,7 @@ static nsurl *get_resource_url(const char *path)
 	if (strcmp(path, "favicon.ico") == 0)
 		path = "favicon.png";
 
-	netsurf_path_to_nsurl(filepath_sfind(respaths, buf, path), &url);
+	netsurfy_path_to_nsurl(filepath_sfind(respaths, buf, path), &url);
 
 	return url;
 }
@@ -65,7 +65,7 @@ static nsurl *get_resource_url(const char *path)
 static const char *fetch_filetype(const char *unix_path)
 {
 	int l;
-	NSLOG(netsurf, INFO, "unix path %s", unix_path);
+	NSLOG(netsurfy, INFO, "unix path %s", unix_path);
 	l = strlen(unix_path);
 	if (2 < l && strcasecmp(unix_path + l - 3, "css") == 0)
 		return "text/css";

@@ -1,13 +1,13 @@
 /*
  * Copyright 2004 James Bursa <bursa@users.sourceforge.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -31,13 +31,13 @@
  * file table.  Use the _ctx versions of the functions to do this.
  */
 
-#ifndef NETSURF_UTILS_MESSAGES_H_
-#define NETSURF_UTILS_MESSAGES_H_
+#ifndef NETSURFY_UTILS_MESSAGES_H_
+#define NETSURFY_UTILS_MESSAGES_H_
 
 #include <stdint.h>
 
 #include "utils/errors.h"
-#include "netsurf/ssl_certs.h"
+#include "netsurfy/ssl_certs.h"
 
 /**
  * Read keys and values from messages file into the standard Messages hash.

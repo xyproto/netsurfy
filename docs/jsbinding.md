@@ -48,12 +48,12 @@ The IDL uses some slightly different terms than other object orientated
 JavaScript implementation
 -------------------------
 
-NetSurf consumes the Duktape JS engine in order to run the JS code which
+NetSurfy consumes the Duktape JS engine in order to run the JS code which
 is used within the browser.  Duktape is exceedingly well documented and
 its API docs at https://duktape.org/api.html are incredibly useful.
 
 It'll be worthwhile learning about how duktape stacks work in order to
-work on bindings in NetSurf
+work on bindings in NetSurfy
 
 Dukky
 -----
@@ -85,18 +85,18 @@ engine.
 
 The bindings are specific to a JavaScript engine, the DOM library, the
 CSS library and the browser. In this case that is the tuple of
-duktape, libdom, libcss and NetSurf.
+duktape, libdom, libcss and NetSurfy.
 
 In principle other engines or libraries could be substituted
-(historically NetSurf unsuccessfully tried to use spidermonkey) but the
+(historically NetSurfy unsuccessfully tried to use spidermonkey) but the
 engineering to do so is formidable.
 
-The bindings are kept the main [NetSurf source code
-repository](http://git.netsurf-browser.org/netsurf.git/) within the
+The bindings are kept the main [NetSurfy source code
+repository](https://github.com/xyproto/netsurfy) within the
 duktape JavaScript handler directory `content/handlers/javascript/duktape/`
 
 The root binding which contains all the interfaces introduced into
-the JavaScript programs initial execution context is nesurf.bnd this
+the JavaScript programs initial execution context is netsurfy.bnd, this
 references all the WebIDL to be bound and includes all additional
 binding definitions to implement the interfaces.
 
@@ -149,7 +149,7 @@ The getter and setter for the Window class attribute will be added to
     %{
     %}
 
-The top level `netsurf.bnd` binding includes `Window.bnd` (using a
+The top level `netsurfy.bnd` binding includes `Window.bnd` (using a
 `#include` directive) which contains the implementation of the Window
 class. This is purely to split the bindings up into logical units.
 
@@ -226,7 +226,7 @@ the attribute example used `Window.bnd`
             duk_pop(ctx);
             
             if (priv_win == NULL || priv_win->win == NULL) {
-                    NSLOG(netsurf, INFO, "failed to get browser context");
+                    NSLOG(netsurfy, INFO, "failed to get browser context");
                     return 0;
             }
             
@@ -287,7 +287,7 @@ The method binding will be added to `Window.bnd` as the attribute example
     %{
             duk_idx_t dukky_argc = duk_get_top(ctx);
             if (dukky_argc == 0) {
-                    NSLOG(netsurf, INFO, "JS ALERT");
+                    NSLOG(netsurfy, INFO, "JS ALERT");
             } else {
                     duk_size_t msg_len;
                     const char *msg;
@@ -296,7 +296,7 @@ The method binding will be added to `Window.bnd` as the attribute example
                             duk_to_string(ctx, 0);
                     }
                     msg = duk_safe_to_lstring(ctx, 0, &msg_len);
-                    NSLOG(netsurf, INFO, "JS ALERT: %*s", (int)msg_len, msg);
+                    NSLOG(netsurfy, INFO, "JS ALERT: %*s", (int)msg_len, msg);
 	    }
             return 0;
     %}

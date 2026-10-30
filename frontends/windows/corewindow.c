@@ -1,13 +1,13 @@
 /*
  * Copyright 2016 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -40,9 +40,9 @@
 #include "utils/log.h"
 #include "utils/messages.h"
 #include "utils/utf8.h"
-#include "netsurf/types.h"
-#include "netsurf/keypress.h"
-#include "netsurf/mouse.h"
+#include "netsurfy/types.h"
+#include "netsurfy/keypress.h"
+#include "netsurfy/mouse.h"
 
 #include "windows/windbg.h"
 #include "windows/corewindow.h"
@@ -152,7 +152,7 @@ static LRESULT nsw32_corewindow_vscroll(struct nsw32_corewindow *nsw32_cw,
 	SCROLLINFO si; /* current scroll information */
 	SCROLLINFO usi; /* updated scroll infomation for scrollwindowex */
 
-	NSLOG(netsurf, INFO, "VSCROLL");
+	NSLOG(netsurfy, INFO, "VSCROLL");
 
 	si.cbSize = sizeof(si);
 	si.fMask = SIF_ALL;
@@ -226,7 +226,7 @@ static LRESULT nsw32_corewindow_hscroll(struct nsw32_corewindow *nsw32_cw,
 	SCROLLINFO si; /* current scroll information */
 	SCROLLINFO usi; /* updated scroll infomation for scrollwindowex */
 
-	NSLOG(netsurf, INFO, "VSCROLL");
+	NSLOG(netsurfy, INFO, "VSCROLL");
 
 	si.cbSize = sizeof(si);
 	si.fMask = SIF_ALL;
@@ -450,7 +450,7 @@ nsw32_cw_update_size(struct core_window *cw, int width, int height)
 
 	nsw32_cw->content_width = width;
 	nsw32_cw->content_height = height;
-	NSLOG(netsurf, INFO, "new content size w:%d h:%d", width, height);
+	NSLOG(netsurfy, INFO, "new content size w:%d h:%d", width, height);
 
 	update_scrollbars(nsw32_cw);
 	return NSERROR_OK;
@@ -532,7 +532,7 @@ nserror nsw32_corewindow_init(HINSTANCE hInstance,
 			  WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CS_DBLCLKS;
 	}
 
-	NSLOG(netsurf, INFO, "creating hInstance %p core window", hInstance);
+	NSLOG(netsurfy, INFO, "creating hInstance %p core window", hInstance);
 	nsw32_cw->hWnd = CreateWindowEx(0,
 					windowclassname_corewindow,
 					nsw32_cw->title,
@@ -546,7 +546,7 @@ nserror nsw32_corewindow_init(HINSTANCE hInstance,
 					hInstance,
 					NULL);
 	if (nsw32_cw->hWnd == NULL) {
-		NSLOG(netsurf, INFO, "Window create failed");
+		NSLOG(netsurfy, INFO, "Window create failed");
 		return NSERROR_NOMEM;
 	}
 

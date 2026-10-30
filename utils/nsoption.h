@@ -1,13 +1,13 @@
 /*
  * Copyright 2012 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -35,13 +35,13 @@
  * pointer to the active options table and be implemented as functions
  * within nsoptions.c
  *
- * Indirect access would have an impact on performance of NetSurf as
+ * Indirect access would have an impact on performance of NetSurfy as
  * the expected option lookup cost is currently that of a simple
  * dereference (which this current implementation keeps).
  */
 
-#ifndef _NETSURF_UTILS_NSOPTION_H_
-#define _NETSURF_UTILS_NSOPTION_H_
+#ifndef _NETSURFY_UTILS_NSOPTION_H_
+#define _NETSURFY_UTILS_NSOPTION_H_
 
 #include <stdio.h>
 #include <stdint.h>
@@ -107,7 +107,7 @@ enum nsoption_type_e {
 	OPTION_INTEGER, /**< Option is an integer. */
 	OPTION_UINT, /**< Option is an unsigned integer */
 	OPTION_STRING, /**< option is a heap allocated string. */
-	OPTION_COLOUR /**< Option  is a netsurf colour. */
+	OPTION_COLOUR /**< Option  is a netsurfy colour. */
 };
 
 struct nsoption_s {
@@ -349,7 +349,7 @@ int nsoption_snoptionf(char *string,
 
 
 /**
- * Get the value of a netsurf colour option.
+ * Get the value of a netsurfy colour option.
  *
  * Gets the value of an option assuming it is a colour type.
  * @note option type is unchecked so care must be taken in caller.

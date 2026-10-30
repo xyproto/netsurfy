@@ -2,7 +2,7 @@
 <interface>
   <requires lib="gtk" version="4.0"/>
   <object class="GtkWindow" id="wndWarning">
-    <property name="title" translatable="1">Warning from NetSurf</property>
+    <property name="title" translatable="1">Warning from NetSurfy</property>
     <property name="icon-name">dialog-warning</property>
     <property name="hide-on-close">1</property>
     <property name="default-widget">button14</property>

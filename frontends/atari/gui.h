@@ -1,13 +1,13 @@
 /*
  * Copyright 2010 Ole Loots <ole@monochrom.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -22,7 +22,7 @@
 #include <stdbool.h>
 #include <mt_gem.h>
 
-#include "netsurf/mouse.h"
+#include "netsurfy/mouse.h"
 
 #include "atari/redrawslots.h"
 #include "atari/gemtk/gemtk.h"
@@ -130,9 +130,9 @@ struct s_browser {
 };
 
 /*
-	This is the part of the gui which is known by netsurf core.
+	This is the part of the gui which is known by netsurfy core.
 	You must implement it. Altough, you are free how to do it.
-	Each of the browser "viewports" managed by netsurf are bound
+	Each of the browser "viewports" managed by netsurfy are bound
 	to this structure.
 */
 struct gui_window {

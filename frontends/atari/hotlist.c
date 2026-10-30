@@ -1,13 +1,13 @@
 /*
  * Copyright 2013 Ole Loots <ole@monochrom.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -27,8 +27,8 @@
 #include "utils/messages.h"
 #include "utils/nsoption.h"
 #include "utils/nsurl.h"
-#include "netsurf/inttypes.h"
-#include "netsurf/keypress.h"
+#include "netsurfy/inttypes.h"
+#include "netsurfy/keypress.h"
 #include "content/content.h"
 #include "desktop/hotlist.h"
 
@@ -38,7 +38,7 @@
 #include "atari/hotlist.h"
 #include "atari/findfile.h"
 #include "atari/gemtk/gemtk.h"
-#include "atari/res/netsurf.rsh"
+#include "atari/res/netsurfy.rsh"
 
 extern GRECT desk_area;
 
@@ -71,13 +71,13 @@ static struct atari_treeview_callbacks atari_hotlist_treeview_callbacks = {
 
 static nserror atari_hotlist_init_phase2(struct core_window *cw)
 {
-	NSLOG(netsurf, INFO, "cw:%p", cw);
+	NSLOG(netsurfy, INFO, "cw:%p", cw);
 	return hotlist_manager_init(cw);
 }
 
 static void atari_hotlist_finish(struct core_window *cw)
 {
-	NSLOG(netsurf, INFO, "cw:%p", cw);
+	NSLOG(netsurfy, INFO, "cw:%p", cw);
 	hotlist_fini();
 }
 
@@ -94,7 +94,7 @@ static void atari_hotlist_keypress(struct core_window *cw, uint32_t ucs4)
 {
 	// GUIWIN *gemtk_win;
 	// GRECT area;
-	NSLOG(netsurf, INFO, "ucs4: %" PRIu32, ucs4);
+	NSLOG(netsurfy, INFO, "ucs4: %" PRIu32, ucs4);
 	hotlist_keypress(ucs4);
 	// gemtk_win = atari_treeview_get_gemtk_window(cw);
 	// atari_treeview_get_grect(cw, TREEVIEW_AREA_CONTENT, &area);
@@ -106,7 +106,7 @@ static void atari_hotlist_mouse_action(struct core_window *cw,
 				       int x,
 				       int y)
 {
-	NSLOG(netsurf, INFO, "x:  %d, y: %d\n", x, y);
+	NSLOG(netsurfy, INFO, "x:  %d, y: %d\n", x, y);
 
 	hotlist_mouse_action(mouse, x, y);
 }
@@ -124,7 +124,7 @@ static short handle_event(GUIWIN *win, EVMULT_OUT *ev_out, short msg[8])
 	GRECT tb_area;
 	GUIWIN *gemtk_win;
 
-	NSLOG(netsurf, INFO, "gw:%p", win);
+	NSLOG(netsurfy, INFO, "gw:%p", win);
 
 	tv = (struct atari_treeview_window *)gemtk_wm_get_user_data(win);
 	cw = (struct core_window *)tv;
@@ -133,7 +133,7 @@ static short handle_event(GUIWIN *win, EVMULT_OUT *ev_out, short msg[8])
 		switch (msg[0]) {
 
 		case WM_TOOLBAR:
-			NSLOG(netsurf, INFO, "WM_TOOLBAR");
+			NSLOG(netsurfy, INFO, "WM_TOOLBAR");
 
 			toolbar = gemtk_obj_get_tree(TOOLBAR_HOTLIST);
 
@@ -208,7 +208,7 @@ void atari_hotlist_init(void)
 				PATH_MAX - 1);
 		}
 
-		NSLOG(netsurf, INFO, "Hotlist: %s", (char *)&hl.path);
+		NSLOG(netsurfy, INFO, "Hotlist: %s", (char *)&hl.path);
 		hotlist_init(hl.path, hl.path);
 
 		if (hl.window == NULL) {
@@ -244,7 +244,7 @@ void atari_hotlist_init(void)
 			if (hl.tv == NULL) {
 				/* handle it properly, clean up previous allocs
 				 */
-				NSLOG(netsurf,
+				NSLOG(netsurfy,
 				      INFO,
 				      "Failed to allocate treeview");
 				return;
@@ -297,7 +297,7 @@ void atari_hotlist_destroy(void)
 		atari_treeview_delete(hl.tv);
 		hl.init = false;
 	}
-	NSLOG(netsurf, INFO, "done");
+	NSLOG(netsurfy, INFO, "done");
 }
 
 void atari_hotlist_redraw(void)
@@ -320,7 +320,7 @@ void atari_hotlist_add_page(const char *url, const char *title)
 		return;
 
 	if (hotlist_has_url(nsurl)) {
-		NSLOG(netsurf, INFO, "URL already added as Bookmark");
+		NSLOG(netsurfy, INFO, "URL already added as Bookmark");
 		nsurl_unref(nsurl);
 		return;
 	}

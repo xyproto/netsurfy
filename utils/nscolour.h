@@ -1,13 +1,13 @@
 /*
  * Copyright 2020 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -17,18 +17,18 @@
  */
 
 /** \file
- * NetSurf UI colours (interface).
+ * NetSurfy UI colours (interface).
  *
- * Interface to acquire common colours used throughout NetSurf's interface.
+ * Interface to acquire common colours used throughout NetSurfy's interface.
  */
 
-#ifndef _NETSURF_UTILS_NSCOLOUR_H_
-#define _NETSURF_UTILS_NSCOLOUR_H_
+#ifndef _NETSURFY_UTILS_NSCOLOUR_H_
+#define _NETSURFY_UTILS_NSCOLOUR_H_
 
-#include "netsurf/types.h"
+#include "netsurfy/types.h"
 
 /**
- * NetSurf UI colour key.
+ * NetSurfy UI colour key.
  */
 enum nscolour {
 	NSCOLOUR_WIN_ODD_BG,
@@ -60,7 +60,7 @@ enum nscolour {
 };
 
 /**
- * NetSurf UI colour table.
+ * NetSurfy UI colour table.
  */
 extern colour nscolours[];
 

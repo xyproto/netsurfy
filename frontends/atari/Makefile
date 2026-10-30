@@ -7,7 +7,7 @@
 # manually via env. variables, because the m68k-atari-mint
 # toolchain is located in /usr/bin and the wildcard matching
 # fails then. So this wildcard matches only works for
-# the netsurf environment!
+# the netsurfy environment!
 STRIP := $(wildcard $(GCCSDK_INSTALL_CROSSBIN)/*-strip)
 STACK := $(wildcard $(GCCSDK_INSTALL_CROSSBIN)/*stack)
 FT2CF := $(GCCSDK_INSTALL_ENV)/bin/freetype-config
@@ -49,18 +49,18 @@ endif
 SPIDERMONKEY_CFLAGS := -DXP_UNIX -DJS_HAS_FILE_OBJECT=0 -DJSOPTION_JIT=0 -DPOSIX_SOURCE -D_BSD_SOURCE
 
 # freetype is optional but older versions do not use pkg-config
-ifeq ($(NETSURF_USE_ATARI_FREETYPE_FONT),YES)
-  NETSURF_USE_FREETYPE2 := AUTO
-  NETSURF_FEATURE_FREETYPE2_CFLAGS := -DWITH_FREETYPE_FONT_DRIVER
+ifeq ($(NETSURFY_USE_ATARI_FREETYPE_FONT),YES)
+  NETSURFY_USE_FREETYPE2 := AUTO
+  NETSURFY_FEATURE_FREETYPE2_CFLAGS := -DWITH_FREETYPE_FONT_DRIVER
 
   $(eval $(call pkg_config_find_and_add_enabled,FREETYPE2,freetype2,freetype2))
 
   # try and use non pkg-config method
-  ifeq ($(NETSURF_USE_FREETYPE2),NO)
+  ifeq ($(NETSURFY_USE_FREETYPE2),NO)
     FREETYPE_CONFIG_EXISTS := $(shell $(FT2CF) --cflags >/dev/null && echo yes)
     ifeq ($(FREETYPE_CONFIG_EXISTS),yes)
-      NETSURF_USE_FREETYPE2 := YES
-      CFLAGS += $(shell $(FT2CF) --cflags) $(NETSURF_FEATURE_FREETYPE2_CFLAGS)
+      NETSURFY_USE_FREETYPE2 := YES
+      CFLAGS += $(shell $(FT2CF) --cflags) $(NETSURFY_FEATURE_FREETYPE2_CFLAGS)
       LDFLAGS += $(shell $(FT2CF) --libs)
       $(info FT2.CNFG: freetype2 (freetype2)	enabled)
     else
@@ -71,7 +71,7 @@ ifeq ($(NETSURF_USE_ATARI_FREETYPE_FONT),YES)
 endif
 
 
-$(eval $(call feature_enabled,ATARI_NETSURF_FONT,-DWITH_INTERNAL_FONT_DRIVER,,(Internal Font)))
+$(eval $(call feature_enabled,ATARI_NETSURFY_FONT,-DWITH_INTERNAL_FONT_DRIVER,,(Internal Font)))
 $(eval $(call feature_enabled,ATARI_VDI_FONT,-DWITH_VDI_FONT_DRIVER,,(VDI Font)))
 $(eval $(call feature_enabled,ATARI_8BPP_SUPPORT,-DWITH_8BPP_SUPPORT,,(Indexed screen format support)))
 
@@ -150,7 +150,7 @@ MESSAGES_FILTER=atari
 # Install target
 # ----------------------------------------------------------------------------
 
-ATARI_TARGET_DIR := netsurf/
+ATARI_TARGET_DIR := netsurfy/
 ATARI_RES_DIR := $(FRONTEND_RESOURCES_DIR)/
 ATARI_DOC_DIR := $(FRONTEND_SOURCE_DIR)/doc/
 ATARI_FONT_NAME := ttf-bitstream-vera-1.10
@@ -201,12 +201,12 @@ endif
 
 # GUI resources:
 	$(Q)cp -r $(ATARI_RESOURCES)  $(ATARI_TARGET_DIR)res/
-	$(Q)cp $(ATARI_RES_DIR)/netsurf.rsc  $(ATARI_TARGET_DIR)res/netsurf.rsc
+	$(Q)cp $(ATARI_RES_DIR)/netsurfy.rsc  $(ATARI_TARGET_DIR)res/netsurfy.rsc
 	$(Q)cp $(ATARI_RES_DIR)/languages  $(ATARI_TARGET_DIR)res/languages
 	$(Q)cp $(ATARI_RES_DIR)/icons/toolbar -R $(ATARI_TARGET_DIR)res/icons
 	$(Q)cp resources/icons/* -R $(ATARI_TARGET_DIR)res/icons/
 
-	$(Q)cp resources/netsurf.png $(ATARI_TARGET_DIR)res/netsurf.png
+	$(Q)cp resources/netsurfy.png $(ATARI_TARGET_DIR)res/netsurfy.png
 	$(Q)cp resources/adblock.css $(ATARI_TARGET_DIR)res/adblock.css
 	$(Q)cp resources/default.css $(ATARI_TARGET_DIR)res/default.css
 	$(Q)cp resources/quirks.css $(ATARI_TARGET_DIR)res/quirks.css
@@ -214,7 +214,6 @@ endif
 	$(Q)cp resources/SearchEngines $(ATARI_TARGET_DIR)res/search
 	$(Q)cp resources/ca-bundle $(ATARI_TARGET_DIR)res/cabundle
 	$(Q)$(INSTALL) -m 644 -T $(MESSAGES_TARGET)/en/Messages $(ATARI_TARGET_DIR)res/messages
-	$(Q)cp resources/en/welcome.html $(ATARI_TARGET_DIR)res/welcome.html
 	$(Q)cp resources/en/licence.html $(ATARI_TARGET_DIR)res/licence.html
 	$(Q)cp resources/en/credits.html $(ATARI_TARGET_DIR)res/credits.html
 

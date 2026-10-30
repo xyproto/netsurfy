@@ -1,13 +1,13 @@
 /*
  * Copyright 2010 Ole Loots <ole@monochrom.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -89,7 +89,7 @@ int ctor_font_plotter_vdi(FONT_PLOTTER self)
 	self->str_split = str_split;
 	self->pixel_pos = pixel_pos;
 	self->text = text;
-	NSLOG(netsurf, INFO, "%s: %s\n", (char *)__FILE__, __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s: %s\n", (char *)__FILE__, __FUNCTION__);
 	if (!init) {
 		vdih = self->vdi_handle;
 	}
@@ -319,8 +319,8 @@ static int text(FONT_PLOTTER self,
 	if (fstyle->weight > 450)
 		fx |= 1;
 
-	/* TODO: netsurf uses 90 as default dpi ( somewhere defined in libcss),
-	   use that value or pass it as arg, to reduce netsurf dependency */
+	/* TODO: netsurfy uses 90 as default dpi ( somewhere defined in libcss),
+	   use that value or pass it as arg, to reduce netsurfy dependency */
 	// pxsize = ceil( (fstyle->size/PLOT_STYLE_SCALE) * 90 / 72 );
 	pxsize = ceil((fstyle->size / PLOT_STYLE_SCALE) * 90 / 72);
 

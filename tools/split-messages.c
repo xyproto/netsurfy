@@ -480,7 +480,7 @@ fatmessages_read(struct param *param, struct trnsltn_entry **tlist)
 
 
 /**
- * write output in NetSurf messages format
+ * write output in NetSurfy messages format
  */
 static nserror message_write(struct param *param, struct trnsltn_entry *tlist)
 {

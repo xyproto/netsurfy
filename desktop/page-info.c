@@ -1,13 +1,13 @@
 /*
  * Copyright 2020 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -30,12 +30,12 @@
 #include "utils/nsurl.h"
 #include "utils/nscolour.h"
 
-#include "netsurf/mouse.h"
-#include "netsurf/layout.h"
-#include "netsurf/keypress.h"
-#include "netsurf/plotters.h"
-#include "netsurf/core_window.h"
-#include "netsurf/browser_window.h"
+#include "netsurfy/mouse.h"
+#include "netsurfy/layout.h"
+#include "netsurfy/keypress.h"
+#include "netsurfy/plotters.h"
+#include "netsurfy/core_window.h"
+#include "netsurfy/browser_window.h"
 
 #include "desktop/knockout.h"
 #include "desktop/page-info.h"

@@ -2,13 +2,13 @@
  * Copyright 2006 Daniel Silverstone <dsilvers@digital-scurf.org>
  * Copyright 2006 Rob Kendrick <rjek@rjek.com>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
@@ -35,14 +35,14 @@
 #include "utils/nsoption.h"
 #include "utils/messages.h"
 #include "utils/nsurl.h"
-#include "netsurf/inttypes.h"
-#include "netsurf/content.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/mouse.h"
-#include "netsurf/window.h"
-#include "netsurf/plotters.h"
-#include "netsurf/form.h"
-#include "netsurf/keypress.h"
+#include "netsurfy/inttypes.h"
+#include "netsurfy/content.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/mouse.h"
+#include "netsurfy/window.h"
+#include "netsurfy/plotters.h"
+#include "netsurfy/form.h"
+#include "netsurfy/keypress.h"
 #include "desktop/searchweb.h"
 #include "desktop/textinput.h"
 
@@ -779,7 +779,7 @@ static struct gui_window *gui_window_create(struct browser_window *bw,
 
 	res = nsgtk_builder_new_from_resname("tabcontents", &tab_builder);
 	if (res != NSERROR_OK) {
-		NSLOG(netsurf, INFO, "Tab contents UI builder init failed");
+		NSLOG(netsurfy, INFO, "Tab contents UI builder init failed");
 		return NULL;
 	}
 
@@ -790,7 +790,7 @@ static struct gui_window *gui_window_create(struct browser_window *bw,
 		return NULL;
 	}
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Creating gui window %p for browser window %p",
 	      g,
@@ -947,7 +947,7 @@ static struct gui_window *gui_window_create(struct browser_window *bw,
 	if (flags & GW_CREATE_FOCUS_LOCATION) {
 		if (nsgtk_window_item_activate(g, OPENLOCATION_BUTTON) !=
 		    NSERROR_OK) {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      WARNING,
 			      "Unable to focus location input");
 		}
@@ -959,10 +959,10 @@ static struct gui_window *gui_window_create(struct browser_window *bw,
 
 static void gui_window_destroy(struct gui_window *gw)
 {
-	NSLOG(netsurf, INFO, "gui_window: %p", gw);
+	NSLOG(netsurfy, INFO, "gui_window: %p", gw);
 	assert(gw != NULL);
 	assert(gw->bw != NULL);
-	NSLOG(netsurf, INFO, "scaffolding: %p", gw->scaffold);
+	NSLOG(netsurfy, INFO, "scaffolding: %p", gw->scaffold);
 
 	/* kill off any throbber that might be running */
 	nsgtk_schedule(-1, next_throbber_frame, gw);
@@ -978,7 +978,7 @@ static void gui_window_destroy(struct gui_window *gw)
 		gw->next->prev = gw->prev;
 	}
 
-	NSLOG(netsurf, INFO, "window list head: %p", window_list);
+	NSLOG(netsurfy, INFO, "window list head: %p", window_list);
 }
 
 
@@ -1002,14 +1002,14 @@ gui_window_set_icon(struct gui_window *gw, struct hlcache_handle *icon)
 	if (icon != NULL) {
 		icon_bitmap = content_get_bitmap(icon);
 		if (icon_bitmap != NULL) {
-			NSLOG(netsurf, INFO, "Using %p bitmap", icon_bitmap);
+			NSLOG(netsurfy, INFO, "Using %p bitmap", icon_bitmap);
 			gw->icon = nsgdk_pixbuf_get_from_surface(
 				icon_bitmap->surface, 16, 16);
 		}
 	}
 
 	if (gw->icon == NULL) {
-		NSLOG(netsurf, INFO, "Using default favicon");
+		NSLOG(netsurfy, INFO, "Using default favicon");
 		g_object_ref(favicon_pixbuf);
 		gw->icon = favicon_pixbuf;
 	}
@@ -1314,7 +1314,7 @@ static void gui_window_create_form_select_menu(struct gui_window *g,
 	item = 0;
 	option = form_select_get_option(control, item);
 	while (option != NULL) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Item %" PRIdPTR " option %p text %s",
 		      item,

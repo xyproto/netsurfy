@@ -2,13 +2,13 @@
  * Copyright 2005 James Bursa <bursa@users.sourceforge.net>
  * Copyright 2005 John M Bell <jmb202@ecs.soton.ac.uk>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -22,8 +22,8 @@
  * \brief Interface to URL parsing and joining operations.
  */
 
-#ifndef _NETSURF_UTILS_URL_H_
-#define _NETSURF_UTILS_URL_H_
+#ifndef _NETSURFY_UTILS_URL_H_
+#define _NETSURFY_UTILS_URL_H_
 
 #include "utils/errors.h"
 

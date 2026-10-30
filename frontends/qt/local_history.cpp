@@ -1,13 +1,13 @@
 /*
  * Copyright 2024 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -21,8 +21,8 @@
  * Local history corewindow.
  */
 extern "C" {
-#include "netsurf/content.h"
-#include "netsurf/browser_window.h"
+#include "netsurfy/content.h"
+#include "netsurfy/browser_window.h"
 
 #include "desktop/local_history.h"
 #include "desktop/browser_private.h"

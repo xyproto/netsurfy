@@ -1,7 +1,7 @@
 Core Window Interface
 =====================
 
-The NetSurf core provides an optional API to frontend implementations
+The NetSurfy core provides an optional API to frontend implementations
 which allows a number of "standard" window content interfaces to be
 provided.
 
@@ -27,7 +27,7 @@ core window API
 The API is fairly simple and simply involves passing a callback table
 and context pointer to the interface element being constructed.
 
-The header that defines the callback interface is netsurf/core_window.h 
+The header that defines the callback interface is netsurfy/core_window.h 
 
 The callback table contains five function pointer interfaces which the
 frontend must implement for the core.
@@ -121,13 +121,13 @@ frontends/example/corewindow.h
     /*
      * Copyright 2016 Vincent Sanders <vince@netsurf-browser.org>
      *
-     * This file is part of NetSurf, http://www.netsurf-browser.org/
+     * This file is part of NetSurfy, http://www.netsurf-browser.org/
      *
-     * NetSurf is free software; you can redistribute it and/or modify
+     * NetSurfy is free software; you can redistribute it and/or modify
      * it under the terms of the GNU General Public License as published by
      * the Free Software Foundation; version 2 of the License.
      *
-     * NetSurf is distributed in the hope that it will be useful,
+     * NetSurfy is distributed in the hope that it will be useful,
      * but WITHOUT ANY WARRANTY; without even the implied warranty of
      * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
      * GNU General Public License for more details.
@@ -139,7 +139,7 @@ frontends/example/corewindow.h
     #ifndef EXAMPLE_COREWINDOW_H
     #define EXAMPLE_COREWINDOW_H
     
-    #include "netsurf/core_window.h"
+    #include "netsurfy/core_window.h"
     
     /**
      * example core window state
@@ -174,7 +174,7 @@ frontends/example/corewindow.h
              * callback for keypress on example core window
              *
              * \param example_cw The example core window structure.
-             * \param nskey The netsurf key code.
+             * \param nskey The netsurfy key code.
              * \return NSERROR_OK if key processed,
              *         NSERROR_NOT_IMPLEMENTED if key not processed
              *         otherwise apropriate error code
@@ -219,13 +219,13 @@ frontends/example/corewindow.c
     /*
      * Copyright 2016 Vincent Sanders <vince@netsurf-browser.org>
      *
-     * This file is part of NetSurf, http://www.netsurf-browser.org/
+     * This file is part of NetSurfy, http://www.netsurf-browser.org/
      *
-     * NetSurf is free software; you can redistribute it and/or modify
+     * NetSurfy is free software; you can redistribute it and/or modify
      * it under the terms of the GNU General Public License as published by
      * the Free Software Foundation; version 2 of the License.
      *
-     * NetSurf is distributed in the hope that it will be useful,
+     * NetSurfy is distributed in the hope that it will be useful,
      * but WITHOUT ANY WARRANTY; without even the implied warranty of
      * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
      * GNU General Public License for more details.
@@ -257,9 +257,9 @@ frontends/example/corewindow.c
     #include "utils/utils.h"
     #include "utils/messages.h"
     #include "utils/utf8.h"
-    #include "netsurf/keypress.h"
-    #include "netsurf/mouse.h"
-    #include "netsurf/plot_style.h"
+    #include "netsurfy/keypress.h"
+    #include "netsurfy/mouse.h"
+    #include "netsurfy/plot_style.h"
     
     /* extremely likely there will be additional headers required in a real frontend */
     #include "example/corewindow.h"
@@ -422,13 +422,13 @@ frontends/example/ssl_cert.h
     /*
      * Copyright 2016 Vincent Sanders <vince@netsurf-browser.org>
      *
-     * This file is part of NetSurf, http://www.netsurf-browser.org/
+     * This file is part of NetSurfy, http://www.netsurf-browser.org/
      *
-     * NetSurf is free software; you can redistribute it and/or modify
+     * NetSurfy is free software; you can redistribute it and/or modify
      * it under the terms of the GNU General Public License as published by
      * the Free Software Foundation; version 2 of the License.
      *
-     * NetSurf is distributed in the hope that it will be useful,
+     * NetSurfy is distributed in the hope that it will be useful,
      * but WITHOUT ANY WARRANTY; without even the implied warranty of
      * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
      * GNU General Public License for more details.
@@ -437,8 +437,8 @@ frontends/example/ssl_cert.h
      * along with this program.  If not, see <http://www.gnu.org/licenses/>.
      */
     
-    #ifndef NETSURF_EXAMPLE_SSL_CERT_H
-    #define NETSURF_EXAMPLE_SSL_CERT_H 1
+    #ifndef NETSURFY_EXAMPLE_SSL_CERT_H
+    #define NETSURFY_EXAMPLE_SSL_CERT_H 1
     
     struct nsurl;
     struct ssl_cert_info;
@@ -463,13 +463,13 @@ frontends/example/ssl_cert.c
     /*
      * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
      *
-     * This file is part of NetSurf, http://www.netsurf-browser.org/
+     * This file is part of NetSurfy, http://www.netsurf-browser.org/
      *
-     * NetSurf is free software; you can redistribute it and/or modify
+     * NetSurfy is free software; you can redistribute it and/or modify
      * it under the terms of the GNU General Public License as published by
      * the Free Software Foundation; version 2 of the License.
      *
-     * NetSurf is distributed in the hope that it will be useful,
+     * NetSurfy is distributed in the hope that it will be useful,
      * but WITHOUT ANY WARRANTY; without even the implied warranty of
      * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
      * GNU General Public License for more details.
@@ -487,8 +487,8 @@ frontends/example/ssl_cert.c
     #include <stdlib.h>
     
     #include "utils/log.h"
-    #include "netsurf/keypress.h"
-    #include "netsurf/plotters.h"
+    #include "netsurfy/keypress.h"
+    #include "netsurfy/plotters.h"
     #include "desktop/sslcert_viewer.h"
     
     #include "example/corewindow.h"
@@ -548,7 +548,7 @@ frontends/example/ssl_cert.c
      * callback for mouse action for certificate verify on core window
      *
      * \param example_cw The example core window structure.
-     * \param mouse_state netsurf mouse state on event
+     * \param mouse_state netsurfy mouse state on event
      * \param x location of event
      * \param y location of event
      * \return NSERROR_OK on success otherwise apropriate error code
@@ -571,7 +571,7 @@ frontends/example/ssl_cert.c
      * callback for keypress for certificate verify on core window
      *
      * \param example_cw The example core window structure.
-     * \param nskey The netsurf key code
+     * \param nskey The netsurfy key code
      * \return NSERROR_OK on success otherwise apropriate error code
      */
     static nserror

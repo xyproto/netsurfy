@@ -1,13 +1,13 @@
 /*
  * Copyright 2022 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -20,7 +20,7 @@
  * \file
  * implementation of content handler for image/svg using librsvg 2.46 API.
  *
- * SVG files are rendered to a NetSurf bitmap by creating a Cairo rendering
+ * SVG files are rendered to a NetSurfy bitmap by creating a Cairo rendering
  * surface (content_rsvg_data.cs) over the bitmap's data, creating a Cairo
  * drawing context using that surface, and then passing that drawing context
  * to librsvg which then uses Cairo calls to plot the graphic to the bitmap.
@@ -41,9 +41,9 @@
 #include "utils/log.h"
 #include "utils/utils.h"
 #include "utils/messages.h"
-#include "netsurf/plotters.h"
-#include "netsurf/bitmap.h"
-#include "netsurf/content.h"
+#include "netsurfy/plotters.h"
+#include "netsurfy/bitmap.h"
+#include "netsurfy/content.h"
 #include "content/llcache.h"
 #include "content/content_protected.h"
 #include "content/content_factory.h"
@@ -109,7 +109,7 @@ static struct bitmap *rsvg_cache_convert(struct content *c)
 
 	if ((bitmap = guit->bitmap->create(c->width, c->height, BITMAP_NONE)) ==
 	    NULL) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Failed to create bitmap for rsvg render.");
 		return NULL;
@@ -121,14 +121,14 @@ static struct bitmap *rsvg_cache_convert(struct content *c)
 		     c->width,
 		     c->height,
 		     guit->bitmap->get_rowstride(bitmap))) == NULL) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Failed to create Cairo image surface for rsvg render.");
 		guit->bitmap->destroy(bitmap);
 		return NULL;
 	}
 	if ((cr = cairo_create(cs)) == NULL) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Failed to create Cairo drawing context for rsvg render.");
 		cairo_surface_destroy(cs);
@@ -142,7 +142,7 @@ static struct bitmap *rsvg_cache_convert(struct content *c)
 	viewport.height = c->height;
 	renderres = rsvg_handle_render_document(
 		svgc->rsvgh, cr, &viewport, NULL);
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEBUG,
 	      "rsvg render:%d, width:%d, height %d",
 	      renderres,
@@ -190,7 +190,7 @@ rsvg__get_demensions(const rsvg_content *svgc, int *width, int *height)
 	*width = rsvgsize.width;
 	*height = rsvgsize.height;
 #endif
-	NSLOG(netsurf, DEBUG, "rsvg width:%d height:%d.", *width, *height);
+	NSLOG(netsurfy, DEBUG, "rsvg width:%d height:%d.", *width, *height);
 }
 
 static bool rsvg_convert(struct content *c)
@@ -210,7 +210,7 @@ static bool rsvg_convert(struct content *c)
 		istream, NULL, RSVG_HANDLE_FLAGS_NONE, NULL, &gerror);
 	g_object_unref(istream);
 	if (svgc->rsvgh == NULL) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Failed to create rsvg handle for content.");
 		return false;

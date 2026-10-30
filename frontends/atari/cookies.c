@@ -1,13 +1,13 @@
 /*
  * Copyright 2013 Ole Loots <ole@monochrom.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -18,17 +18,17 @@
 
 #include <assert.h>
 
-#include "netsurf/inttypes.h"
+#include "netsurfy/inttypes.h"
 #include "utils/log.h"
 #include "utils/messages.h"
-#include "netsurf/mouse.h"
-#include "netsurf/plotters.h"
+#include "netsurfy/mouse.h"
+#include "netsurfy/plotters.h"
 #include "desktop/cookie_manager.h"
 
 #include "atari/treeview.h"
 #include "atari/cookies.h"
 #include "atari/gemtk/gemtk.h"
-#include "atari/res/netsurf.rsh"
+#include "atari/res/netsurfy.rsh"
 
 extern GRECT desk_area;
 
@@ -62,14 +62,14 @@ static struct atari_treeview_callbacks atari_cookie_manager_treeview_callbacks =
 
 static nserror atari_cookie_manager_init_phase2(struct core_window *cw)
 {
-	NSLOG(netsurf, INFO, "cw %p", cw);
+	NSLOG(netsurfy, INFO, "cw %p", cw);
 	return (cookie_manager_init(cw));
 }
 
 
 static void atari_cookie_manager_finish(struct core_window *cw)
 {
-	NSLOG(netsurf, INFO, "cw %p", cw);
+	NSLOG(netsurfy, INFO, "cw %p", cw);
 	cookie_manager_fini();
 }
 
@@ -86,7 +86,7 @@ static void atari_cookie_manager_draw(struct core_window *cw,
 
 static void atari_cookie_manager_keypress(struct core_window *cw, uint32_t ucs4)
 {
-	NSLOG(netsurf, INFO, "ucs4: %" PRIu32, ucs4);
+	NSLOG(netsurfy, INFO, "ucs4: %" PRIu32, ucs4);
 	cookie_manager_keypress(ucs4);
 }
 
@@ -104,13 +104,13 @@ static short handle_event(GUIWIN *win, EVMULT_OUT *ev_out, short msg[8])
 {
 	short retval = 0;
 
-	NSLOG(netsurf, INFO, "win %p", win);
+	NSLOG(netsurfy, INFO, "win %p", win);
 
 	if (ev_out->emo_events & MU_MESAG) {
 		switch (msg[0]) {
 
 		case WM_TOOLBAR:
-			NSLOG(netsurf, INFO, "WM_TOOLBAR");
+			NSLOG(netsurfy, INFO, "WM_TOOLBAR");
 			break;
 
 		case WM_CLOSED:
@@ -162,7 +162,7 @@ void atari_cookie_manager_init(void)
 			if (atari_cookie_manager.tv == NULL) {
 				/* handle it properly, clean up previous allocs
 				 */
-				NSLOG(netsurf,
+				NSLOG(netsurfy,
 				      INFO,
 				      "Failed to allocate treeview");
 				return;
@@ -218,7 +218,7 @@ void atari_cookie_manager_destroy(void)
 		atari_treeview_delete(atari_cookie_manager.tv);
 		atari_cookie_manager.init = false;
 	}
-	NSLOG(netsurf, INFO, "done");
+	NSLOG(netsurfy, INFO, "done");
 }
 
 

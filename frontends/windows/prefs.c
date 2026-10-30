@@ -1,13 +1,13 @@
 /*
  * Copyright 2009 Mark Benjamin <netsurf-browser.org.MarkBenjamin@dfgh.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -336,7 +336,7 @@ static BOOL CALLBACK options_appearance_dialog_handler(HWND hwnd,
 
 
 	case WM_COMMAND:
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "WM_COMMAND Identifier 0x%x",
 		      LOWORD(wparam));
@@ -827,7 +827,7 @@ nserror nsws_prefs_save(void)
 	char *choices = NULL;
 	nserror res;
 
-	res = netsurf_mkpath(&choices, NULL, 2, G_config_path, "Choices");
+	res = netsurfy_mkpath(&choices, NULL, 2, G_config_path, "Choices");
 	if (res == NSERROR_OK) {
 		nsoption_write(choices, NULL, NULL);
 		free(choices);
@@ -872,8 +872,8 @@ void nsws_prefs_dialog_init(HINSTANCE hinst, HWND parent)
 	psh.dwFlags = PSH_NOAPPLYNOW | PSH_USEICONID | PSH_PROPSHEETPAGE;
 	psh.hwndParent = parent;
 	psh.hInstance = hinst;
-	psh.pszIcon = MAKEINTRESOURCE(IDR_NETSURF_ICON);
-	psh.pszCaption = (LPSTR) "NetSurf Options";
+	psh.pszIcon = MAKEINTRESOURCE(IDR_NETSURFY_ICON);
+	psh.pszCaption = (LPSTR) "NetSurfy Options";
 	psh.nPages = sizeof(psp) / sizeof(PROPSHEETPAGE);
 	psh.nStartPage = 0;
 	psh.ppsp = (LPCPROPSHEETPAGE)&psp;

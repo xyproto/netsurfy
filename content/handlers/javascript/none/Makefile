@@ -1,5 +1,5 @@
 #
-# NetSurf javascript source file inclusion
+# NetSurfy javascript source file inclusion
 #
 # Included by javascript/Makefile 
 #

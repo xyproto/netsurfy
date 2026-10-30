@@ -1,13 +1,13 @@
 /*
  * Copyright 2011 Daniel Silverstone <dsilvers@digital-scurf.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -33,10 +33,10 @@
 #include "utils/filepath.h"
 #include "utils/nsoption.h"
 #include "utils/nsurl.h"
-#include "netsurf/misc.h"
-#include "netsurf/netsurf.h"
-#include "netsurf/url_db.h"
-#include "netsurf/cookie_db.h"
+#include "netsurfy/misc.h"
+#include "netsurfy/netsurfy.h"
+#include "netsurfy/url_db.h"
+#include "netsurfy/cookie_db.h"
 #include "content/fetch.h"
 #include "content/backing_store.h"
 
@@ -246,9 +246,9 @@ static void monkey_options_handle_command(int argc, char **argv)
 static nserror set_defaults(struct nsoption_s *defaults)
 {
 	/* Set defaults for absent option strings */
-	nsoption_setnull_charp(cookie_file, strdup("~/.netsurf/Cookies"));
-	nsoption_setnull_charp(cookie_jar, strdup("~/.netsurf/Cookies"));
-	nsoption_setnull_charp(url_file, strdup("~/.netsurf/URLs"));
+	nsoption_setnull_charp(cookie_file, strdup("~/.netsurfy/Cookies"));
+	nsoption_setnull_charp(cookie_jar, strdup("~/.netsurfy/Cookies"));
+	nsoption_setnull_charp(url_file, strdup("~/.netsurfy/URLs"));
 
 	return NSERROR_OK;
 }
@@ -301,20 +301,20 @@ static void monkey_run(void)
 		/* setup timeout */
 		switch (schedtm) {
 		case -1:
-			NSLOG(netsurf, INFO, "Iterate blocking");
+			NSLOG(netsurfy, INFO, "Iterate blocking");
 			moutf(MOUT_GENERIC, "POLL BLOCKING");
 			timeout = NULL;
 			break;
 
 		case 0:
-			NSLOG(netsurf, INFO, "Iterate immediate");
+			NSLOG(netsurfy, INFO, "Iterate immediate");
 			tv.tv_sec = 0;
 			tv.tv_usec = 0;
 			timeout = &tv;
 			break;
 
 		default:
-			NSLOG(netsurf, INFO, "Iterate non-blocking");
+			NSLOG(netsurfy, INFO, "Iterate non-blocking");
 			moutf(MOUT_GENERIC, "POLL TIMED %d", schedtm);
 			tv.tv_sec = schedtm / 1000; /* miliseconds to seconds */
 			tv.tv_usec = (schedtm % 1000) *
@@ -329,7 +329,7 @@ static void monkey_run(void)
 				&exc_fd_set,
 				timeout);
 		if (rdy_fd < 0) {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      CRITICAL,
 			      "Unable to select: %s",
 			      strerror(errno));
@@ -403,7 +403,7 @@ int main(int argc, char **argv)
 	char *options;
 	char buf[PATH_MAX];
 	nserror ret;
-	struct netsurf_table monkey_table = {
+	struct netsurfy_table monkey_table = {
 		.misc = &monkey_misc_table,
 		.window = monkey_window_table,
 		.download = monkey_download_table,
@@ -422,9 +422,9 @@ int main(int argc, char **argv)
 	signal(SIGBUS, signal_handler);
 #endif
 
-	ret = netsurf_register(&monkey_table);
+	ret = netsurfy_register(&monkey_table);
 	if (ret != NSERROR_OK) {
-		die("NetSurf operation table failed registration");
+		die("NetSurfy operation table failed registration");
 	}
 
 	/* Unbuffer stdin/out/err */
@@ -434,7 +434,7 @@ int main(int argc, char **argv)
 
 	/* Prep the search paths */
 	respaths = nsmonkey_init_resource(
-		"${HOME}/.netsurf/:${NETSURFRES}:" MONKEY_RESPATH
+		"${HOME}/.netsurfy/:${NETSURFYRES}:" MONKEY_RESPATH
 		":./frontends/monkey/res");
 
 	/* initialise logging. Not fatal if it fails but not much we can do
@@ -455,14 +455,14 @@ int main(int argc, char **argv)
 	messages = filepath_find(respaths, "Messages");
 	ret = messages_add_from_file(messages);
 	if (ret != NSERROR_OK) {
-		NSLOG(netsurf, INFO, "Messages failed to load");
+		NSLOG(netsurfy, INFO, "Messages failed to load");
 	}
 
 	/* common initialisation */
-	ret = netsurf_init(NULL);
+	ret = netsurfy_init(NULL);
 	free(messages);
 	if (ret != NSERROR_OK) {
-		die("NetSurf failed to initialise");
+		die("NetSurfy failed to initialise");
 	}
 
 	filepath_sfinddef(respaths, buf, "mime.types", "/etc/");
@@ -504,7 +504,7 @@ int main(int argc, char **argv)
 	moutf(MOUT_GENERIC, "CLOSING_DOWN");
 	monkey_kill_browser_windows();
 
-	netsurf_exit();
+	netsurfy_exit();
 	moutf(MOUT_GENERIC, "FINISHED");
 
 	/* finalise options */

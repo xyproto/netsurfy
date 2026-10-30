@@ -1,6 +1,6 @@
 ## NetSurfy
 
-This is a lightweight browser written in C that uses GTK4. It's a fork of NetSurf.
+This is a lightweight browser written in C that uses GTK4. It's a fork of NetSurfy.
 
 ### Building NetSurfy
 
@@ -9,5 +9,5 @@ This is a lightweight browser written in C that uses GTK4. It's a fork of NetSur
 
 ### General info
 
-* Version: 3.14.0
+* Version: 1.0.0
 * License: MIT and GPL2, see the `LICENSE` file for more information.

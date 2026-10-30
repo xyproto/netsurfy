@@ -1,13 +1,13 @@
 /*
  * Copyright 2006 Richard Wilson <info@tinct.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -28,8 +28,8 @@
 #include "utils/utils.h"
 #include "utils/log.h"
 #include "utils/messages.h"
-#include "netsurf/bitmap.h"
-#include "netsurf/content.h"
+#include "netsurfy/bitmap.h"
+#include "netsurfy/content.h"
 #include "content/llcache.h"
 #include "content/content_protected.h"
 #include "content/content_factory.h"
@@ -169,7 +169,7 @@ static bool nsico_convert(struct content *c)
 	bmp = ico_find(ico->ico, 255, 255);
 	if (bmp == NULL) {
 		/* return error */
-		NSLOG(netsurf, INFO, "Failed to select icon");
+		NSLOG(netsurfy, INFO, "Failed to select icon");
 		return false;
 	}
 
@@ -184,7 +184,7 @@ static bool nsico_convert(struct content *c)
 static bool nsico__decode(struct bmp_image *ico)
 {
 	if (ico->decoded == false) {
-		NSLOG(netsurf, DEBUG, "Decoding ICO %p", ico);
+		NSLOG(netsurfy, DEBUG, "Decoding ICO %p", ico);
 		if (bmp_decode(ico) != BMP_OK) {
 			return false;
 		}
@@ -212,7 +212,7 @@ static bool nsico_redraw(struct content *c,
 	bmp = ico_find(ico->ico, data->width, data->height);
 	if (bmp == NULL) {
 		/* return error */
-		NSLOG(netsurf, INFO, "Failed to select icon");
+		NSLOG(netsurfy, INFO, "Failed to select icon");
 		return false;
 	}
 
@@ -278,7 +278,7 @@ static void *nsico_get_internal(const struct content *c, void *context)
 	bmp = ico_find(ico->ico, 16, 16);
 	if (bmp == NULL) {
 		/* return error */
-		NSLOG(netsurf, INFO, "Failed to select icon");
+		NSLOG(netsurfy, INFO, "Failed to select icon");
 		return NULL;
 	}
 
@@ -306,7 +306,7 @@ static bool nsico_is_opaque(struct content *c)
 	bmp = ico_find(ico->ico, 16, 16);
 	if (bmp == NULL) {
 		/* return error */
-		NSLOG(netsurf, INFO, "Failed to select icon");
+		NSLOG(netsurfy, INFO, "Failed to select icon");
 		return false;
 	}
 

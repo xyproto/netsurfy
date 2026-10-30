@@ -1,13 +1,13 @@
 /*
  * Copyright 2009 Daniel Silverstone <dsilvers@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -266,7 +266,7 @@ int main(int argc, char **argv)
 	fprintf(f, "#include <stdint.h>\n\n");
 	fprintf(f, "#include <stdbool.h>\n\n");
 	fprintf(f, "#include <libnsfb.h>\n\n");
-	fprintf(f, "#include \"netsurf/plot_style.h\"\n");
+	fprintf(f, "#include \"netsurfy/plot_style.h\"\n");
 	fprintf(f, "#include \"framebuffer/gui.h\"\n");
 	fprintf(f, "#include \"framebuffer/fbtk.h\"\n\n");
 

@@ -1,13 +1,13 @@
 /*
  * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -27,10 +27,10 @@
 
 #include "utils/log.h"
 #include "utils/messages.h"
-#include "netsurf/keypress.h"
-#include "netsurf/plotters.h"
-#include "netsurf/misc.h"
-#include "netsurf/browser_window.h"
+#include "netsurfy/keypress.h"
+#include "netsurfy/plotters.h"
+#include "netsurfy/misc.h"
+#include "netsurfy/browser_window.h"
 #include "desktop/page-info.h"
 #include "desktop/gui_internal.h"
 
@@ -114,7 +114,7 @@ static nserror nsgtk_pi_mouse(struct nsgtk_corewindow *nsgtk_cw,
  * callback for keypress for certificate verify on core window
  *
  * \param nsgtk_cw The nsgtk core window structure.
- * \param nskey The netsurf key code
+ * \param nskey The netsurfy key code
  * \return NSERROR_OK on success otherwise appropriate error code
  */
 static nserror nsgtk_pi_key(struct nsgtk_corewindow *nsgtk_cw, uint32_t nskey)
@@ -165,7 +165,7 @@ nserror nsgtk_page_info(GtkWidget *anchor, struct browser_window *bw)
 
 	res = nsgtk_builder_new_from_resname("pageinfo", &ncwin->builder);
 	if (res != NSERROR_OK) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      CRITICAL,
 		      "Page Info UI builder init failed %s",
 		      messages_get_errorcode(res));

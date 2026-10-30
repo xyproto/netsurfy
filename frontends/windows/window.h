@@ -1,13 +1,13 @@
 /*
  * Copyright 2011 Vincent Sanders <vince@simtec.co.uk>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -16,13 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NETSURF_WINDOWS_WINDOW_H_
-#define NETSURF_WINDOWS_WINDOW_H_
+#ifndef NETSURFY_WINDOWS_WINDOW_H_
+#define NETSURFY_WINDOWS_WINDOW_H_
 
 /** The window operation function table for win32 */
 extern struct gui_window_table *win32_window_table;
 
-#include "netsurf/mouse.h"
+#include "netsurfy/mouse.h"
 
 struct browser_mouse {
 	struct gui_window *gui;
@@ -124,4 +124,4 @@ HWND gui_window_main_window(struct gui_window *gw);
 struct nsws_localhistory *gui_window_localhistory(struct gui_window *);
 
 
-#endif /* _NETSURF_WINDOWS_WINDOW_H_ */
+#endif /* _NETSURFY_WINDOWS_WINDOW_H_ */

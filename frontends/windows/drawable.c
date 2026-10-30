@@ -1,13 +1,13 @@
 /*
  * Copyright 2011 Vincent Sanders <vince@simtec.co.uk>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -31,9 +31,9 @@
 
 #include "utils/errors.h"
 #include "utils/log.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/plotters.h"
-#include "netsurf/keypress.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/plotters.h"
+#include "netsurfy/keypress.h"
 
 #include "windows/windbg.h"
 #include "windows/plot.h"
@@ -83,7 +83,7 @@ nsws_drawable_vscroll(struct gui_window *gw, HWND hwnd, WPARAM wparam)
 	SCROLLINFO si;
 	int mem;
 
-	NSLOG(netsurf, INFO, "VSCROLL %d", gw->requestscrolly);
+	NSLOG(netsurfy, INFO, "VSCROLL %d", gw->requestscrolly);
 
 	if (gw->requestscrolly != 0)
 		return 0;
@@ -158,7 +158,7 @@ nsws_drawable_hscroll(struct gui_window *gw, HWND hwnd, WPARAM wparam)
 	SCROLLINFO si;
 	int mem;
 
-	NSLOG(netsurf, INFO, "HSCROLL %d", gw->requestscrollx);
+	NSLOG(netsurfy, INFO, "HSCROLL %d", gw->requestscrollx);
 
 	if (gw->requestscrollx != 0)
 		return 0;
@@ -407,7 +407,7 @@ static LRESULT nsws_drawable_mouseup(struct gui_window *gw,
 	if ((gw == NULL) || (gw->mouse == NULL) || (gw->bw == NULL))
 		return 0;
 
-	NSLOG(netsurf, INFO, "state 0x%x, press 0x%x", gw->mouse->state, press);
+	NSLOG(netsurfy, INFO, "state 0x%x, press 0x%x", gw->mouse->state, press);
 	if ((gw->mouse->state & press) != 0) {
 		gw->mouse->state &= ~press;
 		gw->mouse->state |= click;
@@ -421,7 +421,7 @@ static LRESULT nsws_drawable_mouseup(struct gui_window *gw,
 		gw->mouse->state &= ~BROWSER_MOUSE_MOD_3;
 
 	if ((gw->mouse->state & click) != 0) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "mouse click bw %p, state 0x%x, x %d, y %d",
 		      gw->bw,
@@ -467,7 +467,7 @@ static LRESULT nsws_drawable_mousedown(struct gui_window *gw,
 	gw->mouse->pressed_x = x + gw->scrollx;
 	gw->mouse->pressed_y = y + gw->scrolly;
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "mouse click bw %p, state %x, x %d, y %d",
 	      gw->bw,
@@ -505,7 +505,7 @@ static LRESULT nsws_drawable_mousemove(struct gui_window *gw, int x, int y)
 	    (abs(x - gw->mouse->pressed_x) >= 5) &&
 	    (abs(y - gw->mouse->pressed_y) >= 5)) {
 
-		NSLOG(netsurf, INFO, "Drag start state 0x%x", gw->mouse->state);
+		NSLOG(netsurfy, INFO, "Drag start state 0x%x", gw->mouse->state);
 
 		if ((gw->mouse->state & BROWSER_MOUSE_PRESS_1) != 0) {
 			browser_window_mouse_click(gw->bw,
@@ -554,7 +554,7 @@ static LRESULT CALLBACK nsws_window_drawable_event_callback(HWND hwnd,
 
 	gw = nsws_get_gui_window(hwnd);
 	if (gw == NULL) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Unable to find gui window structure for hwnd %p",
 		      hwnd);
@@ -677,7 +677,7 @@ HWND nsws_window_create_drawable(HINSTANCE hinstance,
 
 	if (hwnd == NULL) {
 		win_perror("WindowCreateDrawable");
-		NSLOG(netsurf, INFO, "Window creation failed");
+		NSLOG(netsurfy, INFO, "Window creation failed");
 		return NULL;
 	}
 

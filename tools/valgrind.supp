@@ -1,4 +1,4 @@
-# Valgrind suppression file for NetSurf
+# Valgrind suppression file for NetSurfy
 
 # Suppress a valgrind message about use of uninitialized memory in strchrnul().
 # This use is OK because it provides only a speedup.

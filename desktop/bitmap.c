@@ -1,13 +1,13 @@
 /*
  * Copyright 2022 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -114,12 +114,12 @@ static const char *bitmap__layout_to_str(enum bitmap_layout layout)
 	return str[layout];
 }
 
-/* Exported function, documented in include/netsurf/bitmap.h */
+/* Exported function, documented in include/netsurfy/bitmap.h */
 void bitmap_set_format(const bitmap_fmt_t *bitmap_format)
 {
 	bitmap_fmt = *bitmap_format;
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Setting core bitmap format to: %s%s",
 	      bitmap__layout_to_str(bitmap_format->layout),
@@ -128,7 +128,7 @@ void bitmap_set_format(const bitmap_fmt_t *bitmap_format)
 	bitmap_fmt.layout = bitmap_sanitise_bitmap_layout(bitmap_fmt.layout);
 
 	if (bitmap_format->layout != bitmap_fmt.layout) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Sanitised layout to: %s",
 		      bitmap__layout_to_str(bitmap_fmt.layout));
@@ -290,7 +290,7 @@ void bitmap_format_convert(void *bitmap,
 	struct bitmap_colour_layout to = bitmap__get_colour_layout(fmt_to);
 	struct bitmap_colour_layout from = bitmap__get_colour_layout(fmt_from);
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "%p: format conversion (%u%s --> %u%s)",
 	      bitmap,

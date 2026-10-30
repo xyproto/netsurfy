@@ -1,13 +1,13 @@
 /*
  * Copyright 2008 Adam Blokus <adamblokus@gmail.com>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -29,8 +29,8 @@
  * print_set_up, print_draw_next_page and print_cleanup directly.
  */
 
-#ifndef NETSURF_DESKTOP_PRINT_H
-#define NETSURF_DESKTOP_PRINT_H
+#ifndef NETSURFY_DESKTOP_PRINT_H
+#define NETSURFY_DESKTOP_PRINT_H
 
 #include <stdbool.h>
 #include <libcss/libcss.h>

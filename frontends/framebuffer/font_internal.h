@@ -1,13 +1,13 @@
 /*
  * Copyright 2008 Vincent Sanders <vince@simtec.co.uk>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NETSURF_FB_FONT_INTERNAL_H
-#define NETSURF_FB_FONT_INTERNAL_H
+#ifndef NETSURFY_FB_FONT_INTERNAL_H
+#define NETSURFY_FB_FONT_INTERNAL_H
 
 #include <stdbool.h>
 
@@ -44,4 +44,4 @@ int fb_get_font_size(const plot_font_style_t *fstyle);
 
 const uint8_t *fb_get_glyph(uint32_t ucs4, enum fb_font_style style, int scale);
 
-#endif /* NETSURF_FB_FONT_INTERNAL_H */
+#endif /* NETSURFY_FB_FONT_INTERNAL_H */

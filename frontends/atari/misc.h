@@ -1,13 +1,13 @@
 /*
  * Copyright 2010 Ole Loots <ole@monochrom.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -76,11 +76,11 @@ void dbg_rect(const char *str, int *pxy);
 const char *file_select(const char *title, const char *name);
 
 /**
- * Convert NKC to netsurf input key code and/or to ucs4 (depends on keycode).
+ * Convert NKC to netsurfy input key code and/or to ucs4 (depends on keycode).
  *
  * \param[in] nkc atari normalized key code
  * \param[out] ucs4_out The ucs4 converted keycode
- * \return The netsurf input keycode or 0 and ucs4_out updated with
+ * \return The netsurfy input keycode or 0 and ucs4_out updated with
  *          the NKC converted to UC4 encoding.
  */
 long nkc_to_input_key(short nkc, long *ucs4_out);

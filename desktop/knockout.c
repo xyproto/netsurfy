@@ -1,13 +1,13 @@
 /*
  * Copyright 2006 Richard Wilson <info@tinct.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -70,9 +70,9 @@
 #include "utils/utils.h"
 #include "utils/log.h"
 #include "utils/errors.h"
-#include "netsurf/bitmap.h"
+#include "netsurfy/bitmap.h"
 #include "content/content.h"
-#include "netsurf/plotters.h"
+#include "netsurfy/plotters.h"
 
 #include "desktop/gui_internal.h"
 #include "desktop/knockout.h"
@@ -266,7 +266,7 @@ static nserror knockout_plot_flush(const struct redraw_context *ctx)
 
 	/* debugging information */
 #ifdef KNOCKOUT_DEBUG
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Entries are %i/%i, %i/%i, %i/%i",
 	      knockout_entry_cur,
@@ -738,7 +738,7 @@ knockout_plot_clip(const struct redraw_context *ctx, const struct rect *clip)
 
 	if (clip->x1 < clip->x0 || clip->y0 > clip->y1) {
 #ifdef KNOCKOUT_DEBUG
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "bad clip rectangle %i %i %i %i",
 		      clip->x0,

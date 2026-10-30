@@ -1,13 +1,13 @@
 /*
  * Copyright 2012 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -32,8 +32,8 @@
 #include <string.h>
 #include <strings.h>
 
-#include "netsurf/inttypes.h"
-#include "netsurf/plot_style.h"
+#include "netsurfy/inttypes.h"
+#include "netsurfy/plot_style.h"
 #include "utils/errors.h"
 #include "utils/log.h"
 #include "utils/utils.h"
@@ -713,11 +713,11 @@ nserror nsoption_read(const char *path, struct nsoption_s *opts)
 
 	fp = fopen(path, "r");
 	if (!fp) {
-		NSLOG(netsurf, INFO, "Failed to open file '%s'", path);
+		NSLOG(netsurfy, INFO, "Failed to open file '%s'", path);
 		return NSERROR_NOT_FOUND;
 	}
 
-	NSLOG(netsurf, INFO, "Successfully opened '%s' for Options file", path);
+	NSLOG(netsurfy, INFO, "Successfully opened '%s' for Options file", path);
 
 	while (fgets(s, NSOPTION_MAX_LINE_LEN, fp)) {
 		optionline(opts, s, strlen(s));
@@ -802,7 +802,7 @@ nserror nsoption_write(const char *path,
 
 	fp = fopen(path, "w");
 	if (!fp) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "failed to open file '%s' for writing",
 		      path);
@@ -892,7 +892,7 @@ nserror nsoption_commandline(int *pargc, char **argv, struct nsoption_s *opts)
 
 		/* arg+arglen is the option to set, val is the value */
 
-		NSLOG(netsurf, INFO, "%.*s = %s", arglen, arg, val);
+		NSLOG(netsurfy, INFO, "%.*s = %s", arglen, arg, val);
 
 		for (entry_loop = 0; entry_loop < NSOPTION_LISTEND;
 		     entry_loop++) {

@@ -1,13 +1,13 @@
 /*
  * Copyright 2019 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -40,9 +40,9 @@
 #include "desktop/save_text.h"
 #include "desktop/print.h"
 #include "desktop/hotlist.h"
-#include "netsurf/content.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/keypress.h"
+#include "netsurfy/content.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/keypress.h"
 
 #include "gtk/toolbar_items.h"
 #include "gtk/completion.h"
@@ -645,7 +645,7 @@ static nserror nsgtk_toolbar_customisation_save(struct nsgtk_toolbar *tb)
 	nsoption_set_charp(toolbar_items, order);
 
 	/* ensure choices are saved */
-	netsurf_mkpath(&choices, NULL, 2, nsgtk_config_home, "Choices");
+	netsurfy_mkpath(&choices, NULL, 2, nsgtk_config_home, "Choices");
 	if (choices != NULL) {
 		nsoption_write(choices, NULL, NULL);
 		free(choices);
@@ -900,7 +900,7 @@ nsgtk_browser_window_create(struct browser_window *bw, bool intab)
 		if (nsoption_charp(homepage_url) != NULL) {
 			addr = nsoption_charp(homepage_url);
 		} else {
-			addr = NETSURF_HOMEPAGE;
+			addr = NETSURFY_HOMEPAGE;
 		}
 		res = nsurl_create(addr, &url);
 	}
@@ -1441,7 +1441,7 @@ static gboolean cutomize_button_clicked_cb(GtkWidget *widget, gpointer data)
 	/* create builder */
 	res = nsgtk_builder_new_from_resname("toolbar", &builder);
 	if (res != NSERROR_OK) {
-		NSLOG(netsurf, INFO, "Toolbar UI builder init failed");
+		NSLOG(netsurfy, INFO, "Toolbar UI builder init failed");
 		return TRUE;
 	}
 
@@ -1700,7 +1700,7 @@ static gboolean home_button_clicked_cb(GtkWidget *widget, gpointer data)
 	if (nsoption_charp(homepage_url) != NULL) {
 		addr = nsoption_charp(homepage_url);
 	} else {
-		addr = NETSURF_HOMEPAGE;
+		addr = NETSURFY_HOMEPAGE;
 	}
 
 	res = toolbar_navigate_to_url(tb, addr);
@@ -1980,7 +1980,7 @@ static gboolean savepage_button_clicked_cb(GtkWidget *widget, gpointer data)
 
 	d = opendir(path);
 	if (d == NULL) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Unable to open directory %s for complete save: %s",
 		      path,
@@ -2115,7 +2115,7 @@ static gboolean print_button_clicked_cb(GtkWidget *widget, gpointer data)
 	}
 
 	/* use previously saved settings if any */
-	netsurf_mkpath(&settings_fname, NULL, 2, nsgtk_config_home, "Print");
+	netsurfy_mkpath(&settings_fname, NULL, 2, nsgtk_config_home, "Print");
 	if (settings_fname != NULL) {
 		print_settings = gtk_print_settings_new_from_file(
 			settings_fname, NULL);
@@ -2526,7 +2526,7 @@ savewindowsize_button_clicked_cb(GtkWidget *widget, gpointer data)
 	nsoption_set_int(window_width, gtk_widget_get_width(gtkwindow));
 	nsoption_set_int(window_height, gtk_widget_get_height(gtkwindow));
 
-	netsurf_mkpath(&choices, NULL, 2, nsgtk_config_home, "Choices");
+	netsurfy_mkpath(&choices, NULL, 2, nsgtk_config_home, "Choices");
 	if (choices != NULL) {
 		nsoption_write(choices, NULL, NULL);
 		free(choices);
@@ -2668,7 +2668,7 @@ static gboolean localhistory_button_clicked_cb(GtkWidget *widget, gpointer data)
 
 		res = nsgtk_local_history_present(anchor, bw);
 		if (res != NSERROR_OK) {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "Unable to present local history window.");
 		}
@@ -2702,7 +2702,7 @@ globalhistory_button_clicked_cb(GtkWidget *widget, gpointer data)
 	nserror res;
 	res = nsgtk_global_history_present();
 	if (res != NSERROR_OK) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Unable to initialise global history window.");
 	}
@@ -2743,7 +2743,7 @@ showbookmarks_button_clicked_cb(GtkWidget *widget, gpointer data)
 	nserror res;
 	res = nsgtk_hotlist_present();
 	if (res != NSERROR_OK) {
-		NSLOG(netsurf, INFO, "Unable to initialise bookmark window.");
+		NSLOG(netsurfy, INFO, "Unable to initialise bookmark window.");
 	}
 	return TRUE;
 }
@@ -2761,7 +2761,7 @@ static gboolean showcookies_button_clicked_cb(GtkWidget *widget, gpointer data)
 	nserror res;
 	res = nsgtk_cookies_present(NULL);
 	if (res != NSERROR_OK) {
-		NSLOG(netsurf, INFO, "Unable to initialise cookies window.");
+		NSLOG(netsurfy, INFO, "Unable to initialise cookies window.");
 	}
 	return TRUE;
 }
@@ -2800,7 +2800,7 @@ static gboolean contents_button_clicked_cb(GtkWidget *widget, gpointer data)
 	nserror res;
 
 	res = toolbar_navigate_to_url(
-		tb, "https://www.netsurf-browser.org/documentation/");
+		tb, "https://github.com/xyproto/netsurfy");
 	if (res != NSERROR_OK) {
 		nsgtk_warning(messages_get_errorcode(res), 0);
 	}
@@ -2821,7 +2821,7 @@ static gboolean guide_button_clicked_cb(GtkWidget *widget, gpointer data)
 	nserror res;
 
 	res = toolbar_navigate_to_url(
-		tb, "https://www.netsurf-browser.org/documentation/guide");
+		tb, "https://github.com/xyproto/netsurfy");
 	if (res != NSERROR_OK) {
 		nsgtk_warning(messages_get_errorcode(res), 0);
 	}
@@ -2843,7 +2843,7 @@ static gboolean info_button_clicked_cb(GtkWidget *widget, gpointer data)
 	nserror res;
 
 	res = toolbar_navigate_to_url(
-		tb, "https://www.netsurf-browser.org/documentation/info");
+		tb, "https://github.com/xyproto/netsurfy");
 	if (res != NSERROR_OK) {
 		nsgtk_warning(messages_get_errorcode(res), 0);
 	}

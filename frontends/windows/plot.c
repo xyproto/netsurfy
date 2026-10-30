@@ -2,13 +2,13 @@
  * Copyright 2008 Vincent Sanders <vince@simtec.co.uk>
  * Copyright 2009 Mark Benjamin <netsurf-browser.org.MarkBenjamin@dfgh.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -32,9 +32,9 @@
 
 #include "utils/log.h"
 #include "utils/utf8.h"
-#include "netsurf/mouse.h"
-#include "netsurf/window.h"
-#include "netsurf/plotters.h"
+#include "netsurfy/mouse.h"
+#include "netsurfy/window.h"
+#include "netsurfy/plotters.h"
 
 #include "windows/bitmap.h"
 #include "windows/font.h"
@@ -71,7 +71,7 @@ static nserror plot_block(COLORREF col, int x, int y, int width, int height)
 
 	/* ensure the plot HDC is set */
 	if (plot_hdc == NULL) {
-		NSLOG(netsurf, INFO, "HDC not set on call to plotters");
+		NSLOG(netsurfy, INFO, "HDC not set on call to plotters");
 		return NSERROR_INVALID;
 	}
 
@@ -318,7 +318,7 @@ plot_bitmap(struct bitmap *bitmap, int x, int y, int width, int height)
 
 	/* ensure the plot HDC is set */
 	if (plot_hdc == NULL) {
-		NSLOG(netsurf, INFO, "HDC not set on call to plotters");
+		NSLOG(netsurfy, INFO, "HDC not set on call to plotters");
 		return NSERROR_INVALID;
 	}
 
@@ -441,7 +441,7 @@ static nserror arc(const struct redraw_context *ctx,
 
 	/* ensure the plot HDC is set */
 	if (plot_hdc == NULL) {
-		NSLOG(netsurf, INFO, "HDC not set on call to plotters");
+		NSLOG(netsurfy, INFO, "HDC not set on call to plotters");
 		return NSERROR_INVALID;
 	}
 
@@ -559,7 +559,7 @@ static nserror disc(const struct redraw_context *ctx,
 
 	/* ensure the plot HDC is set */
 	if (plot_hdc == NULL) {
-		NSLOG(netsurf, INFO, "HDC not set on call to plotters");
+		NSLOG(netsurfy, INFO, "HDC not set on call to plotters");
 		return NSERROR_INVALID;
 	}
 
@@ -653,7 +653,7 @@ static nserror line(const struct redraw_context *ctx,
 
 	/* ensure the plot HDC is set */
 	if (plot_hdc == NULL) {
-		NSLOG(netsurf, INFO, "HDC not set on call to plotters");
+		NSLOG(netsurfy, INFO, "HDC not set on call to plotters");
 		return NSERROR_INVALID;
 	}
 
@@ -728,7 +728,7 @@ static nserror rectangle(const struct redraw_context *ctx,
 
 	/* ensure the plot HDC is set */
 	if (plot_hdc == NULL) {
-		NSLOG(netsurf, INFO, "HDC not set on call to plotters");
+		NSLOG(netsurfy, INFO, "HDC not set on call to plotters");
 		return NSERROR_INVALID;
 	}
 
@@ -818,7 +818,7 @@ static nserror polygon(const struct redraw_context *ctx,
 
 	/* ensure the plot HDC is set */
 	if (plot_hdc == NULL) {
-		NSLOG(netsurf, INFO, "HDC not set on call to plotters");
+		NSLOG(netsurfy, INFO, "HDC not set on call to plotters");
 		return NSERROR_INVALID;
 	}
 
@@ -956,7 +956,7 @@ static nserror bitmap(const struct redraw_context *ctx,
 	      height);
 
 	if (bitmap == NULL) {
-		NSLOG(netsurf, INFO, "Passed null bitmap!");
+		NSLOG(netsurfy, INFO, "Passed null bitmap!");
 		return NSERROR_OK;
 	}
 
@@ -1090,7 +1090,7 @@ static nserror text(const struct redraw_context *ctx,
 
 	/* ensure the plot HDC is set */
 	if (plot_hdc == NULL) {
-		NSLOG(netsurf, INFO, "HDC not set on call to plotters");
+		NSLOG(netsurfy, INFO, "HDC not set on call to plotters");
 		return NSERROR_INVALID;
 	}
 

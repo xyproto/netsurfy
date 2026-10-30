@@ -1,12 +1,12 @@
 #
-# NetSurf javascript source file inclusion
+# NetSurfy javascript source file inclusion
 #
 # Included by Makefile
 #
 
 S_JAVASCRIPT_BINDING:=
 
-ifeq ($(NETSURF_USE_DUKTAPE),YES)
+ifeq ($(NETSURFY_USE_DUKTAPE),YES)
 # Duktape
 include content/handlers/javascript/duktape/Makefile
 else

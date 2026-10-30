@@ -5,13 +5,13 @@
  * Copyright 2004 John Tytgat <joty@netsurf-browser.org>
  * Copyright 2005 Adrian Lees <adrianl@users.sourceforge.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -33,12 +33,12 @@
 #include "utils/talloc.h"
 #include "utils/utf8.h"
 #include "utils/utils.h"
-#include "netsurf/types.h"
-#include "netsurf/mouse.h"
-#include "netsurf/form.h"
-#include "netsurf/window.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/keypress.h"
+#include "netsurfy/types.h"
+#include "netsurfy/mouse.h"
+#include "netsurfy/form.h"
+#include "netsurfy/window.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/keypress.h"
 #include "content/content.h"
 
 #include "desktop/browser_private.h"
@@ -107,7 +107,7 @@ void browser_window_remove_caret(struct browser_window *bw, bool only_hide)
 	}
 }
 
-/* exported interface documented in netsurf/keypress.h */
+/* exported interface documented in netsurfy/keypress.h */
 bool browser_window_key_press(struct browser_window *bw, uint32_t key)
 {
 	struct browser_window *focus = bw->focus;

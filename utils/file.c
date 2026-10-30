@@ -1,13 +1,13 @@
 /*
  * Copyright 2014 vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -284,7 +284,7 @@ static struct gui_file_table file_table = {
 struct gui_file_table *default_file_table = &file_table;
 
 /* exported interface documented in utils/file.h */
-nserror netsurf_mkpath(char **str, size_t *size, size_t nelm, ...)
+nserror netsurfy_mkpath(char **str, size_t *size, size_t nelm, ...)
 {
 	va_list ap;
 	nserror ret;
@@ -297,25 +297,25 @@ nserror netsurf_mkpath(char **str, size_t *size, size_t nelm, ...)
 }
 
 /* exported interface documented in utils/file.h */
-nserror netsurf_nsurl_to_path(struct nsurl *url, char **path_out)
+nserror netsurfy_nsurl_to_path(struct nsurl *url, char **path_out)
 {
 	return guit->file->nsurl_to_path(url, path_out);
 }
 
 /* exported interface documented in utils/file.h */
-nserror netsurf_path_to_nsurl(const char *path, struct nsurl **url)
+nserror netsurfy_path_to_nsurl(const char *path, struct nsurl **url)
 {
 	return guit->file->path_to_nsurl(path, url);
 }
 
 /* exported interface documented in utils/file.h */
-nserror netsurf_mkdir_all(const char *fname)
+nserror netsurfy_mkdir_all(const char *fname)
 {
 	return guit->file->mkdir_all(fname);
 }
 
 /* exported interface documented in utils/file.h */
-nserror netsurf_recursive_rm(const char *path)
+nserror netsurfy_recursive_rm(const char *path)
 {
 	DIR *parent;
 	struct dirent *entry;
@@ -339,7 +339,7 @@ nserror netsurf_recursive_rm(const char *path)
 		    strcmp(entry->d_name, "..") == 0)
 			continue;
 
-		ret = netsurf_mkpath(&leafpath, NULL, 2, path, entry->d_name);
+		ret = netsurfy_mkpath(&leafpath, NULL, 2, path, entry->d_name);
 		if (ret != NSERROR_OK)
 			goto out;
 
@@ -355,7 +355,7 @@ nserror netsurf_recursive_rm(const char *path)
 			goto out_via_errno;
 		}
 		if (S_ISDIR(ent_stat.st_mode)) {
-			ret = netsurf_recursive_rm(leafpath);
+			ret = netsurfy_recursive_rm(leafpath);
 			if (ret != NSERROR_OK) {
 				free(leafpath);
 				goto out;

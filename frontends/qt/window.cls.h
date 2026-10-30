@@ -1,13 +1,13 @@
 /*
  * Copyright 2023 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -29,15 +29,15 @@
 extern "C" {
 #include "utils/errors.h"
 
-#include "netsurf/mouse.h"
-#include "netsurf/window.h"
+#include "netsurfy/mouse.h"
+#include "netsurfy/window.h"
 }
 
 #include "qt/widget.cls.h"
 #include "qt/urlbar.cls.h"
 
 /**
- * Class for netsurf window
+ * Class for netsurfy window
  */
 class NS_Window : public QWidget
 {

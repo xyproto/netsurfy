@@ -3,13 +3,13 @@
  * Copyright 2008 François Revol <mmu_man@users.sourceforge.net>
  * Copyright 2005 James Bursa <bursa@users.sourceforge.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -56,15 +56,15 @@ extern "C" {
 #include "utils/utf8.h"
 #include "utils/utils.h"
 #include "utils/nsurl.h"
-#include "netsurf/misc.h"
-#include "netsurf/clipboard.h"
-#include "netsurf/search.h"
-#include "netsurf/fetch.h"
-#include "netsurf/netsurf.h"
-#include "netsurf/content.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/cookie_db.h"
-#include "netsurf/url_db.h"
+#include "netsurfy/misc.h"
+#include "netsurfy/clipboard.h"
+#include "netsurfy/search.h"
+#include "netsurfy/fetch.h"
+#include "netsurfy/netsurfy.h"
+#include "netsurfy/content.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/cookie_db.h"
+#include "netsurfy/url_db.h"
 #include "content/fetch.h"
 }
 
@@ -113,13 +113,13 @@ static int sEventPipe[2];
 /* exported function defined in beos/gui.h */
 nserror beos_warn_user(const char *warning, const char *detail)
 {
-	NSLOG(netsurf, INFO, "warn_user: %s (%s)", warning, detail);
+	NSLOG(netsurfy, INFO, "warn_user: %s (%s)", warning, detail);
 	BAlert *alert;
 	BString text(warning);
 	if (detail)
 		text << ":\n" << detail;
 
-	alert = new BAlert("NetSurf Warning",
+	alert = new BAlert("NetSurfy Warning",
 			   text.String(),
 			   "Debug",
 			   "Ok",
@@ -134,7 +134,7 @@ nserror beos_warn_user(const char *warning, const char *detail)
 }
 
 NSBrowserApplication::NSBrowserApplication()
-	: BApplication("application/x-vnd.NetSurf")
+	: BApplication("application/x-vnd.NetSurfy")
 {
 }
 
@@ -237,7 +237,7 @@ char *realpath(const char *f, char *buf)
 }
 #endif
 
-/* finds the NetSurf binary image ID and path
+/* finds the NetSurfy binary image ID and path
  *
  */
 image_id nsbeos_find_app_path(char *path)
@@ -267,8 +267,8 @@ image_id nsbeos_find_app_path(char *path)
 /**
  * Locate a shared resource file by searching known places in order.
  *
- * Search order is: ~/config/settings/NetSurf/, ~/.netsurf/, $NETSURFRES/
- * (where NETSURFRES is an environment variable), and finally the path
+ * Search order is: ~/config/settings/NetSurfy/, ~/.netsurfy/, $NETSURFYRES/
+ * (where NETSURFYRES is an environment variable), and finally the path
  * specified by the macro at the top of this file.
  *
  * \param  buf      buffer to write to.  must be at least PATH_MAX chars
@@ -284,7 +284,7 @@ char *find_resource(char *buf, const char *filename, const char *def)
 	char t[PATH_MAX];
 
 	err = find_directory(B_USER_SETTINGS_DIRECTORY, &path);
-	path.Append("NetSurf");
+	path.Append("NetSurfy");
 	if (err >= B_OK)
 		cdir = path.Path();
 	if (cdir != NULL) {
@@ -299,14 +299,14 @@ char *find_resource(char *buf, const char *filename, const char *def)
 	cdir = getenv("HOME");
 	if (cdir != NULL) {
 		strcpy(t, cdir);
-		strcat(t, "/.netsurf/");
+		strcat(t, "/.netsurfy/");
 		strcat(t, filename);
 		realpath(t, buf);
 		if (access(buf, R_OK) == 0)
 			return buf;
 	}
 
-	cdir = getenv("NETSURFRES");
+	cdir = getenv("NETSURFYRES");
 
 	if (cdir != NULL) {
 		realpath(cdir, buf);
@@ -320,7 +320,7 @@ char *find_resource(char *buf, const char *filename, const char *def)
 	BPathFinder f((void *)find_resource);
 
 	BPath p;
-	if (f.FindPath(B_FIND_PATH_APPS_DIRECTORY, "netsurf/res", p) == B_OK) {
+	if (f.FindPath(B_FIND_PATH_APPS_DIRECTORY, "netsurfy/res", p) == B_OK) {
 		strcpy(t, p.Path());
 		strcat(t, filename);
 		realpath(t, buf);
@@ -348,7 +348,7 @@ char *find_resource(char *buf, const char *filename, const char *def)
 }
 
 /**
- * Check that ~/.netsurf/ exists, and if it doesn't, create it.
+ * Check that ~/.netsurfy/ exists, and if it doesn't, create it.
  */
 static void check_homedir(void)
 {
@@ -359,17 +359,17 @@ static void check_homedir(void)
 
 	if (err < B_OK) {
 		/* we really can't continue without a home directory. */
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Can't find user settings directory - nowhere to store state!");
-		die("NetSurf needs to find the user settings directory in order to run.\n");
+		die("NetSurfy needs to find the user settings directory in order to run.\n");
 	}
 
-	path.Append("NetSurf");
+	path.Append("NetSurfy");
 	err = create_directory(path.Path(), 0644);
 	if (err < B_OK) {
-		NSLOG(netsurf, INFO, "Unable to create %s", path.Path());
-		die("NetSurf could not create its settings directory.\n");
+		NSLOG(netsurfy, INFO, "Unable to create %s", path.Path());
+		die("NetSurfy could not create its settings directory.\n");
 	}
 }
 
@@ -394,7 +394,7 @@ static nsurl *gui_get_resource_url(const char *path)
 		path = "favicon.png";
 
 	u << path;
-	NSLOG(netsurf, INFO, "(%s) -> '%s'\n", path, u.String());
+	NSLOG(netsurfy, INFO, "(%s) -> '%s'\n", path, u.String());
 	nsurl_create(u.String(), &url);
 	return url;
 }
@@ -555,7 +555,7 @@ static BPath get_messages_path()
 	BPathFinder f((void *)get_messages_path);
 
 	BPath p;
-	f.FindPath(B_FIND_PATH_APPS_DIRECTORY, "netsurf/res", p);
+	f.FindPath(B_FIND_PATH_APPS_DIRECTORY, "netsurfy/res", p);
 	BString lang;
 #ifdef __HAIKU__
 	BMessage preferredLangs;
@@ -589,7 +589,7 @@ static void gui_init(int argc, char **argv)
 		return;
 	if (!replicated) {
 		sBAppThreadID = spawn_thread(bapp_thread,
-					     "BApplication(NetSurf)",
+					     "BApplication(NetSurfy)",
 					     B_NORMAL_PRIORITY,
 					     (void *)find_thread(NULL));
 		if (sBAppThreadID < B_OK)
@@ -641,7 +641,7 @@ static void gui_init(int argc, char **argv)
 		die("Unable to load throbber image.\n");
 
 	find_resource(buf, "Choices", "%/Choices");
-	NSLOG(netsurf, INFO, "Using '%s' as Preferences file", buf);
+	NSLOG(netsurfy, INFO, "Using '%s' as Preferences file", buf);
 	options_file_location = strdup(buf);
 	nsoption_read(buf, NULL);
 
@@ -688,12 +688,12 @@ static void gui_init(int argc, char **argv)
 
 	if (nsoption_charp(cookie_file) == NULL) {
 		find_resource(buf, "Cookies", "%/Cookies");
-		NSLOG(netsurf, INFO, "Using '%s' as Cookies file", buf);
+		NSLOG(netsurfy, INFO, "Using '%s' as Cookies file", buf);
 		nsoption_set_charp(cookie_file, strdup(buf));
 	}
 	if (nsoption_charp(cookie_jar) == NULL) {
 		find_resource(buf, "Cookies", "%/Cookies");
-		NSLOG(netsurf, INFO, "Using '%s' as Cookie Jar file", buf);
+		NSLOG(netsurfy, INFO, "Using '%s' as Cookie Jar file", buf);
 		nsoption_set_charp(cookie_jar, strdup(buf));
 	}
 	if ((nsoption_charp(cookie_file) == NULL) ||
@@ -702,13 +702,13 @@ static void gui_init(int argc, char **argv)
 
 	if (nsoption_charp(url_file) == NULL) {
 		find_resource(buf, "URLs", "%/URLs");
-		NSLOG(netsurf, INFO, "Using '%s' as URL file", buf);
+		NSLOG(netsurfy, INFO, "Using '%s' as URL file", buf);
 		nsoption_set_charp(url_file, strdup(buf));
 	}
 
 	if (nsoption_charp(ca_path) == NULL) {
 		find_resource(buf, "certs", "/etc/ssl/certs");
-		NSLOG(netsurf, INFO, "Using '%s' as certificate path", buf);
+		NSLOG(netsurfy, INFO, "Using '%s' as certificate path", buf);
 		nsoption_set_charp(ca_path, strdup(buf));
 	}
 
@@ -728,7 +728,7 @@ static void gui_init(int argc, char **argv)
 	} else if (nsoption_charp(homepage_url) != NULL) {
 		addr = nsoption_charp(homepage_url);
 	} else {
-		addr = NETSURF_HOMEPAGE;
+		addr = NETSURFY_HOMEPAGE;
 	}
 
 	/* create an initial browser window */
@@ -817,21 +817,21 @@ void nsbeos_gui_poll(void)
 	timeout.tv_sec = (long)(next_schedule / 1000000LL);
 	timeout.tv_usec = (long)(next_schedule % 1000000LL);
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "gui_poll: select(%d, ..., %Ldus",
 	      max_fd,
 	      next_schedule);
 	fd_count = select(
 		max_fd, &read_fd_set, &write_fd_set, &exc_fd_set, &timeout);
-	NSLOG(netsurf, DEEPDEBUG, "select: %d\n", fd_count);
+	NSLOG(netsurfy, DEEPDEBUG, "select: %d\n", fd_count);
 
 	if (fd_count > 0 && FD_ISSET(sEventPipe[0], &read_fd_set)) {
 		BMessage *message;
 		int len = read(sEventPipe[0], &message, sizeof(void *));
-		NSLOG(netsurf, DEEPDEBUG, "gui_poll: BMessage ? %d read", len);
+		NSLOG(netsurfy, DEEPDEBUG, "gui_poll: BMessage ? %d read", len);
 		if (len == sizeof(void *)) {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      DEEPDEBUG,
 			      "gui_poll: BMessage.what %-4.4s\n",
 			      (char *)&(message->what));
@@ -1010,7 +1010,7 @@ void die(const char *const error)
 	BString text("Cannot continue:\n");
 	text << error;
 
-	alert = new BAlert("NetSurf Error",
+	alert = new BAlert("NetSurfy Error",
 			   text.String(),
 			   "Debug",
 			   "Ok",
@@ -1049,7 +1049,7 @@ int main(int argc, char **argv)
 {
 	nserror ret;
 	BPath options;
-	struct netsurf_table beos_table = {
+	struct netsurfy_table beos_table = {
 		&beos_misc_table,
 		beos_window_table,
 		NULL, /* corewindow */
@@ -1064,13 +1064,13 @@ int main(int argc, char **argv)
 		beos_bitmap_table,
 		beos_layout_table};
 
-	ret = netsurf_register(&beos_table);
+	ret = netsurfy_register(&beos_table);
 	if (ret != NSERROR_OK) {
-		die("NetSurf operation table failed registration");
+		die("NetSurfy operation table failed registration");
 	}
 
 	if (find_directory(B_USER_SETTINGS_DIRECTORY, &options, true) == B_OK) {
-		options.Append("x-vnd.NetSurf");
+		options.Append("x-vnd.NetSurfy");
 	}
 
 	if (!replicated) {
@@ -1112,7 +1112,7 @@ int main(int argc, char **argv)
 
 	char path[12];
 	sprintf(path, "%.2s/Messages", lang.String());
-	NSLOG(netsurf, INFO, "Loading messages from resource %s\n", path);
+	NSLOG(netsurfy, INFO, "Loading messages from resource %s\n", path);
 
 	const uint8_t *res = (const uint8_t *)resources.LoadResource('data',
 								     path,
@@ -1124,9 +1124,9 @@ int main(int argc, char **argv)
 		ret = messages_add_from_file(messages.Path());
 	}
 
-	ret = netsurf_init(NULL);
+	ret = netsurfy_init(NULL);
 	if (ret != NSERROR_OK) {
-		die("NetSurf failed to initialise");
+		die("NetSurfy failed to initialise");
 	}
 
 	gui_init(argc, argv);
@@ -1135,7 +1135,7 @@ int main(int argc, char **argv)
 		nsbeos_gui_poll();
 	}
 
-	netsurf_exit();
+	netsurfy_exit();
 
 	/* finalise options */
 	nsoption_finalise(nsoptions, nsoptions_default);
@@ -1151,7 +1151,7 @@ int gui_init_replicant(int argc, char **argv)
 {
 	nserror ret;
 	BPath options;
-	struct netsurf_table beos_table = {
+	struct netsurfy_table beos_table = {
 		&beos_misc_table,
 		beos_window_table,
 		NULL, /* corewindow */
@@ -1166,13 +1166,13 @@ int gui_init_replicant(int argc, char **argv)
 		beos_bitmap_table,
 		beos_layout_table};
 
-	ret = netsurf_register(&beos_table);
+	ret = netsurfy_register(&beos_table);
 	if (ret != NSERROR_OK) {
-		die("NetSurf operation table failed registration");
+		die("NetSurfy operation table failed registration");
 	}
 
 	if (find_directory(B_USER_SETTINGS_DIRECTORY, &options, true) == B_OK) {
-		options.Append("x-vnd.NetSurf");
+		options.Append("x-vnd.NetSurfy");
 	}
 
 	/* initialise logging. Not fatal if it fails but not much we
@@ -1196,10 +1196,10 @@ int gui_init_replicant(int argc, char **argv)
 	BPath messages = get_messages_path();
 	ret = messages_add_from_file(messages.Path());
 
-	ret = netsurf_init(NULL);
+	ret = netsurfy_init(NULL);
 	if (ret != NSERROR_OK) {
 		// FIXME: must not die when in replicant!
-		die("NetSurf failed to initialise");
+		die("NetSurfy failed to initialise");
 	}
 
 	gui_init(argc, argv);

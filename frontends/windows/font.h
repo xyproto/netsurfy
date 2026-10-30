@@ -2,13 +2,13 @@
  * Copyright 2008 Vincent Sanders <vince@simtec.co.uk>
  * Copyright 2009 Mark Benjamin <netsurf-browser.org.MarkBenjamin@dfgh.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -22,8 +22,8 @@
  * The interface to the win32 font and utf8 handling.
  */
 
-#ifndef NETSURF_WINDOWS_FONT_H
-#define NETSURF_WINDOWS_FONT_H
+#ifndef NETSURFY_WINDOWS_FONT_H
+#define NETSURFY_WINDOWS_FONT_H
 
 struct plot_font_style;
 
@@ -59,4 +59,4 @@ extern nserror utf8_to_font_encoding(const struct font_desc *font,
  */
 HFONT get_font(const struct plot_font_style *style);
 
-#endif /* NETSURF_WINDOWS_FONT_H */
+#endif /* NETSURFY_WINDOWS_FONT_H */

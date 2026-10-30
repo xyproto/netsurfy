@@ -1,13 +1,13 @@
 /*
  * Copyright 2023 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -18,7 +18,7 @@
 
 /**
  * \file
- * Implementation of netsurf layout operations for qt.
+ * Implementation of netsurfy layout operations for qt.
  */
 
 #include <stddef.h>
@@ -30,9 +30,9 @@ extern "C" {
 #include "utils/errors.h"
 #include "utils/utf8.h"
 #include "utils/nsoption.h"
-#include "netsurf/inttypes.h"
-#include "netsurf/layout.h"
-#include "netsurf/plot_style.h"
+#include "netsurfy/inttypes.h"
+#include "netsurfy/layout.h"
+#include "netsurfy/plot_style.h"
 }
 
 #include "qt/layout.h"
@@ -105,7 +105,7 @@ struct pfcache_entry {
 };
 
 /**
- * get a qt font object for a given netsurf font style
+ * get a qt font object for a given netsurfy font style
  *
  * This implents a trivial LRU cache for font entries
  */
@@ -137,7 +137,7 @@ static QFont *nsfont_style_to_font(const struct plot_font_style *fstyle)
 
 	/* no existing entry, replace oldest */
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "evicting slot %d age %d after %d hits",
 	      oldest_idx,
@@ -275,7 +275,7 @@ static nserror nsqt_layout_width(const struct plot_font_style *fstyle,
 	QFontMetrics metrics(*font);
 	*width = metrics.horizontalAdvance(string, length);
 	delete font;
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "fstyle: %p string:\"%.*s\", length: %" PRIsizet ", width: %dpx",
 	      fstyle,
@@ -314,7 +314,7 @@ static nserror nsqt_layout_position(const struct plot_font_style *fstyle,
 
 	delete font;
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "fstyle: %p string:\"%.*s\", length: %" PRIsizet ", "
 	      "search_x: %dpx, offset: %" PRIsizet ", actual_x: %dpx",
@@ -409,7 +409,7 @@ static nserror nsqt_layout_split(const struct plot_font_style *fstyle,
 
 nsqt_layout_split_done:
 	delete font;
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "fstyle: %p string:\"%.*s\", length: %" PRIsizet ", "
 	      "split: %dpx, offset: %" PRIsizet ", actual_x: %dpx",
@@ -439,7 +439,7 @@ nserror nsqt_layout_plot(QPainter *painter,
 	QPen pen(strokecolour);
 	QFont *font = nsfont_style_to_font(fstyle);
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "fstyle: %p string:\"%.*s\", length: %" PRIsizet ", width: %dpx",
 	      fstyle,

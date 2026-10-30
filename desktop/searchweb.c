@@ -1,13 +1,13 @@
 /*
  * Copyright 2014 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -28,7 +28,7 @@
 #include "utils/log.h"
 #include "utils/url.h"
 #include "utils/nsoption.h"
-#include "netsurf/content.h"
+#include "netsurfy/content.h"
 #include "content/hlcache.h"
 
 #include "desktop/searchweb.h"
@@ -287,7 +287,7 @@ static nserror search_web_ico_callback(hlcache_handle *ico,
 	switch (event->type) {
 
 	case CONTENT_MSG_DONE:
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "icon '%s' retrieved",
 		      nsurl_access(hlcache_handle_get_url(ico)));
@@ -296,7 +296,7 @@ static nserror search_web_ico_callback(hlcache_handle *ico,
 		break;
 
 	case CONTENT_MSG_ERROR:
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "icon %s error: %s",
 		      nsurl_access(hlcache_handle_get_url(ico)),
@@ -488,7 +488,7 @@ default_ico_callback(hlcache_handle *ico, const hlcache_event *event, void *pw)
 	switch (event->type) {
 
 	case CONTENT_MSG_DONE:
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "default icon '%s' retrieved",
 		      nsurl_access(hlcache_handle_get_url(ico)));
@@ -502,7 +502,7 @@ default_ico_callback(hlcache_handle *ico, const hlcache_event *event, void *pw)
 		break;
 
 	case CONTENT_MSG_ERROR:
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "icon %s error: %s",
 		      nsurl_access(hlcache_handle_get_url(ico)),

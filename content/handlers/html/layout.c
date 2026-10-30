@@ -4,13 +4,13 @@
  * Copyright 2008 Michael Drake <tlsa@netsurf-browser.org>
  * Copyright 2003 Phil Mellor <monkeyson@users.sourceforge.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -49,10 +49,10 @@
 #include "utils/nsoption.h"
 #include "utils/corestrings.h"
 #include "utils/nsurl.h"
-#include "netsurf/inttypes.h"
-#include "netsurf/content.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/layout.h"
+#include "netsurfy/inttypes.h"
+#include "netsurfy/content.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/layout.h"
 #include "content/content.h"
 #include "content/content_protected.h"
 #include "css/utils.h"
@@ -270,7 +270,7 @@ static void layout_minmax_table(struct box *table,
 
 	if (table_calculate_column_types(&content->unit_len_ctx, table) ==
 	    false) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      ERROR,
 		      "Could not establish table column types.");
 		return;

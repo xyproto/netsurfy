@@ -2,24 +2,24 @@
 # windows-specific options
 # ----------------------------------------------------------------------------
 
-# Where to search for NetSurf's resources after looking in ~/.netsurf and
-# ${APPDATA}\NetSurf.  It must have a trailing backslash
-NETSURF_WINDOWS_RESPATH := $${NETSURFRES}
+# Where to search for NetSurfy's resources after looking in ~/.netsurfy and
+# ${APPDATA}\NetSurfy.  It must have a trailing backslash
+NETSURFY_WINDOWS_RESPATH := $${NETSURFYRES}
 
-# Enable NetSurf's use of librosprite for displaying RISC OS Sprites
+# Enable NetSurfy's use of librosprite for displaying RISC OS Sprites
 # Valid options: YES, NO, AUTO
-NETSURF_USE_ROSPRITE := NO
+NETSURFY_USE_ROSPRITE := NO
 
-# Enable NetSurf's use of libsvgtiny for displaying SVGs
+# Enable NetSurfy's use of libsvgtiny for displaying SVGs
 # Valid options: YES, NO
-NETSURF_USE_NSSVG := NO
+NETSURFY_USE_NSSVG := NO
 
 # Force using glibc internal iconv implementation instead of external libiconv
 # Valid options: YES, NO
-NETSURF_USE_LIBICONV_PLUG := NO
+NETSURFY_USE_LIBICONV_PLUG := NO
 
 # no pdf support
-NETSURF_USE_HARU_PDF := NO
+NETSURFY_USE_HARU_PDF := NO
 
 # Optimisation levels
 CFLAGS += -O2

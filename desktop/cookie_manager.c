@@ -1,13 +1,13 @@
 /*
  * Copyright 2013 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -757,7 +757,7 @@ static void cookie_manager_delete_entry(struct cookie_manager_entry *e)
 
 			urldb_delete_cookie(domain, path, name);
 		} else {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "Delete cookie fail: "
 			      "need domain, path, and name.");
@@ -828,7 +828,7 @@ nserror cookie_manager_init(void *core_window_handle)
 		return err;
 	}
 
-	NSLOG(netsurf, INFO, "Generating cookie manager data");
+	NSLOG(netsurfy, INFO, "Generating cookie manager data");
 
 	/* Init. cookie manager treeview entry fields */
 	err = cookie_manager_init_entry_fields();
@@ -868,7 +868,7 @@ nserror cookie_manager_init(void *core_window_handle)
 	/* Inform client of window height */
 	treeview_get_height(cm_ctx.tree);
 
-	NSLOG(netsurf, INFO, "Generated cookie manager data");
+	NSLOG(netsurfy, INFO, "Generated cookie manager data");
 
 	return NSERROR_OK;
 }
@@ -880,7 +880,7 @@ nserror cookie_manager_fini(void)
 	int i;
 	nserror err;
 
-	NSLOG(netsurf, INFO, "Finalising cookie manager");
+	NSLOG(netsurfy, INFO, "Finalising cookie manager");
 
 	cm_ctx.built = false;
 
@@ -901,7 +901,7 @@ nserror cookie_manager_fini(void)
 		return err;
 	}
 
-	NSLOG(netsurf, INFO, "Finalised cookie manager");
+	NSLOG(netsurfy, INFO, "Finalised cookie manager");
 
 	return err;
 }

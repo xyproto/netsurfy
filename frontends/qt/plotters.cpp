@@ -1,13 +1,13 @@
 /*
  * Copyright 2021 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -29,10 +29,10 @@ extern "C" {
 
 #include "utils/log.h"
 #include "utils/errors.h"
-#include "netsurf/types.h"
-#include "netsurf/mouse.h"
-#include "netsurf/window.h"
-#include "netsurf/plotters.h"
+#include "netsurfy/types.h"
+#include "netsurfy/mouse.h"
+#include "netsurfy/window.h"
+#include "netsurfy/plotters.h"
 }
 
 #include "qt/window.h"
@@ -41,14 +41,14 @@ extern "C" {
 
 
 /**
- * setup qt painter styles according to netsurf plot style
+ * setup qt painter styles according to netsurfy plot style
  */
 static nserror nsqt_set_style(QPainter *painter, const plot_style_t *style)
 {
 	QColor fillcolour(style->fill_colour & 0xFF,
 			  (style->fill_colour & 0xFF00) >> 8,
 			  (style->fill_colour & 0xFF0000) >> 16);
-	/*NSLOG(netsurf, WARNING,"fill_colour %x -> %d,%d,%d",
+	/*NSLOG(netsurfy, WARNING,"fill_colour %x -> %d,%d,%d",
 	      style->fill_colour,
 	      style->fill_colour & 0xFF,
 	      (style->fill_colour & 0xFF00) >>8,
@@ -256,7 +256,7 @@ static nserror nsqt_plot_path(const struct redraw_context *ctx,
 		return NSERROR_OK;
 	}
 	if (p[0] != PLOTTER_PATH_MOVE) {
-		NSLOG(netsurf, INFO, "Path does not start with move");
+		NSLOG(netsurfy, INFO, "Path does not start with move");
 		return NSERROR_INVALID;
 	}
 
@@ -286,7 +286,7 @@ static nserror nsqt_plot_path(const struct redraw_context *ctx,
 			break;
 
 		default:
-			NSLOG(netsurf, INFO, "bad path command %f", p[idx]);
+			NSLOG(netsurfy, INFO, "bad path command %f", p[idx]);
 			return NSERROR_INVALID;
 		}
 	}

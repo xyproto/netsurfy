@@ -2,13 +2,13 @@
  * Copyright 2005 James Bursa <bursa@users.sourceforge.net>
  *           2008 Vincent Sanders <vince@simtec.co.uk>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -22,15 +22,15 @@
 #include <ft2build.h>
 #include FT_CACHE_H
 
-#include "netsurf/inttypes.h"
+#include "netsurfy/inttypes.h"
 #include "utils/filepath.h"
 #include "utils/utf8.h"
 #include "utils/log.h"
 #include "utils/nsoption.h"
-#include "netsurf/utf8.h"
-#include "netsurf/layout.h"
-#include "netsurf/browser.h"
-#include "netsurf/plot_style.h"
+#include "netsurfy/utf8.h"
+#include "netsurfy/layout.h"
+#include "netsurfy/browser.h"
+#include "netsurfy/plot_style.h"
 
 #include "framebuffer/gui.h"
 #include "framebuffer/font.h"
@@ -89,12 +89,12 @@ static FT_Error ft_face_requester(FTC_FaceID face_id,
 
 	error = FT_New_Face(library, fb_face->fontfile, fb_face->index, face);
 	if (error) {
-		NSLOG(netsurf, INFO, "Could not find font (code %d)", error);
+		NSLOG(netsurfy, INFO, "Could not find font (code %d)", error);
 	} else {
 
 		error = FT_Select_Charmap(*face, FT_ENCODING_UNICODE);
 		if (error) {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "Could not select charmap (code %d)",
 			      error);
@@ -108,7 +108,7 @@ static FT_Error ft_face_requester(FTC_FaceID face_id,
 			}
 		}
 	}
-	NSLOG(netsurf, INFO, "Loaded face from %s", fb_face->fontfile);
+	NSLOG(netsurfy, INFO, "Loaded face from %s", fb_face->fontfile);
 
 	return error;
 }
@@ -135,7 +135,7 @@ fb_new_face(const char *option, const char *resname, const char *fontname)
 
 	error = FTC_Manager_LookupFace(ft_cmanager, (FTC_FaceID)newf, &aface);
 	if (error) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Could not find font face %s (code %d)",
 		      fontname,
@@ -159,7 +159,7 @@ bool fb_font_init(void)
 	/* freetype library initialise */
 	error = FT_Init_FreeType(&library);
 	if (error) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Freetype could not initialised (code %d)",
 		      error);
@@ -182,7 +182,7 @@ bool fb_font_init(void)
 				NULL,
 				&ft_cmanager);
 	if (error) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Freetype could not initialise cache manager (code %d)",
 		      error);
@@ -199,10 +199,10 @@ bool fb_font_init(void)
 	/* Start with the sans serif font */
 	fb_face = fb_new_face(nsoption_charp(fb_face_sans_serif),
 			      "sans_serif.ttf",
-			      NETSURF_FB_FONT_SANS_SERIF);
+			      NETSURFY_FB_FONT_SANS_SERIF);
 	if (fb_face == NULL) {
 		/* The sans serif font is the default and must be found. */
-		NSLOG(netsurf, INFO, "Could not find the default font");
+		NSLOG(netsurfy, INFO, "Could not find the default font");
 		FTC_Manager_Done(ft_cmanager);
 		FT_Done_FreeType(library);
 		return false;
@@ -213,7 +213,7 @@ bool fb_font_init(void)
 	/* Bold sans serif face */
 	fb_face = fb_new_face(nsoption_charp(fb_face_sans_serif_bold),
 			      "sans_serif_bold.ttf",
-			      NETSURF_FB_FONT_SANS_SERIF_BOLD);
+			      NETSURFY_FB_FONT_SANS_SERIF_BOLD);
 	if (fb_face == NULL) {
 		/* seperate bold face unavailabe use the normal weight version
 		 */
@@ -226,7 +226,7 @@ bool fb_font_init(void)
 	/* Italic sans serif face */
 	fb_face = fb_new_face(nsoption_charp(fb_face_sans_serif_italic),
 			      "sans_serif_italic.ttf",
-			      NETSURF_FB_FONT_SANS_SERIF_ITALIC);
+			      NETSURFY_FB_FONT_SANS_SERIF_ITALIC);
 	if (fb_face == NULL) {
 		/* seperate italic face unavailabe use the normal weight version
 		 */
@@ -239,7 +239,7 @@ bool fb_font_init(void)
 	/* Bold italic sans serif face */
 	fb_face = fb_new_face(nsoption_charp(fb_face_sans_serif_italic_bold),
 			      "sans_serif_italic_bold.ttf",
-			      NETSURF_FB_FONT_SANS_SERIF_ITALIC_BOLD);
+			      NETSURFY_FB_FONT_SANS_SERIF_ITALIC_BOLD);
 	if (fb_face == NULL) {
 		/* seperate italic face unavailabe use the normal weight version
 		 */
@@ -252,7 +252,7 @@ bool fb_font_init(void)
 	/* serif face */
 	fb_face = fb_new_face(nsoption_charp(fb_face_serif),
 			      "serif.ttf",
-			      NETSURF_FB_FONT_SERIF);
+			      NETSURFY_FB_FONT_SERIF);
 	if (fb_face == NULL) {
 		/* serif face unavailabe use the default */
 		fb_faces[FB_FACE_SERIF] = fb_faces[FB_FACE_SANS_SERIF];
@@ -263,7 +263,7 @@ bool fb_font_init(void)
 	/* bold serif face*/
 	fb_face = fb_new_face(nsoption_charp(fb_face_serif_bold),
 			      "serif_bold.ttf",
-			      NETSURF_FB_FONT_SERIF_BOLD);
+			      NETSURFY_FB_FONT_SERIF_BOLD);
 	if (fb_face == NULL) {
 		/* bold serif face unavailabe use the normal weight */
 		fb_faces[FB_FACE_SERIF_BOLD] = fb_faces[FB_FACE_SERIF];
@@ -275,7 +275,7 @@ bool fb_font_init(void)
 	/* monospace face */
 	fb_face = fb_new_face(nsoption_charp(fb_face_monospace),
 			      "monospace.ttf",
-			      NETSURF_FB_FONT_MONOSPACE);
+			      NETSURFY_FB_FONT_MONOSPACE);
 	if (fb_face == NULL) {
 		/* serif face unavailabe use the default */
 		fb_faces[FB_FACE_MONOSPACE] = fb_faces[FB_FACE_SANS_SERIF];
@@ -286,7 +286,7 @@ bool fb_font_init(void)
 	/* bold monospace face*/
 	fb_face = fb_new_face(nsoption_charp(fb_face_monospace_bold),
 			      "monospace_bold.ttf",
-			      NETSURF_FB_FONT_MONOSPACE_BOLD);
+			      NETSURFY_FB_FONT_MONOSPACE_BOLD);
 	if (fb_face == NULL) {
 		/* bold serif face unavailabe use the normal weight */
 		fb_faces[FB_FACE_MONOSPACE_BOLD] = fb_faces[FB_FACE_MONOSPACE];
@@ -297,7 +297,7 @@ bool fb_font_init(void)
 	/* cursive face */
 	fb_face = fb_new_face(nsoption_charp(fb_face_cursive),
 			      "cursive.ttf",
-			      NETSURF_FB_FONT_CURSIVE);
+			      NETSURFY_FB_FONT_CURSIVE);
 	if (fb_face == NULL) {
 		/* cursive face unavailabe use the default */
 		fb_faces[FB_FACE_CURSIVE] = fb_faces[FB_FACE_SANS_SERIF];
@@ -308,7 +308,7 @@ bool fb_font_init(void)
 	/* fantasy face */
 	fb_face = fb_new_face(nsoption_charp(fb_face_fantasy),
 			      "fantasy.ttf",
-			      NETSURF_FB_FONT_FANTASY);
+			      NETSURFY_FB_FONT_FANTASY);
 	if (fb_face == NULL) {
 		/* fantasy face unavailabe use the default */
 		fb_faces[FB_FACE_FANTASY] = fb_faces[FB_FACE_SANS_SERIF];

@@ -1,13 +1,13 @@
 /*
  * Copyright 2011-2017 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NETSURF_UTILS_NSURL_PRIVATE_H_
-#define NETSURF_UTILS_NSURL_PRIVATE_H_
+#ifndef NETSURFY_UTILS_NSURL_PRIVATE_H_
+#define NETSURFY_UTILS_NSURL_PRIVATE_H_
 
 #include <libwapcaplet/libwapcaplet.h>
 
@@ -52,12 +52,12 @@ struct nsurl_components {
 
 
 /**
- * NetSurf URL object
+ * NetSurfy URL object
  */
 struct nsurl {
 	struct nsurl_components components;
 
-	int count; /* Number of references to NetSurf URL object */
+	int count; /* Number of references to NetSurfy URL object */
 	uint32_t hash; /* Hash value for nsurl identification */
 
 	size_t length; /* Length of string */
@@ -122,7 +122,7 @@ nserror nsurl__components_to_string(const struct nsurl_components *components,
 /**
  * Calculate hash value
  *
- * \param url		NetSurf URL object to set hash value for
+ * \param url		NetSurfy URL object to set hash value for
  */
 void nsurl__calc_hash(nsurl *url);
 

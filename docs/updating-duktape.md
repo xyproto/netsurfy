@@ -23,7 +23,7 @@ Updating Duktape
         sources in `/tmp/output`
 
 5.  Replace the `duktape.c`, `duktape.h` and
-    `duk_config.h` files in the netsurf source
+    `duk_config.h` files in the netsurfy source
     tree (in `content/handlers/javascript/duktape`)
     with those generated in `/tmp/output`.
 

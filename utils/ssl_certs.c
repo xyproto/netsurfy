@@ -1,13 +1,13 @@
 /*
  * Copyright 2020 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -30,12 +30,12 @@
 #include "utils/log.h"
 #include "utils/nsurl.h"
 
-#include "netsurf/ssl_certs.h"
+#include "netsurfy/ssl_certs.h"
 
 /*
  * create new certificate chain
  *
- * exported interface documented in netsurf/ssl_certs.h
+ * exported interface documented in netsurfy/ssl_certs.h
  */
 nserror cert_chain_alloc(size_t depth, struct cert_chain **chain_out)
 {
@@ -57,7 +57,7 @@ nserror cert_chain_alloc(size_t depth, struct cert_chain **chain_out)
 /*
  * duplicate certificate chain into existing chain
  *
- * exported interface documented in netsurf/ssl_certs.h
+ * exported interface documented in netsurfy/ssl_certs.h
  */
 nserror
 cert_chain_dup_into(const struct cert_chain *src, struct cert_chain *dst)
@@ -94,7 +94,7 @@ cert_chain_dup_into(const struct cert_chain *src, struct cert_chain *dst)
 /*
  * duplicate certificate chain
  *
- * exported interface documented in netsurf/ssl_certs.h
+ * exported interface documented in netsurfy/ssl_certs.h
  */
 nserror
 cert_chain_dup(const struct cert_chain *src, struct cert_chain **dst_out)
@@ -163,7 +163,7 @@ process_query_section(const char *str, size_t len, struct cert_chain *chain)
 /*
  * create a certificate chain from a fetch query string
  *
- * exported interface documented in netsurf/ssl_certs.h
+ * exported interface documented in netsurfy/ssl_certs.h
  */
 nserror cert_chain_from_query(struct nsurl *url, struct cert_chain **chain_out)
 {
@@ -220,7 +220,7 @@ nserror cert_chain_from_query(struct nsurl *url, struct cert_chain **chain_out)
 /*
  * create a fetch query string from a certificate chain
  *
- * exported interface documented in netsurf/ssl_certs.h
+ * exported interface documented in netsurfy/ssl_certs.h
  */
 nserror cert_chain_to_query(struct cert_chain *chain, struct nsurl **url_out)
 {
@@ -309,7 +309,7 @@ nserror cert_chain_to_query(struct cert_chain *chain, struct nsurl **url_out)
 /*
  * free certificate chain
  *
- * exported interface documented in netsurf/ssl_certs.h
+ * exported interface documented in netsurfy/ssl_certs.h
  */
 nserror cert_chain_free(struct cert_chain *chain)
 {
@@ -332,7 +332,7 @@ nserror cert_chain_free(struct cert_chain *chain)
 /*
  * calculate storage used of certificate chain
  *
- * exported interface documented in netsurf/ssl_certs.h
+ * exported interface documented in netsurfy/ssl_certs.h
  */
 size_t cert_chain_size(const struct cert_chain *chain)
 {

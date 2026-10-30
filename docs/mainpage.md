@@ -1,4 +1,4 @@
-NetSurf web browser
+NetSurfy web browser
 ===================
 
 ![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/1037/badge)

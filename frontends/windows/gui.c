@@ -2,13 +2,13 @@
  * Copyright 2008 Vincent Sanders <vince@simtec.co.uk>
  * Copyright 2009 Mark Benjamin <netsurf-browser.org.MarkBenjamin@dfgh.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -35,7 +35,7 @@
 #include "utils/url.h"
 #include "utils/file.h"
 #include "utils/messages.h"
-#include "netsurf/browser_window.h"
+#include "netsurfy/browser_window.h"
 
 #include "windows/schedule.h"
 #include "windows/window.h"
@@ -88,7 +88,7 @@ nserror nsw32_del_dialog(HWND hwndDlg)
 		if (cur->hwnd == hwndDlg) {
 			/* found match */
 			*prev = cur->next;
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      DEBUG,
 			      "removed hwnd %p entry %p",
 			      cur->hwnd,
@@ -99,7 +99,7 @@ nserror nsw32_del_dialog(HWND hwndDlg)
 		prev = &cur->next;
 		cur = *prev;
 	}
-	NSLOG(netsurf, INFO, "did not find hwnd %p", hwndDlg);
+	NSLOG(netsurfy, INFO, "did not find hwnd %p", hwndDlg);
 
 	return NSERROR_NOT_FOUND;
 }
@@ -113,7 +113,7 @@ static nserror handle_dialog_message(LPMSG lpMsg)
 	cur = dlglist;
 	while (cur != NULL) {
 		if (IsDialogMessage(cur->hwnd, lpMsg)) {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      DEBUG,
 			      "dispatched dialog hwnd %p",
 			      cur->hwnd);
@@ -139,7 +139,7 @@ void win32_run(void)
 	int timeout; /* timeout in miliseconds */
 	UINT timer_id = 0;
 
-	NSLOG(netsurf, INFO, "Starting messgae dispatcher");
+	NSLOG(netsurfy, INFO, "Starting messgae dispatcher");
 
 	while (!win32_quit) {
 		/* run the scheduler and discover how long to wait for

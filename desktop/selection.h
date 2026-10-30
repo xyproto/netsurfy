@@ -1,13 +1,13 @@
 /*
  * Copyright 2005 Adrian Lees <adrianl@users.sourceforge.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -20,11 +20,11 @@
  * Text selection within browser windows (interface).
  */
 
-#ifndef NETSURF_DESKTOP_SELECTION_H_
-#define NETSURF_DESKTOP_SELECTION_H_
+#ifndef NETSURFY_DESKTOP_SELECTION_H_
+#define NETSURFY_DESKTOP_SELECTION_H_
 
 #include <stdbool.h>
-#include "netsurf/mouse.h"
+#include "netsurfy/mouse.h"
 
 struct box;
 struct browser_window;

@@ -1,13 +1,13 @@
 /*
  * Copyright 2005 John M Bell <jmb202@ecs.soton.ac.uk>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -32,8 +32,8 @@
 #include "utils/log.h"
 #include "utils/utf8.h"
 
-#include "netsurf/inttypes.h"
-#include "netsurf/utf8.h"
+#include "netsurfy/inttypes.h"
+#include "netsurfy/utf8.h"
 #include "desktop/gui_internal.h"
 
 
@@ -475,7 +475,7 @@ bool utf8_save_text(const char *utf8_text, const char *path)
 
 	ret = guit->utf8->utf8_to_local(utf8_text, strlen(utf8_text), &conv);
 	if (ret != NSERROR_OK) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "failed to convert to local encoding, return %d",
 		      ret);
@@ -486,7 +486,7 @@ bool utf8_save_text(const char *utf8_text, const char *path)
 	if (out) {
 		int res = fputs(conv, out);
 		if (res < 0) {
-			NSLOG(netsurf, INFO, "Warning: writing data failed");
+			NSLOG(netsurfy, INFO, "Warning: writing data failed");
 		}
 
 		res = fputs("\n", out);

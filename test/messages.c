@@ -1,13 +1,13 @@
 /*
  * Copyright 2016 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -47,7 +47,7 @@ struct message_test_vec_s {
 struct message_test_vec_s message_errorcode_test_vec[] = {
 	{NSERROR_OK, "OK"},
 	{NSERROR_NOMEM,
-	 "NetSurf is running out of memory. Please free some memory and try again."},
+	 "NetSurfy is running out of memory. Please free some memory and try again."},
 	{NSERROR_NO_FETCH_HANDLER, "NoHandler"},
 	{NSERROR_NOT_FOUND, "Not found"},
 	{NSERROR_SAVE_FAILED, "SaveFailed"},
@@ -124,7 +124,7 @@ START_TEST(message_get_buff_test)
 	buf = messages_get_buff("NoMemory");
 	ck_assert_str_eq(
 		buf,
-		"NetSurf is running out of memory. Please free some memory and try again.");
+		"NetSurfy is running out of memory. Please free some memory and try again.");
 	free(buf);
 
 	/* cleanup */

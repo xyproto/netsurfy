@@ -3,7 +3,7 @@
  * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
  * Copyright 2015 Daniel Silverstone <dsilvers@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
  * Released under the terms of the MIT License,
  *         http://www.opensource.org/licenses/mit-license
@@ -15,7 +15,7 @@ class Location {
 
 prologue Location()
 %{
-#include "netsurf/browser_window.h"
+#include "netsurfy/browser_window.h"
 %}
 
 init Location(nsurl *url)
@@ -40,7 +40,7 @@ method Location::reload()
 	if (priv_win->win != NULL) {
 		browser_window_reload(priv_win->win, false);
 	} else {
-		NSLOG(netsurf, INFO, "failed to get browser context");
+		NSLOG(netsurfy, INFO, "failed to get browser context");
 	}
 	return 0;
 %}
@@ -54,7 +54,7 @@ method Location::assign()
 	duk_pop(ctx);
 
 	if (priv_win == NULL || priv_win->win == NULL) {
-		NSLOG(netsurf, INFO, "failed to get browser context");
+		NSLOG(netsurfy, INFO, "failed to get browser context");
 		return 0;
 	}
 
@@ -83,7 +83,7 @@ method Location::replace()
 	duk_pop(ctx);
 
 	if (priv_win == NULL || priv_win->win == NULL) {
-		NSLOG(netsurf, INFO, "failed to get browser context");
+		NSLOG(netsurfy, INFO, "failed to get browser context");
 		return 0;
 	}
 
@@ -131,7 +131,7 @@ setter Location::href()
 	duk_pop(ctx);
 
 	if (priv_win == NULL || priv_win->win == NULL) {
-		NSLOG(netsurf, INFO, "failed to get browser context");
+		NSLOG(netsurfy, INFO, "failed to get browser context");
 		return 0;
 	}
 

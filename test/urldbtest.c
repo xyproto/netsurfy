@@ -2,13 +2,13 @@
  * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
  * Copyright 2011 John Mark Bell <jmb@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -36,9 +36,9 @@
 #include "utils/corestrings.h"
 #include "utils/nsurl.h"
 #include "utils/nsoption.h"
-#include "netsurf/url_db.h"
-#include "netsurf/cookie_db.h"
-#include "netsurf/bitmap.h"
+#include "netsurfy/url_db.h"
+#include "netsurfy/cookie_db.h"
+#include "netsurfy/bitmap.h"
 #include "content/urldb.h"
 #include "desktop/gui_internal.h"
 #include "desktop/cookie_manager.h"
@@ -63,7 +63,7 @@ const char *test_cookies_out_path = "test/data/cookies-out";
 
 const char *wikipedia_url = "http://www.wikipedia.org/";
 
-struct netsurf_table *guit = NULL;
+struct netsurfy_table *guit = NULL;
 
 
 struct test_urls {
@@ -149,7 +149,7 @@ static nsurl *make_url(const char *url)
 {
 	nsurl *nsurl;
 	if (nsurl_create(url, &nsurl) != NSERROR_OK) {
-		NSLOG(netsurf, INFO, "failed creating nsurl");
+		NSLOG(netsurfy, INFO, "failed creating nsurl");
 		exit(1);
 	}
 	return nsurl;
@@ -198,7 +198,7 @@ struct gui_bitmap_table tst_bitmap_table = {
 	.destroy = destroy_bitmap,
 };
 
-struct netsurf_table tst_table = {
+struct netsurfy_table tst_table = {
 	.bitmap = &tst_bitmap_table,
 };
 
@@ -235,7 +235,7 @@ static void urldb_lwc_iterator(lwc_string *str, void *pw)
 {
 	int *scount = pw;
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "[%3u] %.*s",
 	      str->refcnt,
@@ -254,7 +254,7 @@ static void urldb_teardown(void)
 
 	corestrings_fini();
 
-	NSLOG(netsurf, INFO, "Remaining lwc strings:");
+	NSLOG(netsurfy, INFO, "Remaining lwc strings:");
 	lwc_iterate_strings(urldb_lwc_iterator, &scount);
 	ck_assert_int_eq(scount, 0);
 }
@@ -268,22 +268,22 @@ START_TEST(urldb_original_test)
 
 	/* fragments */
 	url = make_url(
-		"http://netsurf.strcprstskrzkrk.co.uk/path/to/resource.htm?a=b");
+		"http://netsurfy.strcprstskrzkrk.co.uk/path/to/resource.htm?a=b");
 	ck_assert(urldb_add_url(url) == true);
 	nsurl_unref(url);
 
 	url = make_url(
-		"http://netsurf.strcprstskrzkrk.co.uk/path/to/resource.htm#zz?a=b");
+		"http://netsurfy.strcprstskrzkrk.co.uk/path/to/resource.htm#zz?a=b");
 	ck_assert(urldb_add_url(url) == true);
 	nsurl_unref(url);
 
 	url = make_url(
-		"http://netsurf.strcprstskrzkrk.co.uk/path/to/resource.htm#aa?a=b");
+		"http://netsurfy.strcprstskrzkrk.co.uk/path/to/resource.htm#aa?a=b");
 	ck_assert(urldb_add_url(url) == true);
 	nsurl_unref(url);
 
 	url = make_url(
-		"http://netsurf.strcprstskrzkrk.co.uk/path/to/resource.htm#yy?a=b");
+		"http://netsurfy.strcprstskrzkrk.co.uk/path/to/resource.htm#yy?a=b");
 	ck_assert(urldb_add_url(url) == true);
 	nsurl_unref(url);
 
@@ -491,7 +491,7 @@ START_TEST(urldb_original_test)
 END_TEST
 
 /**
- * test case comprised of tests historicaly found in netsurf
+ * test case comprised of tests historicaly found in netsurfy
  *
  * These tests are carried forward from original open coded tests
  * found in the url database code.
@@ -767,7 +767,7 @@ static int cb_count;
 
 static bool urldb_iterate_entries_cb(nsurl *url, const struct url_data *data)
 {
-	NSLOG(netsurf, INFO, "url: %s", nsurl_access(url));
+	NSLOG(netsurfy, INFO, "url: %s", nsurl_access(url));
 	/* fprintf(stderr, "url:%s\ntitle:%s\n\n",nsurl_access(url),
 	 * data->title); */
 	cb_count++;
@@ -1071,7 +1071,7 @@ static TCase *urldb_case_create(void)
 
 static bool urldb_iterate_cookies_cb(const struct cookie_data *data)
 {
-	NSLOG(netsurf, INFO, "%p", data);
+	NSLOG(netsurfy, INFO, "%p", data);
 	/* fprintf(stderr, "domain:%s\npath:%s\nname:%s\n\n",data->domain,
 	 * data->path, data->name);*/
 	return true;

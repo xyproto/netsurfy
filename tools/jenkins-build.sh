@@ -20,9 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-# NetSurf continuous integration build script for jenkins
+# NetSurfy continuous integration build script for jenkins
 #
-# This script is executed by jenkins to build netsurf itself
+# This script is executed by jenkins to build netsurfy itself
 #
 # Usage: jenkins-build.sh
 #
@@ -81,28 +81,28 @@ case ${TARGET} in
 
 	esac
 
-	export GCCSDK_INSTALL_ENV=/opt/netsurf/${HOST}/env
-	export GCCSDK_INSTALL_CROSSBIN=/opt/netsurf/${HOST}/cross/bin
+	export GCCSDK_INSTALL_ENV=/opt/netsurfy/${HOST}/env
+	export GCCSDK_INSTALL_CROSSBIN=/opt/netsurfy/${HOST}/cross/bin
 	IDENTIFIER="${HOST}-${IDENTIFIER}"
 	OLD_IDENTIFIER="${HOST}-${OLD_IDENTIFIER}"
-	PKG_SRC=netsurf
+	PKG_SRC=netsurfy
 	PKG_SFX=.zip
 	;;
 
     "haiku")
-	# NetSurf version number haiku needs it for package name
-	NETSURF_VERSION="3.12"
+	# NetSurfy version number haiku needs it for package name
+	NETSURFY_VERSION="3.12"
 	USE_RSYNC=1
 
 	case ${HOST} in
 	    "i586-pc-haiku")
 	    # 32bit x86 (gcc) abi
-		PKG_SRC="netsurf_x86-${NETSURF_VERSION}-1-x86_gcc2"
+		PKG_SRC="netsurfy_x86-${NETSURFY_VERSION}-1-x86_gcc2"
 		;;
 
 	    "x86_64-unknown-haiku")
 		# 64bit x86 (gcc) abi
-		PKG_SRC="netsurf-${NETSURF_VERSION}-1-x86_64"
+		PKG_SRC="netsurfy-${NETSURFY_VERSION}-1-x86_64"
 		;;
 
 	    *)
@@ -130,7 +130,7 @@ case ${TARGET} in
 
 	esac
 
-	PKG_SRC=netsurf-installer
+	PKG_SRC=netsurfy-installer
 	PKG_SFX=.exe
 	;;
 
@@ -156,7 +156,7 @@ case ${TARGET} in
 
 	IDENTIFIER="${HOST}-${IDENTIFIER}"
 	OLD_IDENTIFIER="${HOST}-${OLD_IDENTIFIER}"
-	PKG_SRC=NetSurf
+	PKG_SRC=NetSurfy
 	PKG_SFX=.dmg
 	;;
 
@@ -173,7 +173,7 @@ case ${TARGET} in
 
 	esac
 
-	PKG_SRC=NetSurf_Amiga/netsurf
+	PKG_SRC=NetSurfy_Amiga/netsurfy
 	PKG_SFX=.lha
 	;;
 
@@ -190,7 +190,7 @@ case ${TARGET} in
 
 	esac
 
-	PKG_SRC=NetSurf_Amiga/netsurf
+	PKG_SRC=NetSurfy_Amiga/netsurfy
 	PKG_SFX=.lha
 	;;
 
@@ -203,8 +203,8 @@ case ${TARGET} in
 		;;
 
 	    "m5475-atari-mint")
-		export GCCSDK_INSTALL_ENV=/opt/netsurf/m5475-atari-mint/env
-		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurf/m5475-atari-mint/cross/bin
+		export GCCSDK_INSTALL_ENV=/opt/netsurfy/m5475-atari-mint/env
+		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurfy/m5475-atari-mint/cross/bin
 		ATARIARCH=v4e
 		PKG_SRC=nsv4e
 		PKG_SFX=.zip
@@ -347,39 +347,39 @@ case ${TARGET} in
 		;;
 
 	    "arm-riscos-gnueabi")
-		export GCCSDK_INSTALL_ENV=/opt/netsurf/${HOST}/env
-		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurf/${HOST}/cross/bin
+		export GCCSDK_INSTALL_ENV=/opt/netsurfy/${HOST}/env
+		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurfy/${HOST}/cross/bin
 		;;
 
 	    "arm-unknown-riscos")
-		export GCCSDK_INSTALL_ENV=/opt/netsurf/${HOST}/env
-		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurf/${HOST}/cross/bin
+		export GCCSDK_INSTALL_ENV=/opt/netsurfy/${HOST}/env
+		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurfy/${HOST}/cross/bin
 		;;
 
 	    "m68k-atari-mint")
-		export GCCSDK_INSTALL_ENV=/opt/netsurf/${HOST}/env
-		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurf/${HOST}/cross/bin
+		export GCCSDK_INSTALL_ENV=/opt/netsurfy/${HOST}/env
+		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurfy/${HOST}/cross/bin
 		;;
 
 	    "m5475-atari-mint")
 		ATARIARCH=v4e
-		export GCCSDK_INSTALL_ENV=/opt/netsurf/${HOST}/env
-		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurf/${HOST}/cross/bin
+		export GCCSDK_INSTALL_ENV=/opt/netsurfy/${HOST}/env
+		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurfy/${HOST}/cross/bin
 		;;
 
 	    "i686-w64-mingw32")
-		export GCCSDK_INSTALL_ENV=/opt/netsurf/${HOST}/env
-		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurf/${HOST}/cross/bin
+		export GCCSDK_INSTALL_ENV=/opt/netsurfy/${HOST}/env
+		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurfy/${HOST}/cross/bin
 		;;
 
 	    "ppc-amigaos")
-		export GCCSDK_INSTALL_ENV=/opt/netsurf/${HOST}/env
-		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurf/${HOST}/cross/bin
+		export GCCSDK_INSTALL_ENV=/opt/netsurfy/${HOST}/env
+		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurfy/${HOST}/cross/bin
 		;;
 
 	    "m68k-unknown-amigaos")
-		export GCCSDK_INSTALL_ENV=/opt/netsurf/${HOST}/env
-		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurf/${HOST}/cross/bin
+		export GCCSDK_INSTALL_ENV=/opt/netsurfy/${HOST}/env
+		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurfy/${HOST}/cross/bin
 		;;
 
 	    *)
@@ -408,37 +408,37 @@ case ${TARGET} in
 		;;
 
 	    "arm-riscos-gnueabi")
-		export GCCSDK_INSTALL_ENV=/opt/netsurf/${HOST}/env
-		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurf/${HOST}/cross/bin
+		export GCCSDK_INSTALL_ENV=/opt/netsurfy/${HOST}/env
+		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurfy/${HOST}/cross/bin
 		;;
 
 	    "arm-unknown-riscos")
-		export GCCSDK_INSTALL_ENV=/opt/netsurf/${HOST}/env
-		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurf/${HOST}/cross/bin
+		export GCCSDK_INSTALL_ENV=/opt/netsurfy/${HOST}/env
+		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurfy/${HOST}/cross/bin
 		# headers and compiler combination throw these warnings
 		export CFLAGS="-Wno-redundant-decls -Wno-parentheses"
                 export LDFLAGS=-lcares
 		;;
 
 	    "m68k-atari-mint")
-		export GCCSDK_INSTALL_ENV=/opt/netsurf/${HOST}/env
-		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurf/${HOST}/cross/bin
+		export GCCSDK_INSTALL_ENV=/opt/netsurfy/${HOST}/env
+		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurfy/${HOST}/cross/bin
 		;;
 
 	    "m5475-atari-mint")
 		ATARIARCH=v4e
-		export GCCSDK_INSTALL_ENV=/opt/netsurf/${HOST}/env
-		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurf/${HOST}/cross/bin
+		export GCCSDK_INSTALL_ENV=/opt/netsurfy/${HOST}/env
+		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurfy/${HOST}/cross/bin
 		;;
 
 	    "i686-w64-mingw32")
-		export GCCSDK_INSTALL_ENV=/opt/netsurf/${HOST}/env
-		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurf/${HOST}/cross/bin
+		export GCCSDK_INSTALL_ENV=/opt/netsurfy/${HOST}/env
+		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurfy/${HOST}/cross/bin
 		;;
 
 	    "ppc-amigaos")
-		export GCCSDK_INSTALL_ENV=/opt/netsurf/${HOST}/env
-		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurf/${HOST}/cross/bin
+		export GCCSDK_INSTALL_ENV=/opt/netsurfy/${HOST}/env
+		export GCCSDK_INSTALL_CROSSBIN=/opt/netsurfy/${HOST}/cross/bin
 		;;
 
 	    *)
@@ -489,7 +489,7 @@ fi
 
 rm -f Makefile.config
 cat > Makefile.config <<EOF
-override NETSURF_LOG_LEVEL := DEBUG
+override NETSURFY_LOG_LEVEL := DEBUG
 EOF
 
 ########### Additional environment info ########
@@ -509,7 +509,7 @@ ${MAKE} -j ${PARALLEL} -k CI_BUILD=${BUILD_NUMBER} ATARIARCH=${ATARIARCH} Q=
 ############ Package artifact construction ################
 
 # build the package file
-${MAKE} -k CI_BUILD=${BUILD_NUMBER} ATARIARCH=${ATARIARCH} PACKAGER="NetSurf Developers <support@netsurf-browser.org>" Q= package
+${MAKE} -k CI_BUILD=${BUILD_NUMBER} ATARIARCH=${ATARIARCH} PACKAGER="NetSurfy Developers <support@netsurf-browser.org>" Q= package
 
 if [ ! -f "${PKG_SRC}${PKG_SFX}" ]; then
     echo "unable to find package file:${PKG_SRC}${PKG_SFX}"
@@ -585,24 +585,24 @@ retry_ssh()
 #destination for package artifacts
 DESTDIR=/srv/ci.netsurf-browser.org/html/builds/${TARGET}/
 
-NEW_ARTIFACT_TARGET="NetSurf-${IDENTIFIER}"
+NEW_ARTIFACT_TARGET="NetSurfy-${IDENTIFIER}"
 OLD_ARTIFACT_TARGETS=""
 
 for SUFFIX in "${PKG_SFX}" .md5 .sha256;do
     # copy the file to the output - always use scp as it works local or remote
-    retry_scp "${PKG_SRC}${SUFFIX}" "netsurf@ci.netsurf-browser.org:${DESTDIR}/${NEW_ARTIFACT_TARGET}${SUFFIX}"
+    retry_scp "${PKG_SRC}${SUFFIX}" "netsurfy@ci.netsurf-browser.org:${DESTDIR}/${NEW_ARTIFACT_TARGET}${SUFFIX}"
 
     # remove the local file artifact
     rm -f "${PKG_SRC}${SUFFIX}"
 
-    OLD_ARTIFACT_TARGETS="${OLD_ARTIFACT_TARGETS} ${DESTDIR}/NetSurf-${OLD_IDENTIFIER}${SUFFIX}"
+    OLD_ARTIFACT_TARGETS="${OLD_ARTIFACT_TARGETS} ${DESTDIR}/NetSurfy-${OLD_IDENTIFIER}${SUFFIX}"
 done
 
 
 ############ Expired package artifact removal and latest linking ##############
 
 
-retry_ssh netsurf@ci.netsurf-browser.org "rm -f ${OLD_ARTIFACT_TARGETS}"
+retry_ssh netsurfy@ci.netsurf-browser.org "rm -f ${OLD_ARTIFACT_TARGETS}"
 if [ ${UPDATE_LATEST} = "yes" ]; then
-    retry_ssh netsurf@ci.netsurf-browser.org "rm -f ${DESTDIR}/LATEST && echo "${NEW_ARTIFACT_TARGET}${PKG_SFX}" > ${DESTDIR}/LATEST"
+    retry_ssh netsurfy@ci.netsurf-browser.org "rm -f ${DESTDIR}/LATEST && echo "${NEW_ARTIFACT_TARGET}${PKG_SFX}" > ${DESTDIR}/LATEST"
 fi

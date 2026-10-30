@@ -1,13 +1,13 @@
 /*
  * Copyright 2004 James Bursa <bursa@users.sourceforge.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -23,15 +23,15 @@
  * These functions should in general be called via the content interface.
  */
 
-#ifndef NETSURF_HTML_HTML_H
-#define NETSURF_HTML_HTML_H
+#ifndef NETSURFY_HTML_HTML_H
+#define NETSURFY_HTML_HTML_H
 
 #include <stdbool.h>
 
-#include "netsurf/types.h"
-#include "netsurf/content_type.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/mouse.h"
+#include "netsurfy/types.h"
+#include "netsurfy/content_type.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/mouse.h"
 #include "desktop/frame_types.h"
 
 struct fetch_multipart_data;

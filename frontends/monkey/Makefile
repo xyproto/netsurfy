@@ -1,7 +1,7 @@
 #
-# Makefile for NetSurf monkey target
+# Makefile for NetSurfy monkey target
 #
-# This file is part of NetSurf 
+# This file is part of NetSurfy 
 
 # ----------------------------------------------------------------------------
 # Monkey flag setup (using pkg-config)
@@ -11,7 +11,7 @@ CWARNFLAGS += -Werror
 
 CFLAGS += -std=c99 \
 	  -Dmonkey -Dnsmonkey -g \
-	  -DMONKEY_RESPATH=\"$(NETSURF_MONKEY_RESOURCES)\"
+	  -DMONKEY_RESPATH=\"$(NETSURFY_MONKEY_RESOURCES)\"
 
 LDFLAGS += -lm
 

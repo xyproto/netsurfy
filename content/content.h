@@ -2,13 +2,13 @@
  * Copyright 2005-2007 James Bursa <bursa@users.sourceforge.net>
  * Copyright 2003 Philip Pemberton <philpem@users.sourceforge.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -24,14 +24,14 @@
  * The content functions manipulate struct contents, which correspond to URLs.
  */
 
-#ifndef NETSURF_CONTENT_CONTENT_H_
-#define NETSURF_CONTENT_CONTENT_H_
+#ifndef NETSURFY_CONTENT_CONTENT_H_
+#define NETSURFY_CONTENT_CONTENT_H_
 
 #include <libwapcaplet/libwapcaplet.h>
 
-#include "netsurf/content_type.h"
-#include "netsurf/mouse.h" /* mouse state enums */
-#include "netsurf/console.h" /* console state and flags enums */
+#include "netsurfy/content_type.h"
+#include "netsurfy/mouse.h" /* mouse state enums */
+#include "netsurfy/console.h" /* console state and flags enums */
 
 struct browser_window;
 struct browser_window_features;

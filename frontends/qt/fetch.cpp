@@ -1,13 +1,13 @@
 /*
  * Copyright 2021 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -18,7 +18,7 @@
 
 /**
  * \file
- * Implementation of netsurf fetch for qt.
+ * Implementation of netsurfy fetch for qt.
  */
 
 #include <stddef.h>
@@ -34,7 +34,7 @@ extern "C" {
 #include "utils/log.h"
 #include "utils/filepath.h"
 #include "utils/file.h"
-#include "netsurf/fetch.h"
+#include "netsurfy/fetch.h"
 }
 
 #include "qt/fetch.h"
@@ -54,7 +54,7 @@ static const char *nsqt_fetch_filetype(const char *unix_path)
 	int l;
 	char *res = (char *)"text/html";
 	l = strlen(unix_path);
-	NSLOG(netsurf, INFO, "unix path: %s", unix_path);
+	NSLOG(netsurfy, INFO, "unix path: %s", unix_path);
 
 
 	if (2 < l && strcasecmp(unix_path + l - 3, "f79") == 0)
@@ -76,7 +76,7 @@ static const char *nsqt_fetch_filetype(const char *unix_path)
 	else if (2 < l && strcasecmp(unix_path + l - 3, "txt") == 0)
 		res = (char *)"text/plain";
 
-	NSLOG(netsurf, INFO, "mime type: %s", res);
+	NSLOG(netsurfy, INFO, "mime type: %s", res);
 	return res;
 }
 
@@ -90,7 +90,7 @@ static const char *nsqt_fetch_filetype(const char *unix_path)
  * the returned nsurl including unrefing it when finished with it.
  *
  * \param path The path of the resource to locate.
- * \return A netsurf url object containing the full URL of the resource path
+ * \return A netsurfy url object containing the full URL of the resource path
  *           or NULL if a suitable resource URL can not be generated.
  */
 static nsurl *nsqt_get_resource_url(const char *path)
@@ -98,7 +98,7 @@ static nsurl *nsqt_get_resource_url(const char *path)
 	char buf[PATH_MAX];
 	nsurl *url = NULL;
 
-	netsurf_path_to_nsurl(filepath_sfind(respaths, buf, path), &url);
+	netsurfy_path_to_nsurl(filepath_sfind(respaths, buf, path), &url);
 
 	return url;
 }
@@ -126,7 +126,7 @@ static nserror nsqt_get_resource_data(const char *resname,
 	*data_out = data;
 	*data_size_out = size;
 
-	NSLOG(netsurf, DEBUG, "returning resource data for: %s", resname);
+	NSLOG(netsurfy, DEBUG, "returning resource data for: %s", resname);
 	return NSERROR_OK;
 }
 

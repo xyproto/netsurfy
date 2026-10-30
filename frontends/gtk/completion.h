@@ -1,13 +1,13 @@
 /*
  * Copyright 2006 Rob Kendrick <rjek@rjek.com>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -21,8 +21,8 @@
  * Interface to url entry completion.
  */
 
-#ifndef _NETSURF_GTK_COMPLETION_H_
-#define _NETSURF_GTK_COMPLETION_H_
+#ifndef _NETSURFY_GTK_COMPLETION_H_
+#define _NETSURFY_GTK_COMPLETION_H_
 
 struct nsgtk_scaffolding;
 

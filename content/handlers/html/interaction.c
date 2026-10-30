@@ -4,13 +4,13 @@
  * Copyright 2008 Michael Drake <tlsa@netsurf-browser.org>
  * Copyright 2009 Paul Blokus <paul_pl@users.sourceforge.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -35,12 +35,12 @@
 #include "utils/utils.h"
 #include "utils/log.h"
 #include "utils/nsoption.h"
-#include "netsurf/content.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/mouse.h"
-#include "netsurf/misc.h"
-#include "netsurf/layout.h"
-#include "netsurf/keypress.h"
+#include "netsurfy/content.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/mouse.h"
+#include "netsurfy/misc.h"
+#include "netsurfy/layout.h"
+#include "netsurfy/keypress.h"
 #include "content/hlcache.h"
 #include "content/textsearch.h"
 #include "desktop/browser_history.h"
@@ -288,7 +288,7 @@ html__image_coords_dom_user_data_handler(dom_node_operation operation,
 		break;
 
 	default:
-		NSLOG(netsurf, INFO, "User data operation not handled.");
+		NSLOG(netsurfy, INFO, "User data operation not handled.");
 		assert(0);
 	}
 }
@@ -849,7 +849,7 @@ static nserror gadget_mouse_action(html_content *html,
 						    form_select_menu_callback,
 						    c);
 			if (res != NSERROR_OK) {
-				NSLOG(netsurf,
+				NSLOG(netsurfy,
 				      ERROR,
 				      "%s",
 				      messages_get_errorcode(res));
@@ -1513,7 +1513,7 @@ nserror html_mouse_action(struct content *c,
 	}
 
 	if (res != NSERROR_OK) {
-		NSLOG(netsurf, ERROR, "%s", messages_get_errorcode(res));
+		NSLOG(netsurfy, ERROR, "%s", messages_get_errorcode(res));
 	}
 
 	return res;

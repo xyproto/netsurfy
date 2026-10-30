@@ -1,13 +1,13 @@
 /*
  * Copyright 2022 Michael Drake <tlsa@nesturf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -20,13 +20,13 @@
  * Internal core bitmap interface.
  */
 
-#ifndef _NETSURF_DESKTOP_BITMAP_H_
-#define _NETSURF_DESKTOP_BITMAP_H_
+#ifndef _NETSURFY_DESKTOP_BITMAP_H_
+#define _NETSURFY_DESKTOP_BITMAP_H_
 
 #include <nsutils/endian.h>
 
-#include "netsurf/types.h"
-#include "netsurf/bitmap.h"
+#include "netsurfy/types.h"
+#include "netsurfy/bitmap.h"
 
 /** Pixel format: colour component order. */
 struct bitmap_colour_layout {
@@ -43,12 +43,12 @@ extern bitmap_fmt_t bitmap_fmt;
 extern struct bitmap_colour_layout bitmap_layout;
 
 /**
- * Convert a bitmap pixel to a NetSurf colour (0xAARRGGBB).
+ * Convert a bitmap pixel to a NetSurfy colour (0xAARRGGBB).
  *
  * The bitmap must be in the client format.
  *
  * \param[in]  Pointer to a pixel in the bitmap's pixel data.
- * \return The corresponding NetSurf colour.
+ * \return The corresponding NetSurfy colour.
  */
 static inline colour bitmap_pixel_to_colour(const uint8_t *pixel)
 {

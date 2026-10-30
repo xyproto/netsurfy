@@ -1,13 +1,13 @@
 /*
  * Copyright 2009 John-Mark Bell <jmb@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
@@ -30,9 +30,9 @@
 #include "utils/messages.h"
 #include "utils/ring.h"
 #include "utils/utils.h"
-#include "netsurf/inttypes.h"
-#include "netsurf/misc.h"
-#include "netsurf/content.h"
+#include "netsurfy/inttypes.h"
+#include "netsurfy/misc.h"
+#include "netsurfy/content.h"
 #include "desktop/gui_internal.h"
 
 #include "content/mimesniff.h"
@@ -130,7 +130,7 @@ static void hlcache_clean(void *force_clean_flag)
 		    CONTENT_STATUS_LOADING) {
 			if (force_clean == false)
 				continue;
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      DEBUG,
 			      "Forcing content cleanup during shutdown");
 			content_abort(entry->content);
@@ -217,7 +217,7 @@ static void hlcache_content_callback(struct content *c,
 		error = handle->cb(handle, &event, handle->pw);
 
 	if (error != NSERROR_OK)
-		NSLOG(netsurf, INFO, "Error in callback: %d", error);
+		NSLOG(netsurfy, INFO, "Error in callback: %d", error);
 }
 
 /**
@@ -620,7 +620,7 @@ void hlcache_finalise(void)
 		num_contents++;
 	}
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "%" PRIu32 " contents remain before cache drain",
 	      num_contents);
@@ -638,7 +638,7 @@ void hlcache_finalise(void)
 		}
 	} while (num_contents > 0 && num_contents != prev_contents);
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "%" PRIu32 " contents remaining after being polite",
 	      num_contents);
@@ -656,13 +656,13 @@ void hlcache_finalise(void)
 		}
 	} while (num_contents > 0 && num_contents != prev_contents);
 
-	NSLOG(netsurf, INFO, "%" PRIu32 " contents remaining:", num_contents);
+	NSLOG(netsurfy, INFO, "%" PRIu32 " contents remaining:", num_contents);
 	for (entry = hlcache->content_list; entry != NULL;
 	     entry = entry->next) {
 		hlcache_handle entry_handle = {entry, NULL, NULL};
 
 		if (entry->content != NULL) {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "	%p : %s (%" PRIu32 " users)",
 			      entry,
@@ -670,7 +670,7 @@ void hlcache_finalise(void)
 				      hlcache_handle_get_url(&entry_handle)),
 			      content_count_users(entry->content));
 		} else {
-			NSLOG(netsurf, INFO, "	%p", entry);
+			NSLOG(netsurfy, INFO, "	%p", entry);
 		}
 	}
 
@@ -698,7 +698,7 @@ void hlcache_finalise(void)
 		hlcache->retrieval_ctx_ring = NULL;
 	}
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "hit/miss %d/%d",
 	      hlcache->hit_count,
@@ -710,7 +710,7 @@ void hlcache_finalise(void)
 	free(hlcache);
 	hlcache = NULL;
 
-	NSLOG(netsurf, INFO, "Finalising low-level cache");
+	NSLOG(netsurfy, INFO, "Finalising low-level cache");
 	llcache_finalise();
 }
 

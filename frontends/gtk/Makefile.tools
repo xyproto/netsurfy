@@ -7,4 +7,4 @@
 PKG_CONFIG := pkg-config
 
 # gtk target processing
-override NETSURF_GTK_MAJOR := 4
+override NETSURFY_GTK_MAJOR := 4

@@ -3,13 +3,13 @@
  * Copyright 2004 Richard Wilson <not_ginger_matt@hotmail.com>
  * Copyright 2008 Daniel Silverstone <dsilvers@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -23,11 +23,11 @@
 #include <stdlib.h>
 #include <png.h>
 
-#include "netsurf/inttypes.h"
+#include "netsurfy/inttypes.h"
 #include "utils/utils.h"
 #include "utils/log.h"
 #include "utils/messages.h"
-#include "netsurf/bitmap.h"
+#include "netsurfy/bitmap.h"
 #include "content/llcache.h"
 #include "content/content_protected.h"
 #include "content/content_factory.h"
@@ -56,7 +56,7 @@ typedef struct nspng_content {
 	png_structp png;
 	png_infop info;
 	int interlace;
-	struct bitmap *bitmap; /**< Created NetSurf bitmap */
+	struct bitmap *bitmap; /**< Created NetSurfy bitmap */
 	size_t rowstride, bpp; /**< Bitmap rowstride and bpp */
 	size_t rowbytes; /**< Number of bytes per row */
 } nspng_content;
@@ -78,7 +78,7 @@ enum nspng_cberr {
  */
 static void nspng_warning(png_structp png_ptr, png_const_charp warning_message)
 {
-	NSLOG(netsurf, INFO, "%s", warning_message);
+	NSLOG(netsurfy, INFO, "%s", warning_message);
 }
 
 /**
@@ -86,7 +86,7 @@ static void nspng_warning(png_structp png_ptr, png_const_charp warning_message)
  */
 static void nspng_error(png_structp png_ptr, png_const_charp error_message)
 {
-	NSLOG(netsurf, INFO, "%s", error_message);
+	NSLOG(netsurfy, INFO, "%s", error_message);
 	longjmp(png_jmpbuf(png_ptr), CBERR_LIBPNG);
 }
 
@@ -208,7 +208,7 @@ static void info_callback(png_structp png_s, png_infop info)
 	png_c->rowbytes = png_get_rowbytes(png_s, info);
 	png_c->interlace = (interlace == PNG_INTERLACE_ADAM7);
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "size %li * %li, rowbytes %" PRIsizet,
 	      (unsigned long)width,
@@ -297,7 +297,7 @@ static nserror nspng_create_png_data(nspng_content *png_c)
 
 	if (setjmp(png_jmpbuf(png_c->png))) {
 		png_destroy_read_struct(&png_c->png, &png_c->info, 0);
-		NSLOG(netsurf, INFO, "Failed to set callbacks");
+		NSLOG(netsurfy, INFO, "Failed to set callbacks");
 		png_c->png = NULL;
 		png_c->info = NULL;
 
@@ -387,7 +387,7 @@ nspng_process_data(struct content *c, const char *data, unsigned int size)
 			 * up png conversion and signal the content
 			 * error
 			 */
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "Fatal PNG error during header, error content");
 

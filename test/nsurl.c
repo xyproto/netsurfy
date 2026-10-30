@@ -2,13 +2,13 @@
  * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
  * Copyright 2011 John Mark Bell <jmb@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -63,7 +63,7 @@ static void corestring_create(void)
 /**
  * iterator for any remaining strings in teardown fixture
  */
-static void netsurf_lwc_iterator(lwc_string *str, void *pw)
+static void netsurfy_lwc_iterator(lwc_string *str, void *pw)
 {
 	fprintf(stderr,
 		"[%3u] %.*s",
@@ -76,7 +76,7 @@ static void corestring_teardown(void)
 {
 	corestrings_fini();
 
-	lwc_iterate_strings(netsurf_lwc_iterator, NULL);
+	lwc_iterate_strings(netsurfy_lwc_iterator, NULL);
 }
 
 /* tests */

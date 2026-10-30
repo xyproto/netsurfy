@@ -1,13 +1,13 @@
 /*
  * Copyright 2020 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -21,8 +21,8 @@
  * HTML content handler CSS interface.
  */
 
-#ifndef NETSURF_HTML_CSS_H
-#define NETSURF_HTML_CSS_H
+#ifndef NETSURFY_HTML_CSS_H
+#define NETSURFY_HTML_CSS_H
 
 /**
  * Initialise html content css handling.

@@ -1,13 +1,13 @@
 /*
  * Copyright 2012 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -26,7 +26,7 @@
 #include "utils/file.h"
 #include "utils/log.h"
 #include "utils/nsurl.h"
-#include "netsurf/browser_window.h"
+#include "netsurfy/browser_window.h"
 #include "desktop/searchweb.h"
 
 #include "gtk/compat.h"
@@ -60,7 +60,7 @@ struct ppref {
 static struct ppref ppref;
 
 
-/* Set netsurf option based on toggle button state
+/* Set netsurfy option based on toggle button state
  *
  * This works for any widget which subclasses togglebutton (checkbox,
  * radiobutton etc.)
@@ -652,7 +652,7 @@ static nserror comboboxLanguage_add_from_file(GtkListStore *liststore,
 
 	gtk_list_store_clear(liststore);
 
-	NSLOG(netsurf, INFO, "Used %s for languages", file_location);
+	NSLOG(netsurfy, INFO, "Used %s for languages", file_location);
 	while (fgets(buf, sizeof(buf), fp)) {
 		/* Ignore blank lines */
 		if (buf[0] == '\0')
@@ -700,7 +700,7 @@ nsgtk_preferences_comboboxLanguage_realize(GtkWidget *widget,
 	const char *accept_language;
 
 	if (priv->content_language == NULL) {
-		NSLOG(netsurf, INFO, "content language list store unavailable");
+		NSLOG(netsurfy, INFO, "content language list store unavailable");
 		return;
 	}
 
@@ -730,7 +730,7 @@ nsgtk_preferences_comboboxLanguage_realize(GtkWidget *widget,
 		}
 	}
 	if (res != NSERROR_OK) {
-		NSLOG(netsurf, INFO, "error populatiung languages combo");
+		NSLOG(netsurfy, INFO, "error populatiung languages combo");
 	}
 }
 
@@ -855,7 +855,7 @@ G_MODULE_EXPORT void
 nsgtk_preferences_setDefaultPage_clicked(GtkButton *button, gpointer user_data)
 {
 	struct ppref *priv = &ppref;
-	const gchar *url = NETSURF_HOMEPAGE;
+	const gchar *url = NETSURFY_HOMEPAGE;
 
 	if (priv->entryHomePageURL != NULL) {
 		gtk_editable_set_text(GTK_EDITABLE(priv->entryHomePageURL),
@@ -1031,7 +1031,7 @@ nsgtk_preferences_dialogPreferences_closerequest(GtkWindow *dlg,
 {
 	char *choices = NULL;
 
-	netsurf_mkpath(&choices, NULL, 2, nsgtk_config_home, "Choices");
+	netsurfy_mkpath(&choices, NULL, 2, nsgtk_config_home, "Choices");
 	if (choices != NULL) {
 		nsoption_write(choices, NULL, NULL);
 		free(choices);
@@ -1045,7 +1045,7 @@ nsgtk_preferences_dialogPreferences_destroy(GtkWindow *dlg, gpointer user_data)
 {
 	char *choices = NULL;
 
-	netsurf_mkpath(&choices, NULL, 2, nsgtk_config_home, "Choices");
+	netsurfy_mkpath(&choices, NULL, 2, nsgtk_config_home, "Choices");
 	if (choices != NULL) {
 		nsoption_write(choices, NULL, NULL);
 		free(choices);
@@ -1070,14 +1070,14 @@ GtkWidget *nsgtk_preferences(struct browser_window *bw, GtkWindow *parent)
 
 	res = nsgtk_builder_new_from_resname("options", &preferences_builder);
 	if (res != NSERROR_OK) {
-		NSLOG(netsurf, INFO, "Preferences UI builder init failed");
+		NSLOG(netsurfy, INFO, "Preferences UI builder init failed");
 		return NULL;
 	}
 
 	priv->dialog = gtk_builder_get_object(preferences_builder,
 					      "dialogPreferences");
 	if (priv->dialog == NULL) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Unable to get object for preferences dialog");
 		/* release builder as were done with it */

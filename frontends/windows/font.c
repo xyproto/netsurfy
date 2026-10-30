@@ -2,13 +2,13 @@
  * Copyright 2009 - 2014 Vincent Sanders <vince@netsurf-browser.org>
  * Copyright 2009 - 2013 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -26,13 +26,13 @@
 #include <assert.h>
 #include <windows.h>
 
-#include "netsurf/inttypes.h"
+#include "netsurfy/inttypes.h"
 #include "utils/log.h"
 #include "utils/nsoption.h"
 #include "utils/utf8.h"
-#include "netsurf/layout.h"
-#include "netsurf/utf8.h"
-#include "netsurf/plot_style.h"
+#include "netsurfy/layout.h"
+#include "netsurfy/utf8.h"
+#include "netsurfy/plot_style.h"
 
 #include "windows/font.h"
 
@@ -332,7 +332,7 @@ static nserror win32_font_split(const plot_font_style_t *style,
 	/* find the actual string width of the break */
 	res = win32_font_width(style, string, *offset, actual_x);
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "ret %d Split %u chars at %ipx: Split at char %i (%ipx) - %.*s",
 	      res,

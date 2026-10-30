@@ -2,13 +2,13 @@
  * Copyright 2008 François Revol <mmu_man@users.sourceforge.net>
  * Copyright 2005 James Bursa <bursa@users.sourceforge.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -21,8 +21,8 @@
  * Target independent plotting (BeOS interface).
  */
 
-#ifndef NETSURF_BEOS_PLOTTERS_H
-#define NETSURF_BEOS_PLOTTERS_H 1
+#ifndef NETSURFY_BEOS_PLOTTERS_H
+#define NETSURFY_BEOS_PLOTTERS_H 1
 
 extern "C" {
 
@@ -44,4 +44,4 @@ rgb_color nsbeos_rgb_colour(colour c);
 void nsbeos_set_colour(colour c);
 void nsbeos_plot_caret(int x, int y, int h);
 
-#endif /* NETSURF_GTK_PLOTTERS_H */
+#endif /* NETSURFY_GTK_PLOTTERS_H */

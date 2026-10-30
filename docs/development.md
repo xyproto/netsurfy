@@ -6,7 +6,7 @@ Development
 # Working with the team
 
 Generally it is sensible to check with the other developers if you are
-planning to make a change to NetSurf intended to be merged.
+planning to make a change to NetSurfy intended to be merged.
 
 We are often about on the IRC channel but failing that the developer
 mailing list is a good place to try.
@@ -15,7 +15,7 @@ All the project sources are held in [public git repositories](http://source.nets
 
 # Compilation environment
 
-Compiling a development edition of NetSurf requires a POSIX style
+Compiling a development edition of NetSurfy requires a POSIX style
 environment. Typically this means a Linux based system although Free
 BSD, Open BSD, Mac OS X and Haiku all known to work.
 
@@ -39,11 +39,10 @@ development environment setup quickly and uses the
 ## Manual setup
 
 The Manual environment setup and compilation method is covered by the
-details in the [netsurf libraries](docs/netsurf-libraries.md) document
+details in the [netsurfy libraries](docs/netsurfy-libraries.md) document
 for the core libraries and then one of the building documents for the
 specific frontend.
 
-- [Amiga Os cross](docs/building-AmigaCross.md) and [Amiga OS](docs/building-AmigaOS.md)
 - [Framebuffer](docs/building-Framebuffer.md)
 - [GTK](docs/building-GTK.md)
 - [Haiku (BeOS)](docs/building-Haiku.md)
@@ -59,13 +58,13 @@ messages not output through the GUI.
 
 # Unit testing
 
-NetSurf [unit tests](docs/unit-testing.md) provide basic test coverage
+NetSurfy [unit tests](docs/unit-testing.md) provide basic test coverage
 of many core parts of the browser code such as url parsing and utility
 functions.
 
 # Integration testing
 
-NetSurf [integration tests](docs/integration-testing.md) use the
+NetSurfy [integration tests](docs/integration-testing.md) use the
 monkey frontend to operate the browser as a whole. These tests open
 windows, navigate to websites and render contents as a user might.
 
@@ -77,7 +76,7 @@ worked example.
 
 # Documented API
 
-The NetSurf code makes use of Doxygen for code documentation.
+The NetSurfy code makes use of Doxygen for code documentation.
 
 There are several documents which detail specific aspects of the
 codebase and APIs.

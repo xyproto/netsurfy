@@ -1,13 +1,13 @@
 /*
  * Copyright 2010 Ole Loots <ole@monochrom.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -28,14 +28,14 @@
 #include <math.h>
 
 #include "utils/log.h"
-#include "netsurf/mouse.h"
-#include "netsurf/plotters.h"
+#include "netsurfy/mouse.h"
+#include "netsurfy/plotters.h"
 
 #include "atari/gui.h"
 #include "atari/statusbar.h"
 #include "atari/rootwin.h"
 #include "atari/misc.h"
-#include "atari/res/netsurf.rsh"
+#include "atari/res/netsurfy.rsh"
 #include "atari/plot/plot.h"
 #include "atari/osspec.h"
 
@@ -187,7 +187,7 @@ CMP_STATUSBAR sb_create(struct gui_window *gw)
 
 void sb_destroy(CMP_STATUSBAR s)
 {
-	NSLOG(netsurf, INFO, "%s\n", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s\n", __FUNCTION__);
 	if (s) {
 		if (s->comp) {
 			mt_CompDelete(&app, s->comp);
@@ -233,7 +233,7 @@ CMP_STATUSBAR sb_create(struct gui_window *gw)
 
 void sb_destroy(CMP_STATUSBAR s)
 {
-	NSLOG(netsurf, INFO, "%s\n", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s\n", __FUNCTION__);
 	if (s) {
 		free(s);
 	}

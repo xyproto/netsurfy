@@ -1,16 +1,16 @@
-Quick Build Steps for NetSurf
+Quick Build Steps for NetSurfy
 =============================
 
 Last Updated: 28th May 2024
 
-This document provides steps for building NetSurf.
+This document provides steps for building NetSurfy.
 
 These instructions use a shell script to perform several operations.
   This script has only been tested with the bash and zsh bourne style
   shell interpreters. The latest version of this script should be
-  retrieved from the official NetSurf source repository.
+  retrieved from the official NetSurfy source repository.
 
-This shell script is used by the NetSurf Developers but you should
+This shell script is used by the NetSurfy Developers but you should
   satisfy yourself that the script is not malicious. It should be noted
   that building the browser will also be executing shell code and
   requires a similar level of trust.
@@ -22,7 +22,7 @@ Native build
 Grab a temporary env.sh
 -----------------------
 
-     $ wget https://git.netsurf-browser.org/netsurf.git/plain/docs/env.sh
+     $ wget https://raw.githubusercontent.com/xyproto/netsurfy/main/docs/env.sh
      $ unset HOST
      $ source env.sh
 
@@ -30,13 +30,13 @@ Grab a temporary env.sh
 Install any packages you need
 -----------------------------
 
-The package install helper installs all packages required to build NetSurf
-  and the NetSurf project libraries. By *default* no libraries for a graphical
+The package install helper installs all packages required to build NetSurfy
+  and the NetSurfy project libraries. By *default* no libraries for a graphical
   toolkit are installed.
 
      $ ns-package-install
 
-If NetSurf is to be built to target a graphical toolkit the development
+If NetSurfy is to be built to target a graphical toolkit the development
   packages for that toolkit can be installed by setting the TARGET_TOOLKIT
   variable to one of framebuffer, gtk2, gtk3 or qt6
 
@@ -53,7 +53,7 @@ Update the environment settings after package installation
      $ source env.sh
 
 
-Get the NetSurf project source code from Git
+Get the NetSurfy project source code from Git
 --------------------------------------------
 
 All the sources for the browser and support libraries is available
@@ -64,34 +64,34 @@ Local copies may be easily obtained with the ns-clone command.
      $ ns-clone
 
 
-Build and install NetSurf project libraries
+Build and install NetSurfy project libraries
 -------------------------------------------
 
-Updates NetSurf project library sources to latest, builds and installs them.
+Updates NetSurfy project library sources to latest, builds and installs them.
 
       $ ns-pull-install
 
 
-Switch to new NetSurf workspace
+Switch to new NetSurfy workspace
 -------------------------------
 
 Remove the bootstrap script and use the newly installed one
 
       $ rm env.sh
-      $ cd ~/dev-netsurf/workspace
+      $ cd ~/dev-netsurfy/workspace
       $ source env.sh
 
 
-Build and run NetSurf
+Build and run NetSurfy
 ---------------------
 
-      $ cd netsurf
+      $ cd netsurfy
 
 To build the native front end (the GTK front end on Linux, BSDs, etc)
   you could do:
 
       $ make
-      $ ./nsgtk3
+      $ ./netsurfy
 
 To build the framebuffer front end, you could do:
 
@@ -106,24 +106,25 @@ Cross Compiling
 
 If you are cross compiling, you can follow the above steps, but when
   sourcing env.sh, you should set HOST environment variable to the
-  appropriate triplet for your cross compiler. For example, to cross
-  compile for RISC OS:
+  appropriate triplet for your cross compiler.
 
-      $ HOST=arm-unknown-riscos source env.sh
+The example in the command below shows cross compiling for Windows:
+
+      $ HOST=x86_64-w64-mingw32 source env.sh
 
 After that, the commands such as `ns-package-install` and
   `ns-pull-install` will do what is appropriate for the platform you are
   building for.
 
-To do the final build of NetSurf, pass the appropriate TARGET to
-  make. For example, to cross compile for RISC OS:
+To do the final build of NetSurfy, pass the appropriate TARGET to
+  make. For example, to cross compile for Windows:
 
-      $ make TARGET=riscos
+      $ make TARGET=windows
 
 Finally, you can package up your build to transfer to the system you
-  are developing for.  For example, to produce a package for RISC OS:
+  are developing for.  For example, to produce a package for Windows:
 
-      $ make TARGET=riscos package
+      $ make TARGET=windows package
 
 Getting a cross compiler set up
 -------------------------------
@@ -143,5 +144,5 @@ Not working?
 
 If the above steps are inapplicable, or don't work, you can build
   manually. Follow the instructions in the BUILDING-* documents in the
-  docs/ directory the NetSurf browser source tree.
+  docs/ directory the NetSurfy browser source tree.
 

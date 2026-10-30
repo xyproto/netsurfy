@@ -2,13 +2,13 @@
  * Copyright 2005 James Bursa <bursa@users.sourceforge.net>
  * Copyright 2005 Richard Wilson <info@tinct.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -1052,7 +1052,7 @@ bool table_calculate_column_types(const css_unit_ctx *unit_len_ctx,
 
 #ifdef TABLE_DEBUG
 	for (i = 0; i != table->columns; i++)
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "table %p, column %u: type %s, width %i",
 		      table,

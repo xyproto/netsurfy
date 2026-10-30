@@ -1,13 +1,13 @@
 /*
  * Copyright 2010 Ole Loots <ole@monochrom.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -29,9 +29,9 @@
 #include "utils/log.h"
 #include "utils/utf8.h"
 #include "utils/utils.h"
-#include "netsurf/bitmap.h"
-#include "netsurf/plotters.h"
-#include "netsurf/mouse.h"
+#include "netsurfy/bitmap.h"
+#include "netsurfy/plotters.h"
+#include "netsurfy/mouse.h"
 
 #include "atari/gui.h"
 #include "atari/osspec.h"
@@ -187,7 +187,7 @@ static HermesFormat vfmt;
 
 /* no screen format here, hermes may not suitable for it */
 
-/* netsurf source bitmap format */
+/* netsurfy source bitmap format */
 static HermesFormat nsfmt;
 
 struct s_vdi_sysinfo vdi_sysinfo;
@@ -223,10 +223,10 @@ const char *plot_err_str(int i)
 
 
 /**
- * Set line drawing color by passing netsurf XBGR "colour" type.
+ * Set line drawing color by passing netsurfy XBGR "colour" type.
  *
  * \param vdih The vdi handle
- * \param cin  The netsurf colour value
+ * \param cin  The netsurfy colour value
  */
 inline static void vsl_rgbcolor(short vdih, colour cin)
 {
@@ -249,10 +249,10 @@ inline static void vsl_rgbcolor(short vdih, colour cin)
 
 
 /**
- * Set fill color by passing netsurf XBGR "colour" type.
+ * Set fill color by passing netsurfy XBGR "colour" type.
  *
  * \param vdih The vdi handle
- * \param cin  The netsurf colour value
+ * \param cin  The netsurfy colour value
  */
 inline static void vsf_rgbcolor(short vdih, colour cin)
 {
@@ -796,9 +796,9 @@ static MFDB *snapshot_create_native_mfdb(int x, int y, int w, int h)
 
 
 /**
- * Create an snapshot of the screen in netsurf ABGR format
+ * Create an snapshot of the screen in netsurfy ABGR format
  *
- * This creates an snapshot in RGBA format (NetSurf's native format)
+ * This creates an snapshot in RGBA format (NetSurfy's native format)
  *
  * Capture the screen at x,y location
  *
@@ -1670,7 +1670,7 @@ int plot_init(const struct redraw_context *ctx, char *fdrvrname)
 		atari_plot_vdi_handle = graf_handle(
 			&dummy, &dummy, &dummy, &dummy);
 		v_opnvwk(work_in, &atari_plot_vdi_handle, work_out);
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Plot VDI handle: %d",
 		      atari_plot_vdi_handle);
@@ -1685,7 +1685,7 @@ int plot_init(const struct redraw_context *ctx, char *fdrvrname)
 		atari_plot_vdi_handle, fdrvrname, atari_font_flags, &err);
 	if (err) {
 		const char *desc = plot_err_str(err);
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Unable to load font plotter %s -> %s",
 		      fdrvrname,
@@ -1791,7 +1791,7 @@ int plot_init(const struct redraw_context *ctx, char *fdrvrname)
 	assert(hermes_res_h);
 
 	/* set up the src & dst format: */
-	/* netsurf uses RGBA ... */
+	/* netsurfy uses RGBA ... */
 	nsfmt.a = 0xFFUL;
 	nsfmt.b = 0x0FF00UL;
 	nsfmt.g = 0x0FF0000UL;

@@ -1,13 +1,13 @@
 /*
  * Copyright 2018 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -28,7 +28,7 @@
 #include "utils/file.h"
 #include "utils/filepath.h"
 #include "content/fetch.h"
-#include "netsurf/fetch.h"
+#include "netsurfy/fetch.h"
 
 #include "windows/fetch.h"
 #include "windows/gui.h"
@@ -42,7 +42,7 @@
 static const char *fetch_filetype(const char *unix_path)
 {
 	int l;
-	NSLOG(netsurf, INFO, "unix path %s", unix_path);
+	NSLOG(netsurfy, INFO, "unix path %s", unix_path);
 	l = strlen(unix_path);
 	if (2 < l && strcasecmp(unix_path + l - 3, "css") == 0)
 		return "text/css";
@@ -79,7 +79,7 @@ static nsurl *nsw32_get_resource_url(const char *path)
 	char buf[PATH_MAX];
 	nsurl *url = NULL;
 
-	netsurf_path_to_nsurl(filepath_sfind(G_resource_pathv, buf, path),
+	netsurfy_path_to_nsurl(filepath_sfind(G_resource_pathv, buf, path),
 			      &url);
 
 	return url;

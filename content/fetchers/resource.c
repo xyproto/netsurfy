@@ -1,13 +1,13 @@
 /*
  * Copyright 2011 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf.
+ * This file is part of NetSurfy.
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -29,7 +29,7 @@
 #include <stdarg.h>
 #include <libwapcaplet/libwapcaplet.h>
 
-#include "netsurf/inttypes.h"
+#include "netsurfy/inttypes.h"
 #include "utils/nsurl.h"
 #include "utils/corestrings.h"
 #include "utils/log.h"
@@ -37,7 +37,7 @@
 #include "utils/messages.h"
 #include "utils/utils.h"
 #include "utils/ring.h"
-#include "netsurf/fetch.h"
+#include "netsurfy/fetch.h"
 #include "desktop/gui_internal.h"
 
 #include "content/fetch.h"
@@ -54,10 +54,9 @@ static const char *fetch_resource_paths[] = {"adblock.css",
 					     "user.css",
 					     "credits.html",
 					     "licence.html",
-					     "welcome.html",
 					     "favicon.ico",
 					     "default.ico",
-					     "netsurf.png",
+					     "netsurfy.png",
 					     "icons/arrow-l.png",
 					     "icons/content.png",
 					     "icons/directory.png",
@@ -299,7 +298,7 @@ static bool fetch_resource_initialise(lwc_string *scheme)
 						     &e->data,
 						     &e->data_len);
 		if (res == NSERROR_OK) {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "direct data for %s",
 			      fetch_resource_paths[i]);
@@ -310,7 +309,7 @@ static bool fetch_resource_initialise(lwc_string *scheme)
 			if (e->redirect_url == NULL) {
 				lwc_string_unref(e->path);
 			} else {
-				NSLOG(netsurf,
+				NSLOG(netsurfy,
 				      INFO,
 				      "redirect url for %s",
 				      fetch_resource_paths[i]);

@@ -1,13 +1,13 @@
 /*
  * Copyright 2013 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -33,8 +33,8 @@
 #include "utils/config.h"
 #include "utils/log.h"
 #include "utils/nsoption.h"
-#include "netsurf/content.h"
-#include "netsurf/misc.h"
+#include "netsurfy/content.h"
+#include "netsurfy/misc.h"
 #include "content/hlcache.h"
 #include "css/utils.h"
 #include "desktop/scrollbar.h"
@@ -194,7 +194,7 @@ static nserror html_object_callback(hlcache_handle *object,
 
 	case CONTENT_MSG_DONE:
 		c->base.active--;
-		NSLOG(netsurf, INFO, "%d fetches active", c->base.active);
+		NSLOG(netsurfy, INFO, "%d fetches active", c->base.active);
 
 		html_object_done(box, object, o->background);
 
@@ -226,7 +226,7 @@ static nserror html_object_callback(hlcache_handle *object,
 		o->content = NULL;
 
 		c->base.active--;
-		NSLOG(netsurf, INFO, "%d fetches active", c->base.active);
+		NSLOG(netsurfy, INFO, "%d fetches active", c->base.active);
 
 		html_object_failed(box, c, o->background);
 
@@ -549,7 +549,7 @@ static bool html_replace_object(struct content_html_object *object, nsurl *url)
 		if (content_get_status(object->content) !=
 		    CONTENT_STATUS_DONE) {
 			c->base.active--;
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "%d fetches active",
 			      c->base.active);
@@ -577,7 +577,7 @@ static bool html_replace_object(struct content_html_object *object, nsurl *url)
 
 	for (page = c; page != NULL; page = page->page) {
 		page->base.active++;
-		NSLOG(netsurf, INFO, "%d fetches active", c->base.active);
+		NSLOG(netsurfy, INFO, "%d fetches active", c->base.active);
 
 		page->base.status = CONTENT_STATUS_READY;
 	}
@@ -662,7 +662,7 @@ nserror html_object_abort_objects(html_content *htmlc)
 			object->content = NULL;
 			if (object->box != NULL) {
 				htmlc->base.active--;
-				NSLOG(netsurf,
+				NSLOG(netsurfy,
 				      INFO,
 				      "%d fetches active",
 				      htmlc->base.active);
@@ -706,7 +706,7 @@ nserror html_object_free_objects(html_content *html)
 		struct content_html_object *victim = html->object_list;
 
 		if (victim->content != NULL) {
-			NSLOG(netsurf, INFO, "object %p", victim->content);
+			NSLOG(netsurfy, INFO, "object %p", victim->content);
 
 			if (content_get_type(victim->content) == CONTENT_HTML) {
 				guit->misc->schedule(-1,
@@ -781,7 +781,7 @@ bool html_fetch_object(html_content *c,
 	c->num_objects++;
 	if (box != NULL) {
 		c->base.active++;
-		NSLOG(netsurf, INFO, "%d fetches active", c->base.active);
+		NSLOG(netsurfy, INFO, "%d fetches active", c->base.active);
 	}
 
 	return true;

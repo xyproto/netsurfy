@@ -57,7 +57,7 @@ jobs:
       with:
         languages: ${{ matrix.language }}
 
-    - name: Build NetSurf
+    - name: Build NetSurfy
       run: |
           export TARGET_WORKSPACE="$(pwd)/projects"
           source docs/env.sh

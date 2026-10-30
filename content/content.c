@@ -1,13 +1,13 @@
 /*
  * Copyright 2005-2007 James Bursa <bursa@users.sourceforge.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
@@ -26,13 +26,13 @@
 #include <string.h>
 #include <nsutils/time.h>
 
-#include "netsurf/inttypes.h"
+#include "netsurfy/inttypes.h"
 #include "utils/log.h"
 #include "utils/messages.h"
 #include "utils/corestrings.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/bitmap.h"
-#include "netsurf/content.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/bitmap.h"
+#include "netsurfy/content.h"
 #include "desktop/knockout.h"
 
 #include "content/content_protected.h"
@@ -71,7 +71,7 @@ static void content_convert(struct content *c)
 	if (c->locked == true)
 		return;
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "content " URL_FMT_SPC " (%p)",
 	      nsurl_access_log(llcache_handle_get_url(c->llcache)),
@@ -198,7 +198,7 @@ nserror content__init(struct content *c,
 	struct content_user *user_sentinel;
 	nserror error;
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "url " URL_FMT_SPC " -> %p",
 	      nsurl_access_log(llcache_handle_get_url(llcache)),
@@ -361,7 +361,7 @@ void content_destroy(struct content *c)
 	struct content_rfc5988_link *link;
 
 	assert(c);
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "content %p %s",
 	      c,
@@ -496,13 +496,13 @@ bool content_exec(struct hlcache_handle *h, const char *src, size_t srclen)
 
 	if (c->locked) {
 		/* Not safe to do stuff */
-		NSLOG(netsurf, DEEPDEBUG, "Unable to exec, content locked");
+		NSLOG(netsurfy, DEEPDEBUG, "Unable to exec, content locked");
 		return false;
 	}
 
 	if (c->handler->exec == NULL) {
 		/* Can't exec something on this content */
-		NSLOG(netsurf, DEEPDEBUG, "Unable to exec, no exec function");
+		NSLOG(netsurfy, DEEPDEBUG, "Unable to exec, no exec function");
 		return false;
 	}
 
@@ -615,7 +615,7 @@ bool content_scaled_redraw(struct hlcache_handle *h,
 		return true;
 	}
 
-	NSLOG(netsurf, INFO, "Content %p %dx%d ctx:%p", c, width, height, ctx);
+	NSLOG(netsurfy, INFO, "Content %p %dx%d ctx:%p", c, width, height, ctx);
 
 	if (ctx->plot->option_knockout) {
 		knockout_plot_start(ctx, &new_ctx);
@@ -672,7 +672,7 @@ bool content_add_user(struct content *c,
 {
 	struct content_user *user;
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "content " URL_FMT_SPC " (%p), user %p %p",
 	      nsurl_access_log(llcache_handle_get_url(c->llcache)),
@@ -703,7 +703,7 @@ void content_remove_user(struct content *c,
 			 void *pw)
 {
 	struct content_user *user, *next;
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "content " URL_FMT_SPC " (%p), user %p %p",
 	      nsurl_access_log(llcache_handle_get_url(c->llcache)),
@@ -718,7 +718,7 @@ void content_remove_user(struct content *c,
 	     user = user->next)
 		;
 	if (user->next == 0) {
-		NSLOG(netsurf, INFO, "user not found in list");
+		NSLOG(netsurfy, INFO, "user not found in list");
 		assert(0);
 		return;
 	}
@@ -774,7 +774,7 @@ void content_broadcast(struct content *c,
 	struct content_user *user, *next;
 	assert(c);
 
-	NSLOG(netsurf, DEEPDEBUG, "%p -> msg:%d", c, msg);
+	NSLOG(netsurfy, DEEPDEBUG, "%p -> msg:%d", c, msg);
 	for (user = c->user_list->next; user != 0; user = next) {
 		next = user->next; /* user may be destroyed during callback */
 		if (user->callback != 0)
@@ -816,7 +816,7 @@ nserror content_open(hlcache_handle *h,
 
 	c = hlcache_handle_get_content(h);
 	assert(c != 0);
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "content %p %s",
 	      c,
@@ -847,7 +847,7 @@ nserror content_close(hlcache_handle *h)
 		return NSERROR_INVALID;
 	}
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "content %p %s",
 	      c,
@@ -1462,7 +1462,7 @@ nserror content__clone(const struct content *c, struct content *nc)
 /* exported interface documented in content/content.h */
 nserror content_abort(struct content *c)
 {
-	NSLOG(netsurf, INFO, "Aborting %p", c);
+	NSLOG(netsurfy, INFO, "Aborting %p", c);
 
 	if (c->handler->stop != NULL)
 		c->handler->stop(c);

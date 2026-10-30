@@ -2,13 +2,13 @@
  * Copyright 2007 James Bursa <bursa@users.sourceforge.net>
  * Copyright 2010 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -41,19 +41,19 @@
 #include "utils/nsoption.h"
 #include "utils/string.h"
 #include "utils/ascii.h"
-#include "netsurf/content.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/utf8.h"
-#include "netsurf/keypress.h"
-#include "netsurf/layout.h"
-#include "netsurf/misc.h"
+#include "netsurfy/content.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/utf8.h"
+#include "netsurfy/keypress.h"
+#include "netsurfy/layout.h"
+#include "netsurfy/misc.h"
 #include "content/hlcache.h"
 #include "content/content_factory.h"
 #include "content/textsearch.h"
 #include "desktop/selection.h"
 #include "desktop/scrollbar.h"
 #include "desktop/textarea.h"
-#include "netsurf/bitmap.h"
+#include "netsurfy/bitmap.h"
 #include "javascript/js.h"
 #include "desktop/gui_internal.h"
 
@@ -122,7 +122,7 @@ bool fire_generic_dom_event(dom_string *type,
 		dom_event_unref(evt);
 		return false;
 	}
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Dispatching '%*s' against %p",
 	      (int)dom_string_length(type),
@@ -218,7 +218,7 @@ bool fire_dom_keyboard_event(dom_string *type,
 		return false;
 	}
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Dispatching '%*s' against %p",
 	      (int)dom_string_length(type),
@@ -242,7 +242,7 @@ static void html_box_convert_done(html_content *c, bool success)
 	dom_exception exc; /* returned by libdom functions */
 	dom_node *html;
 
-	NSLOG(netsurf, INFO, "DOM to box conversion complete (content %p)", c);
+	NSLOG(netsurfy, INFO, "DOM to box conversion complete (content %p)", c);
 
 	c->box_conversion_context = NULL;
 
@@ -278,7 +278,7 @@ static void html_box_convert_done(html_content *c, bool success)
 		/** @todo should this call html_object_free_objects(c);
 		 * like the other error paths
 		 */
-		NSLOG(netsurf, INFO, "error retrieving html element from dom");
+		NSLOG(netsurfy, INFO, "error retrieving html element from dom");
 		content_broadcast_error(&c->base, NSERROR_DOM, NULL);
 		content_set_error(&c->base);
 		return;
@@ -287,7 +287,7 @@ static void html_box_convert_done(html_content *c, bool success)
 	/* extract image maps - can't do this sensibly in dom_to_box */
 	err = imagemap_extract(c);
 	if (err != NSERROR_OK) {
-		NSLOG(netsurf, INFO, "imagemap extraction failed");
+		NSLOG(netsurfy, INFO, "imagemap extraction failed");
 		html_object_free_objects(c);
 		content_broadcast_error(&c->base, err, NULL);
 		content_set_error(&c->base);
@@ -322,7 +322,7 @@ nserror html_proceed_to_done(html_content *html)
 	case CONTENT_STATUS_LOADING:
 		return NSERROR_OK;
 	default:
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      ERROR,
 		      "Content status unexpectedly not LOADING/READY/DONE");
 		break;
@@ -391,11 +391,11 @@ void html_finish_conversion(html_content *htmlc)
 	 *
 	 * If we didn't do this, the HTML content would try to rebuild the
 	 * box tree for the html content when this new stylesheet is ready.
-	 * NetSurf has no concept of dynamically changing documents, so this
+	 * NetSurfy has no concept of dynamically changing documents, so this
 	 * would break badly.
 	 */
 	if (htmlc->select_ctx != NULL) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Ignoring style change: NS layout is static.");
 		return;
@@ -419,14 +419,14 @@ void html_finish_conversion(html_content *htmlc)
 	}
 
 	/* convert dom tree to box tree */
-	NSLOG(netsurf, INFO, "DOM to box (%p)", htmlc);
+	NSLOG(netsurfy, INFO, "DOM to box (%p)", htmlc);
 	content_set_status(&htmlc->base, messages_get("Processing"));
 	msg_data.explicit_status_text = NULL;
 	content_broadcast(&htmlc->base, CONTENT_MSG_STATUS, &msg_data);
 
 	exc = dom_document_get_document_element(htmlc->document, (void *)&html);
 	if ((exc != DOM_NO_ERR) || (html == NULL)) {
-		NSLOG(netsurf, INFO, "error retrieving html element from dom");
+		NSLOG(netsurfy, INFO, "error retrieving html element from dom");
 		content_broadcast_error(&htmlc->base, NSERROR_DOM, NULL);
 		content_set_error(&htmlc->base);
 		return;
@@ -439,7 +439,7 @@ void html_finish_conversion(html_content *htmlc)
 			   html_box_convert_done,
 			   &htmlc->box_conversion_context);
 	if (error != NSERROR_OK) {
-		NSLOG(netsurf, INFO, "box conversion failed");
+		NSLOG(netsurfy, INFO, "box conversion failed");
 		dom_node_unref(html);
 		html_object_free_objects(htmlc);
 		content_broadcast_error(&htmlc->base, error, NULL);
@@ -465,22 +465,22 @@ static void html_document_user_data_handler(dom_node_operation operation,
 
 	switch (operation) {
 	case DOM_NODE_CLONED:
-		NSLOG(netsurf, INFO, "Cloned");
+		NSLOG(netsurfy, INFO, "Cloned");
 		break;
 	case DOM_NODE_RENAMED:
-		NSLOG(netsurf, INFO, "Renamed");
+		NSLOG(netsurfy, INFO, "Renamed");
 		break;
 	case DOM_NODE_IMPORTED:
-		NSLOG(netsurf, INFO, "imported");
+		NSLOG(netsurfy, INFO, "imported");
 		break;
 	case DOM_NODE_ADOPTED:
-		NSLOG(netsurf, INFO, "Adopted");
+		NSLOG(netsurfy, INFO, "Adopted");
 		break;
 	case DOM_NODE_DELETED:
 		/* This is the only path I expect */
 		break;
 	default:
-		NSLOG(netsurf, INFO, "User data operation not handled.");
+		NSLOG(netsurfy, INFO, "User data operation not handled.");
 		assert(0);
 	}
 }
@@ -625,7 +625,7 @@ html_create_html_data(html_content *c, const http_parameter *params)
 		lwc_string_unref(c->media.prefers_color_scheme);
 		c->media.prefers_color_scheme = NULL;
 
-		NSLOG(netsurf, INFO, "Unable to set user data.");
+		NSLOG(netsurfy, INFO, "Unable to set user data.");
 		return NSERROR_DOM;
 	}
 
@@ -832,11 +832,11 @@ static bool html_convert(struct content *c)
 	exc = dom_document_get_quirks_mode(htmlc->document, &htmlc->quirks);
 	if (exc == DOM_NO_ERR) {
 		html_css_quirks_stylesheets(htmlc);
-		NSLOG(netsurf, INFO, "quirks set to %d", htmlc->quirks);
+		NSLOG(netsurfy, INFO, "quirks set to %d", htmlc->quirks);
 	}
 
 	htmlc->base.active--; /* the html fetch is no longer active */
-	NSLOG(netsurf, INFO, "%d fetches active (%p)", htmlc->base.active, c);
+	NSLOG(netsurfy, INFO, "%d fetches active (%p)", htmlc->base.active, c);
 
 	/* The parse cannot be completed here because it may be paused
 	 * untill all the resources being fetched have completed.
@@ -891,7 +891,7 @@ bool html_begin_conversion(html_content *htmlc)
 	 * complete to avoid repeating the completion pointlessly.
 	 */
 	if (htmlc->parse_completed == false) {
-		NSLOG(netsurf, INFO, "Completing parse (%p)", htmlc);
+		NSLOG(netsurfy, INFO, "Completing parse (%p)", htmlc);
 		/* complete parsing */
 		error = dom_hubbub_parser_completed(htmlc->parser);
 		if (error == DOM_HUBBUB_HUBBUB_ERR_PAUSED &&
@@ -899,13 +899,13 @@ bool html_begin_conversion(html_content *htmlc)
 			/* The act of completing the parse failed because we've
 			 * encountered a sync script which needs to run
 			 */
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "Completing parse brought synchronous JS to light, cannot complete yet");
 			return true;
 		}
 		if (error != DOM_HUBBUB_OK) {
-			NSLOG(netsurf, INFO, "Parsing failed");
+			NSLOG(netsurfy, INFO, "Parsing failed");
 
 			content_broadcast_error(&htmlc->base,
 						libdom_hubbub_error_to_nserror(
@@ -918,14 +918,14 @@ bool html_begin_conversion(html_content *htmlc)
 	}
 
 	if (html_can_begin_conversion(htmlc) == false) {
-		NSLOG(netsurf, INFO, "Can't begin conversion (%p)", htmlc);
+		NSLOG(netsurfy, INFO, "Can't begin conversion (%p)", htmlc);
 		/* We can't proceed (see commentary above) */
 		return true;
 	}
 
 	/* Give up processing if we've been aborted */
 	if (htmlc->aborted) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Conversion aborted (%p) (active: %u)",
 		      htmlc,
@@ -970,7 +970,7 @@ bool html_begin_conversion(html_content *htmlc)
 	/* locate root element and ensure it is html */
 	exc = dom_document_get_document_element(htmlc->document, (void *)&html);
 	if ((exc != DOM_NO_ERR) || (html == NULL)) {
-		NSLOG(netsurf, INFO, "error retrieving html element from dom");
+		NSLOG(netsurfy, INFO, "error retrieving html element from dom");
 		content_broadcast_error(&htmlc->base, NSERROR_DOM, NULL);
 		return false;
 	}
@@ -979,7 +979,7 @@ bool html_begin_conversion(html_content *htmlc)
 	if ((exc != DOM_NO_ERR) || (node_name == NULL) ||
 	    (!dom_string_caseless_lwc_isequal(node_name,
 					      corestring_lwc_html))) {
-		NSLOG(netsurf, INFO, "root element not html");
+		NSLOG(netsurfy, INFO, "root element not html");
 		content_broadcast_error(&htmlc->base, NSERROR_DOM, NULL);
 		dom_node_unref(html);
 		return false;
@@ -1085,7 +1085,7 @@ static void html_stop(struct content *c)
 		break;
 
 	default:
-		NSLOG(netsurf, INFO, "Unexpected status %d (%p)", c->status, c);
+		NSLOG(netsurfy, INFO, "Unexpected status %d (%p)", c->status, c);
 		assert(0);
 	}
 }
@@ -1268,13 +1268,13 @@ static void html_destroy(struct content *c)
 	html_content *html = (html_content *)c;
 	struct form *f, *g;
 
-	NSLOG(netsurf, INFO, "content %p", c);
+	NSLOG(netsurfy, INFO, "content %p", c);
 
 	/* If we're still converting a layout, cancel it */
 	if (html->box_conversion_context != NULL) {
 		if (cancel_dom_to_box(html->box_conversion_context) !=
 		    NSERROR_OK) {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      CRITICAL,
 			      "WARNING, Unable to cancel conversion context, browser may crash");
 		}
@@ -1703,7 +1703,7 @@ static void html__dom_user_data_handler(dom_node_operation operation,
 		free(data);
 		break;
 	default:
-		NSLOG(netsurf, INFO, "User data operation not handled.");
+		NSLOG(netsurfy, INFO, "User data operation not handled.");
 		assert(0);
 	}
 }
@@ -1720,7 +1720,7 @@ static void html__set_file_gadget_filename(struct content *c,
 	ret = guit->utf8->local_to_utf8(fn, 0, &utf8_fn);
 	if (ret != NSERROR_OK) {
 		assert(ret != NSERROR_BAD_ENCODING);
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "utf8 to local encoding conversion failed");
 		/* Load was for us - just no memory */
@@ -1884,7 +1884,7 @@ static bool html_drop_file_at_point(struct content *c, int x, int y, char *file)
 		ret = guit->utf8->local_to_utf8(buffer, file_len, &utf8_buff);
 		if (ret != NSERROR_OK) {
 			/* bad encoding shouldn't happen */
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      ERROR,
 			      "local to utf8 encoding failed (%s)",
 			      messages_get_errorcode(ret));
@@ -1955,20 +1955,20 @@ html_debug_dump(struct content *c, FILE *f, enum content_debug op)
 		ret = NSERROR_OK;
 	} else {
 		if (htmlc->document == NULL) {
-			NSLOG(netsurf, INFO, "No document to dump");
+			NSLOG(netsurfy, INFO, "No document to dump");
 			return NSERROR_DOM;
 		}
 
 		exc = dom_document_get_document_element(htmlc->document,
 							(void *)&html);
 		if ((exc != DOM_NO_ERR) || (html == NULL)) {
-			NSLOG(netsurf, INFO, "Unable to obtain root node");
+			NSLOG(netsurfy, INFO, "Unable to obtain root node");
 			return NSERROR_DOM;
 		}
 
 		ret = libdom_dump_structure(html, f, 0);
 
-		NSLOG(netsurf, INFO, "DOM structure dump returning %d", ret);
+		NSLOG(netsurfy, INFO, "DOM structure dump returning %d", ret);
 
 		dom_node_unref(html);
 	}
@@ -2193,13 +2193,13 @@ bool html_exec(struct content *c, const char *src, size_t srclen)
 	dom_html_script_element *script_node;
 
 	if (htmlc->document == NULL) {
-		NSLOG(netsurf, DEEPDEBUG, "Unable to exec, no document");
+		NSLOG(netsurfy, DEEPDEBUG, "Unable to exec, no document");
 		goto out_no_string;
 	}
 
 	err = dom_string_create((const uint8_t *)src, srclen, &dom_src);
 	if (err != DOM_NO_ERR) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      DEEPDEBUG,
 		      "Unable to exec, could not create string");
 		goto out_no_string;
@@ -2207,7 +2207,7 @@ bool html_exec(struct content *c, const char *src, size_t srclen)
 
 	err = dom_html_document_get_body(htmlc->document, &body_node);
 	if (err != DOM_NO_ERR) {
-		NSLOG(netsurf, DEEPDEBUG, "Unable to retrieve body element");
+		NSLOG(netsurfy, DEEPDEBUG, "Unable to retrieve body element");
 		goto out_no_body;
 	}
 
@@ -2215,7 +2215,7 @@ bool html_exec(struct content *c, const char *src, size_t srclen)
 					    dom_src,
 					    &text_node);
 	if (err != DOM_NO_ERR) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      DEEPDEBUG,
 		      "Unable to exec, could not create text node");
 		goto out_no_text_node;
@@ -2225,7 +2225,7 @@ bool html_exec(struct content *c, const char *src, size_t srclen)
 					  corestring_dom_SCRIPT,
 					  &script_node);
 	if (err != DOM_NO_ERR) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      DEEPDEBUG,
 		      "Unable to exec, could not create script node");
 		goto out_no_script_node;
@@ -2233,7 +2233,7 @@ bool html_exec(struct content *c, const char *src, size_t srclen)
 
 	err = dom_node_append_child(script_node, text_node, &spare_node);
 	if (err != DOM_NO_ERR) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      DEEPDEBUG,
 		      "Unable to exec, could not insert code node into script node");
 		goto out_unparented;
@@ -2242,7 +2242,7 @@ bool html_exec(struct content *c, const char *src, size_t srclen)
 
 	err = dom_node_append_child(body_node, script_node, &spare_node);
 	if (err != DOM_NO_ERR) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      DEEPDEBUG,
 		      "Unable to exec, could not insert script node into document body");
 		goto out_unparented;

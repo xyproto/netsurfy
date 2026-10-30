@@ -1,13 +1,13 @@
 /*
  * Copyright 2008 François Revol <mmu_man@users.sourceforge.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -26,7 +26,7 @@ extern "C" {
 #include "testament.h"
 #include "utils/useragent.h"
 #include "curl/curlver.h"
-#include "netsurf/clipboard.h"
+#include "netsurfy/clipboard.h"
 }
 #include "beos/about.h"
 #include "beos/scaffolding.h"
@@ -44,14 +44,14 @@ extern "C" {
 void nsbeos_about(struct gui_window *gui)
 {
 	BString text;
-	text << "Netsurf  : " << user_agent_string() << "\n";
-	text << "Version  : " << netsurf_version << "\n";
+	text << "Netsurfy  : " << user_agent_string() << "\n";
+	text << "Version  : " << netsurfy_version << "\n";
 	text << "Build ID : " << WT_REVID << "\n";
 	text << "Date     : " << WT_COMPILEDATE << "\n";
 	text << "cURL     : " << LIBCURL_VERSION << "\n";
 
-	BAboutWindow *alert = new BAboutWindow("About NetSurf",
-					       "application/x-vnd.NetSurf");
+	BAboutWindow *alert = new BAboutWindow("About NetSurfy",
+					       "application/x-vnd.NetSurfy");
 	alert->AddExtraInfo(text);
 	alert->Show();
 	// TODO: i18n-ize

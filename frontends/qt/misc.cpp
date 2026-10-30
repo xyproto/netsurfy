@@ -1,13 +1,13 @@
 /*
  * Copyright 2021 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -18,7 +18,7 @@
 
 /**
  * \file
- * Implementation of netsurf miscelaneous operations for qt.
+ * Implementation of netsurfy miscelaneous operations for qt.
  */
 
 #include <stddef.h>
@@ -30,7 +30,7 @@ extern "C" {
 #include "utils/errors.h"
 #include "utils/sys_time.h"
 #include "utils/log.h"
-#include "netsurf/misc.h"
+#include "netsurfy/misc.h"
 }
 
 #include "qt/misc.h"

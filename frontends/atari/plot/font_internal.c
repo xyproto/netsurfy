@@ -2,13 +2,13 @@
  * Copyright 2008 Vincent Sanders <vince@simtec.co.uk>
  * Copyright 2011 Ole Loots <ole@monochrom.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -24,9 +24,9 @@
 
 #include "utils/utf8.h"
 #include "utils/log.h"
-#include "netsurf/mouse.h"
-#include "netsurf/bitmap.h"
-#include "netsurf/plot_style.h"
+#include "netsurfy/mouse.h"
+#include "netsurfy/bitmap.h"
+#include "netsurfy/plot_style.h"
 
 #include "atari/gui.h"
 #include "atari/bitmap.h"
@@ -114,7 +114,7 @@ int ctor_font_plotter_internal(FONT_PLOTTER self)
 	self->str_split = str_split;
 	self->pixel_pos = pixel_pos;
 	self->text = text;
-	NSLOG(netsurf, INFO, "%s: %s\n", (char *)__FILE__, __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s: %s\n", (char *)__FILE__, __FUNCTION__);
 	if (!init) {
 		vdih = self->vdi_handle;
 		fontbmp = atari_bitmap_create(48, 48, 0);
@@ -703,7 +703,7 @@ static const uint32_t fontdata_bold[FONTDATAMAX] = {
 };
 
 const struct fb_font_desc font_bold = {
-	.name = "NetSurf Bold",
+	.name = "NetSurfy Bold",
 	.width = 8,
 	.height = 16,
 	.encoding = "CP1252",
@@ -1057,7 +1057,7 @@ static const uint32_t fontdata_italic[FONTDATAMAX] = {
 };
 
 const struct fb_font_desc font_italic = {
-	.name = "NetSurf Italic",
+	.name = "NetSurfy Italic",
 	.width = 8,
 	.height = 16,
 	.encoding = "CP1252",
@@ -1411,7 +1411,7 @@ static const uint32_t fontdata_italic_bold[FONTDATAMAX] = {
 };
 
 const struct fb_font_desc font_italic_bold = {
-	.name = "NetSurf Italic Bold",
+	.name = "NetSurfy Italic Bold",
 	.width = 8,
 	.height = 16,
 	.encoding = "CP1252",
@@ -1765,7 +1765,7 @@ static const uint32_t fontdata_regular[FONTDATAMAX] = {
 };
 
 const struct fb_font_desc font_regular = {
-	.name = "NetSurf Regular",
+	.name = "NetSurfy Regular",
 	.width = 8,
 	.height = 16,
 	.encoding = "CP1252",

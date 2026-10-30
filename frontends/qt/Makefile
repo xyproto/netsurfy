@@ -1,14 +1,14 @@
 #
-# Makefile for NetSurf qt target
+# Makefile for NetSurfy qt target
 #
-# This file is part of NetSurf
+# This file is part of NetSurfy
 #
 # ----------------------------------------------------------------------------
 # QT flag setup (using pkg-config)
 # ----------------------------------------------------------------------------
 
 CFLAGS += -Dnsqt
-CXXFLAGS += -DQT_RESPATH=\"$(NETSURF_QT_RES_PATH)\" -Dnsqt -g
+CXXFLAGS += -DQT_RESPATH=\"$(NETSURFY_QT_RES_PATH)\" -Dnsqt -g
 
 $(eval $(call pkg_config_find_and_add,Qt6Widgets,Qt6Widgets))
 $(eval $(call pkg_config_find_and_add,Qt6Core,Qt6Core))
@@ -31,7 +31,7 @@ MESSAGES_TARGET=$(FRONTEND_RESOURCES_DIR)
 # Builtin resource handling
 # ----------------------------------------------------------------------------
 
-QRC_FILE := netsurf
+QRC_FILE := netsurfy
 
 # use RCC to generate resource source
 $(OBJROOT)/%.qrc.cpp: $(FRONTEND_RESOURCES_DIR)/%.qrc $(addsuffix /Messages,$(addprefix $(MESSAGES_TARGET)/,$(MESSAGES_LANGUAGES)))

@@ -1,13 +1,13 @@
 /*
  * Copyright 2010 <ole@monochrom.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -121,14 +121,14 @@ char *gemdos_realpath(const char *path, char *rpath)
 		return (rpath);
 	}
 
-	NSLOG(netsurf, INFO, "realpath in: %s\n", path);
+	NSLOG(netsurfy, INFO, "realpath in: %s\n", path);
 	r = realpath(path, work);
 	if (r != NULL) {
 		unx2dos((const char *)r, rpath);
-		NSLOG(netsurf, INFO, "realpath out: %s\n", rpath);
+		NSLOG(netsurfy, INFO, "realpath out: %s\n", rpath);
 		return (rpath);
 	} else {
-		NSLOG(netsurf, INFO, "realpath out: NULL!\n");
+		NSLOG(netsurfy, INFO, "realpath out: NULL!\n");
 	}
 	return (NULL);
 }

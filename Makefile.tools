@@ -61,14 +61,8 @@ else
   ccvsn := $(shell $(CC) --version 2>&1)
   ifeq ($(ccvsn),)
     # Version string is blank
-    ifeq ($(BUILD),arm-unknown-riscos)
-      # For some reason we never see the output of SCL apps, so might be
-      # Norcroft.  However it might also be a GCC linked against a buggy
-      # UnixLib.
-      # TODO: Something more useful than blindly assuming GCC.
-      ccvsn := GCC
-      # ccvsn := Norcroft
-    endif
+    # TODO: Something more useful than blindly assuming GCC.
+    ccvsn := GCC
   endif
 
   ifeq ($(findstring lcc:,$(ccvsn)),lcc:)

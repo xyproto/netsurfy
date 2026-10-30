@@ -1,13 +1,13 @@
 /*
  * Copyright 2010 Ole Loots <ole@monochrom.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -24,11 +24,11 @@
 #include "utils/messages.h"
 #include "utils/nsoption.h"
 #include "utils/utils.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/keypress.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/keypress.h"
 #include "desktop/save_complete.h"
 
-#include "atari/res/netsurf.rsh"
+#include "atari/res/netsurfy.rsh"
 #include "atari/gemtk/gemtk.h"
 #include "atari/deskmenu.h"
 #include "atari/hotlist.h"
@@ -186,7 +186,7 @@ static void __CDECL menu_about(short item, short title, void *data)
 	  nserror error;
 	  char buf[PATH_MAX];
 
-	  NSLOG(netsurf, INFO, "abort menu");
+	  NSLOG(netsurfy, INFO, "abort menu");
 	  strcpy((char*)&buf, "file://");
 	  strncat((char*)&buf, (char*)"./doc/README.TXT",
 	  PATH_MAX - (strlen("file://")+1) );
@@ -213,12 +213,12 @@ static void __CDECL menu_new_win(short item, short title, void *data)
 	nserror error;
 	const char *addr;
 
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 
 	if (nsoption_charp(homepage_url) != NULL) {
 		addr = nsoption_charp(homepage_url);
 	} else {
-		addr = NETSURF_HOMEPAGE;
+		addr = NETSURFY_HOMEPAGE;
 	}
 
 	/* create an initial browser window */
@@ -237,7 +237,7 @@ static void __CDECL menu_open_url(short item, short title, void *data)
 {
 	struct gui_window *gw;
 	struct browser_window *bw;
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 
 	gw = input_window;
 	if (gw == NULL) {
@@ -248,7 +248,7 @@ static void __CDECL menu_open_url(short item, short title, void *data)
 static void __CDECL menu_open_file(short item, short title, void *data)
 {
 
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 
 	const char *filename = file_select(messages_get("OpenFile"), "");
 	if (filename != NULL) {
@@ -277,7 +277,7 @@ static void __CDECL menu_open_file(short item, short title, void *data)
 
 static void __CDECL menu_close_win(short item, short title, void *data)
 {
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 	if (input_window == NULL)
 		return;
 	gui_window_destroy(input_window);
@@ -285,7 +285,7 @@ static void __CDECL menu_close_win(short item, short title, void *data)
 
 static void __CDECL menu_save_page(short item, short title, void *data)
 {
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 	static bool init = true;
 	bool is_folder = false;
 	const char *path;
@@ -317,7 +317,7 @@ static void __CDECL menu_quit(short item, short title, void *data)
 {
 	short buff[8];
 	memset(&buff, 0, sizeof(short) * 8);
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 	gemtk_wm_send_msg(NULL, AP_TERM, 0, 0, 0, 0);
 }
 
@@ -330,7 +330,7 @@ static void __CDECL menu_cut(short item, short title, void *data)
 
 static void __CDECL menu_copy(short item, short title, void *data)
 {
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 	if (input_window != NULL)
 		browser_window_key_press(input_window->browser->bw,
 					 NS_KEY_COPY_SELECTION);
@@ -338,7 +338,7 @@ static void __CDECL menu_copy(short item, short title, void *data)
 
 static void __CDECL menu_paste(short item, short title, void *data)
 {
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 	if (input_window != NULL)
 		browser_window_key_press(input_window->browser->bw,
 					 NS_KEY_PASTE);
@@ -346,7 +346,7 @@ static void __CDECL menu_paste(short item, short title, void *data)
 
 static void __CDECL menu_find(short item, short title, void *data)
 {
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 	if (input_window != NULL) {
 		if (input_window->search) {
 			window_close_search(input_window->root);
@@ -358,13 +358,13 @@ static void __CDECL menu_find(short item, short title, void *data)
 
 static void __CDECL menu_choices(short item, short title, void *data)
 {
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 	open_settings();
 }
 
 static void __CDECL menu_stop(short item, short title, void *data)
 {
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 	if (input_window == NULL)
 		return;
 
@@ -377,7 +377,7 @@ static void __CDECL menu_reload(short item, short title, void *data)
 	if (input_window == NULL)
 		return;
 	toolbar_reload_click(input_window->root->toolbar);
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 }
 
 
@@ -402,7 +402,7 @@ static void __CDECL menu_dec_scale(short item, short title, void *data)
 static void __CDECL menu_toolbars(short item, short title, void *data)
 {
 	static int state = 0;
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 	if (input_window != null && input_window->root->toolbar != null) {
 		state = !state;
 		// TODO: implement toolbar hide
@@ -412,7 +412,7 @@ static void __CDECL menu_toolbars(short item, short title, void *data)
 
 static void __CDECL menu_savewin(short item, short title, void *data)
 {
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 	if (input_window && input_window->browser) {
 		GRECT rect;
 		wind_get_grect(gemtk_wm_get_handle(input_window->root->win),
@@ -432,7 +432,7 @@ static void __CDECL menu_savewin(short item, short title, void *data)
 
 static void __CDECL menu_debug_render(short item, short title, void *data)
 {
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 	html_redraw_debug = !html_redraw_debug;
 	if (input_window != NULL) {
 		if (input_window->browser != NULL &&
@@ -470,7 +470,7 @@ static void __CDECL menu_bg_images(short item, short title, void *data)
 
 static void __CDECL menu_back(short item, short title, void *data)
 {
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 	if (input_window == NULL)
 		return;
 	toolbar_back_click(input_window->root->toolbar);
@@ -478,7 +478,7 @@ static void __CDECL menu_back(short item, short title, void *data)
 
 static void __CDECL menu_forward(short item, short title, void *data)
 {
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 	if (input_window == NULL)
 		return;
 	toolbar_forward_click(input_window->root->toolbar);
@@ -486,7 +486,7 @@ static void __CDECL menu_forward(short item, short title, void *data)
 
 static void __CDECL menu_home(short item, short title, void *data)
 {
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 	if (input_window == NULL)
 		return;
 	toolbar_home_click(input_window->root->toolbar);
@@ -494,20 +494,20 @@ static void __CDECL menu_home(short item, short title, void *data)
 
 static void __CDECL menu_lhistory(short item, short title, void *data)
 {
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 	if (input_window == NULL)
 		return;
 }
 
 static void __CDECL menu_ghistory(short item, short title, void *data)
 {
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 	atari_global_history_open();
 }
 
 static void __CDECL menu_add_bookmark(short item, short title, void *data)
 {
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 	if (input_window) {
 		if (browser_window_has_content(input_window->browser->bw)) {
 			atari_hotlist_add_page(
@@ -520,26 +520,26 @@ static void __CDECL menu_add_bookmark(short item, short title, void *data)
 
 static void __CDECL menu_bookmarks(short item, short title, void *data)
 {
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 	atari_hotlist_open();
 }
 
 static void __CDECL menu_cookies(short item, short title, void *data)
 {
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 	atari_cookie_manager_open();
 }
 
 static void __CDECL menu_vlog(short item, short title, void *data)
 {
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 	verbose_log = !verbose_log;
 	menu_icheck(h_gem_menu, MAINMENU_M_VLOG, (verbose_log) ? 1 : 0);
 }
 
 static void __CDECL menu_help_content(short item, short title, void *data)
 {
-	NSLOG(netsurf, INFO, "%s", __FUNCTION__);
+	NSLOG(netsurfy, INFO, "%s", __FUNCTION__);
 }
 
 /*
@@ -581,7 +581,7 @@ static void register_menu_str(struct s_menu_item_evnt *mi)
 	while (i > 2) {
 		if ((strncmp("  ", &str[i], 2) == 0) && (strlen(&str[i]) > 2)) {
 			// "Standard" Keyboard Shortcut Element found:
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "Standard Keyboard Shortcut: \"%s\"\n",
 			      &str[i]);
@@ -591,7 +591,7 @@ static void register_menu_str(struct s_menu_item_evnt *mi)
 		}
 
 		if (str[i] == '[') {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "Keyboard Shortcut: \"%s\"\n",
 			      &str[i]);
@@ -666,7 +666,7 @@ static void register_menu_str(struct s_menu_item_evnt *mi)
 			}
 		}
 
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Registered keyboard shortcut for \"%s\" => mod: %d, "
 		      "keycode: %ld, ascii: %c\n",
@@ -834,7 +834,7 @@ int deskmenu_dispatch_keypress(unsigned short kcode,
 }
 
 /**
- *	Refresh the desk menu, reflecting netsurf current state.
+ *	Refresh the desk menu, reflecting netsurfy current state.
  */
 void deskmenu_update(void)
 {

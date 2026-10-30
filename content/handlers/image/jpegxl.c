@@ -1,13 +1,13 @@
 /*
  * Copyright 2023 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -33,7 +33,7 @@
 #include "utils/utils.h"
 #include "utils/log.h"
 #include "utils/messages.h"
-#include "netsurf/bitmap.h"
+#include "netsurfy/bitmap.h"
 #include "content/llcache.h"
 #include "content/content.h"
 #include "content/content_protected.h"
@@ -117,13 +117,13 @@ static struct bitmap *jpegxl_cache_convert(struct content *c)
 
 	jxldec = JxlDecoderCreate(NULL);
 	if (jxldec == NULL) {
-		NSLOG(netsurf, ERROR, "Unable to allocate decoder");
+		NSLOG(netsurfy, ERROR, "Unable to allocate decoder");
 		return NULL;
 	}
 
 	decstatus = JxlDecoderSetUnpremultiplyAlpha(jxldec, !bitmap_fmt.pma);
 	if (decstatus != JXL_DEC_SUCCESS) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      ERROR,
 		      "unable to set premultiplied alpha status: %d",
 		      decstatus);
@@ -133,20 +133,20 @@ static struct bitmap *jpegxl_cache_convert(struct content *c)
 
 	decstatus = JxlDecoderSubscribeEvents(jxldec, JXL_DEC_FULL_IMAGE);
 	if (decstatus != JXL_DEC_SUCCESS) {
-		NSLOG(netsurf, ERROR, "Unable to subscribe");
+		NSLOG(netsurfy, ERROR, "Unable to subscribe");
 		return NULL;
 	}
 	src_data = content__get_source_data(c, &src_size);
 
 	decstatus = JxlDecoderSetInput(jxldec, src_data, src_size);
 	if (decstatus != JXL_DEC_SUCCESS) {
-		NSLOG(netsurf, ERROR, "unable to set input");
+		NSLOG(netsurfy, ERROR, "unable to set input");
 		return NULL;
 	}
 
 	decstatus = JxlDecoderProcessInput(jxldec);
 	if (decstatus != JXL_DEC_NEED_IMAGE_OUT_BUFFER) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      ERROR,
 		      "expected status JXL_DEC_NEED_IMAGE_OUT_BUFFER(%d) got %d",
 		      JXL_DEC_NEED_IMAGE_OUT_BUFFER,
@@ -157,7 +157,7 @@ static struct bitmap *jpegxl_cache_convert(struct content *c)
 
 	decstatus = JxlDecoderGetBasicInfo(jxldec, &binfo);
 	if (decstatus != JXL_DEC_SUCCESS) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      ERROR,
 		      "unable to get basic info status:%d",
 		      decstatus);
@@ -190,7 +190,7 @@ static struct bitmap *jpegxl_cache_convert(struct content *c)
 	decstatus = JxlDecoderSetImageOutBuffer(
 		jxldec, &jxl_output_format, output, c->size);
 	if (decstatus != JXL_DEC_SUCCESS) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      ERROR,
 		      "unable to set output buffer callback status:%d",
 		      decstatus);
@@ -201,7 +201,7 @@ static struct bitmap *jpegxl_cache_convert(struct content *c)
 
 	decstatus = JxlDecoderProcessInput(jxldec);
 	if (decstatus != JXL_DEC_FULL_IMAGE) {
-		NSLOG(netsurf, ERROR, "did not get decode event");
+		NSLOG(netsurfy, ERROR, "did not get decode event");
 		guit->bitmap->destroy(bitmap);
 		JxlDecoderDestroy(jxldec);
 		return NULL;
@@ -222,7 +222,7 @@ static bool
 jxl_report_fail(struct content *c, JxlDecoderStatus decstatus, const char *msg)
 {
 	union content_msg_data msg_data;
-	NSLOG(netsurf, ERROR, "%s decoder status:%d", msg, decstatus);
+	NSLOG(netsurfy, ERROR, "%s decoder status:%d", msg, decstatus);
 	msg_data.errordata.errorcode = NSERROR_UNKNOWN;
 	msg_data.errordata.errormsg = msg;
 	content_broadcast(c, CONTENT_MSG_ERROR, &msg_data);
@@ -249,7 +249,7 @@ static bool nsjpegxl_convert(struct content *c)
 
 	decsig = JxlSignatureCheck(data, size);
 	if ((decsig != JXL_SIG_CODESTREAM) && (decsig != JXL_SIG_CONTAINER)) {
-		NSLOG(netsurf, ERROR, "signature failed");
+		NSLOG(netsurfy, ERROR, "signature failed");
 		msg_data.errordata.errorcode = NSERROR_UNKNOWN;
 		msg_data.errordata.errormsg = "Signature failed";
 		content_broadcast(c, CONTENT_MSG_ERROR, &msg_data);
@@ -291,7 +291,7 @@ static bool nsjpegxl_convert(struct content *c)
 
 	JxlDecoderDestroy(jxldec);
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "got basic info size:%ld x:%d y:%d",
 	      image_size,

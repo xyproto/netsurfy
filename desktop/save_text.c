@@ -2,13 +2,13 @@
  * Copyright 2004 John M Bell <jmb202@ecs.soton.ac.uk>
  * Copyright 2008 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -31,11 +31,11 @@
 #include "utils/log.h"
 #include "utils/utf8.h"
 #include "utils/utils.h"
-#include "netsurf/content.h"
+#include "netsurfy/content.h"
 #include "html/box.h"
 #include "html/html_save.h"
 
-#include "netsurf/utf8.h"
+#include "netsurfy/utf8.h"
 #include "desktop/gui_internal.h"
 #include "desktop/save_text.h"
 
@@ -80,7 +80,7 @@ void save_as_text(struct hlcache_handle *c, char *path)
 	free(save.block);
 
 	if (ret != NSERROR_OK) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "failed to convert to local encoding, return %d",
 		      ret);
@@ -92,12 +92,12 @@ void save_as_text(struct hlcache_handle *c, char *path)
 		int res = fputs(result, out);
 
 		if (res < 0) {
-			NSLOG(netsurf, INFO, "Warning: write failed");
+			NSLOG(netsurfy, INFO, "Warning: write failed");
 		}
 
 		res = fputs("\n", out);
 		if (res < 0) {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "Warning: failed writing trailing newline");
 		}

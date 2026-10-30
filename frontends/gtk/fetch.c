@@ -2,13 +2,13 @@
  * Copyright 2007, 2014 Vincent Sanders <vince@netsurf-browser.org>
  * Copyright 2007 Rob Kendrick <rjek@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -46,7 +46,7 @@
 #include "utils/file.h"
 #include "utils/nsurl.h"
 #include "utils/ascii.h"
-#include "netsurf/fetch.h"
+#include "netsurfy/fetch.h"
 
 #include "gtk/gui.h"
 #include "gtk/resources.h"
@@ -92,7 +92,7 @@ void gtk_fetch_filetype_init(const char *mimefile)
 
 	fh = fopen(mimefile, "r");
 	if (fh == NULL) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Unable to open a mime.types file, so using a minimal one for you.");
 		return;
@@ -195,7 +195,7 @@ const char *fetch_filetype(const char *unix_path)
 		/* stat suceeded so can check for directory */
 
 		if (S_ISDIR(statbuf.st_mode)) {
-			return "application/x-netsurf-directory";
+			return "application/x-netsurfy-directory";
 		}
 	}
 
@@ -257,7 +257,7 @@ static nsurl *nsgtk_get_resource_url(const char *path)
 	if (strcmp(path, "favicon.ico") == 0) {
 		nsurl_create("resource:favicon.png", &url);
 	} else {
-		netsurf_path_to_nsurl(filepath_sfind(respaths, buf, path),
+		netsurfy_path_to_nsurl(filepath_sfind(respaths, buf, path),
 				      &url);
 	}
 

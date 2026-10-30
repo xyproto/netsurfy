@@ -1,13 +1,13 @@
 /*
  * Copyright 2023 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -26,8 +26,8 @@
 
 extern "C" {
 #include "utils/errors.h"
-#include "netsurf/types.h"
-#include "netsurf/plotters.h"
+#include "netsurfy/types.h"
+#include "netsurfy/plotters.h"
 }
 
 #include "qt/corewindow.cls.h"
@@ -59,7 +59,7 @@ void NS_Corewindow::paintEvent(QPaintEvent *event)
 		.priv = NULL,
 	};
 
-	/* netsurf render clip region coordinates */
+	/* netsurfy render clip region coordinates */
 	clip.x0 = event->rect().left();
 	clip.y0 = event->rect().top();
 	clip.x1 = clip.x0 + event->rect().width();

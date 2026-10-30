@@ -2,13 +2,13 @@
  * Copyright 2006 Rob Kendrick <rjek@rjek.com>
  * Copyright 2005 James Bursa <bursa@users.sourceforge.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -31,7 +31,7 @@
 #include <gtk/gtk.h>
 
 #include "utils/log.h"
-#include "netsurf/plotters.h"
+#include "netsurfy/plotters.h"
 #include "utils/nsoption.h"
 
 #include "gtk/layout_pango.h"
@@ -46,7 +46,7 @@ static GdkRectangle cliprect;
 /**
  * Set cairo context colour to nsgtk colour.
  *
- * \param c the netsurf colour to set in cairo
+ * \param c the netsurfy colour to set in cairo
  */
 void nsgtk_set_colour(colour c)
 {
@@ -434,7 +434,7 @@ static nserror nsgtk_plot_path(const struct redraw_context *ctx,
 		return NSERROR_OK;
 
 	if (p[0] != PLOTTER_PATH_MOVE) {
-		NSLOG(netsurf, INFO, "Path does not start with move");
+		NSLOG(netsurfy, INFO, "Path does not start with move");
 		return NSERROR_INVALID;
 	}
 
@@ -476,7 +476,7 @@ static nserror nsgtk_plot_path(const struct redraw_context *ctx,
 				       p[i + 6]);
 			i += 7;
 		} else {
-			NSLOG(netsurf, INFO, "bad path command %f", p[i]);
+			NSLOG(netsurfy, INFO, "bad path command %f", p[i]);
 			/* Reset matrix for safety */
 			cairo_set_matrix(current_cr, &old_ctm);
 			return NSERROR_INVALID;

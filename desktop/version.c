@@ -1,13 +1,13 @@
 /*
  * Copyright 2019 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -20,10 +20,10 @@
 
 #include "desktop/version.h"
 
-const char *const netsurf_version = "3.12 (Dev"
+const char *const netsurfy_version = "1.0.0"
 #if defined(CI_BUILD)
-				    " CI #" CI_BUILD
+				    " (CI #" CI_BUILD ")"
 #endif
-				    ")";
-const int netsurf_version_major = 3;
-const int netsurf_version_minor = 12;
+				    ;
+const int netsurfy_version_major = 1;
+const int netsurfy_version_minor = 0;

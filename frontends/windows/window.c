@@ -1,13 +1,13 @@
 /*
  * Copyright 2011-2016 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -35,9 +35,9 @@
 #include "utils/nsurl.h"
 #include "utils/messages.h"
 #include "content/content.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/window.h"
-#include "netsurf/keypress.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/window.h"
+#include "netsurfy/keypress.h"
 #include "desktop/browser_history.h"
 
 #include "windows/gui.h"
@@ -157,7 +157,7 @@ static HWND nsws_window_create(HINSTANCE hInstance, struct gui_window *gw)
 		width = nsoption_int(window_width);
 		height = nsoption_int(window_height);
 
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      DEBUG,
 		      "Setting Window position %d,%d %d,%d",
 		      xpos,
@@ -178,7 +178,7 @@ static HWND nsws_window_create(HINSTANCE hInstance, struct gui_window *gw)
 
 	hwnd = CreateWindowExW(0,
 			       windowclassname_main,
-			       L"NetSurf Browser",
+			       L"NetSurfy Browser",
 			       WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN |
 				       WS_CLIPSIBLINGS | CS_DBLCLKS,
 			       xpos,
@@ -191,7 +191,7 @@ static HWND nsws_window_create(HINSTANCE hInstance, struct gui_window *gw)
 			       (LPVOID)gw);
 
 	if (hwnd == NULL) {
-		NSLOG(netsurf, INFO, "Window create failed");
+		NSLOG(netsurfy, INFO, "Window create failed");
 	} else {
 		nsws_window_set_accels(gw);
 	}
@@ -215,7 +215,7 @@ static LRESULT nsws_window_toolbar_command(struct gui_window *gw,
 					   int identifier,
 					   HWND ctrl_window)
 {
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEBUG,
 	      "notification_code %d identifier %d ctrl_window %p",
 	      notification_code,
@@ -227,39 +227,39 @@ static LRESULT nsws_window_toolbar_command(struct gui_window *gw,
 	case IDC_MAIN_URLBAR:
 		switch (notification_code) {
 		case EN_CHANGE:
-			NSLOG(netsurf, DEBUG, "EN_CHANGE");
+			NSLOG(netsurfy, DEBUG, "EN_CHANGE");
 			break;
 
 		case EN_ERRSPACE:
-			NSLOG(netsurf, DEBUG, "EN_ERRSPACE");
+			NSLOG(netsurfy, DEBUG, "EN_ERRSPACE");
 			break;
 
 		case EN_HSCROLL:
-			NSLOG(netsurf, DEBUG, "EN_HSCROLL");
+			NSLOG(netsurfy, DEBUG, "EN_HSCROLL");
 			break;
 
 		case EN_KILLFOCUS:
-			NSLOG(netsurf, DEBUG, "EN_KILLFOCUS");
+			NSLOG(netsurfy, DEBUG, "EN_KILLFOCUS");
 			break;
 
 		case EN_MAXTEXT:
-			NSLOG(netsurf, DEBUG, "EN_MAXTEXT");
+			NSLOG(netsurfy, DEBUG, "EN_MAXTEXT");
 			break;
 
 		case EN_SETFOCUS:
-			NSLOG(netsurf, DEBUG, "EN_SETFOCUS");
+			NSLOG(netsurfy, DEBUG, "EN_SETFOCUS");
 			break;
 
 		case EN_UPDATE:
-			NSLOG(netsurf, DEBUG, "EN_UPDATE");
+			NSLOG(netsurfy, DEBUG, "EN_UPDATE");
 			break;
 
 		case EN_VSCROLL:
-			NSLOG(netsurf, DEBUG, "EN_VSCROLL");
+			NSLOG(netsurfy, DEBUG, "EN_VSCROLL");
 			break;
 
 		default:
-			NSLOG(netsurf, DEBUG, "Unknown notification_code");
+			NSLOG(netsurfy, DEBUG, "Unknown notification_code");
 			break;
 		}
 		break;
@@ -388,7 +388,7 @@ static void set_urlbar_edit_size(HWND hwnd)
 	GetClientRect(hwnd, &rc);
 	rc.left += NSW32_PGIBUTTON_HEIGHT;
 	SendMessage(hwnd, EM_SETRECT, 0, (LPARAM)&rc);
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEBUG,
 	      "left:%ld right:%ld top:%ld bot:%ld",
 	      rc.left,
@@ -443,7 +443,7 @@ static LRESULT CALLBACK nsws_window_urlbar_callback(HWND hwnd,
 	case WM_DESTROY:
 		hFont = (HFONT)SendMessage(hwnd, WM_GETFONT, 0, 0);
 		if (hFont != NULL) {
-			NSLOG(netsurf, INFO, "Destroyed font object");
+			NSLOG(netsurfy, INFO, "Destroyed font object");
 			DeleteObject(hFont);
 		}
 		fallthrough;
@@ -538,7 +538,7 @@ static HWND nsws_window_urlbar_create(HINSTANCE hInstance,
 			   DEFAULT_PITCH | FF_SWISS,
 			   "Arial");
 	if (hFont != NULL) {
-		NSLOG(netsurf, INFO, "Setting font object");
+		NSLOG(netsurfy, INFO, "Setting font object");
 		SendMessage(hwnd, WM_SETFONT, (WPARAM)hFont, 0);
 	}
 
@@ -568,7 +568,7 @@ static HWND nsws_window_urlbar_create(HINSTANCE hInstance,
 
 	set_urlbar_edit_size(hwnd);
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Created url bar hwnd:%p, x:%d, y:%d, w:%d, h:%d",
 	      hwnd,
@@ -644,7 +644,7 @@ get_imagelist(HINSTANCE hInstance, int resid, int bsize, int bcnt)
 	HIMAGELIST hImageList;
 	HBITMAP hScrBM;
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "resource id %d, bzize %d, bcnt %d",
 	      resid,
@@ -817,7 +817,7 @@ static HWND nsws_window_create_statusbar(HINSTANCE hInstance,
 			      hInstance,
 			      NULL);
 	if (hwnd != NULL) {
-		SendMessage(hwnd, SB_SETTEXT, 0, (LPARAM) "NetSurf");
+		SendMessage(hwnd, SB_SETTEXT, 0, (LPARAM) "NetSurfy");
 	}
 	return hwnd;
 }
@@ -971,7 +971,7 @@ static void nsws_window_update_forward_back(struct gui_window *w)
 /**
  * Invalidate an area of a win32 browser window
  *
- * \param gw The netsurf window being invalidated.
+ * \param gw The netsurfy window being invalidated.
  * \param rect area to redraw or NULL for entrire window area.
  * \return NSERROR_OK or appropriate error code.
  */
@@ -1015,7 +1015,7 @@ static nserror win32_open_new_window(struct gui_window *gw)
 	if (nsoption_charp(homepage_url) != NULL) {
 		addr = nsoption_charp(homepage_url);
 	} else {
-		addr = NETSURF_HOMEPAGE;
+		addr = NETSURFY_HOMEPAGE;
 	}
 
 	ret = nsurl_create(addr, &url);
@@ -1047,7 +1047,7 @@ static LRESULT nsws_window_command(HWND hwnd,
 {
 	nserror ret;
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "notification_code %x identifier %x ctrl_window %p",
 	      notification_code,
@@ -1292,19 +1292,19 @@ static LRESULT nsws_window_command(HWND hwnd,
 
 	case IDM_HELP_CONTENTS:
 		nsws_window_go(
-			hwnd, "https://www.netsurf-browser.org/documentation/");
+			hwnd, "https://github.com/xyproto/netsurfy");
 		break;
 
 	case IDM_HELP_GUIDE:
 		nsws_window_go(
 			hwnd,
-			"https://www.netsurf-browser.org/documentation/guide");
+			"https://github.com/xyproto/netsurfy");
 		break;
 
 	case IDM_HELP_INFO:
 		nsws_window_go(
 			hwnd,
-			"https://www.netsurf-browser.org/documentation/info");
+			"https://github.com/xyproto/netsurfy");
 		break;
 
 	case IDM_HELP_ABOUT:
@@ -1324,7 +1324,7 @@ static LRESULT nsws_window_command(HWND hwnd,
 			    WM_GETTEXT,
 			    (WPARAM)(len + 1),
 			    (LPARAM)addr);
-		NSLOG(netsurf, INFO, "launching %s\n", addr);
+		NSLOG(netsurfy, INFO, "launching %s\n", addr);
 
 		err = nsurl_create(addr, &url);
 
@@ -1362,7 +1362,7 @@ static LRESULT nsws_window_command(HWND hwnd,
  */
 static bool win32_window_get_scroll(struct gui_window *gw, int *sx, int *sy)
 {
-	NSLOG(netsurf, INFO, "get scroll");
+	NSLOG(netsurfy, INFO, "get scroll");
 	if (gw == NULL)
 		return false;
 
@@ -1453,7 +1453,7 @@ static LRESULT CALLBACK nsws_window_event_callback(HWND hwnd,
 		/* set the gui window associated with this window handle */
 		SetProp(hwnd, TEXT("GuiWnd"), (HANDLE)gw);
 
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "created hWnd:%p hInstance %p GUI window %p",
 		      hwnd,
@@ -1593,7 +1593,7 @@ static struct gui_window *win32_window_create(struct browser_window *bw,
 {
 	struct gui_window *gw;
 
-	NSLOG(netsurf, INFO, "Creating gui window for browser window %p", bw);
+	NSLOG(netsurfy, INFO, "Creating gui window for browser window %p", bw);
 
 	gw = calloc(1, sizeof(struct gui_window));
 	if (gw == NULL) {
@@ -1615,7 +1615,7 @@ static struct gui_window *win32_window_create(struct browser_window *bw,
 	gw->mouse = malloc(sizeof(struct browser_mouse));
 	if (gw->mouse == NULL) {
 		free(gw);
-		NSLOG(netsurf, INFO, "Unable to allocate mouse state");
+		NSLOG(netsurfy, INFO, "Unable to allocate mouse state");
 		return NULL;
 	}
 	gw->mouse->gui = gw;
@@ -1635,7 +1635,7 @@ static struct gui_window *win32_window_create(struct browser_window *bw,
 	gw->statusbar = nsws_window_create_statusbar(hinst, gw->main, gw);
 	gw->drawingarea = nsws_window_create_drawable(hinst, gw->main, gw);
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "new window: main:%p toolbar:%p statusbar %p drawingarea %p",
 	      gw->main,
@@ -1692,7 +1692,7 @@ win32_window_get_dimensions(struct gui_window *gw, int *width, int *height)
 	*width = gw->width;
 	*height = gw->height;
 
-	NSLOG(netsurf, INFO, "gw:%p w=%d h=%d", gw, *width, *height);
+	NSLOG(netsurfy, INFO, "gw:%p w=%d h=%d", gw, *width, *height);
 
 	return NSERROR_OK;
 }
@@ -1729,10 +1729,10 @@ static void win32_window_set_title(struct gui_window *w, const char *title)
 		return;
 	}
 
-	NSLOG(netsurf, INFO, "%p, title %s", w, title);
-	fulltitle = malloc(strlen(title) + SLEN("  -  NetSurf") + 1);
+	NSLOG(netsurfy, INFO, "%p, title %s", w, title);
+	fulltitle = malloc(strlen(title) + SLEN("  -  NetSurfy") + 1);
 	if (fulltitle == NULL) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      ERROR,
 		      "%s",
 		      messages_get_errorcode(NSERROR_NOMEM));
@@ -1740,18 +1740,18 @@ static void win32_window_set_title(struct gui_window *w, const char *title)
 	}
 
 	strcpy(fulltitle, title);
-	strcat(fulltitle, "  -  NetSurf");
+	strcat(fulltitle, "  -  NetSurfy");
 
 	wlen = MultiByteToWideChar(CP_UTF8, 0, fulltitle, -1, NULL, 0);
 	if (wlen == 0) {
-		NSLOG(netsurf, ERROR, "failed encoding \"%s\"", fulltitle);
+		NSLOG(netsurfy, ERROR, "failed encoding \"%s\"", fulltitle);
 		free(fulltitle);
 		return;
 	}
 
 	enctitle = malloc(2 * (wlen + 1));
 	if (enctitle == NULL) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      ERROR,
 		      "%s encoding \"%s\" len %d",
 		      messages_get_errorcode(NSERROR_NOMEM),
@@ -2094,7 +2094,7 @@ nserror win32_window_set_scroll(struct gui_window *gw, const struct rect *rect)
 		gw->requestscrolly = rect->y0 - gw->scrolly;
 	}
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "requestscroll x,y:%d,%d",
 	      gw->requestscrollx,
@@ -2109,7 +2109,7 @@ nserror win32_window_set_scroll(struct gui_window *gw, const struct rect *rect)
 	si.nPos = max(gw->scrolly + gw->requestscrolly, 0);
 	si.nPos = min(si.nPos, height - gw->height);
 	SetScrollInfo(gw->drawingarea, SB_VERT, &si, TRUE);
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "SetScrollInfo VERT min:%d max:%d page:%d pos:%d",
 	      si.nMin,
@@ -2126,7 +2126,7 @@ nserror win32_window_set_scroll(struct gui_window *gw, const struct rect *rect)
 	si.nPos = max(gw->scrollx + gw->requestscrollx, 0);
 	si.nPos = min(si.nPos, width - gw->width);
 	SetScrollInfo(gw->drawingarea, SB_HORZ, &si, TRUE);
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "SetScrollInfo HORZ min:%d max:%d page:%d pos:%d",
 	      si.nMin,
@@ -2153,7 +2153,7 @@ nserror win32_window_set_scroll(struct gui_window *gw, const struct rect *rect)
 		       NULL,
 		       &redraw,
 		       SW_INVALIDATE);
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "ScrollWindowEx %d, %d",
 	      -gw->requestscrollx,
@@ -2181,12 +2181,12 @@ nserror nsws_create_main_class(HINSTANCE hinstance)
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 	wc.hInstance = hinstance;
-	wc.hIcon = LoadIcon(hinstance, MAKEINTRESOURCE(IDR_NETSURF_ICON));
+	wc.hIcon = LoadIcon(hinstance, MAKEINTRESOURCE(IDR_NETSURFY_ICON));
 	wc.hCursor = NULL;
 	wc.hbrBackground = (HBRUSH)(COLOR_MENU + 1);
 	wc.lpszMenuName = NULL;
 	wc.lpszClassName = windowclassname_main;
-	wc.hIconSm = LoadIcon(hinstance, MAKEINTRESOURCE(IDR_NETSURF_ICON));
+	wc.hIconSm = LoadIcon(hinstance, MAKEINTRESOURCE(IDR_NETSURFY_ICON));
 
 	if (RegisterClassExW(&wc) == 0) {
 		win_perror("MainWindowClass");

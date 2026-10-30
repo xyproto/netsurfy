@@ -1,8 +1,8 @@
-/* CSS Stylesheet binding for NetSurf using duktape and libcss/libdom
+/* CSS Stylesheet binding for NetSurfy using duktape and libcss/libdom
  *
  * Copyright 2022 Daniel Silverstone <dsilvers@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
  * Released under the terms of the MIT License,
  *         http://www.opensource.org/licenses/mit-license

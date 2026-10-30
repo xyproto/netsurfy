@@ -1,13 +1,13 @@
 /*
  * Copyright 2021 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -18,7 +18,7 @@
 
 /**
  * \file
- * Implementation of netsurf bitmap for qt.
+ * Implementation of netsurfy bitmap for qt.
  */
 
 #include <stddef.h>
@@ -31,9 +31,9 @@ extern "C" {
 #include "utils/utils.h"
 #include "utils/errors.h"
 
-#include "netsurf/content.h"
-#include "netsurf/bitmap.h"
-#include "netsurf/plotters.h"
+#include "netsurfy/content.h"
+#include "netsurfy/bitmap.h"
+#include "netsurfy/plotters.h"
 }
 
 #include "qt/plotters.h"

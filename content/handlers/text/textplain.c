@@ -2,13 +2,13 @@
  * Copyright 2006 James Bursa <bursa@users.sourceforge.net>
  * Copyright 2006 Adrian Lees <adrianl@users.sourceforge.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -34,11 +34,11 @@
 #include "utils/utils.h"
 #include "utils/utf8.h"
 #include "utils/nsoption.h"
-#include "netsurf/content.h"
-#include "netsurf/keypress.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/plotters.h"
-#include "netsurf/layout.h"
+#include "netsurfy/content.h"
+#include "netsurfy/keypress.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/plotters.h"
+#include "netsurfy/layout.h"
 #include "content/content_protected.h"
 #include "content/content_factory.h"
 #include "content/hlcache.h"
@@ -421,7 +421,7 @@ static void textplain_reformat(struct content *c, int width, int height)
 	size_t line_start;
 	nserror res;
 
-	NSLOG(netsurf, INFO, "content %p w:%d h:%d", c, width, height);
+	NSLOG(netsurfy, INFO, "content %p w:%d h:%d", c, width, height);
 
 	/* compute available columns (assuming monospaced font) - use 8
 	 * characters for better accuracy
@@ -527,7 +527,7 @@ static void textplain_reformat(struct content *c, int width, int height)
 	return;
 
 no_memory:
-	NSLOG(netsurf, INFO, "out of memory (line_count %lu)", line_count);
+	NSLOG(netsurfy, INFO, "out of memory (line_count %lu)", line_count);
 	return;
 }
 

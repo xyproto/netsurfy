@@ -1,5 +1,5 @@
 #
-# NetSurf unit tests
+# NetSurfy unit tests
 
 TESTS := \
 	nsurl \
@@ -146,8 +146,8 @@ BASE_TESTCFLAGS := -std=c99 -g \
 	-D_XOPEN_SOURCE=600 \
 	-Itest -Iinclude -Icontent/handlers -Ifrontends -I. -I.. \
 	-Dnsgtk \
-	-DNETSURF_BUILTIN_LOG_FILTER=\"level:WARNING\" \
-	-DNETSURF_BUILTIN_VERBOSE_FILTER=\"level:DEBUG\" \
+	-DNETSURFY_BUILTIN_LOG_FILTER=\"level:WARNING\" \
+	-DNETSURFY_BUILTIN_VERBOSE_FILTER=\"level:DEBUG\" \
 	-DTESTROOT=\"$(TESTROOT)\" \
 	-DWITH_UTF8PROC \
 	$(SAN_FLAGS) \

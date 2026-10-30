@@ -1,13 +1,13 @@
 /*
  * Copyright 2011 Vincent Sanders <vince@simtec.co.uk>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -32,13 +32,13 @@
 #include "utils/file.h"
 #include "utils/nsurl.h"
 #include "utils/nsoption.h"
-#include "netsurf/url_db.h"
-#include "netsurf/cookie_db.h"
-#include "netsurf/browser.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/fetch.h"
-#include "netsurf/misc.h"
-#include "netsurf/netsurf.h"
+#include "netsurfy/url_db.h"
+#include "netsurfy/cookie_db.h"
+#include "netsurfy/browser.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/fetch.h"
+#include "netsurfy/misc.h"
+#include "netsurfy/netsurfy.h"
 #include "desktop/hotlist.h"
 
 #include "windows/findfile.h"
@@ -73,7 +73,7 @@ static int get_screen_dpi(void)
 		dpi = 96; /* 96DPI is the default */
 	}
 
-	NSLOG(netsurf, INFO, "FIX DPI %d", dpi);
+	NSLOG(netsurfy, INFO, "FIX DPI %d", dpi);
 
 	return dpi;
 }
@@ -91,7 +91,7 @@ static int get_screen_dpi(void)
 static nserror get_config_home(char **config_home_out)
 {
 	TCHAR adPath[MAX_PATH]; /* appdata path */
-	char nsdir[] = "NetSurf";
+	char nsdir[] = "NetSurfy";
 	HRESULT hres;
 
 	hres = SHGetFolderPath(NULL,
@@ -107,7 +107,7 @@ static nserror get_config_home(char **config_home_out)
 		return NSERROR_NOT_FOUND;
 	}
 
-	/* ensure netsurf directory exists */
+	/* ensure netsurfy directory exists */
 	if (CreateDirectory(adPath, NULL) == 0) {
 		DWORD dw;
 		dw = GetLastError();
@@ -118,7 +118,7 @@ static nserror get_config_home(char **config_home_out)
 
 	*config_home_out = strdup(adPath);
 
-	NSLOG(netsurf, INFO, "using config path \"%s\"", *config_home_out);
+	NSLOG(netsurfy, INFO, "using config path \"%s\"", *config_home_out);
 
 	return NSERROR_OK;
 }
@@ -216,32 +216,32 @@ static nserror set_defaults(struct nsoption_s *defaults)
 	free(buf);
 
 	/* ensure homepage option has a default */
-	nsoption_setnull_charp(homepage_url, strdup(NETSURF_HOMEPAGE));
+	nsoption_setnull_charp(homepage_url, strdup(NETSURFY_HOMEPAGE));
 
 	/* cookie file default */
 	fname = NULL;
-	netsurf_mkpath(&fname, NULL, 2, G_config_path, "Cookies");
+	netsurfy_mkpath(&fname, NULL, 2, G_config_path, "Cookies");
 	if (fname != NULL) {
 		nsoption_setnull_charp(cookie_file, fname);
 	}
 
 	/* cookie jar default */
 	fname = NULL;
-	netsurf_mkpath(&fname, NULL, 2, G_config_path, "Cookies");
+	netsurfy_mkpath(&fname, NULL, 2, G_config_path, "Cookies");
 	if (fname != NULL) {
 		nsoption_setnull_charp(cookie_jar, fname);
 	}
 
 	/* url database default */
 	fname = NULL;
-	netsurf_mkpath(&fname, NULL, 2, G_config_path, "URLs");
+	netsurfy_mkpath(&fname, NULL, 2, G_config_path, "URLs");
 	if (fname != NULL) {
 		nsoption_setnull_charp(url_file, fname);
 	}
 
 	/* bookmark database default */
 	fname = NULL;
-	netsurf_mkpath(&fname, NULL, 2, G_config_path, "Hotlist");
+	netsurfy_mkpath(&fname, NULL, 2, G_config_path, "Hotlist");
 	if (fname != NULL) {
 		nsoption_setnull_charp(hotlist_path, fname);
 	}
@@ -270,7 +270,7 @@ nsw32_option_init(int *pargc, char **argv, char **respaths, char *config_path)
 	}
 
 	/* Attempt to load the user choices */
-	ret = netsurf_mkpath(&choices, NULL, 2, config_path, "Choices");
+	ret = netsurfy_mkpath(&choices, NULL, 2, config_path, "Choices");
 	if (ret == NSERROR_OK) {
 		nsoption_read(choices, nsoptions);
 		free(choices);
@@ -383,7 +383,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	nserror ret;
 	const char *addr;
 	nsurl *url;
-	struct netsurf_table win32_table = {
+	struct netsurfy_table win32_table = {
 		.misc = &win32_misc_table,
 		.window = win32_window_table,
 		.corewindow = win32_core_window_table,
@@ -396,9 +396,9 @@ int WINAPI WinMain(HINSTANCE hInstance,
 		.layout = win32_layout_table,
 	};
 
-	ret = netsurf_register(&win32_table);
+	ret = netsurfy_register(&win32_table);
 	if (ret != NSERROR_OK) {
-		die("NetSurf operation table registration failed");
+		die("NetSurfy operation table registration failed");
 	}
 
 	/* Save the application-instance handle. */
@@ -419,12 +419,12 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
 	/* build resource path string vector */
 	respaths = nsws_init_resource(
-		"${APPDATA}\\NetSurf:${PROGRAMFILES}\\NetSurf\\NetSurf\\:" NETSURF_WINDOWS_RESPATH);
+		"${APPDATA}\\NetSurfy:${PROGRAMFILES}\\NetSurfy\\NetSurfy\\:" NETSURFY_WINDOWS_RESPATH);
 
 	/* Locate the correct user configuration directory path */
 	ret = get_config_home(&nsw32_config_home);
 	if (ret != NSERROR_OK) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Unable to locate a configuration directory.");
 	}
@@ -432,7 +432,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	/* Initialise user options */
 	ret = nsw32_option_init(&argc, argv, respaths, nsw32_config_home);
 	if (ret != NSERROR_OK) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      ERROR,
 		      "Options failed to initialise (%s)\n",
 		      messages_get_errorcode(ret));
@@ -445,14 +445,14 @@ int WINAPI WinMain(HINSTANCE hInstance,
 		fprintf(stderr,
 			"Unable to load translated messages (%s)\n",
 			messages_get_errorcode(ret));
-		NSLOG(netsurf, INFO, "Unable to load translated messages");
+		NSLOG(netsurfy, INFO, "Unable to load translated messages");
 		/** \todo decide if message load faliure should be fatal */
 	}
 
 	/* common initialisation */
-	ret = netsurf_init(NULL);
+	ret = netsurfy_init(NULL);
 	if (ret != NSERROR_OK) {
-		NSLOG(netsurf, INFO, "NetSurf failed to initialise");
+		NSLOG(netsurfy, INFO, "NetSurfy failed to initialise");
 		return 1;
 	}
 
@@ -477,10 +477,10 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	} else if (nsoption_charp(homepage_url) != NULL) {
 		addr = nsoption_charp(homepage_url);
 	} else {
-		addr = NETSURF_HOMEPAGE;
+		addr = NETSURFY_HOMEPAGE;
 	}
 
-	NSLOG(netsurf, INFO, "calling browser_window_create");
+	NSLOG(netsurfy, INFO, "calling browser_window_create");
 
 	ret = nsurl_create(addr, &url);
 	if (ret == NSERROR_OK) {
@@ -497,7 +497,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	urldb_save_cookies(nsoption_charp(cookie_jar));
 	urldb_save(nsoption_charp(url_file));
 
-	netsurf_exit();
+	netsurfy_exit();
 
 	/* finalise options */
 	nsoption_finalise(nsoptions, nsoptions_default);

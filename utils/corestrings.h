@@ -1,13 +1,13 @@
 /*
  * Copyright 2012 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -20,8 +20,8 @@
  * Useful interned string pointers (interface).
  */
 
-#ifndef NETSURF_UTILS_CORESTRINGS_H_
-#define NETSURF_UTILS_CORESTRINGS_H_
+#ifndef NETSURFY_UTILS_CORESTRINGS_H_
+#define NETSURFY_UTILS_CORESTRINGS_H_
 
 #include <libwapcaplet/libwapcaplet.h>
 #include "utils/errors.h"

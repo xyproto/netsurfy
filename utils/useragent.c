@@ -2,13 +2,13 @@
  * Copyright 2007 Daniel Silverstone <dsilvers@digital-scurf.org>
  * Copyright 2007 Rob Kendrick <rjek@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -29,8 +29,8 @@
 
 static const char *core_user_agent_string = NULL;
 
-#ifndef NETSURF_UA_FORMAT_STRING
-#define NETSURF_UA_FORMAT_STRING "Mozilla/5.0 (%s) NetSurfy/%d.%d"
+#ifndef NETSURFY_UA_FORMAT_STRING
+#define NETSURFY_UA_FORMAT_STRING "Mozilla/5.0 (%s) NetSurfy/%d.%d"
 #endif
 
 /**
@@ -54,10 +54,10 @@ static void user_agent_build_string(void)
 
 	len = snprintf(NULL,
 		       0,
-		       NETSURF_UA_FORMAT_STRING,
+		       NETSURFY_UA_FORMAT_STRING,
 		       sysname,
-		       netsurf_version_major,
-		       netsurf_version_minor);
+		       netsurfy_version_major,
+		       netsurfy_version_minor);
 	ua_string = malloc(len + 1);
 	if (!ua_string) {
 		/** \todo this needs handling better */
@@ -65,14 +65,14 @@ static void user_agent_build_string(void)
 	}
 	snprintf(ua_string,
 		 len + 1,
-		 NETSURF_UA_FORMAT_STRING,
+		 NETSURFY_UA_FORMAT_STRING,
 		 sysname,
-		 netsurf_version_major,
-		 netsurf_version_minor);
+		 netsurfy_version_major,
+		 netsurfy_version_minor);
 
 	core_user_agent_string = ua_string;
 
-	NSLOG(netsurf, INFO, "Built user agent \"%s\"", core_user_agent_string);
+	NSLOG(netsurfy, INFO, "Built user agent \"%s\"", core_user_agent_string);
 }
 
 /* This is a function so that later we can override it trivially */

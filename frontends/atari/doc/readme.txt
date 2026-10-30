@@ -1,6 +1,6 @@
 
 
-                               NETSURF
+                               NETSURFY
 
                                   -
 
@@ -30,7 +30,7 @@ Table of Contents:
 What is it? A web browser!
 --------------------------
 
- NetSurf is a multi-platform web browser which is written with
+ NetSurfy is a multi-platform web browser which is written with
  portability and speed in mind.
  This is the native Port for the FreeMiNT OS.
  More info at project website: www.netsurf-browser.org
@@ -57,7 +57,7 @@ Main Features:
 Missing Features:
 -----------------
 
- This section describes Features that NetSurf-Core offers but which are not
+ This section describes Features that NetSurfy-Core offers but which are not
  handled by the GEM frontend currently.
 
  - Grapical website history dialog
@@ -80,14 +80,14 @@ Additional Notes
 ----------------
 
  If you would like to see the above mentioned features or
- can't run NetSurf because you only have a 16 or 256 Color system
+ can't run NetSurfy because you only have a 16 or 256 Color system
  get in contact.
 
  Please also check the FAQ document.
 
  Want to have other software ported? Get in contact and make me rich >;-)
- If you want to help with netsurf, contact me for further info
- or visit the netsurf svn and add something usefull :)
+ If you want to help with netsurfy, contact me for further info
+ or visit the netsurfy svn and add something usefull :)
 
  This is "just an early" alpha release. I wanted to get things moving on
  and I think it is good to show the Atari-Users what has been archived
@@ -113,8 +113,8 @@ Greetings & Thanks
 
  - AtFact for providing help with resource files & images
  - The MiNT Mailing list, they all helped me a lot!
- - The NetSurf Mailing list guys, especially the Amiga guys.
- - The NetSurf developers that did a great job!
+ - The NetSurfy Mailing list guys, especially the Amiga guys.
+ - The NetSurfy developers that did a great job!
  - Everyone that tested this Browser!
  - Everyone that provides feedback!
  - The forum.atari-home.de members for giving me much help

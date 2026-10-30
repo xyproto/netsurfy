@@ -1,13 +1,13 @@
 /*
  * Copyright 2009 John-Mark Bell <jmb@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -339,14 +339,14 @@ static css_error nscss_convert_css_data(struct content_css_data *c)
 		const char *url;
 
 		if (css_stylesheet_get_url(c->sheet, &url) == CSS_OK) {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "Failed converting %p %s (%d)",
 			      c,
 			      url,
 			      error);
 		} else {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "Failed converting %p (%d)",
 			      c,
@@ -455,7 +455,7 @@ bool nscss_matches_quirks(const struct content *c, bool quirks)
 	return c->quirks == quirks;
 }
 
-/* exported interface documented in netsurf/css.h */
+/* exported interface documented in netsurfy/css.h */
 css_stylesheet *nscss_get_stylesheet(struct hlcache_handle *h)
 {
 	nscss_content *c = (nscss_content *)hlcache_handle_get_content(h);
@@ -465,7 +465,7 @@ css_stylesheet *nscss_get_stylesheet(struct hlcache_handle *h)
 	return c->data.sheet;
 }
 
-/* exported interface documented in netsurf/css.h */
+/* exported interface documented in netsurfy/css.h */
 struct nscss_import *nscss_get_imports(hlcache_handle *h, uint32_t *n)
 {
 	nscss_content *c = (nscss_content *)hlcache_handle_get_content(h);
@@ -632,7 +632,7 @@ css_error nscss_handle_import(void *pw, css_stylesheet *parent, lwc_string *url)
 	nsurl_unref(ns_ref);
 
 #ifdef NSCSS_IMPORT_TRACE
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Import %d '%s' -> (handle: %p ctx: %p)",
 	      c->import_count,
@@ -661,7 +661,7 @@ nscss_import(hlcache_handle *handle, const hlcache_event *event, void *pw)
 	css_error error = CSS_OK;
 
 #ifdef NSCSS_IMPORT_TRACE
-	NSLOG(netsurf, INFO, "Event %d for %p (%p)", event->type, handle, ctx);
+	NSLOG(netsurfy, INFO, "Event %d for %p (%p)", event->type, handle, ctx);
 #endif
 
 	assert(ctx->css->imports[ctx->index].c == handle);
@@ -701,7 +701,7 @@ css_error nscss_import_complete(nscss_import_ctx *ctx)
 		error = nscss_register_imports(ctx->css);
 
 #ifdef NSCSS_IMPORT_TRACE
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Destroying import context %p for %d",
 	      ctx,
@@ -846,7 +846,7 @@ static const content_handler css_content_handler = {
 	.no_share = false,
 };
 
-/* exported interface documented in netsurf/css.h */
+/* exported interface documented in netsurfy/css.h */
 nserror nscss_init(void)
 {
 	nserror error;

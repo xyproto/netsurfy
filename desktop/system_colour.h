@@ -1,13 +1,13 @@
 /*
  * Copyright 2014 vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -20,19 +20,19 @@
  * \file
  * Interface to system colour values.
  *
- * Netsurf has a list of user configurable colours with frontend
+ * Netsurfy has a list of user configurable colours with frontend
  * specific defaults. These colours are used for the css system
  * colours and to colour and style internally rendered widgets
  * (e.g. cookies treeview or local file directory views.
  */
 
-#ifndef NETSURF_DESKTOP_SYSTEM_COLOUR_H
-#define NETSURF_DESKTOP_SYSTEM_COLOUR_H
+#ifndef NETSURFY_DESKTOP_SYSTEM_COLOUR_H
+#define NETSURFY_DESKTOP_SYSTEM_COLOUR_H
 
 #include <libcss/libcss.h>
 
 #include "utils/errors.h"
-#include "netsurf/types.h"
+#include "netsurfy/types.h"
 
 /**
  * css callback to obtain named system colour.
@@ -51,7 +51,7 @@ css_error ns_system_colour(void *pw, lwc_string *name, css_color *color);
  *
  * \param[in] name The name of the colour being looked up
  * \param[out] color The system colour associated with the name in the
- *                     netsurf colour representation.
+ *                     netsurfy colour representation.
  * \return NSERROR_OK and \a color updated on success else appropriate
  *           error code.
  */

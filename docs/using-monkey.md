@@ -1,9 +1,9 @@
-Usage Instructions for Monkey NetSurf
+Usage Instructions for Monkey NetSurfy
 =====================================
 
-This document provides usage instructions for the Monkey version of NetSurf.
+This document provides usage instructions for the Monkey version of NetSurfy.
 
-Monkey NetSurf has been tested on Ubuntu and Debian.
+Monkey NetSurfy has been tested on Ubuntu and Debian.
 
 Automated testing
 -----------------
@@ -17,15 +17,15 @@ Overview
 
 ### What it is
 
-The NetSurf Monkey front end is a developer debug tool used to test how the
+The NetSurfy Monkey front end is a developer debug tool used to test how the
 core interacts with the user interface.  It allows the developers to profile
-NetSurf and to interact with the core directly as though the developer were a
+NetSurfy and to interact with the core directly as though the developer were a
 front end.
  
 ### What it is not
 
 Monkey is not a tool for building web-crawling robots or indeed anything other
-than a debug tool for the NetSurf developers.
+than a debug tool for the NetSurfy developers.
 
 ### How to interact with `nsmonkey`
 
@@ -74,7 +74,7 @@ In the below, _%something%_ indicates a substitution made by Monkey.
 
 ### Warnings, errors etc
 
-*  Warnings (tagged `WARN`) come from the NetSurf core.
+*  Warnings (tagged `WARN`) come from the NetSurfy core.
 *  Errors (tagged `ERROR`) tend to come from Monkey's parsers
 *  Death (tagged `DIE`) comes from the core and kills Monkey dead.
 

@@ -1,13 +1,13 @@
 /*
  * Copyright 2012 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -28,10 +28,10 @@
  *   with different macro definitions so there is no guard
  */
 
-#ifndef NETSURF_DESKTOP_OPTIONS_H_
-#define NETSURF_DESKTOP_OPTIONS_H_
+#ifndef NETSURFY_DESKTOP_OPTIONS_H_
+#define NETSURFY_DESKTOP_OPTIONS_H_
 
-#include "netsurf/types.h"
+#include "netsurfy/types.h"
 
 /* defines for system colour table */
 #define NSOPTION_SYS_COLOUR_START NSOPTION_sys_colour_AccentColor
@@ -208,7 +208,7 @@ NSOPTION_INTEGER(max_fetchers, 24)
 NSOPTION_INTEGER(max_fetchers_per_host, 5)
 
 /** Maximum number of inactive fetchers cached.  The total number of
- * handles netsurf will therefore have open is this plus
+ * handles netsurfy will therefore have open is this plus
  * option_max_fetchers.
  */
 NSOPTION_INTEGER(max_cached_fetch_handles, 6)
@@ -295,6 +295,6 @@ NSOPTION_COLOUR(sys_colour_SelectedItemText, 0x00ffffff)
 NSOPTION_COLOUR(sys_colour_VisitedText, 0x008b1a55)
 
 /** Filter for non-verbose logging */
-NSOPTION_STRING(log_filter, NETSURF_BUILTIN_LOG_FILTER)
+NSOPTION_STRING(log_filter, NETSURFY_BUILTIN_LOG_FILTER)
 /** Filter for verbose logging */
-NSOPTION_STRING(verbose_filter, NETSURF_BUILTIN_VERBOSE_FILTER)
+NSOPTION_STRING(verbose_filter, NETSURFY_BUILTIN_VERBOSE_FILTER)

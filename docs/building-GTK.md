@@ -1,35 +1,35 @@
-Build Instructions for GTK NetSurf
+Build Instructions for GTK NetSurfy
 ==================================
 
-This document provides instructions for building the GTK version of NetSurf
-and provides guidance on obtaining NetSurf's build dependencies.
+This document provides instructions for building the GTK version of NetSurfy
+and provides guidance on obtaining NetSurfy's build dependencies.
 
-GTK NetSurf has been tested on Debian, Ubuntu, Fedora 8, FreeBSD, NetBSD and
-Solaris 10.  NetSurf requires at minimum GTK 2.12.
+GTK NetSurfy has been tested on Debian, Ubuntu, Fedora 8, FreeBSD, NetBSD and
+Solaris 10.  NetSurfy requires at minimum GTK 2.12.
 
 
 Quick Start
 -----------
 
 See the QUICK-START document, which provides a simple environment with
-which you can fetch, build and install NetSurf and its dependencies.
+which you can fetch, build and install NetSurfy and its dependencies.
 
-The QUICK-START is the recommended way to build NetSurf.
+The QUICK-START is the recommended way to build NetSurfy.
 
 
 Manual building
 ---------------
 
 If you can't follow the quick start instructions, you will have to build
-NetSurf manually.  The instructions for doing this are given below.
+NetSurfy manually.  The instructions for doing this are given below.
 
 
 Obtaining the build dependencies
 --------------------------------
 
-Many of NetSurf's dependencies are packaged on various operating systems.
+Many of NetSurfy's dependencies are packaged on various operating systems.
 The remainder must be installed manually.  Currently, some of the libraries
-developed as part of the NetSurf project have not had official releases.
+developed as part of the NetSurfy project have not had official releases.
 Hopefully they will soon be released with downloadable tarballs and packaged
 in common distros.  For now, you'll have to make do with Git checkouts.
 
@@ -46,7 +46,7 @@ Recent OS versions might need libcurl4-dev instead of libcurl3-dev but
 note that when it has not been built with OpenSSL, the SSL_CTX is not
 available and results that certification details won't be presented in case
 they are invalid.  But as this is currently unimplemented in the GTK
-flavour of NetSurf, this won't make a difference at all.
+flavour of NetSurfy, this won't make a difference at all.
 
 Fedora:
 
@@ -61,19 +61,19 @@ libpng and librsvg.
 
 ### Preparing your workspace
 
-NetSurf has a number of libraries which must be built in-order and
+NetSurfy has a number of libraries which must be built in-order and
 installed into your workspace. Each library depends on a core build
-system which NetSurf projects use. This build system relies on the
+system which NetSurfy projects use. This build system relies on the
 presence of things like pkg-config to find libraries and also certain
 environment variables in order to work correctly.
 
-Assuming you are preparing a workspace in /home/netsurf/workspace then
+Assuming you are preparing a workspace in /home/netsurfy/workspace then
 the following steps will set you up:
 
 ### Make the workspace directory and change to it
 
-    $ mkdir -p ${HOME}/netsurf/workspace
-    $ cd ${HOME}/netsurf/workspace
+    $ mkdir -p ${HOME}/netsurfy/workspace
+    $ cd ${HOME}/netsurfy/workspace
 
 ### Make the temporary install space
 
@@ -82,25 +82,25 @@ the following steps will set you up:
 ### Make an environment script
 
     $ cat > env.sh <<'EOF'
-      export PKG_CONFIG_PATH=${HOME}/netsurf/workspace/inst/lib/pkgconfig::
-      export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${HOME}/netsurf/workspace/inst/lib
-      export PREFIX=${HOME}/netsurf/workspace/inst
+      export PKG_CONFIG_PATH=${HOME}/netsurfy/workspace/inst/lib/pkgconfig::
+      export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${HOME}/netsurfy/workspace/inst/lib
+      export PREFIX=${HOME}/netsurfy/workspace/inst
       EOF
 
 ### Change to workspace and source the environment
 
 Whenever you wish to start development in a new shell, run the following:
 
-    $ cd ${HOME}/netsurf/workspace
+    $ cd ${HOME}/netsurfy/workspace
     $ source env.sh
 
 From here on, any commands in this document assume you have sourced your
 shell environment.
 
 
-### The NetSurf project's libraries
+### The NetSurfy project's libraries
 
-The NetSurf project has developed several libraries which are required by
+The NetSurfy project has developed several libraries which are required by
 the browser. These are:
 
 | BuildSystem    | Shared build system, needed to build the other libraries |
@@ -131,21 +131,21 @@ and run:
 >
 > For more information, consult the libparserutils README file.
 
-Now you should have all the NetSurf project libraries built and installed.
+Now you should have all the NetSurfy project libraries built and installed.
 
 
-### Getting the NetSurf source
+### Getting the NetSurfy source
 
-From your workspace directory, run the following command to get the NetSurf
+From your workspace directory, run the following command to get the NetSurfy
 source:
 
-    $ git clone git://git.netsurf-browser.org/netsurf.git
+    $ git clone https://github.com/xyproto/netsurfy
 
-And change to the 'netsurf' directory:
+And change to the 'netsurfy' directory:
 
-    $ cd netsurf
+    $ cd netsurfy
 
-Building and executing NetSurf
+Building and executing NetSurfy
 ------------------------------
 
 First of all, you should examine the options in Makefile.defaults
@@ -157,48 +157,48 @@ where this is the case they are set to such.  Others cannot be
 automatically detected from the Makefile, so you will either need to
 install the dependencies, or set them to NO.
 
-You should then obtain NetSurf's dependencies, keeping in mind which options
+You should then obtain NetSurfy's dependencies, keeping in mind which options
 you have enabled in the configuration file.  See the next section for
 specifics.
 
-Once done, to build GTK NetSurf on a UNIX-like platform, simply run:
+Once done, to build GTK NetSurfy on a UNIX-like platform, simply run:
 
     $ make
 
-If that produces errors, you probably don't have some of NetSurf's
-build dependencies installed. See "Obtaining NetSurf's dependencies"
+If that produces errors, you probably don't have some of NetSurfy's
+build dependencies installed. See "Obtaining NetSurfy's dependencies"
 below. Or turn off the complaining features in a Makefile.config
 file. You may need to "make clean" before attempting to build after
 installing the dependencies.
 
-Run NetSurf by executing "nsgtk3":
+Run NetSurfy by executing "netsurfy":
 
-    $ ./nsgtk3
+    $ ./netsurfy
 
 
 ### Builtin resources
 
-There are numerous resources that accompany NetSurf, such as the
+There are numerous resources that accompany NetSurfy, such as the
 image files for icons, cursors and the ui builder files that
 construct the browsers interface.
 
 Some of these resources can be compiled into the browser executable
 removing the need to install these resources separately. The GLib
 library on which GTK is based provides this functionality to
-NetSurf.
+NetSurfy.
 
 Up until GLib version 2.32 only the GDK pixbuf could be integrated
-in this way and is controlled with the NETSURF_USE_INLINE_PIXBUF
+in this way and is controlled with the NETSURFY_USE_INLINE_PIXBUF
 variable (set in makefile.config).
 
 Glib version 2.32 and later integrated support for any file to be a
-resource while depreciating the old inline pixbuf interface. NetSurf
+resource while depreciating the old inline pixbuf interface. NetSurfy
 gtk executables can integrate many resources using this interface,
-configuration is controlled with the NETSURF_USE_GRESOURCE variable.
+configuration is controlled with the NETSURFY_USE_GRESOURCE variable.
 
 Loading from file is the fallback if a resource has not been
 compiled in, because of this if both of these features are
-unavailable (or disabled) NetSurf will automatically fall back to
+unavailable (or disabled) NetSurfy will automatically fall back to
 loading all its resources from files.
 
 The resource initialisation within the browser ensures it can access
@@ -211,4 +211,4 @@ inaccessible after initialisation.
 Note for packagers
 ------------------
 
-If you are packaging NetSurf, see the PACKAGING-GTK document.
+If you are packaging NetSurfy, see the PACKAGING-GTK document.

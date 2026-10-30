@@ -1,13 +1,13 @@
 /*
  * Copyright 2017 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -26,8 +26,8 @@
 #include <gtk/gtk.h>
 
 #include "utils/log.h"
-#include "netsurf/keypress.h"
-#include "netsurf/plotters.h"
+#include "netsurfy/keypress.h"
+#include "netsurfy/plotters.h"
 #include "desktop/local_history.h"
 
 #include "gtk/compat.h"
@@ -54,7 +54,7 @@ static struct nsgtk_local_history_window *local_history_window = NULL;
  * callback for mouse action on local history window
  *
  * \param nsgtk_cw The nsgtk core window structure.
- * \param mouse_state netsurf mouse state on event
+ * \param mouse_state netsurfy mouse state on event
  * \param x location of event
  * \param y location of event
  * \return NSERROR_OK on success otherwise apropriate error code
@@ -78,7 +78,7 @@ static nserror nsgtk_local_history_mouse(struct nsgtk_corewindow *nsgtk_cw,
  * callback for keypress on local history window
  *
  * \param nsgtk_cw The nsgtk core window structure.
- * \param nskey The netsurf key code
+ * \param nskey The netsurfy key code
  * \return NSERROR_OK on success otherwise apropriate error code
  */
 static nserror
@@ -146,7 +146,7 @@ nsgtk_local_history_init(struct browser_window *bw,
 
 	res = nsgtk_builder_new_from_resname("localhistory", &ncwin->builder);
 	if (res != NSERROR_OK) {
-		NSLOG(netsurf, INFO, "Local history UI builder init failed");
+		NSLOG(netsurfy, INFO, "Local history UI builder init failed");
 		free(ncwin);
 		return res;
 	}

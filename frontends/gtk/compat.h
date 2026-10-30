@@ -1,13 +1,13 @@
 /*
  * Copyright 2010 Rob Kendrick <rjek@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -21,8 +21,8 @@
  * GTK helper functions (interface)
  */
 
-#ifndef NETSURF_GTK_COMPAT_H_
-#define NETSURF_GTK_COMPAT_H_
+#ifndef NETSURFY_GTK_COMPAT_H_
+#define NETSURFY_GTK_COMPAT_H_
 
 #include <stdint.h>
 
@@ -196,4 +196,4 @@ guint nsgtk_builder_add_from_resource(GtkBuilder *builder,
 				      const gchar *resource_path,
 				      GError **error);
 
-#endif /* NETSURF_GTK_COMPAT_H */
+#endif /* NETSURFY_GTK_COMPAT_H */

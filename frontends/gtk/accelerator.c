@@ -1,13 +1,13 @@
 /*
  * Copyright 2018 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -48,7 +48,7 @@ nserror nsgtk_accelerator_init(char **respaths)
 		accelerators_hash = hash_create(HASH_SIZE);
 	}
 	if (accelerators_hash == NULL) {
-		NSLOG(netsurf, INFO, "Unable to create hash table");
+		NSLOG(netsurfy, INFO, "Unable to create hash table");
 		return NSERROR_NOMEM;
 	}
 

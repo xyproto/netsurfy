@@ -2,13 +2,13 @@
  * Copyright 2006 John-Mark Bell <jmb@netsurf-browser.org>
  * Copyright 2009 Paul Blokus <paul_pl@users.sourceforge.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -29,12 +29,12 @@
 #include "utils/log.h"
 #include "utils/utf8.h"
 #include "utils/utils.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/plotters.h"
-#include "netsurf/mouse.h"
-#include "netsurf/keypress.h"
-#include "netsurf/clipboard.h"
-#include "netsurf/layout.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/plotters.h"
+#include "netsurfy/mouse.h"
+#include "netsurfy/keypress.h"
+#include "netsurfy/clipboard.h"
+#include "netsurfy/layout.h"
 #include "css/utils.h"
 
 #include "desktop/textarea.h"
@@ -823,7 +823,7 @@ textarea_reflow_singleline(struct textarea *ta, size_t b_off, struct rect *r)
 	if (ta->lines == NULL) {
 		ta->lines = malloc(LINE_CHUNK_SIZE * sizeof(struct line_info));
 		if (ta->lines == NULL) {
-			NSLOG(netsurf, INFO, "malloc failed");
+			NSLOG(netsurfy, INFO, "malloc failed");
 			return false;
 		}
 		ta->lines_alloc_size = LINE_CHUNK_SIZE;
@@ -847,7 +847,7 @@ textarea_reflow_singleline(struct textarea *ta, size_t b_off, struct rect *r)
 			char *temp = realloc(ta->password.data,
 					     b_len + TA_ALLOC_STEP);
 			if (temp == NULL) {
-				NSLOG(netsurf, INFO, "realloc failed");
+				NSLOG(netsurfy, INFO, "realloc failed");
 				return false;
 			}
 
@@ -931,7 +931,7 @@ static bool textarea_reflow_multiline(struct textarea *ta,
 	if (ta->lines == NULL) {
 		ta->lines = calloc(LINE_CHUNK_SIZE, sizeof(struct line_info));
 		if (ta->lines == NULL) {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "Failed to allocate memory for textarea lines");
 			return false;
@@ -1060,7 +1060,7 @@ static bool textarea_reflow_multiline(struct textarea *ta,
 					(line + 2 + LINE_CHUNK_SIZE) *
 						sizeof(struct line_info));
 				if (temp == NULL) {
-					NSLOG(netsurf, INFO, "realloc failed");
+					NSLOG(netsurfy, INFO, "realloc failed");
 					return false;
 				}
 
@@ -1353,7 +1353,7 @@ static bool textarea_insert_text(struct textarea *ta,
 		char *temp = realloc(ta->text.data,
 				     b_len + ta->text.len + TA_ALLOC_STEP);
 		if (temp == NULL) {
-			NSLOG(netsurf, INFO, "realloc failed");
+			NSLOG(netsurfy, INFO, "realloc failed");
 			return false;
 		}
 
@@ -1510,7 +1510,7 @@ static bool textarea_replace_text_internal(struct textarea *ta,
 				     rep_len + ta->text.len -
 					     (b_end - b_start) + TA_ALLOC_STEP);
 		if (temp == NULL) {
-			NSLOG(netsurf, INFO, "realloc failed");
+			NSLOG(netsurfy, INFO, "realloc failed");
 			return false;
 		}
 
@@ -1590,7 +1590,7 @@ static bool textarea_copy_to_undo_buffer(struct textarea *ta,
 		char *temp = realloc(undo->text.data,
 				     b_offset + len + TA_ALLOC_STEP);
 		if (temp == NULL) {
-			NSLOG(netsurf, INFO, "realloc failed");
+			NSLOG(netsurfy, INFO, "realloc failed");
 			return false;
 		}
 
@@ -1605,7 +1605,7 @@ static bool textarea_copy_to_undo_buffer(struct textarea *ta,
 			(undo->next_detail + 128) *
 				sizeof(struct textarea_undo_detail));
 		if (temp == NULL) {
-			NSLOG(netsurf, INFO, "realloc failed");
+			NSLOG(netsurfy, INFO, "realloc failed");
 			return false;
 		}
 
@@ -1910,13 +1910,13 @@ struct textarea *textarea_create(const textarea_flags flags,
 	assert(!(flags & TEXTAREA_MULTILINE && flags & TEXTAREA_PASSWORD));
 
 	if (callback == NULL) {
-		NSLOG(netsurf, INFO, "no callback provided");
+		NSLOG(netsurfy, INFO, "no callback provided");
 		return NULL;
 	}
 
 	ret = malloc(sizeof(struct textarea));
 	if (ret == NULL) {
-		NSLOG(netsurf, INFO, "malloc failed");
+		NSLOG(netsurfy, INFO, "malloc failed");
 		return NULL;
 	}
 
@@ -1960,7 +1960,7 @@ struct textarea *textarea_create(const textarea_flags flags,
 
 	ret->text.data = malloc(TA_ALLOC_STEP);
 	if (ret->text.data == NULL) {
-		NSLOG(netsurf, INFO, "malloc failed");
+		NSLOG(netsurfy, INFO, "malloc failed");
 		free(ret);
 		return NULL;
 	}
@@ -1972,7 +1972,7 @@ struct textarea *textarea_create(const textarea_flags flags,
 	if (flags & TEXTAREA_PASSWORD) {
 		ret->password.data = malloc(TA_ALLOC_STEP);
 		if (ret->password.data == NULL) {
-			NSLOG(netsurf, INFO, "malloc failed");
+			NSLOG(netsurfy, INFO, "malloc failed");
 			free(ret->text.data);
 			free(ret);
 			return NULL;
@@ -2050,7 +2050,7 @@ bool textarea_set_text(struct textarea *ta, const char *text)
 	if (len >= ta->text.alloc) {
 		char *temp = realloc(ta->text.data, len + TA_ALLOC_STEP);
 		if (temp == NULL) {
-			NSLOG(netsurf, INFO, "realloc failed");
+			NSLOG(netsurfy, INFO, "realloc failed");
 			return false;
 		}
 		ta->text.data = temp;
@@ -2150,7 +2150,7 @@ int textarea_get_text(struct textarea *ta, char *buf, unsigned int len)
 	}
 
 	if (len < ta->text.len) {
-		NSLOG(netsurf, INFO, "buffer too small");
+		NSLOG(netsurfy, INFO, "buffer too small");
 		return -1;
 	}
 

@@ -1,13 +1,13 @@
 /*
  * Copyright 2013 Ole Loots <ole@monochrom.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -27,9 +27,9 @@
 
 #include "utils/log.h"
 #include "utils/messages.h"
-#include "netsurf/browser_window.h"
+#include "netsurfy/browser_window.h"
 #include "desktop/search.h"
-#include "netsurf/search.h"
+#include "netsurfy/search.h"
 
 #include "atari/gui.h"
 #include "atari/rootwin.h"
@@ -37,7 +37,7 @@
 #include "atari/toolbar.h"
 #include "atari/search.h"
 #include "atari/gemtk/gemtk.h"
-#include "atari/res/netsurf.rsh"
+#include "atari/res/netsurfy.rsh"
 
 extern struct gui_window *input_window;
 
@@ -66,7 +66,7 @@ struct gui_search_table *atari_search_table = &search_table;
  */
 void nsatari_search_set_status(bool found, void *p)
 {
-	NSLOG(netsurf, INFO, "%p set status: %d\n", p, found);
+	NSLOG(netsurfy, INFO, "%p set status: %d\n", p, found);
 	// TODO: maybe update GUI
 }
 
@@ -79,7 +79,7 @@ void nsatari_search_set_status(bool found, void *p)
 void nsatari_search_set_hourglass(bool active, void *p)
 {
 	SEARCH_FORM_SESSION s = (SEARCH_FORM_SESSION)p;
-	NSLOG(netsurf, INFO, "active: %d, session: %p", active, p);
+	NSLOG(netsurfy, INFO, "active: %d, session: %p", active, p);
 	if (active) {
 		gui_window_set_pointer(s->g, GUI_POINTER_PROGRESS);
 	} else {
@@ -98,7 +98,7 @@ void nsatari_search_set_hourglass(bool active, void *p)
  */
 void nsatari_search_add_recent(const char *string, void *p)
 {
-	NSLOG(netsurf, INFO, "%p add recent: %s\n", p, string);
+	NSLOG(netsurfy, INFO, "%p add recent: %s\n", p, string);
 }
 
 
@@ -114,7 +114,7 @@ void nsatari_search_set_forward_state(bool active, void *p)
 	GRECT area;
 	SEARCH_FORM_SESSION s = (SEARCH_FORM_SESSION)p;
 	/* deactivate back cb */
-	NSLOG(netsurf, INFO, "%p: set forward state: %d\n", p, active);
+	NSLOG(netsurfy, INFO, "%p: set forward state: %d\n", p, active);
 
 	gw = s->g;
 
@@ -141,7 +141,7 @@ void nsatari_search_set_back_state(bool active, void *p)
 	GRECT area;
 	SEARCH_FORM_SESSION s = (SEARCH_FORM_SESSION)p;
 	/* deactivate back cb */
-	NSLOG(netsurf, INFO, "%p: set back state: %d\n", p, active);
+	NSLOG(netsurfy, INFO, "%p: set back state: %d\n", p, active);
 
 	s->state.back_avail = active;
 	gw = s->g;
@@ -222,7 +222,7 @@ void nsatari_search_restore_form(struct s_search_form_session *s, OBJECT *obj)
 void nsatari_search_session_destroy(struct s_search_form_session *s)
 {
 	if (s != NULL) {
-		NSLOG(netsurf, INFO, "session %p", s);
+		NSLOG(netsurfy, INFO, "session %p", s);
 		browser_window_search_clear(s->g->browser->bw);
 		free(s);
 	}

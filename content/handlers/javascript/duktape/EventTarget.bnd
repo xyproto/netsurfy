@@ -2,7 +2,7 @@
  *
  * Copyright 2016 Daniel Silverstone <dsilvers@digital-scurf.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
  * Released under the terms of the MIT License,
  *         http://www.opensource.org/licenses/mit-license
@@ -173,7 +173,7 @@ method EventTarget::addEventListener()
 		exc = dom_string_create((const uint8_t*)ev_ty, ev_ty_l,
 					&ev_ty_s);
 		if (exc != DOM_NO_ERR) {
-			NSLOG(netsurf, INFO,
+			NSLOG(netsurfy, INFO,
 			      "Oh dear, failed to create dom_string in addEventListener()");
 			return 0;
 		}

@@ -3,13 +3,13 @@
  *
  * Framebuffer interface
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -31,9 +31,9 @@
 #include "utils/utils.h"
 #include "utils/log.h"
 #include "utils/utf8.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/plotters.h"
-#include "netsurf/bitmap.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/plotters.h"
+#include "netsurfy/bitmap.h"
 
 #include "framebuffer/gui.h"
 #include "framebuffer/fbtk.h"
@@ -41,7 +41,7 @@
 #include "framebuffer/font.h"
 #include "framebuffer/bitmap.h"
 
-/* netsurf framebuffer library handle */
+/* netsurfy framebuffer library handle */
 static nsfb_t *nsfb;
 
 
@@ -276,7 +276,7 @@ static nserror framebuffer_plot_path(const struct redraw_context *ctx,
 				     unsigned int n,
 				     const float transform[6])
 {
-	NSLOG(netsurf, INFO, "path unimplemented");
+	NSLOG(netsurfy, INFO, "path unimplemented");
 	return NSERROR_OK;
 }
 
@@ -571,7 +571,7 @@ static bool framebuffer_format_from_bpp(int bpp, enum nsfb_format_e *fmt)
 		break;
 
 	default:
-		NSLOG(netsurf, INFO, "Bad bits per pixel (%d)\n", bpp);
+		NSLOG(netsurfy, INFO, "Bad bits per pixel (%d)\n", bpp);
 		return false;
 	}
 
@@ -592,7 +592,7 @@ framebuffer_initialise(const char *fename, int width, int height, int bpp)
 
 	fbtype = nsfb_type_from_name(fename);
 	if (fbtype == NSFB_SURFACE_NONE) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "The %s surface is not available from libnsfb\n",
 		      fename);
@@ -601,7 +601,7 @@ framebuffer_initialise(const char *fename, int width, int height, int bpp)
 
 	nsfb = nsfb_new(fbtype);
 	if (nsfb == NULL) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Unable to create %s fb surface\n",
 		      fename);
@@ -609,7 +609,7 @@ framebuffer_initialise(const char *fename, int width, int height, int bpp)
 	}
 
 	if (nsfb_set_geometry(nsfb, width, height, fbfmt) == -1) {
-		NSLOG(netsurf, INFO, "Unable to set surface geometry\n");
+		NSLOG(netsurfy, INFO, "Unable to set surface geometry\n");
 		nsfb_free(nsfb);
 		return NULL;
 	}
@@ -617,7 +617,7 @@ framebuffer_initialise(const char *fename, int width, int height, int bpp)
 	nsfb_cursor_init(nsfb);
 
 	if (nsfb_init(nsfb) == -1) {
-		NSLOG(netsurf, INFO, "Unable to initialise nsfb surface\n");
+		NSLOG(netsurfy, INFO, "Unable to initialise nsfb surface\n");
 		nsfb_free(nsfb);
 		return NULL;
 	}
@@ -635,7 +635,7 @@ bool framebuffer_resize(nsfb_t *nsfb, int width, int height, int bpp)
 	}
 
 	if (nsfb_set_geometry(nsfb, width, height, fbfmt) == -1) {
-		NSLOG(netsurf, INFO, "Unable to change surface geometry\n");
+		NSLOG(netsurfy, INFO, "Unable to change surface geometry\n");
 		return false;
 	}
 

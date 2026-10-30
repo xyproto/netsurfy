@@ -1,13 +1,13 @@
 /*
  * Copyright 2008 Rob Kendrick <rjek@netsurf-browser.org>
  *
- * This file is part of NetSurf.
+ * This file is part of NetSurfy.
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -28,7 +28,7 @@
 #include <libwapcaplet/libwapcaplet.h>
 #include <nsutils/base64.h>
 
-#include "netsurf/inttypes.h"
+#include "netsurfy/inttypes.h"
 #include "utils/url.h"
 #include "utils/nsurl.h"
 #include "utils/corestrings.h"
@@ -58,7 +58,7 @@ static struct fetch_data_context *ring = NULL;
 
 static bool fetch_data_initialise(lwc_string *scheme)
 {
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "fetch_data_initialise called for %s",
 	      lwc_string_data(scheme));
@@ -68,7 +68,7 @@ static bool fetch_data_initialise(lwc_string *scheme)
 
 static void fetch_data_finalise(lwc_string *scheme)
 {
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "fetch_data_finalise called for %s",
 	      lwc_string_data(scheme));
@@ -171,7 +171,7 @@ static bool fetch_data_process(struct fetch_data_context *c)
 	 * data must still be there.
 	 */
 
-	NSLOG(netsurf, DEEPDEBUG, "url: %.140s", nsurl_access(c->url));
+	NSLOG(netsurfy, DEEPDEBUG, "url: %.140s", nsurl_access(c->url));
 
 	if (nsurl_length(c->url) < 6) {
 		/* 6 is the minimum possible length (data:,) */
@@ -273,7 +273,7 @@ static void fetch_data_poll(lwc_string *scheme)
 		/* Only process non-aborted fetches */
 		if (c->aborted == false && fetch_data_process(c) == true) {
 			fetch_set_http_code(c->parent_fetch, 200);
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "setting data: MIME type to %s, length to %" PRIsizet,
 			      c->mimetype,
@@ -313,7 +313,7 @@ static void fetch_data_poll(lwc_string *scheme)
 				fetch_data_send_callback(&msg, c);
 			}
 		} else {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "Processing of %.140s failed!",
 			      nsurl_access(c->url));

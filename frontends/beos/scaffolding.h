@@ -2,13 +2,13 @@
  * Copyright 2008 François Revol <mmu_man@users.sourceforge.net>
  * Copyright 2005 James Bursa <bursa@users.sourceforge.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -17,8 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NETSURF_BEOS_SCAFFOLDING_H
-#define NETSURF_BEOS_SCAFFOLDING_H 1
+#ifndef NETSURFY_BEOS_SCAFFOLDING_H
+#define NETSURFY_BEOS_SCAFFOLDING_H 1
 
 #include <View.h>
 #include <Window.h>
@@ -218,4 +218,4 @@ void gui_window_set_status(struct gui_window *_g, const char *text);
 void gui_window_start_throbber(struct gui_window *_g);
 void gui_window_stop_throbber(struct gui_window *_g);
 
-#endif /* NETSURF_BEOS_SCAFFOLDING_H */
+#endif /* NETSURFY_BEOS_SCAFFOLDING_H */

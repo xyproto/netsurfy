@@ -2,13 +2,13 @@
  * Copyright 2008 Vincent Sanders <vince@simtec.co.uk>
  * Copyright 2009 Mark Benjamin <netsurf-browser.org.MarkBenjamin@dfgh.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -30,9 +30,9 @@
 #include <windows.h>
 
 #include "utils/log.h"
-#include "netsurf/bitmap.h"
-#include "netsurf/plotters.h"
-#include "netsurf/content.h"
+#include "netsurfy/bitmap.h"
+#include "netsurfy/plotters.h"
+#include "netsurfy/content.h"
 
 #include "windows/plot.h"
 #include "windows/bitmap.h"
@@ -53,7 +53,7 @@ win32_bitmap_create(int width, int height, enum gui_bitmap_flags flags)
 	HBITMAP windib;
 	uint8_t *pixdata;
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "width %d, height %d, flags %u",
 	      width,
@@ -107,7 +107,7 @@ win32_bitmap_create(int width, int height, enum gui_bitmap_flags flags)
 		bitmap->opaque = false;
 	}
 
-	NSLOG(netsurf, INFO, "bitmap %p", bitmap);
+	NSLOG(netsurfy, INFO, "bitmap %p", bitmap);
 
 	return bitmap;
 }
@@ -126,7 +126,7 @@ static unsigned char *bitmap_get_buffer(void *bitmap)
 {
 	struct bitmap *bm = bitmap;
 	if (bitmap == NULL) {
-		NSLOG(netsurf, INFO, "NULL bitmap!");
+		NSLOG(netsurfy, INFO, "NULL bitmap!");
 		return NULL;
 	}
 
@@ -145,7 +145,7 @@ static size_t bitmap_get_rowstride(void *bitmap)
 	struct bitmap *bm = bitmap;
 
 	if (bitmap == NULL) {
-		NSLOG(netsurf, INFO, "NULL bitmap!");
+		NSLOG(netsurfy, INFO, "NULL bitmap!");
 		return 0;
 	}
 
@@ -163,7 +163,7 @@ void win32_bitmap_destroy(void *bitmap)
 	struct bitmap *bm = bitmap;
 
 	if (bitmap == NULL) {
-		NSLOG(netsurf, INFO, "NULL bitmap!");
+		NSLOG(netsurfy, INFO, "NULL bitmap!");
 		return;
 	}
 
@@ -193,11 +193,11 @@ static void bitmap_set_opaque(void *bitmap, bool opaque)
 	struct bitmap *bm = bitmap;
 
 	if (bitmap == NULL) {
-		NSLOG(netsurf, INFO, "NULL bitmap!");
+		NSLOG(netsurfy, INFO, "NULL bitmap!");
 		return;
 	}
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "setting bitmap %p to %s",
 	      bm,
@@ -216,7 +216,7 @@ static bool bitmap_get_opaque(void *bitmap)
 	struct bitmap *bm = bitmap;
 
 	if (bitmap == NULL) {
-		NSLOG(netsurf, INFO, "NULL bitmap!");
+		NSLOG(netsurfy, INFO, "NULL bitmap!");
 		return false;
 	}
 
@@ -228,7 +228,7 @@ static int bitmap_get_width(void *bitmap)
 	struct bitmap *bm = bitmap;
 
 	if (bitmap == NULL) {
-		NSLOG(netsurf, INFO, "NULL bitmap!");
+		NSLOG(netsurfy, INFO, "NULL bitmap!");
 		return 0;
 	}
 
@@ -240,7 +240,7 @@ static int bitmap_get_height(void *bitmap)
 	struct bitmap *bm = bitmap;
 
 	if (bitmap == NULL) {
-		NSLOG(netsurf, INFO, "NULL bitmap!");
+		NSLOG(netsurfy, INFO, "NULL bitmap!");
 		return 0;
 	}
 
@@ -294,7 +294,7 @@ bitmap_render(struct bitmap *bitmap, struct hlcache_handle *content)
 	height = ((width * bitmap->height) + (bitmap->width / 2)) /
 		 bitmap->width;
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "bitmap %p for content %p width %d, height %d",
 	      bitmap,

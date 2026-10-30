@@ -1,11 +1,11 @@
-# This installs NetSurf execuatables and resources, creates a start menu shortcut, builds an uninstaller, and
+# This installs NetSurfy execuatables and resources, creates a start menu shortcut, builds an uninstaller, and
 # adds uninstall information to the registry for Add/Remove Programs
  
 # show up in a few places.
 # All the other settings can be tweaked by editing the !defines at the top of this script
 
-!define APPNAME "NetSurf"
-!define COMPANYNAME "NetSurf"
+!define APPNAME "NetSurfy"
+!define COMPANYNAME "NetSurfy"
 !define DESCRIPTION "Web Browser"
 
 # The version values must be simple integers
@@ -20,15 +20,15 @@
 !endif
 
 # These will be displayed by the "Click here for support information" link in "Add/Remove Programs"
-!define HELPURL "https://www.netsurf-browser.org/" # "Support Information" link
-!define UPDATEURL "https://www.netsurf-browser.org/" # "Product Updates" link
-!define ABOUTURL "https://www.netsurf-browser.org/" # "Publisher" link
+!define HELPURL "https://github.com/xyproto/netsurfy/" # "Support Information" link
+!define UPDATEURL "https://github.com/xyproto/netsurfy/" # "Product Updates" link
+!define ABOUTURL "https://github.com/xyproto/netsurfy/" # "Publisher" link
 # This is the size (in kB) of all the files copied into "Program Files"
 !define INSTALLSIZE 9000
 
 # output filename
 !ifndef OUTFNAME
-  !define OUTFNAME "netsurf-installer.exe"
+  !define OUTFNAME "netsurfy-installer.exe"
 !endif
 
 # path to resources
@@ -45,7 +45,7 @@ InstallDir "$PROGRAMFILES\${COMPANYNAME}\${APPNAME}"
 LicenseData "COPYING"
 # This will be in the installer/uninstaller's title bar
 Name "${COMPANYNAME} - ${APPNAME}"
-Icon "${RESDIR}\NetSurf.ico"
+Icon "${RESDIR}\NetSurfy.ico"
 outFile "${OUTFNAME}"
 BrandingText "${COMPANYNAME}"
  
@@ -78,15 +78,14 @@ section "install"
 	setOutPath $INSTDIR
 
 	# Files added here should be removed by the uninstaller section
-	file "NetSurf.exe"
-	file /oname=NetSurf.ico "${RESDIR}\NetSurf.ico"
+	file "NetSurfy.exe"
+	file /oname=NetSurfy.ico "${RESDIR}\NetSurfy.ico"
 	file /oname=default.css "${RESDIR}\default.css"
 	file /oname=internal.css "${RESDIR}\internal.css"
 	file /oname=adblock.css "${RESDIR}\adblock.css"
-	file /oname=welcome.html "${RESDIR}\welcome.html"
 	file /oname=credits.html "${RESDIR}\credits.html"
 	file /oname=licence.html "${RESDIR}\licence.html"
-	file /oname=netsurf.png "${RESDIR}\netsurf.png"
+	file /oname=netsurfy.png "${RESDIR}\netsurfy.png"
 	file /oname=messages "${OBJROOT}\messages-en"
 	file /oname=ca-bundle.crt "${RESDIR}\ca-bundle.crt"
  
@@ -95,14 +94,14 @@ section "install"
  
 	# Start Menu
 	createDirectory "$SMPROGRAMS\${COMPANYNAME}"
-	createShortCut "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}.lnk" "$INSTDIR\NetSurf.exe" "" "$INSTDIR\NetSurf.ico"
+	createShortCut "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}.lnk" "$INSTDIR\NetSurfy.exe" "" "$INSTDIR\NetSurfy.ico"
  
 	# Registry information for add/remove programs
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "DisplayName" "${COMPANYNAME} - ${APPNAME} - ${DESCRIPTION}"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "QuietUninstallString" "$\"$INSTDIR\uninstall.exe$\" /S"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "InstallLocation" "$\"$INSTDIR$\""
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "DisplayIcon" "$\"$INSTDIR\NetSurf.ico$\""
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "DisplayIcon" "$\"$INSTDIR\NetSurfy.ico$\""
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "Publisher" "$\"${COMPANYNAME}$\""
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "HelpLink" "$\"${HELPURL}$\""
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANYNAME} ${APPNAME}" "URLUpdateInfo" "$\"${UPDATEURL}$\""
@@ -137,17 +136,16 @@ section "uninstall"
 	rmDir "$SMPROGRAMS\${COMPANYNAME}"
  
 	# Remove files
-	delete $INSTDIR\NetSurf.exe
-	delete $INSTDIR\NetSurf.ico
+	delete $INSTDIR\NetSurfy.exe
+	delete $INSTDIR\NetSurfy.ico
 	delete $INSTDIR\libcares-2.dll
 	delete $INSTDIR\libgnurx-0.dll
 	delete $INSTDIR\default.css
 	delete $INSTDIR\internal.css
 	delete $INSTDIR\adblock.css
-	delete $INSTDIR\welcome.html
 	delete $INSTDIR\credits.html
 	delete $INSTDIR\licence.html
-	delete $INSTDIR\netsurf.png
+	delete $INSTDIR\netsurfy.png
 	delete $INSTDIR\messages
 	delete $INSTDIR\ca-bundle.crt
 

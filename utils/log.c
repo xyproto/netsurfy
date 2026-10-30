@@ -1,13 +1,13 @@
 /*
  * Copyright 2017 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -95,7 +95,7 @@ static const char *nslog_gettime(void)
 
 #ifdef WITH_NSLOG
 
-NSLOG_DEFINE_CATEGORY(netsurf, "NetSurf default logging");
+NSLOG_DEFINE_CATEGORY(netsurfy, "NetSurfy default logging");
 NSLOG_DEFINE_CATEGORY(llcache, "Low level cache");
 NSLOG_DEFINE_CATEGORY(fetch, "Object fetching");
 NSLOG_DEFINE_CATEGORY(plot, "Rendering system");
@@ -106,7 +106,7 @@ NSLOG_DEFINE_CATEGORY(flex, "Flex");
 NSLOG_DEFINE_CATEGORY(dukky, "Duktape JavaScript Binding");
 NSLOG_DEFINE_CATEGORY(jserrors, "JavaScript error messages");
 
-static void netsurf_render_log(void *_ctx,
+static void netsurfy_render_log(void *_ctx,
 			       nslog_entry_context_t *ctx,
 			       const char *fmt,
 			       va_list args)
@@ -247,12 +247,12 @@ nserror nslog_init(nslog_ensure_t *ensure, int *pargc, char **argv)
 
 #ifdef WITH_NSLOG
 
-	if (nslog_set_filter(verbose_log ? NETSURF_BUILTIN_VERBOSE_FILTER
-					 : NETSURF_BUILTIN_LOG_FILTER) !=
+	if (nslog_set_filter(verbose_log ? NETSURFY_BUILTIN_VERBOSE_FILTER
+					 : NETSURFY_BUILTIN_LOG_FILTER) !=
 	    NSERROR_OK) {
 		ret = NSERROR_INIT_FAILED;
 		verbose_log = false;
-	} else if (nslog_set_render_callback(netsurf_render_log, NULL) !=
+	} else if (nslog_set_render_callback(netsurfy_render_log, NULL) !=
 		   NSLOG_NO_ERROR) {
 		ret = NSERROR_INIT_FAILED;
 		verbose_log = false;
@@ -265,15 +265,15 @@ nserror nslog_init(nslog_ensure_t *ensure, int *pargc, char **argv)
 
 	/* sucessfull logging initialisation so log system info */
 	if (ret == NSERROR_OK) {
-		NSLOG(netsurf, INFO, "NetSurf version '%s'", netsurf_version);
+		NSLOG(netsurfy, INFO, "NetSurfy version '%s'", netsurfy_version);
 		if (uname(&utsname) < 0) {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
 			      "Failed to extract machine information");
 		} else {
-			NSLOG(netsurf,
+			NSLOG(netsurfy,
 			      INFO,
-			      "NetSurf on <%s>, node <%s>, release <%s>, version <%s>, machine <%s>",
+			      "NetSurfy on <%s>, node <%s>, release <%s>, version <%s>, machine <%s>",
 			      utsname.sysname,
 			      utsname.nodename,
 			      utsname.release,
@@ -297,7 +297,7 @@ nserror nslog_set_filter_by_options(void)
 /* exported interface documented in utils/log.h */
 void nslog_finalise(void)
 {
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "Finalising logging, please report any further messages");
 	verbose_log = true;

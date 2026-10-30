@@ -2,7 +2,7 @@
 <interface>
   <requires lib="gtk" version="4.0"/>
   <object class="GtkWindow" id="wndDownloads">
-    <property name="title" translatable="1">Downloads - NetSurf</property>
+    <property name="title" translatable="1">Downloads - NetSurfy</property>
     <property name="default-width">500</property>
     <property name="default-height">300</property>
     <property name="destroy-with-parent">1</property>

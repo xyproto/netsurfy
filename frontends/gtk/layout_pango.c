@@ -1,13 +1,13 @@
 /*
  * Copyright 2005 James Bursa <bursa@users.sourceforge.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -30,9 +30,9 @@
 
 #include "utils/log.h"
 #include "utils/nsoption.h"
-#include "netsurf/inttypes.h"
-#include "netsurf/layout.h"
-#include "netsurf/plot_style.h"
+#include "netsurfy/inttypes.h"
+#include "netsurfy/layout.h"
+#include "netsurfy/plot_style.h"
 
 #include "gtk/layout_pango.h"
 #include "gtk/plotters.h"
@@ -43,13 +43,13 @@ static PangoLayout *nsfont_pango_layout = NULL;
 static inline void nsfont_pango_check(void)
 {
 	if (nsfont_pango_context == NULL) {
-		NSLOG(netsurf, INFO, "Creating nsfont_pango_context.");
+		NSLOG(netsurfy, INFO, "Creating nsfont_pango_context.");
 		nsfont_pango_context = pango_font_map_create_context(
 			pango_cairo_font_map_get_default());
 	}
 
 	if (nsfont_pango_layout == NULL) {
-		NSLOG(netsurf, INFO, "Creating nsfont_pango_layout.");
+		NSLOG(netsurfy, INFO, "Creating nsfont_pango_layout.");
 		nsfont_pango_layout = pango_layout_new(nsfont_pango_context);
 	}
 }
@@ -87,7 +87,7 @@ static nserror nsfont_width(const plot_font_style_t *fstyle,
 	pango_layout_index_to_pos(nsfont_pango_layout, length, &pos);
 	*width = PANGO_PIXELS(pos.x);
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "fstyle: %p string:\"%.*s\", length: %" PRIsizet ", width: %dpx",
 	      fstyle,
@@ -188,7 +188,7 @@ static nserror nsfont_position_in_string(const plot_font_style_t *fstyle,
 	res = layout_position(
 		nsfont_pango_layout, string, length, x, char_offset, actual_x);
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "fstyle: %p string:\"%.*s\", length: %" PRIsizet ", "
 	      "search_x: %dpx, offset: %" PRIsizet ", actual_x: %dpx",
@@ -297,7 +297,7 @@ split_done:
 	g_object_unref(layout);
 	g_object_unref(context);
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      DEEPDEBUG,
 	      "fstyle: %p string:\"%.*s\" / \"%.*s\", length: %" PRIsizet ", "
 	      "split_x: %dpx, offset: %" PRIsizet ", actual_x: %dpx",

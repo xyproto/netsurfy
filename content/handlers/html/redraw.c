@@ -7,13 +7,13 @@
  * Copyright 2008 Michael Drake <tlsa@netsurf-browser.org>
  * Copyright 2009 Paul Blokus <paul_pl@users.sourceforge.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -41,11 +41,11 @@
 #include "utils/utils.h"
 #include "utils/nsoption.h"
 #include "utils/corestrings.h"
-#include "netsurf/content.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/plotters.h"
-#include "netsurf/bitmap.h"
-#include "netsurf/layout.h"
+#include "netsurfy/content.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/plotters.h"
+#include "netsurfy/bitmap.h"
+#include "netsurfy/layout.h"
 #include "content/content.h"
 #include "content/content_protected.h"
 #include "content/textsearch.h"
@@ -2110,7 +2110,7 @@ bool html_redraw_box(const html_content *html,
 					    has_x_scroll,
 					    has_y_scroll);
 		if (res != NSERROR_OK) {
-			NSLOG(netsurf, INFO, "%s", messages_get_errorcode(res));
+			NSLOG(netsurfy, INFO, "%s", messages_get_errorcode(res));
 			return false;
 		}
 

@@ -3,13 +3,13 @@
  *
  * Framebuffer windowing toolkit event processing.
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -31,8 +31,8 @@
 
 #include "utils/utils.h"
 #include "utils/log.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/keypress.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/keypress.h"
 
 #include "framebuffer/gui.h"
 #include "framebuffer/fbtk.h"
@@ -50,7 +50,7 @@ void fbtk_input(fbtk_widget_t *root, nsfb_event_t *event)
 	/* obtain widget with input focus */
 	input = root->u.root.input;
 	if (input == NULL) {
-		NSLOG(netsurf, INFO, "No widget has input focus.");
+		NSLOG(netsurfy, INFO, "No widget has input focus.");
 		return; /* no widget with input */
 	}
 
@@ -82,7 +82,7 @@ void fbtk_click(fbtk_widget_t *widget, nsfb_event_t *event)
 	x = fbtk_get_absx(clicked);
 	y = fbtk_get_absy(clicked);
 
-	NSLOG(netsurf, DEEPDEBUG, "clicked %p at %d,%d", clicked, x, y);
+	NSLOG(netsurfy, DEEPDEBUG, "clicked %p at %d,%d", clicked, x, y);
 
 	/* post the click */
 	fbtk_post_callback(

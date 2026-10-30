@@ -1,13 +1,13 @@
 /*
  * Copyright 2011 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf.
+ * This file is part of NetSurfy.
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -33,7 +33,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "netsurf/inttypes.h"
+#include "netsurfy/inttypes.h"
 
 #include "utils/errors.h"
 #include "utils/nsurl.h"
@@ -304,19 +304,7 @@ static bool fetch_about_licence_handler(struct fetch_about_context *ctx)
  */
 static bool fetch_about_logo_handler(struct fetch_about_context *ctx)
 {
-	return fetch_about_redirect(ctx, "resource:netsurf.png");
-}
-
-
-/**
- * Handler to generate about scheme welcome page
- *
- * \param ctx The fetcher context.
- * \return true if handled false if aborted.
- */
-static bool fetch_about_welcome_handler(struct fetch_about_context *ctx)
-{
-	return fetch_about_redirect(ctx, "resource:welcome.html");
+	return fetch_about_redirect(ctx, "resource:netsurfy.png");
 }
 
 
@@ -330,7 +318,6 @@ struct about_handlers about_handler_list[] = {
 	{"credits", SLEN("credits"), NULL, fetch_about_credits_handler, false},
 	{"licence", SLEN("licence"), NULL, fetch_about_licence_handler, false},
 	{"license", SLEN("license"), NULL, fetch_about_licence_handler, true},
-	{"welcome", SLEN("welcome"), NULL, fetch_about_welcome_handler, false},
 	{"config", SLEN("config"), NULL, fetch_about_config_handler, false},
 	{"Choices", SLEN("Choices"), NULL, fetch_about_choices_handler, false},
 	{"testament",
@@ -421,12 +408,12 @@ static bool fetch_about_about_handler(struct fetch_about_context *ctx)
 	res = fetch_about_ssenddataf(
 		ctx,
 		"<html>\n<head>\n"
-		"<title>List of NetSurf pages</title>\n"
+		"<title>List of NetSurfy pages</title>\n"
 		"<link rel=\"stylesheet\" type=\"text/css\" "
 		"href=\"resource:internal.css\">\n"
 		"</head>\n"
 		"<body class=\"ns-even-bg ns-even-fg ns-border\">\n"
-		"<h1 class =\"ns-border\">List of NetSurf pages</h1>\n"
+		"<h1 class =\"ns-border\">List of NetSurfy pages</h1>\n"
 		"<ul>\n");
 	if (res != NSERROR_OK) {
 		goto fetch_about_config_handler_aborted;

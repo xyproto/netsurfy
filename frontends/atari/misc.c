@@ -1,13 +1,13 @@
 /*
  * Copyright 2010 Ole Loots <ole@monochrom.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -31,8 +31,8 @@
 #include "utils/log.h"
 #include "utils/file.h"
 #include "utils/dirent.h"
-#include "netsurf/mouse.h"
-#include "netsurf/keypress.h"
+#include "netsurfy/mouse.h"
+#include "netsurfy/keypress.h"
 #include "content/content.h"
 #include "content/hlcache.h"
 #include "desktop/cookie_manager.h"

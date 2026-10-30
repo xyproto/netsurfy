@@ -1,13 +1,13 @@
 /*
  * Copyright 2013 Ole Loots <ole@monochrom.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -28,7 +28,7 @@
 #include "utils/nsurl.h"
 #include "utils/messages.h"
 #include "desktop/version.h"
-#include "netsurf/browser_window.h"
+#include "netsurfy/browser_window.h"
 
 #include "curl/curlver.h"
 
@@ -37,7 +37,7 @@
 #include "atari/misc.h"
 #include "atari/plot/plot.h"
 #include "atari/gemtk/gemtk.h"
-#include "atari/res/netsurf.rsh"
+#include "atari/res/netsurfy.rsh"
 #include "atari/about.h"
 
 static OBJECT *about_form = NULL;
@@ -129,7 +129,7 @@ void atari_about_show(void)
 
 	snprintf(infocontent,
 		 8000,
-		 "Netsurf  : %s\n"
+		 "Netsurfy  : %s\n"
 		 "Build ID : %s\n"
 		 "Date     : %s\n"
 		 "MiNTLib  : %d.%d-%d%s\n"
@@ -154,7 +154,7 @@ void atari_about_show(void)
 		 LIBCURL_VERSION);
 
 	about_form = gemtk_obj_get_tree(ABOUT);
-	snprintf(version, 32, "%s%s", "NetSurf ", (char *)netsurf_version);
+	snprintf(version, 32, "%s%s", "NetSurfy ", (char *)netsurfy_version);
 	set_string(about_form, ABOUT_LBL_VERSION, version);
 
 	userblk.ub_code = about_userdraw;

@@ -3,13 +3,13 @@
  * Copyright 2006 Rob Kendrick <rjek@rjek.com>
  * Copyright 2005 James Bursa <bursa@users.sourceforge.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -36,7 +36,7 @@ extern "C" {
 #include "utils/utils.h"
 #include "utils/nsoption.h"
 #include "utils/nsurl.h"
-#include "netsurf/plotters.h"
+#include "netsurfy/plotters.h"
 }
 #include "beos/font.h"
 #include "beos/gui.h"
@@ -47,7 +47,7 @@ extern "C" {
 /*static*/ BView *current_view;
 
 /*
- * NOTE: BeOS rects differ from NetSurf ones:
+ * NOTE: BeOS rects differ from NetSurfy ones:
  * the right-bottom pixel is actually part of the BRect!
  */
 
@@ -535,7 +535,7 @@ static nserror nsbeos_plot_path(const struct redraw_context *ctx,
 	}
 
 	if (p[0] != PLOTTER_PATH_MOVE) {
-		NSLOG(netsurf, INFO, "path doesn't start with a move");
+		NSLOG(netsurfy, INFO, "path doesn't start with a move");
 		return NSERROR_INVALID;
 	}
 
@@ -559,7 +559,7 @@ static nserror nsbeos_plot_path(const struct redraw_context *ctx,
 			shape.BezierTo(pt);
 			i += 7;
 		} else {
-			NSLOG(netsurf, INFO, "bad path command %f", p[i]);
+			NSLOG(netsurfy, INFO, "bad path command %f", p[i]);
 			return NSERROR_INVALID;
 		}
 	}
@@ -831,13 +831,13 @@ class PTView : public BView
 extern "C" void test_plotters_main(void);
 void test_plotters_main(void)
 {
-	BApplication app("application/x-vnd.NetSurf");
+	BApplication app("application/x-vnd.NetSurfy");
 	memcpy(&plot, &nsbeos_plotters, sizeof(plot));
 	BRect frame(0, 0, 300, 300);
 	PTView *view = new PTView(frame);
 	frame.OffsetBySelf(100, 100);
 	BWindow *win = new BWindow(frame,
-				   "NetSurfPlotterTest",
+				   "NetSurfyPlotterTest",
 				   B_TITLED_WINDOW,
 				   B_QUIT_ON_WINDOW_CLOSE);
 	win->AddChild(view);

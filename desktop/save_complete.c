@@ -2,13 +2,13 @@
  * Copyright 2012 John-Mark Bell <jmb@netsurf-browser.org>
  * Copyright 2004-2007 James Bursa <bursa@users.sourceforge.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -40,14 +40,14 @@
 #include "utils/file.h"
 #include "utils/messages.h"
 #include "utils/ascii.h"
-#include "netsurf/content.h"
+#include "netsurfy/content.h"
 #include "content/hlcache.h"
 #include "css/css.h"
 #include "html/box.h"
 #include "html/html_save.h"
 #include "html/html.h"
 
-#include "netsurf/misc.h"
+#include "netsurfy/misc.h"
 #include "desktop/gui_internal.h"
 #include "desktop/save_complete.h"
 
@@ -165,7 +165,7 @@ static nserror save_complete_save_buffer(save_complete_ctx *ctx,
 	FILE *fp;
 	char *fname = NULL;
 
-	ret = netsurf_mkpath(&fname, NULL, 2, ctx->path, leafname);
+	ret = netsurfy_mkpath(&fname, NULL, 2, ctx->path, leafname);
 	if (ret != NSERROR_OK) {
 		return ret;
 	}
@@ -173,7 +173,7 @@ static nserror save_complete_save_buffer(save_complete_ctx *ctx,
 	fp = fopen(fname, "wb");
 	if (fp == NULL) {
 		free(fname);
-		NSLOG(netsurf, INFO, "fopen(): %s", strerror(errno));
+		NSLOG(netsurfy, INFO, "fopen(): %s", strerror(errno));
 		return NSERROR_SAVE_FAILED;
 	}
 
@@ -1124,7 +1124,7 @@ static bool save_complete_node_handler(dom_node *node,
 	} else if (type == DOM_DOCUMENT_NODE) {
 		/* Do nothing */
 	} else {
-		NSLOG(netsurf, INFO, "Unhandled node type: %d", type);
+		NSLOG(netsurfy, INFO, "Unhandled node type: %d", type);
 	}
 
 	return true;
@@ -1147,7 +1147,7 @@ static nserror save_complete_save_html_document(save_complete_ctx *ctx,
 		snprintf(filename, sizeof filename, "%p", c);
 	}
 
-	ret = netsurf_mkpath(&fname, NULL, 2, ctx->path, filename);
+	ret = netsurfy_mkpath(&fname, NULL, 2, ctx->path, filename);
 	if (ret != NSERROR_OK) {
 		return ret;
 	}
@@ -1155,7 +1155,7 @@ static nserror save_complete_save_html_document(save_complete_ctx *ctx,
 	fp = fopen(fname, "wb");
 	if (fp == NULL) {
 		free(fname);
-		NSLOG(netsurf, INFO, "fopen(): %s", strerror(errno));
+		NSLOG(netsurfy, INFO, "fopen(): %s", strerror(errno));
 		return NSERROR_SAVE_FAILED;
 	}
 
@@ -1234,7 +1234,7 @@ static nserror save_complete_inventory(save_complete_ctx *ctx)
 	char *fname = NULL;
 	save_complete_entry *entry;
 
-	ret = netsurf_mkpath(&fname, NULL, 2, ctx->path, "Inventory");
+	ret = netsurfy_mkpath(&fname, NULL, 2, ctx->path, "Inventory");
 	if (ret != NSERROR_OK) {
 		return ret;
 	}
@@ -1242,7 +1242,7 @@ static nserror save_complete_inventory(save_complete_ctx *ctx)
 	fp = fopen(fname, "w");
 	free(fname);
 	if (fp == NULL) {
-		NSLOG(netsurf, INFO, "fopen(): %s", strerror(errno));
+		NSLOG(netsurfy, INFO, "fopen(): %s", strerror(errno));
 		return NSERROR_SAVE_FAILED;
 	}
 
@@ -1270,7 +1270,7 @@ static nserror regcomp_wrapper(regex_t *preg, const char *regex, int cflags)
 	if (r) {
 		char errbuf[200];
 		regerror(r, preg, errbuf, sizeof errbuf);
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Failed to compile regexp '%s': %s\n",
 		      regex,

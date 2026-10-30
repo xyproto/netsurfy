@@ -1,13 +1,13 @@
 /*
  * Copyright 2013 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -28,8 +28,8 @@
 #include "utils/log.h"
 #include "utils/corestrings.h"
 #include "utils/messages.h"
-#include "netsurf/keypress.h"
-#include "netsurf/misc.h"
+#include "netsurfy/keypress.h"
+#include "netsurfy/misc.h"
 #include "desktop/textarea.h"
 
 #include "html/private.h"
@@ -161,7 +161,7 @@ static void box_textarea_callback(void *data, struct textarea_msg *msg)
 				break;
 
 			default:
-				NSLOG(netsurf,
+				NSLOG(netsurfy,
 				      INFO,
 				      "Drag type %d not handled.",
 				      msg->data.drag);

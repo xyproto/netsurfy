@@ -22,9 +22,9 @@
 
 =head1
 
-Filter the NetSurf combined messages (i10n) file according to language
+Filter the NetSurfy combined messages (i10n) file according to language
 and platform and generate output in a selection of formats for use
-both internally within netsurf and externally for translation
+both internally within netsurfy and externally for translation
 services.
 
 =cut
@@ -271,7 +271,7 @@ sub static_section ($)
 }
 
 {
-    package msgfmt::messages; # native netsurf format
+    package msgfmt::messages; # native netsurfy format
 
     sub format { return join( ":", @_ ) . "\n" }
     sub header

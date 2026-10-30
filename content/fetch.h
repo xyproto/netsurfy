@@ -1,13 +1,13 @@
 /*
  * Copyright 2003 James Bursa <bursa@users.sourceforge.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -20,8 +20,8 @@
  * Fetching of data from a URL (interface).
  */
 
-#ifndef _NETSURF_DESKTOP_FETCH_H_
-#define _NETSURF_DESKTOP_FETCH_H_
+#ifndef _NETSURFY_DESKTOP_FETCH_H_
+#define _NETSURFY_DESKTOP_FETCH_H_
 
 #include <stdbool.h>
 
@@ -30,7 +30,7 @@
 #include "utils/inet.h"
 #include "utils/http/response-codes.h"
 
-#include "netsurf/ssl_certs.h"
+#include "netsurfy/ssl_certs.h"
 
 struct content;
 struct fetch;

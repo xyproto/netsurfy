@@ -1,13 +1,13 @@
 /*
  * Copyright 2012 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NETSURF_GTK_TOOLBAR_ITEMS_H
-#define NETSURF_GTK_TOOLBAR_ITEMS_H
+#ifndef NETSURFY_GTK_TOOLBAR_ITEMS_H
+#define NETSURFY_GTK_TOOLBAR_ITEMS_H
 
 typedef enum {
 	BACK_BUTTON = 0,
@@ -89,7 +89,7 @@ typedef enum {
  *          available as a button but not placed in the toolbox (t, implies y)
  *   - if there is a menu activate signal handler (y/n) and it calls the
  *          toolbar click handler directly. (p, implies y)
- *   - item label as a netsurf message (identifier)
+ *   - item label as a netsurfy message (identifier)
  *   - icon image name ("string")
  */
 

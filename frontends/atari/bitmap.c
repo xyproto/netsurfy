@@ -1,13 +1,13 @@
 /*
  * Copyright 2010 Ole Loots <ole@monochrom.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -21,11 +21,11 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "netsurf/inttypes.h"
+#include "netsurfy/inttypes.h"
 #include "utils/nsoption.h"
 #include "utils/log.h"
-#include "netsurf/bitmap.h"
-#include "netsurf/mouse.h"
+#include "netsurfy/bitmap.h"
+#include "netsurfy/mouse.h"
 
 #include "atari/bitmap.h"
 #include "atari/plot/plot.h"
@@ -86,7 +86,7 @@ static void *atari_bitmap_create_ex(int w,
 {
 	struct bitmap *bitmap;
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "width %d (rowstride: %d, bpp: %d), height %d, flags %u",
 	      w,
@@ -118,10 +118,10 @@ static void *atari_bitmap_create_ex(int w,
 		} else {
 			free(bitmap);
 			bitmap = NULL;
-			NSLOG(netsurf, INFO, "Out of memory!");
+			NSLOG(netsurfy, INFO, "Out of memory!");
 		}
 	}
-	NSLOG(netsurf, INFO, "bitmap %p", bitmap);
+	NSLOG(netsurfy, INFO, "bitmap %p", bitmap);
 	return bitmap;
 }
 
@@ -212,7 +212,7 @@ static unsigned char *bitmap_get_buffer(void *bitmap)
 	struct bitmap *bm = bitmap;
 
 	if (bitmap == NULL) {
-		NSLOG(netsurf, INFO, "NULL bitmap!");
+		NSLOG(netsurfy, INFO, "NULL bitmap!");
 		return NULL;
 	}
 
@@ -236,7 +236,7 @@ size_t atari_bitmap_get_rowstride(void *bitmap)
 	struct bitmap *bm = bitmap;
 
 	if (bitmap == NULL) {
-		NSLOG(netsurf, INFO, "NULL bitmap!");
+		NSLOG(netsurfy, INFO, "NULL bitmap!");
 		return 0;
 	}
 	return bm->rowstride;
@@ -249,7 +249,7 @@ void atari_bitmap_destroy(void *bitmap)
 	struct bitmap *bm = bitmap;
 
 	if (bitmap == NULL) {
-		NSLOG(netsurf, INFO, "NULL bitmap!");
+		NSLOG(netsurfy, INFO, "NULL bitmap!");
 		return;
 	}
 
@@ -275,11 +275,11 @@ static void bitmap_set_opaque(void *bitmap, bool opaque)
 	struct bitmap *bm = bitmap;
 
 	if (bitmap == NULL) {
-		NSLOG(netsurf, INFO, "NULL bitmap!");
+		NSLOG(netsurfy, INFO, "NULL bitmap!");
 		return;
 	}
 
-	NSLOG(netsurf,
+	NSLOG(netsurfy,
 	      INFO,
 	      "setting bitmap %p to %s",
 	      bm,
@@ -294,7 +294,7 @@ bool atari_bitmap_get_opaque(void *bitmap)
 	struct bitmap *bm = bitmap;
 
 	if (bitmap == NULL) {
-		NSLOG(netsurf, INFO, "NULL bitmap!");
+		NSLOG(netsurfy, INFO, "NULL bitmap!");
 		return false;
 	}
 
@@ -308,7 +308,7 @@ int atari_bitmap_get_width(void *bitmap)
 	struct bitmap *bm = bitmap;
 
 	if (bitmap == NULL) {
-		NSLOG(netsurf, INFO, "NULL bitmap!");
+		NSLOG(netsurfy, INFO, "NULL bitmap!");
 		return 0;
 	}
 
@@ -322,7 +322,7 @@ int atari_bitmap_get_height(void *bitmap)
 	struct bitmap *bm = bitmap;
 
 	if (bitmap == NULL) {
-		NSLOG(netsurf, INFO, "NULL bitmap!");
+		NSLOG(netsurfy, INFO, "NULL bitmap!");
 		return 0;
 	}
 	return (bm->height);

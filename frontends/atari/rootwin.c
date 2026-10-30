@@ -1,13 +1,13 @@
 /*
  * Copyright 2010 Ole Loots <ole@monochrom.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -18,7 +18,7 @@
 
 /**
  * \file
- * Implements the NetSurf Browser window, or passed functionality to
+ * Implements the NetSurfy Browser window, or passed functionality to
  * the appropriate widget's.
  *
  */
@@ -39,12 +39,12 @@
 
 #include "utils/log.h"
 #include "utils/nsurl.h"
-#include "netsurf/browser_window.h"
-#include "netsurf/mouse.h"
-#include "netsurf/plotters.h"
-#include "netsurf/keypress.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/mouse.h"
+#include "netsurfy/plotters.h"
+#include "netsurfy/keypress.h"
 
-#include "atari/res/netsurf.rsh"
+#include "atari/res/netsurfy.rsh"
 #include "atari/gemtk/gemtk.h"
 #include "atari/ctxmenu.h"
 #include "atari/gui.h"
@@ -104,7 +104,7 @@ static short handle_event(GUIWIN *win, EVMULT_OUT *ev_out, short msg[8])
 		switch (msg[0]) {
 
 		case WM_REDRAW:
-			NSLOG(netsurf, INFO, "WM_REDRAW");
+			NSLOG(netsurfy, INFO, "WM_REDRAW");
 			on_redraw(data->rootwin, msg);
 			break;
 
@@ -112,7 +112,7 @@ static short handle_event(GUIWIN *win, EVMULT_OUT *ev_out, short msg[8])
 		case WM_SIZED:
 		case WM_MOVED:
 		case WM_FULLED:
-			NSLOG(netsurf, INFO, "WM_SIZED");
+			NSLOG(netsurfy, INFO, "WM_SIZED");
 			on_resized(data->rootwin);
 			break;
 
@@ -137,7 +137,7 @@ static short handle_event(GUIWIN *win, EVMULT_OUT *ev_out, short msg[8])
 		case WM_TOPPED:
 		case WM_NEWTOP:
 		case WM_UNICONIFY:
-			NSLOG(netsurf, INFO, "WM_TOPPED");
+			NSLOG(netsurfy, INFO, "WM_TOPPED");
 			gui_set_input_gui_window(
 				data->rootwin->active_gui_window);
 			// window_restore_active_gui_window(data->rootwin);
@@ -150,7 +150,7 @@ static short handle_event(GUIWIN *win, EVMULT_OUT *ev_out, short msg[8])
 			// TODO: this needs to iterate through all gui windows
 			// and check if the rootwin is this window...
 			if (data->rootwin->active_gui_window != NULL) {
-				NSLOG(netsurf,
+				NSLOG(netsurfy,
 				      INFO,
 				      "WM_CLOSED initiated destroy for bw %p",
 				      data->rootwin->active_gui_window->browser
@@ -180,12 +180,12 @@ static short handle_event(GUIWIN *win, EVMULT_OUT *ev_out, short msg[8])
 		// handle key
 		uint16_t nkc = gem_to_norm((short)ev_out->emo_kmeta,
 					   (short)ev_out->emo_kreturn);
-		NSLOG(netsurf, INFO, "rootwin MU_KEYBD input, nkc: %x\n", nkc);
+		NSLOG(netsurfy, INFO, "rootwin MU_KEYBD input, nkc: %x\n", nkc);
 		retval = on_window_key_input(data->rootwin, nkc);
 		// printf("on_window_key_input: %d\n", retval);
 	}
 	if ((ev_out->emo_events & MU_BUTTON) != 0) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "rootwin MU_BUTTON input, x: %d, y: %d\n",
 		      ev_out->emo_mouse.p_x,
@@ -322,7 +322,7 @@ int window_create(struct gui_window *gw,
 	}
 
 	// Setup some window defaults:
-	wind_set_str(gw->root->aes_handle, WF_NAME, (char *)"NetSurf");
+	wind_set_str(gw->root->aes_handle, WF_NAME, (char *)"NetSurfy");
 	wind_set(gw->root->aes_handle, WF_OPTS, 1, WO0_FULLREDRAW, 0, 0);
 	wind_set(gw->root->aes_handle, WF_OPTS, 1, WO0_NOBLITW, 0, 0);
 	wind_set(gw->root->aes_handle, WF_OPTS, 1, WO0_NOBLITH, 0, 0);
@@ -339,13 +339,13 @@ void window_unref_gui_window(ROOTWIN *rootwin, struct gui_window *gw)
 	struct gui_window *w;
 	input_window = NULL;
 
-	NSLOG(netsurf, INFO, "window: %p, gui_window: %p", rootwin, gw);
+	NSLOG(netsurfy, INFO, "window: %p, gui_window: %p", rootwin, gw);
 
 	w = window_list;
 	// find the next active tab:
 	while (w != NULL) {
 		if (w->root == rootwin && w != gw) {
-			NSLOG(netsurf, INFO, "activating next tab %p", w);
+			NSLOG(netsurfy, INFO, "activating next tab %p", w);
 			gui_set_input_gui_window(w);
 			break;
 		}
@@ -365,7 +365,7 @@ int window_destroy(ROOTWIN *rootwin)
 
 	assert(rootwin != NULL);
 
-	NSLOG(netsurf, INFO, "%p", rootwin);
+	NSLOG(netsurfy, INFO, "%p", rootwin);
 
 	if (gemtk_wm_get_user_data(rootwin->win) != NULL) {
 		free(gemtk_wm_get_user_data(rootwin->win));
@@ -431,7 +431,7 @@ void window_restore_active_gui_window(ROOTWIN *rootwin)
 	GRECT tb_area;
 	struct gui_window *gw;
 
-	NSLOG(netsurf, INFO, "rootwin %p", rootwin);
+	NSLOG(netsurfy, INFO, "rootwin %p", rootwin);
 
 	assert(rootwin->active_gui_window);
 
@@ -531,7 +531,7 @@ void window_set_focus(struct s_gui_win_root *rootwin,
 	assert(rootwin != NULL);
 
 	if (rootwin->focus.type != type || rootwin->focus.element != element) {
-		NSLOG(netsurf, INFO, "Set focus: %p (%d)\n", element, type);
+		NSLOG(netsurfy, INFO, "Set focus: %p (%d)\n", element, type);
 		rootwin->focus.type = type;
 		rootwin->focus.element = element;
 		switch (type) {
@@ -602,11 +602,11 @@ void window_set_active_gui_window(ROOTWIN *rootwin, struct gui_window *gw)
 {
 	struct gui_window *old_gw = rootwin->active_gui_window;
 
-	NSLOG(netsurf, INFO, "gw %p", gw);
+	NSLOG(netsurfy, INFO, "gw %p", gw);
 
 	if (rootwin->active_gui_window != NULL) {
 		if (rootwin->active_gui_window == gw) {
-			NSLOG(netsurf, INFO, "nothing to do...");
+			NSLOG(netsurfy, INFO, "nothing to do...");
 			return;
 		}
 	}
@@ -615,7 +615,7 @@ void window_set_active_gui_window(ROOTWIN *rootwin, struct gui_window *gw)
 
 	rootwin->active_gui_window = gw;
 	if (old_gw != NULL) {
-		NSLOG(netsurf, INFO, "restoring window...");
+		NSLOG(netsurfy, INFO, "restoring window...");
 		window_restore_active_gui_window(rootwin);
 	}
 }
@@ -688,7 +688,7 @@ void window_open_search(ROOTWIN *rootwin, bool reformat)
 	GRECT area;
 	OBJECT *obj;
 
-	NSLOG(netsurf, INFO, "rootwin %p", rootwin);
+	NSLOG(netsurfy, INFO, "rootwin %p", rootwin);
 
 	gw = rootwin->active_gui_window;
 	bw = gw->browser->bw;
@@ -1263,7 +1263,7 @@ static void on_content_mouse_click(ROOTWIN *rootwin)
 	my = aes_event_out.emo_mouse.p_y - cwork.g_y;
 	// printf("content click at %d,%d\n", mx, my);
 
-	/* Translate GEM key state to netsurf mouse modifier */
+	/* Translate GEM key state to netsurfy mouse modifier */
 	if (aes_event_out.emo_kmeta & (K_RSHIFT | K_LSHIFT)) {
 		bmstate |= BROWSER_MOUSE_MOD_1;
 	} else {
@@ -1603,7 +1603,7 @@ static void on_file_dropped(ROOTWIN *rootwin, short msg[8])
 
 				buff[size] = 0;
 
-				NSLOG(netsurf,
+				NSLOG(netsurfy,
 				      INFO,
 				      "file: %s, ext: %s, size: %ld dropped at: %d,%d\n",
 				      (char *)buff,
@@ -1638,7 +1638,7 @@ static void on_file_dropped(ROOTWIN *rootwin, short msg[8])
 						free(buff);
 						/* A bad encoding should never
 						 * happen */
-						NSLOG(netsurf,
+						NSLOG(netsurfy,
 						      INFO,
 						      "utf8_from_local_encoding failed");
 						assert(ret !=

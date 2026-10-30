@@ -1,4 +1,4 @@
-# NetSurf Frontend sources
+# NetSurfy Frontend sources
 
 FRONTEND_SOURCE_DIR := frontends/$(TARGET)
 FRONTEND_RESOURCES_DIR := frontends/$(TARGET)/res

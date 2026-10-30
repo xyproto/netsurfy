@@ -1,13 +1,13 @@
 /*
  * Copyright 2013 Ole Loots <ole@monochrom.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, http://www.netsurf-browser.org/
  *
- * NetSurf is free software; you can redistribute it and/or modify
+ * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurf is distributed in the hope that it will be useful,
+ * NetSurfy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -20,16 +20,16 @@
 
 #include "utils/log.h"
 #include "utils/messages.h"
-#include "netsurf/inttypes.h"
-#include "netsurf/core_window.h"
-#include "netsurf/plotters.h"
+#include "netsurfy/inttypes.h"
+#include "netsurfy/core_window.h"
+#include "netsurfy/plotters.h"
 
 #include "atari/gui.h"
 #include "atari/plot/plot.h"
 #include "atari/misc.h"
 #include "atari/gemtk/gemtk.h"
 #include "atari/treeview.h"
-#include "atari/res/netsurf.rsh"
+#include "atari/res/netsurfy.rsh"
 
 
 struct atari_treeview_window {
@@ -346,7 +346,7 @@ static void __CDECL on_keybd_event(struct core_window *cw,
 
 
 /**
- * GEMTK (netsurf's GEM toolkit) event sink
+ * GEMTK (netsurfy's GEM toolkit) event sink
  *
  */
 static short handle_event(GUIWIN *win, EVMULT_OUT *ev_out, short msg[8])
@@ -372,7 +372,7 @@ static short handle_event(GUIWIN *win, EVMULT_OUT *ev_out, short msg[8])
 		on_keybd_event(cw, ev_out, msg);
 	}
 	if ((ev_out->emo_events & MU_BUTTON) != 0) {
-		NSLOG(netsurf,
+		NSLOG(netsurfy,
 		      INFO,
 		      "Treeview click at: %d,%d\n",
 		      ev_out->emo_mouse.p_x,
@@ -566,7 +566,7 @@ atari_treeview_create(GUIWIN *win,
 
 	tv = calloc(1, sizeof(struct atari_treeview_window));
 	if (tv == NULL) {
-		NSLOG(netsurf, INFO, "calloc failed");
+		NSLOG(netsurfy, INFO, "calloc failed");
 		atari_warn_user(messages_get_errorcode(NSERROR_NOMEM), 0);
 		return NULL;
 	}

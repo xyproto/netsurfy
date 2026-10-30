@@ -1,13 +1,13 @@
 /*
- * Generics for Duktape binding in NetSurf
+ * Generics for Duktape binding in NetSurfy
  *
- * The result of this *MUST* be setting a NetSurf object only.
+ * The result of this *MUST* be setting a NetSurfy object only.
  *
  * That object will then be absorbed into the global object as a hidden
  * object which is used by the rest of the bindings.
  */
 
-var NetSurf = {
+var NetSurfy = {
     /* The make-proxy call for list-type objects */
     makeListProxy: function(inner) {
 	return new Proxy(inner, {

@@ -14,7 +14,7 @@ jobs:
           - ubuntu-22.04
           - ubuntu-24.04
         compiler:
-          # The NetSurf build system can't find LLVM AR (it looks for it
+          # The NetSurfy build system can't find LLVM AR (it looks for it
           # in /usr/lib instead of /usr/bin:
           #     `make: /usr/lib/llvm-ar: No such file or directory`).
           # So we need to make it explicit for llvm.
@@ -86,7 +86,7 @@ jobs:
           source docs/env.sh
           make test
 
-    - name: Build NetSurf GTK
+    - name: Build NetSurfy GTK
       env:
         CC: ${{ matrix.compiler.CC }}
         CXX: ${{ matrix.compiler.CXX }}
@@ -95,7 +95,7 @@ jobs:
           source docs/env.sh
           make -j"$(nproc)" TARGET=gtk
 
-    - name: Build NetSurf Monkey
+    - name: Build NetSurfy Monkey
       env:
         CC: ${{ matrix.compiler.CC }}
         CXX: ${{ matrix.compiler.CXX }}
@@ -104,7 +104,7 @@ jobs:
           source docs/env.sh
           make -j"$(nproc)" TARGET=monkey
 
-    - name: Build NetSurf Framebuffer
+    - name: Build NetSurfy Framebuffer
       env:
         CC: ${{ matrix.compiler.CC }}
         CXX: ${{ matrix.compiler.CXX }}
@@ -203,7 +203,7 @@ jobs:
         sudo tar -xzf "${{ matrix.build.toolchain }}.tar.gz" -C /
         rm "${{ matrix.build.toolchain }}.tar.gz"
         echo "Toolchain testament:"
-        cat /opt/netsurf/${{ matrix.build.toolchain }}/BUILD_INFO.txt
+        cat /opt/netsurfy/${{ matrix.build.toolchain }}/BUILD_INFO.txt
 
     - name: Build and install project libs
       env:
@@ -216,15 +216,15 @@ jobs:
         echo "TARGET_WORKSPACE=$TARGET_WORKSPACE"
         
         echo "Looking for cross-compiler tools..."
-        echo "Expected path: /opt/netsurf/${HOST}/cross/bin/"
-        if [ -f "/opt/netsurf/${HOST}/cross/bin/${HOST}-gcc" ]; then
-          echo "Found: /opt/netsurf/${HOST}/cross/bin/${HOST}-gcc"
+        echo "Expected path: /opt/netsurfy/${HOST}/cross/bin/"
+        if [ -f "/opt/netsurfy/${HOST}/cross/bin/${HOST}-gcc" ]; then
+          echo "Found: /opt/netsurfy/${HOST}/cross/bin/${HOST}-gcc"
           echo "Testing if it's executable:"
-          /opt/netsurf/${HOST}/cross/bin/${HOST}-gcc --version || echo "Failed to execute gcc --version"
+          /opt/netsurfy/${HOST}/cross/bin/${HOST}-gcc --version || echo "Failed to execute gcc --version"
           echo "Testing dumpmachine output:"
-          /opt/netsurf/${HOST}/cross/bin/${HOST}-gcc -dumpmachine || echo "Failed to execute gcc -dumpmachine"
+          /opt/netsurfy/${HOST}/cross/bin/${HOST}-gcc -dumpmachine || echo "Failed to execute gcc -dumpmachine"
         else
-          echo "NOT FOUND: /opt/netsurf/${HOST}/cross/bin/${HOST}-gcc"
+          echo "NOT FOUND: /opt/netsurfy/${HOST}/cross/bin/${HOST}-gcc"
         fi
         
         echo "Sourcing env.sh with error checking..."
@@ -246,7 +246,7 @@ jobs:
         echo "Building and installing libs..."
         ns-make-libs install
 
-    - name: Build NetSurf
+    - name: Build NetSurfy
       env:
         HOST: "${{ matrix.build.toolchain }}"
         TARGET_WORKSPACE: "${{ github.workspace }}/projects" # Same as "$(pwd)/projects"
