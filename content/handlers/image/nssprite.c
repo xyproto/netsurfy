@@ -53,12 +53,12 @@ typedef struct nssprite_content {
 	do {                                                                    \
 		rosprite_error err = x;                                         \
 		if (err == ROSPRITE_EOF) {                                      \
-			NSLOG(netsurfy,                                          \
+			NSLOG(netsurfy,                                         \
 			      INFO,                                             \
 			      "Got ROSPRITE_EOF when loading sprite file");     \
 			goto ro_sprite_error;                                   \
 		} else if (err == ROSPRITE_BADMODE) {                           \
-			NSLOG(netsurfy,                                          \
+			NSLOG(netsurfy,                                         \
 			      INFO,                                             \
 			      "Got ROSPRITE_BADMODE when loading sprite file"); \
 			goto ro_sprite_error;                                   \

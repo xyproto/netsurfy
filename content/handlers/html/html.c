@@ -1085,7 +1085,11 @@ static void html_stop(struct content *c)
 		break;
 
 	default:
-		NSLOG(netsurfy, INFO, "Unexpected status %d (%p)", c->status, c);
+		NSLOG(netsurfy,
+		      INFO,
+		      "Unexpected status %d (%p)",
+		      c->status,
+		      c);
 		assert(0);
 	}
 }

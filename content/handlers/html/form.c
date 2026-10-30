@@ -482,7 +482,9 @@ form_dom_to_data_select(dom_html_select_element *select_element,
 	/* get options collection */
 	exp = dom_html_select_element_get_options(select_element, &options);
 	if (exp != DOM_NO_ERR) {
-		NSLOG(netsurfy, INFO, "Could not get select options collection");
+		NSLOG(netsurfy,
+		      INFO,
+		      "Could not get select options collection");
 		dom_string_unref(inputname);
 		return NSERROR_DOM;
 	}

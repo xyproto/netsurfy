@@ -247,7 +247,10 @@ static bool gif_convert(struct content *c)
 	/* Initialise the GIF */
 	gif_err = nsgif_data_scan(gif->gif, size, data);
 	if (gif_err != NSGIF_OK) {
-		NSLOG(netsurfy, INFO, "nsgif scan: %s", nsgif_strerror(gif_err));
+		NSLOG(netsurfy,
+		      INFO,
+		      "nsgif scan: %s",
+		      nsgif_strerror(gif_err));
 		/* Not fatal unless we have no frames. */
 	}
 

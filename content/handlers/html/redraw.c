@@ -2110,7 +2110,10 @@ bool html_redraw_box(const html_content *html,
 					    has_x_scroll,
 					    has_y_scroll);
 		if (res != NSERROR_OK) {
-			NSLOG(netsurfy, INFO, "%s", messages_get_errorcode(res));
+			NSLOG(netsurfy,
+			      INFO,
+			      "%s",
+			      messages_get_errorcode(res));
 			return false;
 		}
 

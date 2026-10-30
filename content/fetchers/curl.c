@@ -2081,7 +2081,7 @@ nserror fetch_curl_register(void)
 #define SETOPT(option, value)                                                  \
 	mcode = curl_multi_setopt(fetch_curl_multi, option, value);            \
 	if (mcode != CURLM_OK) {                                               \
-		NSLOG(netsurfy,                                                 \
+		NSLOG(netsurfy,                                                \
 		      ERROR,                                                   \
 		      "attempting curl_multi_setopt(%s, ...)",                 \
 		      #option);                                                \
@@ -2108,7 +2108,7 @@ nserror fetch_curl_register(void)
 #define SETOPT(option, value)                                                  \
 	code = curl_easy_setopt(fetch_blank_curl, option, value);              \
 	if (code != CURLE_OK) {                                                \
-		NSLOG(netsurfy,                                                 \
+		NSLOG(netsurfy,                                                \
 		      ERROR,                                                   \
 		      "attempting curl_easy_setopt(%s, ...)",                  \
 		      #option);                                                \

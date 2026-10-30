@@ -381,16 +381,16 @@ store_fname(struct store_state *state, entry_ident_t ident, int elem_idx)
 	case ENTRY_ELEM_DATA:
 	case ENTRY_ELEM_META:
 		netsurfy_mkpath(&fname,
-			       NULL,
-			       8,
-			       state->path,
-			       b32u_d[0],
-			       b32u_d[1],
-			       b32u_d[2],
-			       b32u_d[3],
-			       b32u_d[4],
-			       b32u_d[5],
-			       b32u_i);
+				NULL,
+				8,
+				state->path,
+				b32u_d[0],
+				b32u_d[1],
+				b32u_d[2],
+				b32u_d[3],
+				b32u_d[4],
+				b32u_d[5],
+				b32u_i);
 		break;
 
 	case (ENTRY_ELEM_COUNT + ENTRY_ELEM_META):
