@@ -32,7 +32,7 @@ void win_perror(const char *lpszFunction);
 #define LOG_WIN_MSG(h, m, w, l)                                                \
 	if (((m) != WM_SETCURSOR) && ((m) != WM_MOUSEMOVE) &&                  \
 	    ((m) != WM_NCHITTEST) && ((m) != WM_ENTERIDLE))                    \
-	NSLOG(netsurfy,                                                         \
+	NSLOG(netsurfy,                                                        \
 	      DEBUG,                                                           \
 	      "%s, hwnd %p, w 0x%x, l 0x%Ix",                                  \
 	      msg_num_to_name(m),                                              \

@@ -787,7 +787,9 @@ nserror hotlist_load_directory_cb(dom_node *node, void *ctx)
 
 		error = dom_node_get_text_content(node, &title);
 		if (error != DOM_NO_ERR || title == NULL) {
-			NSLOG(netsurfy, INFO, "Empty <h4> or memory exhausted.");
+			NSLOG(netsurfy,
+			      INFO,
+			      "Empty <h4> or memory exhausted.");
 			dom_string_unref(name);
 			return NSERROR_DOM;
 		}
@@ -998,8 +1000,7 @@ static nserror hotlist_generate(void)
 		{"https://github.com/xyproto/netsurfy", "HotlistHomepage"},
 		{"https://github.com/xyproto/netsurfy/releases",
 		 "HotlistDownloads"},
-		{"https://github.com/xyproto/netsurfy",
-		 "HotlistDocumentation"},
+		{"https://github.com/xyproto/netsurfy", "HotlistDocumentation"},
 		{"https://github.com/xyproto/netsurfy", "HotlistContact"}};
 	const int n_entries = sizeof(default_entries) /
 			      sizeof(default_entries[0]);

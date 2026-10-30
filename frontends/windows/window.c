@@ -1291,20 +1291,15 @@ static LRESULT nsws_window_command(HWND hwnd,
 		break;
 
 	case IDM_HELP_CONTENTS:
-		nsws_window_go(
-			hwnd, "https://github.com/xyproto/netsurfy");
+		nsws_window_go(hwnd, "https://github.com/xyproto/netsurfy");
 		break;
 
 	case IDM_HELP_GUIDE:
-		nsws_window_go(
-			hwnd,
-			"https://github.com/xyproto/netsurfy");
+		nsws_window_go(hwnd, "https://github.com/xyproto/netsurfy");
 		break;
 
 	case IDM_HELP_INFO:
-		nsws_window_go(
-			hwnd,
-			"https://github.com/xyproto/netsurfy");
+		nsws_window_go(hwnd, "https://github.com/xyproto/netsurfy");
 		break;
 
 	case IDM_HELP_ABOUT:

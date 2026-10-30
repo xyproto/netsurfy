@@ -80,7 +80,7 @@ static nsurl *nsw32_get_resource_url(const char *path)
 	nsurl *url = NULL;
 
 	netsurfy_path_to_nsurl(filepath_sfind(G_resource_pathv, buf, path),
-			      &url);
+			       &url);
 
 	return url;
 }

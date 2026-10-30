@@ -202,7 +202,11 @@ void list_schedule(void)
 
 	gettimeofday(&tv, NULL);
 
-	NSLOG(netsurfy, INFO, "schedule list at %ld:%ld", tv.tv_sec, tv.tv_usec);
+	NSLOG(netsurfy,
+	      INFO,
+	      "schedule list at %ld:%ld",
+	      tv.tv_sec,
+	      tv.tv_usec);
 
 	cur_nscb = schedule_list;
 

@@ -107,9 +107,9 @@ NSLOG_DEFINE_CATEGORY(dukky, "Duktape JavaScript Binding");
 NSLOG_DEFINE_CATEGORY(jserrors, "JavaScript error messages");
 
 static void netsurfy_render_log(void *_ctx,
-			       nslog_entry_context_t *ctx,
-			       const char *fmt,
-			       va_list args)
+				nslog_entry_context_t *ctx,
+				const char *fmt,
+				va_list args)
 {
 	fprintf(logfile,
 		"%s [%s %.*s] %.*s:%i %.*s: ",
@@ -265,7 +265,10 @@ nserror nslog_init(nslog_ensure_t *ensure, int *pargc, char **argv)
 
 	/* sucessfull logging initialisation so log system info */
 	if (ret == NSERROR_OK) {
-		NSLOG(netsurfy, INFO, "NetSurfy version '%s'", netsurfy_version);
+		NSLOG(netsurfy,
+		      INFO,
+		      "NetSurfy version '%s'",
+		      netsurfy_version);
 		if (uname(&utsname) < 0) {
 			NSLOG(netsurfy,
 			      INFO,

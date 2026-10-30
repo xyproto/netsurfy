@@ -354,7 +354,8 @@ START_TEST(nsoption_read_test)
 	ck_assert_int_eq(res, NSERROR_OK);
 
 	ck_assert(nsoption_charp(homepage_url) != NULL);
-	ck_assert_str_eq(nsoption_charp(homepage_url), "https://duckduckgo.com");
+	ck_assert_str_eq(nsoption_charp(homepage_url),
+			 "https://duckduckgo.com");
 }
 END_TEST
 

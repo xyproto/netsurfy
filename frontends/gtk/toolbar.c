@@ -2799,8 +2799,8 @@ static gboolean contents_button_clicked_cb(GtkWidget *widget, gpointer data)
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	nserror res;
 
-	res = toolbar_navigate_to_url(
-		tb, "https://github.com/xyproto/netsurfy");
+	res = toolbar_navigate_to_url(tb,
+				      "https://github.com/xyproto/netsurfy");
 	if (res != NSERROR_OK) {
 		nsgtk_warning(messages_get_errorcode(res), 0);
 	}
@@ -2820,8 +2820,8 @@ static gboolean guide_button_clicked_cb(GtkWidget *widget, gpointer data)
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	nserror res;
 
-	res = toolbar_navigate_to_url(
-		tb, "https://github.com/xyproto/netsurfy");
+	res = toolbar_navigate_to_url(tb,
+				      "https://github.com/xyproto/netsurfy");
 	if (res != NSERROR_OK) {
 		nsgtk_warning(messages_get_errorcode(res), 0);
 	}
@@ -2842,8 +2842,8 @@ static gboolean info_button_clicked_cb(GtkWidget *widget, gpointer data)
 	struct nsgtk_toolbar *tb = (struct nsgtk_toolbar *)data;
 	nserror res;
 
-	res = toolbar_navigate_to_url(
-		tb, "https://github.com/xyproto/netsurfy");
+	res = toolbar_navigate_to_url(tb,
+				      "https://github.com/xyproto/netsurfy");
 	if (res != NSERROR_OK) {
 		nsgtk_warning(messages_get_errorcode(res), 0);
 	}

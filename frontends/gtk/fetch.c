@@ -258,7 +258,7 @@ static nsurl *nsgtk_get_resource_url(const char *path)
 		nsurl_create("resource:favicon.png", &url);
 	} else {
 		netsurfy_path_to_nsurl(filepath_sfind(respaths, buf, path),
-				      &url);
+				       &url);
 	}
 
 	return url;

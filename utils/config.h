@@ -182,7 +182,7 @@ char *realpath(const char *path, char *resolved_path);
 /*not yet: #define WITH_MMAP*/
 #endif
 #if defined(__BEOS__)
-	/* Not even BONE has it. */
+/* Not even BONE has it. */
 #define NO_IPV6 1
 #endif
 #else

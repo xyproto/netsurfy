@@ -3681,7 +3681,9 @@ navigate_internal_query_ssl(struct browser_window *bw,
 	}
 
 	if (nsurl_create(siteurl, &siteurl_ns) != NSERROR_OK) {
-		NSLOG(netsurfy, ERROR, "Unable to reset ssl loading parameters");
+		NSLOG(netsurfy,
+		      ERROR,
+		      "Unable to reset ssl loading parameters");
 	} else {
 		/* In order that we may proceed, replace the loading parameters
 		 */

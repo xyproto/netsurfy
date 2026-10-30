@@ -295,7 +295,7 @@ static void __CDECL on_mbutton_event(struct core_window *cw,
 					// TODO: maybe GUI poll would fit better
 					// here?
 					//		 ... is gui_poll
-					//re-entrance save?
+					// re-entrance save?
 					atari_treeview_redraw(cw);
 				}
 
@@ -654,7 +654,7 @@ void atari_treeview_redraw(struct core_window *cw)
 			slid = gemtk_wm_get_scroll_info(tv->window);
 
 			//			// Debug code: this 3 lines help
-			//to inspect the redraw
+			// to inspect the redraw
 			//			// areas...
 			//			pxy[0] = work.g_x;
 			//			pxy[1] = work.g_y;
@@ -662,8 +662,8 @@ void atari_treeview_redraw(struct core_window *cw)
 			//			pxy[3] = pxy[1] + work.g_h-1;
 			//
 			//			vsf_color(plot_get_vdi_handle(),
-			//0); 			v_bar(plot_get_vdi_handle(), (short*)&pxy);
-			//			evnt_timer(500);
+			// 0); 			v_bar(plot_get_vdi_handle(),
+			// (short*)&pxy); 			evnt_timer(500);
 
 			struct redraw_context ctx = {.interactive = true,
 						     .background_images = true,
@@ -705,19 +705,21 @@ void atari_treeview_redraw(struct core_window *cw)
 					// inspect the redraw areas...
 
 					//					vsf_color(plot_get_vdi_handle(),
-					//3); 					v_bar(plot_get_vdi_handle(),
-					//(short*)&pxy); 					evnt_timer(500);
+					// 3);
+					// v_bar(plot_get_vdi_handle(),
+					//(short*)&pxy);
+					// evnt_timer(500);
 
 
 					/* convert screen to treeview coords: */
 					todo[0] =
 						todo[0] -
 						work.g_x; //+
-							  //slid->x_pos*slid->x_unit_px;
+							  // slid->x_pos*slid->x_unit_px;
 					todo[1] =
 						todo[1] -
 						work.g_y; //+
-							  //slid->y_pos*slid->y_unit_px;
+							  // slid->y_pos*slid->y_unit_px;
 					if (todo[0] < 0) {
 						todo[2] = todo[2] + todo[0];
 						todo[0] = 0;

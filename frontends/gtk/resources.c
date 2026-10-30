@@ -244,7 +244,10 @@ static nserror init_resource(char **respath, struct nsgtk_resource_s *resource)
 		/* found an entry in the resources */
 		resource->path = resname;
 		resource->type = NSGTK_RESOURCE_GLIB;
-		NSLOG(netsurfy, INFO, "Found gresource path %s", resource->path);
+		NSLOG(netsurfy,
+		      INFO,
+		      "Found gresource path %s",
+		      resource->path);
 		return NSERROR_OK;
 	}
 	NSLOG(netsurfy, DEEPDEBUG, "gresource \"%s\" not found", resname);

@@ -700,7 +700,9 @@ nsgtk_preferences_comboboxLanguage_realize(GtkWidget *widget,
 	const char *accept_language;
 
 	if (priv->content_language == NULL) {
-		NSLOG(netsurfy, INFO, "content language list store unavailable");
+		NSLOG(netsurfy,
+		      INFO,
+		      "content language list store unavailable");
 		return;
 	}
 

@@ -407,7 +407,11 @@ static LRESULT nsws_drawable_mouseup(struct gui_window *gw,
 	if ((gw == NULL) || (gw->mouse == NULL) || (gw->bw == NULL))
 		return 0;
 
-	NSLOG(netsurfy, INFO, "state 0x%x, press 0x%x", gw->mouse->state, press);
+	NSLOG(netsurfy,
+	      INFO,
+	      "state 0x%x, press 0x%x",
+	      gw->mouse->state,
+	      press);
 	if ((gw->mouse->state & press) != 0) {
 		gw->mouse->state &= ~press;
 		gw->mouse->state |= click;
@@ -505,7 +509,10 @@ static LRESULT nsws_drawable_mousemove(struct gui_window *gw, int x, int y)
 	    (abs(x - gw->mouse->pressed_x) >= 5) &&
 	    (abs(y - gw->mouse->pressed_y) >= 5)) {
 
-		NSLOG(netsurfy, INFO, "Drag start state 0x%x", gw->mouse->state);
+		NSLOG(netsurfy,
+		      INFO,
+		      "Drag start state 0x%x",
+		      gw->mouse->state);
 
 		if ((gw->mouse->state & BROWSER_MOUSE_PRESS_1) != 0) {
 			browser_window_mouse_click(gw->bw,

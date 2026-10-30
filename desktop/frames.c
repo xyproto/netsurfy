@@ -651,7 +651,9 @@ browser_window_create_frameset_internal(struct browser_window *bw,
 				      "Created frame '%s'",
 				      window->name);
 			else
-				NSLOG(netsurfy, INFO, "Created frame (unnamed)");
+				NSLOG(netsurfy,
+				      INFO,
+				      "Created frame (unnamed)");
 		}
 	}
 

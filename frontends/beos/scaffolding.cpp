@@ -157,8 +157,8 @@ struct replicant_thread_info {
 
 
 static int open_windows = 0; /**< current number of open browsers */
-static NSBaseView *replicant_view =
-	NULL; /**< if not NULL, the replicant View we are running NetSurfy for */
+static NSBaseView *replicant_view = NULL; /**< if not NULL, the replicant View
+					     we are running NetSurfy for */
 static sem_id replicant_done_sem = -1;
 static thread_id replicant_thread = -1;
 
@@ -1363,7 +1363,10 @@ void nsbeos_scaffolding_dispatch_event(nsbeos_scaffolding *scaffold,
 
 void nsbeos_scaffolding_destroy(nsbeos_scaffolding *scaffold)
 {
-	NSLOG(netsurfy, INFO, "Being Destroyed = %d", scaffold->being_destroyed);
+	NSLOG(netsurfy,
+	      INFO,
+	      "Being Destroyed = %d",
+	      scaffold->being_destroyed);
 	if (scaffold->being_destroyed)
 		return;
 	scaffold->being_destroyed = 1;

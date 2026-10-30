@@ -22,8 +22,8 @@
 
 const char *const netsurfy_version = "1.0.0"
 #if defined(CI_BUILD)
-				    " (CI #" CI_BUILD ")"
+				     " (CI #" CI_BUILD ")"
 #endif
-				    ;
+	;
 const int netsurfy_version_major = 1;
 const int netsurfy_version_minor = 0;

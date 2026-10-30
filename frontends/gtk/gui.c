@@ -445,12 +445,12 @@ static nserror create_config_home(char **config_home_out)
 		}
 
 		ret = netsurfy_mkpath(&config_home,
-				     NULL,
-				     4,
-				     home_dir,
-				     ".config",
-				     "netsurfy",
-				     "/");
+				      NULL,
+				      4,
+				      home_dir,
+				      ".config",
+				      "netsurfy",
+				      "/");
 		if (ret != NSERROR_OK) {
 			return ret;
 		}
@@ -713,12 +713,12 @@ static nserror create_cache_home(char **cache_home_out)
 		}
 
 		ret = netsurfy_mkpath(&cache_home,
-				     NULL,
-				     4,
-				     home_dir,
-				     ".cache",
-				     "netsurfy",
-				     "/");
+				      NULL,
+				      4,
+				      home_dir,
+				      ".cache",
+				      "netsurfy",
+				      "/");
 		if (ret != NSERROR_OK) {
 			return ret;
 		}
@@ -957,7 +957,9 @@ static nserror nsgtk_setup(int argc, char **argv, char **respath)
 	/* add named icons to gtk theme */
 	res = nsgtk_add_named_icons_to_theme();
 	if (res != NSERROR_OK) {
-		NSLOG(netsurfy, INFO, "Unable to add named icons to GTK theme.");
+		NSLOG(netsurfy,
+		      INFO,
+		      "Unable to add named icons to GTK theme.");
 		return res;
 	}
 

@@ -717,7 +717,10 @@ nserror nsoption_read(const char *path, struct nsoption_s *opts)
 		return NSERROR_NOT_FOUND;
 	}
 
-	NSLOG(netsurfy, INFO, "Successfully opened '%s' for Options file", path);
+	NSLOG(netsurfy,
+	      INFO,
+	      "Successfully opened '%s' for Options file",
+	      path);
 
 	while (fgets(s, NSOPTION_MAX_LINE_LEN, fp)) {
 		optionline(opts, s, strlen(s));

@@ -4448,7 +4448,7 @@ nserror urldb_load_cookies(const char *filename)
 		for (; *p && *p != '\t'; p++)                                  \
 			; /* do nothing */                                     \
 		if (p >= end) {                                                \
-			NSLOG(netsurfy, INFO, "Overran input");                 \
+			NSLOG(netsurfy, INFO, "Overran input");                \
 			continue;                                              \
 		}                                                              \
 		*p++ = '\0';                                                   \
@@ -4459,7 +4459,7 @@ nserror urldb_load_cookies(const char *filename)
 		for (; *p && *p == '\t'; p++)                                  \
 			; /* do nothing */                                     \
 		if (p >= end) {                                                \
-			NSLOG(netsurfy, INFO, "Overran input");                 \
+			NSLOG(netsurfy, INFO, "Overran input");                \
 			continue;                                              \
 		}                                                              \
 	}

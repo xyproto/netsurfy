@@ -392,7 +392,8 @@ short gemtk_dd_sexts(short fd, char *exts)
  *	Ausgabeparameters:
  *	name	-	Zeiger auf Buffer fr Datenbeschreibung (min.
  * DD_NAMEMAX!) file	-	Zeiger auf Buffer fr Datendateiname (min.
- * DD_NAMEMAX!) whichext-	Zeiger auf Buffer fr Extension (4 Bytes) size	-	Zeiger auf Buffer fr Datengr”e (4 Bytes)
+ * DD_NAMEMAX!) whichext-	Zeiger auf Buffer fr Extension (4 Bytes) size
+ *	-	Zeiger auf Buffer fr Datengr”e (4 Bytes)
  *
  *	Returnwert:
  *	>0: kein Fehler

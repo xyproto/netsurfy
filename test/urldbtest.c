@@ -326,7 +326,7 @@ START_TEST(urldb_original_test)
 	nsurl_unref(url);
 
 	//	urldb_set_cookie("a=b; path=/; domain=.a.com", "http://a.com/",
-	//NULL);
+	// NULL);
 
 	url = make_url("https://www.foo.com/blah/moose");
 	urlr = make_url("https://www.foo.com/blah/moose");
