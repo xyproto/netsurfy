@@ -141,7 +141,7 @@ TOOLBAR_ITEM(PRINTPREVIEW_BUTTON,
 	     n,
 	     p,
 	     gtkPrintPreview,
-	     "gtk-print-preview")
+	     "document-print-preview")
 TOOLBAR_ITEM(PRINT_BUTTON, print, true, b, p, gtkPrint, "document-print")
 TOOLBAR_ITEM(QUIT_BUTTON, quit, true, b, p, gtkQuitMenu, "application-exit")
 TOOLBAR_ITEM(CUT_BUTTON, cut, true, b, p, gtkCut, "edit-cut")
@@ -163,35 +163,35 @@ TOOLBAR_ITEM(PREFERENCES_BUTTON,
 	     p,
 	     gtkPreferences,
 	     "preferences-system")
-TOOLBAR_ITEM(ZOOMPLUS_BUTTON, zoomplus, true, b, p, gtkZoomPlus, "gtk-zoom-in")
+TOOLBAR_ITEM(ZOOMPLUS_BUTTON, zoomplus, true, b, p, gtkZoomPlus, "zoom-in")
 TOOLBAR_ITEM(ZOOMMINUS_BUTTON,
 	     zoomminus,
 	     true,
 	     b,
 	     p,
 	     gtkZoomMinus,
-	     "gtk-zoom-out")
+	     "zoom-out")
 TOOLBAR_ITEM(ZOOMNORMAL_BUTTON,
 	     zoomnormal,
 	     true,
 	     b,
 	     p,
 	     gtkZoomNormal,
-	     "gtk-zoom-100")
+	     "zoom-original")
 TOOLBAR_ITEM(FULLSCREEN_BUTTON,
 	     fullscreen,
 	     true,
 	     b,
 	     p,
 	     gtkFullScreen,
-	     "gtk-fullscreen")
+	     "view-fullscreen")
 TOOLBAR_ITEM(VIEWSOURCE_BUTTON,
 	     viewsource,
 	     true,
 	     b,
 	     p,
 	     gtkPageSource,
-	     "gtk-index")
+	     "text-x-script")
 TOOLBAR_ITEM(DOWNLOADS_BUTTON,
 	     downloads,
 	     true,
@@ -277,8 +277,8 @@ TOOLBAR_ITEM(PREVTAB_BUTTON,
 	     y,
 	     gtkPrevTab,
 	     "media-skip-backward")
-TOOLBAR_ITEM(CONTENTS_BUTTON, contents, true, y, p, gtkContents, "gtk-help")
-TOOLBAR_ITEM(GUIDE_BUTTON, guide, true, y, p, gtkGuide, "gtk-help")
+TOOLBAR_ITEM(CONTENTS_BUTTON, contents, true, y, p, gtkContents, "help-browser")
+TOOLBAR_ITEM(GUIDE_BUTTON, guide, true, y, p, gtkGuide, "help-contents")
 TOOLBAR_ITEM(INFO_BUTTON,
 	     info,
 	     true,
