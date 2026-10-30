@@ -62,7 +62,7 @@ nserror nsgtk_viewsource(GtkWindow *parent, struct browser_window *bw)
 	}
 
 	titlesize = strlen(nsurl_access(browser_window_access_url(bw))) +
-		    SLEN("Source of  - NetSurf") + 1;
+		    SLEN("Source of  - NetSurfy") + 1;
 	title = malloc(titlesize);
 	if (title == NULL) {
 		free(filename);
@@ -70,7 +70,7 @@ nserror nsgtk_viewsource(GtkWindow *parent, struct browser_window *bw)
 	}
 	snprintf(title,
 		 titlesize,
-		 "Source of %s - NetSurf",
+		 "Source of %s - NetSurfy",
 		 nsurl_access(browser_window_access_url(bw)));
 
 	ret = utf8_from_enc((const char *)source_data,

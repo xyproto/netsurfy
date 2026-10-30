@@ -1,9 +1,10 @@
 #
-# Makefile for NetSurf
+# Makefile for NetSurfy
 #
 # Copyright 2007 Daniel Silverstone <dsilvers@netsurf-browser.org>
 # Copyright 2008 Rob Kendrick <rjek@netsurf-browser.org>
 # Copyright 2024 Vincent Sanders <vince@netsurf-browser.org>
+# Copyright 2026 Alexander F. Rødseth <xyproto@archlinux.org>
 #
 # Trivially, invoke as:
 #   make

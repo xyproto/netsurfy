@@ -30,7 +30,7 @@
 static const char *core_user_agent_string = NULL;
 
 #ifndef NETSURF_UA_FORMAT_STRING
-#define NETSURF_UA_FORMAT_STRING "Mozilla/5.0 (%s) NetSurf/%d.%d"
+#define NETSURF_UA_FORMAT_STRING "Mozilla/5.0 (%s) NetSurfy/%d.%d"
 #endif
 
 /**
