@@ -16,11 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "desktop/version.h"
 #include "testament.h"
 
-#include "desktop/version.h"
-
-const char *const netsurfy_version = "1.0.0"
+const char *const netsurfy_version = "1.0.1"
 #if defined(CI_BUILD)
 				     " (CI #" CI_BUILD ")"
 #endif
