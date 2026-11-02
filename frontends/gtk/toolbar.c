@@ -429,6 +429,10 @@ static GtkWidget *make_toolbar_item_websearch(bool sensitivity, bool edit)
 
 /**
  * create local history toolbar item widget
+ *
+ * Uses the standard "go-down" icon, so that it comes from the icon theme.
+ * The narrow built-in local-history image gets squashed into a square
+ * icon in GTK 4.
  */
 static GtkWidget *make_toolbar_item_history(bool sensitivity, bool edit)
 {
@@ -436,10 +440,10 @@ static GtkWidget *make_toolbar_item_history(bool sensitivity, bool edit)
 
 	if (edit) {
 		return make_button(
-			"local-history", "gtkLocalHistory", sensitivity, true);
+			"go-down", "gtkLocalHistory", sensitivity, true);
 	}
 
-	item = gtk_button_new_from_icon_name("local-history");
+	item = gtk_button_new_from_icon_name("go-down");
 	gtk_button_set_has_frame(GTK_BUTTON(item), FALSE);
 	gtk_widget_set_focus_on_click(item, FALSE);
 	gtk_widget_set_tooltip_text(item, messages_get("gtkLocalHistory"));

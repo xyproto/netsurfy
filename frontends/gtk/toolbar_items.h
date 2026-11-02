@@ -99,7 +99,7 @@ typedef enum {
 #endif
 
 TOOLBAR_ITEM(BACK_BUTTON, back, false, b, p, gtkBack, "go-previous")
-TOOLBAR_ITEM(HISTORY_BUTTON, history, true, y, n, , "local-history")
+TOOLBAR_ITEM(HISTORY_BUTTON, history, true, y, n, , "go-down")
 TOOLBAR_ITEM(FORWARD_BUTTON, forward, false, b, p, gtkForward, "go-next")
 TOOLBAR_ITEM(STOP_BUTTON, stop, false, t, p, gtkStop, NSGTK_STOCK_STOP)
 TOOLBAR_ITEM(RELOAD_BUTTON, reload, true, t, p, Reload, NSGTK_STOCK_REFRESH)
