@@ -10,5 +10,5 @@ This is a lightweight browser written in C that uses GTK4. It's a fork of NetSur
 
 ### General info
 
-* Version: 1.0.1
+* Version: 1.0.2
 * License: MIT and GPL2, see the `LICENSE` file for more information.
