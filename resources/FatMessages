@@ -39,12 +39,12 @@
 en.all.NetSurfy:NetSurfy
 zh_CN.all.NetSurfy:NetSurfy
 
-en.all.NetSurfyCopyright:© 2003-2023 The NetSurfy Developers
-de.all.NetSurfyCopyright:© 2003-2023 die NetSurfy Entwickler
-fr.all.NetSurfyCopyright:© 2003-2023 Les développeurs de NetSurfy
-nl.all.NetSurfyCopyright:© 2003-2023 De NetSurfy-ontwikkelaars
-it.all.NetSurfyCopyright:© 2003-2023 A cura degli sviluppatori di NetSurfy
-zh_CN.all.NetSurfyCopyright:© 2003-2023 NetSurfy 开发人员
+en.all.NetSurfyCopyright:© 2003-2026 The NetSurf + NetSurfy Developers
+de.all.NetSurfyCopyright:© 2003-2026 die NetSurf + NetSurfy Entwickler
+fr.all.NetSurfyCopyright:© 2003-2026 Les développeurs de NetSurf + NetSurfy
+nl.all.NetSurfyCopyright:© 2003-2026 De NetSurf + NetSurfy-ontwikkelaars
+it.all.NetSurfyCopyright:© 2003-2026 A cura degli sviluppatori di NetSurf + NetSurfy
+zh_CN.all.NetSurfyCopyright:© 2003-2026 NetSurf + NetSurfy 开发人员
 
 
 # General
@@ -1694,8 +1694,8 @@ en.all.PageInfoInternal:NetSurfy data
 fr.all.PageInfoInternal:Données internes de NetSurfy
 it.all.PageInfoInternal:Dati interni di NetSurfy
 
-en.all.PageInfoCert:Certificate: 
-fr.all.PageInfoCert:Certificat : 
+en.all.PageInfoCert:Certificate:
+fr.all.PageInfoCert:Certificat :
 
 en.all.PageInfoCertMissing:Missing
 fr.all.PageInfoCertMissing:Manquant
@@ -1712,8 +1712,8 @@ fr.all.PageInfoCertInvalid:Non valide
 en.all.PageInfoNoDomain:<No domain>
 fr.all.PageInfoNoDomain:<sans domaine>
 
-en.all.PageInfoCookies:Cookies: 
-fr.all.PageInfoCookies:Cookies : 
+en.all.PageInfoCookies:Cookies:
+fr.all.PageInfoCookies:Cookies :
 
 en.all.PageInfoCookiesUsed:(%u in use)
 fr.all.PageInfoCookiesUsed:(%u utilisés)
@@ -3894,33 +3894,33 @@ zh_CN.gtk.gtkRemaining:剩余
 # spaces necessary
 #
 
-en.gtk.gtkError: Error 
-de.gtk.gtkError: Fehler 
-fr.gtk.gtkError: Erreur 
-it.gtk.gtkError: Errore 
-nl.gtk.gtkError: Fout 
-zh_CN.gtk.gtkError: 错误 
+en.gtk.gtkError: Error
+de.gtk.gtkError: Fehler
+fr.gtk.gtkError: Erreur
+it.gtk.gtkError: Errore
+nl.gtk.gtkError: Fout
+zh_CN.gtk.gtkError: 错误
 
-en.gtk.gtkComplete: Complete 
-de.gtk.gtkComplete: Vollständig 
-fr.gtk.gtkComplete: Terminé 
-it.gtk.gtkComplete: Completato 
-nl.gtk.gtkComplete: Voltooid 
-zh_CN.gtk.gtkComplete: 完成 
+en.gtk.gtkComplete: Complete
+de.gtk.gtkComplete: Vollständig
+fr.gtk.gtkComplete: Terminé
+it.gtk.gtkComplete: Completato
+nl.gtk.gtkComplete: Voltooid
+zh_CN.gtk.gtkComplete: 完成
 
-en.gtk.gtkCanceled: Canceled 
-de.gtk.gtkCanceled: Abgebrochen 
-fr.gtk.gtkCanceled: Annulé 
-it.gtk.gtkCanceled: Annullato 
-nl.gtk.gtkCanceled: Afgebroken 
-zh_CN.gtk.gtkCanceled: 已取消 
+en.gtk.gtkCanceled: Canceled
+de.gtk.gtkCanceled: Abgebrochen
+fr.gtk.gtkCanceled: Annulé
+it.gtk.gtkCanceled: Annullato
+nl.gtk.gtkCanceled: Afgebroken
+zh_CN.gtk.gtkCanceled: 已取消
 
-en.gtk.gtkWorking: Working 
-de.gtk.gtkWorking: Arbeite 
+en.gtk.gtkWorking: Working
+de.gtk.gtkWorking: Arbeite
 fr.gtk.gtkWorking: En cours
-it.gtk.gtkWorking: In corso 
-nl.gtk.gtkWorking: In bedrijf 
-zh_CN.gtk.gtkWorking: 正在处理 
+it.gtk.gtkWorking: In corso
+nl.gtk.gtkWorking: In bedrijf
+zh_CN.gtk.gtkWorking: 正在处理
 
 # Dialogs
 #
@@ -4001,10 +4001,10 @@ it.gtk.gtkSourceSave:Salva sorgente
 nl.gtk.gtkSourceSave:Brontekst bewaren
 zh_CN.gtk.gtkSourceSave:保存源
 
-en.gtk.gtkSourceTabError:Error handling source data 
-de.gtk.gtkSourceTabError:Fehler beim behandeln der Quelldaten 
-fr.gtk.gtkSourceTabError:Erreur de manipulation des données source 
-it.gtk.gtkSourceTabError:Errore di modifica sul sorgente 
+en.gtk.gtkSourceTabError:Error handling source data
+de.gtk.gtkSourceTabError:Fehler beim behandeln der Quelldaten
+fr.gtk.gtkSourceTabError:Erreur de manipulation des données source
+it.gtk.gtkSourceTabError:Errore di modifica sul sorgente
 nl.gtk.gtkSourceTabError:Fout plaatsgevonden bij afhandelen brondata
 zh_CN.gtk.gtkSourceTabError:处理源数据时出错
 
@@ -7190,7 +7190,7 @@ nl.ro.HelpCookiesToolbar0:Dit is de Verwijder-knop.|MKlik met KIES om deze selec
 zh_CN.ro.HelpCookiesToolbar0:\T删除键。|M\S删除当前选项。
 
 en.ro.HelpCookiesToolbar1:\Texpand cookies button.|M\Sexpand all cookies in the list.|M\Acollapse all cookies in the list.|MExpanded cookies show additional details.
-de.ro.HelpCookiesToolbar1:Dies ist der Schalter zum Expandieren der Einträge.|MKlicken mit AUSWAHL expandiert alle Cookies.|MKlicken mit SPEZIAL versteckt die Zusatzinformationen wieder.|MIn expandierten Cookies werden zusätzliche Informationen angezeigt. 
+de.ro.HelpCookiesToolbar1:Dies ist der Schalter zum Expandieren der Einträge.|MKlicken mit AUSWAHL expandiert alle Cookies.|MKlicken mit SPEZIAL versteckt die Zusatzinformationen wieder.|MIn expandierten Cookies werden zusätzliche Informationen angezeigt.
 fr.ro.HelpCookiesToolbar1:\Tbouton de développement des cookies.|M\Sdévelopper tous les cookies de la liste.|M\Aréduire tous les cookies de la liste.|MDévelopper les cookies permet l’affichage de détails supplémentaires.
 it.ro.HelpCookiesToolbar1:\Tpulsante espandi cookie.|M\Sespandi tutti i cookie nella lista.|M\Araggruppa tutti i cookie nella lista.|ML'espansione dei cookie serve a mostrare dettagli addizionali.
 nl.ro.HelpCookiesToolbar1:Dit is de Detail-knop.|MKlik met KIES om alle cookies uit te klappen.|MKlik met PASAAN om alle cookies in te klappen.|MUitgeklapte cookies tonen aanvullende details,
@@ -7548,7 +7548,7 @@ nl.ro.HelpConnectConfig16:Dit is het maximaal aantal simultaan uit te voeren oph
 zh_CN.ro.HelpConnectConfig16:\T NetSurfy 将执行的同时获取最大数量。
 
 en.ro.HelpConnectConfig17:\Sreduce the maximum number of simultaneous fetches.
-de.ro.HelpConnectConfig17:Klicken mit AUSWAHL verringert die Maximalzahl simultaner Fetches. 
+de.ro.HelpConnectConfig17:Klicken mit AUSWAHL verringert die Maximalzahl simultaner Fetches.
 fr.ro.HelpConnectConfig17:\Sréduire le nombre de téléchargements simultanés.
 it.ro.HelpConnectConfig17:\Sriduci il numero massimo di tentativi simultanei.
 nl.ro.HelpConnectConfig17:Klik met KIES om het maximaal aantal simultaan uit te voeren ophaalopdrachten te verlagen.
@@ -7968,14 +7968,14 @@ nl.ro.HelpImageConfig17:Klik met KIES om de instellingen in dit venster terug te
 zh_CN.ro.HelpImageConfig17:\S将图像选项重置为默认值。
 
 en.ro.HelpImageConfig18:\Sclose this \w without saving changes.|M\Areturn the image options to the last saved configuration.
-de.ro.HelpImageConfig18:Klicken mit AUSWAHL schließt das Fenster ohne die Änderungen zu speichern.|MKlicken mit SPEZIAL stellt die zuletzt abgespeicherten Einstellungen wieder her.            
+de.ro.HelpImageConfig18:Klicken mit AUSWAHL schließt das Fenster ohne die Änderungen zu speichern.|MKlicken mit SPEZIAL stellt die zuletzt abgespeicherten Einstellungen wieder her.
 fr.ro.HelpImageConfig18:\Sfermer cette fenêtre sans sauver les changements|M\Arevenir aux options d’Image précédemment sauvegardées.
 it.ro.HelpImageConfig18:\Schiudi questa finestra senza salvare le modifiche.|M\Aripristina le opzioni delle immagini all'ultima configurazione salvata.
 nl.ro.HelpImageConfig18:Klik met KIES om dit venster te sluiten zonder dat de gemaakte wijzigingen worden bewaard.|MKlik met PASAAN om de gemaakte wijzigingen ongedaan te maken; het venster wordt hierbij niet gesloten.
 zh_CN.ro.HelpImageConfig18:\S关闭此 \w 而不保存更改。|M\A将图像选项恢复到上次保存的配置。
 
 en.ro.HelpImageConfig19:\Ssave these settings and close the \w.|M\Asave these settings without closing the \w.
-de.ro.HelpImageConfig19:Klicken mit AUSWAHL speichert die Einstellungen und schließt das Fenster.|MKlicken mit SPEZIAL speichert die Einstellungen ohne das Fenster zu schließen.               
+de.ro.HelpImageConfig19:Klicken mit AUSWAHL speichert die Einstellungen und schließt das Fenster.|MKlicken mit SPEZIAL speichert die Einstellungen ohne das Fenster zu schließen.
 fr.ro.HelpImageConfig19:\Ssauver ces réglages et fermer la fenêtre.|M\Asauver ces réglages sans fermer la fenêtre.
 it.ro.HelpImageConfig19:\Ssalva queste impostazioni e chiudi la finestra.|M\Asalva queste impostazioni senza chiudere la finestra.
 nl.ro.HelpImageConfig19:Klik met KIES om de gemaakte wijzigingen te bewaren en dit venster te sluiten.|MKlikken met PASAAN heeft hetzelfde effect, alleen wordt het huidige venster dan niet gesloten.
@@ -8157,14 +8157,14 @@ nl.ro.HelpSecurityConfig10:Klik met KIES om de instellingen in dit venster terug
 zh_CN.ro.HelpSecurityConfig10:\S将安全选项重置为其默认值。
 
 en.ro.HelpSecurityConfig11:\Sclose this \w without saving changes.|M\Areturn the security options to the last saved configuration.
-de.ro.HelpSecurityConfig11:Klicken mit AUSWAHL schließt das Fenster ohne die Änderungen zu speichern.|MKlicken mit SPEZIAL stellt die zuletzt abgespeicherten Einstellungen wieder her.                                  
+de.ro.HelpSecurityConfig11:Klicken mit AUSWAHL schließt das Fenster ohne die Änderungen zu speichern.|MKlicken mit SPEZIAL stellt die zuletzt abgespeicherten Einstellungen wieder her.
 fr.ro.HelpSecurityConfig11:\Sfermer cette fenêtre sans sauver les changements|M\Arevenir aux options de Sécurité précédemment sauvegardées.
 it.ro.HelpSecurityConfig11:\Schiudi questa finestra senza salvare le modifiche.|M\Aripristina le opzioni di sicurezza all'ultima configurazione salvata.
 nl.ro.HelpSecurityConfig11:Klik met KIES om dit venster te sluiten zonder dat de gemaakte wijzigingen worden bewaard.|MKlik met PASAAN om de gemaakte wijzigingen ongedaan te maken; het venster wordt hierbij niet gesloten.
 zh_CN.ro.HelpSecurityConfig11:\S关闭此 \w 而不保存更改。|M\A将安全选项恢复到上次保存的配置。
 
 en.ro.HelpSecurityConfig12:\Ssave these settings and close the \w.|M\Asave these settings without closing the \w.
-de.ro.HelpSecurityConfig12:Klicken mit AUSWAHL speichert die Einstellungen und schließt das Fenster.|MKlicken mit SPEZIAL speichert die Einstellungen ohne das Fenster zu schließen.                                     
+de.ro.HelpSecurityConfig12:Klicken mit AUSWAHL speichert die Einstellungen und schließt das Fenster.|MKlicken mit SPEZIAL speichert die Einstellungen ohne das Fenster zu schließen.
 fr.ro.HelpSecurityConfig12:\Ssauver ces réglages et fermer la fenêtre.|M\Asauver ces réglages sans fermer la fenêtre.
 it.ro.HelpSecurityConfig12:\Ssalva queste impostazioni e chiudi la finestra.|M\Asalva queste impostazioni senza chiudere la finestra.
 nl.ro.HelpSecurityConfig12:Klik met KIES om de gemaakte wijzigingen te bewaren en dit venster te sluiten.|MKlikken met PASAAN heeft hetzelfde effect, alleen wordt het huidige venster dan niet gesloten.
@@ -8192,7 +8192,7 @@ nl.ro.HelpThemeConfig3:Klik met KIES om dit venster te sluiten zonder dat de gem
 zh_CN.ro.HelpThemeConfig3:\S关闭此 \w 而不保存更改。|M\A将主题选项恢复到上次保存的配置。
 
 en.ro.HelpThemeConfig4:\Ssave these settings and close the \w.|M\Asave these settings without closing the \w.
-de.ro.HelpThemeConfig4:Klicken mit AUSWAHL speichert die Einstellungen und schließt das Fenster.|MKlicken mit SPEZIAL speichert die Einstellungen ohne das Fenster zu schließen.   
+de.ro.HelpThemeConfig4:Klicken mit AUSWAHL speichert die Einstellungen und schließt das Fenster.|MKlicken mit SPEZIAL speichert die Einstellungen ohne das Fenster zu schließen.
 fr.ro.HelpThemeConfig4:\Ssauver ces réglages et fermer la fenêtre.|M\Asauver ces réglages sans fermer la fenêtre.
 it.ro.HelpThemeConfig4:\Ssalva queste impostazioni e chiudi la finestra.|M\Asalva queste impostazioni senza chiudere la finestra.
 nl.ro.HelpThemeConfig4:Klik met KIES om de gemaakte wijzigingen te bewaren en dit venster te sluiten.|MKlikken met PASAAN heeft hetzelfde effect, alleen wordt het huidige venster dan niet gesloten.
@@ -9465,6 +9465,6 @@ nl.all.SetPassword:Stel wachtwoord in
 #en.ami.FontBitmap:Allow bitmap fonts
 #de.ami.FontBitmap:Bitmap Fonts zulassen
 #fr.ami.FontBitmap:Autoriser les polices de caractères bitmap
-#it.ami.FontBitmap:Permetti font bitmap 
+#it.ami.FontBitmap:Permetti font bitmap
 #nl.ami.FontBitmap:Allow bitmap fonts
 #zh_CN.ami.FontBitmap:允许使用点阵字体
