@@ -530,10 +530,19 @@ static nserror set_defaults(struct nsoption_s *defaults)
 		nsoption_setnull_charp(hotlist_path, fname);
 	}
 
-	/* download directory default */
-	fname = getenv("HOME");
+	/* download directory default: the XDG download directory if one is
+	 * configured, otherwise ~/downloads */
+	fname = NULL;
+	if (g_get_user_special_dir(G_USER_DIRECTORY_DOWNLOAD) != NULL) {
+		fname = strdup(g_get_user_special_dir(G_USER_DIRECTORY_DOWNLOAD));
+	} else if (getenv("HOME") != NULL) {
+		netsurfy_mkpath(&fname, NULL, 2, getenv("HOME"), "downloads");
+	}
 	if (fname != NULL) {
-		nsoption_setnull_charp(downloads_directory, strdup(fname));
+		if (nsoption_charp(downloads_directory) == NULL) {
+			g_mkdir_with_parents(fname, 0755);
+		}
+		nsoption_setnull_charp(downloads_directory, fname);
 	}
 
 	if ((nsoption_charp(cookie_file) == NULL) ||
