@@ -112,7 +112,7 @@ NETSURFY_STRIP_BINARY := NO
 NETSURFY_UA_FORMAT_STRING := "Mozilla/5.0 (Arch Linux; %s) NetSurfy/%d.%d"
 
 # Default home page, if one is not defined by the user.
-NETSURFY_HOMEPAGE := "https://duckduckgo.com/"
+NETSURFY_HOMEPAGE := "https://html.duckduckgo.com/"
 
 # Enable building the source object cache filesystem based backing store.
 # implementation.
