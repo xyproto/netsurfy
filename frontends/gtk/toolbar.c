@@ -443,7 +443,9 @@ static GtkWidget *make_toolbar_item_history(bool sensitivity, bool edit)
 			"go-down", "gtkLocalHistory", sensitivity, true);
 	}
 
-	item = gtk_button_new_from_icon_name("go-down");
+	item = gtk_button_new();
+	gtk_button_set_child(GTK_BUTTON(item),
+			     nsgtk_image_new_from_icon_name("go-down"));
 	gtk_button_set_has_frame(GTK_BUTTON(item), FALSE);
 	gtk_widget_set_focus_on_click(item, FALSE);
 	gtk_widget_set_tooltip_text(item, messages_get("gtkLocalHistory"));

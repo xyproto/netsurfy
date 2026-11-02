@@ -51,3 +51,8 @@ nsmonkey
 nsqt
 resources/*/Messages
 venv/
+!libs/*/build/
+!libs/*/build/**
+!libs/**/Makefile.config
+!libs/**/core/
+!libs/**/core/**

@@ -151,14 +151,14 @@ BASE_TESTCFLAGS := -std=c99 -g \
 	-DTESTROOT=\"$(TESTROOT)\" \
 	-DWITH_UTF8PROC \
 	$(SAN_FLAGS) \
-	$(shell pkg-config --cflags libcurl libparserutils libwapcaplet libdom libnsutils libutf8proc) \
+	$(shell $(PKG_CONFIG) --cflags libcurl libparserutils libwapcaplet libdom libnsutils libutf8proc) \
 	$(LIB_CFLAGS)
 TESTCFLAGS := $(BASE_TESTCFLAGS) \
 	$(COV_CFLAGS) \
 	$(COV_CPPFLAGS)
 
 TESTLDFLAGS := -L$(TESTROOT) \
-	$(shell pkg-config --libs libcurl libparserutils libwapcaplet libdom libnsutils libutf8proc) -lz \
+	$(shell $(PKG_CONFIG) --libs libcurl libparserutils libwapcaplet libdom libnsutils libutf8proc) -lz \
 	$(SAN_FLAGS) \
 	$(LIB_LDFLAGS)\
 	$(COV_LDFLAGS)

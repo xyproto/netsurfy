@@ -78,6 +78,8 @@ struct flex_line_data {
 
 	int used_main_size;
 	int main_auto_margin_count;
+	int gap_total;
+	size_t in_flow;
 
 	int pos;
 
@@ -96,6 +98,9 @@ struct flex_ctx {
 
 	int main_size;
 	int cross_size;
+
+	int main_gap;
+	int cross_gap;
 
 	int available_main;
 	int available_cross;
@@ -169,6 +174,8 @@ layout_flex_ctx__create(html_content *content, const struct box *flex)
 	ctx->wrap = css_computed_flex_wrap(flex->style);
 	ctx->horizontal = lh__flex_main_is_horizontal(flex);
 	ctx->main_reversed = lh__flex_direction_reversed(flex);
+	ctx->main_gap = lh__flex_gap(ctx->unit_len_ctx, flex, true);
+	ctx->cross_gap = lh__flex_gap(ctx->unit_len_ctx, flex, false);
 
 	return ctx;
 }
@@ -449,20 +456,24 @@ layout_flex__build_line(struct flex_ctx *ctx, size_t item_index)
 		struct flex_item_data *item = &ctx->item.data[item_index];
 		struct box *b = item->box;
 		int pos_main;
+		int gap;
 
 		pos_main = ctx->horizontal
 				   ? item->main_size
 				   : b->height +
 					     lh__delta_outer_main(ctx->flex, b);
+		gap = line->in_flow > 0 ? ctx->main_gap : 0;
 
 		if (ctx->wrap == CSS_FLEX_WRAP_NOWRAP ||
-		    pos_main + used_main <= ctx->available_main ||
+		    pos_main + used_main + gap <= ctx->available_main ||
 		    lh__box_is_absolute(item->box) ||
 		    ctx->available_main == AUTO || line->count == 0 ||
 		    pos_main == 0) {
 			if (lh__box_is_absolute(item->box) == false) {
 				line->main_size += item->main_size;
-				used_main += pos_main;
+				used_main += pos_main + gap;
+				line->gap_total += gap;
+				line->in_flow++;
 
 				if (b->margin[start_side] == AUTO) {
 					line->main_auto_margin_count++;
@@ -738,6 +749,8 @@ layout_flex__resolve_line(struct flex_ctx *ctx, struct flex_line_data *line)
 
 	if (available_main == AUTO) {
 		available_main = INT_MAX;
+	} else {
+		available_main -= line->gap_total;
 	}
 
 	grow = (line->main_size < available_main);
@@ -847,9 +860,13 @@ static bool layout_flex__place_line_items_main(struct flex_ctx *ctx,
 	int main_pos = ctx->flex->padding[layout_flex__main_start_side(ctx)];
 	int post_multiplier = ctx->main_reversed ? 0 : 1;
 	int pre_multiplier = ctx->main_reversed ? -1 : 0;
+	int direction = ctx->main_reversed ? -1 : 1;
 	size_t item_count = line->first + line->count;
 	int extra_remainder = 0;
 	int extra = 0;
+	int between = 0;
+	int between_remainder = 0;
+	size_t placed = 0;
 
 	if (ctx->main_reversed) {
 		main_pos = lh__box_size_main(ctx->horizontal, ctx->flex) -
@@ -858,12 +875,47 @@ static bool layout_flex__place_line_items_main(struct flex_ctx *ctx,
 
 	if (ctx->available_main != AUTO &&
 	    ctx->available_main != UNKNOWN_WIDTH &&
-	    ctx->available_main > line->used_main_size) {
+	    ctx->available_main > line->used_main_size + line->gap_total) {
+		int free_main = ctx->available_main - line->used_main_size -
+				line->gap_total;
+
 		if (line->main_auto_margin_count > 0) {
-			extra = ctx->available_main - line->used_main_size;
+			extra = free_main;
 
 			extra_remainder = extra % line->main_auto_margin_count;
 			extra /= line->main_auto_margin_count;
+		} else {
+			switch (css_computed_justify_content(
+				ctx->flex->style)) {
+			case CSS_JUSTIFY_CONTENT_FLEX_END:
+				main_pos += direction * free_main;
+				break;
+			case CSS_JUSTIFY_CONTENT_CENTER:
+				main_pos += direction * (free_main / 2);
+				break;
+			case CSS_JUSTIFY_CONTENT_SPACE_BETWEEN:
+				if (line->in_flow > 1) {
+					between = free_main /
+						  (int)(line->in_flow - 1);
+					between_remainder =
+						free_main %
+						(int)(line->in_flow - 1);
+				}
+				break;
+			case CSS_JUSTIFY_CONTENT_SPACE_AROUND:
+				if (line->in_flow > 0) {
+					between = free_main /
+						  (int)line->in_flow;
+					main_pos += direction * (between / 2);
+				}
+				break;
+			case CSS_JUSTIFY_CONTENT_SPACE_EVENLY:
+				between = free_main / (int)(line->in_flow + 1);
+				main_pos += direction * between;
+				break;
+			default:
+				break;
+			}
 		}
 	}
 
@@ -891,6 +943,17 @@ static bool layout_flex__place_line_items_main(struct flex_ctx *ctx,
 		box_pos_main = ctx->horizontal ? &b->x : &b->y;
 
 		if (!lh__box_is_absolute(b)) {
+			if (placed > 0) {
+				int spacing = ctx->main_gap + between;
+
+				if (between_remainder > 0) {
+					spacing++;
+					between_remainder--;
+				}
+				main_pos += direction * spacing;
+			}
+			placed++;
+
 			if (b->margin[main_start] == AUTO) {
 				extra_pre = extra + extra_remainder;
 			}
@@ -964,9 +1027,12 @@ static bool layout_flex__collect_items_into_lines(struct flex_ctx *ctx)
 			return false;
 		}
 
+		if (ctx->line.count > 1) {
+			ctx->cross_size += ctx->cross_gap;
+		}
 		ctx->cross_size += line->cross_size;
-		if (ctx->main_size < line->main_size) {
-			ctx->main_size = line->main_size;
+		if (ctx->main_size < line->main_size + line->gap_total) {
+			ctx->main_size = line->main_size + line->gap_total;
 		}
 	}
 
@@ -1062,6 +1128,9 @@ static void layout_flex__place_lines(struct flex_ctx *ctx)
 	for (size_t i = 0; i < ctx->line.count; i++) {
 		struct flex_line_data *line = &ctx->line.data[i];
 
+		if (i > 0) {
+			line_pos += (reversed ? -1 : 1) * ctx->cross_gap;
+		}
 		line_pos += pre_multiplier * line->cross_size;
 		line->pos = line_pos;
 		line_pos += post_multiplier * line->cross_size + extra +

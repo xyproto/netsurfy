@@ -112,9 +112,32 @@ void nsgtk_widget_override_background_color(GtkWidget *widget,
 	g_free(css);
 }
 
+GIcon *nsgtk_themed_icon_new(const gchar *icon_name)
+{
+	const char *names[2];
+	char *symbolic;
+	GIcon *icon;
+
+	if (g_str_has_suffix(icon_name, "-symbolic")) {
+		return g_themed_icon_new(icon_name);
+	}
+	symbolic = g_strconcat(icon_name, "-symbolic", NULL);
+	names[0] = symbolic;
+	names[1] = icon_name;
+	icon = g_themed_icon_new_from_names((char **)names, 2);
+	g_free(symbolic);
+	return icon;
+}
+
 GtkWidget *nsgtk_image_new_from_icon_name(const gchar *icon_name)
 {
-	return gtk_image_new_from_icon_name(icon_name);
+	GtkWidget *image;
+	GIcon *icon;
+
+	icon = nsgtk_themed_icon_new(icon_name);
+	image = gtk_image_new_from_gicon(icon);
+	g_object_unref(icon);
+	return image;
 }
 
 GtkWidget *nsgtk_image_new_from_pixbuf(GdkPixbuf *pixbuf)
@@ -170,14 +193,14 @@ void nsgtk_button_set_style(GtkButton *button,
 
 	switch (button_type) {
 	case 1: /* Small icons */
-		image = gtk_image_new_from_icon_name(icon_name);
+		image = nsgtk_image_new_from_icon_name(icon_name);
 		gtk_image_set_icon_size(GTK_IMAGE(image), GTK_ICON_SIZE_NORMAL);
 		gtk_button_set_child(button, image);
 		break;
 
 	case 3: /* Large icons with text */
 		box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-		image = gtk_image_new_from_icon_name(icon_name);
+		image = nsgtk_image_new_from_icon_name(icon_name);
 		gtk_image_set_icon_size(GTK_IMAGE(image), GTK_ICON_SIZE_LARGE);
 		gtk_box_append(GTK_BOX(box), image);
 		gtk_box_append(GTK_BOX(box),
@@ -192,7 +215,7 @@ void nsgtk_button_set_style(GtkButton *button,
 
 	case 2: /* Large icons */
 	default:
-		image = gtk_image_new_from_icon_name(icon_name);
+		image = nsgtk_image_new_from_icon_name(icon_name);
 		gtk_image_set_icon_size(GTK_IMAGE(image), GTK_ICON_SIZE_LARGE);
 		gtk_button_set_child(button, image);
 		break;

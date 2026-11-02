@@ -178,6 +178,28 @@ static inline bool lh__flex_direction_reversed(const struct box *flex)
 	}
 }
 
+static inline int lh__flex_gap(const css_unit_ctx *unit_len_ctx,
+			       const struct box *flex,
+			       bool main)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+	uint8_t type;
+
+	if (lh__flex_main_is_horizontal(flex) == main) {
+		type = css_computed_column_gap(flex->style, &length, &unit);
+	} else {
+		type = css_computed_row_gap(flex->style, &length, &unit);
+	}
+
+	if (type != CSS_COLUMN_GAP_SET || unit == CSS_UNIT_PCT) {
+		return 0;
+	}
+
+	return FIXTOINT(css_unit_len2device_px(
+		flex->style, unit_len_ctx, length, unit));
+}
+
 static inline int lh__non_auto_margin(const struct box *b, enum box_side side)
 {
 	return (b->margin[side] == AUTO) ? 0 : b->margin[side];

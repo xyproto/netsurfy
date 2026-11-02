@@ -152,3 +152,11 @@ mark {
 	background: yellow;
 	color: black;
 }
+
+details, summary {
+	display: block;
+}
+
+details:not([open]) > :not(summary) {
+	display: none;
+}

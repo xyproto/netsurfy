@@ -71,6 +71,8 @@ void nsgtk_widget_override_background_color(GtkWidget *widget,
 					    uint16_t g,
 					    uint16_t b);
 
+GIcon *nsgtk_themed_icon_new(const gchar *icon_name);
+
 /**
  * Create an image widget showing a named icon.
  */

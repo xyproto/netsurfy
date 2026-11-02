@@ -1141,6 +1141,179 @@ static bool box_iframe(dom_node *n,
 }
 
 
+static const char *box_image_srcset_pick(char *srcset, int target)
+{
+	const char *best_w = NULL, *best_x = NULL, *largest = NULL;
+	int best_w_size = 0, largest_size = 0;
+	float best_x_density = 0;
+	char *p = srcset;
+
+	while (*p != '\0') {
+		char *url, *end;
+		bool last = false;
+		float density = 1;
+		int width = 0;
+
+		while (*p == ',' || ascii_is_space(*p)) {
+			p++;
+		}
+		if (*p == '\0') {
+			break;
+		}
+		url = p;
+		while (*p != '\0' && !ascii_is_space(*p)) {
+			p++;
+		}
+		end = p;
+		if (end > url && end[-1] == ',') {
+			end[-1] = '\0';
+			last = true;
+		}
+		while (!last && *p != '\0' && *p != ',') {
+			char *descriptor;
+
+			while (ascii_is_space(*p)) {
+				p++;
+			}
+			descriptor = p;
+			while (*p != '\0' && *p != ',' && !ascii_is_space(*p)) {
+				p++;
+			}
+			if (p > descriptor && p[-1] == 'w') {
+				width = atoi(descriptor);
+			} else if (p > descriptor && p[-1] == 'x') {
+				density = strtof(descriptor, NULL);
+			}
+		}
+		if (*p == ',') {
+			p++;
+		}
+		if (!last) {
+			*end = '\0';
+		}
+		if (*url == '\0') {
+			continue;
+		}
+
+		if (width > 0) {
+			if (width >= target &&
+			    (best_w == NULL || width < best_w_size)) {
+				best_w = url;
+				best_w_size = width;
+			}
+			if (width > largest_size) {
+				largest = url;
+				largest_size = width;
+			}
+		} else if (best_x == NULL ||
+			   (density >= 1 &&
+			    (best_x_density < 1 || density < best_x_density)) ||
+			   (best_x_density < 1 && density > best_x_density)) {
+			best_x = url;
+			best_x_density = density;
+		}
+	}
+
+	if (best_w != NULL) {
+		return best_w;
+	}
+	if (largest != NULL) {
+		return largest;
+	}
+	return best_x;
+}
+
+static bool box_image_source_usable(dom_node *source, html_content *content)
+{
+	char *media = NULL, *type = NULL;
+	content_type ctype;
+	lwc_string *mime;
+
+	if (!box_get_attribute(source, "media", content->bctx, &media) ||
+	    !box_get_attribute(source, "type", content->bctx, &type)) {
+		return false;
+	}
+	if (media != NULL) {
+		return false;
+	}
+	if (type == NULL) {
+		return true;
+	}
+	if (lwc_intern_string(type, strlen(type), &mime) != lwc_error_ok) {
+		return false;
+	}
+	ctype = content_factory_type_from_mime_type(mime);
+	lwc_string_unref(mime);
+
+	return (ctype & image_types) != 0;
+}
+
+static bool box_node_name_is(dom_node *n, const char *name)
+{
+	dom_string *node_name;
+	bool result;
+
+	if (dom_node_get_node_name(n, &node_name) != DOM_NO_ERR ||
+	    node_name == NULL) {
+		return false;
+	}
+	result = strcasecmp(dom_string_data(node_name), name) == 0;
+	dom_string_unref(node_name);
+
+	return result;
+}
+
+static bool
+box_image_get_srcset(dom_node *n, html_content *content, char **srcset)
+{
+	dom_node *parent = NULL, *child = NULL, *next;
+
+	*srcset = NULL;
+
+	if (dom_node_get_parent_node(n, &parent) == DOM_NO_ERR &&
+	    parent != NULL && box_node_name_is(parent, "picture")) {
+		dom_node_get_first_child(parent, &child);
+		while (child != NULL && child != n && *srcset == NULL) {
+			dom_node_type type;
+
+			if (dom_node_get_node_type(child, &type) ==
+				    DOM_NO_ERR &&
+			    type == DOM_ELEMENT_NODE &&
+			    box_node_name_is(child, "source") &&
+			    box_image_source_usable(child, content)) {
+				if (!box_get_attribute(child,
+						       "srcset",
+						       content->bctx,
+						       srcset)) {
+					break;
+				}
+			}
+			next = NULL;
+			dom_node_get_next_sibling(child, &next);
+			dom_node_unref(child);
+			child = next;
+		}
+		if (child != NULL) {
+			dom_node_unref(child);
+		}
+	}
+	if (parent != NULL) {
+		dom_node_unref(parent);
+	}
+
+	if (*srcset == NULL &&
+	    !box_get_attribute(n, "srcset", content->bctx, srcset)) {
+		return false;
+	}
+	if (*srcset == NULL &&
+	    !box_get_attribute(n, "data-srcset", content->bctx, srcset)) {
+		return false;
+	}
+
+	return true;
+}
+
+
 /**
  * Embedded image [13.2].
  */
@@ -1158,6 +1331,8 @@ static bool box_image(dom_node *n,
 	css_fixed value = 0;
 	css_unit wunit = CSS_UNIT_PX;
 	css_unit hunit = CSS_UNIT_PX;
+	char *srcset;
+	const char *candidate = NULL;
 
 	if (box->style &&
 	    ns_computed_display(box->style, box_is_root(n)) == CSS_DISPLAY_NONE)
@@ -1187,8 +1362,32 @@ static bool box_image(dom_node *n,
 	if (box->usemap && box->usemap[0] == '#')
 		box->usemap++;
 
+	if (!box_image_get_srcset(n, content, &srcset))
+		return false;
+
+	if (srcset != NULL) {
+		int target = FIXTOINT(content->unit_len_ctx.viewport_width);
+
+		wtype = css_computed_width(box->style, &value, &wunit);
+		if (wtype == CSS_WIDTH_SET && wunit != CSS_UNIT_PCT) {
+			target = FIXTOINT(
+				css_unit_len2device_px(box->style,
+						       &content->unit_len_ctx,
+						       value,
+						       wunit));
+		}
+		candidate = box_image_srcset_pick(srcset, target);
+	}
+
 	/* get image URL */
-	err = dom_element_get_attribute(n, corestring_dom_src, &s);
+	s = NULL;
+	if (candidate != NULL) {
+		err = dom_string_create((const uint8_t *)candidate,
+					strlen(candidate),
+					&s);
+	} else {
+		err = dom_element_get_attribute(n, corestring_dom_src, &s);
+	}
 	if (err != DOM_NO_ERR || s == NULL)
 		return true;
 

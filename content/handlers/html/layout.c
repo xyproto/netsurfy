@@ -976,6 +976,8 @@ static void layout_minmax_block(struct box *block,
 	bool using_min_border_box = false;
 	bool using_max_border_box = false;
 	bool child_has_height = false;
+	int flex_gap = 0;
+	int flex_in_flow = 0;
 
 	assert(block->type == BOX_BLOCK || block->type == BOX_FLEX ||
 	       block->type == BOX_INLINE_FLEX ||
@@ -1104,15 +1106,23 @@ static void layout_minmax_block(struct box *block,
 
 			if (lh__box_is_flex_container(block) &&
 			    lh__flex_main_is_horizontal(block)) {
+				if (flex_in_flow++ == 0) {
+					flex_gap = 0;
+				} else {
+					flex_gap = lh__flex_gap(
+						&content->unit_len_ctx,
+						block,
+						true);
+				}
 				if (block->style != NULL &&
 				    css_computed_flex_wrap(block->style) ==
 					    CSS_FLEX_WRAP_NOWRAP) {
-					min += child->min_width;
+					min += child->min_width + flex_gap;
 				} else {
 					if (min < child->min_width)
 						min = child->min_width;
 				}
-				max += child->max_width;
+				max += child->max_width + flex_gap;
 
 			} else {
 				if (min < child->min_width)

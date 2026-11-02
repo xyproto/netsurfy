@@ -123,6 +123,29 @@ $(eval $(call feature_switch,HARU_PDF,PDF export (haru),-DWITH_PDF_EXPORT,-lhpdf
 $(eval $(call feature_switch,LIBICONV_PLUG,glibc internal iconv,-DLIBICONV_PLUG,,-ULIBICONV_PLUG,-liconv))
 $(eval $(call feature_switch,DUKTAPE,Javascript (Duktape),,,,,))
 
+# Bundled NetSurf project libraries
+NSLIBS_ROOT := $(CURDIR)/$(OBJROOT)/libs
+NSLIBS_STAMP := $(NSLIBS_ROOT)/stamp
+ifeq ($(filter $(MAKECMDGOALS),clean),)
+  ifneq ($(wildcard $(NSLIBS_STAMP)),)
+    NSLIBS_CHANGED := $(shell find libs -newer $(NSLIBS_STAMP) -print -quit)
+  else
+    NSLIBS_CHANGED := yes
+  endif
+  ifneq ($(NSLIBS_CHANGED),)
+    $(info    NSLIBS: building bundled libraries in $(NSLIBS_ROOT))
+    NSLIBS_STATUS := $(shell mkdir -p $(NSLIBS_ROOT) && \
+	env -u MAKEFLAGS -u MAKELEVEL $(MAKE) \
+	-j$(shell nproc 2>/dev/null || echo 1) -C libs CC="$(CC)" \
+	NSLIBS_PREFIX=$(NSLIBS_ROOT)/inst NSLIBS_OBJROOT=$(NSLIBS_ROOT)/obj \
+	>$(NSLIBS_ROOT).log 2>&1 && touch $(NSLIBS_STAMP) && echo ok)
+    ifneq ($(NSLIBS_STATUS),ok)
+      $(error Building bundled libraries failed, see $(NSLIBS_ROOT).log)
+    endif
+  endif
+endif
+PKG_CONFIG := PKG_CONFIG_PATH="$(NSLIBS_ROOT)/inst/lib/pkgconfig$(if $(PKG_CONFIG_PATH),:$(PKG_CONFIG_PATH))" $(PKG_CONFIG)
+
 # Common libraries with pkgconfig
 $(eval $(call pkg_config_find_and_add,libcss,CSS))
 $(eval $(call pkg_config_find_and_add,libdom,DOM))
