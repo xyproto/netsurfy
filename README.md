@@ -1,6 +1,6 @@
-![NetSurfy logo](img/netsurfy.png)
-
 ## NetSurfy
+
+![NetSurfy logo](img/netsurfy.png)
 
 This is a lightweight browser written in C that uses GTK4. It's a fork of NetSurfy.
 
