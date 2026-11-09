@@ -1132,7 +1132,7 @@ const char *content__get_title(struct content *c)
 	if (c == NULL)
 		return NULL;
 
-	return c->title != NULL
+	return (c->title != NULL && c->title[0] != '\0')
 		       ? c->title
 		       : nsurl_access(llcache_handle_get_url(c->llcache));
 }

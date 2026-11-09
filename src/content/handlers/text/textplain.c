@@ -1683,6 +1683,7 @@ nserror textplain_init(void)
 						 &textplain_content_handler);
 	if (error != NSERROR_OK) {
 		lwc_string_unref(textplain_default_charset);
+		return error;
 	}
 
 	error = content_factory_register_handler("application/json",

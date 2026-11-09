@@ -14,8 +14,6 @@ set(urldbtest_SRCS ${NSURL_SOURCES}
   ${SRC}/utils/utils.c ${SRC}/utils/http/primitives.c ${SRC}/utils/http/generics.c
   ${SRC}/utils/http/strict-transport-security.c ${SRC}/content/urldb.c
   log.c urldbtest.c)
-set(messages_SRCS ${SRC}/utils/messages.c ${SRC}/utils/hashtable.c log.c messages.c)
-set(nsoption_SRCS ${SRC}/utils/nsoption.c log.c nsoption.c)
 set(bloom_SRCS ${SRC}/utils/bloom.c bloom.c)
 set(hashtable_SRCS ${SRC}/utils/hashtable.c log.c hashtable.c)
 set(hashmap_SRCS ${NSURL_SOURCES} ${SRC}/utils/hashmap.c ${SRC}/utils/corestrings.c
@@ -29,14 +27,13 @@ set(mimesniff_SRCS ${NSURL_SOURCES} ${SRC}/utils/hashtable.c ${SRC}/utils/corest
   ${SRC}/utils/http/primitives.c ${SRC}/utils/messages.c
   ${SRC}/utils/http/parameter.c ${SRC}/content/mimesniff.c
   log.c mimesniff.c)
-set(corestrings_SRCS ${NSURL_SOURCES} ${SRC}/utils/corestrings.c log.c corestrings.c)
 
 add_library(malloc_fig SHARED malloc_fig.c)
 target_include_directories(malloc_fig PRIVATE ${PROJECT_SOURCE_DIR})
 target_link_libraries(malloc_fig PRIVATE ${CMAKE_DL_LIBS})
 
-set(TESTS nsurl urldbtest nsoption bloom hashtable hashmap urlescape utils
-  messages time mimesniff corestrings)
+set(TESTS nsurl urldbtest bloom hashtable hashmap urlescape utils time
+  mimesniff)
 foreach(test ${TESTS})
   add_executable(test_${test} ${${test}_SRCS})
   set_target_properties(test_${test} PROPERTIES OUTPUT_NAME ${test})
@@ -65,4 +62,3 @@ foreach(test ${TESTS})
   add_test(NAME ${test} COMMAND test_${test} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 endforeach()
 target_link_libraries(test_hashmap PRIVATE malloc_fig)
-target_link_libraries(test_corestrings PRIVATE malloc_fig)

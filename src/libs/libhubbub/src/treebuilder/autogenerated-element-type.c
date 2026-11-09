@@ -38,7 +38,7 @@
 #line 25 "src/treebuilder/element-type.gperf"
 struct element_type_map;
 
-#define TOTAL_KEYWORDS 108
+#define TOTAL_KEYWORDS 107
 #define MIN_WORD_LENGTH 1
 #define MAX_WORD_LENGTH 14
 #define MIN_HASH_VALUE 1
@@ -110,11 +110,11 @@ hubbub_element_type_generated_hash (register const char *str, register size_t le
        30,  30,  30,  25,  20,  20,  15, 299, 299, 299,
       299, 299, 299, 299, 299,   0, 105,  35,  30,   5,
         5,  50, 120,  10,  15,  15,  90,  25,   0,  55,
-       75,  25,  20,   5,   0, 102,  84,  10,  35,   5,
+       75,  25,  20,   5,   0, 102,  84,  10,  30,   5,
       299, 299, 299, 299, 299, 299, 299,   0, 105,  35,
        30,   5,   5,  50, 120,  10,  15,  15,  90,  25,
         0,  55,  75,  25,  20,   5,   0, 102,  84,  10,
-       35,   5, 299, 299, 299, 299, 299, 299, 299, 299,
+       30,   5, 299, 299, 299, 299, 299, 299, 299, 299,
       299, 299, 299, 299, 299, 299, 299, 299, 299, 299,
       299, 299, 299, 299, 299, 299, 299, 299, 299, 299,
       299, 299, 299, 299, 299, 299, 299, 299, 299, 299,
@@ -158,7 +158,7 @@ static const struct element_type_map wordlist[] =
     {"a",                   A},
 #line 31 "src/treebuilder/element-type.gperf"
     {"area",                AREA},
-#line 109 "src/treebuilder/element-type.gperf"
+#line 108 "src/treebuilder/element-type.gperf"
     {"s",                   S},
 #line 32 "src/treebuilder/element-type.gperf"
     {"article",             ARTICLE},
@@ -166,21 +166,21 @@ static const struct element_type_map wordlist[] =
     {"frameset",            FRAMESET},
 #line 65 "src/treebuilder/element-type.gperf"
     {"frame",               FRAME},
-#line 110 "src/treebuilder/element-type.gperf"
+#line 109 "src/treebuilder/element-type.gperf"
     {"script",              SCRIPT},
 #line 28 "src/treebuilder/element-type.gperf"
     {"address",             ADDRESS},
-#line 129 "src/treebuilder/element-type.gperf"
+#line 128 "src/treebuilder/element-type.gperf"
     {"track",               TRACK},
 #line 76 "src/treebuilder/element-type.gperf"
     {"i",                   I},
-#line 128 "src/treebuilder/element-type.gperf"
-    {"tr",                  TR},
 #line 127 "src/treebuilder/element-type.gperf"
+    {"tr",                  TR},
+#line 126 "src/treebuilder/element-type.gperf"
     {"title",               TITLE},
 #line 30 "src/treebuilder/element-type.gperf"
     {"applet",              APPLET},
-#line 118 "src/treebuilder/element-type.gperf"
+#line 117 "src/treebuilder/element-type.gperf"
     {"summary",             SUMMARY},
 #line 58 "src/treebuilder/element-type.gperf"
     {"fieldset",            FIELDSET},
@@ -188,99 +188,99 @@ static const struct element_type_map wordlist[] =
     {"figcaption",          FIGCAPTION},
 #line 60 "src/treebuilder/element-type.gperf"
     {"figure",              FIGURE},
-#line 99 "src/treebuilder/element-type.gperf"
+#line 98 "src/treebuilder/element-type.gperf"
     {"noscript",            NOSCRIPT},
 #line 61 "src/treebuilder/element-type.gperf"
     {"font",                FONT},
-#line 122 "src/treebuilder/element-type.gperf"
-    {"td",                  TD},
-#line 98 "src/treebuilder/element-type.gperf"
-    {"noframes",            NOFRAMES},
 #line 121 "src/treebuilder/element-type.gperf"
+    {"td",                  TD},
+#line 97 "src/treebuilder/element-type.gperf"
+    {"noframes",            NOFRAMES},
+#line 120 "src/treebuilder/element-type.gperf"
     {"tbody",               TBODY},
-#line 113 "src/treebuilder/element-type.gperf"
+#line 112 "src/treebuilder/element-type.gperf"
     {"source",              SOURCE},
 #line 63 "src/treebuilder/element-type.gperf"
     {"foreignobject",       FOREIGNOBJECT},
-#line 120 "src/treebuilder/element-type.gperf"
+#line 119 "src/treebuilder/element-type.gperf"
     {"table",               TABLE},
-#line 96 "src/treebuilder/element-type.gperf"
+#line 95 "src/treebuilder/element-type.gperf"
     {"nobr",                NOBR},
-#line 126 "src/treebuilder/element-type.gperf"
+#line 125 "src/treebuilder/element-type.gperf"
     {"thead",               THEAD},
-#line 114 "src/treebuilder/element-type.gperf"
+#line 113 "src/treebuilder/element-type.gperf"
     {"spacer",              SPACER},
-#line 91 "src/treebuilder/element-type.gperf"
+#line 90 "src/treebuilder/element-type.gperf"
     {"mi",                  MI},
 #line 62 "src/treebuilder/element-type.gperf"
     {"footer",              FOOTER},
-#line 123 "src/treebuilder/element-type.gperf"
+#line 122 "src/treebuilder/element-type.gperf"
     {"textarea",            TEXTAREA},
 #line 64 "src/treebuilder/element-type.gperf"
     {"form",                FORM},
-#line 111 "src/treebuilder/element-type.gperf"
+#line 110 "src/treebuilder/element-type.gperf"
     {"select",              SELECT},
-#line 97 "src/treebuilder/element-type.gperf"
+#line 96 "src/treebuilder/element-type.gperf"
     {"noembed",             NOEMBED},
-#line 133 "src/treebuilder/element-type.gperf"
+#line 132 "src/treebuilder/element-type.gperf"
     {"wbr",                 WBR},
 #line 48 "src/treebuilder/element-type.gperf"
     {"dd",                  DD},
 #line 52 "src/treebuilder/element-type.gperf"
     {"dir",                 DIR},
-#line 104 "src/treebuilder/element-type.gperf"
+#line 103 "src/treebuilder/element-type.gperf"
     {"output",              OUTPUT},
-#line 86 "src/treebuilder/element-type.gperf"
+#line 85 "src/treebuilder/element-type.gperf"
     {"marquee",             MARQUEE},
 #line 78 "src/treebuilder/element-type.gperf"
     {"image",               IMAGE},
 #line 43 "src/treebuilder/element-type.gperf"
     {"caption",             CAPTION},
-#line 89 "src/treebuilder/element-type.gperf"
+#line 88 "src/treebuilder/element-type.gperf"
     {"meta",                META},
-#line 103 "src/treebuilder/element-type.gperf"
+#line 102 "src/treebuilder/element-type.gperf"
     {"option",              OPTION},
-#line 108 "src/treebuilder/element-type.gperf"
-    {"pre",                 PRE},
 #line 107 "src/treebuilder/element-type.gperf"
+    {"pre",                 PRE},
+#line 106 "src/treebuilder/element-type.gperf"
     {"plaintext",           PLAINTEXT},
-#line 85 "src/treebuilder/element-type.gperf"
+#line 84 "src/treebuilder/element-type.gperf"
     {"malignmark",          MALIGNMARK},
-#line 130 "src/treebuilder/element-type.gperf"
+#line 129 "src/treebuilder/element-type.gperf"
     {"tt",                  TT},
 #line 56 "src/treebuilder/element-type.gperf"
     {"em",                  EM},
+#line 118 "src/treebuilder/element-type.gperf"
+    {"svg",                 SVG},
 #line 80 "src/treebuilder/element-type.gperf"
     {"input",               INPUT},
-#line 100 "src/treebuilder/element-type.gperf"
+#line 99 "src/treebuilder/element-type.gperf"
     {"object",              OBJECT},
 #line 50 "src/treebuilder/element-type.gperf"
     {"details",             DETAILS},
-#line 119 "src/treebuilder/element-type.gperf"
-    {"svg",                 SVG},
 #line 57 "src/treebuilder/element-type.gperf"
     {"embed",               EMBED},
 #line 47 "src/treebuilder/element-type.gperf"
     {"command",             COMMAND},
-#line 117 "src/treebuilder/element-type.gperf"
+#line 116 "src/treebuilder/element-type.gperf"
     {"style",               STYLE},
-#line 115 "src/treebuilder/element-type.gperf"
+#line 114 "src/treebuilder/element-type.gperf"
     {"strike",              STRIKE},
 #line 51 "src/treebuilder/element-type.gperf"
     {"dialog",              DIALOG},
-#line 92 "src/treebuilder/element-type.gperf"
+#line 91 "src/treebuilder/element-type.gperf"
     {"mn",                  MN},
-#line 93 "src/treebuilder/element-type.gperf"
+#line 92 "src/treebuilder/element-type.gperf"
     {"mo",                  MO},
 #line 44 "src/treebuilder/element-type.gperf"
     {"center",              CENTER},
 #line 33 "src/treebuilder/element-type.gperf"
     {"aside",               ASIDE},
-#line 95 "src/treebuilder/element-type.gperf"
+#line 94 "src/treebuilder/element-type.gperf"
     {"mtext",               MTEXT},
 #line 55 "src/treebuilder/element-type.gperf"
     {"dt",                  DT},
-#line 82 "src/treebuilder/element-type.gperf"
+#line 81 "src/treebuilder/element-type.gperf"
     {"li",                  LI},
 #line 79 "src/treebuilder/element-type.gperf"
     {"img",                 IMG},
@@ -292,21 +292,21 @@ static const struct element_type_map wordlist[] =
     {"button",              BUTTON},
 #line 54 "src/treebuilder/element-type.gperf"
     {"dl",                  DL},
-#line 83 "src/treebuilder/element-type.gperf"
+#line 82 "src/treebuilder/element-type.gperf"
     {"link",                LINK},
-#line 124 "src/treebuilder/element-type.gperf"
+#line 123 "src/treebuilder/element-type.gperf"
     {"tfoot",               TFOOT},
 #line 41 "src/treebuilder/element-type.gperf"
     {"br",                  BR},
 #line 53 "src/treebuilder/element-type.gperf"
     {"div",                 DIV},
-#line 94 "src/treebuilder/element-type.gperf"
+#line 93 "src/treebuilder/element-type.gperf"
     {"ms",                  MS},
-#line 125 "src/treebuilder/element-type.gperf"
+#line 124 "src/treebuilder/element-type.gperf"
     {"th",                  TH},
 #line 40 "src/treebuilder/element-type.gperf"
     {"body",                BODY},
-#line 106 "src/treebuilder/element-type.gperf"
+#line 105 "src/treebuilder/element-type.gperf"
     {"param",               PARAM},
 #line 77 "src/treebuilder/element-type.gperf"
     {"iframe",              IFRAME},
@@ -314,36 +314,34 @@ static const struct element_type_map wordlist[] =
     {"hr",                  HR},
 #line 46 "src/treebuilder/element-type.gperf"
     {"colgroup",            COLGROUP},
-#line 116 "src/treebuilder/element-type.gperf"
+#line 115 "src/treebuilder/element-type.gperf"
     {"strong",              STRONG},
-#line 101 "src/treebuilder/element-type.gperf"
+#line 100 "src/treebuilder/element-type.gperf"
     {"ol",                  OL},
 #line 36 "src/treebuilder/element-type.gperf"
     {"basefont",            BASEFONT},
 #line 35 "src/treebuilder/element-type.gperf"
     {"base",                BASE},
-#line 105 "src/treebuilder/element-type.gperf"
+#line 104 "src/treebuilder/element-type.gperf"
     {"p",                   P},
 #line 37 "src/treebuilder/element-type.gperf"
     {"bgsound",             BGSOUND},
 #line 45 "src/treebuilder/element-type.gperf"
     {"col",                 COL},
-#line 81 "src/treebuilder/element-type.gperf"
-    {"isindex",             ISINDEX},
-#line 112 "src/treebuilder/element-type.gperf"
+#line 111 "src/treebuilder/element-type.gperf"
     {"small",               SMALL},
 #line 72 "src/treebuilder/element-type.gperf"
     {"h6",                  H6},
-#line 102 "src/treebuilder/element-type.gperf"
+#line 101 "src/treebuilder/element-type.gperf"
     {"optgroup",            OPTGROUP},
-#line 90 "src/treebuilder/element-type.gperf"
+#line 89 "src/treebuilder/element-type.gperf"
     {"mglyph",              MGLYPH},
-#line 84 "src/treebuilder/element-type.gperf"
+#line 83 "src/treebuilder/element-type.gperf"
     {"listing",             LISTING},
+#line 133 "src/treebuilder/element-type.gperf"
+    {"xmp",                 XMP},
 #line 71 "src/treebuilder/element-type.gperf"
     {"h5",                  H5},
-#line 134 "src/treebuilder/element-type.gperf"
-    {"xmp",                 XMP},
 #line 70 "src/treebuilder/element-type.gperf"
     {"h4",                  H4},
 #line 38 "src/treebuilder/element-type.gperf"
@@ -352,19 +350,19 @@ static const struct element_type_map wordlist[] =
     {"h3",                  H3},
 #line 29 "src/treebuilder/element-type.gperf"
     {"annotation-xml",      ANNOTATION_XML},
-#line 88 "src/treebuilder/element-type.gperf"
+#line 87 "src/treebuilder/element-type.gperf"
     {"menu",                MENU},
 #line 68 "src/treebuilder/element-type.gperf"
     {"h2",                  H2},
-#line 87 "src/treebuilder/element-type.gperf"
+#line 86 "src/treebuilder/element-type.gperf"
     {"math",                MATH},
 #line 67 "src/treebuilder/element-type.gperf"
     {"h1",                  H1},
-#line 132 "src/treebuilder/element-type.gperf"
+#line 131 "src/treebuilder/element-type.gperf"
     {"ul",                  UL},
 #line 73 "src/treebuilder/element-type.gperf"
     {"head",                HEAD},
-#line 131 "src/treebuilder/element-type.gperf"
+#line 130 "src/treebuilder/element-type.gperf"
     {"u",                   U},
 #line 34 "src/treebuilder/element-type.gperf"
     {"b",                   B},
@@ -532,16 +530,16 @@ hubbub_element_type_generated_lookup (register const char *str, register size_t 
               case 86:
                 resword = &wordlist[47];
                 goto compare;
-              case 89:
+              case 87:
                 resword = &wordlist[48];
                 goto compare;
-              case 90:
+              case 89:
                 resword = &wordlist[49];
                 goto compare;
-              case 91:
+              case 90:
                 resword = &wordlist[50];
                 goto compare;
-              case 92:
+              case 91:
                 resword = &wordlist[51];
                 goto compare;
               case 94:
@@ -649,68 +647,65 @@ hubbub_element_type_generated_lookup (register const char *str, register size_t 
               case 152:
                 resword = &wordlist[86];
                 goto compare;
-              case 153:
+              case 154:
                 resword = &wordlist[87];
                 goto compare;
-              case 154:
+              case 156:
                 resword = &wordlist[88];
                 goto compare;
-              case 156:
+              case 157:
                 resword = &wordlist[89];
                 goto compare;
-              case 157:
+              case 160:
                 resword = &wordlist[90];
                 goto compare;
-              case 160:
+              case 161:
                 resword = &wordlist[91];
                 goto compare;
-              case 161:
+              case 162:
                 resword = &wordlist[92];
                 goto compare;
               case 166:
                 resword = &wordlist[93];
                 goto compare;
-              case 167:
+              case 171:
                 resword = &wordlist[94];
                 goto compare;
-              case 171:
+              case 172:
                 resword = &wordlist[95];
                 goto compare;
-              case 172:
+              case 176:
                 resword = &wordlist[96];
                 goto compare;
-              case 176:
+              case 178:
                 resword = &wordlist[97];
                 goto compare;
-              case 178:
+              case 180:
                 resword = &wordlist[98];
                 goto compare;
-              case 180:
+              case 181:
                 resword = &wordlist[99];
                 goto compare;
-              case 181:
+              case 183:
                 resword = &wordlist[100];
                 goto compare;
-              case 183:
+              case 186:
                 resword = &wordlist[101];
                 goto compare;
-              case 186:
+              case 193:
                 resword = &wordlist[102];
                 goto compare;
-              case 193:
+              case 203:
                 resword = &wordlist[103];
                 goto compare;
-              case 203:
+              case 204:
                 resword = &wordlist[104];
                 goto compare;
-              case 204:
+              case 210:
                 resword = &wordlist[105];
                 goto compare;
-              case 210:
-                resword = &wordlist[106];
-                goto compare;
               case 297:
-                resword = &wordlist[107];
+                resword = &wordlist[106];
                 goto compare;
             }
           return (struct element_type_map *) 0;

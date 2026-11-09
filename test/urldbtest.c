@@ -486,6 +486,35 @@ START_TEST(urldb_original_test)
 	cdata = test_urldb_get_cookie("http://expires.com/");
 	ck_assert(cdata == NULL);
 
+	ck_assert(test_urldb_set_cookie(
+		"foo=bar; Max-Age=abc\r\n", "http://maxage.com/", NULL));
+	cdata = test_urldb_get_cookie("http://maxage.com/");
+	ck_assert(cdata != NULL && strcmp(cdata, "foo=bar") == 0);
+	free(cdata);
+	ck_assert(test_urldb_set_cookie(
+		"foo=bar; Max-Age=\r\n", "http://maxage.com/", NULL));
+	cdata = test_urldb_get_cookie("http://maxage.com/");
+	ck_assert(cdata != NULL && strcmp(cdata, "foo=bar") == 0);
+	free(cdata);
+	ck_assert(test_urldb_set_cookie(
+		"foo=bar; Max-Age=3600; expires=Thu, 01-Jan-1970 00:00:01 GMT\r\n",
+		"http://maxage.com/",
+		NULL));
+	cdata = test_urldb_get_cookie("http://maxage.com/");
+	ck_assert(cdata != NULL && strcmp(cdata, "foo=bar") == 0);
+	free(cdata);
+	ck_assert(test_urldb_set_cookie(
+		"foo=bar; expires=Thu, 01-Jan-1970 00:00:01 GMT; Max-Age=3600\r\n",
+		"http://maxage.com/",
+		NULL));
+	cdata = test_urldb_get_cookie("http://maxage.com/");
+	ck_assert(cdata != NULL && strcmp(cdata, "foo=bar") == 0);
+	free(cdata);
+	ck_assert(test_urldb_set_cookie(
+		"foo=bar; Max-Age=0\r\n", "http://maxage.com/", NULL));
+	cdata = test_urldb_get_cookie("http://maxage.com/");
+	ck_assert(cdata == NULL);
+
 	urldb_dump();
 }
 END_TEST

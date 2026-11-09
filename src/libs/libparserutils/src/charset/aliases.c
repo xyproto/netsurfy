@@ -50,7 +50,7 @@ static int parserutils_charset_alias_match(const void *a, const void *b)
                 if (key_left == 0)
                         break;
                 
-                cmpret = tolower(*s_key) - *s_alias;
+                cmpret = tolower((unsigned char)*s_key) - *s_alias;
                 
                 if (cmpret != 0) {
                         return cmpret;

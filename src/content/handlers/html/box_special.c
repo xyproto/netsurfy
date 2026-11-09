@@ -554,6 +554,44 @@ static bool box_get_attribute(dom_node *n,
 }
 
 
+static bool
+box_input_label(html_content *content, struct box *box, const char *label)
+{
+	struct box *inline_container, *inline_box;
+
+	inline_container = box_create(
+		NULL, 0, false, 0, 0, 0, 0, content->bctx);
+	if (inline_container == NULL)
+		return false;
+
+	inline_container->type = BOX_INLINE_CONTAINER;
+
+	inline_box = box_create(NULL,
+				box->style,
+				false,
+				0,
+				0,
+				box->title,
+				0,
+				content->bctx);
+	if (inline_box == NULL)
+		return false;
+
+	inline_box->type = BOX_TEXT;
+	inline_box->text = talloc_strdup(content->bctx, label);
+	if (inline_box->text == NULL)
+		return false;
+
+	inline_box->length = strlen(inline_box->text);
+
+	box_add_child(inline_container, inline_box);
+
+	box_add_child(box, inline_container);
+
+	return true;
+}
+
+
 /**
  * Helper function for adding textarea widget to box.
  *
@@ -1478,56 +1516,53 @@ static bool box_input(dom_node *n,
 						   corestring_lwc_reset) ||
 		   dom_string_caseless_lwc_isequal(type,
 						   corestring_lwc_button)) {
-		struct box *inline_container, *inline_box;
+		const char *label;
 
 		if (box_button(n, content, box, 0) == false)
 			goto no_memory;
 
-		inline_container = box_create(
-			NULL, 0, false, 0, 0, 0, 0, content->bctx);
-		if (inline_container == NULL)
-			goto no_memory;
-
-		inline_container->type = BOX_INLINE_CONTAINER;
-
-		inline_box = box_create(NULL,
-					box->style,
-					false,
-					0,
-					0,
-					box->title,
-					0,
-					content->bctx);
-		if (inline_box == NULL)
-			goto no_memory;
-
-		inline_box->type = BOX_TEXT;
-
 		if (box->gadget->value != NULL)
-			inline_box->text = talloc_strdup(content->bctx,
-							 box->gadget->value);
+			label = box->gadget->value;
 		else if (box->gadget->type == GADGET_SUBMIT)
-			inline_box->text = talloc_strdup(
-				content->bctx, messages_get("Form_Submit"));
+			label = messages_get("Form_Submit");
 		else if (box->gadget->type == GADGET_RESET)
-			inline_box->text = talloc_strdup(
-				content->bctx, messages_get("Form_Reset"));
+			label = messages_get("Form_Reset");
 		else
-			inline_box->text = talloc_strdup(content->bctx,
-							 "Button");
+			label = "Button";
 
-		if (inline_box->text == NULL)
+		if (box_input_label(content, box, label) == false)
 			goto no_memory;
-
-		inline_box->length = strlen(inline_box->text);
-
-		box_add_child(inline_container, inline_box);
-
-		box_add_child(box, inline_container);
 
 	} else if (dom_string_caseless_lwc_isequal(type,
 						   corestring_lwc_image)) {
+		dom_string *src = NULL;
+		dom_string *alt = NULL;
+		bool labelled;
+
 		gadget->type = GADGET_IMAGE;
+
+		err = dom_element_get_attribute(n, corestring_dom_src, &src);
+		if (err == DOM_NO_ERR && src == NULL) {
+			box->type = BOX_INLINE_BLOCK;
+
+			err = dom_element_get_attribute(n,
+							corestring_dom_alt,
+							&alt);
+			if (err == DOM_NO_ERR && alt != NULL &&
+			    dom_string_byte_length(alt) > 0) {
+				labelled = box_input_label(
+					content, box, dom_string_data(alt));
+			} else {
+				labelled = box_input_label(
+					content, box, messages_get("Form_Submit"));
+			}
+			if (alt != NULL)
+				dom_string_unref(alt);
+			if (labelled == false)
+				goto no_memory;
+		}
+		if (src != NULL)
+			dom_string_unref(src);
 
 		if (box->style &&
 		    ns_computed_display(box->style, box_is_root(n)) !=

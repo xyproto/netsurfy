@@ -62,8 +62,6 @@ static hubbub_error process_hr_in_body(hubbub_treebuilder *treebuilder,
 		const hubbub_token *token);
 static hubbub_error process_image_in_body(hubbub_treebuilder *treebuilder,
 		const hubbub_token *token);
-static hubbub_error process_isindex_in_body(hubbub_treebuilder *treebuilder,
-		const hubbub_token *token);
 static hubbub_error process_textarea_in_body(hubbub_treebuilder *treebuilder,
 		const hubbub_token *token);
 static hubbub_error process_select_in_body(hubbub_treebuilder *treebuilder,
@@ -338,8 +336,6 @@ hubbub_error process_start_tag(hubbub_treebuilder *treebuilder,
 		err = process_hr_in_body(treebuilder, token);
 	} else if (type == IMAGE) {
 		err = process_image_in_body(treebuilder, token);
-	} else if (type == ISINDEX) {
-		err = process_isindex_in_body(treebuilder, token);
 	} else if (type == TEXTAREA) {
 		err = process_textarea_in_body(treebuilder, token);
 	} else if (type == IFRAME || type == NOEMBED || 
@@ -466,7 +462,7 @@ hubbub_error process_end_tag(hubbub_treebuilder *treebuilder,
 			type == BGSOUND || type == EMBED || 
 			type == HR || type == IFRAME ||
 			type == IMAGE || type == IMG ||
-			type == INPUT || type == ISINDEX ||
+			type == INPUT ||
 			type == NOEMBED || type == NOFRAMES ||
 			type == PARAM || type == SELECT ||
 			type == SOURCE || type == SPACER ||
@@ -1141,182 +1137,6 @@ hubbub_error process_image_in_body(hubbub_treebuilder *treebuilder,
 		return err;
 
 	return insert_element(treebuilder, &tag, false);
-}
-
-/**
- * Process an isindex start tag as if in "in body"
- *
- * \param treebuilder  The treebuilder instance
- * \param token        The token to process
- */
-hubbub_error process_isindex_in_body(hubbub_treebuilder *treebuilder,
-		const hubbub_token *token)
-{
-	hubbub_error err;
-	hubbub_token dummy;
-	hubbub_attribute *action = NULL;
-	hubbub_attribute *prompt = NULL;
-	hubbub_attribute *attrs = NULL;
-	size_t n_attrs = 0;
-
-	/** \todo parse error */
-
-	if (treebuilder->context.form_element != NULL)
-		return HUBBUB_OK;
-
-	/* First up, clone the token's attributes */
-	if (token->data.tag.n_attributes > 0) {
-		uint32_t i;
-		attrs = malloc((token->data.tag.n_attributes + 1) *
-						sizeof(hubbub_attribute));
-		if (attrs == NULL)
-			return HUBBUB_NOMEM;
-
-		for (i = 0; i < token->data.tag.n_attributes; i++) {
-			hubbub_attribute *attr = &token->data.tag.attributes[i];
-			const uint8_t *name = attr->name.ptr;
-
-			if (strncmp((const char *) name, "action",
-					attr->name.len) == 0) {
-				action = attr;
-			} else if (strncmp((const char *) name, "prompt",
-					attr->name.len) == 0) {
-				prompt = attr;
-			} else if (strncmp((const char *) name, "name",
-					attr->name.len) == 0) {
-			} else {
-				attrs[n_attrs++] = *attr;
-			}
-		}
-
-		attrs[n_attrs].ns = HUBBUB_NS_HTML;
-		attrs[n_attrs].name.ptr = (const uint8_t *) "name";
-		attrs[n_attrs].name.len = SLEN("name");
-		attrs[n_attrs].value.ptr = (const uint8_t *) "isindex";
-		attrs[n_attrs].value.len = SLEN("isindex");
-		n_attrs++;
-	}
-
-	/* isindex algorithm */
-
-	/* Set up dummy as a start tag token */
-	dummy.type = HUBBUB_TOKEN_START_TAG;
-	dummy.data.tag.ns = HUBBUB_NS_HTML;
-
-	/* Act as if <form> were seen */
-	dummy.data.tag.name.ptr = (const uint8_t *) "form";
-	dummy.data.tag.name.len = SLEN("form");
-
-	dummy.data.tag.n_attributes = action != NULL ? 1 : 0;
-	dummy.data.tag.attributes = action;
-
-	err = process_form_in_body(treebuilder, &dummy);
-	if (err != HUBBUB_OK) {
-		free(attrs);
-		return err;
-	}
-
-	/* Act as if <hr> were seen */
-	dummy.data.tag.name.ptr = (const uint8_t *) "hr";
-	dummy.data.tag.name.len = SLEN("hr");
-	dummy.data.tag.n_attributes = 0;
-	dummy.data.tag.attributes = NULL;
-
-	err = process_hr_in_body(treebuilder, &dummy);
-	if (err != HUBBUB_OK) {
-		free(attrs);
-		return err;
-	}
-
-	/* Act as if <p> were seen */
-	dummy.data.tag.name.ptr = (const uint8_t *) "p";
-	dummy.data.tag.name.len = SLEN("p");
-	dummy.data.tag.n_attributes = 0;
-	dummy.data.tag.attributes = NULL;
-
-	err = process_container_in_body(treebuilder, &dummy);
-	if (err != HUBBUB_OK) {
-		free(attrs);
-		return err;
-	}
-
-	/* Act as if <label> were seen */
-	dummy.data.tag.name.ptr = (const uint8_t *) "label";
-	dummy.data.tag.name.len = SLEN("label");
-	dummy.data.tag.n_attributes = 0;
-	dummy.data.tag.attributes = NULL;
-
-	err = process_phrasing_in_body(treebuilder, &dummy);
-	if (err != HUBBUB_OK) {
-		free(attrs);
-		return err;
-	}
-
-	/* Act as if a stream of characters were seen */
-	dummy.type = HUBBUB_TOKEN_CHARACTER;
-	if (prompt != NULL) {
-		dummy.data.character = prompt->value;
-	} else {
-		/** \todo Localisation */
-#define PROMPT "This is a searchable index. Insert your search keywords here: "
-		dummy.data.character.ptr = (const uint8_t *) PROMPT;
-		dummy.data.character.len = SLEN(PROMPT);
-#undef PROMPT
-	}
-	
-	err = process_character(treebuilder, &dummy);
-	if (err != HUBBUB_OK) {
-		free(attrs);
-		return err;
-	}
-
-	/* Act as if <input> was seen */
-	dummy.type = HUBBUB_TOKEN_START_TAG;
-	dummy.data.tag.ns = HUBBUB_NS_HTML;
-	dummy.data.tag.name.ptr = (const uint8_t *) "input";
-	dummy.data.tag.name.len = SLEN("input");
-
-	dummy.data.tag.n_attributes = n_attrs;
-	dummy.data.tag.attributes = attrs;
-
-	err = reconstruct_active_formatting_list(treebuilder);
-	if (err != HUBBUB_OK) {
-		free(attrs);
-		return err;
-	}
-
-	err = insert_element(treebuilder, &dummy.data.tag, false);
-	if (err != HUBBUB_OK) {
-		free(attrs);
-		return err;
-	}
-
-	/* No longer need attrs */
-	free(attrs);
-
-	treebuilder->context.frameset_ok = false;
-
-	/* Act as if </label> was seen */
-	err = process_0generic_in_body(treebuilder, LABEL);
-	assert(err == HUBBUB_OK);
-
-	/* Act as if </p> was seen */
-	err = process_0p_in_body(treebuilder);
-	if (err != HUBBUB_OK)
-		return err;
-
-	/* Act as if <hr> was seen */
-	dummy.data.tag.name.ptr = (const uint8_t *) "hr";
-	dummy.data.tag.name.len = SLEN("hr");
-	dummy.data.tag.n_attributes = 0;
-	dummy.data.tag.attributes = NULL;
-
-	err = process_hr_in_body(treebuilder, &dummy);
-	if (err != HUBBUB_OK)
-		return err;
-
-	/* Act as if </form> was seen */
-	return process_0container_in_body(treebuilder, FORM);
 }
 
 /**

@@ -1139,11 +1139,10 @@ static bool box_construct_text(struct box_construct_ctx *ctx)
 		enum css_white_space_e white_space = css_computed_white_space(
 			props.parent_style);
 
-		/* note: pre-wrap/pre-line are unimplemented */
+		/* note: pre-wrap is unimplemented */
 		assert(white_space == CSS_WHITE_SPACE_PRE ||
 		       white_space == CSS_WHITE_SPACE_PRE_LINE ||
 		       white_space == CSS_WHITE_SPACE_PRE_WRAP);
-		(void)white_space;
 
 		text = malloc(text_len + 1);
 		dom_string_unref(content);
@@ -1158,6 +1157,24 @@ static bool box_construct_text(struct box_construct_ctx *ctx)
 		for (i = 0; i < text_len; i++)
 			if (text[i] == '\t')
 				text[i] = ' ';
+
+		if (white_space == CSS_WHITE_SPACE_PRE_LINE) {
+			size_t j = 0;
+
+			for (i = 0; i < text_len; i++) {
+				char c = text[i];
+
+				if (c == ' ' && j > 0 &&
+				    (text[j - 1] == ' ' || text[j - 1] == '\n' ||
+				     text[j - 1] == '\r'))
+					continue;
+				if ((c == '\n' || c == '\r') && j > 0 &&
+				    text[j - 1] == ' ')
+					j--;
+				text[j++] = c;
+			}
+			text[j] = '\0';
+		}
 
 		if (css_computed_text_transform(props.parent_style) !=
 		    CSS_TEXT_TRANSFORM_NONE)

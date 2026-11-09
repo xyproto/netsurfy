@@ -140,6 +140,11 @@ static void layout_get_object_dimensions(struct box *box,
 	assert(box->object != NULL);
 	assert(width != NULL && height != NULL);
 
+	if (max_width >= 0 && min_width > max_width)
+		max_width = min_width;
+	if (max_height >= 0 && min_height > max_height)
+		max_height = min_height;
+
 	if (*width == AUTO && *height == AUTO) {
 		/* No given dimensions */
 
@@ -1758,6 +1763,54 @@ static void layout_move_children(struct box *box, int x, int y)
 }
 
 
+static int layout_table_percent_base(const struct column *col,
+				     unsigned int columns,
+				     int auto_width)
+{
+	unsigned int i;
+	int remaining = 100;
+	int max_percent = 0;
+	int max_other = 0;
+	int width;
+	bool has_percent = false;
+
+	for (i = 0; i != columns; i++) {
+		if (col[i].positioned)
+			continue;
+
+		if (col[i].type == COLUMN_WIDTH_PERCENT) {
+			int percent = col[i].width < remaining ? col[i].width
+							       : remaining;
+
+			has_percent = true;
+			if (percent > 0) {
+				width = col[i].max * 100 / percent;
+				if (width > max_percent)
+					max_percent = width;
+			}
+			remaining -= percent;
+		} else if (col[i].type == COLUMN_WIDTH_FIXED) {
+			max_other += col[i].width > col[i].min ? col[i].width
+							       : col[i].min;
+		} else {
+			max_other += col[i].max;
+		}
+	}
+
+	if (!has_percent)
+		return auto_width;
+
+	if (remaining > 0)
+		max_other = max_other * 100 / remaining;
+	else if (max_other > 0)
+		return auto_width;
+
+	width = max_percent > max_other ? max_percent : max_other;
+
+	return width < auto_width ? width : auto_width;
+}
+
+
 /* Documented in layout_internal.h */
 bool layout_table(struct box *table, int available_width, html_content *content)
 {
@@ -1767,6 +1820,7 @@ bool layout_table(struct box *table, int available_width, html_content *content)
 	int *excess_y;
 	int table_width, min_width = 0, max_width = 0;
 	int required_width = 0;
+	int percent_base;
 	int x, remainder = 0, count = 0;
 	int table_height = 0;
 	int min_height = 0;
@@ -1966,6 +2020,11 @@ bool layout_table(struct box *table, int available_width, html_content *content)
 		}
 	}
 
+	if (table_width == AUTO)
+		percent_base = layout_table_percent_base(col, columns, auto_width);
+	else
+		percent_base = auto_width;
+
 	/* calculate width required by cells */
 	for (i = 0; i != columns; i++) {
 
@@ -1996,7 +2055,7 @@ bool layout_table(struct box *table, int available_width, html_content *content)
 				col[i].min = col[i].max = col[i].width;
 			required_width += col[i].width;
 		} else if (col[i].type == COLUMN_WIDTH_PERCENT) {
-			int width = col[i].width * auto_width / 100;
+			int width = col[i].width * percent_base / 100;
 			required_width += col[i].min < width ? width
 							     : col[i].min;
 		} else
@@ -2022,7 +2081,7 @@ bool layout_table(struct box *table, int available_width, html_content *content)
 			if (col[i].type == COLUMN_WIDTH_RELATIVE)
 				continue;
 			if (col[i].type == COLUMN_WIDTH_PERCENT) {
-				col[i].max = auto_width * col[i].width / 100;
+				col[i].max = percent_base * col[i].width / 100;
 				if (col[i].max < col[i].min)
 					col[i].max = col[i].min;
 			}
@@ -2035,7 +2094,7 @@ bool layout_table(struct box *table, int available_width, html_content *content)
 			if (col[i].type == COLUMN_WIDTH_RELATIVE)
 				continue;
 			if (col[i].type == COLUMN_WIDTH_PERCENT) {
-				int width = auto_width * col[i].width / 100;
+				int width = percent_base * col[i].width / 100;
 				if (width < col[i].min)
 					width = col[i].min;
 				col[i].min = col[i].width = col[i].max = width;

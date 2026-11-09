@@ -88,6 +88,7 @@
  */
 
 #include <assert.h>
+#include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -134,6 +135,7 @@ struct cookie_internal_data {
 	bool path_from_set; /**< Path came from Set-Cookie: header */
 	char *path; /**< Path */
 	time_t expires; /**< Expiry timestamp, or -1 for session */
+	bool expires_from_max_age; /**< Expiry came from Max-Age */
 	time_t last_used; /**< Last used time */
 	bool secure; /**< Only send for HTTPS requests */
 	bool http_only; /**< Only expose to HTTP(S) requests */
@@ -1763,12 +1765,25 @@ static bool urldb_parse_avpair(struct cookie_internal_data *c,
 				return false;
 		}
 	} else if (strcasecmp(n, "Max-Age") == 0) {
-		int temp = atoi(v);
-		if (temp == 0)
-			/* Special case - 0 means delete */
-			c->expires = 0;
-		else
-			c->expires = time(NULL) + temp;
+		char *end;
+		long age;
+
+		errno = 0;
+		age = strtol(v, &end, 10);
+		if ((ascii_is_digit(v[0]) || v[0] == '-') && *end == '\0') {
+			time_t now = time(NULL);
+
+			if (age <= 0) {
+				/* Special case - 0 means delete */
+				c->expires = 0;
+			} else if (errno == ERANGE ||
+				   age > (time_t)0x7fffffff - now) {
+				c->expires = (time_t)0x7fffffff;
+			} else {
+				c->expires = now + age;
+			}
+			c->expires_from_max_age = true;
+		}
 	} else if (!c->path && strcasecmp(n, "Path") == 0) {
 		c->path_from_set = true;
 		c->path = strdup(v);
@@ -1797,7 +1812,9 @@ static bool urldb_parse_avpair(struct cookie_internal_data *c,
 			 * deal with that once we come to it) */
 			expires = (time_t)0x7fffffff;
 		}
-		c->expires = expires;
+		if (!c->expires_from_max_age) {
+			c->expires = expires;
+		}
 	} else if (strcasecmp(n, "Secure") == 0) {
 		c->secure = true;
 	} else if (strcasecmp(n, "HttpOnly") == 0) {
@@ -4581,6 +4598,7 @@ nserror urldb_load_cookies(const char *filename)
 		c->path_from_set = path_specified;
 		c->path = strdup(path);
 		c->expires = expires;
+		c->expires_from_max_age = false;
 		c->last_used = last_used;
 		c->secure = secure;
 		c->http_only = http_only;

@@ -671,14 +671,14 @@ static int dir_sort_alpha(const struct dirent **d1, const struct dirent **d2)
 			if (*s1 == '\0' || *s2 == '\0')
 				break;
 		}
-		if (tolower(*s1) != tolower(*s2))
+		if (tolower((unsigned char)*s1) != tolower((unsigned char)*s2))
 			break;
 
 		s1++;
 		s2++;
 	}
 
-	return tolower(*s1) - tolower(*s2);
+	return tolower((unsigned char)*s1) - tolower((unsigned char)*s2);
 }
 
 static void
