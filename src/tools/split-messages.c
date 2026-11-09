@@ -48,7 +48,7 @@ struct trnsltn_entry {
 	char *value;
 };
 
-static nserror usage(int argc, char **argv)
+static nserror usage(char **argv)
 {
 	fprintf(stderr,
 		"Usage: %s -l lang [-z] [-d lang] [-W warning] [-o <file>] [-i <file>] [-p platform] [-f format] [<file> [<file>]]\n"
@@ -113,13 +113,13 @@ static nserror process_cmdline(int argc, char **argv, struct param *param)
 				fprintf(stderr,
 					"output format %s not supported",
 					optarg);
-				usage(argc, argv);
+				usage(argv);
 				return NSERROR_NOT_IMPLEMENTED;
 			}
 			break;
 
 		default:
-			usage(argc, argv);
+			usage(argv);
 			return NSERROR_BAD_PARAMETER;
 		}
 	}
@@ -138,19 +138,19 @@ static nserror process_cmdline(int argc, char **argv, struct param *param)
 	/* parameter checks */
 	if (param->selected == NULL) {
 		fprintf(stderr, "A language to select must be specified\n");
-		usage(argc, argv);
+		usage(argv);
 		return NSERROR_BAD_PARAMETER;
 	}
 
 	if (param->infilename == NULL) {
 		fprintf(stderr, "Input file required\n");
-		usage(argc, argv);
+		usage(argv);
 		return NSERROR_BAD_PARAMETER;
 	}
 
 	if (param->outfilename == NULL) {
 		fprintf(stderr, "Output file required\n");
-		usage(argc, argv);
+		usage(argv);
 		return NSERROR_BAD_PARAMETER;
 	}
 

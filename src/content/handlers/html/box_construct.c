@@ -1143,6 +1143,7 @@ static bool box_construct_text(struct box_construct_ctx *ctx)
 		assert(white_space == CSS_WHITE_SPACE_PRE ||
 		       white_space == CSS_WHITE_SPACE_PRE_LINE ||
 		       white_space == CSS_WHITE_SPACE_PRE_WRAP);
+		(void)white_space;
 
 		text = malloc(text_len + 1);
 		dom_string_unref(content);

@@ -332,7 +332,7 @@ static void layout_minmax_table(struct box *table,
 		for (row = row_group->children; row; row = row->next)
 			for (cell = row->children; cell; cell = cell->next) {
 				unsigned int flexible_columns = 0;
-				int min = 0, max = 0, fixed_width = 0, extra;
+				int min = 0, max = 0, extra;
 
 				if (cell->columns == 1)
 					continue;
@@ -341,14 +341,11 @@ static void layout_minmax_table(struct box *table,
 				i = cell->start_column;
 
 				/* find min width so far of spanned columns, and
-				 * count number of non-fixed spanned columns and
-				 * total fixed width */
+				 * count number of non-fixed spanned columns */
 				for (j = 0; j != cell->columns; j++) {
 					min += col[i + j].min;
-					if (col[i + j].type ==
+					if (col[i + j].type !=
 					    COLUMN_WIDTH_FIXED)
-						fixed_width += col[i + j].width;
-					else
 						flexible_columns++;
 				}
 				min += (cell->columns - 1) * border_spacing_h;

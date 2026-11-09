@@ -298,7 +298,7 @@ void output_number(FILE *outputf, struct keyval *parseid, struct keyval_list *kv
 		ckv->val);
 }
 
-void output_color(FILE *outputf, struct keyval *parseid, struct keyval_list *kvlist)
+void output_color(FILE *outputf, struct keyval *parseid)
 {
 	fprintf(outputf,
 		"{\n"
@@ -541,7 +541,6 @@ int main(int argc, char **argv)
 {
 	char *descriptor;
 	char *curpos; /* current position in input string */
-	struct keyval *parser_id; /* the parser we are creating output for */
 	FILE *outputf;
 	struct keyval *rkv; /* current read key:val */
 	struct keyval_list *curlist;
@@ -699,7 +698,7 @@ int main(int argc, char **argv)
 
 		/* terminal blocks, these end the ladder ie no trailing else */
 		if (COLOR.count > 0) {
-			output_color(outputf, base.item[0], &COLOR);
+			output_color(outputf, base.item[0]);
 		} else if (LENGTH_UNIT.count > 0) {
 			output_length_unit(outputf, base.item[0], &LENGTH_UNIT);
 		} else if (IDENT_LIST.count > 0) {

@@ -22,6 +22,7 @@
  */
 
 #include <assert.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,10 +56,10 @@ nserror nslog_set_filter_by_options()
 static char *testnam(char *out)
 {
 	static int count = 0;
-	static char name[64];
+	static char name[PATH_MAX];
 	int pid;
 	pid = getpid();
-	snprintf(name, 64, TESTROOT "/nsoptiontest%d%d", pid, count);
+	snprintf(name, sizeof(name), TESTROOT "/nsoptiontest%d%d", pid, count);
 	count++;
 	return name;
 }

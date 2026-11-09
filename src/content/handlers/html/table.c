@@ -952,7 +952,6 @@ bool table_calculate_column_types(const css_unit_ctx *unit_len_ctx,
 			for (cell = row->children; cell; cell = cell->next) {
 				unsigned int fixed_columns = 0,
 					     percent_columns = 0,
-					     auto_columns = 0,
 					     unknown_columns = 0;
 				int fixed_width = 0, percent_width = 0;
 				enum css_width_e type;
@@ -978,10 +977,8 @@ bool table_calculate_column_types(const css_unit_ctx *unit_len_ctx,
 						percent_width +=
 							col[i + j].width;
 						percent_columns++;
-					} else if (col[i + j].type ==
+					} else if (col[i + j].type !=
 						   COLUMN_WIDTH_AUTO) {
-						auto_columns++;
-					} else {
 						unknown_columns++;
 					}
 				}

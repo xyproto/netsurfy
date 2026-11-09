@@ -1265,6 +1265,7 @@ nserror treeview_update_node_folder(treeview *tree,
 				  field->field,
 				  &match) == lwc_error_ok &&
 	       match == true);
+	(void)match;
 	folder->text.data = field->value;
 	folder->text.len = field->value_len;
 	folder->text.width = 0;
@@ -1316,6 +1317,7 @@ nserror treeview_update_node_entry(treeview *tree,
 				  fields[0].field,
 				  &match) == lwc_error_ok &&
 	       match == true);
+	(void)match;
 	entry->text.data = fields[0].value;
 	entry->text.len = fields[0].value_len;
 	entry->text.width = 0;
@@ -1412,6 +1414,7 @@ nserror treeview_create_node_entry(treeview *tree,
 				  fields[0].field,
 				  &match) == lwc_error_ok &&
 	       match == true);
+	(void)match;
 	n->text.data = fields[0].value;
 	n->text.len = fields[0].value_len;
 	n->text.width = 0;

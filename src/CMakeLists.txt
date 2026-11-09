@@ -251,6 +251,9 @@ if(NETSURFY_USE_DUKTAPE)
       VERBATIM)
   endforeach()
 
+  set_source_files_properties(content/handlers/javascript/duktape/duktape.c
+    PROPERTIES COMPILE_OPTIONS -Wno-unused-but-set-variable)
+
   set(NETSURFY_JAVASCRIPT_SOURCES
     content/handlers/javascript/content.c
     content/handlers/javascript/duktape/dukky.c

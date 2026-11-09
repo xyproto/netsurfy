@@ -13,7 +13,7 @@ foreach(config RELEASE RELWITHDEBINFO MINSIZEREL)
   string(REPLACE "-DNDEBUG" "" CMAKE_C_FLAGS_${config} "${CMAKE_C_FLAGS_${config}}")
 endforeach()
 
-set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
@@ -77,7 +77,7 @@ set(NETSURFY_WARNING_FLAGS
   -Wmissing-declarations -Wuninitialized -Wno-unused-parameter
   -Wredundant-decls -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs)
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-  list(APPEND NETSURFY_WARNING_FLAGS -Wno-unused-but-set-variable -Wimplicit-fallthrough=5)
+  list(APPEND NETSURFY_WARNING_FLAGS -Wimplicit-fallthrough=5)
 endif()
 
 set(netsurfy_config_header)
