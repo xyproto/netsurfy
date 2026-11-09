@@ -38,7 +38,7 @@ in common distros.  For now, you'll have to make do with Git checkouts.
 Debian-like OS:
 
     $ apt-get install libgtk2.0-dev libcurl3-dev libpng-dev 
-    $ apt-get install librsvg2-dev libjpeg-dev
+    $ apt-get install libjpeg-dev
 
 If you want to build with gtk 3 replace libgtk2.0-dev with libgtk-3-dev 
 
@@ -51,12 +51,12 @@ flavour of NetSurfy, this won't make a difference at all.
 Fedora:
 
     $ yum install curl-devel libpng-devel
-    $ yum install librsvg2-devel expat-devel
+    $ yum install expat-devel
 
 Other:
 
 You'll need to install the development resources for libglade2, libcurl3,
-libpng and librsvg.
+and libpng.
 
 
 ### Preparing your workspace
