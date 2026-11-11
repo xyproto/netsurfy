@@ -542,6 +542,12 @@ static gboolean nsgtk_window_key_pressed(GtkEventControllerKey *controller,
 	if (browser_window_key_press(g->bw, nskey))
 		return TRUE;
 
+	if (keyval == GDK_KEY(space) && (state & GDK_CONTROL_MASK) == 0) {
+		double page = gtk_adjustment_get_page_increment(g->vadj);
+		nsgtk_adjustment_scroll(g->vadj, (state & GDK_SHIFT_MASK) ? -page : page);
+		return TRUE;
+	}
+
 	if ((state & (GDK_SHIFT_MASK | GDK_LOCK_MASK | GDK_CONTROL_MASK)) != 0)
 		return FALSE;
 

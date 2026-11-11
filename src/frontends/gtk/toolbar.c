@@ -1734,6 +1734,8 @@ static gboolean url_entry_activate_cb(GtkWidget *widget, gpointer data)
 	struct browser_window *bw;
 	nsurl *url;
 
+	nsgtk_completion_cancel();
+
 	res = search_web_omni(gtk_editable_get_text(GTK_EDITABLE(widget)),
 			      SEARCH_WEB_OMNI_NONE,
 			      &url);
@@ -1745,6 +1747,8 @@ static gboolean url_entry_activate_cb(GtkWidget *widget, gpointer data)
 	}
 	if (res != NSERROR_OK) {
 		nsgtk_warning(messages_get_errorcode(res), 0);
+	} else {
+		gtk_widget_grab_focus(nsgtk_window_get_layout(tb->get_ctx));
 	}
 
 	return TRUE;

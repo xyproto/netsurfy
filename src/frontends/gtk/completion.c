@@ -127,17 +127,48 @@ void nsgtk_completion_init(void)
 	nsgtk_completion_list = gtk_list_store_new(1, G_TYPE_STRING);
 }
 
+static guint nsgtk_completion_timer;
+
+static gboolean nsgtk_completion_show(gpointer data)
+{
+	GtkEntry *entry = data;
+	GtkEntryCompletion *completion = gtk_entry_get_completion(entry);
+
+	nsgtk_completion_timer = 0;
+	if (completion == NULL || !gtk_widget_has_focus(GTK_WIDGET(entry)) ||
+	    nsoption_bool(url_suggestion) == false) {
+		return G_SOURCE_REMOVE;
+	}
+	urldb_iterate_partial(gtk_editable_get_text(GTK_EDITABLE(entry)),
+			      nsgtk_completion_udb_callback);
+	gtk_entry_completion_set_popup_completion(completion, TRUE);
+	gtk_entry_completion_complete(completion);
+	return G_SOURCE_REMOVE;
+}
+
+/* exported interface documented in completion.h */
+void nsgtk_completion_cancel(void)
+{
+	if (nsgtk_completion_timer != 0) {
+		g_source_remove(nsgtk_completion_timer);
+		nsgtk_completion_timer = 0;
+	}
+}
+
 /* exported interface documented in completion.h */
 gboolean nsgtk_completion_update(GtkEntry *entry)
 {
+	GtkEntryCompletion *completion = gtk_entry_get_completion(entry);
+
+	nsgtk_completion_cancel();
 	gtk_list_store_clear(nsgtk_completion_list);
-
-	if (nsoption_bool(url_suggestion) == true) {
-		urldb_iterate_partial(gtk_editable_get_text(
-					      GTK_EDITABLE(entry)),
-				      nsgtk_completion_udb_callback);
+	if (completion != NULL) {
+		gtk_entry_completion_set_popup_completion(completion, FALSE);
 	}
-
+	nsgtk_completion_timer = g_timeout_add_full(G_PRIORITY_DEFAULT, 600,
+						    nsgtk_completion_show,
+						    g_object_ref(entry),
+						    g_object_unref);
 	return TRUE;
 }
 
@@ -170,8 +201,7 @@ nsgtk_completion_connect_signals(GtkEntry *entry,
 
 	gtk_entry_completion_set_minimum_key_length(completion, 1);
 
-	/* enable popup for completion */
-	gtk_entry_completion_set_popup_completion(completion, TRUE);
+	gtk_entry_completion_set_popup_completion(completion, FALSE);
 
 	/* when selected callback */
 	g_signal_connect(G_OBJECT(completion),

@@ -36,6 +36,8 @@ void nsgtk_completion_init(void);
  */
 gboolean nsgtk_completion_update(GtkEntry *entry);
 
+void nsgtk_completion_cancel(void);
+
 /**
  * connect signals on entry completion
  */
