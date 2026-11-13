@@ -15,7 +15,8 @@
 static void _virtual_dom_mutation_name_event_destroy(struct dom_event *evt);
 
 static const struct dom_event_private_vtable _event_vtable = {
-	_virtual_dom_mutation_name_event_destroy, DOM_EVENT_KIND_MUTATION_NAME};
+	_virtual_dom_mutation_name_event_destroy,
+	DOM_EVENT_KIND_MUTATION_NAME};
 
 /* Constructor */
 dom_exception

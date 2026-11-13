@@ -13,7 +13,8 @@
 static void _virtual_dom_text_event_destroy(struct dom_event *evt);
 
 static const struct dom_event_private_vtable _event_vtable = {
-	_virtual_dom_text_event_destroy, DOM_EVENT_KIND_TEXT};
+	_virtual_dom_text_event_destroy,
+	DOM_EVENT_KIND_TEXT};
 
 /* Constructor */
 dom_exception _dom_text_event_create(struct dom_text_event **evt)

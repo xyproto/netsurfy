@@ -12,7 +12,8 @@
 static void _virtual_dom_ui_event_destroy(struct dom_event *evt);
 
 static const struct dom_event_private_vtable _event_vtable = {
-	_virtual_dom_ui_event_destroy, DOM_EVENT_KIND_UI};
+	_virtual_dom_ui_event_destroy,
+	DOM_EVENT_KIND_UI};
 
 /* Constructor */
 dom_exception _dom_ui_event_create(struct dom_ui_event **evt)

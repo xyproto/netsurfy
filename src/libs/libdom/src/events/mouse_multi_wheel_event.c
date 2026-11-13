@@ -16,7 +16,8 @@
 static void _virtual_dom_mouse_multi_wheel_event_destroy(struct dom_event *evt);
 
 static const struct dom_event_private_vtable _event_vtable = {
-	_virtual_dom_mouse_multi_wheel_event_destroy, DOM_EVENT_KIND_MOUSE_MULTI_WHEEL};
+	_virtual_dom_mouse_multi_wheel_event_destroy,
+	DOM_EVENT_KIND_MOUSE_MULTI_WHEEL};
 
 /* Constructor */
 dom_exception

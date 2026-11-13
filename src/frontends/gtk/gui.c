@@ -1073,7 +1073,8 @@ struct nsgtk_poll_set {
 	GPollFD fds[NSGTK_MAX_POLLS];
 };
 
-static void nsgtk_poll_set_add(struct nsgtk_poll_set *set, int fd, gushort events)
+static void
+nsgtk_poll_set_add(struct nsgtk_poll_set *set, int fd, gushort events)
 {
 	if (set->count < NSGTK_MAX_POLLS) {
 		set->fds[set->count].fd = fd;
@@ -1122,10 +1123,13 @@ static void nsgtk_main(void)
 			if (FD_ISSET(i, &read_fd_set)) {
 				nsgtk_poll_set_add(&wanted,
 						   i,
-						   G_IO_IN | G_IO_HUP | G_IO_ERR);
+						   G_IO_IN | G_IO_HUP |
+							   G_IO_ERR);
 			}
 			if (FD_ISSET(i, &write_fd_set)) {
-				nsgtk_poll_set_add(&wanted, i, G_IO_OUT | G_IO_ERR);
+				nsgtk_poll_set_add(&wanted,
+						   i,
+						   G_IO_OUT | G_IO_ERR);
 			}
 			if (FD_ISSET(i, &exc_fd_set)) {
 				nsgtk_poll_set_add(&wanted, i, G_IO_ERR);
@@ -1134,11 +1138,14 @@ static void nsgtk_main(void)
 
 		if (!nsgtk_poll_set_equal(&active, &wanted)) {
 			for (unsigned int i = 0; i != active.count; i++) {
-				g_main_context_remove_poll(NULL, &active.fds[i]);
+				g_main_context_remove_poll(NULL,
+							   &active.fds[i]);
 			}
 			active = wanted;
 			for (unsigned int i = 0; i != active.count; i++) {
-				g_main_context_add_poll(NULL, &active.fds[i], 0);
+				g_main_context_add_poll(NULL,
+							&active.fds[i],
+							0);
 			}
 		}
 
