@@ -140,6 +140,8 @@ struct gui_window {
 	/** The input method to use with this window */
 	GtkIMContext *input_method;
 
+	GtkEventController *key_controller;
+
 	/** current frame of throbber */
 	int throb_frame;
 
@@ -620,6 +622,23 @@ static void nsgtk_window_input_method_commit(GtkIMContext *ctx,
 	struct gui_window *g = data;
 	size_t len = strlen(str), offset = 0;
 
+	if (strcmp(str, " ") == 0 && !browser_window_key_press(g->bw, ' ')) {
+		GdkModifierType state = 0;
+		double page = gtk_adjustment_get_page_increment(g->vadj);
+
+		if (g->key_controller != NULL) {
+			state = gtk_event_controller_get_current_event_state(
+				g->key_controller);
+		}
+		if ((state & GDK_CONTROL_MASK) == 0) {
+			nsgtk_adjustment_scroll(g->vadj,
+						(state & GDK_SHIFT_MASK)
+							? -page
+							: page);
+		}
+		return;
+	}
+
 	while (offset < len) {
 		uint32_t nskey = utf8_to_ucs4(str + offset, len - offset);
 
@@ -898,6 +917,7 @@ static struct gui_window *gui_window_create(struct browser_window *bw,
 	gtk_widget_add_controller(g->layout, controller);
 
 	controller = gtk_event_controller_key_new();
+	g->key_controller = controller;
 	gtk_event_controller_key_set_im_context(
 		GTK_EVENT_CONTROLLER_KEY(controller), g->input_method);
 	CONNECT(controller, "key-pressed", nsgtk_window_key_pressed, g);
