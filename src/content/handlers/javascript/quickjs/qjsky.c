@@ -22,6 +22,11 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/random.h>
+#include <sys/stat.h>
 #include <nsutils/time.h>
 
 #include "netsurfy/inttypes.h"
@@ -98,6 +103,7 @@ struct jsthread {
 	struct dom_node *current_script;
 	struct qjsky_fetch *fetches;
 	uint32_t next_fetch_id;
+	int ready_state;
 };
 
 static JSClassID qjsky_class_id;
@@ -1926,6 +1932,276 @@ static JSValue qjsky_native_utf8_decode(JSContext *ctx,
 	return JS_NewStringLen(ctx, (const char *)data + offset, length);
 }
 
+static JSValue qjsky_native_ready_state(JSContext *ctx,
+					JSValueConst this_val,
+					int argc,
+					JSValueConst *argv)
+{
+	return JS_NewInt32(ctx, qjsky_thread(ctx)->ready_state);
+}
+
+static JSValue qjsky_native_random(JSContext *ctx,
+				   JSValueConst this_val,
+				   int argc,
+				   JSValueConst *argv)
+{
+	uint8_t buf[65536];
+	int32_t n;
+	size_t got = 0;
+
+	if (JS_ToInt32(ctx, &n, argv[0]) < 0) {
+		return JS_EXCEPTION;
+	}
+	if (n < 0 || n > (int32_t)sizeof(buf)) {
+		return JS_ThrowRangeError(ctx, "invalid length");
+	}
+	while (got < (size_t)n) {
+		ssize_t r = getrandom(buf + got, (size_t)n - got, 0);
+		if (r < 0) {
+			if (errno == EINTR) {
+				continue;
+			}
+			return JS_ThrowInternalError(ctx, "no random data");
+		}
+		got += (size_t)r;
+	}
+	return JS_NewArrayBufferCopy(ctx, buf, (size_t)n);
+}
+
+static char *qjsky_storage_path(JSContext *ctx, JSValueConst key, bool mkdirs)
+{
+	const char *cookies = nsoption_charp(cookie_file);
+	const char *slash;
+	const char *k;
+	size_t klen, dirlen, len;
+	char *path;
+
+	if (cookies == NULL || (slash = strrchr(cookies, '/')) == NULL) {
+		return NULL;
+	}
+	k = JS_ToCStringLen(ctx, &klen, key);
+	if (k == NULL) {
+		return NULL;
+	}
+	dirlen = (size_t)(slash - cookies);
+	len = dirlen + SLEN("/Storage/") + klen * 2 + SLEN(".json") + 1;
+	path = malloc(len);
+	if (path != NULL) {
+		size_t o = (size_t)snprintf(
+			path, len, "%.*s/Storage", (int)dirlen, cookies);
+		if (mkdirs && mkdir(path, 0700) != 0 && errno != EEXIST) {
+			free(path);
+			JS_FreeCString(ctx, k);
+			return NULL;
+		}
+		path[o++] = '/';
+		for (size_t i = 0; i < klen; i++) {
+			o += (size_t)snprintf(
+				path + o, len - o, "%02x", (unsigned char)k[i]);
+		}
+		snprintf(path + o, len - o, ".json");
+	}
+	JS_FreeCString(ctx, k);
+	return path;
+}
+
+static JSValue qjsky_native_storage_read(JSContext *ctx,
+					 JSValueConst this_val,
+					 int argc,
+					 JSValueConst *argv)
+{
+	char *path = qjsky_storage_path(ctx, argv[0], false);
+	FILE *f;
+	char *data = NULL;
+	size_t len = 0, cap = 0;
+	JSValue ret = JS_NULL;
+
+	if (path == NULL) {
+		return JS_NULL;
+	}
+	f = fopen(path, "rb");
+	free(path);
+	if (f == NULL) {
+		return JS_NULL;
+	}
+	for (;;) {
+		size_t n;
+		if (len == cap) {
+			char *grown;
+			cap = cap ? cap * 2 : 4096;
+			if (cap > 16 * 1024 * 1024 ||
+			    (grown = realloc(data, cap)) == NULL) {
+				free(data);
+				fclose(f);
+				return JS_NULL;
+			}
+			data = grown;
+		}
+		n = fread(data + len, 1, cap - len, f);
+		if (n == 0) {
+			break;
+		}
+		len += n;
+	}
+	fclose(f);
+	ret = JS_NewStringLen(ctx, data != NULL ? data : "", len);
+	free(data);
+	return ret;
+}
+
+static JSValue qjsky_native_storage_write(JSContext *ctx,
+					  JSValueConst this_val,
+					  int argc,
+					  JSValueConst *argv)
+{
+	char *path, *tmp;
+	const char *text = NULL;
+	size_t len = 0, tlen;
+	FILE *f;
+	bool ok;
+
+	if (!JS_IsNull(argv[1]) && !JS_IsUndefined(argv[1])) {
+		text = JS_ToCStringLen(ctx, &len, argv[1]);
+		if (text == NULL) {
+			return JS_EXCEPTION;
+		}
+	}
+	path = qjsky_storage_path(ctx, argv[0], text != NULL);
+	if (path == NULL) {
+		JS_FreeCString(ctx, text);
+		return JS_FALSE;
+	}
+	if (text == NULL) {
+		ok = unlink(path) == 0 || errno == ENOENT;
+		free(path);
+		return JS_NewBool(ctx, ok);
+	}
+	tlen = strlen(path) + SLEN(".tmp") + 1;
+	tmp = malloc(tlen);
+	if (tmp == NULL) {
+		free(path);
+		JS_FreeCString(ctx, text);
+		return JS_FALSE;
+	}
+	snprintf(tmp, tlen, "%s.tmp", path);
+	f = fopen(tmp, "wb");
+	ok = f != NULL;
+	if (ok) {
+		ok = fwrite(text, 1, len, f) == len;
+		ok = fclose(f) == 0 && ok;
+		ok = ok && rename(tmp, path) == 0;
+		if (!ok) {
+			unlink(tmp);
+		}
+	}
+	free(tmp);
+	free(path);
+	JS_FreeCString(ctx, text);
+	return JS_NewBool(ctx, ok);
+}
+
+static JSValue qjsky_native_language(JSContext *ctx,
+				     JSValueConst this_val,
+				     int argc,
+				     JSValueConst *argv)
+{
+	const char *lang = nsoption_charp(accept_language);
+	return JS_NewString(ctx, lang != NULL && *lang != '\0' ? lang : "en");
+}
+
+struct qjsky_session {
+	struct qjsky_session *next;
+	char *key;
+	char *text;
+	size_t len;
+};
+
+static struct qjsky_session *qjsky_sessions;
+
+static struct qjsky_session **qjsky_session_find(const char *key)
+{
+	struct qjsky_session **s = &qjsky_sessions;
+	while (*s != NULL && strcmp((*s)->key, key) != 0) {
+		s = &(*s)->next;
+	}
+	return s;
+}
+
+static JSValue qjsky_native_session_read(JSContext *ctx,
+					 JSValueConst this_val,
+					 int argc,
+					 JSValueConst *argv)
+{
+	const char *key = JS_ToCString(ctx, argv[0]);
+	struct qjsky_session *s;
+
+	if (key == NULL) {
+		return JS_EXCEPTION;
+	}
+	s = *qjsky_session_find(key);
+	JS_FreeCString(ctx, key);
+	if (s == NULL) {
+		return JS_NULL;
+	}
+	return JS_NewStringLen(ctx, s->text, s->len);
+}
+
+static JSValue qjsky_native_session_write(JSContext *ctx,
+					  JSValueConst this_val,
+					  int argc,
+					  JSValueConst *argv)
+{
+	const char *key = JS_ToCString(ctx, argv[0]);
+	struct qjsky_session **slot, *s;
+	const char *text;
+	size_t len;
+	char *copy;
+
+	if (key == NULL) {
+		return JS_EXCEPTION;
+	}
+	slot = qjsky_session_find(key);
+	if (JS_IsNull(argv[1]) || JS_IsUndefined(argv[1])) {
+		if ((s = *slot) != NULL) {
+			*slot = s->next;
+			free(s->key);
+			free(s->text);
+			free(s);
+		}
+		JS_FreeCString(ctx, key);
+		return JS_TRUE;
+	}
+	text = JS_ToCStringLen(ctx, &len, argv[1]);
+	if (text == NULL) {
+		JS_FreeCString(ctx, key);
+		return JS_EXCEPTION;
+	}
+	copy = malloc(len + 1);
+	if (copy != NULL) {
+		memcpy(copy, text, len + 1);
+	}
+	JS_FreeCString(ctx, text);
+	if (copy == NULL) {
+		JS_FreeCString(ctx, key);
+		return JS_FALSE;
+	}
+	if ((s = *slot) == NULL) {
+		s = calloc(1, sizeof(*s));
+		if (s == NULL || (s->key = strdup(key)) == NULL) {
+			free(s);
+			free(copy);
+			JS_FreeCString(ctx, key);
+			return JS_FALSE;
+		}
+		*slot = s;
+	}
+	JS_FreeCString(ctx, key);
+	free(s->text);
+	s->text = copy;
+	s->len = len;
+	return JS_TRUE;
+}
+
 static JSValue qjsky_native_object(JSContext *ctx)
 {
 	static const struct {
@@ -1939,6 +2215,13 @@ static JSValue qjsky_native_object(JSContext *ctx)
 		{"utf8Encode", qjsky_native_utf8_encode, 1},
 		{"utf8Decode", qjsky_native_utf8_decode, 1},
 		{"origin", qjsky_native_origin, 1},
+		{"readyState", qjsky_native_ready_state, 0},
+		{"language", qjsky_native_language, 0},
+		{"random", qjsky_native_random, 1},
+		{"storageRead", qjsky_native_storage_read, 1},
+		{"storageWrite", qjsky_native_storage_write, 2},
+		{"sessionRead", qjsky_native_session_read, 1},
+		{"sessionWrite", qjsky_native_session_write, 2},
 	};
 	JSValue obj = JS_NewObject(ctx);
 
@@ -2391,7 +2674,9 @@ bool js_fire_event(jsthread *thread,
 
 	qjsky_enter_thread(thread);
 
+	thread->ready_state = 1;
 	qjsky_fire_content_loaded(thread, doc);
+	thread->ready_state = 2;
 
 	if (!thread->pending_destroy && dom_event_create(&evt) == DOM_NO_ERR) {
 		if (dom_event_init(evt, corestring_dom_load, false, false) ==

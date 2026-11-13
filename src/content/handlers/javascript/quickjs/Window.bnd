@@ -262,6 +262,62 @@ static void window_scroll(window_private_t *priv, int *sx, int *sy)
 	}
 }
 
+static JSValue window_scroll_to(JSContext *ctx, window_private_t *priv, int argc, JSValueConst *argv, bool relative)
+{
+	int sx, sy;
+	double x, y, scale = window_scale(priv);
+	struct rect rect;
+
+	window_scroll(priv, &sx, &sy);
+	x = relative ? 0 : sx / scale;
+	y = relative ? 0 : sy / scale;
+	if (argc > 0 && JS_IsObject(argv[0])) {
+		JSValue v = JS_GetPropertyStr(ctx, argv[0], "left");
+		if (!JS_IsUndefined(v) && JS_ToFloat64(ctx, &x, v) < 0) {
+			JS_FreeValue(ctx, v);
+			return JS_EXCEPTION;
+		}
+		JS_FreeValue(ctx, v);
+		v = JS_GetPropertyStr(ctx, argv[0], "top");
+		if (!JS_IsUndefined(v) && JS_ToFloat64(ctx, &y, v) < 0) {
+			JS_FreeValue(ctx, v);
+			return JS_EXCEPTION;
+		}
+		JS_FreeValue(ctx, v);
+	} else {
+		if (argc > 0 && JS_ToFloat64(ctx, &x, argv[0]) < 0) {
+			return JS_EXCEPTION;
+		}
+		if (argc > 1 && JS_ToFloat64(ctx, &y, argv[1]) < 0) {
+			return JS_EXCEPTION;
+		}
+	}
+	if (x != x) {
+		x = 0;
+	}
+	if (y != y) {
+		y = 0;
+	}
+	if (relative) {
+		x += sx / scale;
+		y += sy / scale;
+	}
+	if (x < 0) {
+		x = 0;
+	}
+	if (y < 0) {
+		y = 0;
+	}
+	if (priv->closed_down || priv->win->window == NULL ||
+	    guit->window->set_scroll == NULL) {
+		return JS_UNDEFINED;
+	}
+	rect.x0 = rect.x1 = (int)(x * scale);
+	rect.y0 = rect.y1 = (int)(y * scale);
+	guit->window->set_scroll(priv->win->window, &rect);
+	return JS_UNDEFINED;
+}
+
 static JSValue
 window_cached_object(JSContext *ctx, JSValueConst this_val, qjsky_hidden key, JSValue (*create)(JSContext *ctx, void *ptr), void *ptr)
 {
@@ -687,4 +743,19 @@ getter Window::pageYOffset()
 getter Window::devicePixelRatio()
 %{
 	return JS_NewFloat64(ctx, window_scale(priv));
+%}
+
+method Window::scroll()
+%{
+	return window_scroll_to(ctx, priv, argc, argv, false);
+%}
+
+method Window::scrollTo()
+%{
+	return window_scroll_to(ctx, priv, argc, argv, false);
+%}
+
+method Window::scrollBy()
+%{
+	return window_scroll_to(ctx, priv, argc, argv, true);
 %}

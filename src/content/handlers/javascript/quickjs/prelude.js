@@ -1783,12 +1783,24 @@
         if (body instanceof ArrayBuffer || ArrayBuffer.isView(body)) {
             return native.utf8Decode(body);
         }
+        if (body instanceof FormData) {
+            return native.utf8Decode(encodeMultipart(body).bytes);
+        }
+        if (body instanceof Blob) {
+            return native.utf8Decode(body._bytes);
+        }
         return String(body);
     }
 
     function defaultContentType(body) {
         if (typeof body === "string" || body instanceof String) {
             return "text/plain;charset=UTF-8";
+        }
+        if (typeof URLSearchParams === "function" && body instanceof URLSearchParams) {
+            return "application/x-www-form-urlencoded;charset=UTF-8";
+        }
+        if (body instanceof Blob) {
+            return body.type || null;
         }
         return null;
     }
@@ -1832,7 +1844,10 @@
             });
         });
         define(proto, "blob", function () {
-            return Promise.reject(domException("Blob is not supported", "NotSupportedError"));
+            var type = this._headers && this._headers.get ? this._headers.get("content-type") : null;
+            return this.arrayBuffer().then(function (buffer) {
+                return new Blob([buffer], { type: type || "" });
+            });
         });
         define(proto, "formData", function () {
             return Promise.reject(domException("FormData is not supported", "NotSupportedError"));
@@ -1858,8 +1873,9 @@
             throw new TypeError("Request with GET/HEAD method cannot have body.");
         }
         var headers = new Headers(init.headers !== undefined ? init.headers : (base ? base.headers : undefined));
-        var bodyText = bodyToString(body);
-        var contentType = defaultContentType(body);
+        var multipart = body instanceof FormData ? encodeMultipart(body) : null;
+        var bodyText = multipart ? native.utf8Decode(multipart.bytes) : bodyToString(body);
+        var contentType = multipart ? multipart.type : defaultContentType(body);
         if (bodyText !== null && contentType !== null && !headers.has("content-type")) {
             headers.set("content-type", contentType);
         }
@@ -2220,6 +2236,1219 @@
     define(global, "Request", Request);
     define(global, "Response", Response);
     define(Window.prototype, "fetch", fetch);
+
+    function defineGetter(proto, name, get, set) {
+        Object.defineProperty(proto, name, { get: get, set: set, configurable: true, enumerable: true });
+    }
+
+    function defineMissing(target, name, value) {
+        if (!(name in target)) {
+            define(target, name, value);
+        }
+    }
+
+    function Storage() {
+        throw new TypeError("Illegal constructor");
+    }
+
+    var storageQuota = 5 * 1024 * 1024;
+
+    function storageKey() {
+        var origin = native.origin(location.href);
+        if (origin !== "null") {
+            return origin;
+        }
+        return location.protocol === "file:" ? "file://" : null;
+    }
+
+    function parseStore(text, data) {
+        data.clear();
+        if (!text) {
+            return;
+        }
+        try {
+            var obj = JSON.parse(text);
+            Object.keys(obj).forEach(function (k) {
+                data.set(k, String(obj[k]));
+            });
+        } catch (e) {
+        }
+    }
+
+    function makeStorage(persistent) {
+        var key = storageKey();
+        var data = new Map();
+        var read = persistent ? native.storageRead : native.sessionRead;
+        var write = persistent ? native.storageWrite : native.sessionWrite;
+        var store = Object.create(Storage.prototype);
+        function load() {
+            if (key !== null) {
+                parseStore(read(key), data);
+            }
+        }
+        function save(next) {
+            var obj = {};
+            next.forEach(function (v, k) {
+                obj[k] = v;
+            });
+            var text = JSON.stringify(obj);
+            if (text.length * 2 > storageQuota) {
+                throw domException("The quota has been exceeded.", "QuotaExceededError");
+            }
+            if (key !== null) {
+                write(key, next.size ? text : null);
+            }
+            data = next;
+        }
+        function change(fn) {
+            load();
+            var next = new Map(data);
+            fn(next);
+            save(next);
+        }
+        load();
+        define(store, "_get", function (k) {
+            return data.has(k) ? data.get(k) : null;
+        });
+        define(store, "_keys", function () {
+            return Array.from(data.keys());
+        });
+        define(store, "_change", change);
+        return new Proxy(store, {
+            get: function (target, prop) {
+                if (typeof prop === "symbol" || prop in target) {
+                    return target[prop];
+                }
+                var v = target._get(prop);
+                return v === null ? undefined : v;
+            },
+            set: function (target, prop, value) {
+                if (typeof prop === "symbol") {
+                    target[prop] = value;
+                } else {
+                    target.setItem(prop, value);
+                }
+                return true;
+            },
+            has: function (target, prop) {
+                return prop in target || (typeof prop === "string" && target._get(prop) !== null);
+            },
+            deleteProperty: function (target, prop) {
+                if (typeof prop === "string" && !(prop in target)) {
+                    target.removeItem(prop);
+                }
+                return true;
+            },
+            ownKeys: function (target) {
+                return target._keys();
+            },
+            getOwnPropertyDescriptor: function (target, prop) {
+                if (typeof prop !== "string" || prop in target) {
+                    return undefined;
+                }
+                var v = target._get(prop);
+                return v === null ? undefined : { value: v, writable: true, enumerable: true, configurable: true };
+            }
+        });
+    }
+
+    define(Storage.prototype, "getItem", function (k) {
+        return this._get(String(k));
+    });
+    define(Storage.prototype, "setItem", function (k, v) {
+        k = String(k);
+        v = String(v);
+        this._change(function (m) {
+            m.set(k, v);
+        });
+    });
+    define(Storage.prototype, "removeItem", function (k) {
+        k = String(k);
+        this._change(function (m) {
+            m.delete(k);
+        });
+    });
+    define(Storage.prototype, "clear", function () {
+        this._change(function (m) {
+            m.clear();
+        });
+    });
+    define(Storage.prototype, "key", function (i) {
+        var keys = this._keys();
+        i = Number(i) >>> 0;
+        return i < keys.length ? keys[i] : null;
+    });
+    Object.defineProperty(Storage.prototype, "length", { get: function () { return this._keys().length; }, configurable: true });
+    define(Storage.prototype, Symbol.toStringTag, "Storage");
+    define(global, "Storage", Storage);
+
+    var localStore = null;
+    var sessionStore = null;
+    defineGetter(Window.prototype, "localStorage", function () {
+        return localStore || (localStore = makeStorage(true));
+    });
+    defineGetter(Window.prototype, "sessionStorage", function () {
+        return sessionStore || (sessionStore = makeStorage(false));
+    });
+
+    defineGetter(Document.prototype, "readyState", function () {
+        return ["loading", "interactive", "complete"][native.readyState()] || "loading";
+    });
+    defineGetter(Document.prototype, "forms", function () {
+        return this.getElementsByTagName("form");
+    });
+    defineGetter(Document.prototype, "images", function () {
+        return this.getElementsByTagName("img");
+    });
+    defineGetter(Document.prototype, "scripts", function () {
+        return this.getElementsByTagName("script");
+    });
+    defineGetter(Document.prototype, "links", function () {
+        return this.querySelectorAll("a[href], area[href]");
+    });
+    defineGetter(Document.prototype, "activeElement", function () {
+        return this.body || this.documentElement;
+    });
+    defineGetter(Document.prototype, "hidden", function () {
+        return false;
+    });
+    defineGetter(Document.prototype, "visibilityState", function () {
+        return "visible";
+    });
+    defineMissing(Document.prototype, "hasFocus", function () {
+        return true;
+    });
+
+    defineMissing(Element.prototype, "getAttributeNames", function () {
+        var attrs = this.attributes, names = [];
+        for (var i = 0; i < attrs.length; i++) {
+            names.push(attrs.item(i).name);
+        }
+        return names;
+    });
+    defineMissing(Element.prototype, "toggleAttribute", function (name, force) {
+        var has = this.hasAttribute(name);
+        if (force === undefined ? has : !force) {
+            if (has) {
+                this.removeAttribute(name);
+            }
+            return false;
+        }
+        if (!has) {
+            this.setAttribute(name, "");
+        }
+        return true;
+    });
+    defineGetter(Element.prototype, "outerHTML", function () {
+        var holder = document.createElement("div");
+        holder.appendChild(this.cloneNode(true));
+        return holder.innerHTML;
+    }, function (html) {
+        var parent = this.parentNode;
+        if (parent === null) {
+            return;
+        }
+        var holder = document.createElement("div");
+        holder.innerHTML = String(html);
+        while (holder.firstChild) {
+            parent.insertBefore(holder.firstChild, this);
+        }
+        parent.removeChild(this);
+    });
+    defineMissing(Element.prototype, "getBoundingClientRect", function () {
+        return new DOMRect(0, 0, 0, 0);
+    });
+    defineMissing(Element.prototype, "getClientRects", function () {
+        return [];
+    });
+    defineMissing(Element.prototype, "scrollIntoView", function () {
+    });
+    defineGetter(Node.prototype, "isConnected", function () {
+        var n = this;
+        while (n.parentNode) {
+            n = n.parentNode;
+        }
+        return n.nodeType === 9;
+    });
+    defineMissing(Node.prototype, "getRootNode", function () {
+        var n = this;
+        while (n.parentNode) {
+            n = n.parentNode;
+        }
+        return n;
+    });
+    defineGetter(HTMLElement.prototype, "hidden", function () {
+        return this.hasAttribute("hidden");
+    }, function (v) {
+        if (v) {
+            this.setAttribute("hidden", "");
+        } else {
+            this.removeAttribute("hidden");
+        }
+    });
+    defineGetter(HTMLElement.prototype, "innerText", function () {
+        return this.textContent;
+    }, function (v) {
+        this.textContent = v === null || v === undefined ? "" : String(v);
+    });
+
+    var datasets = new WeakMap();
+    function dataAttrName(prop) {
+        return "data-" + prop.replace(/[A-Z]/g, function (c) { return "-" + c.toLowerCase(); });
+    }
+    defineGetter(HTMLElement.prototype, "dataset", function () {
+        var el = this;
+        var map = datasets.get(el);
+        if (map) {
+            return map;
+        }
+        map = new Proxy(Object.create(null), {
+            get: function (target, prop) {
+                if (typeof prop !== "string") {
+                    return undefined;
+                }
+                var v = el.getAttribute(dataAttrName(prop));
+                return v === null ? undefined : v;
+            },
+            set: function (target, prop, value) {
+                if (typeof prop === "string") {
+                    el.setAttribute(dataAttrName(prop), String(value));
+                }
+                return true;
+            },
+            has: function (target, prop) {
+                return typeof prop === "string" && el.hasAttribute(dataAttrName(prop));
+            },
+            deleteProperty: function (target, prop) {
+                if (typeof prop === "string") {
+                    el.removeAttribute(dataAttrName(prop));
+                }
+                return true;
+            },
+            ownKeys: function () {
+                return el.getAttributeNames().filter(function (n) {
+                    return n.indexOf("data-") === 0;
+                }).map(function (n) {
+                    return n.slice(5).replace(/-([a-z])/g, function (m, c) { return c.toUpperCase(); });
+                });
+            },
+            getOwnPropertyDescriptor: function (target, prop) {
+                if (typeof prop !== "string") {
+                    return undefined;
+                }
+                var v = el.getAttribute(dataAttrName(prop));
+                return v === null ? undefined : { value: v, writable: true, enumerable: true, configurable: true };
+            }
+        });
+        datasets.set(el, map);
+        return map;
+    });
+
+    define(HTMLElement.prototype, "click", function () {
+        var tag = this.tagName;
+        var type = tag === "INPUT" ? String(this.getAttribute("type") || "").toLowerCase() : "";
+        var before = type === "checkbox" || type === "radio" ? this.checked : null;
+        if (type === "checkbox") {
+            this.checked = !before;
+        } else if (type === "radio") {
+            this.checked = true;
+        }
+        var ev = document.createEvent("Event");
+        ev.initEvent("click", true, true);
+        var go = this.dispatchEvent(ev);
+        if (!go && before !== null) {
+            this.checked = before;
+        }
+        if (go && tag === "A" && this.hasAttribute("href")) {
+            var href = native.resolve(this.getAttribute("href"));
+            if (href !== null && !/^javascript:/i.test(href)) {
+                location.href = href;
+            }
+        }
+    });
+
+    function DOMRect(x, y, width, height) {
+        this.x = Number(x) || 0;
+        this.y = Number(y) || 0;
+        this.width = Number(width) || 0;
+        this.height = Number(height) || 0;
+        this.left = Math.min(this.x, this.x + this.width);
+        this.top = Math.min(this.y, this.y + this.height);
+        this.right = Math.max(this.x, this.x + this.width);
+        this.bottom = Math.max(this.y, this.y + this.height);
+    }
+    define(DOMRect.prototype, "toJSON", function () {
+        return { x: this.x, y: this.y, width: this.width, height: this.height, top: this.top, right: this.right, bottom: this.bottom, left: this.left };
+    });
+    defineMissing(global, "DOMRect", DOMRect);
+
+    var historyState = null;
+    var historyObject = {};
+    Object.defineProperty(historyObject, "length", { get: function () { return 1; }, enumerable: true });
+    Object.defineProperty(historyObject, "state", { get: function () { return historyState; }, enumerable: true });
+    Object.defineProperty(historyObject, "scrollRestoration", { value: "auto", writable: true, enumerable: true });
+    function changeState(state, title, url) {
+        if (url !== undefined && url !== null) {
+            var target = native.resolve(String(url));
+            if (target === null || native.origin(target) !== native.origin(location.href)) {
+                throw domException("The URL is not of the same origin as the document.", "SecurityError");
+            }
+        }
+        historyState = state === undefined ? null : structuredCloneImpl(state);
+    }
+    define(historyObject, "pushState", changeState);
+    define(historyObject, "replaceState", changeState);
+    define(historyObject, "back", function () {});
+    define(historyObject, "forward", function () {});
+    define(historyObject, "go", function (delta) {
+        if (!delta) {
+            location.reload();
+        }
+    });
+    define(historyObject, Symbol.toStringTag, "History");
+    defineGetter(Window.prototype, "history", function () {
+        return historyObject;
+    });
+
+    var screenObject = {};
+    ["width", "availWidth"].forEach(function (name) {
+        Object.defineProperty(screenObject, name, { get: function () { return global.outerWidth || global.innerWidth || 1024; }, enumerable: true });
+    });
+    ["height", "availHeight"].forEach(function (name) {
+        Object.defineProperty(screenObject, name, { get: function () { return global.outerHeight || global.innerHeight || 768; }, enumerable: true });
+    });
+    define(screenObject, "colorDepth", 24);
+    define(screenObject, "pixelDepth", 24);
+    define(screenObject, Symbol.toStringTag, "Screen");
+    defineGetter(Window.prototype, "screen", function () {
+        return screenObject;
+    });
+
+    function languages() {
+        return native.language().split(",").map(function (part) {
+            return part.split(";")[0].trim();
+        }).filter(function (part) {
+            return part.length > 0;
+        });
+    }
+    defineGetter(Navigator.prototype, "language", function () {
+        return languages()[0] || "en";
+    });
+    defineGetter(Navigator.prototype, "languages", function () {
+        var list = languages();
+        return Object.freeze(list.length ? list : ["en"]);
+    });
+    defineGetter(Navigator.prototype, "cookieEnabled", function () {
+        return true;
+    });
+    defineGetter(Navigator.prototype, "onLine", function () {
+        return true;
+    });
+    defineGetter(Navigator.prototype, "hardwareConcurrency", function () {
+        return 1;
+    });
+
+    var integerArrays = [Int8Array, Uint8Array, Uint8ClampedArray, Int16Array, Uint16Array, Int32Array, Uint32Array, BigInt64Array, BigUint64Array];
+    var cryptoObject = {};
+    define(cryptoObject, "getRandomValues", function (array) {
+        if (!integerArrays.some(function (t) { return array instanceof t; })) {
+            throw domException("The data is not an integer typed array.", "TypeMismatchError");
+        }
+        if (array.byteLength > 65536) {
+            throw domException("The requested length exceeds 65536 bytes.", "QuotaExceededError");
+        }
+        new Uint8Array(array.buffer, array.byteOffset, array.byteLength).set(new Uint8Array(native.random(array.byteLength)));
+        return array;
+    });
+    define(cryptoObject, "randomUUID", function () {
+        var b = new Uint8Array(native.random(16));
+        b[6] = (b[6] & 0x0f) | 0x40;
+        b[8] = (b[8] & 0x3f) | 0x80;
+        var h = Array.from(b, function (x) { return (x + 256).toString(16).slice(1); }).join("");
+        return h.slice(0, 8) + "-" + h.slice(8, 12) + "-" + h.slice(12, 16) + "-" + h.slice(16, 20) + "-" + h.slice(20);
+    });
+    define(cryptoObject, Symbol.toStringTag, "Crypto");
+    defineGetter(Window.prototype, "crypto", function () {
+        return cryptoObject;
+    });
+
+    function structuredCloneImpl(value, seen) {
+        if (value === null || typeof value !== "object") {
+            if (typeof value === "function" || typeof value === "symbol") {
+                throw domException(String(value) + " could not be cloned.", "DataCloneError");
+            }
+            return value;
+        }
+        seen = seen || new Map();
+        if (seen.has(value)) {
+            return seen.get(value);
+        }
+        var copy;
+        if (value instanceof Date) {
+            copy = new Date(value.getTime());
+        } else if (value instanceof RegExp) {
+            copy = new RegExp(value.source, value.flags);
+        } else if (value instanceof ArrayBuffer) {
+            copy = value.slice(0);
+        } else if (ArrayBuffer.isView(value)) {
+            copy = new value.constructor(structuredCloneImpl(value.buffer, seen), value.byteOffset, value instanceof DataView ? value.byteLength : value.length);
+        } else if (value instanceof Map) {
+            copy = new Map();
+            seen.set(value, copy);
+            value.forEach(function (v, k) {
+                copy.set(structuredCloneImpl(k, seen), structuredCloneImpl(v, seen));
+            });
+            return copy;
+        } else if (value instanceof Set) {
+            copy = new Set();
+            seen.set(value, copy);
+            value.forEach(function (v) {
+                copy.add(structuredCloneImpl(v, seen));
+            });
+            return copy;
+        } else if (value instanceof Error) {
+            copy = new Error(value.message);
+            copy.name = value.name;
+        } else if (Array.isArray(value)) {
+            copy = [];
+            seen.set(value, copy);
+            value.forEach(function (v, i) {
+                copy[i] = structuredCloneImpl(v, seen);
+            });
+            return copy;
+        } else if (typeof Blob === "function" && value instanceof Blob) {
+            return value;
+        } else if (value instanceof Node || value instanceof Promise || value instanceof WeakMap || value instanceof WeakSet) {
+            throw domException("The object could not be cloned.", "DataCloneError");
+        } else {
+            copy = {};
+            seen.set(value, copy);
+            Object.keys(value).forEach(function (k) {
+                copy[k] = structuredCloneImpl(value[k], seen);
+            });
+            return copy;
+        }
+        seen.set(value, copy);
+        return copy;
+    }
+    defineMissing(global, "structuredClone", function structuredClone(value) {
+        return structuredCloneImpl(value);
+    });
+
+    var idleCallbacks = new Map();
+    var nextIdle = 1;
+    defineMissing(Window.prototype, "requestIdleCallback", function (fn, options) {
+        var id = nextIdle++;
+        var start = Date.now();
+        idleCallbacks.set(id, global.setTimeout(function () {
+            idleCallbacks.delete(id);
+            fn({
+                didTimeout: false,
+                timeRemaining: function () {
+                    return Math.max(0, 50 - (Date.now() - start));
+                }
+            });
+        }, 1));
+        return id;
+    });
+    defineMissing(Window.prototype, "cancelIdleCallback", function (id) {
+        if (idleCallbacks.has(id)) {
+            global.clearTimeout(idleCallbacks.get(id));
+            idleCallbacks.delete(id);
+        }
+    });
+
+    function Image(width, height) {
+        var img = document.createElement("img");
+        if (width !== undefined) {
+            img.setAttribute("width", String(width));
+        }
+        if (height !== undefined) {
+            img.setAttribute("height", String(height));
+        }
+        return img;
+    }
+    Image.prototype = HTMLImageElement.prototype;
+    defineMissing(global, "Image", Image);
+    function Option(text, value, defaultSelected, selected) {
+        var opt = document.createElement("option");
+        if (text !== undefined) {
+            opt.textContent = String(text);
+        }
+        if (value !== undefined) {
+            opt.setAttribute("value", String(value));
+        }
+        if (defaultSelected) {
+            opt.setAttribute("selected", "");
+        }
+        if (selected) {
+            opt.selected = true;
+        }
+        return opt;
+    }
+    Option.prototype = HTMLOptionElement.prototype;
+    defineMissing(global, "Option", Option);
+
+    function ObserverEntries(callback, make) {
+        this._callback = callback;
+        this._targets = [];
+        this._make = make;
+    }
+    function makeObserver(name, make) {
+        var Ctor = function (callback) {
+            if (!new.target) {
+                throw new TypeError("Constructor " + name + " requires 'new'");
+            }
+            if (typeof callback !== "function") {
+                throw new TypeError("The callback provided is not a function.");
+            }
+            ObserverEntries.call(this, callback, make);
+        };
+        define(Ctor.prototype, "observe", function (target) {
+            var self = this;
+            if (this._targets.indexOf(target) >= 0) {
+                return;
+            }
+            this._targets.push(target);
+            Promise.resolve().then(function () {
+                if (self._targets.indexOf(target) >= 0) {
+                    self._callback.call(self, [self._make(target)], self);
+                }
+            });
+        });
+        define(Ctor.prototype, "unobserve", function (target) {
+            this._targets = this._targets.filter(function (t) { return t !== target; });
+        });
+        define(Ctor.prototype, "disconnect", function () {
+            this._targets = [];
+        });
+        define(Ctor.prototype, "takeRecords", function () {
+            return [];
+        });
+        define(Ctor.prototype, Symbol.toStringTag, name);
+        Object.defineProperty(Ctor, "name", { value: name });
+        defineMissing(global, name, Ctor);
+    }
+    makeObserver("IntersectionObserver", function (target) {
+        var rect = new DOMRect(0, 0, 0, 0);
+        return { target: target, isIntersecting: true, intersectionRatio: 1, boundingClientRect: rect, intersectionRect: rect, rootBounds: null, time: Date.now() };
+    });
+    makeObserver("ResizeObserver", function (target) {
+        var rect = new DOMRect(0, 0, 0, 0);
+        return { target: target, contentRect: rect, borderBoxSize: [{ inlineSize: 0, blockSize: 0 }], contentBoxSize: [{ inlineSize: 0, blockSize: 0 }] };
+    });
+
+    function blobBytes(parts) {
+        var chunks = [];
+        var total = 0;
+        (parts || []).forEach(function (part) {
+            var bytes;
+            if (part instanceof Blob) {
+                bytes = part._bytes;
+            } else if (part instanceof ArrayBuffer) {
+                bytes = new Uint8Array(part.slice(0));
+            } else if (ArrayBuffer.isView(part)) {
+                bytes = new Uint8Array(part.buffer.slice(part.byteOffset, part.byteOffset + part.byteLength));
+            } else {
+                bytes = new Uint8Array(native.utf8Encode(String(part)));
+            }
+            chunks.push(bytes);
+            total += bytes.length;
+        });
+        var out = new Uint8Array(total);
+        var offset = 0;
+        chunks.forEach(function (c) {
+            out.set(c, offset);
+            offset += c.length;
+        });
+        return out;
+    }
+    function Blob(parts, options) {
+        if (!new.target) {
+            throw new TypeError("Constructor Blob requires 'new'");
+        }
+        define(this, "_bytes", blobBytes(parts));
+        define(this, "_type", options && options.type ? String(options.type).toLowerCase() : "");
+    }
+    Object.defineProperty(Blob.prototype, "size", { get: function () { return this._bytes.length; }, configurable: true });
+    Object.defineProperty(Blob.prototype, "type", { get: function () { return this._type; }, configurable: true });
+    define(Blob.prototype, "arrayBuffer", function () {
+        return Promise.resolve(this._bytes.slice().buffer);
+    });
+    define(Blob.prototype, "bytes", function () {
+        return Promise.resolve(this._bytes.slice());
+    });
+    define(Blob.prototype, "text", function () {
+        return Promise.resolve(native.utf8Decode(this._bytes));
+    });
+    define(Blob.prototype, "slice", function (start, end, type) {
+        return new Blob([this._bytes.slice(start, end)], { type: type || "" });
+    });
+    define(Blob.prototype, Symbol.toStringTag, "Blob");
+    function File(parts, name, options) {
+        if (!new.target) {
+            throw new TypeError("Constructor File requires 'new'");
+        }
+        var blob = Reflect.construct(Blob, [parts, options], new.target);
+        define(blob, "_name", String(name));
+        define(blob, "_lastModified", options && options.lastModified !== undefined ? Number(options.lastModified) : Date.now());
+        return blob;
+    }
+    Object.setPrototypeOf(File.prototype, Blob.prototype);
+    Object.defineProperty(File.prototype, "name", { get: function () { return this._name; }, configurable: true });
+    Object.defineProperty(File.prototype, "lastModified", { get: function () { return this._lastModified; }, configurable: true });
+    define(File.prototype, Symbol.toStringTag, "File");
+    defineMissing(global, "Blob", Blob);
+    defineMissing(global, "File", File);
+
+    function SimpleEventTarget() {
+    }
+    define(SimpleEventTarget.prototype, "addEventListener", function (type, fn) {
+        if (typeof fn !== "function" && !(fn && typeof fn.handleEvent === "function")) {
+            return;
+        }
+        var map = this._listeners || (define(this, "_listeners", {}), this._listeners);
+        (map[type] || (map[type] = [])).push(fn);
+    });
+    define(SimpleEventTarget.prototype, "removeEventListener", function (type, fn) {
+        var list = this._listeners && this._listeners[type];
+        if (list) {
+            this._listeners[type] = list.filter(function (f) { return f !== fn; });
+        }
+    });
+    define(SimpleEventTarget.prototype, "_emit", function (type, extra) {
+        var self = this;
+        var ev = { type: type, target: this, currentTarget: this, bubbles: false, cancelable: false, defaultPrevented: false, timeStamp: Date.now(), preventDefault: function () {}, stopPropagation: function () {} };
+        if (extra) {
+            Object.keys(extra).forEach(function (k) {
+                ev[k] = extra[k];
+            });
+        }
+        var handlers = [];
+        if (typeof this["on" + type] === "function") {
+            handlers.push(this["on" + type]);
+        }
+        handlers = handlers.concat((this._listeners && this._listeners[type]) || []);
+        handlers.forEach(function (fn) {
+            try {
+                if (typeof fn === "function") {
+                    fn.call(self, ev);
+                } else {
+                    fn.handleEvent(ev);
+                }
+            } catch (e) {
+                reportPreludeError(e);
+            }
+        });
+    });
+    function reportPreludeError(e) {
+        Promise.reject(e);
+    }
+
+    function FileReader() {
+        if (!new.target) {
+            throw new TypeError("Constructor FileReader requires 'new'");
+        }
+        define(this, "_state", 0);
+        define(this, "_result", null);
+        ["onload", "onerror", "onloadend", "onloadstart", "onprogress", "onabort"].forEach(function (n) {
+            this[n] = null;
+        }, this);
+    }
+    Object.setPrototypeOf(FileReader.prototype, SimpleEventTarget.prototype);
+    Object.defineProperty(FileReader.prototype, "readyState", { get: function () { return this._state; }, configurable: true });
+    Object.defineProperty(FileReader.prototype, "result", { get: function () { return this._result; }, configurable: true });
+    Object.defineProperty(FileReader.prototype, "error", { get: function () { return null; }, configurable: true });
+    function readBlob(reader, blob, convert) {
+        if (!(blob instanceof Blob)) {
+            throw new TypeError("The argument is not a Blob.");
+        }
+        reader._state = 1;
+        reader._emit("loadstart");
+        Promise.resolve().then(function () {
+            reader._result = convert(blob);
+            reader._state = 2;
+            reader._emit("load");
+            reader._emit("loadend");
+        });
+    }
+    define(FileReader.prototype, "readAsText", function (blob) {
+        readBlob(this, blob, function (b) { return native.utf8Decode(b._bytes); });
+    });
+    define(FileReader.prototype, "readAsArrayBuffer", function (blob) {
+        readBlob(this, blob, function (b) { return b._bytes.slice().buffer; });
+    });
+    define(FileReader.prototype, "readAsDataURL", function (blob) {
+        readBlob(this, blob, function (b) {
+            var s = "";
+            for (var i = 0; i < b._bytes.length; i++) {
+                s += String.fromCharCode(b._bytes[i]);
+            }
+            return "data:" + (b.type || "application/octet-stream") + ";base64," + btoa(s);
+        });
+    });
+    define(FileReader.prototype, "abort", function () {
+        this._state = 2;
+    });
+    defineMissing(global, "FileReader", FileReader);
+
+    function formControlValues(form) {
+        var entries = [];
+        Array.from(form.getElementsByTagName("*")).forEach(function (el) {
+            var name = el.getAttribute("name");
+            var tag = el.tagName;
+            if (!name || el.hasAttribute("disabled") || (tag !== "INPUT" && tag !== "SELECT" && tag !== "TEXTAREA")) {
+                return;
+            }
+            var type = String(el.getAttribute("type") || "").toLowerCase();
+            if (tag === "INPUT" && ["submit", "button", "reset", "image", "file"].indexOf(type) >= 0) {
+                return;
+            }
+            if ((type === "checkbox" || type === "radio") && !el.checked) {
+                return;
+            }
+            if (tag === "SELECT") {
+                Array.from(el.getElementsByTagName("option")).forEach(function (opt) {
+                    if (opt.selected) {
+                        entries.push([name, opt.hasAttribute("value") ? opt.getAttribute("value") : opt.textContent]);
+                    }
+                });
+                return;
+            }
+            entries.push([name, type === "checkbox" || type === "radio" ? (el.hasAttribute("value") ? el.getAttribute("value") : "on") : String(el.value === undefined ? "" : el.value)]);
+        });
+        return entries;
+    }
+    function FormData(form) {
+        if (!new.target) {
+            throw new TypeError("Constructor FormData requires 'new'");
+        }
+        define(this, "_entries", form ? formControlValues(form) : []);
+    }
+    function formValue(value, filename) {
+        if (value instanceof Blob) {
+            return value instanceof File && filename === undefined ? value : new File([value], filename !== undefined ? String(filename) : "blob", { type: value.type });
+        }
+        return String(value);
+    }
+    define(FormData.prototype, "append", function (name, value, filename) {
+        this._entries.push([String(name), formValue(value, filename)]);
+    });
+    define(FormData.prototype, "set", function (name, value, filename) {
+        name = String(name);
+        var v = formValue(value, filename);
+        var i = this._entries.findIndex(function (e) { return e[0] === name; });
+        this._entries = this._entries.filter(function (e, j) { return e[0] !== name || j === i; });
+        if (i >= 0) {
+            this._entries[this._entries.findIndex(function (e) { return e[0] === name; })][1] = v;
+        } else {
+            this._entries.push([name, v]);
+        }
+    });
+    define(FormData.prototype, "get", function (name) {
+        var e = this._entries.find(function (e) { return e[0] === String(name); });
+        return e ? e[1] : null;
+    });
+    define(FormData.prototype, "getAll", function (name) {
+        return this._entries.filter(function (e) { return e[0] === String(name); }).map(function (e) { return e[1]; });
+    });
+    define(FormData.prototype, "has", function (name) {
+        return this._entries.some(function (e) { return e[0] === String(name); });
+    });
+    define(FormData.prototype, "delete", function (name) {
+        this._entries = this._entries.filter(function (e) { return e[0] !== String(name); });
+    });
+    define(FormData.prototype, "entries", function () {
+        return this._entries.map(function (e) { return [e[0], e[1]]; })[Symbol.iterator]();
+    });
+    define(FormData.prototype, "keys", function () {
+        return this._entries.map(function (e) { return e[0]; })[Symbol.iterator]();
+    });
+    define(FormData.prototype, "values", function () {
+        return this._entries.map(function (e) { return e[1]; })[Symbol.iterator]();
+    });
+    define(FormData.prototype, "forEach", function (fn, thisArg) {
+        var self = this;
+        this._entries.slice().forEach(function (e) {
+            fn.call(thisArg, e[1], e[0], self);
+        });
+    });
+    define(FormData.prototype, Symbol.iterator, FormData.prototype.entries);
+    define(FormData.prototype, Symbol.toStringTag, "FormData");
+    defineMissing(global, "FormData", FormData);
+
+    function encodeMultipart(formData) {
+        var boundary = "----NetSurfyFormBoundary" + Array.from(new Uint8Array(native.random(8)), function (x) { return (x + 256).toString(16).slice(1); }).join("");
+        var parts = [];
+        formData._entries.forEach(function (e) {
+            var head = "--" + boundary + "\r\nContent-Disposition: form-data; name=\"" + e[0].replace(/"/g, "%22") + "\"";
+            if (e[1] instanceof Blob) {
+                head += "; filename=\"" + (e[1].name || "blob").replace(/"/g, "%22") + "\"\r\nContent-Type: " + (e[1].type || "application/octet-stream");
+                parts.push(head + "\r\n\r\n", e[1], "\r\n");
+            } else {
+                parts.push(head + "\r\n\r\n" + e[1] + "\r\n");
+            }
+        });
+        parts.push("--" + boundary + "--\r\n");
+        return { bytes: blobBytes(parts), type: "multipart/form-data; boundary=" + boundary };
+    }
+
+    var intlLocale = function () {
+        return languages()[0] || "en-US";
+    };
+    function groupDigits(text) {
+        var neg = text[0] === "-";
+        var body = neg ? text.slice(1) : text;
+        var parts = body.split(".");
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return (neg ? "-" : "") + parts.join(".");
+    }
+    function NumberFormat(locale, options) {
+        if (!(this instanceof NumberFormat)) {
+            return new NumberFormat(locale, options);
+        }
+        this._options = options || {};
+    }
+    define(NumberFormat.prototype, "format", function (n) {
+        var o = this._options;
+        var value = Number(n);
+        if (!isFinite(value)) {
+            return String(value);
+        }
+        if (o.style === "percent") {
+            value *= 100;
+        }
+        var min = o.minimumFractionDigits !== undefined ? o.minimumFractionDigits : (o.style === "currency" ? 2 : 0);
+        var max = o.maximumFractionDigits !== undefined ? Math.max(o.maximumFractionDigits, min) : Math.max(min, o.style === "currency" ? 2 : (o.style === "percent" ? 0 : 3));
+        var text = value.toFixed(max);
+        if (max > min) {
+            text = text.replace(new RegExp("(\\.\\d{" + min + "}\\d*?)0+$"), "$1").replace(/\.$/, "");
+        }
+        if (o.useGrouping !== false) {
+            text = groupDigits(text);
+        }
+        if (o.style === "percent") {
+            return text + "%";
+        }
+        if (o.style === "currency") {
+            var symbols = { USD: "$", EUR: "€", GBP: "£", JPY: "¥" };
+            var c = String(o.currency || "").toUpperCase();
+            return (symbols[c] || c + " ") + text;
+        }
+        return text;
+    });
+    define(NumberFormat.prototype, "formatToParts", function (n) {
+        return [{ type: "literal", value: this.format(n) }];
+    });
+    define(NumberFormat.prototype, "resolvedOptions", function () {
+        return Object.assign({ locale: intlLocale(), numberingSystem: "latn", style: "decimal" }, this._options);
+    });
+    function DateTimeFormat(locale, options) {
+        if (!(this instanceof DateTimeFormat)) {
+            return new DateTimeFormat(locale, options);
+        }
+        this._options = options || {};
+    }
+    var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    var dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    define(DateTimeFormat.prototype, "format", function (date) {
+        var d = date === undefined ? new Date() : new Date(date);
+        var o = this._options;
+        if (isNaN(d.getTime())) {
+            throw new RangeError("Invalid time value");
+        }
+        var hasDate = o.year || o.month || o.day || o.weekday || o.dateStyle;
+        var hasTime = o.hour || o.minute || o.second || o.timeStyle;
+        if (!hasDate && !hasTime) {
+            hasDate = true;
+        }
+        var out = [];
+        if (hasDate) {
+            var parts = [];
+            if (o.weekday) {
+                parts.push(o.weekday === "long" ? dayNames[d.getDay()] : dayNames[d.getDay()].slice(0, 3));
+            }
+            if (o.month === "long" || o.month === "short" || o.dateStyle === "long" || o.dateStyle === "full" || o.dateStyle === "medium") {
+                var m = monthNames[d.getMonth()];
+                parts.push((o.month === "short" || o.dateStyle === "medium" ? m.slice(0, 3) : m) + " " + d.getDate() + ", " + d.getFullYear());
+            } else {
+                parts.push((d.getMonth() + 1) + "/" + d.getDate() + "/" + d.getFullYear());
+            }
+            out.push(parts.join(", "));
+        }
+        if (hasTime) {
+            var h = d.getHours();
+            var hour12 = o.hour12 !== false && o.hourCycle !== "h23";
+            var t = (hour12 ? (h % 12 || 12) : String(h).padStart(2, "0")) + ":" + String(d.getMinutes()).padStart(2, "0");
+            if (o.second || o.timeStyle === "medium" || o.timeStyle === "long") {
+                t += ":" + String(d.getSeconds()).padStart(2, "0");
+            }
+            out.push(hour12 ? t + (h < 12 ? " AM" : " PM") : t);
+        }
+        return out.join(", ");
+    });
+    define(DateTimeFormat.prototype, "formatToParts", function (date) {
+        return [{ type: "literal", value: this.format(date) }];
+    });
+    define(DateTimeFormat.prototype, "resolvedOptions", function () {
+        return Object.assign({ locale: intlLocale(), calendar: "gregory", numberingSystem: "latn", timeZone: "UTC" }, this._options);
+    });
+    function Collator(locale, options) {
+        if (!(this instanceof Collator)) {
+            return new Collator(locale, options);
+        }
+        var o = options || {};
+        this.compare = function (a, b) {
+            a = String(a);
+            b = String(b);
+            if (o.sensitivity === "base" || o.sensitivity === "accent") {
+                a = a.toLowerCase();
+                b = b.toLowerCase();
+            }
+            if (o.numeric) {
+                return a.localeCompare(b, undefined, { numeric: true });
+            }
+            return a < b ? -1 : a > b ? 1 : 0;
+        };
+    }
+    define(Collator.prototype, "resolvedOptions", function () {
+        return { locale: intlLocale(), usage: "sort", sensitivity: "variant" };
+    });
+    function PluralRules(locale, options) {
+        if (!(this instanceof PluralRules)) {
+            throw new TypeError("Constructor PluralRules requires 'new'");
+        }
+        this._ordinal = !!(options && options.type === "ordinal");
+    }
+    define(PluralRules.prototype, "select", function (n) {
+        n = Number(n);
+        if (this._ordinal) {
+            var m10 = n % 10, m100 = n % 100;
+            return m10 === 1 && m100 !== 11 ? "one" : m10 === 2 && m100 !== 12 ? "two" : m10 === 3 && m100 !== 13 ? "few" : "other";
+        }
+        return n === 1 ? "one" : "other";
+    });
+    function RelativeTimeFormat(locale, options) {
+        if (!(this instanceof RelativeTimeFormat)) {
+            throw new TypeError("Constructor RelativeTimeFormat requires 'new'");
+        }
+        this._numeric = options && options.numeric;
+    }
+    define(RelativeTimeFormat.prototype, "format", function (value, unit) {
+        value = Number(value);
+        unit = String(unit).replace(/s$/, "");
+        var abs = Math.abs(value);
+        var label = abs === 1 ? unit : unit + "s";
+        return value < 0 || Object.is(value, -0) ? abs + " " + label + " ago" : "in " + abs + " " + label;
+    });
+    if (typeof global.Intl === "undefined") {
+        var intl = {};
+        define(intl, "NumberFormat", NumberFormat);
+        define(intl, "DateTimeFormat", DateTimeFormat);
+        define(intl, "Collator", Collator);
+        define(intl, "PluralRules", PluralRules);
+        define(intl, "RelativeTimeFormat", RelativeTimeFormat);
+        define(intl, "getCanonicalLocales", function (l) {
+            return l === undefined ? [] : [].concat(l).map(String);
+        });
+        define(intl, Symbol.toStringTag, "Intl");
+        define(global, "Intl", intl);
+    }
+
+    if (typeof console.table !== "function") {
+        define(console, "table", function (data) {
+            console.log(data);
+        });
+    }
+
+    var XHR_UNSENT = 0, XHR_OPENED = 1, XHR_HEADERS = 2, XHR_LOADING = 3, XHR_DONE = 4;
+    function XMLHttpRequest() {
+        if (!new.target) {
+            throw new TypeError("Constructor XMLHttpRequest requires 'new'");
+        }
+        define(this, "_state", XHR_UNSENT);
+        define(this, "_method", "GET");
+        define(this, "_url", null);
+        define(this, "_headers", new Headers());
+        define(this, "_response", null);
+        define(this, "_controller", null);
+        define(this, "_sent", false);
+        define(this, "_timer", null);
+        define(this, "_mime", null);
+        this.responseType = "";
+        this.timeout = 0;
+        this.withCredentials = false;
+        this.upload = Object.create(SimpleEventTarget.prototype);
+        ["onreadystatechange", "onload", "onerror", "onloadend", "onloadstart", "onprogress", "onabort", "ontimeout"].forEach(function (n) {
+            this[n] = null;
+        }, this);
+    }
+    Object.setPrototypeOf(XMLHttpRequest.prototype, SimpleEventTarget.prototype);
+    [["UNSENT", XHR_UNSENT], ["OPENED", XHR_OPENED], ["HEADERS_RECEIVED", XHR_HEADERS], ["LOADING", XHR_LOADING], ["DONE", XHR_DONE]].forEach(function (c) {
+        Object.defineProperty(XMLHttpRequest, c[0], { value: c[1], enumerable: true });
+        Object.defineProperty(XMLHttpRequest.prototype, c[0], { value: c[1], enumerable: true });
+    });
+    function xhrSetState(xhr, state) {
+        xhr._state = state;
+        xhr._emit("readystatechange");
+    }
+    Object.defineProperty(XMLHttpRequest.prototype, "readyState", { get: function () { return this._state; }, configurable: true });
+    Object.defineProperty(XMLHttpRequest.prototype, "status", { get: function () { return this._response ? this._response.status : 0; }, configurable: true });
+    Object.defineProperty(XMLHttpRequest.prototype, "statusText", { get: function () { return this._response ? this._response.statusText : ""; }, configurable: true });
+    Object.defineProperty(XMLHttpRequest.prototype, "responseURL", { get: function () { return this._response ? this._response.url : ""; }, configurable: true });
+    Object.defineProperty(XMLHttpRequest.prototype, "responseText", {
+        get: function () {
+            if (this.responseType !== "" && this.responseType !== "text") {
+                throw domException("responseText is only available if responseType is '' or 'text'.", "InvalidStateError");
+            }
+            return this._state < XHR_LOADING || !this._response ? "" : this._text;
+        },
+        configurable: true
+    });
+    Object.defineProperty(XMLHttpRequest.prototype, "responseXML", { get: function () { return null; }, configurable: true });
+    Object.defineProperty(XMLHttpRequest.prototype, "response", {
+        get: function () {
+            if (this.responseType === "" || this.responseType === "text") {
+                return this.responseText;
+            }
+            if (this._state !== XHR_DONE || !this._response) {
+                return null;
+            }
+            switch (this.responseType) {
+            case "json":
+                try {
+                    return JSON.parse(this._text);
+                } catch (e) {
+                    return null;
+                }
+            case "arraybuffer":
+                return this._buffer.slice(0);
+            case "blob":
+                return new Blob([this._buffer], { type: this._response.headers.get("content-type") || "" });
+            default:
+                return null;
+            }
+        },
+        configurable: true
+    });
+    define(XMLHttpRequest.prototype, "open", function (method, url, async) {
+        if (async === false) {
+            throw domException("Synchronous requests are not supported.", "InvalidAccessError");
+        }
+        var resolved = native.resolve(String(url));
+        if (resolved === null) {
+            throw domException("Invalid URL", "SyntaxError");
+        }
+        if (this._controller) {
+            this._controller.abort();
+        }
+        this._method = String(method).toUpperCase();
+        this._url = resolved;
+        this._headers = new Headers();
+        this._response = null;
+        this._sent = false;
+        xhrSetState(this, XHR_OPENED);
+    });
+    define(XMLHttpRequest.prototype, "setRequestHeader", function (name, value) {
+        if (this._state !== XHR_OPENED || this._sent) {
+            throw domException("The object's state must be OPENED.", "InvalidStateError");
+        }
+        this._headers.append(name, value);
+    });
+    define(XMLHttpRequest.prototype, "overrideMimeType", function (mime) {
+        this._mime = String(mime);
+    });
+    define(XMLHttpRequest.prototype, "getResponseHeader", function (name) {
+        return this._response && this._state >= XHR_HEADERS ? this._response.headers.get(name) : null;
+    });
+    define(XMLHttpRequest.prototype, "getAllResponseHeaders", function () {
+        if (!this._response || this._state < XHR_HEADERS) {
+            return "";
+        }
+        var out = "";
+        this._response.headers.forEach(function (value, name) {
+            out += name + ": " + value + "\r\n";
+        });
+        return out;
+    });
+    define(XMLHttpRequest.prototype, "send", function (body) {
+        var xhr = this;
+        if (this._state !== XHR_OPENED || this._sent) {
+            throw domException("The object's state must be OPENED.", "InvalidStateError");
+        }
+        this._sent = true;
+        var controller = new AbortController();
+        this._controller = controller;
+        var init = { method: this._method, headers: this._headers, signal: controller.signal, credentials: this.withCredentials ? "include" : "same-origin" };
+        if (this._method !== "GET" && this._method !== "HEAD" && body !== undefined && body !== null) {
+            init.body = body;
+        }
+        this._emit("loadstart");
+        if (this.timeout > 0) {
+            this._timer = global.setTimeout(function () {
+                if (xhr._controller === controller) {
+                    xhr._controller = null;
+                    controller.abort();
+                    xhrSetState(xhr, XHR_DONE);
+                    xhr._emit("timeout");
+                    xhr._emit("loadend");
+                }
+            }, this.timeout);
+        }
+        fetch(this._url, init).then(function (response) {
+            if (xhr._controller !== controller) {
+                return;
+            }
+            xhr._response = response;
+            xhrSetState(xhr, XHR_HEADERS);
+            return response.arrayBuffer().then(function (buffer) {
+                if (xhr._controller !== controller) {
+                    return;
+                }
+                xhr._controller = null;
+                if (xhr._timer !== null) {
+                    global.clearTimeout(xhr._timer);
+                    xhr._timer = null;
+                }
+                xhr._buffer = buffer;
+                xhr._text = native.utf8Decode(buffer);
+                xhrSetState(xhr, XHR_LOADING);
+                xhr._emit("progress", { loaded: buffer.byteLength, total: buffer.byteLength, lengthComputable: true });
+                xhrSetState(xhr, XHR_DONE);
+                xhr._emit("load", { loaded: buffer.byteLength, total: buffer.byteLength, lengthComputable: true });
+                xhr._emit("loadend");
+            });
+        }).catch(function (error) {
+            if (xhr._controller !== controller) {
+                return;
+            }
+            xhr._controller = null;
+            if (xhr._timer !== null) {
+                global.clearTimeout(xhr._timer);
+                xhr._timer = null;
+            }
+            xhr._response = null;
+            xhrSetState(xhr, XHR_DONE);
+            xhr._emit("error");
+            xhr._emit("loadend");
+        });
+    });
+    define(XMLHttpRequest.prototype, "abort", function () {
+        if (this._controller) {
+            var controller = this._controller;
+            this._controller = null;
+            controller.abort();
+            this._response = null;
+            if (this._state !== XHR_UNSENT) {
+                xhrSetState(this, XHR_DONE);
+                this._emit("abort");
+                this._emit("loadend");
+            }
+        }
+        this._state = XHR_UNSENT;
+    });
+    define(XMLHttpRequest.prototype, Symbol.toStringTag, "XMLHttpRequest");
+    defineMissing(global, "XMLHttpRequest", XMLHttpRequest);
 
     return {
         makeListProxy: function (inner) {

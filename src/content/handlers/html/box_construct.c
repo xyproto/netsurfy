@@ -1016,6 +1016,16 @@ box_text_transform(char *s, unsigned int len, enum css_text_transform_e tt)
  * \param  ctx  Tree construction context
  * \return  true on success, false on memory exhaustion
  */
+static void box_space_before(struct box *box)
+{
+	while (box != NULL && box->type == BOX_INLINE) {
+		box = box->prev;
+	}
+	if (box != NULL) {
+		box->space = UNKNOWN_WIDTH;
+	}
+}
+
 static bool box_construct_text(struct box_construct_ctx *ctx)
 {
 	struct box_construct_props props;
@@ -1052,8 +1062,7 @@ static bool box_construct_text(struct box_construct_ctx *ctx)
 			if (props.inline_container != NULL) {
 				assert(props.inline_container->last != NULL);
 
-				props.inline_container->last->space =
-					UNKNOWN_WIDTH;
+				box_space_before(props.inline_container->last);
 			}
 
 			free(text);
@@ -1127,8 +1136,7 @@ static bool box_construct_text(struct box_construct_ctx *ctx)
 
 			memmove(box->text, &box->text[1], box->length);
 
-			if (box->prev != NULL)
-				box->prev->space = UNKNOWN_WIDTH;
+			box_space_before(box->prev);
 		}
 	} else {
 		/* white-space: pre */

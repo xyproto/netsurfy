@@ -8,4 +8,7 @@ partial interface Window {
   [Replaceable] readonly attribute long outerWidth;
   [Replaceable] readonly attribute long outerHeight;
   [Replaceable] readonly attribute double devicePixelRatio;
+  void scroll(optional any x, optional any y);
+  void scrollTo(optional any x, optional any y);
+  void scrollBy(optional any x, optional any y);
 };
