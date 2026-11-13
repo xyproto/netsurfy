@@ -1066,16 +1066,47 @@ static nserror nsgtk_setup(int argc, char **argv, char **respath)
  * The same as the standard gtk_main loop except this ensures active
  * FD are added to the gtk poll event set.
  */
+#define NSGTK_MAX_POLLS 1024
+
+struct nsgtk_poll_set {
+	unsigned int count;
+	GPollFD fds[NSGTK_MAX_POLLS];
+};
+
+static void nsgtk_poll_set_add(struct nsgtk_poll_set *set, int fd, gushort events)
+{
+	if (set->count < NSGTK_MAX_POLLS) {
+		set->fds[set->count].fd = fd;
+		set->fds[set->count].events = events;
+		set->fds[set->count].revents = 0;
+		set->count++;
+	}
+}
+
+static bool nsgtk_poll_set_equal(const struct nsgtk_poll_set *a,
+				 const struct nsgtk_poll_set *b)
+{
+	if (a->count != b->count) {
+		return false;
+	}
+	for (unsigned int i = 0; i < a->count; i++) {
+		if (a->fds[i].fd != b->fds[i].fd ||
+		    a->fds[i].events != b->fds[i].events) {
+			return false;
+		}
+	}
+	return true;
+}
+
 static void nsgtk_main(void)
 {
+	static struct nsgtk_poll_set active;
+	static struct nsgtk_poll_set wanted;
 	fd_set read_fd_set, write_fd_set, exc_fd_set;
 	int max_fd;
-	GPollFD *fd_list[1000];
-	unsigned int fd_count;
 
 	while (!nsgtk_complete) {
 		max_fd = -1;
-		fd_count = 0;
 		FD_ZERO(&read_fd_set);
 		FD_ZERO(&write_fd_set);
 		FD_ZERO(&exc_fd_set);
@@ -1086,37 +1117,38 @@ static void nsgtk_main(void)
 		schedule_run();
 
 		fetch_fdset(&read_fd_set, &write_fd_set, &exc_fd_set, &max_fd);
+		wanted.count = 0;
 		for (int i = 0; i <= max_fd; i++) {
 			if (FD_ISSET(i, &read_fd_set)) {
-				GPollFD *fd = malloc(sizeof *fd);
-				fd->fd = i;
-				fd->events = G_IO_IN | G_IO_HUP | G_IO_ERR;
-				g_main_context_add_poll(0, fd, 0);
-				fd_list[fd_count++] = fd;
+				nsgtk_poll_set_add(&wanted,
+						   i,
+						   G_IO_IN | G_IO_HUP | G_IO_ERR);
 			}
 			if (FD_ISSET(i, &write_fd_set)) {
-				GPollFD *fd = malloc(sizeof *fd);
-				fd->fd = i;
-				fd->events = G_IO_OUT | G_IO_ERR;
-				g_main_context_add_poll(0, fd, 0);
-				fd_list[fd_count++] = fd;
+				nsgtk_poll_set_add(&wanted, i, G_IO_OUT | G_IO_ERR);
 			}
 			if (FD_ISSET(i, &exc_fd_set)) {
-				GPollFD *fd = malloc(sizeof *fd);
-				fd->fd = i;
-				fd->events = G_IO_ERR;
-				g_main_context_add_poll(0, fd, 0);
-				fd_list[fd_count++] = fd;
+				nsgtk_poll_set_add(&wanted, i, G_IO_ERR);
+			}
+		}
+
+		if (!nsgtk_poll_set_equal(&active, &wanted)) {
+			for (unsigned int i = 0; i != active.count; i++) {
+				g_main_context_remove_poll(NULL, &active.fds[i]);
+			}
+			active = wanted;
+			for (unsigned int i = 0; i != active.count; i++) {
+				g_main_context_add_poll(NULL, &active.fds[i], 0);
 			}
 		}
 
 		g_main_context_iteration(NULL, TRUE);
-
-		for (unsigned int i = 0; i != fd_count; i++) {
-			g_main_context_remove_poll(0, fd_list[i]);
-			free(fd_list[i]);
-		}
 	}
+
+	for (unsigned int i = 0; i != active.count; i++) {
+		g_main_context_remove_poll(NULL, &active.fds[i]);
+	}
+	active.count = 0;
 }
 
 
