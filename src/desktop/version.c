@@ -19,7 +19,7 @@
 #include "desktop/version.h"
 #include "testament.h"
 
-const char *const netsurfy_version = "1.1.1"
+const char *const netsurfy_version = "1.1.2"
 #if defined(CI_BUILD)
 				     " (CI #" CI_BUILD ")"
 #endif
