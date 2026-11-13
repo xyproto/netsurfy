@@ -77,6 +77,16 @@ runs code on your behalf (`js_exec()`, events, timers, etc) then call
 `qjsky_call()` with `reset_timeout` set to `true`, otherwise your code
 may be terminated early.
 
+Parts of the web platform are implemented in JavaScript, in
+`content/handlers/javascript/quickjs/prelude.js`. It runs in every new
+context before any page script and provides the selector engine
+(`querySelector`, `querySelectorAll`, `matches`, `closest`),
+`matchMedia`, custom elements, `fetch` with `Headers`, `Request`,
+`Response` and `AbortController`, and `TextEncoder`/`TextDecoder`. It
+receives a small object of native helpers from `qjsky.c` (network
+requests through the fetch layer, URL resolution, origins and UTF-8
+conversion) and returns the generics used by the bindings.
+
 Interface binding introduction
 ------------------------------
 

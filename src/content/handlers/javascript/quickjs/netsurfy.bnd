@@ -16,6 +16,7 @@ binding qjs_libdom {
 	webidl "uievents.idl";
 	webidl "urlutils.idl";
 	webidl "console.idl";
+	webidl "cssom-view.idl";
 
 	preface	%{
 /* QuickJS JavaScript bindings for NetSurfy browser
@@ -65,6 +66,7 @@ struct dom_html_br_element;
 #include "DOMSettableTokenList.bnd"
 #include "NamedNodeMap.bnd"
 #include "Element.bnd"
+#include "Attr.bnd"
 #include "HTMLCollection.bnd"
 #include "Location.bnd"
 #include "Navigator.bnd"
@@ -74,8 +76,8 @@ struct dom_html_br_element;
 
 #include "Event.bnd"
 #include "KeyboardEvent.bnd"
+#include "MutationEvent.bnd"
 
-init MutationEvent(struct dom_mutation_event *evt::evt);
 init UIEvent(struct dom_ui_event *evt::evt);
 init TextEvent(struct dom_text_event *evt::evt);
 init MutationNameEvent(struct dom_mutation_name_event *evt::evt);

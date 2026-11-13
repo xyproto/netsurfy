@@ -50,6 +50,26 @@ typedef bool(script_handler_t)(struct jsthread *jsthread,
 			       const char *name);
 
 
+static void html_script_run(html_content *c,
+			    struct dom_node *node,
+			    script_handler_t *script_handler,
+			    const uint8_t *data,
+			    size_t size,
+			    const char *name)
+{
+	struct jsthread *thread = c->jsthread;
+
+	if (node != NULL) {
+		dom_node_ref(node);
+	}
+	js_set_current_script(thread, node);
+	script_handler(thread, data, size, name);
+	js_set_current_script(thread, NULL);
+	if (node != NULL) {
+		dom_node_unref(node);
+	}
+}
+
 static script_handler_t *select_script_handler(content_type ctype)
 {
 	if (ctype == CONTENT_JS) {
@@ -100,8 +120,10 @@ nserror html_script_exec(html_content *c, bool allow_defer)
 				size_t size;
 				data = content_get_source_data(s->data.handle,
 							       &size);
-				script_handler(
-					c->jsthread,
+				html_script_run(
+					c,
+					s->node,
+					script_handler,
 					data,
 					size,
 					nsurl_access(hlcache_handle_get_url(
@@ -127,6 +149,7 @@ nserror html_script_exec(html_content *c, bool allow_defer)
 
 /* create new html script entry */
 static struct html_script *html_process_new_script(html_content *c,
+						   dom_node *node,
 						   dom_string *mimetype,
 						   enum html_script_type type)
 {
@@ -154,6 +177,7 @@ static struct html_script *html_process_new_script(html_content *c,
 	nscript->type = type;
 
 	nscript->mimetype = dom_string_ref(mimetype); /* reference mimetype */
+	nscript->node = node != NULL ? dom_node_ref(node) : NULL;
 
 	return nscript;
 }
@@ -340,11 +364,13 @@ static nserror convert_script_sync_cb(hlcache_handle *script,
 			const uint8_t *data;
 			size_t size;
 			data = content_get_source_data(s->data.handle, &size);
-			script_handler(parent->jsthread,
-				       data,
-				       size,
-				       nsurl_access(hlcache_handle_get_url(
-					       s->data.handle)));
+			html_script_run(parent,
+					s->node,
+					script_handler,
+					data,
+					size,
+					nsurl_access(hlcache_handle_get_url(
+						s->data.handle)));
 		}
 
 		/* continue parse */
@@ -487,7 +513,7 @@ static dom_hubbub_error exec_src_script(html_content *c,
 		}
 	}
 
-	nscript = html_process_new_script(c, mimetype, script_type);
+	nscript = html_process_new_script(c, node, mimetype, script_type);
 	if (nscript == NULL) {
 		nsurl_unref(joined);
 		content_broadcast_error(&c->base, NSERROR_NOMEM, NULL);
@@ -557,7 +583,8 @@ exec_inline_script(html_content *c, dom_node *node, dom_string *mimetype)
 		return DOM_HUBBUB_OK; /* no contents, skip */
 	}
 
-	nscript = html_process_new_script(c, mimetype, HTML_SCRIPT_INLINE);
+	nscript = html_process_new_script(
+		c, node, mimetype, HTML_SCRIPT_INLINE);
 	if (nscript == NULL) {
 		dom_string_unref(script);
 
@@ -579,10 +606,12 @@ exec_inline_script(html_content *c, dom_node *node, dom_string *mimetype)
 	lwc_string_unref(lwcmimetype);
 
 	if (script_handler != NULL) {
-		script_handler(c->jsthread,
-			       (const uint8_t *)dom_string_data(script),
-			       dom_string_byte_length(script),
-			       "?inline script?");
+		html_script_run(c,
+				node,
+				script_handler,
+				(const uint8_t *)dom_string_data(script),
+				dom_string_byte_length(script),
+				"?inline script?");
 	}
 	return DOM_HUBBUB_OK;
 }
@@ -681,6 +710,9 @@ nserror html_script_free(html_content *html)
 	for (i = 0; i != html->scripts_count; i++) {
 		if (html->scripts[i].mimetype != NULL) {
 			dom_string_unref(html->scripts[i].mimetype);
+		}
+		if (html->scripts[i].node != NULL) {
+			dom_node_unref(html->scripts[i].node);
 		}
 
 		switch (html->scripts[i].type) {

@@ -1,0 +1,72 @@
+/* MutationEvent binding for browser using QuickJS and libdom
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+class MutationEvent {
+	prologue %{
+static JSValue mutation_string(JSContext *ctx, dom_exception exc, dom_string *str)
+{
+	JSValue ret;
+
+	if (exc != DOM_NO_ERR) {
+		return JS_UNDEFINED;
+	}
+	if (str == NULL) {
+		return JS_NewString(ctx, "");
+	}
+	ret = qjsky_string(ctx, str);
+	dom_string_unref(str);
+	return ret;
+}
+%};
+};
+
+init MutationEvent(struct dom_mutation_event *evt::evt);
+
+getter MutationEvent::relatedNode()
+%{
+	struct dom_node *node = NULL;
+	JSValue ret;
+	if (dom_mutation_event_get_related_node(priv->parent.evt, &node) != DOM_NO_ERR) {
+		return JS_UNDEFINED;
+	}
+	ret = qjsky_node(ctx, node);
+	if (node != NULL) {
+		dom_node_unref(node);
+	}
+	return ret;
+%}
+
+getter MutationEvent::prevValue()
+%{
+	dom_string *str = NULL;
+	dom_exception exc = dom_mutation_event_get_prev_value(priv->parent.evt, &str);
+	return mutation_string(ctx, exc, str);
+%}
+
+getter MutationEvent::newValue()
+%{
+	dom_string *str = NULL;
+	dom_exception exc = dom_mutation_event_get_new_value(priv->parent.evt, &str);
+	return mutation_string(ctx, exc, str);
+%}
+
+getter MutationEvent::attrName()
+%{
+	dom_string *str = NULL;
+	dom_exception exc = dom_mutation_event_get_attr_name(priv->parent.evt, &str);
+	return mutation_string(ctx, exc, str);
+%}
+
+getter MutationEvent::attrChange()
+%{
+	dom_mutation_type change;
+	if (dom_mutation_event_get_attr_change(priv->parent.evt, &change) != DOM_NO_ERR) {
+		return JS_UNDEFINED;
+	}
+	return JS_NewUint32(ctx, (uint32_t)change);
+%}

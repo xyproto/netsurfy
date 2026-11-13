@@ -52,6 +52,7 @@ typedef enum {
 
 JSValue qjsky_node(JSContext *ctx, struct dom_node *node);
 JSValue qjsky_event(JSContext *ctx, struct dom_event *evt);
+JSValue qjsky_current_script(JSContext *ctx);
 JSValue qjsky_generic(JSContext *ctx, const char *name);
 JSValue qjsky_list_proxy(JSContext *ctx, const char *generic, JSValue inner);
 

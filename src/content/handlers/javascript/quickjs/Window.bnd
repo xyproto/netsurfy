@@ -25,6 +25,8 @@ class Window {
 #include "desktop/gui_internal.h"
 #include "netsurfy/misc.h"
 #include "utils/ring.h"
+#include "desktop/browser_private.h"
+#include "netsurfy/window.h"
 #include "netsurfy/inttypes.h"
 
 static size_t next_handle = 1;
@@ -228,6 +230,36 @@ window_set_timer(JSContext *ctx, window_private_t *priv, bool repeating, int arg
 	handle = window_alloc_new_callback(ctx, priv, repeating, (int)timeout,
 					   argv[0], argc > 2 ? argc - 2 : 0, argv + 2);
 	return JS_NewInt64(ctx, (int64_t)handle);
+}
+
+static float window_scale(window_private_t *priv)
+{
+	float scale = browser_window_get_scale(priv->win);
+	return scale > 0 ? scale : 1.0f;
+}
+
+static void window_viewport(window_private_t *priv, int *width, int *height)
+{
+	*width = 0;
+	*height = 0;
+	if (priv->closed_down ||
+	    browser_window_get_dimensions(priv->win, width, height) != NSERROR_OK) {
+		*width = 0;
+		*height = 0;
+	}
+}
+
+static void window_scroll(window_private_t *priv, int *sx, int *sy)
+{
+	*sx = 0;
+	*sy = 0;
+	if (!priv->closed_down && priv->win->window != NULL &&
+	    guit->window->get_scroll != NULL) {
+		if (!guit->window->get_scroll(priv->win->window, sx, sy)) {
+			*sx = 0;
+			*sy = 0;
+		}
+	}
 }
 
 static JSValue
@@ -595,3 +627,64 @@ getter Window::onwaiting();
 setter Window::onwaiting();
 getter Window::onwheel();
 setter Window::onwheel();
+
+getter Window::innerWidth()
+%{
+	int width, height;
+	window_viewport(priv, &width, &height);
+	return JS_NewInt32(ctx, (int32_t)(width / window_scale(priv)));
+%}
+
+getter Window::innerHeight()
+%{
+	int width, height;
+	window_viewport(priv, &width, &height);
+	return JS_NewInt32(ctx, (int32_t)(height / window_scale(priv)));
+%}
+
+getter Window::outerWidth()
+%{
+	int width, height;
+	window_viewport(priv, &width, &height);
+	return JS_NewInt32(ctx, width);
+%}
+
+getter Window::outerHeight()
+%{
+	int width, height;
+	window_viewport(priv, &width, &height);
+	return JS_NewInt32(ctx, height);
+%}
+
+getter Window::scrollX()
+%{
+	int sx, sy;
+	window_scroll(priv, &sx, &sy);
+	return JS_NewFloat64(ctx, sx / window_scale(priv));
+%}
+
+getter Window::pageXOffset()
+%{
+	int sx, sy;
+	window_scroll(priv, &sx, &sy);
+	return JS_NewFloat64(ctx, sx / window_scale(priv));
+%}
+
+getter Window::scrollY()
+%{
+	int sx, sy;
+	window_scroll(priv, &sx, &sy);
+	return JS_NewFloat64(ctx, sy / window_scale(priv));
+%}
+
+getter Window::pageYOffset()
+%{
+	int sx, sy;
+	window_scroll(priv, &sx, &sy);
+	return JS_NewFloat64(ctx, sy / window_scale(priv));
+%}
+
+getter Window::devicePixelRatio()
+%{
+	return JS_NewFloat64(ctx, window_scale(priv));
+%}

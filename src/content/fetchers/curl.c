@@ -1232,14 +1232,17 @@ static CURLcode fetch_curl_set_options(struct curl_fetch_info *f)
 		return code;
 	}
 
-	f->cookie_string = urldb_get_cookie(f->url, true);
+	f->cookie_string = fetch_sends_credentials(f->fetch_handle)
+				   ? urldb_get_cookie(f->url, true)
+				   : NULL;
 	if (f->cookie_string) {
 		SETOPT(CURLOPT_COOKIE, f->cookie_string);
 	} else {
 		SETOPT(CURLOPT_COOKIE, NULL);
 	}
 
-	if ((auth = urldb_get_auth_details(f->url, NULL)) != NULL) {
+	if (fetch_sends_credentials(f->fetch_handle) &&
+	    (auth = urldb_get_auth_details(f->url, NULL)) != NULL) {
 		SETOPT(CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 		SETOPT(CURLOPT_USERPWD, auth);
 	} else {

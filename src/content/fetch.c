@@ -91,6 +91,7 @@ struct fetch {
 	nsurl *url; /**< URL. */
 	nsurl *referer; /**< Referer URL. */
 	bool verifiable; /**< Transaction is verifiable */
+	bool credentials;
 	void *p; /**< Private data for callback. */
 	lwc_string *host; /**< Host part of URL, interned */
 	http_response_code http_code; /**< HTTP response code, or 0. */
@@ -467,6 +468,7 @@ nserror fetch_start(nsurl *url,
 		    const struct fetch_multipart_data *post_multipart,
 		    bool verifiable,
 		    bool downgrade_tls,
+		    bool credentials,
 		    const char *headers[],
 		    struct fetch **fetch_out)
 {
@@ -496,6 +498,7 @@ nserror fetch_start(nsurl *url,
 	fetch->callback = callback;
 	fetch->url = nsurl_ref(url);
 	fetch->verifiable = verifiable;
+	fetch->credentials = credentials;
 	fetch->p = p;
 	fetch->host = nsurl_get_component(url, NSURL_HOST);
 
@@ -818,9 +821,18 @@ nserror fetch_set_http_code(struct fetch *fetch, http_response_code http_code)
 
 
 /* exported interface documented in content/fetch.h */
+bool fetch_sends_credentials(const struct fetch *fetch)
+{
+	return fetch->credentials;
+}
+
 void fetch_set_cookie(struct fetch *fetch, const char *data)
 {
 	assert(fetch && data);
+
+	if (!fetch->credentials) {
+		return;
+	}
 
 	/* If the fetch is unverifiable err on the side of caution and
 	 * do not set the cookie */

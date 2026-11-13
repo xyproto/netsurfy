@@ -325,14 +325,12 @@ interface NamedNodeMap {
 };
 
 [Exposed=Window]
-interface Attr {
+interface Attr : Node {
   readonly attribute DOMString? namespaceURI;
   readonly attribute DOMString? prefix;
   readonly attribute DOMString localName;
   readonly attribute DOMString name;
            attribute DOMString value;
-  [TreatNullAs=EmptyString] attribute DOMString nodeValue; // legacy alias of .value
-  [TreatNullAs=EmptyString] attribute DOMString textContent; // legacy alias of .value
 
   readonly attribute Element? ownerElement;
 

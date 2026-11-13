@@ -502,3 +502,8 @@ method Document::getElementsByClassName()
 	dom_nodelist_unref(nodes);
 	return qjsky_list_proxy(ctx, "makeListProxy", list);
 %}
+
+getter Document::currentScript()
+%{
+	return qjsky_current_script(ctx);
+%}

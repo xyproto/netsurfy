@@ -20,7 +20,8 @@
 static void _virtual_dom_event_destroy(dom_event *evt);
 
 static const struct dom_event_private_vtable _event_vtable = {
-	_virtual_dom_event_destroy};
+	_virtual_dom_event_destroy,
+	DOM_EVENT_KIND_EVENT};
 
 /* Constructor */
 dom_exception _dom_event_create(dom_event **evt)
@@ -279,6 +280,12 @@ dom_exception _dom_event_get_namespace(dom_event *evt, dom_string **namespace)
  * \param custom  The returned value
  * \return DOM_NO_ERR.
  */
+dom_exception _dom_event_get_kind(dom_event *evt, dom_event_kind *kind)
+{
+	*kind = evt->vtable->kind;
+	return DOM_NO_ERR;
+}
+
 dom_exception _dom_event_is_custom(dom_event *evt, bool *custom)
 {
 	*custom = evt->custom;

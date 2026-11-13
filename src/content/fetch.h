@@ -174,8 +174,11 @@ nserror fetch_start(nsurl *url,
 		    const struct fetch_multipart_data *post_multipart,
 		    bool verifiable,
 		    bool downgrade_tls,
+		    bool credentials,
 		    const char *headers[],
 		    struct fetch **fetch_out);
+
+bool fetch_sends_credentials(const struct fetch *fetch);
 
 /**
  * Abort a fetch.

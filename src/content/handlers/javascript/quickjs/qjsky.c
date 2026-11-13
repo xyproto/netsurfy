@@ -30,6 +30,9 @@
 #include "utils/log.h"
 #include "utils/corestrings.h"
 #include "content/content.h"
+#include "content/fetch.h"
+#include "utils/nsurl.h"
+#include "html/private.h"
 
 #include "javascript/js.h"
 #include "javascript/content.h"
@@ -45,6 +48,20 @@
 
 #define QJSKY_MEMORY_LIMIT (256u * 1024u * 1024u)
 #define QJSKY_MAX_JOBS 100000
+#define QJSKY_MAX_FETCH_BODY (64u * 1024u * 1024u)
+
+struct qjsky_fetch {
+	struct qjsky_fetch *next;
+	jsthread *thread;
+	struct fetch *fetch;
+	uint32_t id;
+	JSValue callback;
+	uint8_t *body;
+	size_t body_len;
+	size_t body_alloc;
+	char **headers;
+	size_t n_headers;
+};
 
 struct qjsky_map_slot {
 	void *key;
@@ -78,6 +95,9 @@ struct jsthread {
 	struct qjsky_map nodes;
 	struct qjsky_map events;
 	window_private_t *window_priv;
+	struct dom_node *current_script;
+	struct qjsky_fetch *fetches;
+	uint32_t next_fetch_id;
 };
 
 static JSClassID qjsky_class_id;
@@ -721,6 +741,21 @@ static int qjsky_node_iface(struct dom_node *node)
 		if (dom_html_element_get_tag_type(node, &type) != DOM_NO_ERR) {
 			type = DOM_HTML_ELEMENT_TYPE__UNKNOWN;
 		}
+		if (type == DOM_HTML_ELEMENT_TYPE__UNKNOWN) {
+			dom_string *name = NULL;
+			bool custom = false;
+			if (dom_node_get_node_name(node, &name) == DOM_NO_ERR &&
+			    name != NULL) {
+				custom = memchr(dom_string_data(name),
+						'-',
+						dom_string_byte_length(name)) !=
+					 NULL;
+				dom_string_unref(name);
+			}
+			if (custom) {
+				return QJSKY_IFACE_HTMLELEMENT;
+			}
+		}
 		return qjsky_node_iface_html(type);
 	case DOM_TEXT_NODE:
 		return QJSKY_IFACE_TEXT;
@@ -728,6 +763,8 @@ static int qjsky_node_iface(struct dom_node *node)
 		return QJSKY_IFACE_COMMENT;
 	case DOM_DOCUMENT_NODE:
 		return QJSKY_IFACE_DOCUMENT;
+	case DOM_ATTRIBUTE_NODE:
+		return QJSKY_IFACE_ATTR;
 	default:
 		return QJSKY_IFACE_NODE;
 	}
@@ -763,19 +800,20 @@ JSValue qjsky_node(JSContext *ctx, struct dom_node *node)
 
 static int qjsky_event_iface(dom_event *evt)
 {
-	dom_string *type = NULL;
-	int iface = QJSKY_IFACE_EVENT;
+	dom_event_kind kind;
 
-	if (dom_event_get_type(evt, &type) != DOM_NO_ERR || type == NULL) {
-		return iface;
+	if (dom_event_get_kind(evt, &kind) != DOM_NO_ERR) {
+		return QJSKY_IFACE_EVENT;
 	}
-	if (dom_string_isequal(type, corestring_dom_keydown) ||
-	    dom_string_isequal(type, corestring_dom_keyup) ||
-	    dom_string_isequal(type, corestring_dom_keypress)) {
-		iface = QJSKY_IFACE_KEYBOARDEVENT;
+	switch (kind) {
+	case DOM_EVENT_KIND_KEYBOARD:
+		return QJSKY_IFACE_KEYBOARDEVENT;
+	case DOM_EVENT_KIND_MUTATION:
+	case DOM_EVENT_KIND_MUTATION_NAME:
+		return QJSKY_IFACE_MUTATIONEVENT;
+	default:
+		return QJSKY_IFACE_EVENT;
 	}
-	dom_string_unref(type);
-	return iface;
 }
 
 JSValue qjsky_event(JSContext *ctx, struct dom_event *evt)
@@ -1400,6 +1438,526 @@ void js_destroyheap(jsheap *heap)
 	}
 }
 
+JSValue qjsky_current_script(JSContext *ctx)
+{
+	return qjsky_node(ctx, qjsky_thread(ctx)->current_script);
+}
+
+void js_set_current_script(jsthread *thread, struct dom_node *node)
+{
+	if (thread == NULL) {
+		return;
+	}
+	if (thread->current_script != NULL) {
+		dom_node_unref(thread->current_script);
+	}
+	thread->current_script = node != NULL ? dom_node_ref(node) : NULL;
+}
+
+static void qjsky_fetch_free(JSContext *ctx, struct qjsky_fetch *f)
+{
+	JS_FreeValue(ctx, f->callback);
+	for (size_t i = 0; i < f->n_headers; i++) {
+		free(f->headers[i]);
+	}
+	free(f->headers);
+	free(f->body);
+	free(f);
+}
+
+static void qjsky_fetch_unlink(jsthread *thread, struct qjsky_fetch *f)
+{
+	struct qjsky_fetch **pp;
+
+	for (pp = &thread->fetches; *pp != NULL; pp = &(*pp)->next) {
+		if (*pp == f) {
+			*pp = f->next;
+			return;
+		}
+	}
+}
+
+static void qjsky_fetch_abort_all(jsthread *thread)
+{
+	while (thread->fetches != NULL) {
+		struct qjsky_fetch *f = thread->fetches;
+		thread->fetches = f->next;
+		if (f->fetch != NULL) {
+			fetch_abort(f->fetch);
+		}
+		qjsky_fetch_free(thread->ctx, f);
+	}
+}
+
+static void qjsky_fetch_deliver(struct qjsky_fetch *f,
+				const char *error,
+				long status,
+				const char *location)
+{
+	jsthread *thread = f->thread;
+	JSContext *ctx = thread->ctx;
+	JSValue args[5], ret;
+
+	qjsky_fetch_unlink(thread, f);
+	if (thread->pending_destroy) {
+		qjsky_fetch_free(ctx, f);
+		return;
+	}
+
+	qjsky_enter_thread(thread);
+	args[0] = error != NULL ? JS_NewString(ctx, error) : JS_NULL;
+	args[1] = JS_NewInt32(ctx, (int32_t)status);
+	args[2] = location != NULL ? JS_NewString(ctx, location) : JS_NULL;
+	args[3] = JS_NewArray(ctx);
+	for (size_t i = 0; i < f->n_headers; i++) {
+		JS_SetPropertyUint32(ctx,
+				     args[3],
+				     (uint32_t)i,
+				     JS_NewString(ctx, f->headers[i]));
+	}
+	args[4] = JS_NewArrayBufferCopy(ctx,
+					f->body != NULL ? f->body
+							: (const uint8_t *)"",
+					f->body_len);
+	ret = qjsky_call(ctx, f->callback, JS_UNDEFINED, 5, args, true);
+	JS_FreeValue(ctx, ret);
+	for (int i = 0; i < 5; i++) {
+		JS_FreeValue(ctx, args[i]);
+	}
+	qjsky_fetch_free(ctx, f);
+	qjsky_leave_thread(thread);
+}
+
+static void
+qjsky_fetch_add_header(struct qjsky_fetch *f, const uint8_t *buf, size_t len)
+{
+	char **headers;
+	char *line;
+
+	while (len > 0 && (buf[len - 1] == '\r' || buf[len - 1] == '\n')) {
+		len--;
+	}
+	if (len == 0) {
+		return;
+	}
+	if (len > 5 && memcmp(buf, "HTTP/", 5) == 0) {
+		for (size_t i = 0; i < f->n_headers; i++) {
+			free(f->headers[i]);
+		}
+		f->n_headers = 0;
+		return;
+	}
+	headers = realloc(f->headers, (f->n_headers + 1) * sizeof(*headers));
+	if (headers == NULL) {
+		return;
+	}
+	f->headers = headers;
+	line = malloc(len + 1);
+	if (line == NULL) {
+		return;
+	}
+	memcpy(line, buf, len);
+	line[len] = '\0';
+	f->headers[f->n_headers++] = line;
+}
+
+static bool
+qjsky_fetch_add_data(struct qjsky_fetch *f, const uint8_t *buf, size_t len)
+{
+	if (f->body_len + len > QJSKY_MAX_FETCH_BODY) {
+		return false;
+	}
+	if (f->body_len + len > f->body_alloc) {
+		size_t alloc = f->body_alloc == 0 ? 16384 : f->body_alloc;
+		uint8_t *body;
+		while (alloc < f->body_len + len) {
+			alloc *= 2;
+		}
+		body = realloc(f->body, alloc);
+		if (body == NULL) {
+			return false;
+		}
+		f->body = body;
+		f->body_alloc = alloc;
+	}
+	memcpy(f->body + f->body_len, buf, len);
+	f->body_len += len;
+	return true;
+}
+
+static void qjsky_fetch_cb(const fetch_msg *msg, void *p)
+{
+	struct qjsky_fetch *f = p;
+	long status;
+
+	switch (msg->type) {
+	case FETCH_HEADER:
+		qjsky_fetch_add_header(f,
+				       msg->data.header_or_data.buf,
+				       msg->data.header_or_data.len);
+		break;
+	case FETCH_DATA:
+		if (!qjsky_fetch_add_data(f,
+					  msg->data.header_or_data.buf,
+					  msg->data.header_or_data.len)) {
+			fetch_abort(f->fetch);
+			f->fetch = NULL;
+			qjsky_fetch_deliver(f, "Response too large", 0, NULL);
+		}
+		break;
+	case FETCH_FINISHED:
+		status = fetch_http_code(f->fetch);
+		f->fetch = NULL;
+		qjsky_fetch_deliver(f, NULL, status != 0 ? status : 200, NULL);
+		break;
+	case FETCH_REDIRECT:
+		status = fetch_http_code(f->fetch);
+		f->fetch = NULL;
+		qjsky_fetch_deliver(f, NULL, status, msg->data.redirect);
+		break;
+	case FETCH_NOTMODIFIED:
+		f->fetch = NULL;
+		qjsky_fetch_deliver(f, NULL, 304, NULL);
+		break;
+	case FETCH_AUTH:
+		f->fetch = NULL;
+		qjsky_fetch_deliver(f, NULL, 401, NULL);
+		break;
+	case FETCH_TIMEDOUT:
+	case FETCH_ERROR:
+	case FETCH_CERT_ERR:
+	case FETCH_SSL_ERR:
+		f->fetch = NULL;
+		qjsky_fetch_deliver(f, "Failed to fetch", 0, NULL);
+		break;
+	default:
+		break;
+	}
+}
+
+static nsurl *qjsky_document_url(jsthread *thread)
+{
+	if (thread->window_priv == NULL || thread->window_priv->htmlc == NULL) {
+		return NULL;
+	}
+	return thread->window_priv->htmlc->base_url;
+}
+
+static JSValue qjsky_native_fetch(JSContext *ctx,
+				  JSValueConst this_val,
+				  int argc,
+				  JSValueConst *argv)
+{
+	jsthread *thread = qjsky_thread(ctx);
+	struct qjsky_fetch *f = NULL;
+	const char *url_s = NULL, *method = NULL, *body = NULL;
+	char **headers = NULL;
+	int64_t n_headers = 0;
+	nsurl *url = NULL;
+	nserror err;
+	int credentials;
+	bool post;
+	JSValue ret = JS_EXCEPTION;
+
+	if (argc < 6 || !JS_IsFunction(ctx, argv[5])) {
+		return JS_ThrowTypeError(ctx, "bad native fetch call");
+	}
+	if (thread->window_priv == NULL || thread->window_priv->closed_down) {
+		return JS_ThrowTypeError(ctx, "Failed to fetch");
+	}
+	url_s = JS_ToCString(ctx, argv[0]);
+	method = JS_ToCString(ctx, argv[1]);
+	if (url_s == NULL || method == NULL) {
+		goto out;
+	}
+	post = strcmp(method, "POST") == 0;
+	if (!post && strcmp(method, "GET") != 0) {
+		ret = JS_ThrowTypeError(ctx,
+					"Method %s is not supported",
+					method);
+		goto out;
+	}
+	if (post && !JS_IsUndefined(argv[3]) && !JS_IsNull(argv[3])) {
+		body = JS_ToCString(ctx, argv[3]);
+		if (body == NULL) {
+			goto out;
+		}
+	}
+	credentials = JS_ToBool(ctx, argv[4]);
+	if (credentials < 0) {
+		goto out;
+	}
+	if (nsurl_create(url_s, &url) != NSERROR_OK) {
+		ret = JS_ThrowTypeError(ctx, "Invalid URL");
+		goto out;
+	}
+	if (!fetch_can_fetch(url)) {
+		ret = JS_ThrowTypeError(ctx, "Failed to fetch");
+		goto out;
+	}
+	if (JS_GetLength(ctx, argv[2], &n_headers) < 0) {
+		goto out;
+	}
+	headers = calloc((size_t)n_headers + 1, sizeof(*headers));
+	if (headers == NULL) {
+		ret = JS_ThrowOutOfMemory(ctx);
+		goto out;
+	}
+	for (int64_t i = 0; i < n_headers; i++) {
+		JSValue v = JS_GetPropertyInt64(ctx, argv[2], i);
+		const char *h = JS_ToCString(ctx, v);
+		JS_FreeValue(ctx, v);
+		if (h == NULL) {
+			goto out;
+		}
+		headers[i] = strdup(h);
+		JS_FreeCString(ctx, h);
+		if (headers[i] == NULL) {
+			ret = JS_ThrowOutOfMemory(ctx);
+			goto out;
+		}
+	}
+
+	f = calloc(1, sizeof(*f));
+	if (f == NULL) {
+		ret = JS_ThrowOutOfMemory(ctx);
+		goto out;
+	}
+	f->thread = thread;
+	f->id = ++thread->next_fetch_id;
+	f->callback = JS_DupValue(ctx, argv[5]);
+	f->next = thread->fetches;
+	thread->fetches = f;
+
+	err = fetch_start(url,
+			  qjsky_document_url(thread),
+			  qjsky_fetch_cb,
+			  f,
+			  false,
+			  post ? (body != NULL ? body : "") : NULL,
+			  NULL,
+			  true,
+			  false,
+			  credentials != 0,
+			  (const char **)headers,
+			  &f->fetch);
+	if (err != NSERROR_OK) {
+		qjsky_fetch_unlink(thread, f);
+		qjsky_fetch_free(ctx, f);
+		ret = JS_ThrowTypeError(ctx, "Failed to fetch");
+		goto out;
+	}
+	ret = JS_NewUint32(ctx, f->id);
+
+out:
+	if (headers != NULL) {
+		for (int64_t i = 0; i < n_headers; i++) {
+			free(headers[i]);
+		}
+		free(headers);
+	}
+	if (url != NULL) {
+		nsurl_unref(url);
+	}
+	if (body != NULL) {
+		JS_FreeCString(ctx, body);
+	}
+	if (method != NULL) {
+		JS_FreeCString(ctx, method);
+	}
+	if (url_s != NULL) {
+		JS_FreeCString(ctx, url_s);
+	}
+	return ret;
+}
+
+static JSValue qjsky_native_fetch_abort(JSContext *ctx,
+					JSValueConst this_val,
+					int argc,
+					JSValueConst *argv)
+{
+	jsthread *thread = qjsky_thread(ctx);
+	uint32_t id;
+
+	if (JS_ToUint32(ctx, &id, argv[0]) < 0) {
+		return JS_EXCEPTION;
+	}
+	for (struct qjsky_fetch *f = thread->fetches; f != NULL; f = f->next) {
+		if (f->id == id) {
+			qjsky_fetch_unlink(thread, f);
+			if (f->fetch != NULL) {
+				fetch_abort(f->fetch);
+			}
+			qjsky_fetch_free(ctx, f);
+			break;
+		}
+	}
+	return JS_UNDEFINED;
+}
+
+static JSValue qjsky_native_resolve(JSContext *ctx,
+				    JSValueConst this_val,
+				    int argc,
+				    JSValueConst *argv)
+{
+	nsurl *base = qjsky_document_url(qjsky_thread(ctx));
+	nsurl *joined = NULL;
+	const char *rel;
+	JSValue ret = JS_NULL;
+
+	nsurl *own_base = NULL;
+
+	if (argc > 1 && JS_IsString(argv[1])) {
+		const char *base_s = JS_ToCString(ctx, argv[1]);
+		if (base_s == NULL) {
+			return JS_EXCEPTION;
+		}
+		if (nsurl_create(base_s, &own_base) == NSERROR_OK) {
+			base = own_base;
+		}
+		JS_FreeCString(ctx, base_s);
+	}
+	rel = JS_ToCString(ctx, argv[0]);
+	if (rel == NULL) {
+		if (own_base != NULL) {
+			nsurl_unref(own_base);
+		}
+		return JS_EXCEPTION;
+	}
+	if (base != NULL) {
+		if (nsurl_join(base, rel, &joined) != NSERROR_OK) {
+			joined = NULL;
+		}
+	} else if (nsurl_create(rel, &joined) != NSERROR_OK) {
+		joined = NULL;
+	}
+	JS_FreeCString(ctx, rel);
+	if (own_base != NULL) {
+		nsurl_unref(own_base);
+	}
+	if (joined != NULL) {
+		ret = JS_NewString(ctx, nsurl_access(joined));
+		nsurl_unref(joined);
+	}
+	return ret;
+}
+
+static JSValue qjsky_native_origin(JSContext *ctx,
+				   JSValueConst this_val,
+				   int argc,
+				   JSValueConst *argv)
+{
+	const char *url_s = JS_ToCString(ctx, argv[0]);
+	nsurl *url = NULL;
+	lwc_string *scheme;
+	bool web;
+	char *origin = NULL;
+	size_t origin_len = 0;
+	JSValue ret;
+
+	if (url_s == NULL) {
+		return JS_EXCEPTION;
+	}
+	if (nsurl_create(url_s, &url) != NSERROR_OK) {
+		JS_FreeCString(ctx, url_s);
+		return JS_NewString(ctx, "null");
+	}
+	JS_FreeCString(ctx, url_s);
+	scheme = nsurl_get_component(url, NSURL_SCHEME);
+	web = scheme != NULL &&
+	      (scheme == corestring_lwc_http || scheme == corestring_lwc_https);
+	if (scheme != NULL) {
+		lwc_string_unref(scheme);
+	}
+	if (!web || nsurl_get(url,
+			      NSURL_SCHEME | NSURL_HOST | NSURL_PORT,
+			      &origin,
+			      &origin_len) != NSERROR_OK) {
+		nsurl_unref(url);
+		return JS_NewString(ctx, "null");
+	}
+	nsurl_unref(url);
+	ret = JS_NewStringLen(ctx, origin, origin_len);
+	free(origin);
+	return ret;
+}
+
+static JSValue qjsky_native_utf8_encode(JSContext *ctx,
+					JSValueConst this_val,
+					int argc,
+					JSValueConst *argv)
+{
+	size_t len;
+	const char *str = JS_ToCStringLen(ctx, &len, argv[0]);
+	JSValue ret;
+
+	if (str == NULL) {
+		return JS_EXCEPTION;
+	}
+	ret = JS_NewArrayBufferCopy(ctx, (const uint8_t *)str, len);
+	JS_FreeCString(ctx, str);
+	return ret;
+}
+
+static JSValue qjsky_native_utf8_decode(JSContext *ctx,
+					JSValueConst this_val,
+					int argc,
+					JSValueConst *argv)
+{
+	size_t size = 0, offset = 0, length = 0, per = 0;
+	uint8_t *data;
+	JSValue buffer;
+
+	data = JS_GetArrayBuffer(ctx, &size, argv[0]);
+	if (data != NULL) {
+		return JS_NewStringLen(ctx, (const char *)data, size);
+	}
+	JS_FreeValue(ctx, JS_GetException(ctx));
+	buffer = JS_GetTypedArrayBuffer(ctx, argv[0], &offset, &length, &per);
+	if (JS_IsException(buffer)) {
+		return JS_ThrowTypeError(ctx,
+					 "expected an ArrayBuffer or view");
+	}
+	data = JS_GetArrayBuffer(ctx, &size, buffer);
+	JS_FreeValue(ctx, buffer);
+	if (data == NULL || offset + length > size) {
+		return JS_ThrowTypeError(ctx, "detached buffer");
+	}
+	return JS_NewStringLen(ctx, (const char *)data + offset, length);
+}
+
+static JSValue qjsky_native_object(JSContext *ctx)
+{
+	static const struct {
+		const char *name;
+		JSCFunction *fn;
+		int length;
+	} natives[] = {
+		{"fetch", qjsky_native_fetch, 6},
+		{"fetchAbort", qjsky_native_fetch_abort, 1},
+		{"resolve", qjsky_native_resolve, 2},
+		{"utf8Encode", qjsky_native_utf8_encode, 1},
+		{"utf8Decode", qjsky_native_utf8_decode, 1},
+		{"origin", qjsky_native_origin, 1},
+	};
+	JSValue obj = JS_NewObject(ctx);
+
+	if (JS_IsException(obj)) {
+		return obj;
+	}
+	for (size_t i = 0; i < sizeof(natives) / sizeof(natives[0]); i++) {
+		if (qjsky_define_method(ctx,
+					obj,
+					natives[i].name,
+					natives[i].fn,
+					natives[i].length) < 0) {
+			JS_FreeValue(ctx, obj);
+			return JS_EXCEPTION;
+		}
+	}
+	return obj;
+}
+
 static void qjsky_destroythread(jsthread *thread)
 {
 	jsheap *heap = thread->heap;
@@ -1412,6 +1970,7 @@ static void qjsky_destroythread(jsthread *thread)
 
 	if (ctx != NULL) {
 		qjsky_window_closedown(ctx, thread->window_priv);
+		qjsky_fetch_abort_all(thread);
 		qjsky_map_clear(ctx, &thread->nodes);
 		qjsky_map_clear(ctx, &thread->events);
 		for (int i = 0; i < QJSKY_IFACE__COUNT; i++) {
@@ -1426,6 +1985,9 @@ static void qjsky_destroythread(jsthread *thread)
 		JS_FreeValue(ctx, thread->global);
 		JS_FreeContext(ctx);
 		JS_RunGC(heap->rt);
+	}
+	if (thread->current_script != NULL) {
+		dom_node_unref(thread->current_script);
 	}
 	if (thread->window_priv != NULL) {
 		qjsky_iface_fini[QJSKY_IFACE_WINDOW](heap->rt,
@@ -1470,7 +2032,7 @@ js_newthread(jsheap *heap, void *win_priv, void *doc_priv, jsthread **thread)
 {
 	jsthread *ret;
 	JSContext *ctx;
-	JSValue prelude;
+	JSValue prelude, native;
 	static const char *const shadowed[] = {"navigator", "console"};
 
 	assert(heap != NULL);
@@ -1545,7 +2107,22 @@ js_newthread(jsheap *heap, void *win_priv, void *doc_priv, jsthread **thread)
 		      "Unable to run prelude.js, thread aborted");
 		goto fail;
 	}
-	ret->generics = prelude;
+	native = qjsky_native_object(ctx);
+	if (JS_IsException(native)) {
+		JS_FreeValue(ctx, prelude);
+		goto fail;
+	}
+	ret->generics = qjsky_call(
+		ctx, prelude, JS_UNDEFINED, 1, &native, true);
+	JS_FreeValue(ctx, native);
+	JS_FreeValue(ctx, prelude);
+	if (JS_IsException(ret->generics)) {
+		ret->generics = JS_UNDEFINED;
+		NSLOG(qjsky,
+		      CRITICAL,
+		      "Unable to run prelude.js, thread aborted");
+		goto fail;
+	}
 
 	NSLOG(qjsky, DEBUG, "New thread is %p in heap %p", ret, heap);
 	*thread = ret;
@@ -1567,6 +2144,7 @@ nserror js_closethread(jsthread *thread)
 	      thread,
 	      thread->heap);
 	qjsky_window_closedown(thread->ctx, thread->window_priv);
+	qjsky_fetch_abort_all(thread);
 	return NSERROR_OK;
 }
 

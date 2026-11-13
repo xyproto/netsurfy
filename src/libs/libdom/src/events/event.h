@@ -19,6 +19,7 @@
 /* The private virtual table */
 struct dom_event_private_vtable {
 	void (*destroy)(dom_event *evt);
+	dom_event_kind kind;
 };
 
 /**

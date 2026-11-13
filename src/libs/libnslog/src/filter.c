@@ -396,8 +396,7 @@ char *nslog_filter_sprintf(nslog_filter_t *filter)
 nslog_error nslog_filter_from_text(const char *input, nslog_filter_t **output)
 {
 	int ret;
-	YY_BUFFER_STATE buffer = filter__scan_string((char *)input);
-	filter_push_buffer_state(buffer);
+	filter__scan_string((char *)input);
 	ret = filter_parse(output);
 	filter_lex_destroy();
 	switch (ret) {

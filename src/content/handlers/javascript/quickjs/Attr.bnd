@@ -1,0 +1,97 @@
+/* Attr binding for browser using QuickJS and libdom
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+class Attr {
+	prologue %{
+static JSValue attr_string(JSContext *ctx, dom_exception exc, dom_string *str)
+{
+	JSValue ret;
+
+	if (exc != DOM_NO_ERR) {
+		return JS_UNDEFINED;
+	}
+	if (str == NULL) {
+		return JS_NULL;
+	}
+	ret = qjsky_string(ctx, str);
+	dom_string_unref(str);
+	return ret;
+}
+%};
+};
+
+init Attr(struct dom_attr *attr::node);
+
+getter Attr::name()
+%{
+	dom_string *str = NULL;
+	dom_exception exc = dom_attr_get_name(((node_private_t *)priv)->node, &str);
+	return attr_string(ctx, exc, str);
+%}
+
+getter Attr::localName()
+%{
+	dom_string *str = NULL;
+	dom_exception exc = dom_node_get_local_name(((node_private_t *)priv)->node, &str);
+	if (exc == DOM_NO_ERR && str == NULL) {
+		exc = dom_attr_get_name(((node_private_t *)priv)->node, &str);
+	}
+	return attr_string(ctx, exc, str);
+%}
+
+getter Attr::namespaceURI()
+%{
+	dom_string *str = NULL;
+	dom_exception exc = dom_node_get_namespace(((node_private_t *)priv)->node, &str);
+	return attr_string(ctx, exc, str);
+%}
+
+getter Attr::prefix()
+%{
+	dom_string *str = NULL;
+	dom_exception exc = dom_node_get_prefix(((node_private_t *)priv)->node, &str);
+	return attr_string(ctx, exc, str);
+%}
+
+getter Attr::value()
+%{
+	dom_string *str = NULL;
+	dom_exception exc = dom_attr_get_value(((node_private_t *)priv)->node, &str);
+	if (exc == DOM_NO_ERR && str == NULL) {
+		return JS_NewString(ctx, "");
+	}
+	return attr_string(ctx, exc, str);
+%}
+
+setter Attr::value()
+%{
+	dom_string *str = qjsky_to_dom_string(ctx, argv[0]);
+	if (str == NULL) return JS_EXCEPTION;
+	(void)dom_attr_set_value(((node_private_t *)priv)->node, str);
+	dom_string_unref(str);
+	return JS_UNDEFINED;
+%}
+
+getter Attr::ownerElement()
+%{
+	struct dom_element *owner = NULL;
+	JSValue ret;
+	if (dom_attr_get_owner_element(((node_private_t *)priv)->node, &owner) != DOM_NO_ERR) {
+		return JS_UNDEFINED;
+	}
+	ret = qjsky_node(ctx, (struct dom_node *)owner);
+	if (owner != NULL) {
+		dom_node_unref(owner);
+	}
+	return ret;
+%}
+
+getter Attr::specified()
+%{
+	return JS_TRUE;
+%}

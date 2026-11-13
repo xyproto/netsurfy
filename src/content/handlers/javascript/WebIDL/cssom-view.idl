@@ -1,0 +1,11 @@
+partial interface Window {
+  [Replaceable] readonly attribute long innerWidth;
+  [Replaceable] readonly attribute long innerHeight;
+  [Replaceable] readonly attribute double scrollX;
+  [Replaceable] readonly attribute double pageXOffset;
+  [Replaceable] readonly attribute double scrollY;
+  [Replaceable] readonly attribute double pageYOffset;
+  [Replaceable] readonly attribute long outerWidth;
+  [Replaceable] readonly attribute long outerHeight;
+  [Replaceable] readonly attribute double devicePixelRatio;
+};

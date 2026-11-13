@@ -968,9 +968,6 @@ dom_exception _dom_node_remove_child(dom_node_internal *node,
 				     dom_node_internal *old_child,
 				     dom_node_internal **result)
 {
-	dom_exception err;
-	bool success = true;
-
 	/* We don't support removal of DocumentType or root Element nodes */
 	if (node->type == DOM_DOCUMENT_NODE &&
 	    (old_child->type == DOM_DOCUMENT_TYPE_NODE ||
@@ -985,21 +982,10 @@ dom_exception _dom_node_remove_child(dom_node_internal *node,
 	if (_dom_node_readonly(node))
 		return DOM_NO_MODIFICATION_ALLOWED_ERR;
 
-	/* Dispatch a DOMNodeRemoval event */
-	err = dom_node_dispatch_node_change_event(
-		node->owner, old_child, node, DOM_MUTATION_REMOVAL, &success);
-	if (err != DOM_NO_ERR)
-		return err;
-
 	/* Detach the node */
 	_dom_node_detach(old_child);
 
 	*result = (dom_node_internal *)dom_node_ref(old_child);
-
-	success = true;
-	err = _dom_dispatch_subtree_modified_event(node->owner, node, &success);
-	if (err != DOM_NO_ERR)
-		return err;
 
 	return DOM_NO_ERR;
 }

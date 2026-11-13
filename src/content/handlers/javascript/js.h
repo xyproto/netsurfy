@@ -168,4 +168,6 @@ void js_handle_new_element(jsthread *thread, struct dom_element *node);
  */
 void js_event_cleanup(jsthread *thread, struct dom_event *evt);
 
+void js_set_current_script(jsthread *thread, struct dom_node *node);
+
 #endif /* NETSURFY_JAVASCRIPT_JS_H_ */

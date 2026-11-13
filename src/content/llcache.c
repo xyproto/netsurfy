@@ -1002,6 +1002,7 @@ static nserror llcache_object_refetch(llcache_object *object)
 			  multipart,
 			  object->fetch.flags & LLCACHE_RETRIEVE_VERIFIABLE,
 			  object->fetch.tried_with_tls_downgrade,
+			  true,
 			  (const char **)headers,
 			  &object->fetch.fetch);
 

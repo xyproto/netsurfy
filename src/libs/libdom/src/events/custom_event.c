@@ -14,7 +14,7 @@
 static void _virtual_dom_custom_event_destroy(struct dom_event *evt);
 
 static struct dom_event_private_vtable _event_vtable = {
-	_virtual_dom_custom_event_destroy};
+	_virtual_dom_custom_event_destroy, DOM_EVENT_KIND_CUSTOM};
 
 /* Constructor */
 dom_exception _dom_custom_event_create(struct dom_custom_event **evt)

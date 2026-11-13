@@ -80,6 +80,23 @@ dom_exception _dom_event_get_namespace(dom_event *evt, dom_string **namespace);
 #define dom_event_get_namespace(e, n)                                          \
 	_dom_event_get_namespace((dom_event *)(e), (dom_string **)(n))
 
+typedef enum {
+	DOM_EVENT_KIND_EVENT,
+	DOM_EVENT_KIND_UI,
+	DOM_EVENT_KIND_MOUSE,
+	DOM_EVENT_KIND_MOUSE_WHEEL,
+	DOM_EVENT_KIND_MOUSE_MULTI_WHEEL,
+	DOM_EVENT_KIND_KEYBOARD,
+	DOM_EVENT_KIND_TEXT,
+	DOM_EVENT_KIND_MUTATION,
+	DOM_EVENT_KIND_MUTATION_NAME,
+	DOM_EVENT_KIND_CUSTOM
+} dom_event_kind;
+
+dom_exception _dom_event_get_kind(dom_event *evt, dom_event_kind *kind);
+#define dom_event_get_kind(e, k)                                               \
+	_dom_event_get_kind((dom_event *)(e), (dom_event_kind *)(k))
+
 dom_exception _dom_event_is_custom(dom_event *evt, bool *custom);
 #define dom_event_is_custom(e, c)                                              \
 	_dom_event_is_custom((dom_event *)(e), (bool *)(c))

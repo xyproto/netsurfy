@@ -80,6 +80,7 @@ struct html_script {
 	} data; /**< Script data */
 	struct dom_string *mimetype;
 	struct dom_string *encoding;
+	struct dom_node *node;
 	bool already_started;
 	bool parser_inserted;
 	bool force_async;
