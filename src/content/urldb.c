@@ -2,7 +2,7 @@
  * Copyright 2006 John M Bell <jmb202@ecs.soton.ac.uk>
  * Copyright 2009 John Tytgat <joty@netsurf-browser.org>
  *
- * This file is part of NetSurfy, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
  * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

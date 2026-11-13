@@ -1,7 +1,7 @@
 /*
  * Copyright 2003 James Bursa <bursa@users.sourceforge.net>
  *
- * This file is part of NetSurfy, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
  * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -400,8 +400,8 @@ static inline void layout_handle_box_sizing(const css_unit_ctx *unit_len_ctx,
 	}
 }
 
-static inline int layout_percentage_height_base(const struct box *box,
-						int viewport_height)
+static inline int
+layout_percentage_height_base(const struct box *box, int viewport_height)
 {
 	struct box *containing_block = NULL;
 	enum css_height_e cbhtype = CSS_HEIGHT_AUTO;
@@ -412,8 +412,7 @@ static inline int layout_percentage_height_base(const struct box *box,
 		assert(box->float_container);
 		containing_block = box->float_container;
 	} else if (box->float_container &&
-		   css_computed_position(box->style) !=
-			   CSS_POSITION_ABSOLUTE &&
+		   css_computed_position(box->style) != CSS_POSITION_ABSOLUTE &&
 		   (css_computed_float(box->style) == CSS_FLOAT_LEFT ||
 		    css_computed_float(box->style) == CSS_FLOAT_RIGHT)) {
 		/* Box is a float */
@@ -519,7 +518,8 @@ static inline void layout_find_dimensions(const css_unit_ctx *unit_len_ctx,
 					box, viewport_height);
 
 				if (base >= 0) {
-					*height = FPCT_OF_INT_TOINT(value, base);
+					*height = FPCT_OF_INT_TOINT(value,
+								    base);
 				} else {
 					/* precentage height not permissible
 					 * treat height as auto */
@@ -613,7 +613,8 @@ static inline void layout_find_dimensions(const css_unit_ctx *unit_len_ctx,
 					box, viewport_height);
 
 				*max_height = base >= 0
-						      ? FPCT_OF_INT_TOINT(value, base)
+						      ? FPCT_OF_INT_TOINT(value,
+									  base)
 						      : -1;
 			} else {
 				*max_height = FIXTOINT(css_unit_len2device_px(
@@ -638,7 +639,8 @@ static inline void layout_find_dimensions(const css_unit_ctx *unit_len_ctx,
 					box, viewport_height);
 
 				*min_height = base >= 0
-						      ? FPCT_OF_INT_TOINT(value, base)
+						      ? FPCT_OF_INT_TOINT(value,
+									  base)
 						      : 0;
 			} else {
 				*min_height = FIXTOINT(css_unit_len2device_px(

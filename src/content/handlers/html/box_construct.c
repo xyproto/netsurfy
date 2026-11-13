@@ -5,7 +5,7 @@
  * Copyright 2006 Richard Wilson <info@tinct.net>
  * Copyright 2008 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of NetSurfy, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
  * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1165,7 +1165,8 @@ static bool box_construct_text(struct box_construct_ctx *ctx)
 				char c = text[i];
 
 				if (c == ' ' && j > 0 &&
-				    (text[j - 1] == ' ' || text[j - 1] == '\n' ||
+				    (text[j - 1] == ' ' ||
+				     text[j - 1] == '\n' ||
 				     text[j - 1] == '\r'))
 					continue;
 				if ((c == '\n' || c == '\r') && j > 0 &&

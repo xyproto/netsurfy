@@ -106,7 +106,7 @@ The binding file consists of three types of element:
   binding
 
       The binding element has an identifier controlling which type of
-       output is produced (currently duk_libdom and jsapi_libdom).
+       output is produced (currently qjs_libdom).
 
       The binding block may contain one or more directives which
        control overall generation behaviour:
@@ -347,14 +347,14 @@ The binding file consists of three types of element:
 Generated source
 ----------------
 
-duk_libdom
+qjs_libdom
 
   This binding type generates several files as output:
     - binding.c
           support function source
 
     - binding.h
-          header to declare the support functions and magic constant
+          header to declare the interface numbering and support functions
 
     - prototype.h
           header which declares all the prototype builder, initialiser

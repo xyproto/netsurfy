@@ -1,0 +1,74 @@
+/* Navigator binding for browser using QuickJS and libdom
+ *
+ * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+prologue Navigator()
+%{
+#include "utils/useragent.h"
+%}
+
+method Navigator::taintEnabled()
+%{
+	return JS_FALSE;
+%}
+
+getter Navigator::appCodeName()
+%{
+	return JS_NewString(ctx, "Mozilla");
+%}
+
+getter Navigator::appName()
+%{
+	return JS_NewString(ctx, "Netscape");
+%}
+
+getter Navigator::appVersion()
+%{
+	return JS_NewString(ctx, "3.4");
+%}
+
+getter Navigator::platform()
+%{
+	return JS_NewString(ctx, "");
+%}
+
+getter Navigator::product()
+%{
+	return JS_NewString(ctx, "Gecko");
+%}
+
+getter Navigator::productSub()
+%{
+	return JS_NewString(ctx, "20100101");
+%}
+
+getter Navigator::vendor()
+%{
+	return JS_NewString(ctx, "");
+%}
+
+getter Navigator::vendorSub()
+%{
+	return JS_NewString(ctx, "");
+%}
+
+getter Navigator::cookieEnabled()
+%{
+	return JS_TRUE;
+%}
+
+getter Navigator::javaEnabled()
+%{
+	return JS_FALSE;
+%}
+
+getter Navigator::userAgent()
+%{
+	return JS_NewString(ctx, user_agent_string());
+%}

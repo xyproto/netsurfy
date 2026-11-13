@@ -32,6 +32,7 @@ jobs:
                libwebp
                ninja
                openssl
+               quickjs-ng
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v4

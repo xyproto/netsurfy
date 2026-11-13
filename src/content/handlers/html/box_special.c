@@ -6,7 +6,7 @@
  * Copyright 2008 Michael Drake <tlsa@netsurf-browser.org>
  * Copyright 2020 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
  * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -566,14 +566,8 @@ box_input_label(html_content *content, struct box *box, const char *label)
 
 	inline_container->type = BOX_INLINE_CONTAINER;
 
-	inline_box = box_create(NULL,
-				box->style,
-				false,
-				0,
-				0,
-				box->title,
-				0,
-				content->bctx);
+	inline_box = box_create(
+		NULL, box->style, false, 0, 0, box->title, 0, content->bctx);
 	if (inline_box == NULL)
 		return false;
 
@@ -1554,7 +1548,9 @@ static bool box_input(dom_node *n,
 					content, box, dom_string_data(alt));
 			} else {
 				labelled = box_input_label(
-					content, box, messages_get("Form_Submit"));
+					content,
+					box,
+					messages_get("Form_Submit"));
 			}
 			if (alt != NULL)
 				dom_string_unref(alt);

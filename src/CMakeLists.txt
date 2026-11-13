@@ -220,47 +220,41 @@ add_custom_target(testament
   VERBATIM)
 
 set(JAVASCRIPT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/content/handlers/javascript)
-if(NETSURFY_USE_DUKTAPE)
-  set(DUKTAPE_GEN ${NETSURFY_GEN}/duktape)
-  file(GLOB duktape_bindings CONFIGURE_DEPENDS
-    ${JAVASCRIPT_DIR}/duktape/*.bnd ${JAVASCRIPT_DIR}/WebIDL/*.idl)
-  file(REMOVE_RECURSE ${DUKTAPE_GEN})
-  file(MAKE_DIRECTORY ${DUKTAPE_GEN})
+if(NETSURFY_USE_QUICKJS)
+  set(QUICKJS_GEN ${NETSURFY_GEN}/quickjs)
+  file(GLOB quickjs_bindings CONFIGURE_DEPENDS
+    ${JAVASCRIPT_DIR}/quickjs/*.bnd ${JAVASCRIPT_DIR}/WebIDL/*.idl)
+  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${quickjs_bindings})
+  file(REMOVE_RECURSE ${QUICKJS_GEN})
+  file(MAKE_DIRECTORY ${QUICKJS_GEN})
   execute_process(
-    COMMAND ${NETSURFY_NSGENBIND} -D -I ${JAVASCRIPT_DIR}/WebIDL
-      ${JAVASCRIPT_DIR}/duktape/netsurfy.bnd ${DUKTAPE_GEN}
+    COMMAND ${NETSURFY_NSGENBIND} -I ${JAVASCRIPT_DIR}/WebIDL
+      ${JAVASCRIPT_DIR}/quickjs/netsurfy.bnd ${QUICKJS_GEN}
     RESULT_VARIABLE nsgenbind_result
     OUTPUT_QUIET)
   if(NOT nsgenbind_result EQUAL 0)
     message(FATAL_ERROR "nsgenbind failed to generate the JavaScript bindings")
   endif()
-  file(STRINGS ${DUKTAPE_GEN}/Makefile nsgenbind_sources_line
+  file(STRINGS ${QUICKJS_GEN}/Makefile nsgenbind_sources_line
     REGEX "^NSGENBIND_SOURCES:=")
   string(REGEX REPLACE "^NSGENBIND_SOURCES:=" "" nsgenbind_sources "${nsgenbind_sources_line}")
   separate_arguments(nsgenbind_sources UNIX_COMMAND "${nsgenbind_sources}")
-  list(TRANSFORM nsgenbind_sources PREPEND ${DUKTAPE_GEN}/)
+  list(TRANSFORM nsgenbind_sources PREPEND ${QUICKJS_GEN}/)
 
-  foreach(script generics polyfill)
-    add_custom_command(
-      OUTPUT ${DUKTAPE_GEN}/${script}.js.inc
-      COMMAND ${CMAKE_COMMAND} -DINPUT=${JAVASCRIPT_DIR}/duktape/${script}.js
-        -DOUTPUT=${DUKTAPE_GEN}/${script}.js.inc -DNAME=${script}_js
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/bin2c.cmake
-      DEPENDS ${JAVASCRIPT_DIR}/duktape/${script}.js
-        ${CMAKE_CURRENT_SOURCE_DIR}/tools/bin2c.cmake
-      VERBATIM)
-  endforeach()
-
-  set_source_files_properties(content/handlers/javascript/duktape/duktape.c
-    PROPERTIES COMPILE_OPTIONS -Wno-unused-but-set-variable)
+  add_custom_command(
+    OUTPUT ${QUICKJS_GEN}/prelude.js.inc
+    COMMAND ${CMAKE_COMMAND} -DINPUT=${JAVASCRIPT_DIR}/quickjs/prelude.js
+      -DOUTPUT=${QUICKJS_GEN}/prelude.js.inc -DNAME=prelude_js
+      -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/bin2c.cmake
+    DEPENDS ${JAVASCRIPT_DIR}/quickjs/prelude.js
+      ${CMAKE_CURRENT_SOURCE_DIR}/tools/bin2c.cmake
+    VERBATIM)
 
   set(NETSURFY_JAVASCRIPT_SOURCES
     content/handlers/javascript/content.c
-    content/handlers/javascript/duktape/dukky.c
-    content/handlers/javascript/duktape/duktape.c
+    content/handlers/javascript/quickjs/qjsky.c
     content/handlers/javascript/fetcher.c
-    ${DUKTAPE_GEN}/generics.js.inc
-    ${DUKTAPE_GEN}/polyfill.js.inc
+    ${QUICKJS_GEN}/prelude.js.inc
     ${nsgenbind_sources})
 else()
   set(NETSURFY_JAVASCRIPT_SOURCES
@@ -342,13 +336,13 @@ target_compile_definitions(netsurfy PRIVATE
   _BSD_SOURCE
   _DEFAULT_SOURCE
   "GTK_RESPATH=\"${NETSURFY_GTK_RES_PATH}\""
-  WITH_GRESOURCE
-  $<$<BOOL:${NETSURFY_USE_DUKTAPE}>:DUK_OPT_HAVE_CUSTOM_H>)
+  WITH_GRESOURCE)
 
 target_compile_options(netsurfy PRIVATE ${NETSURFY_WARNING_FLAGS} -include ${NETSURFY_CONFIG_HEADER})
 
 target_link_libraries(netsurfy PRIVATE
   ${NETSURFY_CORE_LIBRARIES}
+  $<$<BOOL:${NETSURFY_USE_QUICKJS}>:qjs>
   PkgConfig::GTK)
 
 install(TARGETS netsurfy RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

@@ -1,0 +1,86 @@
+/* binding for browser using QuickJS and libdom
+ *
+ * Copyright 2019 Michael Drake <tlsa@netsurf-browser.org>
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+init KeyboardEvent (struct dom_keyboard_event *evt::ui_event);
+
+getter KeyboardEvent::key ()
+%{
+	dom_string *key = NULL;
+	JSValue ret;
+
+	if (dom_keyboard_event_get_key(priv->parent.parent.evt, &key) != DOM_NO_ERR) return JS_UNDEFINED;
+	ret = qjsky_string(ctx, key);
+	if (key != NULL) dom_string_unref(key);
+	return ret;
+%}
+
+getter KeyboardEvent::code ()
+%{
+	dom_string *code = NULL;
+	JSValue ret;
+
+	if (dom_keyboard_event_get_code(priv->parent.parent.evt, &code) != DOM_NO_ERR) return JS_UNDEFINED;
+	ret = qjsky_string(ctx, code);
+	if (code != NULL) dom_string_unref(code);
+	return ret;
+%}
+
+getter KeyboardEvent::location ()
+%{
+	dom_key_location location;
+
+	if (dom_keyboard_event_get_location(priv->parent.parent.evt, &location) != DOM_NO_ERR) return JS_UNDEFINED;
+	return JS_NewUint32(ctx, (uint32_t)location);
+%}
+
+getter KeyboardEvent::ctrlKey ()
+%{
+	bool ret;
+
+	if (dom_keyboard_event_get_ctrl_key(priv->parent.parent.evt, &ret) != DOM_NO_ERR) return JS_UNDEFINED;
+	return JS_NewBool(ctx, ret);
+%}
+
+getter KeyboardEvent::shiftKey ()
+%{
+	bool ret;
+
+	if (dom_keyboard_event_get_shift_key(priv->parent.parent.evt, &ret) != DOM_NO_ERR) return JS_UNDEFINED;
+	return JS_NewBool(ctx, ret);
+%}
+
+getter KeyboardEvent::altKey ()
+%{
+	bool ret;
+
+	if (dom_keyboard_event_get_alt_key(priv->parent.parent.evt, &ret) != DOM_NO_ERR) return JS_UNDEFINED;
+	return JS_NewBool(ctx, ret);
+%}
+
+getter KeyboardEvent::metaKey ()
+%{
+	bool ret;
+
+	if (dom_keyboard_event_get_meta_key(priv->parent.parent.evt, &ret) != DOM_NO_ERR) return JS_UNDEFINED;
+	return JS_NewBool(ctx, ret);
+%}
+
+method KeyboardEvent::getModifierState ()
+%{
+	dom_string *modifier = qjsky_to_dom_string(ctx, argv[0]);
+	dom_exception err;
+	bool state;
+
+	if (modifier == NULL) return JS_EXCEPTION;
+	err = dom_keyboard_event_get_modifier_state(priv->parent.parent.evt, modifier, &state);
+	dom_string_unref(modifier);
+	if (err != DOM_NO_ERR) return JS_UNDEFINED;
+	return JS_NewBool(ctx, state);
+%}

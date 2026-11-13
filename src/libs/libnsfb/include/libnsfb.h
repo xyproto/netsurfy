@@ -1,11 +1,11 @@
 /*
  * Copyright 2009 Vincent Sanders <vince@simtec.co.uk>
  *
- * This file is part of libnsfb, http://www.netsurf-browser.org/
+ * This file is part of libnsfb, https://github.com/xyproto/netsurfy
  * Licenced under the MIT License,
  *                http://www.opensource.org/licenses/mit-license.php
  *
- * This is the exported interface for the libnsfb graphics library. 
+ * This is the exported interface for the libnsfb graphics library.
  */
 
 #ifndef _LIBNSFB_H
@@ -20,43 +20,43 @@ typedef struct nsfb_event_s nsfb_event_t;
 
 /** co-ordinate for plotting operations */
 typedef struct nsfb_point_s {
-    int x;
-    int y;
+	int x;
+	int y;
 } nsfb_point_t;
 
 /** bounding box for plotting operations */
 typedef struct nsfb_bbox_s {
-    int x0;
-    int y0;
-    int x1;
-    int y1;
+	int x0;
+	int y0;
+	int x1;
+	int y1;
 } nsfb_bbox_t;
 
 /** The type of framebuffer surface. */
 enum nsfb_type_e {
-    NSFB_SURFACE_NONE = 0, /**< No surface */
-    NSFB_SURFACE_SDL, /**< SDL surface */
-    NSFB_SURFACE_X, /**< X windows surface */
-    NSFB_SURFACE_WL, /**< Wayland surface */
-    NSFB_SURFACE_VNC, /**< VNC surface */
-    NSFB_SURFACE_LINUX, /**< Linux framebuffer surface */
-    NSFB_SURFACE_ABLE, /**< ABLE framebuffer surface */
-    NSFB_SURFACE_RAM, /**< RAM surface */
-    NSFB_SURFACE_COUNT, /**< The number of surface kinds */
+	NSFB_SURFACE_NONE = 0, /**< No surface */
+	NSFB_SURFACE_SDL, /**< SDL surface */
+	NSFB_SURFACE_X, /**< X windows surface */
+	NSFB_SURFACE_WL, /**< Wayland surface */
+	NSFB_SURFACE_VNC, /**< VNC surface */
+	NSFB_SURFACE_LINUX, /**< Linux framebuffer surface */
+	NSFB_SURFACE_ABLE, /**< ABLE framebuffer surface */
+	NSFB_SURFACE_RAM, /**< RAM surface */
+	NSFB_SURFACE_COUNT, /**< The number of surface kinds */
 };
 
 enum nsfb_format_e {
-    NSFB_FMT_ANY = 0, /* No specific format - use surface default */
-    NSFB_FMT_XBGR8888, /* 32bpp Blue Green Red */
-    NSFB_FMT_XRGB8888, /* 32bpp Red Green Blue */
-    NSFB_FMT_ABGR8888, /* 32bpp Alpha Blue Green Red */
-    NSFB_FMT_ARGB8888, /* 32bpp Alpha Red Green Blue */
-    NSFB_FMT_RGB888, /* 24 bpp Alpha Red Green Blue */
-    NSFB_FMT_ARGB1555, /* 16 bpp 555 */ 
-    NSFB_FMT_RGB565, /* 16 bpp 565 */ 
-    NSFB_FMT_I8, /* 8bpp indexed */
-    NSFB_FMT_I4, /* 4bpp indexed */
-    NSFB_FMT_I1, /* black and white */
+	NSFB_FMT_ANY = 0, /* No specific format - use surface default */
+	NSFB_FMT_XBGR8888, /* 32bpp Blue Green Red */
+	NSFB_FMT_XRGB8888, /* 32bpp Red Green Blue */
+	NSFB_FMT_ABGR8888, /* 32bpp Alpha Blue Green Red */
+	NSFB_FMT_ARGB8888, /* 32bpp Alpha Red Green Blue */
+	NSFB_FMT_RGB888, /* 24 bpp Alpha Red Green Blue */
+	NSFB_FMT_ARGB1555, /* 16 bpp 555 */
+	NSFB_FMT_RGB565, /* 16 bpp 565 */
+	NSFB_FMT_I8, /* 8bpp indexed */
+	NSFB_FMT_I4, /* 4bpp indexed */
+	NSFB_FMT_I1, /* black and white */
 };
 
 /** Callback for surface enumeration
@@ -75,9 +75,9 @@ typedef void (*surface_enumeration_cb)(void *, const char *, enum nsfb_type_e);
 void nsfb_enumerate_surface_types(surface_enumeration_cb cb, void *context);
 
 /** Select frontend type from a name.
- * 
+ *
  * @param name The name to select a frontend.
- * @return The surface type or NSFB_SURFACE_NONE if frontend with specified 
+ * @return The surface type or NSFB_SURFACE_NONE if frontend with specified
  *         name was not available
  */
 enum nsfb_type_e nsfb_type_from_name(const char *name);
@@ -134,7 +134,10 @@ int nsfb_update(nsfb_t *nsfb, nsfb_bbox_t *box);
  * @param height a variable to store the framebuffer height in or NULL
  * @param format a variable to store the framebuffer format in or NULL
  */
-int nsfb_get_geometry(nsfb_t *nsfb, int *width, int *height, enum nsfb_format_e *format);
+int nsfb_get_geometry(nsfb_t *nsfb,
+		      int *width,
+		      int *height,
+		      enum nsfb_format_e *format);
 
 /** Alter the geometry of a surface
  *
@@ -143,7 +146,10 @@ int nsfb_get_geometry(nsfb_t *nsfb, int *width, int *height, enum nsfb_format_e 
  * @param height The new display height.
  * @param format The desired surface format.
  */
-int nsfb_set_geometry(nsfb_t *nsfb, int width, int height, enum nsfb_format_e format);
+int nsfb_set_geometry(nsfb_t *nsfb,
+		      int width,
+		      int height,
+		      enum nsfb_format_e format);
 
 /** Set parameters a surface
  *
@@ -156,13 +162,13 @@ int nsfb_set_geometry(nsfb_t *nsfb, int width, int height, enum nsfb_format_e fo
  */
 int nsfb_set_parameters(nsfb_t *nsfb, const char *parameters);
 
-/** Obtain the buffer memory base and stride. 
+/** Obtain the buffer memory base and stride.
  *
  * @param nsfb The context to read.
  */
 int nsfb_get_buffer(nsfb_t *nsfb, uint8_t **ptr, int *linelen);
 
-/** Dump the surface to fd in PPM format  
+/** Dump the surface to fd in PPM format
  */
 bool nsfb_dump(nsfb_t *nsfb, int fd);
 

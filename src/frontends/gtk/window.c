@@ -2,7 +2,7 @@
  * Copyright 2006 Daniel Silverstone <dsilvers@digital-scurf.org>
  * Copyright 2006 Rob Kendrick <rjek@rjek.com>
  *
- * This file is part of NetSurfy, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
  * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -544,7 +544,8 @@ static gboolean nsgtk_window_key_pressed(GtkEventControllerKey *controller,
 
 	if (keyval == GDK_KEY(space) && (state & GDK_CONTROL_MASK) == 0) {
 		double page = gtk_adjustment_get_page_increment(g->vadj);
-		nsgtk_adjustment_scroll(g->vadj, (state & GDK_SHIFT_MASK) ? -page : page);
+		nsgtk_adjustment_scroll(
+			g->vadj, (state & GDK_SHIFT_MASK) ? -page : page);
 		return TRUE;
 	}
 

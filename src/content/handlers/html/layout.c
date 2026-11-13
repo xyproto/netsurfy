@@ -4,7 +4,7 @@
  * Copyright 2008 Michael Drake <tlsa@netsurf-browser.org>
  * Copyright 2003 Phil Mellor <monkeyson@users.sourceforge.net>
  *
- * This file is part of NetSurfy, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
  * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -2021,7 +2021,9 @@ bool layout_table(struct box *table, int available_width, html_content *content)
 	}
 
 	if (table_width == AUTO)
-		percent_base = layout_table_percent_base(col, columns, auto_width);
+		percent_base = layout_table_percent_base(col,
+							 columns,
+							 auto_width);
 	else
 		percent_base = auto_width;
 

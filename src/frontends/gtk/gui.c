@@ -8,7 +8,7 @@
  * Copyright 2008 John Tytgat <joty@netsurf-browser.org>
  * Copyright 2008 Adam Blokus <adamblokus@gmail.com>
  *
- * This file is part of NetSurfy, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
  * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -534,7 +534,8 @@ static nserror set_defaults(struct nsoption_s *defaults)
 	 * configured, otherwise ~/downloads */
 	fname = NULL;
 	if (g_get_user_special_dir(G_USER_DIRECTORY_DOWNLOAD) != NULL) {
-		fname = strdup(g_get_user_special_dir(G_USER_DIRECTORY_DOWNLOAD));
+		fname = strdup(
+			g_get_user_special_dir(G_USER_DIRECTORY_DOWNLOAD));
 	} else if (getenv("HOME") != NULL) {
 		netsurfy_mkpath(&fname, NULL, 2, getenv("HOME"), "downloads");
 	}

@@ -30,6 +30,7 @@ jobs:
                libwebp
                ninja
                openssl
+               quickjs-ng
                words
 
     - name: Checkout repository

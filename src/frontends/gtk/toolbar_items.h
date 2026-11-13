@@ -1,7 +1,7 @@
 /*
  * Copyright 2012 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
  * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -164,13 +164,7 @@ TOOLBAR_ITEM(PREFERENCES_BUTTON,
 	     gtkPreferences,
 	     "preferences-system")
 TOOLBAR_ITEM(ZOOMPLUS_BUTTON, zoomplus, true, b, p, gtkZoomPlus, "zoom-in")
-TOOLBAR_ITEM(ZOOMMINUS_BUTTON,
-	     zoomminus,
-	     true,
-	     b,
-	     p,
-	     gtkZoomMinus,
-	     "zoom-out")
+TOOLBAR_ITEM(ZOOMMINUS_BUTTON, zoomminus, true, b, p, gtkZoomMinus, "zoom-out")
 TOOLBAR_ITEM(ZOOMNORMAL_BUTTON,
 	     zoomnormal,
 	     true,

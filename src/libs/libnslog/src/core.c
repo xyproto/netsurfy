@@ -81,9 +81,14 @@ static void nslog__normalise_category(nslog_category_t *cat)
 		cat->namelen = strlen(cat->name);
 	} else {
 		nslog__normalise_category(cat->parent);
-		int bufsz = strlen(cat->parent->name) + strlen(cat->cat_name) + 2 /* a slash and a NUL */;
+		int bufsz = strlen(cat->parent->name) + strlen(cat->cat_name) +
+			    2 /* a slash and a NUL */;
 		cat->name = malloc(bufsz);
-		snprintf(cat->name, bufsz, "%s/%s", cat->parent->name, cat->cat_name);
+		snprintf(cat->name,
+			 bufsz,
+			 "%s/%s",
+			 cat->parent->name,
+			 cat->cat_name);
 		cat->namelen = bufsz - 1;
 	}
 	cat->next = nslog__all_categories;
@@ -96,7 +101,8 @@ static void nslog__log_corked(nslog_entry_context_t *ctx,
 			      va_list args)
 {
 	/* If corked, we need to store a copy */
-	struct nslog_cork_chain *newcork = calloc(sizeof(struct nslog_cork_chain) + measured_len + 1, 1);
+	struct nslog_cork_chain *newcork = calloc(
+		sizeof(struct nslog_cork_chain) + measured_len + 1, 1);
 	if (newcork == NULL) {
 		/* Wow, something went wrong */
 		return;
@@ -111,9 +117,8 @@ static void nslog__log_corked(nslog_entry_context_t *ctx,
 	}
 }
 
-static void nslog__log_uncorked(nslog_entry_context_t *ctx,
-				const char *fmt,
-				va_list args)
+static void
+nslog__log_uncorked(nslog_entry_context_t *ctx, const char *fmt, va_list args)
 {
 	/* TODO: Add filtering here */
 	if (nslog__cb != NULL) {
@@ -125,9 +130,7 @@ static void nslog__log_uncorked(nslog_entry_context_t *ctx,
 	}
 }
 
-void nslog__log(nslog_entry_context_t *ctx,
-		const char *pattern,
-		...)
+void nslog__log(nslog_entry_context_t *ctx, const char *pattern, ...)
 {
 	va_list ap;
 	va_start(ap, pattern);
@@ -153,9 +156,8 @@ nslog_error nslog_set_render_callback(nslog_callback cb, void *context)
 }
 
 
-static void __nslog__deliver_corked_entry(nslog_entry_context_t *ctx,
-					  const char *fmt,
-					  ...)
+static void
+__nslog__deliver_corked_entry(nslog_entry_context_t *ctx, const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
@@ -172,11 +174,13 @@ nslog_error nslog_uncork(void)
 			struct nslog_cork_chain *ent = nslog__cork_chain;
 			nslog__cork_chain = ent->next;
 			if (ent->context.category->name == NULL) {
-				nslog__normalise_category(ent->context.category);
+				nslog__normalise_category(
+					ent->context.category);
 			}
 			if (nslog__filter_matches(&ent->context))
 				__nslog__deliver_corked_entry(&ent->context,
-							      "%s", ent->message);
+							      "%s",
+							      ent->message);
 			free(ent);
 		}
 		nslog__corked = false;

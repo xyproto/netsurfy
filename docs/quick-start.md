@@ -10,7 +10,7 @@ Install the build dependencies
 
 On Arch Linux:
 
-      $ pacman -S --needed base-devel cmake curl expat gtk4 libjpeg-turbo libpng libwebp openssl
+      $ pacman -S --needed base-devel cmake curl expat gtk4 libjpeg-turbo libpng libwebp openssl quickjs-ng
 
 Install `check` as well to build the unit tests.
 
@@ -36,7 +36,7 @@ Build options
 
 Options are set when configuring, for example:
 
-      $ cmake -B build -DNETSURFY_USE_JPEGXL=ON -DNETSURFY_USE_DUKTAPE=OFF
+      $ cmake -B build -DNETSURFY_USE_JPEGXL=ON -DNETSURFY_USE_QUICKJS=OFF
 
 Run `cmake -LH build` to list them all.
 

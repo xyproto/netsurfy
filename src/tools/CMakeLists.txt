@@ -35,11 +35,11 @@ add_executable(nsgenbind
   ${NSGENBIND_DIR}/webidl-ast.c
   ${NSGENBIND_DIR}/nsgenbind-ast.c
   ${NSGENBIND_DIR}/ir.c
-  ${NSGENBIND_DIR}/duk-libdom.c
-  ${NSGENBIND_DIR}/duk-libdom-interface.c
-  ${NSGENBIND_DIR}/duk-libdom-dictionary.c
-  ${NSGENBIND_DIR}/duk-libdom-generated.c
-  ${NSGENBIND_DIR}/duk-libdom-common.c)
+  ${NSGENBIND_DIR}/qjs-libdom.c
+  ${NSGENBIND_DIR}/qjs-libdom-interface.c
+  ${NSGENBIND_DIR}/qjs-libdom-dictionary.c
+  ${NSGENBIND_DIR}/qjs-libdom-generated.c
+  ${NSGENBIND_DIR}/qjs-libdom-common.c)
 target_include_directories(nsgenbind PRIVATE ${NSGENBIND_DIR} ${NSGENBIND_GEN})
 target_compile_definitions(nsgenbind PRIVATE
   _BSD_SOURCE _DEFAULT_SOURCE _POSIX_C_SOURCE=200809L YYENABLE_NLS=0)

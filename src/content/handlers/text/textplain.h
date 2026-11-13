@@ -2,7 +2,7 @@
  * Copyright 2006 James Bursa <bursa@users.sourceforge.net>
  * Copyright 2006 Adrian Lees <adrianl@users.sourceforge.net>
  *
- * This file is part of NetSurfy, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
  * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

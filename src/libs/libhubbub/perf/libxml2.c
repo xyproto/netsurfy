@@ -31,9 +31,12 @@ int main(int argc, char **argv)
 	fd = open(argv[1], 0);
 	file = mmap(NULL, info.st_size, PROT_READ, MAP_SHARED, fd, 0);
 
-	doc = htmlReadMemory(file, info.st_size, NULL, NULL,
-			HTML_PARSE_RECOVER | HTML_PARSE_NOERROR |
-			HTML_PARSE_NOWARNING);
+	doc = htmlReadMemory(file,
+			     info.st_size,
+			     NULL,
+			     NULL,
+			     HTML_PARSE_RECOVER | HTML_PARSE_NOERROR |
+				     HTML_PARSE_NOWARNING);
 #if 0
 	doc = htmlReadFile(argv[1], NULL, HTML_PARSE_RECOVER |
 			HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING);
@@ -49,4 +52,3 @@ int main(int argc, char **argv)
 
 	return 0;
 }
-

@@ -11,12 +11,9 @@
 /**
  * Dispatch table for properties, indexed by opcode
  */
-#define PROPERTY_FUNCS(pname)				\
-	css__cascade_##pname,				\
-	css__set_##pname##_from_hint,			\
-	css__initial_##pname,				\
-	css__copy_##pname,				\
-	css__compose_##pname
+#define PROPERTY_FUNCS(pname)                                                  \
+	css__cascade_##pname, css__set_##pname##_from_hint,                    \
+		css__initial_##pname, css__copy_##pname, css__compose_##pname
 
 struct prop_table prop_dispatch[CSS_N_PROPERTIES] = {
 	{
@@ -526,5 +523,4 @@ struct prop_table prop_dispatch[CSS_N_PROPERTIES] = {
 	{
 		PROPERTY_FUNCS(row_gap),
 		0,
-	}
-};
+	}};

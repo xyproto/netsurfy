@@ -1,11 +1,11 @@
 /*
  * Copyright 2009 Vincent Sanders <vince@simtec.co.uk>
  *
- * This file is part of libnsfb, http://www.netsurf-browser.org/
+ * This file is part of libnsfb, https://github.com/xyproto/netsurfy
  * Licenced under the MIT License,
  *                http://www.opensource.org/licenses/mit-license.php
  *
- * This is the exported interface for the libnsfb graphics library. 
+ * This is the exported interface for the libnsfb graphics library.
  */
 
 #ifndef _LIBNSFB_CURSOR_H
@@ -32,7 +32,13 @@ bool nsfb_cursor_init(nsfb_t *nsfb);
  * (hot_spot_x, hot_spot_y) is from top left.  (0, 0) means top left pixel of
  * cursor bitmap is to be rendered over the cursor location.
  */
-bool nsfb_cursor_set(nsfb_t *nsfb, const nsfb_colour_t *pixel, int bmp_width, int bmp_height, int bmp_stride, int hotspot_x, int hotspot_y);
+bool nsfb_cursor_set(nsfb_t *nsfb,
+		     const nsfb_colour_t *pixel,
+		     int bmp_width,
+		     int bmp_height,
+		     int bmp_stride,
+		     int hotspot_x,
+		     int hotspot_y);
 
 /** Set cursor location.
  *

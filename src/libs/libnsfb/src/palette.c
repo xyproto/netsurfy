@@ -1,7 +1,7 @@
 /*
  * Copyright 2012 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of libnsfb, http://www.netsurf-browser.org/
+ * This file is part of libnsfb, https://github.com/xyproto/netsurfy
  * Licenced under the MIT License,
  *                http://www.opensource.org/licenses/mit-license.php
  */
@@ -83,11 +83,11 @@ void nsfb_palette_generate_nsfb_8bpp(struct nsfb_palette_s *palette)
 		for (gloop = 0; gloop < GLIM; gloop++) {
 			for (bloop = 0; bloop < BLIM; bloop++) {
 				r = ((rloop * 255 * 2) + RLIM - 1) /
-						(2 * (RLIM - 1));
+				    (2 * (RLIM - 1));
 				g = ((gloop * 255 * 2) + GLIM - 1) /
-						(2 * (GLIM - 1));
+				    (2 * (GLIM - 1));
 				b = ((bloop * 255 * 2) + BLIM - 1) /
-						(2 * (BLIM - 1));
+				    (2 * (BLIM - 1));
 
 				palette->data[loop] = r | g << 8 | b << 16;
 				loop++;

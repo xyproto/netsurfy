@@ -1,7 +1,7 @@
 /*
  * Copyright 2019 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
  * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #include "desktop/version.h"
 #include "testament.h"
 
-const char *const netsurfy_version = "1.0.5"
+const char *const netsurfy_version = "1.0.6"
 #if defined(CI_BUILD)
 				     " (CI #" CI_BUILD ")"
 #endif

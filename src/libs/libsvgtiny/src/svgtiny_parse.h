@@ -16,11 +16,9 @@
  */
 static inline void advance_whitespace(const char **cursor, const char *textend)
 {
-	while((*cursor) < textend) {
-		if ((**cursor != 0x20) &&
-		    (**cursor != 0x09) &&
-		    (**cursor != 0x0A) &&
-		    (**cursor != 0x0D)) {
+	while ((*cursor) < textend) {
+		if ((**cursor != 0x20) && (**cursor != 0x09) &&
+		    (**cursor != 0x0A) && (**cursor != 0x0D)) {
 			break;
 		}
 		(*cursor)++;
@@ -34,7 +32,8 @@ static inline void advance_whitespace(const char **cursor, const char *textend)
  * \param cursor current cursor
  * \param textend end of buffer
  */
-static inline void advance_comma_whitespace(const char **cursor, const char *textend)
+static inline void
+advance_comma_whitespace(const char **cursor, const char *textend)
 {
 	advance_whitespace(cursor, textend);
 	if (((*cursor) < textend) && (**cursor == 0x2C /* , */)) {

@@ -1,0 +1,20 @@
+/* HTML font element binding using QuickJS and libdom
+ *
+ * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+init HTMLFontElement(struct dom_html_element *html_font_element::html_element);
+
+getter HTMLFontElement::color();
+setter HTMLFontElement::color();
+
+getter HTMLFontElement::face();
+setter HTMLFontElement::face();
+
+getter HTMLFontElement::size();
+setter HTMLFontElement::size();

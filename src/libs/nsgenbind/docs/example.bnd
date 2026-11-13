@@ -5,7 +5,7 @@
  *
  * Copyright 2012 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurf, https://github.com/xyproto/netsurfy
  *
  * Released under the terms of the MIT License,
  *         http://www.opensource.org/licenses/mit-license
@@ -17,7 +17,7 @@ webidlfile "html.idl";
 
 /* The hdrcomment are added into the geenrated output comment header */
 hdrcomment "Copyright 2012 Vincent Sanders <vince@netsurf-browser.org>";
-hdrcomment "This file is part of NetSurf, http://www.netsurf-browser.org/";
+hdrcomment "This file is part of NetSurf, https://github.com/xyproto/netsurfy";
 hdrcomment "Released under the terms of the MIT License,";
 hdrcomment "        http://www.opensource.org/licenses/mit-license";
 

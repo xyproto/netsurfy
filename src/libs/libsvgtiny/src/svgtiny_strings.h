@@ -8,7 +8,7 @@
 #error No action defined
 #endif
 
-#define SVGTINY_STRING_ACTION(s) SVGTINY_STRING_ACTION2(s,s)
+#define SVGTINY_STRING_ACTION(s) SVGTINY_STRING_ACTION2(s, s)
 
 SVGTINY_STRING_ACTION(svg)
 SVGTINY_STRING_ACTION(viewBox)
@@ -50,9 +50,9 @@ SVGTINY_STRING_ACTION(gradientUnits)
 SVGTINY_STRING_ACTION(gradientTransform)
 SVGTINY_STRING_ACTION(userSpaceOnUse)
 SVGTINY_STRING_ACTION(use)
-SVGTINY_STRING_ACTION2(stroke_width,stroke-width)
-SVGTINY_STRING_ACTION2(stop_color,stop-color)
-SVGTINY_STRING_ACTION2(zero_percent,0%)
-SVGTINY_STRING_ACTION2(hundred_percent,100%)
+SVGTINY_STRING_ACTION2(stroke_width, stroke - width)
+SVGTINY_STRING_ACTION2(stop_color, stop - color)
+SVGTINY_STRING_ACTION2(zero_percent, 0 %)
+SVGTINY_STRING_ACTION2(hundred_percent, 100 %)
 
 #undef SVGTINY_STRING_ACTION

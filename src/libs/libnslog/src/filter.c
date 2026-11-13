@@ -17,11 +17,13 @@
 #include "filter-parser.h"
 
 /* Ensure compatability with bison 2.6 and later */
-#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED && defined FILTER_STYPE_IS_DECLARED
+#if !defined YYSTYPE && !defined YYSTYPE_IS_DECLARED &&                        \
+	defined FILTER_STYPE_IS_DECLARED
 #define YYSTYPE FILTER_STYPE
 #endif
 
-#if ! defined YYLTYPE && ! defined YYLTYPE_IS_DECLARED && defined FILTER_LTYPE_IS_DECLARED
+#if !defined YYLTYPE && !defined YYLTYPE_IS_DECLARED &&                        \
+	defined FILTER_LTYPE_IS_DECLARED
 #define YYLTYPE FILTER_LTYPE
 #endif
 
@@ -60,8 +62,8 @@ struct nslog_filter_s {
 
 static nslog_filter_t *nslog__active_filter = NULL;
 
-nslog_error nslog_filter_category_new(const char *catname,
-				      nslog_filter_t **filter)
+nslog_error
+nslog_filter_category_new(const char *catname, nslog_filter_t **filter)
 {
 	nslog_filter_t *ret = calloc(1, sizeof(*ret));
 	if (ret == NULL)
@@ -78,8 +80,7 @@ nslog_error nslog_filter_category_new(const char *catname,
 	return NSLOG_NO_ERROR;
 }
 
-nslog_error nslog_filter_level_new(nslog_level level,
-				   nslog_filter_t **filter)
+nslog_error nslog_filter_level_new(nslog_level level, nslog_filter_t **filter)
 {
 	nslog_filter_t *ret = calloc(1, sizeof(*ret));
 	if (ret == NULL)
@@ -91,8 +92,8 @@ nslog_error nslog_filter_level_new(nslog_level level,
 	return NSLOG_NO_ERROR;
 }
 
-nslog_error nslog_filter_filename_new(const char *filename,
-				      nslog_filter_t **filter)
+nslog_error
+nslog_filter_filename_new(const char *filename, nslog_filter_t **filter)
 {
 	nslog_filter_t *ret = calloc(1, sizeof(*ret));
 	if (ret == NULL)
@@ -109,8 +110,8 @@ nslog_error nslog_filter_filename_new(const char *filename,
 	return NSLOG_NO_ERROR;
 }
 
-nslog_error nslog_filter_dirname_new(const char *dirname,
-				     nslog_filter_t **filter)
+nslog_error
+nslog_filter_dirname_new(const char *dirname, nslog_filter_t **filter)
 {
 	nslog_filter_t *ret = calloc(1, sizeof(*ret));
 	if (ret == NULL)
@@ -127,8 +128,8 @@ nslog_error nslog_filter_dirname_new(const char *dirname,
 	return NSLOG_NO_ERROR;
 }
 
-nslog_error nslog_filter_funcname_new(const char *funcname,
-				      nslog_filter_t **filter)
+nslog_error
+nslog_filter_funcname_new(const char *funcname, nslog_filter_t **filter)
 {
 	nslog_filter_t *ret = calloc(1, sizeof(*ret));
 	if (ret == NULL)
@@ -191,8 +192,7 @@ nslog_error nslog_filter_xor_new(nslog_filter_t *left,
 	return NSLOG_NO_ERROR;
 }
 
-nslog_error nslog_filter_not_new(nslog_filter_t *input,
-				 nslog_filter_t **filter)
+nslog_error nslog_filter_not_new(nslog_filter_t *input, nslog_filter_t **filter)
 {
 	nslog_filter_t *ret = calloc(1, sizeof(*ret));
 	if (ret == NULL)
@@ -216,7 +216,7 @@ nslog_filter_t *nslog_filter_ref(nslog_filter_t *filter)
 nslog_filter_t *nslog_filter_unref(nslog_filter_t *filter)
 {
 	if (filter != NULL && filter->refcount-- == 1) {
-		switch(filter->kind) {
+		switch (filter->kind) {
 		case NSLFK_CATEGORY:
 		case NSLFK_FILENAME:
 		case NSLFK_DIRNAME:
@@ -242,8 +242,8 @@ nslog_filter_t *nslog_filter_unref(nslog_filter_t *filter)
 	return NULL;
 }
 
-nslog_error nslog_filter_set_active(nslog_filter_t *filter,
-				    nslog_filter_t **prev)
+nslog_error
+nslog_filter_set_active(nslog_filter_t *filter, nslog_filter_t **prev)
 {
 	if (prev != NULL)
 		*prev = nslog__active_filter;
@@ -255,8 +255,8 @@ nslog_error nslog_filter_set_active(nslog_filter_t *filter,
 	return NSLOG_NO_ERROR;
 }
 
-static bool _nslog__filter_matches(nslog_entry_context_t *ctx,
-				   nslog_filter_t *filter)
+static bool
+_nslog__filter_matches(nslog_entry_context_t *ctx, nslog_filter_t *filter)
 {
 	switch (filter->kind) {
 	case NSLFK_CATEGORY:
@@ -277,18 +277,20 @@ static bool _nslog__filter_matches(nslog_entry_context_t *ctx,
 		if ((filter->params.str.len == ctx->filenamelen) &&
 		    (strcmp(filter->params.str.ptr, ctx->filename) == 0))
 			return true;
-		if ((ctx->filename[ctx->filenamelen - filter->params.str.len - 1] == '/')
-		    && (strcmp(filter->params.str.ptr,
-			       ctx->filename + ctx->filenamelen - filter->params.str.len) == 0))
+		if ((ctx->filename[ctx->filenamelen - filter->params.str.len -
+				   1] == '/') &&
+		    (strcmp(filter->params.str.ptr,
+			    ctx->filename + ctx->filenamelen -
+				    filter->params.str.len) == 0))
 			return true;
 		return false;
 	case NSLFK_DIRNAME:
 		if (filter->params.str.len >= ctx->filenamelen)
 			return false;
-		if ((ctx->filename[filter->params.str.len] == '/')
-		    && (strncmp(filter->params.str.ptr,
-				ctx->filename,
-				filter->params.str.len) == 0))
+		if ((ctx->filename[filter->params.str.len] == '/') &&
+		    (strncmp(filter->params.str.ptr,
+			     ctx->filename,
+			     filter->params.str.len) == 0))
 			return true;
 		return false;
 	case NSLFK_FUNCNAME:
@@ -306,17 +308,20 @@ static bool _nslog__filter_matches(nslog_entry_context_t *ctx,
 			strcmp(ctx->funcname, filter->params.str.ptr) == 0);
 #endif
 	case NSLFK_AND:
-		return (_nslog__filter_matches(ctx, filter->params.binary.input1)
-			&&
-			_nslog__filter_matches(ctx, filter->params.binary.input2));
+		return (_nslog__filter_matches(ctx,
+					       filter->params.binary.input1) &&
+			_nslog__filter_matches(ctx,
+					       filter->params.binary.input2));
 	case NSLFK_OR:
-		return (_nslog__filter_matches(ctx, filter->params.binary.input1)
-			||
-			_nslog__filter_matches(ctx, filter->params.binary.input2));
+		return (_nslog__filter_matches(ctx,
+					       filter->params.binary.input1) ||
+			_nslog__filter_matches(ctx,
+					       filter->params.binary.input2));
 	case NSLFK_XOR:
-		return (_nslog__filter_matches(ctx, filter->params.binary.input1)
-			^
-			_nslog__filter_matches(ctx, filter->params.binary.input2));
+		return (_nslog__filter_matches(ctx,
+					       filter->params.binary.input1) ^
+			_nslog__filter_matches(ctx,
+					       filter->params.binary.input2));
 	case NSLFK_NOT:
 		return !_nslog__filter_matches(ctx, filter->params.unary_input);
 	default:
@@ -363,10 +368,11 @@ char *nslog_filter_sprintf(nslog_filter_t *filter)
 	case NSLFK_OR:
 	case NSLFK_XOR: {
 		char *left = nslog_filter_sprintf(filter->params.binary.input1);
-		char *right = nslog_filter_sprintf(filter->params.binary.input2);
-		const char *op =
-			(filter->kind == NSLFK_AND) ? "&&" :
-			(filter->kind == NSLFK_OR) ? "||" : "^";
+		char *right = nslog_filter_sprintf(
+			filter->params.binary.input2);
+		const char *op = (filter->kind == NSLFK_AND)  ? "&&"
+				 : (filter->kind == NSLFK_OR) ? "||"
+							      : "^";
 		ret = calloc(1, strlen(left) + strlen(right) + 7);
 		sprintf(ret, "(%s %s %s)", left, op, right);
 		free(left);
@@ -387,8 +393,7 @@ char *nslog_filter_sprintf(nslog_filter_t *filter)
 	return ret;
 }
 
-nslog_error nslog_filter_from_text(const char *input,
-				   nslog_filter_t **output)
+nslog_error nslog_filter_from_text(const char *input, nslog_filter_t **output)
 {
 	int ret;
 	YY_BUFFER_STATE buffer = filter__scan_string((char *)input);

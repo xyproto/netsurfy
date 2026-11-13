@@ -1,7 +1,7 @@
 /*
  * Copyright 2006 Rob Kendrick <rjek@rjek.com>
  *
- * This file is part of NetSurfy, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
  * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -165,7 +165,8 @@ gboolean nsgtk_completion_update(GtkEntry *entry)
 	if (completion != NULL) {
 		gtk_entry_completion_set_popup_completion(completion, FALSE);
 	}
-	nsgtk_completion_timer = g_timeout_add_full(G_PRIORITY_DEFAULT, 600,
+	nsgtk_completion_timer = g_timeout_add_full(G_PRIORITY_DEFAULT,
+						    600,
 						    nsgtk_completion_show,
 						    g_object_ref(entry),
 						    g_object_unref);

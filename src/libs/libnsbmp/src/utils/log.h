@@ -2,7 +2,7 @@
  * Copyright 2003 James Bursa <bursa@users.sourceforge.net>
  * Copyright 2004 John Tytgat <John.Tytgat@aaug.net>
  *
- * This file is part of NetSurf, http://www.netsurf-browser.org/
+ * This file is part of NetSurf, https://github.com/xyproto/netsurfy
  * Licenced under the MIT License,
  *                http://www.opensource.org/licenses/mit-license.php
  */
@@ -13,15 +13,21 @@
 #define _LIBNSBMP_LOG_H_
 
 #ifdef NDEBUG
-#  define LOG(x) ((void) 0)
+#define LOG(x) ((void)0)
 #else
-#  ifdef __GNUC__
-#    define LOG(x) do { printf x, fputc('\n', stdout)); } while (0)
-#  elif defined(__CC_NORCROFT)
-#    define LOG(x) do { printf x, fputc('\n', stdout)); } while (0)
-#  else
-#    define LOG(x) do { printf x, fputc('\n', stdout)); } while (0)
-#  endif
+#ifdef __GNUC__
+#define LOG(x)                                                                 \
+	do { printf x, fputc('\n', stdout));                        \
+	} while (0)
+#elif defined(__CC_NORCROFT)
+#define LOG(x)                                                                 \
+	do { printf x, fputc('\n', stdout));                        \
+	} while (0)
+#else
+#define LOG(x)                                                                 \
+	do { printf x, fputc('\n', stdout));                        \
+	} while (0)
+#endif
 #endif
 
 #endif

@@ -1,0 +1,388 @@
+/* Element binding for browser using QuickJS and libdom
+ *
+ * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+class Element {
+	prologue %{
+#include <utils/corestrings.h>
+#include <dom/bindings/hubbub/parser.h>
+
+typedef dom_exception (*element_step_fn)(dom_node *node, dom_node **result);
+
+static JSValue element_walk(JSContext *ctx, dom_node *start, element_step_fn first, element_step_fn next)
+{
+	dom_node *element = NULL;
+	dom_node *step;
+	dom_node_type node_type;
+	JSValue ret;
+
+	if (first(start, &element) != DOM_NO_ERR) {
+		return JS_UNDEFINED;
+	}
+	while (element != NULL) {
+		if ((dom_node_get_node_type(element, &node_type) == DOM_NO_ERR) &&
+		    (node_type == DOM_ELEMENT_NODE)) {
+			break;
+		}
+		if (next(element, &step) != DOM_NO_ERR) {
+			step = NULL;
+		}
+		dom_node_unref(element);
+		element = step;
+	}
+	ret = qjsky_node(ctx, element);
+	if (element != NULL) {
+		dom_node_unref(element);
+	}
+	return ret;
+}
+
+static JSValue element_get_attribute_string(JSContext *ctx, dom_node *node, dom_string *name)
+{
+	dom_string *str = NULL;
+	JSValue ret;
+
+	if (dom_element_get_attribute(node, name, &str) != DOM_NO_ERR) {
+		return JS_UNDEFINED;
+	}
+	if (str == NULL) {
+		return JS_NewString(ctx, "");
+	}
+	ret = qjsky_string(ctx, str);
+	dom_string_unref(str);
+	return ret;
+}
+
+static JSValue element_set_attribute_string(JSContext *ctx, dom_node *node, dom_string *name, JSValueConst val)
+{
+	dom_string *str = qjsky_to_dom_string(ctx, val);
+
+	if (str == NULL) {
+		return JS_EXCEPTION;
+	}
+	(void)dom_element_set_attribute(node, name, str);
+	dom_string_unref(str);
+	return JS_UNDEFINED;
+}
+%};
+};
+
+init Element(struct dom_element *element::node);
+
+getter Element::tagName();
+
+getter Element::firstElementChild()
+%{
+	return element_walk(ctx, ((node_private_t *)priv)->node,
+			    dom_node_get_first_child, dom_node_get_next_sibling);
+%}
+
+getter Element::lastElementChild()
+%{
+	return element_walk(ctx, ((node_private_t *)priv)->node,
+			    dom_node_get_last_child, dom_node_get_previous_sibling);
+%}
+
+getter Element::previousElementSibling()
+%{
+	return element_walk(ctx, ((node_private_t *)priv)->node,
+			    dom_node_get_previous_sibling, dom_node_get_previous_sibling);
+%}
+
+getter Element::nextElementSibling()
+%{
+	return element_walk(ctx, ((node_private_t *)priv)->node,
+			    dom_node_get_next_sibling, dom_node_get_next_sibling);
+%}
+
+getter Element::childElementCount()
+%{
+	dom_node *element;
+	dom_node_type node_type;
+	dom_node *next_node;
+	uint32_t count = 0;
+
+	if (dom_node_get_first_child(((node_private_t *)priv)->node, &element) != DOM_NO_ERR) {
+		return JS_UNDEFINED;
+	}
+	while (element != NULL) {
+		if ((dom_node_get_node_type(element, &node_type) == DOM_NO_ERR) &&
+		    (node_type == DOM_ELEMENT_NODE)) {
+			count += 1;
+		}
+		if (dom_node_get_next_sibling(element, &next_node) != DOM_NO_ERR) {
+			next_node = NULL;
+		}
+		dom_node_unref(element);
+		element = next_node;
+	}
+	return JS_NewUint32(ctx, count);
+%}
+
+method Element::getElementsByTagName ()
+%{
+	dom_nodelist *nlist = NULL;
+	dom_string *tagname;
+	dom_exception exc;
+	JSValue list;
+
+	tagname = qjsky_to_dom_string(ctx, argv[0]);
+	if (tagname == NULL) return JS_EXCEPTION;
+	exc = dom_element_get_elements_by_tag_name(priv->parent.node, tagname, &nlist);
+	dom_string_unref(tagname);
+	if (exc != DOM_NO_ERR) return JS_UNDEFINED;
+	list = qjsky_node_list___create(ctx, nlist);
+	dom_nodelist_unref(nlist);
+	return qjsky_list_proxy(ctx, "makeListProxy", list);
+%}
+
+getter Element::id ()
+%{
+	return element_get_attribute_string(ctx, priv->parent.node, corestring_dom_id);
+%}
+
+setter Element::id ()
+%{
+	return element_set_attribute_string(ctx, priv->parent.node, corestring_dom_id, argv[0]);
+%}
+
+method Element::removeAttribute()
+%{
+	dom_string *attr = qjsky_to_dom_string(ctx, argv[0]);
+	if (attr == NULL) return JS_EXCEPTION;
+	(void)dom_element_remove_attribute(priv->parent.node, attr);
+	dom_string_unref(attr);
+	return JS_UNDEFINED;
+%}
+
+method Element::getAttribute()
+%{
+	dom_string *attr_name;
+	dom_string *attr_value = NULL;
+	dom_exception exc;
+	JSValue ret;
+
+	attr_name = qjsky_to_dom_string(ctx, argv[0]);
+	if (attr_name == NULL) return JS_EXCEPTION;
+	exc = dom_element_get_attribute(priv->parent.node, attr_name, &attr_value);
+	dom_string_unref(attr_name);
+	if (exc != DOM_NO_ERR) return JS_UNDEFINED;
+	if (attr_value == NULL) return JS_NULL;
+	ret = qjsky_string(ctx, attr_value);
+	dom_string_unref(attr_value);
+	return ret;
+%}
+
+method Element::setAttribute()
+%{
+	dom_string *attr_str, *value_str;
+
+	attr_str = qjsky_to_dom_string(ctx, argv[0]);
+	if (attr_str == NULL) return JS_EXCEPTION;
+	value_str = qjsky_to_dom_string(ctx, argv[1]);
+	if (value_str == NULL) {
+		dom_string_unref(attr_str);
+		return JS_EXCEPTION;
+	}
+	(void)dom_element_set_attribute(priv->parent.node, attr_str, value_str);
+	dom_string_unref(attr_str);
+	dom_string_unref(value_str);
+	return JS_UNDEFINED;
+%}
+
+method Element::hasAttribute()
+%{
+	dom_string *attr_name;
+	dom_exception exc;
+	bool res;
+
+	attr_name = qjsky_to_dom_string(ctx, argv[0]);
+	if (attr_name == NULL) return JS_EXCEPTION;
+	exc = dom_element_has_attribute(priv->parent.node, attr_name, &res);
+	dom_string_unref(attr_name);
+	if (exc != DOM_NO_ERR) return JS_UNDEFINED;
+	return JS_NewBool(ctx, res);
+%}
+
+getter Element::className ()
+%{
+	return element_get_attribute_string(ctx, priv->parent.node, corestring_dom_class);
+%}
+
+setter Element::className ()
+%{
+	return element_set_attribute_string(ctx, priv->parent.node, corestring_dom_class, argv[0]);
+%}
+
+getter Element::classList ()
+%{
+	dom_tokenlist *tokens;
+	JSValue list;
+
+	list = qjsky_hidden_get(ctx, this_val, QJSKY_HIDDEN_CLASS_LIST, false);
+	if (!JS_IsUndefined(list)) return list;
+
+	if (dom_tokenlist_create((dom_element *)priv->parent.node, corestring_dom_class, &tokens) != DOM_NO_ERR) {
+		return JS_UNDEFINED;
+	}
+	list = qjsky_dom_settable_token_list___create(ctx, tokens);
+	dom_tokenlist_unref(tokens);
+	if (JS_IsException(list)) return list;
+	qjsky_hidden_set(ctx, this_val, QJSKY_HIDDEN_CLASS_LIST, JS_DupValue(ctx, list));
+	return list;
+%}
+
+getter Element::innerHTML()
+%{
+	return JS_NewString(ctx, "");
+%}
+
+setter Element::innerHTML()
+%{
+	size_t size;
+	const char *s;
+	dom_hubbub_parser_params parse_params;
+	dom_hubbub_error error;
+	dom_hubbub_parser *parser = NULL;
+	struct dom_document *doc = NULL;
+	struct dom_document_fragment *fragment = NULL;
+	dom_exception exc;
+	struct dom_node *child = NULL, *html = NULL, *body = NULL;
+	struct dom_nodelist *bodies = NULL;
+
+	s = JS_ToCStringLen(ctx, &size, argv[0]);
+	if (s == NULL) return JS_EXCEPTION;
+
+	exc = dom_node_get_owner_document(priv->parent.node, &doc);
+	if (exc != DOM_NO_ERR) goto out;
+
+	parse_params.enc = "UTF-8";
+	parse_params.fix_enc = true;
+	parse_params.enable_script = false;
+	parse_params.msg = NULL;
+	parse_params.script = NULL;
+	parse_params.ctx = NULL;
+	parse_params.daf = NULL;
+
+	error = dom_hubbub_fragment_parser_create(&parse_params,
+						  doc,
+						  &parser,
+						  &fragment);
+	if (error != DOM_HUBBUB_OK) {
+		NSLOG(netsurfy, ERROR, "Unable to create fragment parser!");
+		goto out;
+	}
+
+	error = dom_hubbub_parser_parse_chunk(parser, (const uint8_t*)s, size);
+	if (error != DOM_HUBBUB_OK) {
+		NSLOG(netsurfy, ERROR, "Unable to parse HTML chunk");
+		goto out;
+	}
+	error = dom_hubbub_parser_completed(parser);
+	if (error != DOM_HUBBUB_OK) {
+		NSLOG(netsurfy, ERROR, "Unable to complete parser");
+		goto out;
+	}
+
+	exc = dom_node_get_first_child(priv->parent.node, &child);
+	if (exc != DOM_NO_ERR) goto out;
+	while (child != NULL) {
+		struct dom_node *cref;
+		exc = dom_node_remove_child(priv->parent.node, child, &cref);
+		if (exc != DOM_NO_ERR) goto out;
+		dom_node_unref(child);
+		child = NULL;
+		dom_node_unref(cref);
+		exc = dom_node_get_first_child(priv->parent.node, &child);
+		if (exc != DOM_NO_ERR) goto out;
+	}
+
+	exc = dom_node_get_first_child(fragment, &html);
+	if (exc != DOM_NO_ERR) goto out;
+
+	exc = dom_element_get_elements_by_tag_name(html, corestring_dom_BODY, &bodies);
+	if (exc != DOM_NO_ERR) goto out;
+
+	exc = dom_nodelist_item(bodies, 0, &body);
+	if (exc != DOM_NO_ERR) goto out;
+
+	exc = dom_node_get_first_child(body, &child);
+	if (exc != DOM_NO_ERR) goto out;
+	while (child != NULL) {
+		struct dom_node *cref;
+		exc = dom_node_remove_child(body, child, &cref);
+		if (exc != DOM_NO_ERR) goto out;
+		dom_node_unref(cref);
+		exc = dom_node_append_child(priv->parent.node, child, &cref);
+		if (exc != DOM_NO_ERR) goto out;
+		dom_node_unref(cref);
+		dom_node_unref(child);
+		child = NULL;
+		exc = dom_node_get_first_child(body, &child);
+		if (exc != DOM_NO_ERR) goto out;
+	}
+out:
+	JS_FreeCString(ctx, s);
+	if (parser != NULL) {
+		dom_hubbub_parser_destroy(parser);
+	}
+	if (doc != NULL) {
+		dom_node_unref(doc);
+	}
+	if (fragment != NULL) {
+		dom_node_unref(fragment);
+	}
+	if (child != NULL) {
+		dom_node_unref(child);
+	}
+	if (html != NULL) {
+		dom_node_unref(html);
+	}
+	if (bodies != NULL) {
+		dom_nodelist_unref(bodies);
+	}
+	if (body != NULL) {
+		dom_node_unref(body);
+	}
+	return JS_UNDEFINED;
+%}
+
+getter Element::attributes()
+%{
+	dom_namednodemap *nmap = NULL;
+	JSValue map, proxy;
+
+	proxy = qjsky_hidden_get(ctx, this_val, QJSKY_HIDDEN_ATTRIBUTES, false);
+	if (!JS_IsUndefined(proxy)) return proxy;
+
+	if (dom_node_get_attributes(priv->parent.node, &nmap) != DOM_NO_ERR) return JS_UNDEFINED;
+	map = qjsky_named_node_map___create(ctx, nmap);
+	dom_namednodemap_unref(nmap);
+	proxy = qjsky_list_proxy(ctx, "makeNodeMapProxy", map);
+	if (JS_IsException(proxy)) return proxy;
+	qjsky_hidden_set(ctx, this_val, QJSKY_HIDDEN_ATTRIBUTES, JS_DupValue(ctx, proxy));
+	return proxy;
+%}
+
+method Element::getElementsByClassName()
+%{
+	dom_nodelist *nodes = NULL;
+	dom_exception err;
+	dom_string *names;
+	JSValue list;
+
+	names = qjsky_to_dom_string(ctx, argv[0]);
+	if (names == NULL) return JS_EXCEPTION;
+	err = dom_node_get_elements_by_class_name((struct dom_node *)((node_private_t *)priv)->node, names, &nodes);
+	dom_string_unref(names);
+	if (err != DOM_NO_ERR || nodes == NULL) return JS_UNDEFINED;
+	list = qjsky_node_list___create(ctx, nodes);
+	dom_nodelist_unref(nodes);
+	return qjsky_list_proxy(ctx, "makeListProxy", list);
+%}

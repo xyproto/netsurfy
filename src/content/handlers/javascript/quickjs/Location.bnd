@@ -1,0 +1,181 @@
+/* Location binding for browser using QuickJS and libdom
+ *
+ * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
+ * Copyright 2015 Daniel Silverstone <dsilvers@netsurf-browser.org>
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+class Location {
+	private nsurl *url;
+};
+
+prologue Location()
+%{
+#include "netsurfy/browser_window.h"
+
+static JSValue location_affixed(JSContext *ctx, nsurl *url, nsurl_component part, const char *prefix, const char *suffix)
+{
+	char *url_s = NULL;
+	size_t url_l = 0;
+	size_t pre_l = strlen(prefix), suf_l = strlen(suffix);
+	char *buf;
+	JSValue ret;
+
+	if (nsurl_get(url, part, &url_s, &url_l) != NSERROR_OK || url_s == NULL || url_l == 0) {
+		free(url_s);
+		return JS_NewString(ctx, "");
+	}
+	buf = malloc(pre_l + url_l + suf_l);
+	if (buf == NULL) {
+		free(url_s);
+		return JS_ThrowOutOfMemory(ctx);
+	}
+	memcpy(buf, prefix, pre_l);
+	memcpy(buf + pre_l, url_s, url_l);
+	memcpy(buf + pre_l + url_l, suffix, suf_l);
+	ret = JS_NewStringLen(ctx, buf, pre_l + url_l + suf_l);
+	free(buf);
+	free(url_s);
+	return ret;
+}
+
+static JSValue location_part(JSContext *ctx, nsurl *url, nsurl_component parts)
+{
+	char *url_s = NULL;
+	size_t url_l = 0;
+	JSValue ret;
+
+	if (nsurl_get(url, parts, &url_s, &url_l) != NSERROR_OK || url_s == NULL) {
+		return JS_NewString(ctx, "");
+	}
+	ret = JS_NewStringLen(ctx, url_s, url_l);
+	free(url_s);
+	return ret;
+}
+
+static JSValue location_navigate(JSContext *ctx, nsurl *base, JSValueConst target, enum browser_window_nav_flags flags)
+{
+	window_private_t *priv_win = qjsky_global_private(ctx);
+	const char *url;
+	nsurl *joined;
+
+	if (priv_win == NULL || priv_win->win == NULL) {
+		NSLOG(netsurfy, INFO, "failed to get browser context");
+		return JS_UNDEFINED;
+	}
+	url = JS_ToCString(ctx, target);
+	if (url == NULL) {
+		return JS_EXCEPTION;
+	}
+	if (nsurl_join(base, url, &joined) == NSERROR_OK) {
+		browser_window_navigate(priv_win->win,
+					joined,
+					NULL,
+					flags,
+					NULL,
+					NULL,
+					NULL);
+		nsurl_unref(joined);
+	}
+	JS_FreeCString(ctx, url);
+	return JS_UNDEFINED;
+}
+%}
+
+init Location(nsurl *url)
+%{
+	priv->url = url;
+	nsurl_ref(url);
+%}
+
+fini Location()
+%{
+	nsurl_unref(priv->url);
+%}
+
+method Location::reload()
+%{
+	window_private_t *priv_win = qjsky_global_private(ctx);
+
+	if (priv_win != NULL && priv_win->win != NULL) {
+		browser_window_reload(priv_win->win, false);
+	} else {
+		NSLOG(netsurfy, INFO, "failed to get browser context");
+	}
+	return JS_UNDEFINED;
+%}
+
+method Location::assign()
+%{
+	return location_navigate(ctx, priv->url, argv[0], BW_NAVIGATE_HISTORY);
+%}
+
+method Location::replace()
+%{
+	return location_navigate(ctx, priv->url, argv[0], BW_NAVIGATE_NONE);
+%}
+
+setter Location::href()
+%{
+	return location_navigate(ctx, priv->url, argv[0], BW_NAVIGATE_HISTORY);
+%}
+
+
+getter Location::href()
+%{
+	return location_part(ctx, priv->url, NSURL_COMPLETE);
+%}
+
+getter Location::origin()
+%{
+	return location_part(ctx, priv->url, NSURL_SCHEME | NSURL_HOST | NSURL_PORT);
+%}
+
+getter Location::protocol()
+%{
+	return location_affixed(ctx, priv->url, NSURL_SCHEME, "", ":");
+%}
+
+getter Location::username()
+%{
+	return location_part(ctx, priv->url, NSURL_USERNAME);
+%}
+
+getter Location::password()
+%{
+	return location_part(ctx, priv->url, NSURL_PASSWORD);
+%}
+
+getter Location::host()
+%{
+	return location_part(ctx, priv->url, NSURL_HOST | NSURL_PORT);
+%}
+
+getter Location::hostname()
+%{
+	return location_part(ctx, priv->url, NSURL_HOST);
+%}
+
+getter Location::port()
+%{
+	return location_part(ctx, priv->url, NSURL_PORT);
+%}
+
+getter Location::pathname()
+%{
+	return location_part(ctx, priv->url, NSURL_PATH);
+%}
+
+getter Location::search()
+%{
+	return location_affixed(ctx, priv->url, NSURL_QUERY, "?", "");
+%}
+
+getter Location::hash()
+%{
+	return location_affixed(ctx, priv->url, NSURL_FRAGMENT, "#", "");
+%}

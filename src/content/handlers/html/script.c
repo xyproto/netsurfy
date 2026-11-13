@@ -1,7 +1,7 @@
 /*
  * Copyright 2012 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
  * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 #include <stdlib.h>
 
 #include "utils/config.h"
+#include "utils/utils.h"
 #include "utils/corestrings.h"
 #include "utils/log.h"
 #include "utils/messages.h"
@@ -625,6 +626,13 @@ dom_hubbub_error html_process_script(void *ctx, dom_node *node)
 	exc = dom_element_get_attribute(node, corestring_dom_type, &mimetype);
 	if (exc != DOM_NO_ERR || mimetype == NULL) {
 		mimetype = dom_string_ref(corestring_dom_text_javascript);
+	}
+
+	if (dom_string_byte_length(mimetype) == SLEN("module") &&
+	    strncasecmp(dom_string_data(mimetype), "module", SLEN("module")) ==
+		    0) {
+		dom_string_unref(mimetype);
+		return DOM_HUBBUB_OK;
 	}
 
 	exc = dom_element_get_attribute(node, corestring_dom_src, &src);

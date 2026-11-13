@@ -9,7 +9,7 @@
 #include <stdlib.h>
 
 #include "librosprite.h"
- 
+
 int main(int argc, char *argv[])
 {
 	if (argc < 2) {
@@ -17,21 +17,22 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	char* filename = argv[1];
+	char *filename = argv[1];
 
-	FILE* f = fopen(filename, "rb");
+	FILE *f = fopen(filename, "rb");
 	if (f == NULL) {
 		printf("Can't load palettefile %s\n", filename);
 		exit(EXIT_FAILURE);
 	}
 
-	struct rosprite_file_context* ctx;
+	struct rosprite_file_context *ctx;
 	if (rosprite_create_file_context(f, &ctx) != ROSPRITE_OK) {
 		exit(EXIT_FAILURE);
 	}
-	
-	struct rosprite_palette* palette;
-	if (rosprite_load_palette(rosprite_file_reader, ctx, &palette) != ROSPRITE_OK) {
+
+	struct rosprite_palette *palette;
+	if (rosprite_load_palette(rosprite_file_reader, ctx, &palette) !=
+	    ROSPRITE_OK) {
 		exit(EXIT_FAILURE);
 	}
 

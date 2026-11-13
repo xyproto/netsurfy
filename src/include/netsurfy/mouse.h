@@ -3,7 +3,7 @@
  * Copyright 2006 James Bursa <bursa@users.sourceforge.net>
  * Copyright 2010 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of NetSurfy, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
  * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

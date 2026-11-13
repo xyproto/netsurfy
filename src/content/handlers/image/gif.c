@@ -3,7 +3,7 @@
  * Copyright 2004 Richard Wilson <not_ginger_matt@users.sourceforge.net>
  * Copyright 2008 Sean Fox <dyntryx@gmail.com>
  *
- * This file is part of NetSurfy, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
  * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

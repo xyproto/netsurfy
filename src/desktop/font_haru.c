@@ -2,7 +2,7 @@
  * Copyright 2008 Adam Blokus <adamblokus@gmail.com>
  * Copyright 2009 John Tytgat <joty@netsurf-browser.org>
  *
- * This file is part of NetSurfy, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
  * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

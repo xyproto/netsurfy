@@ -8,13 +8,11 @@
 /**
  * \mainpage
  *
- * librosprite is a library for reading RISC OS sprite and palette files.  The following subformats are supported:
- * <ul>
- *   <li>1-bit and 8-bit transparency masks</li>
- *   <li>Sprites with custom palettes</li>
- *   <li>Standard RISC OS 1-bit, 2-bit palettes, and 4-bit and 8-bit colour palettes</li>
- *   <li>Old-style sprites with most screen modes from 0-49 supported</li>
- *   <li>32bpp CMYK</li>
+ * librosprite is a library for reading RISC OS sprite and palette files.  The
+ * following subformats are supported: <ul> <li>1-bit and 8-bit transparency
+ * masks</li> <li>Sprites with custom palettes</li> <li>Standard RISC OS 1-bit,
+ * 2-bit palettes, and 4-bit and 8-bit colour palettes</li> <li>Old-style
+ * sprites with most screen modes from 0-49 supported</li> <li>32bpp CMYK</li>
  *   <li>Inline alpha channel, as used by Photodesk and Tinct</li>
  * </ul>
  *
@@ -23,14 +21,15 @@
 /**
  * \file librosprite.h
  *
- * Sprite file reading is performed by rosprite_load(), and palette file reading by rosprite_load_palette().
+ * Sprite file reading is performed by rosprite_load(), and palette file reading
+ * by rosprite_load_palette().
  *
  * Retrieving sprite or palette data is performed by a reader.
  * librosprite implements file and memory readers.
  * To use a reader, create a context by calling the
  * rosprite_create_file_context() or rosprite_create_mem_context().
- * Pass the reader function, and the context you have created, to the load function,
- * typically rosprite_load().
+ * Pass the reader function, and the context you have created, to the load
+ * function, typically rosprite_load().
  */
 
 #ifndef ROSPRITE_H
@@ -40,33 +39,41 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-typedef enum { ROSPRITE_OK, ROSPRITE_NOMEM, ROSPRITE_EOF, ROSPRITE_BADMODE } rosprite_error;
+typedef enum {
+	ROSPRITE_OK,
+	ROSPRITE_NOMEM,
+	ROSPRITE_EOF,
+	ROSPRITE_BADMODE
+} rosprite_error;
 
 typedef enum { ROSPRITE_RGB, ROSPRITE_CMYK } rosprite_color_model;
 
 /**
  * A reader interface used to load sprite files.
  */
-typedef int (*reader)(uint8_t* buf, size_t count, void* ctx);
+typedef int (*reader)(uint8_t *buf, size_t count, void *ctx);
 
 struct rosprite_file_context;
 
 /**
- * A sprite area comprises zero or more rosprites.  Optionally, it may also have an extension_words block.
+ * A sprite area comprises zero or more rosprites.  Optionally, it may also have
+ * an extension_words block.
  */
 struct rosprite_area {
 	uint32_t extension_size; /* size of extension_words in bytes */
-	uint8_t* extension_words;
+	uint8_t *extension_words;
 	uint32_t sprite_count;
-	struct rosprite** sprites; /* array of length sprite_count */
+	struct rosprite **sprites; /* array of length sprite_count */
 };
 
 /**
- * A sprite mode defines the colour depth, colour model and bitmap resolution of a sprite.
+ * A sprite mode defines the colour depth, colour model and bitmap resolution of
+ * a sprite.
  */
 struct rosprite_mode {
 	/**
-	 * The bits per colour channel.  Legal values are 1, 2, 4, 8, 16, 24 and 32.
+	 * The bits per colour channel.  Legal values are 1, 2, 4, 8, 16, 24
+	 * and 32.
 	 */
 	uint32_t colorbpp;
 	/* maskbpp denotes the amount of alpha bpp used
@@ -92,7 +99,7 @@ struct rosprite_mode {
 
 struct rosprite_palette {
 	uint32_t size; /* in number of entries (each entry is a word) */
-	uint32_t* palette;
+	uint32_t *palette;
 };
 
 /**
@@ -101,14 +108,15 @@ struct rosprite_palette {
 struct rosprite {
 
 	/**
-	 * The sprite name.  This may be up to 12 characters long, and must be zero terminated.
+	 * The sprite name.  This may be up to 12 characters long, and must be
+	 * zero terminated.
 	 */
 	unsigned char name[13];
 	struct rosprite_mode mode;
 	bool has_mask;
 	bool has_palette;
 	uint32_t palettesize; /* in number of entries (each entry is a word) */
-	uint32_t* palette;
+	uint32_t *palette;
 
 	/**
 	 * Width in pixels
@@ -121,10 +129,11 @@ struct rosprite {
 	uint32_t height;
 
 	/**
-	 * Image data is a series of words, appearing on screen left-to-right, top-to-bottom.
-	 * Each word takes the form 0xRRGGBBAA.  A is the alpha channel, where 0 is transparent, and 255 is opaque.
+	 * Image data is a series of words, appearing on screen left-to-right,
+	 * top-to-bottom. Each word takes the form 0xRRGGBBAA.  A is the alpha
+	 * channel, where 0 is transparent, and 255 is opaque.
 	 */
-	uint32_t* image; /* image data in 0xRRGGBBAA words */
+	uint32_t *image; /* image data in 0xRRGGBBAA words */
 };
 
 struct rosprite_file_context;
@@ -135,9 +144,10 @@ struct rosprite_file_context;
  *
  * \param[out] result
  */
-rosprite_error rosprite_create_file_context(FILE* f, struct rosprite_file_context** result);
-void rosprite_destroy_file_context(struct rosprite_file_context* ctx);
-int rosprite_file_reader(uint8_t* buf, size_t count, void* ctx);
+rosprite_error
+rosprite_create_file_context(FILE *f, struct rosprite_file_context **result);
+void rosprite_destroy_file_context(struct rosprite_file_context *ctx);
+int rosprite_file_reader(uint8_t *buf, size_t count, void *ctx);
 
 struct rosprite_mem_context;
 
@@ -149,17 +159,22 @@ struct rosprite_mem_context;
  * \param[in]  total_size the size of the block pointed to by p, in bytes
  * \param[out] result
  */
-rosprite_error rosprite_create_mem_context(uint8_t* p, unsigned long total_size, struct rosprite_mem_context** result);
-void rosprite_destroy_mem_context(struct rosprite_mem_context* ctx);
-int rosprite_mem_reader(uint8_t* buf, size_t count, void* ctx);
+rosprite_error
+rosprite_create_mem_context(uint8_t *p,
+			    unsigned long total_size,
+			    struct rosprite_mem_context **result);
+void rosprite_destroy_mem_context(struct rosprite_mem_context *ctx);
+int rosprite_mem_reader(uint8_t *buf, size_t count, void *ctx);
 
 /**
  * Load a rosprite_area using the reader provided.
- * Clients must call rosprite_destroy_sprite_area() to dispose of the rosprite_area.
+ * Clients must call rosprite_destroy_sprite_area() to dispose of the
+ * rosprite_area.
  *
  * \param[out] result The pointer to be populated by this function.
  */
-rosprite_error rosprite_load(reader reader, void* ctx, struct rosprite_area** result);
+rosprite_error
+rosprite_load(reader reader, void *ctx, struct rosprite_area **result);
 
 /**
  * Dispose of a rosprite_area and its children.
@@ -168,14 +183,19 @@ void rosprite_destroy_sprite_area(struct rosprite_area *);
 
 /**
  * Load a RISC OS palette file.  A palette file has RISC OS filetype 0xFED,
- * and is a series of VDU 19 Set Palette commands, each command being 6 bytes long.
+ * and is a series of VDU 19 Set Palette commands, each command being 6 bytes
+ * long.
  *
- * Clients must call rosprite_destroy_palette() to dispose of the rosprite_palette.
+ * Clients must call rosprite_destroy_palette() to dispose of the
+ * rosprite_palette.
  *
  * \param[out] result The pointer to be populated by this function.
- * \see http://www.drobe.co.uk/show_manual.php?manual=/sh-cgi?manual=Vdu%26page=19
+ * \see
+ * http://www.drobe.co.uk/show_manual.php?manual=/sh-cgi?manual=Vdu%26page=19
  */
-rosprite_error rosprite_load_palette(reader reader, void* ctx, struct rosprite_palette** result);
+rosprite_error rosprite_load_palette(reader reader,
+				     void *ctx,
+				     struct rosprite_palette **result);
 
 /**
  * Dispose of a rosprite_palette and its children.

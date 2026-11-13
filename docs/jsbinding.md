@@ -48,33 +48,34 @@ The IDL uses some slightly different terms than other object orientated
 JavaScript implementation
 -------------------------
 
-NetSurfy consumes the Duktape JS engine in order to run the JS code which
-is used within the browser.  Duktape is exceedingly well documented and
-its API docs at https://duktape.org/api.html are incredibly useful.
+NetSurfy uses the system QuickJS-ng library to run the JavaScript
+used within the browser. The QuickJS API is declared and documented in
+`quickjs.h`, and https://quickjs-ng.github.io/quickjs/ describes the
+engine and its embedding API.
 
-It'll be worthwhile learning about how duktape stacks work in order to
-work on bindings in NetSurfy
+Values are passed around as `JSValue`, which is reference counted.
+Every value returned by a `JS_` function or a binding must either be
+returned to the caller or released with `JS_FreeValue()`.
 
-Dukky
+Qjsky
 -----
 
-Wrappering around and layering between duktape and the browser is a
-set of functionality we call `dukky`.  This defines a variety of
-conventions and capabilities which are common to almost all bindings.
-The header `dukky.h` provides the interface to these functions.
+The layer between QuickJS and the browser is called `qjsky`. It
+defines the conventions and capabilities which are common to almost
+all bindings. The header `qjsky.h` provides the interface to these
+functions.
 
 Normally these functions are used by automatically generated content,
-but if a binding needs to add DOM nodes back into the JavaScript
-environment (for example when returning them from a method
-implementation) `dukky_push_node()` should be used or when calling a
-function in a JS context `dukky_pcall()`
+but if a binding needs to return DOM nodes to JavaScript (for example
+from a method implementation) `qjsky_node()` should be used, and when
+calling a JavaScript function `qjsky_call()` should be used.
 
-Dukky automatically terminates any JS call which lasts for more than
-10 seconds.  If you are calling a JS function from outside any of the
-"normal" means by which dukky might call code on your behalf
-(`js_exec()`, events, etc) then you should be sure to use
-`dukky_pcall()` and pass in `true` in `reset_timeout` otherwise your
-code may unexpectedly terminate early.
+Qjsky interrupts any JavaScript execution which lasts longer than the
+`script_timeout` option (10 seconds by default). If you are calling a
+JavaScript function from outside the normal paths through which qjsky
+runs code on your behalf (`js_exec()`, events, timers, etc) then call
+`qjsky_call()` with `reset_timeout` set to `true`, otherwise your code
+may be terminated early.
 
 Interface binding introduction
 ------------------------------
@@ -85,7 +86,7 @@ engine.
 
 The bindings are specific to a JavaScript engine, the DOM library, the
 CSS library and the browser. In this case that is the tuple of
-duktape, libdom, libcss and NetSurfy.
+QuickJS, libdom, libcss and NetSurfy.
 
 In principle other engines or libraries could be substituted
 (historically NetSurfy unsuccessfully tried to use spidermonkey) but the
@@ -93,7 +94,7 @@ engineering to do so is formidable.
 
 The bindings are kept the main [NetSurfy source code
 repository](https://github.com/xyproto/netsurfy) within the
-duktape JavaScript handler directory `content/handlers/javascript/duktape/`
+QuickJS JavaScript handler directory `content/handlers/javascript/quickjs/`
 
 The root binding which contains all the interfaces introduced into
 the JavaScript programs initial execution context is netsurfy.bnd, this
@@ -155,38 +156,38 @@ class. This is purely to split the bindings up into logical units.
 
 The nsgenbind tool generates code that automatically allows acess to
 the classes private data structure elements through a variable called
-`priv` and the duktape stack in the variable `ctx`.
+`priv`, the QuickJS context in the variable `ctx`, the object the
+call was made on in `this_val` and the arguments in `argc` and `argv`.
 
-The getter binding code must place the retrived value on the duktape
-stack and return 1 to indicate this or 0 if it failed.
+The getter binding code returns the retrieved value as a `JSValue`, or
+`JS_EXCEPTION` after throwing an error.
 
 So for the name attribute case the complete getter binding is:
 
     getter Window::name()
     %{
-            const char *name;
+            const char *name = NULL;
             browser_window_get_name(priv->win, &name);
-            duk_push_string(ctx, name);
-            return 1;
+            return JS_NewString(ctx, name != NULL ? name : "");
     %}
 
 This uses the browser_window_get_name() interface to retrieve the name
 string for the window (identified using the private context) and then
-adds it to the duktape stack. The return value indicates the sucess of
-the operation.
+returns it as a new JavaScript string.
 
-The setter must retrive the value to set from the duktap stack and
-update the internal private data structure with that value and return
-0 to indicate success.
+The setter receives the new value in `argv[0]`, updates the internal
+private data structure with that value and returns `JS_UNDEFINED`, or
+`JS_EXCEPTION` if the value could not be converted.
 
 So for the name attribute case the complete setter binding is:
 
     setter Window::name()
     %{
-            const char *name;
-            name = duk_to_string(ctx, -1);
+            const char *name = JS_ToCString(ctx, argv[0]);
+            if (name == NULL) return JS_EXCEPTION;
             browser_window_set_name(priv->win, name);
-            return 0;
+            JS_FreeCString(ctx, name);
+            return JS_UNDEFINED;
     %}
 
 This uses browser_window_set_name() interface to set the name of the
@@ -214,52 +215,50 @@ the attribute example used `Window.bnd`
 
     method Location::assign()
     %{
-            window_private_t *priv_win;
-            nsurl *joined;
-            duk_size_t slen;
+            window_private_t *priv_win = qjsky_global_private(ctx);
             const char *url;
+            nsurl *joined;
 
-            /* retrieve the private data from the root object (window) */
-            duk_push_global_object(ctx);
-            duk_get_prop_string(ctx, -1, PRIVATE_MAGIC);
-            priv_win = duk_get_pointer(ctx, -1);
-            duk_pop(ctx);
-            
             if (priv_win == NULL || priv_win->win == NULL) {
                     NSLOG(netsurfy, INFO, "failed to get browser context");
-                    return 0;
+                    return JS_UNDEFINED;
             }
-            
-            url = duk_safe_to_lstring(ctx, 0, &slen);
-            
-            nsurl_join(priv->url, url, &joined);
-            browser_window_navigate(priv_win->win,
-                    joined,
-                    NULL,
-                    BW_NAVIGATE_HISTORY,
-                    NULL,
-                    NULL,
-                    NULL);
-            nsurl_unref(joined);
-            return 0;
+
+            url = JS_ToCString(ctx, argv[0]);
+            if (url == NULL) {
+                    return JS_EXCEPTION;
+            }
+
+            if (nsurl_join(priv->url, url, &joined) == NSERROR_OK) {
+                    browser_window_navigate(priv_win->win,
+                            joined,
+                            NULL,
+                            BW_NAVIGATE_HISTORY,
+                            NULL,
+                            NULL,
+                            NULL);
+                    nsurl_unref(joined);
+            }
+            JS_FreeCString(ctx, url);
+            return JS_UNDEFINED;
     %}
 
 The nsgenbind tool generates code that automatically allows acess to
 the classes private data structure elements through a variable called
-`priv` and the duktape stack in the variable `ctx`.
+`priv`, the QuickJS context in the variable `ctx`, the object the
+call was made on in `this_val` and the arguments in `argc` and `argv`.
 
-In this case nsgenbind will generate code that will ensure there is at
-least one parameter and coerce it to a string on the duktape `ctx`
-stack returning a type error if it is unable to do so.
+nsgenbind generates code which makes sure `argv` holds at least as
+many values as the operation has parameters, filling missing ones
+with `undefined` or their WebIDL default value.
 
 The binding implementation shown here uses browser_window_navigate()
 to navigate to the new url. To do this it needs the browser window
 handle (pointer) which is obtained from the global object (the window)
-private structure.
+private structure with `qjsky_global_private()`.
 
-Note that the duk_safe_to_lstring() call used to obtain the url
-parameter needs no additional checking as nsgenbind emits this code
-automaticaly.
+The string returned by `JS_ToCString()` must be released with
+`JS_FreeCString()`.
 
 ### Overloaded method example
 
@@ -285,25 +284,22 @@ The method binding will be added to `Window.bnd` as the attribute example
 
     method Window::alert()
     %{
-            duk_idx_t dukky_argc = duk_get_top(ctx);
-            if (dukky_argc == 0) {
+            if (argc == 0) {
                     NSLOG(netsurfy, INFO, "JS ALERT");
             } else {
-                    duk_size_t msg_len;
-                    const char *msg;
-                    
-                    if (!duk_is_string(ctx, 0)) {
-                            duk_to_string(ctx, 0);
-                    }
-                    msg = duk_safe_to_lstring(ctx, 0, &msg_len);
+                    size_t msg_len;
+                    const char *msg = JS_ToCStringLen(ctx, &msg_len, argv[0]);
+                    if (msg == NULL) return JS_EXCEPTION;
                     NSLOG(netsurfy, INFO, "JS ALERT: %*s", (int)msg_len, msg);
-	    }
-            return 0;
+                    JS_FreeCString(ctx, msg);
+            }
+            return JS_UNDEFINED;
     %}
 
 The nsgenbind tool generates code that automatically allows acess to
 the classes private data structure elements through a variable called
-`priv` and the duktape stack in the variable `ctx`.
+`priv`, the QuickJS context in the variable `ctx`, the object the
+call was made on in `this_val` and the arguments in `argc` and `argv`.
 
 For overloaded method calls nsgenbind does not emit code to do
 parameter verification and the binding code has to deal with all

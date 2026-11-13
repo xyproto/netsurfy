@@ -121,7 +121,7 @@ frontends/example/corewindow.h
     /*
      * Copyright 2016 Vincent Sanders <vince@netsurf-browser.org>
      *
-     * This file is part of NetSurfy, http://www.netsurf-browser.org/
+     * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
      *
      * NetSurfy is free software; you can redistribute it and/or modify
      * it under the terms of the GNU General Public License as published by
@@ -219,7 +219,7 @@ frontends/example/corewindow.c
     /*
      * Copyright 2016 Vincent Sanders <vince@netsurf-browser.org>
      *
-     * This file is part of NetSurfy, http://www.netsurf-browser.org/
+     * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
      *
      * NetSurfy is free software; you can redistribute it and/or modify
      * it under the terms of the GNU General Public License as published by
@@ -422,7 +422,7 @@ frontends/example/ssl_cert.h
     /*
      * Copyright 2016 Vincent Sanders <vince@netsurf-browser.org>
      *
-     * This file is part of NetSurfy, http://www.netsurf-browser.org/
+     * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
      *
      * NetSurfy is free software; you can redistribute it and/or modify
      * it under the terms of the GNU General Public License as published by
@@ -463,7 +463,7 @@ frontends/example/ssl_cert.c
     /*
      * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
      *
-     * This file is part of NetSurfy, http://www.netsurf-browser.org/
+     * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
      *
      * NetSurfy is free software; you can redistribute it and/or modify
      * it under the terms of the GNU General Public License as published by

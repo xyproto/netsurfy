@@ -1,0 +1,14 @@
+/* HTML div element binding using QuickJS and libdom
+ *
+ * Copyright 2015 Michael Drake <tlsa@netsurf-browser.org>
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+init HTMLDivElement(struct dom_html_element *html_div_element::html_element);
+
+getter HTMLDivElement::align();
+setter HTMLDivElement::align();

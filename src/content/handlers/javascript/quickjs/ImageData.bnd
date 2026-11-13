@@ -1,0 +1,76 @@
+/* HTML canvas ImageData objects
+ *
+ * Copyright 2020 Daniel Silverstone <dsilvers@netsurf-browser.org>
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+class ImageData {
+      private int width;
+      private int height;
+      private uint8_t *data;
+      private bool data_shared;
+      prologue %{
+#include <stdlib.h>
+
+static void *image_data_buffer(JSRuntime *rt, void *opaque, void *ptr, size_t size)
+{
+	if (size == 0) {
+		free(ptr);
+		return NULL;
+	}
+	return realloc(ptr, size);
+}
+%};
+};
+
+init ImageData(int width, int height)
+%{
+	priv->width = width;
+	priv->height = height;
+	priv->data = calloc((size_t)width * (size_t)height, 4);
+	priv->data_shared = false;
+%}
+
+fini ImageData()
+%{
+	if (!priv->data_shared) {
+		free(priv->data);
+	}
+%}
+
+getter ImageData::width()
+%{
+	return JS_NewInt32(ctx, priv->width);
+%}
+
+getter ImageData::height()
+%{
+	return JS_NewInt32(ctx, priv->height);
+%}
+
+getter ImageData::data()
+%{
+	size_t len = (size_t)priv->width * (size_t)priv->height * 4;
+	JSValue array, buffer;
+	JSValue args[3];
+
+	array = qjsky_hidden_get(ctx, this_val, QJSKY_HIDDEN_DATA, false);
+	if (!JS_IsUndefined(array)) return array;
+	if (priv->data == NULL) return JS_ThrowOutOfMemory(ctx);
+
+	buffer = JS_NewArrayBuffer(ctx, priv->data, len, 0, image_data_buffer, NULL, false);
+	if (JS_IsException(buffer)) return buffer;
+	priv->data_shared = true;
+	args[0] = buffer;
+	args[1] = JS_NewInt32(ctx, 0);
+	args[2] = JS_NewInt64(ctx, (int64_t)len);
+	array = JS_NewTypedArray(ctx, 3, args, JS_TYPED_ARRAY_UINT8C);
+	JS_FreeValue(ctx, buffer);
+	if (JS_IsException(array)) return array;
+	qjsky_hidden_set(ctx, this_val, QJSKY_HIDDEN_DATA, JS_DupValue(ctx, array));
+	return array;
+%}

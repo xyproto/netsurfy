@@ -2,7 +2,7 @@
  * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
  * Copyright 2011 John Mark Bell <jmb@netsurf-browser.org>
  *
- * This file is part of NetSurfy, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
  * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -198,8 +198,8 @@ START_TEST(nsurl_create_test)
 END_TEST
 
 static const struct test_triplets access_tests[] = {
-	{"http://www.netsurf-browser.org/a/big/tree",
-	 "http://www.netsurf-browser.org/a/big/tree",
+	{"https://github.com/xyproto/netsurfya/big/tree",
+	 "https://github.com/xyproto/netsurfya/big/tree",
 	 "tree"},
 
 	{"HTTP://ci.netsurf-browser.org/jenkins/view/Unit Tests/job/coverage-netsurf/11/cobertura/utils/nsurl_c/",

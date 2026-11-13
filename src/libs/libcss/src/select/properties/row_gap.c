@@ -14,28 +14,28 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error css__cascade_row_gap(uint32_t opv, css_style *style,
-		css_select_state *state)
+css_error
+css__cascade_row_gap(uint32_t opv, css_style *style, css_select_state *state)
 {
 	return css__cascade_gap(opv, style, state, set_row_gap);
 }
 
-css_error css__set_row_gap_from_hint(const css_hint *hint,
-		css_computed_style *style)
+css_error
+css__set_row_gap_from_hint(const css_hint *hint, css_computed_style *style)
 {
-	return set_row_gap(style, hint->status,
-			hint->data.length.value, hint->data.length.unit);
+	return set_row_gap(style,
+			   hint->status,
+			   hint->data.length.value,
+			   hint->data.length.unit);
 }
 
 css_error css__initial_row_gap(css_select_state *state)
 {
-	return set_row_gap(state->computed, CSS_ROW_GAP_NORMAL,
-			0, CSS_UNIT_PX);
+	return set_row_gap(state->computed, CSS_ROW_GAP_NORMAL, 0, CSS_UNIT_PX);
 }
 
-css_error css__copy_row_gap(
-		const css_computed_style *from,
-		css_computed_style *to)
+css_error
+css__copy_row_gap(const css_computed_style *from, css_computed_style *to)
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
@@ -49,14 +49,13 @@ css_error css__copy_row_gap(
 }
 
 css_error css__compose_row_gap(const css_computed_style *parent,
-		const css_computed_style *child,
-		css_computed_style *result)
+			       const css_computed_style *child,
+			       css_computed_style *result)
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 	uint8_t type = get_row_gap(child, &length, &unit);
 
-	return css__copy_row_gap(
-			type == CSS_ROW_GAP_INHERIT ? parent : child,
-			result);
+	return css__copy_row_gap(type == CSS_ROW_GAP_INHERIT ? parent : child,
+				 result);
 }

@@ -1,7 +1,7 @@
 /*
  * Copyright 2009 Vincent Sanders <vince@simtec.co.uk>
  *
- * This file is part of libnsfb, http://www.netsurf-browser.org/
+ * This file is part of libnsfb, https://github.com/xyproto/netsurfy
  * Licenced under the MIT License,
  *                http://www.opensource.org/licenses/mit-license.php
  *
@@ -75,12 +75,17 @@ bool nsfb_plot_get_clip(nsfb_t *nsfb, nsfb_bbox_t *clip);
  */
 bool nsfb_plot_clg(nsfb_t *nsfb, nsfb_colour_t c);
 
-/** Plots a rectangle outline. 
+/** Plots a rectangle outline.
  *
  * The line can be solid, dotted or dashed. Top left corner at (x0,y0) and
  * rectangle has given width and height.
  */
-bool nsfb_plot_rectangle(nsfb_t *nsfb, nsfb_bbox_t *rect, int line_width, nsfb_colour_t c, bool dotted, bool dashed);
+bool nsfb_plot_rectangle(nsfb_t *nsfb,
+			 nsfb_bbox_t *rect,
+			 int line_width,
+			 nsfb_colour_t c,
+			 bool dotted,
+			 bool dashed);
 
 /** Plots a filled rectangle. Top left corner at (x0,y0), bottom
  *		  right corner at (x1,y1). Note: (x0,y0) is inside filled area,
@@ -99,15 +104,21 @@ bool nsfb_plot_line(nsfb_t *nsfb, nsfb_bbox_t *line, nsfb_plot_pen_t *pen);
  *
  * Draw a series of lines.
  */
-bool nsfb_plot_lines(nsfb_t *nsfb, int linec, nsfb_bbox_t *line, nsfb_plot_pen_t *pen);
+bool nsfb_plot_lines(nsfb_t *nsfb,
+		     int linec,
+		     nsfb_bbox_t *line,
+		     nsfb_plot_pen_t *pen);
 
 /** Plots a number of connected lines.
  *
  * Draw a series of connected lines.
  */
-bool nsfb_plot_polylines(nsfb_t *nsfb, int pointc, const nsfb_point_t *points, nsfb_plot_pen_t *pen);
+bool nsfb_plot_polylines(nsfb_t *nsfb,
+			 int pointc,
+			 const nsfb_point_t *points,
+			 nsfb_plot_pen_t *pen);
 
-/** Plots a filled polygon. 
+/** Plots a filled polygon.
  *
  * Plots a filled polygon with straight lines between points. The lines around
  * the edge of the ploygon are not plotted. The polygon is filled with a
@@ -115,7 +126,10 @@ bool nsfb_plot_polylines(nsfb_t *nsfb, int pointc, const nsfb_point_t *points, n
  *
  *
  */
-bool nsfb_plot_polygon(nsfb_t *nsfb, const int *p, unsigned int n, nsfb_colour_t fill);
+bool nsfb_plot_polygon(nsfb_t *nsfb,
+		       const int *p,
+		       unsigned int n,
+		       nsfb_colour_t fill);
 
 /** Plot an ellipse.
  */
@@ -123,14 +137,22 @@ bool nsfb_plot_ellipse(nsfb_t *nsfb, nsfb_bbox_t *ellipse, nsfb_colour_t c);
 
 /** Plot a filled ellipse.
  */
-bool nsfb_plot_ellipse_fill(nsfb_t *nsfb, nsfb_bbox_t *ellipse, nsfb_colour_t c);
+bool nsfb_plot_ellipse_fill(nsfb_t *nsfb,
+			    nsfb_bbox_t *ellipse,
+			    nsfb_colour_t c);
 
 /** Plots an arc.
  *
  * around (x,y), from anticlockwise from angle1 to angle2. Angles are measured
  * anticlockwise from horizontal, in degrees.
  */
-bool nsfb_plot_arc(nsfb_t *nsfb, int x, int y, int radius, int angle1, int angle2, nsfb_colour_t c);
+bool nsfb_plot_arc(nsfb_t *nsfb,
+		   int x,
+		   int y,
+		   int radius,
+		   int angle1,
+		   int angle2,
+		   nsfb_colour_t c);
 
 /** Plots an alpha blended pixel.
  *
@@ -138,34 +160,69 @@ bool nsfb_plot_arc(nsfb_t *nsfb, int x, int y, int radius, int angle1, int angle
  */
 bool nsfb_plot_point(nsfb_t *nsfb, int x, int y, nsfb_colour_t c);
 
-bool nsfb_plot_cubic_bezier(nsfb_t *nsfb, nsfb_bbox_t *curve, nsfb_point_t *ctrla, nsfb_point_t *ctrlb, nsfb_plot_pen_t *pen);
+bool nsfb_plot_cubic_bezier(nsfb_t *nsfb,
+			    nsfb_bbox_t *curve,
+			    nsfb_point_t *ctrla,
+			    nsfb_point_t *ctrlb,
+			    nsfb_plot_pen_t *pen);
 
-bool nsfb_plot_quadratic_bezier(nsfb_t *nsfb, nsfb_bbox_t *curve, nsfb_point_t *ctrla, nsfb_plot_pen_t *pen);
+bool nsfb_plot_quadratic_bezier(nsfb_t *nsfb,
+				nsfb_bbox_t *curve,
+				nsfb_point_t *ctrla,
+				nsfb_plot_pen_t *pen);
 
-bool nsfb_plot_path(nsfb_t *nsfb, int pathc, nsfb_plot_pathop_t *pathop, nsfb_plot_pen_t *pen);
+bool nsfb_plot_path(nsfb_t *nsfb,
+		    int pathc,
+		    nsfb_plot_pathop_t *pathop,
+		    nsfb_plot_pen_t *pen);
 
-/** copy an area of screen 
+/** copy an area of screen
  *
  * Copy an area of the display.
  */
-bool nsfb_plot_copy(nsfb_t *srcfb, nsfb_bbox_t *srcbox, nsfb_t *dstfb, nsfb_bbox_t *dstbox);
+bool nsfb_plot_copy(nsfb_t *srcfb,
+		    nsfb_bbox_t *srcbox,
+		    nsfb_t *dstfb,
+		    nsfb_bbox_t *dstbox);
 
 /** Plot bitmap.
  */
-bool nsfb_plot_bitmap(nsfb_t *nsfb, const nsfb_bbox_t *loc, const nsfb_colour_t *pixel, int bmp_width, int bmp_height, int bmp_stride, bool alpha);
+bool nsfb_plot_bitmap(nsfb_t *nsfb,
+		      const nsfb_bbox_t *loc,
+		      const nsfb_colour_t *pixel,
+		      int bmp_width,
+		      int bmp_height,
+		      int bmp_stride,
+		      bool alpha);
 
 /** Plot bitmap.
  */
-bool nsfb_plot_bitmap_tiles(nsfb_t *nsfb, const nsfb_bbox_t *loc, int tiles_x, int tiles_y, const nsfb_colour_t *pixel, int bmp_width, int bmp_height, int bmp_stride, bool alpha);
+bool nsfb_plot_bitmap_tiles(nsfb_t *nsfb,
+			    const nsfb_bbox_t *loc,
+			    int tiles_x,
+			    int tiles_y,
+			    const nsfb_colour_t *pixel,
+			    int bmp_width,
+			    int bmp_height,
+			    int bmp_stride,
+			    bool alpha);
 
 /** Plot an 8 bit glyph.
  */
-bool nsfb_plot_glyph8(nsfb_t *nsfb, nsfb_bbox_t *loc, const uint8_t *pixel, int pitch, nsfb_colour_t c);
+bool nsfb_plot_glyph8(nsfb_t *nsfb,
+		      nsfb_bbox_t *loc,
+		      const uint8_t *pixel,
+		      int pitch,
+		      nsfb_colour_t c);
 
 
 /** Plot an 1 bit glyph.
  */
-bool nsfb_plot_glyph1(nsfb_t *nsfb, nsfb_bbox_t *loc, const uint8_t *pixel, int pitch, nsfb_colour_t c);
+bool nsfb_plot_glyph1(nsfb_t *nsfb,
+		      nsfb_bbox_t *loc,
+		      const uint8_t *pixel,
+		      int pitch,
+		      nsfb_colour_t c);
 
 /* read rectangle into buffer */
 bool nsfb_plot_readrect(nsfb_t *nsfb, nsfb_bbox_t *rect, nsfb_colour_t *buffer);

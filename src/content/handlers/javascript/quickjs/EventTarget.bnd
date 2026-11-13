@@ -1,0 +1,198 @@
+/* Event Target binding for browser using QuickJS and libdom
+ *
+ * Copyright 2016 Daniel Silverstone <dsilvers@digital-scurf.org>
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+class EventTarget {
+	private bool is_node;
+	private bool capture_registered;
+	private bool bubbling_registered;
+};
+
+prologue EventTarget()
+%{
+
+static bool event_listener_option(JSContext *ctx, JSValueConst options, const char *name)
+{
+	JSValue v = JS_GetPropertyStr(ctx, options, name);
+	bool ret = JS_ToBool(ctx, v) > 0;
+	JS_FreeValue(ctx, v);
+	return ret;
+}
+
+static event_listener_flags event_listener_options(JSContext *ctx, int argc, JSValueConst *argv)
+{
+	event_listener_flags ret = ELF_NONE;
+
+	if (argc < 3) {
+		return ret;
+	}
+	if (!JS_IsObject(argv[2])) {
+		return JS_ToBool(ctx, argv[2]) > 0 ? ELF_CAPTURE : ELF_NONE;
+	}
+	if (event_listener_option(ctx, argv[2], "capture"))
+		ret |= ELF_CAPTURE;
+	if (event_listener_option(ctx, argv[2], "passive"))
+		ret |= ELF_PASSIVE;
+	if (event_listener_option(ctx, argv[2], "once"))
+		ret |= ELF_ONCE;
+	return ret;
+}
+
+static int event_listener_find(JSContext *ctx, JSValueConst listeners,
+			       JSValueConst callback, event_listener_flags flags)
+{
+	int64_t len = 0;
+
+	if (JS_GetLength(ctx, listeners, &len) < 0) {
+		return -1;
+	}
+	for (int64_t idx = 0; idx < len; idx++) {
+		JSValue entry = JS_GetPropertyInt64(ctx, listeners, idx);
+		JSValue cb = JS_GetPropertyUint32(ctx, entry, 0);
+		JSValue fl = JS_GetPropertyUint32(ctx, entry, 1);
+		int32_t f = 0;
+		bool same;
+
+		(void)JS_ToInt32(ctx, &f, fl);
+		same = JS_IsStrictEqual(ctx, cb, callback) && f == (int32_t)flags;
+		JS_FreeValue(ctx, fl);
+		JS_FreeValue(ctx, cb);
+		JS_FreeValue(ctx, entry);
+		if (same) {
+			return (int)idx;
+		}
+	}
+	return -1;
+}
+
+static void event_target_register_listener(JSContext *ctx, JSValueConst listeners,
+					   JSValueConst callback, event_listener_flags flags)
+{
+	int64_t len = 0;
+	JSValue entry;
+
+	if (event_listener_find(ctx, listeners, callback, flags) >= 0) {
+		return;
+	}
+	if (JS_GetLength(ctx, listeners, &len) < 0) {
+		return;
+	}
+	entry = JS_NewArray(ctx);
+	JS_SetPropertyUint32(ctx, entry, 0, JS_DupValue(ctx, callback));
+	JS_SetPropertyUint32(ctx, entry, 1, JS_NewInt32(ctx, flags));
+	JS_SetPropertyInt64(ctx, listeners, len, entry);
+}
+
+static void event_target_unregister_listener(JSContext *ctx, JSValueConst listeners,
+					     JSValueConst callback, event_listener_flags flags)
+{
+	int idx = event_listener_find(ctx, listeners, callback, flags);
+	JSValue entry, splice, ret;
+	JSValue args[2];
+
+	if (idx < 0) {
+		return;
+	}
+	entry = JS_GetPropertyUint32(ctx, listeners, idx);
+	JS_SetPropertyUint32(ctx, entry, 2, JS_TRUE);
+	JS_FreeValue(ctx, entry);
+	splice = JS_GetPropertyStr(ctx, listeners, "splice");
+	args[0] = JS_NewInt32(ctx, idx);
+	args[1] = JS_NewInt32(ctx, 1);
+	ret = JS_Call(ctx, splice, listeners, 2, args);
+	JS_FreeValue(ctx, ret);
+	JS_FreeValue(ctx, splice);
+}
+
+%}
+
+init EventTarget()
+%{
+	priv->is_node = false;
+	priv->capture_registered = false;
+	priv->bubbling_registered = false;
+%}
+
+method EventTarget::addEventListener()
+%{
+	event_listener_flags flags;
+	JSValue listeners;
+	bool created = false;
+
+	if (argc < 2 || argc > 3) return JS_UNDEFINED;
+	if (!JS_IsFunction(ctx, argv[1]) && !JS_IsObject(argv[1])) return JS_UNDEFINED;
+	flags = event_listener_options(ctx, argc, argv);
+	listeners = qjsky_event_target_listeners(ctx, this_val, argv[0], true, &created);
+	if (JS_IsException(listeners)) return listeners;
+	if (created && priv->is_node) {
+		dom_string *ev_ty_s = qjsky_to_dom_string(ctx, argv[0]);
+		if (ev_ty_s == NULL) {
+			JS_FreeValue(ctx, listeners);
+			return JS_EXCEPTION;
+		}
+		qjsky_register_event_listener_for(
+			ctx, (dom_element *)((node_private_t *)priv)->node,
+			ev_ty_s,
+			!!(flags & ELF_CAPTURE));
+		dom_string_unref(ev_ty_s);
+	}
+	event_target_register_listener(ctx, listeners, argv[1], flags);
+	JS_FreeValue(ctx, listeners);
+	return JS_UNDEFINED;
+%}
+
+method EventTarget::removeEventListener()
+%{
+	event_listener_flags flags;
+	JSValue listeners;
+
+	if (argc < 2 || argc > 3) return JS_UNDEFINED;
+	flags = event_listener_options(ctx, argc, argv);
+	listeners = qjsky_event_target_listeners(ctx, this_val, argv[0], false, NULL);
+	if (JS_IsException(listeners)) return listeners;
+	if (!JS_IsUndefined(listeners)) {
+		event_target_unregister_listener(ctx, listeners, argv[1], flags);
+	}
+	JS_FreeValue(ctx, listeners);
+	return JS_UNDEFINED;
+%}
+
+method EventTarget::dispatchEvent()
+%{
+	dom_exception exc;
+	event_private_t *evpriv = qjsky_private(ctx, argv[0], QJSKY_IFACE_EVENT);
+	if (evpriv == NULL) return JS_ThrowTypeError(ctx, "parameter 1 is not of type 'Event'");
+
+	dom_event *evt = evpriv->evt;
+
+	bool in_dispatch;
+	if (dom_event_in_dispatch(evt, &in_dispatch) != DOM_NO_ERR) return JS_UNDEFINED;
+	if (in_dispatch) {
+		return JS_ThrowPlainError(ctx, "InvalidStateError: the event is already being dispatched");
+	}
+
+	bool is_initialised;
+	if (dom_event_is_initialised(evt, &is_initialised) != DOM_NO_ERR) return JS_UNDEFINED;
+	if (is_initialised == false) {
+		return JS_ThrowPlainError(ctx, "InvalidStateError: the event is not initialized");
+	}
+
+	if (dom_event_set_is_trusted(evt, false) != DOM_NO_ERR) return JS_UNDEFINED;
+
+	if (priv->is_node == false) return JS_UNDEFINED;
+
+	bool success;
+	exc = dom_event_target_dispatch_event(
+		((node_private_t *)priv)->node,
+		evt,
+		&success);
+	if (exc != DOM_NO_ERR) return JS_UNDEFINED;
+
+	return JS_NewBool(ctx, success);
+%}

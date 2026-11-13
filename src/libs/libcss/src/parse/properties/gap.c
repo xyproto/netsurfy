@@ -29,8 +29,9 @@
  *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error css__parse_gap(css_language *c,
-		const parserutils_vector *vector, int32_t *ctx,
-		css_style *result)
+			 const parserutils_vector *vector,
+			 int32_t *ctx,
+			 css_style *result)
 {
 	int32_t orig_ctx = *ctx;
 	int32_t end_ctx;
@@ -48,13 +49,15 @@ css_error css__parse_gap(css_language *c,
 	flag_value = get_css_flag_value(c, token);
 
 	if (flag_value != FLAG_VALUE__NONE) {
-		error = css_stylesheet_style_flag_value(result, flag_value,
-				CSS_PROP_ROW_GAP);
+		error = css_stylesheet_style_flag_value(result,
+							flag_value,
+							CSS_PROP_ROW_GAP);
 		if (error != CSS_OK)
 			return error;
 
-		error = css_stylesheet_style_flag_value(result, flag_value,
-				CSS_PROP_COLUMN_GAP);
+		error = css_stylesheet_style_flag_value(result,
+							flag_value,
+							CSS_PROP_COLUMN_GAP);
 		if (error == CSS_OK)
 			parserutils_vector_iterate(vector, ctx);
 
@@ -82,10 +85,8 @@ css_error css__parse_gap(css_language *c,
 
 	/* An optional second value is the column-gap */
 	token = parserutils_vector_peek(vector, *ctx);
-	if (token != NULL &&
-			get_css_flag_value(c, token) == FLAG_VALUE__NONE &&
-			css__parse_column_gap(c, vector, ctx,
-					column_style) == CSS_OK) {
+	if (token != NULL && get_css_flag_value(c, token) == FLAG_VALUE__NONE &&
+	    css__parse_column_gap(c, vector, ctx, column_style) == CSS_OK) {
 		end_ctx = *ctx;
 	} else {
 		/* No column-gap value; reparse the row-gap value for it.
@@ -94,7 +95,7 @@ css_error css__parse_gap(css_language *c,
 		if (column_style->used != 0) {
 			css__stylesheet_style_destroy(column_style);
 			error = css__stylesheet_style_create(c->sheet,
-					&column_style);
+							     &column_style);
 			if (error != CSS_OK) {
 				css__stylesheet_style_destroy(row_style);
 				*ctx = orig_ctx;

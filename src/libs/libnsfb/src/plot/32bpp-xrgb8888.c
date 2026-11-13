@@ -2,7 +2,7 @@
  * Copyright 2009 Vincent Sanders <vince@simtec.co.uk>
  * Copyright 2010 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of libnsfb, http://www.netsurf-browser.org/
+ * This file is part of libnsfb, https://github.com/xyproto/netsurfy
  * Licenced under the MIT License,
  *                http://www.opensource.org/licenses/mit-license.php
  */
@@ -25,7 +25,7 @@
  */
 static inline uint32_t *get_xy_loc(nsfb_t *nsfb, int x, int y)
 {
-        return (void *)(nsfb->ptr + (y * nsfb->linelen) + (x << 2));
+	return (void *)(nsfb->ptr + (y * nsfb->linelen) + (x << 2));
 }
 
 
@@ -40,7 +40,7 @@ static inline uint32_t *get_xy_loc(nsfb_t *nsfb, int x, int y)
  */
 static inline nsfb_colour_t pixel_to_colour(UNUSED nsfb_t *nsfb, uint32_t pixel)
 {
-        return (pixel >> 8) & ~0xFF000000U;
+	return (pixel >> 8) & ~0xFF000000U;
 }
 
 /**
@@ -52,7 +52,7 @@ static inline nsfb_colour_t pixel_to_colour(UNUSED nsfb_t *nsfb, uint32_t pixel)
  */
 static inline uint32_t colour_to_pixel(UNUSED nsfb_t *nsfb, nsfb_colour_t c)
 {
-        return (c << 8);
+	return (c << 8);
 }
 
 #else
@@ -66,7 +66,7 @@ static inline uint32_t colour_to_pixel(UNUSED nsfb_t *nsfb, nsfb_colour_t c)
  */
 static inline nsfb_colour_t pixel_to_colour(UNUSED nsfb_t *nsfb, uint32_t pixel)
 {
-        return (((pixel >> 16) | (pixel << 16)) & 0xff00ff) | (pixel & 0xff00);
+	return (((pixel >> 16) | (pixel << 16)) & 0xff00ff) | (pixel & 0xff00);
 }
 
 
@@ -79,7 +79,7 @@ static inline nsfb_colour_t pixel_to_colour(UNUSED nsfb_t *nsfb, uint32_t pixel)
  */
 static inline uint32_t colour_to_pixel(UNUSED nsfb_t *nsfb, nsfb_colour_t c)
 {
-        return (((c >> 16) | (c << 16)) & 0xff00ff) | (c & 0xff00);
+	return (((c >> 16) | (c << 16)) & 0xff00ff) | (c & 0xff00);
 }
 
 #endif
@@ -90,14 +90,14 @@ static inline uint32_t colour_to_pixel(UNUSED nsfb_t *nsfb, nsfb_colour_t c)
 #include "32bpp-common.c"
 
 const nsfb_plotter_fns_t _nsfb_32bpp_xrgb8888_plotters = {
-        .line = line,
-        .fill = fill,
-        .point = point,
-        .bitmap = bitmap,
-        .bitmap_tiles = bitmap_tiles,
-        .glyph8 = glyph8,
-        .glyph1 = glyph1,
-        .readrect = readrect,
+	.line = line,
+	.fill = fill,
+	.point = point,
+	.bitmap = bitmap,
+	.bitmap_tiles = bitmap_tiles,
+	.glyph8 = glyph8,
+	.glyph1 = glyph1,
+	.readrect = readrect,
 };
 
 /*

@@ -1,7 +1,7 @@
 /*
  * Copyright 2009 Vincent Sanders <vince@simtec.co.uk>
  *
- * This file is part of libnsfb, http://www.netsurf-browser.org/
+ * This file is part of libnsfb, https://github.com/xyproto/netsurfy
  * Licenced under the MIT License,
  *                http://www.opensource.org/licenses/mit-license.php
  */
@@ -18,34 +18,38 @@
 #include "surface.h"
 
 /* exported interface documented in libnsfb.h */
-bool
-nsfb_dump(nsfb_t *nsfb, int fd)
+bool nsfb_dump(nsfb_t *nsfb, int fd)
 {
-    FILE *outf;
-    int x;
-    int y;
+	FILE *outf;
+	int x;
+	int y;
 
-    outf = fdopen(dup(fd), "w");
-    if (outf == NULL) {
-	    return false;
-    }
-
-    fprintf(outf,"P3\n#libnsfb buffer dump\n%d %d\n255\n",
-	    nsfb->width, nsfb->height);
-    for (y=0; y < nsfb->height; y++) {
-	for (x=0; x < nsfb->width; x++) {
-	    fprintf(outf,"%d %d %d ", 
-		    *(nsfb->ptr + (((nsfb->width * y) + x) * 4) + 2),
-		    *(nsfb->ptr + (((nsfb->width * y) + x) * 4) + 1),
-		    *(nsfb->ptr + (((nsfb->width * y) + x) * 4) + 0));
-	    
+	outf = fdopen(dup(fd), "w");
+	if (outf == NULL) {
+		return false;
 	}
-	fprintf(outf,"\n");
-    }
 
-    fclose(outf);
+	fprintf(outf,
+		"P3\n#libnsfb buffer dump\n%d %d\n255\n",
+		nsfb->width,
+		nsfb->height);
+	for (y = 0; y < nsfb->height; y++) {
+		for (x = 0; x < nsfb->width; x++) {
+			fprintf(outf,
+				"%d %d %d ",
+				*(nsfb->ptr + (((nsfb->width * y) + x) * 4) +
+				  2),
+				*(nsfb->ptr + (((nsfb->width * y) + x) * 4) +
+				  1),
+				*(nsfb->ptr + (((nsfb->width * y) + x) * 4) +
+				  0));
+		}
+		fprintf(outf, "\n");
+	}
 
-    return true;
+	fclose(outf);
+
+	return true;
 }
 
 /*

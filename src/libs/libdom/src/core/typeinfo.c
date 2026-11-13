@@ -12,8 +12,8 @@
 
 /* TypeInfo object */
 struct dom_type_info {
-	struct lwc_string_s *type;	/**< Type name */
-	struct lwc_string_s *namespace;	/**< Type namespace */
+	struct lwc_string_s *type; /**< Type name */
+	struct lwc_string_s *namespace; /**< Type namespace */
 };
 
 /**
@@ -26,8 +26,7 @@ struct dom_type_info {
  * We don't support this API now, so this function call always
  * return DOM_NOT_SUPPORTED_ERR.
  */
-dom_exception _dom_type_info_get_type_name(dom_type_info *ti, 
-		dom_string **ret)
+dom_exception _dom_type_info_get_type_name(dom_type_info *ti, dom_string **ret)
 {
 	UNUSED(ti);
 	UNUSED(ret);
@@ -45,8 +44,8 @@ dom_exception _dom_type_info_get_type_name(dom_type_info *ti,
  * We don't support this API now, so this function call always
  * return DOM_NOT_SUPPORTED_ERR.
  */
-dom_exception _dom_type_info_get_type_namespace(dom_type_info *ti,
-		dom_string **ret)
+dom_exception
+_dom_type_info_get_type_namespace(dom_type_info *ti, dom_string **ret)
 {
 	UNUSED(ti);
 	UNUSED(ret);
@@ -67,8 +66,10 @@ dom_exception _dom_type_info_get_type_namespace(dom_type_info *ti,
  * return DOM_NOT_SUPPORTED_ERR.
  */
 dom_exception _dom_type_info_is_derived(dom_type_info *ti,
-		dom_string *namespace, dom_string *name, 
-		dom_type_info_derivation_method method, bool *ret)
+					dom_string *namespace,
+					dom_string *name,
+					dom_type_info_derivation_method method,
+					bool *ret)
 {
 	UNUSED(ti);
 	UNUSED(namespace);
@@ -77,4 +78,3 @@ dom_exception _dom_type_info_is_derived(dom_type_info *ti,
 	UNUSED(ret);
 	return DOM_NOT_SUPPORTED_ERR;
 }
-

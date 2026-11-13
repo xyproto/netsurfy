@@ -1,7 +1,7 @@
 /*
  * Copyright 2017 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
  * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -103,7 +103,7 @@ NSLOG_DEFINE_CATEGORY(schedule, "Scheduler");
 NSLOG_DEFINE_CATEGORY(fbtk, "Framebuffer toolkit");
 NSLOG_DEFINE_CATEGORY(layout, "Layout");
 NSLOG_DEFINE_CATEGORY(flex, "Flex");
-NSLOG_DEFINE_CATEGORY(dukky, "Duktape JavaScript Binding");
+NSLOG_DEFINE_CATEGORY(qjsky, "QuickJS JavaScript Binding");
 NSLOG_DEFINE_CATEGORY(jserrors, "JavaScript error messages");
 
 static void netsurfy_render_log(void *_ctx,

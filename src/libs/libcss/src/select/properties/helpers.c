@@ -19,9 +19,12 @@
 /******************************************************************************
  * Utilities below here							      *
  ******************************************************************************/
-css_error css__cascade_bg_border_color(uint32_t opv, css_style *style,
-		css_select_state *state,
-		css_error (*fun)(css_computed_style *, uint8_t, css_color))
+css_error css__cascade_bg_border_color(uint32_t opv,
+				       css_style *style,
+				       css_select_state *state,
+				       css_error (*fun)(css_computed_style *,
+							uint8_t,
+							css_color))
 {
 	uint16_t value = CSS_BACKGROUND_COLOR_INHERIT;
 	css_color color = 0;
@@ -43,24 +46,28 @@ css_error css__cascade_bg_border_color(uint32_t opv, css_style *style,
 			break;
 		case BACKGROUND_COLOR_SET:
 			value = CSS_BACKGROUND_COLOR_COLOR;
-			color = *((css_color *) style->bytecode);
+			color = *((css_color *)style->bytecode);
 			advance_bytecode(style, sizeof(color));
 			break;
 		}
 	}
 
-	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
-			getFlagValue(opv))) {
+	if (css__outranks_existing(getOpcode(opv),
+				   isImportant(opv),
+				   state,
+				   getFlagValue(opv))) {
 		return fun(state->computed, value, color);
 	}
 
 	return CSS_OK;
 }
 
-css_error css__cascade_uri_none(uint32_t opv, css_style *style,
-		css_select_state *state,
-		css_error (*fun)(css_computed_style *, uint8_t,
-				lwc_string *))
+css_error css__cascade_uri_none(uint32_t opv,
+				css_style *style,
+				css_select_state *state,
+				css_error (*fun)(css_computed_style *,
+						 uint8_t,
+						 lwc_string *))
 {
 	uint16_t value = CSS_BACKGROUND_IMAGE_INHERIT;
 	lwc_string *uri = NULL;
@@ -72,7 +79,10 @@ css_error css__cascade_uri_none(uint32_t opv, css_style *style,
 			break;
 		case BACKGROUND_IMAGE_URI:
 			value = CSS_BACKGROUND_IMAGE_IMAGE;
-			css__stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &uri);
+			css__stylesheet_string_get(
+				style->sheet,
+				*((css_code_t *)style->bytecode),
+				&uri);
 			advance_bytecode(style, sizeof(css_code_t));
 			break;
 		}
@@ -80,16 +90,20 @@ css_error css__cascade_uri_none(uint32_t opv, css_style *style,
 
 	/** \todo lose fun != NULL once all properties have set routines */
 	if (fun != NULL && css__outranks_existing(getOpcode(opv),
-			isImportant(opv), state, getFlagValue(opv))) {
+						  isImportant(opv),
+						  state,
+						  getFlagValue(opv))) {
 		return fun(state->computed, value, uri);
 	}
 
 	return CSS_OK;
 }
 
-css_error css__cascade_border_style(uint32_t opv, css_style *style,
-		css_select_state *state,
-		css_error (*fun)(css_computed_style *, uint8_t))
+css_error
+css__cascade_border_style(uint32_t opv,
+			  css_style *style,
+			  css_select_state *state,
+			  css_error (*fun)(css_computed_style *, uint8_t))
 {
 	uint16_t value = CSS_BORDER_STYLE_INHERIT;
 
@@ -130,18 +144,21 @@ css_error css__cascade_border_style(uint32_t opv, css_style *style,
 		}
 	}
 
-	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
-			getFlagValue(opv))) {
+	if (css__outranks_existing(getOpcode(opv),
+				   isImportant(opv),
+				   state,
+				   getFlagValue(opv))) {
 		return fun(state->computed, value);
 	}
 
 	return CSS_OK;
 }
 
-css_error css__cascade_border_width(uint32_t opv, css_style *style,
-		css_select_state *state,
-		css_error (*fun)(css_computed_style *, uint8_t, css_fixed,
-				css_unit))
+css_error css__cascade_border_width(
+	uint32_t opv,
+	css_style *style,
+	css_select_state *state,
+	css_error (*fun)(css_computed_style *, uint8_t, css_fixed, css_unit))
 {
 	uint16_t value = CSS_BORDER_WIDTH_INHERIT;
 	css_fixed length = 0;
@@ -151,9 +168,9 @@ css_error css__cascade_border_width(uint32_t opv, css_style *style,
 		switch (getValue(opv)) {
 		case BORDER_WIDTH_SET:
 			value = CSS_BORDER_WIDTH_WIDTH;
-			length = *((css_fixed *) style->bytecode);
+			length = *((css_fixed *)style->bytecode);
 			advance_bytecode(style, sizeof(length));
-			unit = *((uint32_t *) style->bytecode);
+			unit = *((uint32_t *)style->bytecode);
 			advance_bytecode(style, sizeof(unit));
 			break;
 		case BORDER_WIDTH_THIN:
@@ -177,18 +194,21 @@ css_error css__cascade_border_width(uint32_t opv, css_style *style,
 
 	unit = css__to_css_unit(unit);
 
-	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
-			getFlagValue(opv))) {
+	if (css__outranks_existing(getOpcode(opv),
+				   isImportant(opv),
+				   state,
+				   getFlagValue(opv))) {
 		return fun(state->computed, value, length, unit);
 	}
 
 	return CSS_OK;
 }
 
-css_error css__cascade_length_auto(uint32_t opv, css_style *style,
-		css_select_state *state,
-		css_error (*fun)(css_computed_style *, uint8_t, css_fixed,
-				css_unit))
+css_error css__cascade_length_auto(
+	uint32_t opv,
+	css_style *style,
+	css_select_state *state,
+	css_error (*fun)(css_computed_style *, uint8_t, css_fixed, css_unit))
 {
 	uint16_t value = CSS_BOTTOM_INHERIT;
 	css_fixed length = 0;
@@ -198,9 +218,9 @@ css_error css__cascade_length_auto(uint32_t opv, css_style *style,
 		switch (getValue(opv)) {
 		case BOTTOM_SET:
 			value = CSS_BOTTOM_SET;
-			length = *((css_fixed *) style->bytecode);
+			length = *((css_fixed *)style->bytecode);
 			advance_bytecode(style, sizeof(length));
-			unit = *((uint32_t *) style->bytecode);
+			unit = *((uint32_t *)style->bytecode);
 			advance_bytecode(style, sizeof(unit));
 			break;
 		case BOTTOM_AUTO:
@@ -218,18 +238,23 @@ css_error css__cascade_length_auto(uint32_t opv, css_style *style,
 
 	unit = css__to_css_unit(unit);
 
-	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
-			getFlagValue(opv))) {
+	if (css__outranks_existing(getOpcode(opv),
+				   isImportant(opv),
+				   state,
+				   getFlagValue(opv))) {
 		return fun(state->computed, value, length, unit);
 	}
 
 	return CSS_OK;
 }
 
-css_error css__cascade_length_auto_calc(uint32_t opv, css_style *style,
-		css_select_state *state,
-		css_error (*fun)(css_computed_style *, uint8_t, css_fixed_or_calc,
-				css_unit))
+css_error css__cascade_length_auto_calc(uint32_t opv,
+					css_style *style,
+					css_select_state *state,
+					css_error (*fun)(css_computed_style *,
+							 uint8_t,
+							 css_fixed_or_calc,
+							 css_unit))
 {
 	uint16_t value = CSS_BOTTOM_INHERIT;
 	css_fixed_or_calc length = (css_fixed_or_calc)0;
@@ -240,9 +265,9 @@ css_error css__cascade_length_auto_calc(uint32_t opv, css_style *style,
 		switch (getValue(opv)) {
 		case BOTTOM_SET:
 			value = CSS_BOTTOM_SET;
-			length.value = *((css_fixed *) style->bytecode);
+			length.value = *((css_fixed *)style->bytecode);
 			advance_bytecode(style, sizeof(length.value));
-			unit = css__to_css_unit(*((uint32_t *) style->bytecode));
+			unit = css__to_css_unit(*((uint32_t *)style->bytecode));
 			advance_bytecode(style, sizeof(unit));
 			break;
 		case BOTTOM_AUTO:
@@ -250,11 +275,15 @@ css_error css__cascade_length_auto_calc(uint32_t opv, css_style *style,
 			break;
 		case BOTTOM_CALC:
 			value = CSS_BOTTOM_SET;
-			advance_bytecode(style, sizeof(unit)); // TODO: Skip unit, not sure what to do
-			snum = *((uint32_t *) style->bytecode);
+			advance_bytecode(style,
+					 sizeof(unit)); // TODO: Skip unit, not
+							// sure what to do
+			snum = *((uint32_t *)style->bytecode);
 			advance_bytecode(style, sizeof(snum));
 			unit = CSS_UNIT_CALC;
-			css__stylesheet_string_get(style->sheet, snum, &length.calc);
+			css__stylesheet_string_get(style->sheet,
+						   snum,
+						   &length.calc);
 			break;
 		default:
 			assert(0 && "Invalid value");
@@ -262,18 +291,21 @@ css_error css__cascade_length_auto_calc(uint32_t opv, css_style *style,
 		}
 	}
 
-	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
-			getFlagValue(opv))) {
+	if (css__outranks_existing(getOpcode(opv),
+				   isImportant(opv),
+				   state,
+				   getFlagValue(opv))) {
 		return fun(state->computed, value, length, unit);
 	}
 
 	return CSS_OK;
 }
 
-css_error css__cascade_length_normal(uint32_t opv, css_style *style,
-		css_select_state *state,
-		css_error (*fun)(css_computed_style *, uint8_t, css_fixed,
-				css_unit))
+css_error css__cascade_length_normal(
+	uint32_t opv,
+	css_style *style,
+	css_select_state *state,
+	css_error (*fun)(css_computed_style *, uint8_t, css_fixed, css_unit))
 {
 	uint16_t value = CSS_LETTER_SPACING_INHERIT;
 	css_fixed length = 0;
@@ -283,9 +315,9 @@ css_error css__cascade_length_normal(uint32_t opv, css_style *style,
 		switch (getValue(opv)) {
 		case LETTER_SPACING_SET:
 			value = CSS_LETTER_SPACING_SET;
-			length = *((css_fixed *) style->bytecode);
+			length = *((css_fixed *)style->bytecode);
 			advance_bytecode(style, sizeof(length));
-			unit = *((uint32_t *) style->bytecode);
+			unit = *((uint32_t *)style->bytecode);
 			advance_bytecode(style, sizeof(unit));
 			break;
 		case LETTER_SPACING_NORMAL:
@@ -303,18 +335,21 @@ css_error css__cascade_length_normal(uint32_t opv, css_style *style,
 
 	unit = css__to_css_unit(unit);
 
-	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
-			getFlagValue(opv))) {
+	if (css__outranks_existing(getOpcode(opv),
+				   isImportant(opv),
+				   state,
+				   getFlagValue(opv))) {
 		return fun(state->computed, value, length, unit);
 	}
 
 	return CSS_OK;
 }
 
-css_error css__cascade_gap(uint32_t opv, css_style *style,
-		css_select_state *state,
-		css_error (*fun)(css_computed_style *, uint8_t, css_fixed,
-				css_unit))
+css_error css__cascade_gap(
+	uint32_t opv,
+	css_style *style,
+	css_select_state *state,
+	css_error (*fun)(css_computed_style *, uint8_t, css_fixed, css_unit))
 {
 	uint16_t value = CSS_COLUMN_GAP_INHERIT;
 	css_fixed length = 0;
@@ -324,9 +359,9 @@ css_error css__cascade_gap(uint32_t opv, css_style *style,
 		switch (getValue(opv)) {
 		case COLUMN_GAP_SET:
 			value = CSS_COLUMN_GAP_SET;
-			length = *((css_fixed *) style->bytecode);
+			length = *((css_fixed *)style->bytecode);
 			advance_bytecode(style, sizeof(length));
-			unit = *((uint32_t *) style->bytecode);
+			unit = *((uint32_t *)style->bytecode);
 			advance_bytecode(style, sizeof(unit));
 			break;
 		case COLUMN_GAP_NORMAL:
@@ -353,18 +388,21 @@ css_error css__cascade_gap(uint32_t opv, css_style *style,
 
 	unit = css__to_css_unit(unit);
 
-	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
-			getFlagValue(opv))) {
+	if (css__outranks_existing(getOpcode(opv),
+				   isImportant(opv),
+				   state,
+				   getFlagValue(opv))) {
 		return fun(state->computed, value, length, unit);
 	}
 
 	return CSS_OK;
 }
 
-css_error css__cascade_length_none(uint32_t opv, css_style *style,
-		css_select_state *state,
-		css_error (*fun)(css_computed_style *, uint8_t, css_fixed,
-				css_unit))
+css_error css__cascade_length_none(
+	uint32_t opv,
+	css_style *style,
+	css_select_state *state,
+	css_error (*fun)(css_computed_style *, uint8_t, css_fixed, css_unit))
 {
 	uint16_t value = CSS_MAX_HEIGHT_INHERIT;
 	css_fixed length = 0;
@@ -374,9 +412,9 @@ css_error css__cascade_length_none(uint32_t opv, css_style *style,
 		switch (getValue(opv)) {
 		case MAX_HEIGHT_SET:
 			value = CSS_MAX_HEIGHT_SET;
-			length = *((css_fixed *) style->bytecode);
+			length = *((css_fixed *)style->bytecode);
 			advance_bytecode(style, sizeof(length));
-			unit = *((uint32_t *) style->bytecode);
+			unit = *((uint32_t *)style->bytecode);
 			advance_bytecode(style, sizeof(unit));
 			break;
 		case MAX_HEIGHT_NONE:
@@ -394,18 +432,21 @@ css_error css__cascade_length_none(uint32_t opv, css_style *style,
 
 	unit = css__to_css_unit(unit);
 
-	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
-			getFlagValue(opv))) {
+	if (css__outranks_existing(getOpcode(opv),
+				   isImportant(opv),
+				   state,
+				   getFlagValue(opv))) {
 		return fun(state->computed, value, length, unit);
 	}
 
 	return CSS_OK;
 }
 
-css_error css__cascade_length(uint32_t opv, css_style *style,
-		css_select_state *state,
-		css_error (*fun)(css_computed_style *, uint8_t, css_fixed,
-				css_unit))
+css_error css__cascade_length(
+	uint32_t opv,
+	css_style *style,
+	css_select_state *state,
+	css_error (*fun)(css_computed_style *, uint8_t, css_fixed, css_unit))
 {
 	uint16_t value = CSS_MIN_HEIGHT_INHERIT;
 	css_fixed length = 0;
@@ -415,9 +456,9 @@ css_error css__cascade_length(uint32_t opv, css_style *style,
 		switch (getValue(opv)) {
 		case MIN_HEIGHT_SET:
 			value = CSS_MIN_HEIGHT_SET;
-			length = *((css_fixed *) style->bytecode);
+			length = *((css_fixed *)style->bytecode);
 			advance_bytecode(style, sizeof(length));
-			unit = *((uint32_t *) style->bytecode);
+			unit = *((uint32_t *)style->bytecode);
 			advance_bytecode(style, sizeof(unit));
 			break;
 		case MIN_HEIGHT_CALC:
@@ -434,16 +475,20 @@ css_error css__cascade_length(uint32_t opv, css_style *style,
 
 	/** \todo lose fun != NULL once all properties have set routines */
 	if (fun != NULL && css__outranks_existing(getOpcode(opv),
-			isImportant(opv), state, getFlagValue(opv))) {
+						  isImportant(opv),
+						  state,
+						  getFlagValue(opv))) {
 		return fun(state->computed, value, length, unit);
 	}
 
 	return CSS_OK;
 }
 
-css_error css__cascade_number(uint32_t opv, css_style *style,
-		css_select_state *state,
-		css_error (*fun)(css_computed_style *, uint8_t, css_fixed))
+css_error
+css__cascade_number(uint32_t opv,
+		    css_style *style,
+		    css_select_state *state,
+		    css_error (*fun)(css_computed_style *, uint8_t, css_fixed))
 {
 	uint16_t value = 0;
 	css_fixed length = 0;
@@ -454,7 +499,7 @@ css_error css__cascade_number(uint32_t opv, css_style *style,
 		switch (getValue(opv)) {
 		case ORPHANS_SET:
 			value = 0;
-			length = *((css_fixed *) style->bytecode);
+			length = *((css_fixed *)style->bytecode);
 			advance_bytecode(style, sizeof(length));
 			break;
 		case ORPHANS_CALC:
@@ -469,16 +514,20 @@ css_error css__cascade_number(uint32_t opv, css_style *style,
 
 	/** \todo lose fun != NULL once all properties have set routines */
 	if (fun != NULL && css__outranks_existing(getOpcode(opv),
-			isImportant(opv), state, getFlagValue(opv))) {
+						  isImportant(opv),
+						  state,
+						  getFlagValue(opv))) {
 		return fun(state->computed, value, length);
 	}
 
 	return CSS_OK;
 }
 
-css_error css__cascade_page_break_after_before_inside(uint32_t opv,
-		css_style *style, css_select_state *state,
-		css_error (*fun)(css_computed_style *, uint8_t))
+css_error css__cascade_page_break_after_before_inside(
+	uint32_t opv,
+	css_style *style,
+	css_select_state *state,
+	css_error (*fun)(css_computed_style *, uint8_t))
 {
 	uint16_t value = CSS_PAGE_BREAK_AFTER_INHERIT;
 
@@ -506,16 +555,21 @@ css_error css__cascade_page_break_after_before_inside(uint32_t opv,
 
 	/** \todo lose fun != NULL */
 	if (fun != NULL && css__outranks_existing(getOpcode(opv),
-			isImportant(opv), state, getFlagValue(opv))) {
+						  isImportant(opv),
+						  state,
+						  getFlagValue(opv))) {
 		return fun(state->computed, value);
 	}
 
 	return CSS_OK;
 }
 
-css_error css__cascade_break_after_before_inside(uint32_t opv,
-		css_style *style, css_select_state *state,
-		css_error (*fun)(css_computed_style *, uint8_t))
+css_error
+css__cascade_break_after_before_inside(uint32_t opv,
+				       css_style *style,
+				       css_select_state *state,
+				       css_error (*fun)(css_computed_style *,
+							uint8_t))
 {
 	uint16_t value = CSS_BREAK_AFTER_AUTO;
 
@@ -555,17 +609,20 @@ css_error css__cascade_break_after_before_inside(uint32_t opv,
 
 	/** \todo lose fun != NULL */
 	if (fun != NULL && css__outranks_existing(getOpcode(opv),
-			isImportant(opv), state, getFlagValue(opv))) {
+						  isImportant(opv),
+						  state,
+						  getFlagValue(opv))) {
 		return fun(state->computed, value);
 	}
 
 	return CSS_OK;
 }
 
-css_error css__cascade_counter_increment_reset(uint32_t opv, css_style *style,
-		css_select_state *state,
-		css_error (*fun)(css_computed_style *, uint8_t,
-				css_computed_counter *))
+css_error css__cascade_counter_increment_reset(
+	uint32_t opv,
+	css_style *style,
+	css_select_state *state,
+	css_error (*fun)(css_computed_style *, uint8_t, css_computed_counter *))
 {
 	uint16_t value = CSS_COUNTER_INCREMENT_INHERIT;
 	css_computed_counter *counters = NULL;
@@ -573,8 +630,7 @@ css_error css__cascade_counter_increment_reset(uint32_t opv, css_style *style,
 
 	if (hasFlagValue(opv) == false) {
 		switch (getValue(opv)) {
-		case COUNTER_INCREMENT_NAMED:
-		{
+		case COUNTER_INCREMENT_NAMED: {
 			uint32_t v = getValue(opv);
 
 			value = CSS_COUNTER_INCREMENT_NAMED;
@@ -584,14 +640,18 @@ css_error css__cascade_counter_increment_reset(uint32_t opv, css_style *style,
 				lwc_string *name;
 				css_fixed val = 0;
 
-				css__stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &name);
+				css__stylesheet_string_get(
+					style->sheet,
+					*((css_code_t *)style->bytecode),
+					&name);
 				advance_bytecode(style, sizeof(css_code_t));
 
-				val = *((css_fixed *) style->bytecode);
+				val = *((css_fixed *)style->bytecode);
 				advance_bytecode(style, sizeof(css_code_t));
 
-				temp = realloc(counters,
-						(n_counters + 1) *
+				temp = realloc(
+					counters,
+					(n_counters + 1) *
 						sizeof(css_computed_counter));
 				if (temp == NULL) {
 					if (counters != NULL) {
@@ -607,11 +667,10 @@ css_error css__cascade_counter_increment_reset(uint32_t opv, css_style *style,
 
 				n_counters++;
 
-				v = *((uint32_t *) style->bytecode);
+				v = *((uint32_t *)style->bytecode);
 				advance_bytecode(style, sizeof(css_code_t));
 			}
-		}
-			break;
+		} break;
 		case COUNTER_INCREMENT_NONE:
 			value = CSS_COUNTER_INCREMENT_NONE;
 			break;
@@ -622,8 +681,8 @@ css_error css__cascade_counter_increment_reset(uint32_t opv, css_style *style,
 	if (n_counters > 0) {
 		css_computed_counter *temp;
 
-		temp = realloc(counters, (n_counters + 1) *
-				sizeof(css_computed_counter));
+		temp = realloc(counters,
+			       (n_counters + 1) * sizeof(css_computed_counter));
 		if (temp == NULL) {
 			free(counters);
 			return CSS_NOMEM;
@@ -635,8 +694,10 @@ css_error css__cascade_counter_increment_reset(uint32_t opv, css_style *style,
 		counters[n_counters].value = 0;
 	}
 
-	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
-			getFlagValue(opv))) {
+	if (css__outranks_existing(getOpcode(opv),
+				   isImportant(opv),
+				   state,
+				   getFlagValue(opv))) {
 		css_error error;
 
 		error = fun(state->computed, value, counters);
@@ -650,4 +711,3 @@ css_error css__cascade_counter_increment_reset(uint32_t opv, css_style *style,
 
 	return CSS_OK;
 }
-

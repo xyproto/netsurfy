@@ -1,7 +1,7 @@
 /*
  * Copyright 2009 Vincent Sanders <vince@simtec.co.uk>
  *
- * This file is part of libnsfb, http://www.netsurf-browser.org/
+ * This file is part of libnsfb, https://github.com/xyproto/netsurfy
  * Licenced under the MIT License,
  *                http://www.opensource.org/licenses/mit-license.php
  */
@@ -42,82 +42,80 @@
 #define UNUSED(x) ((x) = (x))
 
 struct wld_event {
-    struct wld_event *next;
+	struct wld_event *next;
 
-    nsfb_event_t event;
+	nsfb_event_t event;
 };
 
 /** structure for display, registry and other global objects that
  * should be cached when connecting to a wayland instance
  */
 struct wld_connection {
-    struct wl_display *display; /**< connection object */
-    struct wl_registry *registry; /**< registry object */
+	struct wl_display *display; /**< connection object */
+	struct wl_registry *registry; /**< registry object */
 
-    /** compositor object, available once the registry messages have
-     * been processed
-     */
-    struct wl_compositor *compositor;
+	/** compositor object, available once the registry messages have
+	 * been processed
+	 */
+	struct wl_compositor *compositor;
 
-    /** shell object, available once the registry messages have been
-     * processed
-     */
-    struct wl_shell *shell;
+	/** shell object, available once the registry messages have been
+	 * processed
+	 */
+	struct wl_shell *shell;
 
-    /** shared memory object, available once the registry messages
-     * have been processed
-     */
-    struct wl_shm *shm;
+	/** shared memory object, available once the registry messages
+	 * have been processed
+	 */
+	struct wl_shm *shm;
 
-    /** shared memory formats available */
-    uint32_t shm_formats;
+	/** shared memory formats available */
+	uint32_t shm_formats;
 
-    /** list of input seats */
-    struct wl_list input_list;
+	/** list of input seats */
+	struct wl_list input_list;
 
-    /** event queue */
-    struct wld_event *event_head;
-    struct wld_event *event_tail;
+	/** event queue */
+	struct wld_event *event_head;
+	struct wld_event *event_tail;
 };
 
 /** wayland input seat */
 struct wld_input {
-    struct wl_list link; /**< input list */
+	struct wl_list link; /**< input list */
 
-    struct wld_connection* connection; /**< connection to wayland server */
+	struct wld_connection *connection; /**< connection to wayland server */
 
-    struct wl_seat *seat; /**< The seat object */
+	struct wl_seat *seat; /**< The seat object */
 
-    struct wl_pointer *pointer;
-    struct wl_keyboard *keyboard;
-
-
+	struct wl_pointer *pointer;
+	struct wl_keyboard *keyboard;
 };
 
 /** wayland window encompasing the display and shell surfaces */
 struct wld_window {
-    struct wld_connection* connection; /**< connection to wayland server */
+	struct wld_connection *connection; /**< connection to wayland server */
 
-    struct wl_surface *surface; /**< drawing surface object */
-    struct wl_shell_surface *shell_surface; /**< shell surface object */
+	struct wl_surface *surface; /**< drawing surface object */
+	struct wl_shell_surface *shell_surface; /**< shell surface object */
 
-    int width, height;
+	int width, height;
 };
 
 struct wld_shm_buffer {
-    struct wl_buffer *buffer; /**< wayland buffer object */
-    void *data; /**< mapped memory */
-    int size; /**< size of mapped memory */
-    bool inuse; /**< flag to indicate if the buffer has been released
-		 * after commit to a surface.
-		 */
+	struct wl_buffer *buffer; /**< wayland buffer object */
+	void *data; /**< mapped memory */
+	int size; /**< size of mapped memory */
+	bool inuse; /**< flag to indicate if the buffer has been released
+		     * after commit to a surface.
+		     */
 };
 
 
 typedef struct wldstate_s {
-    struct wld_connection* connection; /**< connection to wayland server */
-    struct wld_window *window;
-    struct wld_shm_buffer *shm_buffer;
+	struct wld_connection *connection; /**< connection to wayland server */
+	struct wld_window *window;
+	struct wld_shm_buffer *shm_buffer;
 } wldstate_t;
 
 
@@ -140,11 +138,11 @@ xcb_free_size_hints(xcb_size_hints_t *hints)
 #if defined(NSFB_NEED_ICCCM_API_PREFIX)
 #define xcb_size_hints_set_max_size xcb_icccm_size_hints_set_max_size
 #define xcb_size_hints_set_min_size xcb_icccm_size_hints_set_min_size
-#define xcb_set_wm_size_hints       xcb_icccm_set_wm_size_hints
+#define xcb_set_wm_size_hints xcb_icccm_set_wm_size_hints
 #endif
 
-#if (NSFB_XCBPROTO_MAJOR_VERSION > 1) || \
-    (NSFB_XCBPROTO_MAJOR_VERSION == 1 && NSFB_XCBPROTO_MINOR_VERSION >= 6)
+#if (NSFB_XCBPROTO_MAJOR_VERSION > 1) ||                                       \
+	(NSFB_XCBPROTO_MAJOR_VERSION == 1 && NSFB_XCBPROTO_MINOR_VERSION >= 6)
 #define WM_NORMAL_HINTS XCB_ATOM_WM_NORMAL_HINTS
 #endif
 
@@ -670,17 +668,17 @@ xcopy(nsfb_t *nsfb, nsfb_bbox_t *srcbox, nsfb_bbox_t *dstbox)
 static int
 wld_set_geometry(nsfb_t *nsfb, int width, int height, enum nsfb_format_e format)
 {
-    if (nsfb->surface_priv != NULL)
-	return -1; /* if were already initialised fail */
+	if (nsfb->surface_priv != NULL)
+		return -1; /* if were already initialised fail */
 
-    nsfb->width = width;
-    nsfb->height = height;
-    nsfb->format = format;
+	nsfb->width = width;
+	nsfb->height = height;
+	nsfb->format = format;
 
-    /* select default sw plotters for format */
-    select_plotters(nsfb);
+	/* select default sw plotters for format */
+	select_plotters(nsfb);
 
-    return 0;
+	return 0;
 }
 
 #if 0
@@ -865,25 +863,24 @@ create_blank_cursor(xcb_connection_t *conn, const xcb_screen_t *scr)
  *                 wayland-client-protocol.h there are currently only two
  *                 formats available (A|X)RGB8888 so using a bitfield is ok.
  */
-static void
-shm_format(void *ctx, struct wl_shm *wl_shm, uint32_t format)
+static void shm_format(void *ctx, struct wl_shm *wl_shm, uint32_t format)
 {
-    struct wld_connection* connection = ctx;
+	struct wld_connection *connection = ctx;
 
-    UNUSED(wl_shm);
+	UNUSED(wl_shm);
 
-    connection->shm_formats |= (1 << format);
+	connection->shm_formats |= (1 << format);
 }
 
 /** shared memory interface callback handlers */
-struct wl_shm_listener shm_listenter = {
-	shm_format
-};
+struct wl_shm_listener shm_listenter = {shm_format};
 
-static void
-pointer_handle_enter(void *data, struct wl_pointer *pointer,
-		     uint32_t serial, struct wl_surface *surface,
-		     wl_fixed_t sx_w, wl_fixed_t sy_w)
+static void pointer_handle_enter(void *data,
+				 struct wl_pointer *pointer,
+				 uint32_t serial,
+				 struct wl_surface *surface,
+				 wl_fixed_t sx_w,
+				 wl_fixed_t sy_w)
 {
 #if 0
 	struct input *input = data;
@@ -923,9 +920,10 @@ pointer_handle_enter(void *data, struct wl_pointer *pointer,
 #endif
 }
 
-static void
-pointer_handle_leave(void *data, struct wl_pointer *pointer,
-		     uint32_t serial, struct wl_surface *surface)
+static void pointer_handle_leave(void *data,
+				 struct wl_pointer *pointer,
+				 uint32_t serial,
+				 struct wl_surface *surface)
 {
 #if 0
 	struct input *input = data;
@@ -941,97 +939,98 @@ pointer_handle_leave(void *data, struct wl_pointer *pointer,
 }
 
 static void
-enqueue_wld_event(struct wld_connection *connection, struct wld_event* event)
+enqueue_wld_event(struct wld_connection *connection, struct wld_event *event)
 {
-    event->next = NULL;
-    if (connection->event_tail == NULL) {
-	connection->event_head = event;
-	connection->event_tail = event;
-    } else {
-	connection->event_tail->next = event;
-	connection->event_tail = event;
-    }
-}
-
-static struct wld_event*
-dequeue_wld_event(struct wld_connection *connection)
-{
-    struct wld_event* event = connection->event_head;
-
-    if (event != NULL) {
-	connection->event_head = event->next;
-	if (connection->event_head == NULL) {
-	    connection->event_tail = connection->event_head;
+	event->next = NULL;
+	if (connection->event_tail == NULL) {
+		connection->event_head = event;
+		connection->event_tail = event;
+	} else {
+		connection->event_tail->next = event;
+		connection->event_tail = event;
 	}
-    }
-    return event;
 }
 
-static void
-pointer_handle_motion(void *data,
-		      struct wl_pointer *pointer,
-		      uint32_t time,
-		      wl_fixed_t sx_w,
-		      wl_fixed_t sy_w)
+static struct wld_event *dequeue_wld_event(struct wld_connection *connection)
 {
-    struct wld_input *input = data;
-    struct wld_event *event;
+	struct wld_event *event = connection->event_head;
 
-    UNUSED(pointer);
-    UNUSED(time);
-
-    event = calloc(1, sizeof(struct wld_event));
-    if (event != NULL) {
-        event->event.type = NSFB_EVENT_MOVE_ABSOLUTE;
-        event->event.value.vector.x = wl_fixed_to_int(sx_w);
-        event->event.value.vector.y = wl_fixed_to_int(sy_w);
-        event->event.value.vector.z = 0;
-
-        enqueue_wld_event(input->connection, event);
-    }
+	if (event != NULL) {
+		connection->event_head = event->next;
+		if (connection->event_head == NULL) {
+			connection->event_tail = connection->event_head;
+		}
+	}
+	return event;
 }
 
-static void
-pointer_handle_button(void *data, struct wl_pointer *pointer, uint32_t serial,
-		      uint32_t time, uint32_t button, uint32_t state_w)
+static void pointer_handle_motion(void *data,
+				  struct wl_pointer *pointer,
+				  uint32_t time,
+				  wl_fixed_t sx_w,
+				  wl_fixed_t sy_w)
 {
-    struct wld_input *input = data;
-    struct wld_event *event;
-    enum wl_pointer_button_state state = state_w;
+	struct wld_input *input = data;
+	struct wld_event *event;
 
-    UNUSED(pointer);
-    UNUSED(serial);
-    UNUSED(time);
+	UNUSED(pointer);
+	UNUSED(time);
 
-    event = calloc(1, sizeof(struct wld_event));
-    if (event == NULL) {
-        return;
-    }
-    if (state == WL_POINTER_BUTTON_STATE_PRESSED) {
-	event->event.type = NSFB_EVENT_KEY_DOWN;
-    } else {
-	event->event.type = NSFB_EVENT_KEY_UP;
-    }
+	event = calloc(1, sizeof(struct wld_event));
+	if (event != NULL) {
+		event->event.type = NSFB_EVENT_MOVE_ABSOLUTE;
+		event->event.value.vector.x = wl_fixed_to_int(sx_w);
+		event->event.value.vector.y = wl_fixed_to_int(sy_w);
+		event->event.value.vector.z = 0;
 
-    switch (button) {
-    case BTN_LEFT:
-	event->event.value.keycode = NSFB_KEY_MOUSE_1;
-	break;
-    case BTN_MIDDLE:
-	event->event.value.keycode = NSFB_KEY_MOUSE_2;
-	break;
-    case BTN_RIGHT:
-	event->event.value.keycode = NSFB_KEY_MOUSE_3;
-	break;
-    case BTN_FORWARD:
-	event->event.value.keycode = NSFB_KEY_MOUSE_4;
-	break;
-    case BTN_BACK:
-	event->event.value.keycode = NSFB_KEY_MOUSE_5;
-	break;
-    }
+		enqueue_wld_event(input->connection, event);
+	}
+}
 
-    enqueue_wld_event(input->connection, event);
+static void pointer_handle_button(void *data,
+				  struct wl_pointer *pointer,
+				  uint32_t serial,
+				  uint32_t time,
+				  uint32_t button,
+				  uint32_t state_w)
+{
+	struct wld_input *input = data;
+	struct wld_event *event;
+	enum wl_pointer_button_state state = state_w;
+
+	UNUSED(pointer);
+	UNUSED(serial);
+	UNUSED(time);
+
+	event = calloc(1, sizeof(struct wld_event));
+	if (event == NULL) {
+		return;
+	}
+	if (state == WL_POINTER_BUTTON_STATE_PRESSED) {
+		event->event.type = NSFB_EVENT_KEY_DOWN;
+	} else {
+		event->event.type = NSFB_EVENT_KEY_UP;
+	}
+
+	switch (button) {
+	case BTN_LEFT:
+		event->event.value.keycode = NSFB_KEY_MOUSE_1;
+		break;
+	case BTN_MIDDLE:
+		event->event.value.keycode = NSFB_KEY_MOUSE_2;
+		break;
+	case BTN_RIGHT:
+		event->event.value.keycode = NSFB_KEY_MOUSE_3;
+		break;
+	case BTN_FORWARD:
+		event->event.value.keycode = NSFB_KEY_MOUSE_4;
+		break;
+	case BTN_BACK:
+		event->event.value.keycode = NSFB_KEY_MOUSE_5;
+		break;
+	}
+
+	enqueue_wld_event(input->connection, event);
 
 
 #if 0
@@ -1057,9 +1056,11 @@ pointer_handle_button(void *data, struct wl_pointer *pointer, uint32_t serial,
 #endif
 }
 
-static void
-pointer_handle_axis(void *data, struct wl_pointer *pointer,
-		    uint32_t time, uint32_t axis, wl_fixed_t value)
+static void pointer_handle_axis(void *data,
+				struct wl_pointer *pointer,
+				uint32_t time,
+				uint32_t axis,
+				wl_fixed_t value)
 {
 #if 0
 	struct input *input = data;
@@ -1083,30 +1084,31 @@ pointer_handle_axis(void *data, struct wl_pointer *pointer,
 }
 
 static const struct wl_pointer_listener pointer_listener = {
-	.enter  = pointer_handle_enter,
-	.leave  = pointer_handle_leave,
+	.enter = pointer_handle_enter,
+	.leave = pointer_handle_leave,
 	.motion = pointer_handle_motion,
 	.button = pointer_handle_button,
-	.axis   = pointer_handle_axis,
+	.axis = pointer_handle_axis,
 };
 
-static void
-seat_handle_capabilities(void *data,
-			 struct wl_seat *seat,
-			 enum wl_seat_capability caps)
+static void seat_handle_capabilities(void *data,
+				     struct wl_seat *seat,
+				     enum wl_seat_capability caps)
 {
-    struct wld_input *input = data;
+	struct wld_input *input = data;
 
-    if ((caps & WL_SEAT_CAPABILITY_POINTER) && !input->pointer) {
-	input->pointer = wl_seat_get_pointer(seat);
+	if ((caps & WL_SEAT_CAPABILITY_POINTER) && !input->pointer) {
+		input->pointer = wl_seat_get_pointer(seat);
 
-	wl_pointer_add_listener(input->pointer, &pointer_listener, input);
+		wl_pointer_add_listener(input->pointer,
+					&pointer_listener,
+					input);
 
-    } else if (!(caps & WL_SEAT_CAPABILITY_POINTER) && input->pointer) {
+	} else if (!(caps & WL_SEAT_CAPABILITY_POINTER) && input->pointer) {
 
-	wl_pointer_destroy(input->pointer);
-	input->pointer = NULL;
-    }
+		wl_pointer_destroy(input->pointer);
+		input->pointer = NULL;
+	}
 
 #if 0
     if ((caps & WL_SEAT_CAPABILITY_KEYBOARD) && !input->keyboard) {
@@ -1122,316 +1124,300 @@ seat_handle_capabilities(void *data,
 #endif
 }
 
-static void
-seat_name(void *data, struct wl_seat *seat, const char *name)
+static void seat_name(void *data, struct wl_seat *seat, const char *name)
 {
-    UNUSED(data);
-    UNUSED(seat);
-    UNUSED(name);
+	UNUSED(data);
+	UNUSED(seat);
+	UNUSED(name);
 }
 
-static const struct wl_seat_listener seat_listener = {
-	seat_handle_capabilities,
-	seat_name
-};
+static const struct wl_seat_listener seat_listener = {seat_handle_capabilities,
+						      seat_name};
 
 /**
  * new seat added
  */
-static struct wld_input *
-new_input_seat(struct wld_connection *connection,
-	       struct wl_registry *registry,
-	       uint32_t id)
+static struct wld_input *new_input_seat(struct wld_connection *connection,
+					struct wl_registry *registry,
+					uint32_t id)
 {
-    struct wld_input *input;
+	struct wld_input *input;
 
-    input = calloc(1, sizeof(struct wld_input));
-    if (input == NULL) {
-	return NULL;
-    }
+	input = calloc(1, sizeof(struct wld_input));
+	if (input == NULL) {
+		return NULL;
+	}
 
-    input->connection = connection;
+	input->connection = connection;
 
-    input->seat = wl_registry_bind(registry, id, &wl_seat_interface, 1);
-    if (input->seat == NULL) {
-	free(input);
-	return NULL;
-    }
+	input->seat = wl_registry_bind(registry, id, &wl_seat_interface, 1);
+	if (input->seat == NULL) {
+		free(input);
+		return NULL;
+	}
 
-    wl_seat_add_listener(input->seat, &seat_listener, input);
+	wl_seat_add_listener(input->seat, &seat_listener, input);
 
-    return input;
+	return input;
 }
 
 /** registry global addition callback
  *
  * @param ctx context from when listener was added
  */
-static void
-registry_handle_global(void *ctx,
-		       struct wl_registry *registry,
-		       uint32_t id,
-		       const char *interface,
-		       uint32_t version)
+static void registry_handle_global(void *ctx,
+				   struct wl_registry *registry,
+				   uint32_t id,
+				   const char *interface,
+				   uint32_t version)
 {
-    struct wld_connection* connection = ctx;
+	struct wld_connection *connection = ctx;
 
-    UNUSED(version);
+	UNUSED(version);
 
-    /* process new interfaces appearing on the global registry */
+	/* process new interfaces appearing on the global registry */
 
-    if (strcmp(interface, "wl_compositor") == 0) {
-	/* compositor interface is available. Bind the interface */
-	connection->compositor = wl_registry_bind(registry,
-						  id,
-						  &wl_compositor_interface,
-						  1);
+	if (strcmp(interface, "wl_compositor") == 0) {
+		/* compositor interface is available. Bind the interface */
+		connection->compositor = wl_registry_bind(
+			registry, id, &wl_compositor_interface, 1);
 
-    } else if (strcmp(interface, "wl_shell") == 0) {
-	/* shell interface is available. Bind the interface */
-	connection->shell = wl_registry_bind(registry,
-					     id,
-					     &wl_shell_interface,
-					     1);
+	} else if (strcmp(interface, "wl_shell") == 0) {
+		/* shell interface is available. Bind the interface */
+		connection->shell = wl_registry_bind(
+			registry, id, &wl_shell_interface, 1);
 
-    } else if (strcmp(interface, "wl_shm") == 0) {
-	/* shared memory interface is available. Bind the interface
-	 * and add a listener for the shared memory callbacks
-	 */
-	connection->shm = wl_registry_bind(registry,
-					   id,
-					   &wl_shm_interface,
-					   1);
-	if (connection->shm != NULL) {
-	    connection->shm_formats = 0;
-	    wl_shm_add_listener(connection->shm, &shm_listenter, connection);
+	} else if (strcmp(interface, "wl_shm") == 0) {
+		/* shared memory interface is available. Bind the interface
+		 * and add a listener for the shared memory callbacks
+		 */
+		connection->shm = wl_registry_bind(
+			registry, id, &wl_shm_interface, 1);
+		if (connection->shm != NULL) {
+			connection->shm_formats = 0;
+			wl_shm_add_listener(connection->shm,
+					    &shm_listenter,
+					    connection);
+		}
+
+	} else if (strcmp(interface, "wl_seat") == 0) {
+		struct wld_input *input;
+
+		input = new_input_seat(connection, registry, id);
+		if (input != NULL) {
+			wl_list_insert(connection->input_list.prev,
+				       &input->link);
+		}
 	}
-
-    } else if (strcmp(interface, "wl_seat") == 0) {
-	struct wld_input *input;
-
-	input = new_input_seat(connection, registry, id);
-	if (input != NULL) {
-	    wl_list_insert(connection->input_list.prev, &input->link);
-	}
-    }
 }
 
 /** registry global removal callback */
-static void
-registry_handle_global_remove(void *data,
-			      struct wl_registry *registry,
-			      uint32_t name)
+static void registry_handle_global_remove(void *data,
+					  struct wl_registry *registry,
+					  uint32_t name)
 {
-    UNUSED(data);
-    UNUSED(registry);
-    UNUSED(name);
+	UNUSED(data);
+	UNUSED(registry);
+	UNUSED(name);
 }
 
 /** registry global callback handlers */
 static const struct wl_registry_listener registry_listener = {
-    registry_handle_global,
-    registry_handle_global_remove
-};
+	registry_handle_global,
+	registry_handle_global_remove};
 
 
-static void
-free_connection(struct wld_connection* connection)
+static void free_connection(struct wld_connection *connection)
 {
-    if (connection->compositor != NULL) {
-	wl_compositor_destroy(connection->compositor);
-    }
+	if (connection->compositor != NULL) {
+		wl_compositor_destroy(connection->compositor);
+	}
 
-    if (connection->shell != NULL) {
-	wl_shell_destroy(connection->shell);
-    }
+	if (connection->shell != NULL) {
+		wl_shell_destroy(connection->shell);
+	}
 
-    if (connection->shm != NULL) {
-	wl_shm_destroy(connection->shm);
-    }
+	if (connection->shm != NULL) {
+		wl_shm_destroy(connection->shm);
+	}
 
-    wl_registry_destroy(connection->registry);
+	wl_registry_destroy(connection->registry);
 
-    wl_display_flush(connection->display);
+	wl_display_flush(connection->display);
 
-    wl_display_disconnect(connection->display);
+	wl_display_disconnect(connection->display);
 
-    free(connection);
+	free(connection);
 }
 
 /** construct a new connection to the wayland instance and aquire all
  * necessary global objects
  */
-static struct wld_connection*
-new_connection(void)
+static struct wld_connection *new_connection(void)
 {
-    struct wld_connection* connection;
+	struct wld_connection *connection;
 
-    connection = calloc(1, sizeof(struct wld_connection));
-    if (connection == NULL) {
-	return NULL;
-    }
+	connection = calloc(1, sizeof(struct wld_connection));
+	if (connection == NULL) {
+		return NULL;
+	}
 
-    /* initialise lists */
-    wl_list_init(&connection->input_list);
+	/* initialise lists */
+	wl_list_init(&connection->input_list);
 
-    /* make a connection to the wayland server */
-    connection->display = wl_display_connect(NULL);
-    if (connection->display == NULL) {
-	fprintf(stderr, "Unable to open display\n");
-	free(connection);
-	return NULL;
-    }
+	/* make a connection to the wayland server */
+	connection->display = wl_display_connect(NULL);
+	if (connection->display == NULL) {
+		fprintf(stderr, "Unable to open display\n");
+		free(connection);
+		return NULL;
+	}
 
-    /* create the registry object and attach its callback handlers */
-    connection->registry = wl_display_get_registry(connection->display);
-    if (connection->registry == NULL) {
-	fprintf(stderr, "Unable create registry\n");
-	wl_display_flush(connection->display);
-	wl_display_disconnect(connection->display);
-	free(connection);
-	return NULL;
-    }
+	/* create the registry object and attach its callback handlers */
+	connection->registry = wl_display_get_registry(connection->display);
+	if (connection->registry == NULL) {
+		fprintf(stderr, "Unable create registry\n");
+		wl_display_flush(connection->display);
+		wl_display_disconnect(connection->display);
+		free(connection);
+		return NULL;
+	}
 
-    wl_registry_add_listener(connection->registry,
-			     &registry_listener,
-			     connection);
-    /* perform a round trip to ensure registry messages have been processed */
-    wl_display_roundtrip(connection->display);
+	wl_registry_add_listener(connection->registry,
+				 &registry_listener,
+				 connection);
+	/* perform a round trip to ensure registry messages have been processed
+	 */
+	wl_display_roundtrip(connection->display);
 
-    /* all global objects from the registry should now be available. */
+	/* all global objects from the registry should now be available. */
 
-    if (connection->shm == NULL) {
-	/* The shared memory interface is available so fail. */
-	fprintf(stderr, "No shared memory interface available\n");
+	if (connection->shm == NULL) {
+		/* The shared memory interface is available so fail. */
+		fprintf(stderr, "No shared memory interface available\n");
 
-	free_connection(connection);
+		free_connection(connection);
 
-	return NULL;
-    }
+		return NULL;
+	}
 
-    /* perform a round trip to ensure interface messages have been processed */
-    wl_display_roundtrip(connection->display);
+	/* perform a round trip to ensure interface messages have been processed
+	 */
+	wl_display_roundtrip(connection->display);
 
-    /* check the XRGB8888 shared memory format is available */
-    if (!(connection->shm_formats & (1 << WL_SHM_FORMAT_XRGB8888))) {
-	fprintf(stderr, "WL_SHM_FORMAT_XRGB8888 not available\n");
+	/* check the XRGB8888 shared memory format is available */
+	if (!(connection->shm_formats & (1 << WL_SHM_FORMAT_XRGB8888))) {
+		fprintf(stderr, "WL_SHM_FORMAT_XRGB8888 not available\n");
 
-	free_connection(connection);
+		free_connection(connection);
 
-	return NULL;
-    }
+		return NULL;
+	}
 
-    return connection;
+	return connection;
 }
 
 
-
-static int
-update_and_redraw(struct wldstate_s *wldstate,
-		  int x,
-		  int y,
-		  int width,
-		  int height)
+static int update_and_redraw(struct wldstate_s *wldstate,
+			     int x,
+			     int y,
+			     int width,
+			     int height)
 {
-    wl_surface_attach(wldstate->window->surface,
-		      wldstate->shm_buffer->buffer,
-		      0,
-		      0);
+	wl_surface_attach(
+		wldstate->window->surface, wldstate->shm_buffer->buffer, 0, 0);
 
-    wl_surface_damage(wldstate->window->surface, x, y, width, height);
+	wl_surface_damage(wldstate->window->surface, x, y, width, height);
 
-    wl_surface_commit(wldstate->window->surface);
-    wldstate->shm_buffer->inuse = true;
+	wl_surface_commit(wldstate->window->surface);
+	wldstate->shm_buffer->inuse = true;
 
-    /* force syncronisation to cause the update */
-    wl_display_roundtrip(wldstate->connection->display);
+	/* force syncronisation to cause the update */
+	wl_display_roundtrip(wldstate->connection->display);
 
-    return 0;
+	return 0;
 }
 
 static void
-handle_ping(void *data, struct wl_shell_surface *shell_surface,
-							uint32_t serial)
+handle_ping(void *data, struct wl_shell_surface *shell_surface, uint32_t serial)
 {
-    UNUSED(data);
-    wl_shell_surface_pong(shell_surface, serial);
+	UNUSED(data);
+	wl_shell_surface_pong(shell_surface, serial);
 }
 
-static void
-handle_configure(void *data, struct wl_shell_surface *shell_surface,
-		 uint32_t edges, int32_t width, int32_t height)
+static void handle_configure(void *data,
+			     struct wl_shell_surface *shell_surface,
+			     uint32_t edges,
+			     int32_t width,
+			     int32_t height)
 {
-    UNUSED(data);
-    UNUSED(shell_surface);
-    UNUSED(edges);
-    UNUSED(width);
-    UNUSED(height);
+	UNUSED(data);
+	UNUSED(shell_surface);
+	UNUSED(edges);
+	UNUSED(width);
+	UNUSED(height);
 }
 
 static void
 handle_popup_done(void *data, struct wl_shell_surface *shell_surface)
 {
-    UNUSED(data);
-    UNUSED(shell_surface);
+	UNUSED(data);
+	UNUSED(shell_surface);
 }
 
-static const struct wl_shell_surface_listener shell_surface_listener = {
-	handle_ping,
-	handle_configure,
-	handle_popup_done
-};
+static const struct wl_shell_surface_listener shell_surface_listener =
+	{handle_ping, handle_configure, handle_popup_done};
 
 static struct wld_window *
 new_window(struct wld_connection *connection, int width, int height)
 {
-    struct wld_window *window;
+	struct wld_window *window;
 
-    window = calloc(1, sizeof *window);
-    if (window == NULL) {
-	return NULL;
-    }
+	window = calloc(1, sizeof *window);
+	if (window == NULL) {
+		return NULL;
+	}
 
-    window->connection = connection;
-    window->width = width;
-    window->height = height;
+	window->connection = connection;
+	window->width = width;
+	window->height = height;
 
-    window->surface = wl_compositor_create_surface(connection->compositor);
-    if (window->surface == NULL) {
-	fprintf(stderr, "failed to create compositor surface\n");
-	free(window);
-	return NULL;
-    }
+	window->surface = wl_compositor_create_surface(connection->compositor);
+	if (window->surface == NULL) {
+		fprintf(stderr, "failed to create compositor surface\n");
+		free(window);
+		return NULL;
+	}
 
-    window->shell_surface = wl_shell_get_shell_surface(connection->shell,
-						       window->surface);
-    if (window->shell_surface == NULL) {
-	fprintf(stderr, "failed to create shell surface\n");
+	window->shell_surface = wl_shell_get_shell_surface(connection->shell,
+							   window->surface);
+	if (window->shell_surface == NULL) {
+		fprintf(stderr, "failed to create shell surface\n");
 
+		wl_surface_destroy(window->surface);
+
+		free(window);
+		return NULL;
+	}
+
+	wl_shell_surface_add_listener(window->shell_surface,
+				      &shell_surface_listener,
+				      window);
+
+	wl_shell_surface_set_title(window->shell_surface, "nsfb");
+
+	wl_shell_surface_set_toplevel(window->shell_surface);
+
+	return window;
+}
+
+static void free_window(struct wld_window *window)
+{
+
+	wl_shell_surface_destroy(window->shell_surface);
 	wl_surface_destroy(window->surface);
 
 	free(window);
-	return NULL;
-    }
-
-    wl_shell_surface_add_listener(window->shell_surface,
-				  &shell_surface_listener, window);
-
-    wl_shell_surface_set_title(window->shell_surface, "nsfb");
-
-    wl_shell_surface_set_toplevel(window->shell_surface);
-
-    return window;
-}
-
-static void
-free_window(struct wld_window *window)
-{
-
-    wl_shell_surface_destroy(window->shell_surface);
-    wl_surface_destroy(window->surface);
-
-    free(window);
 }
 
 /*
@@ -1449,8 +1435,7 @@ free_window(struct wld_window *window)
  * transmitting the file descriptor over Unix sockets using the
  * SCM_RIGHTS methods.
  */
-static int
-os_create_anonymous_file(off_t size)
+static int os_create_anonymous_file(off_t size)
 {
 	static const char template[] = "/weston-shared-XXXXXX";
 	const char *path;
@@ -1466,7 +1451,7 @@ os_create_anonymous_file(off_t size)
 	name = malloc(strlen(path) + sizeof(template));
 	if (name == NULL) {
 		return -1;
-        }
+	}
 
 	strcpy(name, path);
 	strcat(name, template);
@@ -1489,164 +1474,150 @@ os_create_anonymous_file(off_t size)
 }
 
 
-static void
-buffer_release(void *data, struct wl_buffer *buffer)
+static void buffer_release(void *data, struct wl_buffer *buffer)
 {
-    struct wld_shm_buffer *shmbuf = data;
+	struct wld_shm_buffer *shmbuf = data;
 
-    UNUSED(buffer);
+	UNUSED(buffer);
 
-    shmbuf->inuse = false;
+	shmbuf->inuse = false;
 }
 
-static const struct wl_buffer_listener buffer_listener = {
-	buffer_release
-};
+static const struct wl_buffer_listener buffer_listener = {buffer_release};
 
 static struct wld_shm_buffer *
-new_shm_buffer(struct wl_shm *shm,
-	       int width,
-	       int height,
-	       uint32_t format)
+new_shm_buffer(struct wl_shm *shm, int width, int height, uint32_t format)
 {
-    struct wl_shm_pool *pool;
-    struct wld_shm_buffer *shmbuff;
-    int fd;
-    int stride;
+	struct wl_shm_pool *pool;
+	struct wld_shm_buffer *shmbuff;
+	int fd;
+	int stride;
 
-    shmbuff = calloc(1, sizeof(struct wld_shm_buffer));
-    if (shmbuff == NULL) {
-	return NULL;
-    }
+	shmbuff = calloc(1, sizeof(struct wld_shm_buffer));
+	if (shmbuff == NULL) {
+		return NULL;
+	}
 
-    stride = width * 4;
-    shmbuff->size = stride * height;
+	stride = width * 4;
+	shmbuff->size = stride * height;
 
-    fd = os_create_anonymous_file(shmbuff->size);
-    if (fd < 0) {
-	free(shmbuff);
-	return NULL;
-    }
+	fd = os_create_anonymous_file(shmbuff->size);
+	if (fd < 0) {
+		free(shmbuff);
+		return NULL;
+	}
 
-    shmbuff->data = mmap(NULL,
-			 shmbuff->size,
-			 PROT_READ | PROT_WRITE,
-			 MAP_SHARED,
-			 fd,
-			 0);
-    if (shmbuff->data == MAP_FAILED) {
+	shmbuff->data = mmap(
+		NULL, shmbuff->size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	if (shmbuff->data == MAP_FAILED) {
+		close(fd);
+		free(shmbuff);
+		return NULL;
+	}
+
+	pool = wl_shm_create_pool(shm, fd, shmbuff->size);
+	shmbuff->buffer = wl_shm_pool_create_buffer(
+		pool, 0, width, height, stride, format);
+	wl_shm_pool_destroy(pool);
 	close(fd);
-	free(shmbuff);
-	return NULL;
-    }
 
-    pool = wl_shm_create_pool(shm, fd, shmbuff->size);
-    shmbuff->buffer = wl_shm_pool_create_buffer(pool,
-						0,
-						width,
-						height,
-						stride,
-						format);
-    wl_shm_pool_destroy(pool);
-    close(fd);
+	if (shmbuff->buffer == NULL) {
+		munmap(shmbuff->data, shmbuff->size);
+		free(shmbuff);
+		return NULL;
+	}
 
-    if (shmbuff->buffer == NULL) {
-	munmap(shmbuff->data, shmbuff->size);
-	free(shmbuff);
-	return NULL;
-    }
+	wl_buffer_add_listener(shmbuff->buffer, &buffer_listener, shmbuff);
 
-    wl_buffer_add_listener(shmbuff->buffer, &buffer_listener, shmbuff);
-
-    return shmbuff;
+	return shmbuff;
 }
 
 static void free_shm_buffer(struct wld_shm_buffer *shmbuf)
 {
-    munmap(shmbuf->data, shmbuf->size);
-    free(shmbuf);
+	munmap(shmbuf->data, shmbuf->size);
+	free(shmbuf);
 }
 
 static int wld_initialise(nsfb_t *nsfb)
 {
-    wldstate_t *wldstate = nsfb->surface_priv;
+	wldstate_t *wldstate = nsfb->surface_priv;
 
-    if (wldstate != NULL)
-	return -1; /* already initialised */
+	if (wldstate != NULL)
+		return -1; /* already initialised */
 
-    /* check bpp is what we can support. */
-    if (nsfb->bpp != 32) {
-	return -1;
-    }
+	/* check bpp is what we can support. */
+	if (nsfb->bpp != 32) {
+		return -1;
+	}
 
-    wldstate = calloc(1, sizeof(wldstate_t));
-    if (wldstate == NULL) {
-	return -1; /* no memory */
-    }
+	wldstate = calloc(1, sizeof(wldstate_t));
+	if (wldstate == NULL) {
+		return -1; /* no memory */
+	}
 
-    wldstate->connection = new_connection();
-    if (wldstate->connection == NULL) {
-	fprintf(stderr, "Error initialising wayland connection\n");
+	wldstate->connection = new_connection();
+	if (wldstate->connection == NULL) {
+		fprintf(stderr, "Error initialising wayland connection\n");
 
-	free(wldstate);
+		free(wldstate);
 
-	return -1; /* error */
-    }
+		return -1; /* error */
+	}
 
-    wldstate->window = new_window(wldstate->connection,
-				  nsfb->width,
-				  nsfb->height);
-    if (wldstate->window == NULL) {
-	fprintf(stderr, "Error creating wayland window\n");
+	wldstate->window = new_window(wldstate->connection,
+				      nsfb->width,
+				      nsfb->height);
+	if (wldstate->window == NULL) {
+		fprintf(stderr, "Error creating wayland window\n");
 
-	free_connection(wldstate->connection);
+		free_connection(wldstate->connection);
 
-	free(wldstate);
+		free(wldstate);
 
-	return -1; /* error */
-    }
+		return -1; /* error */
+	}
 
-    wldstate->shm_buffer = new_shm_buffer(wldstate->connection->shm,
-					  nsfb->width,
-					  nsfb->height,
-					  WL_SHM_FORMAT_XRGB8888);
-    if (wldstate->shm_buffer == NULL) {
-	fprintf(stderr, "Error creating wayland shared memory\n");
+	wldstate->shm_buffer = new_shm_buffer(wldstate->connection->shm,
+					      nsfb->width,
+					      nsfb->height,
+					      WL_SHM_FORMAT_XRGB8888);
+	if (wldstate->shm_buffer == NULL) {
+		fprintf(stderr, "Error creating wayland shared memory\n");
+
+		free_window(wldstate->window);
+
+		free_connection(wldstate->connection);
+
+		free(wldstate);
+
+		return -1; /* error */
+	}
+
+	nsfb->ptr = wldstate->shm_buffer->data;
+	nsfb->linelen = nsfb->width * 4;
+
+	update_and_redraw(wldstate, 0, 0, nsfb->width, nsfb->height);
+
+	nsfb->surface_priv = wldstate;
+
+	return 0;
+}
+
+static int wld_finalise(nsfb_t *nsfb)
+{
+	wldstate_t *wldstate = nsfb->surface_priv;
+
+	if (wldstate == NULL) {
+		return 0; /* not initialised */
+	}
+
+	free_shm_buffer(wldstate->shm_buffer);
 
 	free_window(wldstate->window);
 
 	free_connection(wldstate->connection);
 
-	free(wldstate);
-
-	return -1; /* error */
-    }
-
-    nsfb->ptr = wldstate->shm_buffer->data;
-    nsfb->linelen = nsfb->width * 4;
-
-    update_and_redraw(wldstate,0,0, nsfb->width, nsfb->height);
-
-    nsfb->surface_priv = wldstate;
-
-    return 0;
-}
-
-static int wld_finalise(nsfb_t *nsfb)
-{
-    wldstate_t *wldstate = nsfb->surface_priv;
-
-    if (wldstate == NULL) {
-	return 0; /* not initialised */
-    }
-
-    free_shm_buffer(wldstate->shm_buffer);
-
-    free_window(wldstate->window);
-
-    free_connection(wldstate->connection);
-
-    return 0;
+	return 0;
 }
 
 #if 0
@@ -1785,80 +1756,82 @@ static int x_finalise(nsfb_t *nsfb)
 
 static bool wld_input(nsfb_t *nsfb, nsfb_event_t *event, int timeout)
 {
-    wldstate_t *wldstate = nsfb->surface_priv;
-    int ret = 0; /* number of events dispatched */
-    struct wld_event* wldevent; /* input event off queue */
+	wldstate_t *wldstate = nsfb->surface_priv;
+	int ret = 0; /* number of events dispatched */
+	struct wld_event *wldevent; /* input event off queue */
 
-    if (wldstate == NULL) {
-	return false;
-    }
-
-    /* flush any pending outgoing messages to server */
-    wl_display_flush(wldstate->connection->display);
-
-    /* if there are queued input events, return them first */
-    wldevent = dequeue_wld_event(wldstate->connection);
-    if (wldevent != NULL) {
-	*event = wldevent->event;
-	free(wldevent);
-	return true;
-    }
-
-    if (timeout < 0) {
-	/* caller wants to wait forever for an event */
-	ret = wl_display_dispatch(wldstate->connection->display);
-    } else {
-	int confd;
-	fd_set rfds;
-	struct timeval tv;
-	int retval;
-
-	confd = wl_display_get_fd(wldstate->connection->display);
-
-	FD_ZERO(&rfds);
-	FD_SET(confd, &rfds);
-
-	tv.tv_sec = timeout / 1000;
-	tv.tv_usec = timeout % 1000;
-
-	retval = select(confd + 1, &rfds, NULL, NULL, &tv);
-	if (retval == 0) {
-	    /* timeout, nothing ready to read */
-	    ret = wl_display_dispatch_pending(wldstate->connection->display);
-	} else {
-	    ret = wl_display_dispatch(wldstate->connection->display);
+	if (wldstate == NULL) {
+		return false;
 	}
-    }
 
-    /* check for connection error */
-    if (ret == -1) {
-	/* exit on conenction error */
-	event->type = NSFB_EVENT_CONTROL;
-	event->value.controlcode = NSFB_CONTROL_QUIT;
+	/* flush any pending outgoing messages to server */
+	wl_display_flush(wldstate->connection->display);
+
+	/* if there are queued input events, return them first */
+	wldevent = dequeue_wld_event(wldstate->connection);
+	if (wldevent != NULL) {
+		*event = wldevent->event;
+		free(wldevent);
+		return true;
+	}
+
+	if (timeout < 0) {
+		/* caller wants to wait forever for an event */
+		ret = wl_display_dispatch(wldstate->connection->display);
+	} else {
+		int confd;
+		fd_set rfds;
+		struct timeval tv;
+		int retval;
+
+		confd = wl_display_get_fd(wldstate->connection->display);
+
+		FD_ZERO(&rfds);
+		FD_SET(confd, &rfds);
+
+		tv.tv_sec = timeout / 1000;
+		tv.tv_usec = timeout % 1000;
+
+		retval = select(confd + 1, &rfds, NULL, NULL, &tv);
+		if (retval == 0) {
+			/* timeout, nothing ready to read */
+			ret = wl_display_dispatch_pending(
+				wldstate->connection->display);
+		} else {
+			ret = wl_display_dispatch(
+				wldstate->connection->display);
+		}
+	}
+
+	/* check for connection error */
+	if (ret == -1) {
+		/* exit on conenction error */
+		event->type = NSFB_EVENT_CONTROL;
+		event->value.controlcode = NSFB_CONTROL_QUIT;
+		return true;
+
+	} else if (ret == 0) {
+		/* timeout and no messages were processed and the input queue
+		 * was empty on entry
+		 */
+		event->type = NSFB_EVENT_CONTROL;
+		event->value.controlcode = NSFB_CONTROL_TIMEOUT;
+		return true;
+	}
+
+	/* messages were processed, they might have been input events */
+
+	wldevent = dequeue_wld_event(wldstate->connection);
+	if (wldevent == NULL) {
+		/* messages were not input events so signal no event */
+		return false;
+	}
+
+	*event = wldevent->event;
+
+	free(wldevent);
+
 	return true;
-
-    } else if (ret == 0) {
-	/* timeout and no messages were processed and the input queue was
-	 * empty on entry
-	 */
-	event->type = NSFB_EVENT_CONTROL;
-	event->value.controlcode = NSFB_CONTROL_TIMEOUT;
-	return true;
-    }
-
-    /* messages were processed, they might have been input events */
-
-    wldevent = dequeue_wld_event(wldstate->connection);
-    if (wldevent == NULL) {
-	/* messages were not input events so signal no event */
-	return false;
-    }
-
-    *event = wldevent->event;
-
-    free(wldevent);
-
-    return true;
 }
 
 #if 0
@@ -2019,74 +1992,78 @@ static bool x_input(nsfb_t *nsfb, nsfb_event_t *event, int timeout)
 
 static int wld_claim(nsfb_t *nsfb, nsfb_bbox_t *box)
 {
-    struct nsfb_cursor_s *cursor = nsfb->cursor;
+	struct nsfb_cursor_s *cursor = nsfb->cursor;
 
-    if ((cursor != NULL) &&
-	(cursor->plotted == true) &&
-	(nsfb_plot_bbox_intersect(box, &cursor->loc))) {
-	nsfb_cursor_clear(nsfb, cursor);
-    }
-    return 0;
+	if ((cursor != NULL) && (cursor->plotted == true) &&
+	    (nsfb_plot_bbox_intersect(box, &cursor->loc))) {
+		nsfb_cursor_clear(nsfb, cursor);
+	}
+	return 0;
 }
 
-static int
-wld_cursor(nsfb_t *nsfb, struct nsfb_cursor_s *cursor)
+static int wld_cursor(nsfb_t *nsfb, struct nsfb_cursor_s *cursor)
 {
-    wldstate_t *wldstate = nsfb->surface_priv;
-    nsfb_bbox_t redraw;
-    nsfb_bbox_t fbarea;
+	wldstate_t *wldstate = nsfb->surface_priv;
+	nsfb_bbox_t redraw;
+	nsfb_bbox_t fbarea;
 
-    if ((cursor != NULL) && (cursor->plotted == true)) {
+	if ((cursor != NULL) && (cursor->plotted == true)) {
 
-	nsfb_plot_add_rect(&cursor->savloc, &cursor->loc, &redraw);
+		nsfb_plot_add_rect(&cursor->savloc, &cursor->loc, &redraw);
 
-	/* screen area */
-	fbarea.x0 = 0;
-	fbarea.y0 = 0;
-	fbarea.x1 = nsfb->width;
-	fbarea.y1 = nsfb->height;
+		/* screen area */
+		fbarea.x0 = 0;
+		fbarea.y0 = 0;
+		fbarea.x1 = nsfb->width;
+		fbarea.y1 = nsfb->height;
 
-	nsfb_plot_clip(&fbarea, &redraw);
+		nsfb_plot_clip(&fbarea, &redraw);
 
-	nsfb_cursor_clear(nsfb, cursor);
+		nsfb_cursor_clear(nsfb, cursor);
 
-	nsfb_cursor_plot(nsfb, cursor);
+		nsfb_cursor_plot(nsfb, cursor);
 
-	/* TODO: This is hediously ineficient - should keep the pointer image
-	 * as a surface and composite server side
-	 */
-	update_and_redraw(wldstate, redraw.x0, redraw.y0, redraw.x1 - redraw.x0, redraw.y1 - redraw.y0);
-
-    }
-    return true;
-
+		/* TODO: This is hediously ineficient - should keep the pointer
+		 * image as a surface and composite server side
+		 */
+		update_and_redraw(wldstate,
+				  redraw.x0,
+				  redraw.y0,
+				  redraw.x1 - redraw.x0,
+				  redraw.y1 - redraw.y0);
+	}
+	return true;
 }
 
 
 static int wld_update(nsfb_t *nsfb, nsfb_bbox_t *box)
 {
-    wldstate_t *wldstate = nsfb->surface_priv;
-    struct nsfb_cursor_s *cursor = nsfb->cursor;
+	wldstate_t *wldstate = nsfb->surface_priv;
+	struct nsfb_cursor_s *cursor = nsfb->cursor;
 
-    if ((cursor != NULL) && (cursor->plotted == false)) {
-	nsfb_cursor_plot(nsfb, cursor);
-    }
+	if ((cursor != NULL) && (cursor->plotted == false)) {
+		nsfb_cursor_plot(nsfb, cursor);
+	}
 
-    if (wldstate != NULL) {
-	update_and_redraw(wldstate, box->x0, box->y0, box->x1 - box->x0, box->y1 - box->y0);
-    }
-    return 0;
+	if (wldstate != NULL) {
+		update_and_redraw(wldstate,
+				  box->x0,
+				  box->y0,
+				  box->x1 - box->x0,
+				  box->y1 - box->y0);
+	}
+	return 0;
 }
 
 
 const nsfb_surface_rtns_t wld_rtns = {
-    .initialise = wld_initialise,
-    .finalise = wld_finalise,
-    .input = wld_input,
-    .claim = wld_claim,
-    .update = wld_update,
-    .cursor = wld_cursor,
-    .geometry = wld_set_geometry,
+	.initialise = wld_initialise,
+	.finalise = wld_finalise,
+	.input = wld_input,
+	.claim = wld_claim,
+	.update = wld_update,
+	.cursor = wld_cursor,
+	.geometry = wld_set_geometry,
 };
 
 NSFB_SURFACE_DEF(wld, NSFB_SURFACE_WL, &wld_rtns)

@@ -2,7 +2,7 @@
  * Copyright 2020 Daniel Silverstone <dsilvers@netsurf-browser.org>
  * Copyright 2016 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
  * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -321,7 +321,7 @@ static case_pair chain_pairs[] = {{"https://www.google.com/", NULL},
 				  {"https://www.netsurf-browser.org/", NULL},
 				  {"http://www.google.com/", NULL},
 				  {"http://www.google.co.uk/", NULL},
-				  {"http://www.netsurf-browser.org/", NULL},
+				  {"https://github.com/xyproto/netsurfy", NULL},
 				  {"file:///tmp/test.html", NULL},
 				  {"file:///tmp/inner.html", NULL},
 				  {"about:blank", NULL},

@@ -2,7 +2,7 @@
  * Copyright 2003 James Bursa <bursa@users.sourceforge.net>
  * Copyright 2004 John Tytgat <joty@netsurf-browser.org>
  *
- * This file is part of NetSurfy, http://www.netsurf-browser.org/
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
  * NetSurfy is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -85,7 +85,7 @@ NSLOG_DECLARE_CATEGORY(schedule);
 NSLOG_DECLARE_CATEGORY(fbtk);
 NSLOG_DECLARE_CATEGORY(layout);
 NSLOG_DECLARE_CATEGORY(flex);
-NSLOG_DECLARE_CATEGORY(dukky);
+NSLOG_DECLARE_CATEGORY(qjsky);
 NSLOG_DECLARE_CATEGORY(jserrors);
 
 #else /* WITH_NSLOG */

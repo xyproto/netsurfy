@@ -2,7 +2,7 @@
  * Copyright 2009 Vincent Sanders <vince@simtec.co.uk>
  * Copyright 2009 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of libnsfb, http://www.netsurf-browser.org/
+ * This file is part of libnsfb, https://github.com/xyproto/netsurfy
  * Licenced under the MIT License,
  *                http://www.opensource.org/licenses/mit-license.php
  */
@@ -97,8 +97,8 @@ static bool clg(nsfb_t *nsfb, nsfb_colour_t c)
  * It's up to the client to call this function for both lines and check the
  * evenness of the total.
  */
-static bool establish_crossing_value(int x, int y, int x0, int y0,
-		int x1, int y1)
+static bool
+establish_crossing_value(int x, int y, int x0, int y0, int x1, int y1)
 {
 	bool v1 = (x == x0 && y == y0); /* whether we're crossing 1st vertex */
 	bool v2 = (x == x1 && y == y1); /* whether we're crossing 2nd vertex */
@@ -157,12 +157,16 @@ static bool find_span(const int *p, int n, int x, int y, int *x0, int *x1)
 			/* get line endpoints */
 			if (i != n - 2) {
 				/* not the last line */
-				p_x0 = p[i];		p_y0 = p[i + 1];
-				p_x1 = p[i + 2];	p_y1 = p[i + 3];
+				p_x0 = p[i];
+				p_y0 = p[i + 1];
+				p_x1 = p[i + 2];
+				p_y1 = p[i + 3];
 			} else {
 				/* last line; 2nd endpoint is first vertex */
-				p_x0 = p[i];		p_y0 = p[i + 1];
-				p_x1 = p[0];		p_y1 = p[1];
+				p_x0 = p[i];
+				p_y0 = p[i + 1];
+				p_x1 = p[0];
+				p_y1 = p[1];
 			}
 			/* ignore horizontal lines */
 			if (p_y0 == p_y1)
@@ -186,31 +190,31 @@ static bool find_span(const int *p, int n, int x, int y, int *x0, int *x1)
 				 * or subtracted from the numerator,
 				 * depending on whether the numerator and
 				 * denominator have the same sign. */
-				num = ((num < 0) == (den < 0)) ?
-						num + (den / 2) :
-						num - (den / 2);
+				num = ((num < 0) == (den < 0))
+					      ? num + (den / 2)
+					      : num - (den / 2);
 				x_new = p_x0 + num / den;
 			}
 
 			/* ignore crossings before current x */
 			if (x_new < x ||
-					(!found_span_start && x_new < x0_min) ||
-					(found_span_start && x_new < x1_min))
+			    (!found_span_start && x_new < x0_min) ||
+			    (found_span_start && x_new < x1_min))
 				continue;
 
-			crossing_value = establish_crossing_value(x_new, y,
-					p_x0, p_y0, p_x1, p_y1);
+			crossing_value = establish_crossing_value(
+				x_new, y, p_x0, p_y0, p_x1, p_y1);
 
 			/* set nearest intersections as filled area endpoints */
-			if (!found_span_start &&
-				x_new < *x0 && crossing_value) {
+			if (!found_span_start && x_new < *x0 &&
+			    crossing_value) {
 				/* nearer than first endpoint */
 				*x1 = *x0;
 				x1c = x0c;
 				*x0 = x_new;
 				x0c = 1;
-			} else if (!found_span_start &&
-					x_new == *x0 && crossing_value) {
+			} else if (!found_span_start && x_new == *x0 &&
+				   crossing_value) {
 				/* same as first endpoint */
 				x0c++;
 			} else if (x_new < *x1 && crossing_value) {
@@ -226,7 +230,6 @@ static bool find_span(const int *p, int n, int x, int y, int *x0, int *x1)
 		if (!found_span_start && x0c % 2 == 1) {
 			/* valid fill start found */
 			found_span_start = true;
-
 		}
 		if (x1c % 2 == 1) {
 			/* valid fill endpoint found */
@@ -298,10 +301,8 @@ static bool polygon(nsfb_t *nsfb, const int *p, unsigned int n, nsfb_colour_t c)
 	}
 
 	/* Don't try to plot it if it's outside the clip rectangle */
-	if (nsfb->clip.y1 < poly_y0 ||
-			nsfb->clip.y0 > poly_y1 ||
-			nsfb->clip.x1 < poly_x0 ||
-			nsfb->clip.x0 > poly_x1)
+	if (nsfb->clip.y1 < poly_y0 || nsfb->clip.y0 > poly_y1 ||
+	    nsfb->clip.x1 < poly_x0 || nsfb->clip.x0 > poly_x1)
 		return true;
 
 	/* Find the top of the important area */
@@ -347,10 +348,12 @@ static bool polygon(nsfb_t *nsfb, const int *p, unsigned int n, nsfb_colour_t c)
 	return true;
 }
 
-static bool
-rectangle(nsfb_t *nsfb, nsfb_bbox_t *rect,
-	  int line_width, nsfb_colour_t c,
-	  bool dotted, bool dashed)
+static bool rectangle(nsfb_t *nsfb,
+		      nsfb_bbox_t *rect,
+		      int line_width,
+		      nsfb_colour_t c,
+		      bool dotted,
+		      bool dashed)
 {
 	nsfb_bbox_t side[4];
 	nsfb_plot_pen_t pen;
@@ -400,19 +403,22 @@ ellipsefill(nsfb_t *nsfb, int cx, int cy, int x, int y, nsfb_colour_t c)
 	fline[1].y0 = fline[1].y1 = cy - y;
 
 	nsfb->plotter_fns->line(nsfb, 2, fline, &pen);
-
 }
 
-#define ROUND(a) ((int)(a+0.5))
+#define ROUND(a) ((int)(a + 0.5))
 
-static bool
-ellipse_midpoint(nsfb_t *nsfb,
-		 int cx,
-		 int cy,
-		 int rx,
-		 int ry,
-		 nsfb_colour_t c,
-		 void (ellipsefn)(nsfb_t *nsfb, int cx, int cy, int x, int y, nsfb_colour_t c))
+static bool ellipse_midpoint(nsfb_t *nsfb,
+			     int cx,
+			     int cy,
+			     int rx,
+			     int ry,
+			     nsfb_colour_t c,
+			     void(ellipsefn)(nsfb_t *nsfb,
+					     int cx,
+					     int cy,
+					     int x,
+					     int y,
+					     nsfb_colour_t c))
 {
 	int rx2 = rx * rx;
 	int ry2 = ry * ry;
@@ -431,27 +437,28 @@ ellipse_midpoint(nsfb_t *nsfb,
 	while (px < py) {
 		x++;
 		px += twory2;
-		if (p <0) {
-			p+=ry2 + px;
+		if (p < 0) {
+			p += ry2 + px;
 		} else {
 			y--;
 			py -= tworx2;
-			p+=ry2 + px - py;
+			p += ry2 + px - py;
 		}
 		ellipsefn(nsfb, cx, cy, x, y, c);
 	}
 
 	/* region 2 */
-	p = ROUND(ry2*(x+0.5)*(x+0.5) + rx2*(y-1)*(y-1) - rx2*ry2);
+	p = ROUND(ry2 * (x + 0.5) * (x + 0.5) + rx2 * (y - 1) * (y - 1) -
+		  rx2 * ry2);
 	while (y > 0) {
 		y--;
 		py -= tworx2;
 		if (p > 0) {
-			p+=rx2 - py;
+			p += rx2 - py;
 		} else {
 			x++;
 			px += twory2;
-			p+=rx2 - py + px;
+			p += rx2 - py + px;
 		}
 		ellipsefn(nsfb, cx, cy, x, y, c);
 	}
@@ -495,11 +502,16 @@ circlefill(nsfb_t *nsfb, int cx, int cy, int x, int y, nsfb_colour_t c)
 }
 
 static bool circle_midpoint(nsfb_t *nsfb,
-		int cx,
-		int cy,
-		int r,
-		nsfb_colour_t c,
-		void (circfn)(nsfb_t *nsfb, int cx, int cy, int x, int y, nsfb_colour_t c))
+			    int cx,
+			    int cy,
+			    int r,
+			    nsfb_colour_t c,
+			    void(circfn)(nsfb_t *nsfb,
+					 int cx,
+					 int cy,
+					 int x,
+					 int y,
+					 nsfb_colour_t c))
 {
 	int x = 0;
 	int y = r;
@@ -521,17 +533,25 @@ static bool circle_midpoint(nsfb_t *nsfb,
 
 static bool ellipse(nsfb_t *nsfb, nsfb_bbox_t *ellipse, nsfb_colour_t c)
 {
-	int width = (ellipse->x1 - ellipse->x0)>>1;
-	int height = (ellipse->y1 - ellipse->y0)>>1;
+	int width = (ellipse->x1 - ellipse->x0) >> 1;
+	int height = (ellipse->y1 - ellipse->y0) >> 1;
 
 	if (width == height) {
 		/* circle */
-		return circle_midpoint(nsfb, ellipse->x0 + width,
-				ellipse->y0 + height, width, c, circlepoints);
+		return circle_midpoint(nsfb,
+				       ellipse->x0 + width,
+				       ellipse->y0 + height,
+				       width,
+				       c,
+				       circlepoints);
 	} else {
-		return ellipse_midpoint(nsfb, ellipse->x0 + width,
-				ellipse->y0 + height, width, height, c,
-				ellipsepoints);
+		return ellipse_midpoint(nsfb,
+					ellipse->x0 + width,
+					ellipse->y0 + height,
+					width,
+					height,
+					c,
+					ellipsepoints);
 	}
 }
 
@@ -542,23 +562,29 @@ static bool ellipse_fill(nsfb_t *nsfb, nsfb_bbox_t *ellipse, nsfb_colour_t c)
 
 	if (width == height) {
 		/* circle */
-		return circle_midpoint(nsfb, ellipse->x0 + width,
-				ellipse->y0 + height, width, c, circlefill);
+		return circle_midpoint(nsfb,
+				       ellipse->x0 + width,
+				       ellipse->y0 + height,
+				       width,
+				       c,
+				       circlefill);
 	} else {
-		return ellipse_midpoint(nsfb, ellipse->x0 + width,
-				ellipse->y0 + height, width, height, c,
-				ellipsefill);
+		return ellipse_midpoint(nsfb,
+					ellipse->x0 + width,
+					ellipse->y0 + height,
+					width,
+					height,
+					c,
+					ellipsefill);
 	}
 }
-
 
 
 /* copy an area of surface from one location to another.
  *
  * @warning This implementation is woefully incomplete!
  */
-static bool
-copy(nsfb_t *nsfb, nsfb_bbox_t *srcbox, nsfb_bbox_t *dstbox)
+static bool copy(nsfb_t *nsfb, nsfb_bbox_t *srcbox, nsfb_bbox_t *dstbox)
 {
 	int srcx = srcbox->x0;
 	int srcy = srcbox->y0;
@@ -575,13 +601,11 @@ copy(nsfb_t *nsfb, nsfb_bbox_t *srcbox, nsfb_bbox_t *dstbox)
 
 	nsfb->surface_rtns->claim(nsfb, &allbox);
 
-	srcptr = (nsfb->ptr +
-			  (srcy * nsfb->linelen) +
-			  ((srcx * nsfb->bpp) / 8));
+	srcptr = (nsfb->ptr + (srcy * nsfb->linelen) +
+		  ((srcx * nsfb->bpp) / 8));
 
-	dstptr = (nsfb->ptr +
-			  (dsty * nsfb->linelen) +
-			  ((dstx * nsfb->bpp) / 8));
+	dstptr = (nsfb->ptr + (dsty * nsfb->linelen) +
+		  ((dstx * nsfb->bpp) / 8));
 
 
 	if (width == nsfb->width) {
@@ -590,7 +614,9 @@ copy(nsfb_t *nsfb, nsfb_bbox_t *srcbox, nsfb_bbox_t *dstbox)
 	} else {
 		if (srcy > dsty) {
 			for (hloop = height; hloop > 0; hloop--) {
-				memmove(dstptr, srcptr, (width * nsfb->bpp) / 8);
+				memmove(dstptr,
+					srcptr,
+					(width * nsfb->bpp) / 8);
 				srcptr += nsfb->linelen;
 				dstptr += nsfb->linelen;
 			}
@@ -600,7 +626,9 @@ copy(nsfb_t *nsfb, nsfb_bbox_t *srcbox, nsfb_bbox_t *dstbox)
 			for (hloop = height; hloop > 0; hloop--) {
 				srcptr -= nsfb->linelen;
 				dstptr -= nsfb->linelen;
-				memmove(dstptr, srcptr, (width * nsfb->bpp) / 8);
+				memmove(dstptr,
+					srcptr,
+					(width * nsfb->bpp) / 8);
 			}
 		}
 	}
@@ -611,9 +639,13 @@ copy(nsfb_t *nsfb, nsfb_bbox_t *srcbox, nsfb_bbox_t *dstbox)
 }
 
 
-
-static bool arc(nsfb_t *nsfb, int x, int y, int radius, int angle1,
-		int angle2, nsfb_colour_t c)
+static bool arc(nsfb_t *nsfb,
+		int x,
+		int y,
+		int radius,
+		int angle1,
+		int angle2,
+		nsfb_colour_t c)
 {
 	(void)nsfb;
 	(void)x;
@@ -627,12 +659,11 @@ static bool arc(nsfb_t *nsfb, int x, int y, int radius, int angle1,
 
 #define N_SEG 30
 
-static int
-cubic_points(unsigned int pointc,
-			 nsfb_point_t *point,
-			 nsfb_bbox_t *curve,
-			 nsfb_point_t *ctrla,
-			 nsfb_point_t *ctrlb)
+static int cubic_points(unsigned int pointc,
+			nsfb_point_t *point,
+			nsfb_bbox_t *curve,
+			nsfb_point_t *ctrla,
+			nsfb_point_t *ctrlb)
 {
 	unsigned int seg_loop;
 	double t;
@@ -666,14 +697,14 @@ cubic_points(unsigned int pointc,
 		point[cur_point].x = x;
 		point[cur_point].y = y;
 		if ((point[cur_point].x != point[cur_point - 1].x) ||
-				(point[cur_point].y != point[cur_point - 1].y))
+		    (point[cur_point].y != point[cur_point - 1].y))
 			cur_point++;
 	}
 
 	point[cur_point].x = curve->x1;
 	point[cur_point].y = curve->y1;
 	if ((point[cur_point].x != point[cur_point - 1].x) ||
-			(point[cur_point].y != point[cur_point - 1].y))
+	    (point[cur_point].y != point[cur_point - 1].y))
 		cur_point++;
 
 	return cur_point;
@@ -687,11 +718,10 @@ cubic_points(unsigned int pointc,
  * predecessor is the point added which ensures points for the same position
  * are not repeated.
  */
-static int
-quadratic_points(unsigned int pointc,
-				 nsfb_point_t *point,
-				 nsfb_bbox_t *curve,
-				 nsfb_point_t *ctrla)
+static int quadratic_points(unsigned int pointc,
+			    nsfb_point_t *point,
+			    nsfb_bbox_t *curve,
+			    nsfb_point_t *ctrla)
 {
 	unsigned int seg_loop;
 	double t;
@@ -706,7 +736,8 @@ quadratic_points(unsigned int pointc,
 	point[0].x = curve->x0;
 	point[0].y = curve->y0;
 	cur_point = 1;
-	pointc--; /* we have added the start point, one less point in the curve */
+	pointc--; /* we have added the start point, one less point in the curve
+		   */
 
 	for (seg_loop = 1; seg_loop < pointc; ++seg_loop) {
 		t = (double)seg_loop / (double)pointc;
@@ -723,24 +754,23 @@ quadratic_points(unsigned int pointc,
 		point[cur_point].x = x;
 		point[cur_point].y = y;
 		if ((point[cur_point].x != point[cur_point - 1].x) ||
-				(point[cur_point].y != point[cur_point - 1].y))
+		    (point[cur_point].y != point[cur_point - 1].y))
 			cur_point++;
 	}
 
 	point[cur_point].x = curve->x1;
 	point[cur_point].y = curve->y1;
 	if ((point[cur_point].x != point[cur_point - 1].x) ||
-			(point[cur_point].y != point[cur_point - 1].y))
+	    (point[cur_point].y != point[cur_point - 1].y))
 		cur_point++;
 
 	return cur_point;
 }
 
-static bool
-polylines(nsfb_t *nsfb,
-		  int pointc,
-		  const nsfb_point_t *points,
-		  nsfb_plot_pen_t *pen)
+static bool polylines(nsfb_t *nsfb,
+		      int pointc,
+		      const nsfb_point_t *points,
+		      nsfb_plot_pen_t *pen)
 {
 	int point_loop;
 	nsfb_bbox_t line;
@@ -755,11 +785,26 @@ polylines(nsfb_t *nsfb,
 }
 
 
+static bool quadratic(nsfb_t *nsfb,
+		      nsfb_bbox_t *curve,
+		      nsfb_point_t *ctrla,
+		      nsfb_plot_pen_t *pen)
+{
+	nsfb_point_t points[N_SEG];
 
-static bool
-quadratic(nsfb_t *nsfb,
+	if (pen->stroke_type == NFSB_PLOT_OPTYPE_NONE)
+		return false;
+
+	return polylines(nsfb,
+			 quadratic_points(N_SEG, points, curve, ctrla),
+			 points,
+			 pen);
+}
+
+static bool cubic(nsfb_t *nsfb,
 		  nsfb_bbox_t *curve,
 		  nsfb_point_t *ctrla,
+		  nsfb_point_t *ctrlb,
 		  nsfb_plot_pen_t *pen)
 {
 	nsfb_point_t points[N_SEG];
@@ -767,24 +812,10 @@ quadratic(nsfb_t *nsfb,
 	if (pen->stroke_type == NFSB_PLOT_OPTYPE_NONE)
 		return false;
 
-	return polylines(nsfb, quadratic_points(N_SEG, points, curve, ctrla),
-			points, pen);
-}
-
-static bool
-cubic(nsfb_t *nsfb,
-	  nsfb_bbox_t *curve,
-	  nsfb_point_t *ctrla,
-	  nsfb_point_t *ctrlb,
-	  nsfb_plot_pen_t *pen)
-{
-	nsfb_point_t points[N_SEG];
-
-	if (pen->stroke_type == NFSB_PLOT_OPTYPE_NONE)
-		return false;
-
-	return polylines(nsfb, cubic_points(N_SEG, points, curve, ctrla,ctrlb),
-			points, pen);
+	return polylines(nsfb,
+			 cubic_points(N_SEG, points, curve, ctrla, ctrlb),
+			 points,
+			 pen);
 }
 
 
@@ -805,8 +836,7 @@ path(nsfb_t *nsfb, int pathc, nsfb_plot_pathop_t *pathop, nsfb_plot_pen_t *pen)
 	for (path_loop = 0; path_loop < pathc; path_loop++) {
 		ptc++;
 		if ((pathop[path_loop].operation == NFSB_PLOT_PATHOP_QUAD) ||
-				(pathop[path_loop].operation ==
-				 NFSB_PLOT_PATHOP_CUBIC))
+		    (pathop[path_loop].operation == NFSB_PLOT_PATHOP_CUBIC))
 			ptc += N_SEG;
 	}
 
@@ -819,7 +849,7 @@ path(nsfb_t *nsfb, int pathc, nsfb_plot_pathop_t *pathop, nsfb_plot_pen_t *pen)
 	for (path_loop = 0; path_loop < pathc; path_loop++) {
 		switch (pathop[path_loop].operation) {
 		case NFSB_PLOT_PATHOP_QUAD:
-			curpt-=2;
+			curpt -= 2;
 			added_count -= 2;
 			curve.x0 = pathop[path_loop - 2].point.x;
 			curve.y0 = pathop[path_loop - 2].point.y;
@@ -833,8 +863,8 @@ path(nsfb_t *nsfb, int pathc, nsfb_plot_pathop_t *pathop, nsfb_plot_pen_t *pen)
 			break;
 
 		case NFSB_PLOT_PATHOP_CUBIC:
-			curpt-=3;
-			added_count -=3;
+			curpt -= 3;
+			added_count -= 3;
 			curve.x0 = pathop[path_loop - 3].point.x;
 			curve.y0 = pathop[path_loop - 3].point.y;
 			ctrla.x = pathop[path_loop - 2].point.x;
@@ -843,7 +873,8 @@ path(nsfb_t *nsfb, int pathc, nsfb_plot_pathop_t *pathop, nsfb_plot_pen_t *pen)
 			ctrlb.y = pathop[path_loop - 1].point.y;
 			curve.x1 = pathop[path_loop].point.x;
 			curve.y1 = pathop[path_loop].point.y;
-			bpts = cubic_points(N_SEG, curpt, &curve, &ctrla, &ctrlb);
+			bpts = cubic_points(
+				N_SEG, curpt, &curve, &ctrla, &ctrlb);
 			curpt += bpts;
 			added_count += bpts;
 			break;
@@ -851,7 +882,7 @@ path(nsfb_t *nsfb, int pathc, nsfb_plot_pathop_t *pathop, nsfb_plot_pen_t *pen)
 		default:
 			*curpt = pathop[path_loop].point;
 			curpt++;
-			added_count ++;
+			added_count++;
 			break;
 		}
 	}
@@ -897,8 +928,8 @@ bool select_plotters(nsfb_t *nsfb)
 		return false;
 #endif
 
-	case NSFB_FMT_ARGB1555: /* 16 bpp 555 */ 
-	case NSFB_FMT_RGB565: /* 16 bpp 565 */ 
+	case NSFB_FMT_ARGB1555: /* 16 bpp 555 */
+	case NSFB_FMT_RGB565: /* 16 bpp 565 */
 		table = &_nsfb_16bpp_plotters;
 		nsfb->bpp = 16;
 		break;
@@ -910,9 +941,8 @@ bool select_plotters(nsfb_t *nsfb)
 
 	case NSFB_FMT_I1: /* black and white */
 #ifdef ENABLE_1_BPP
-		table = &_nsfb_1bpp_plotters; 
-		nsfb->bpp = 1
-		break;
+		table = &_nsfb_1bpp_plotters;
+		nsfb->bpp = 1 break;
 #else
 		return false;
 #endif

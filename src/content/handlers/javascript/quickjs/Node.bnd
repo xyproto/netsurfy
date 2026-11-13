@@ -1,0 +1,315 @@
+/* Node binding for browser using QuickJS and libdom
+ *
+ * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+class Node {
+	private dom_node *node;
+	prologue %{
+
+static node_private_t *node_arg(JSContext *ctx, JSValueConst val)
+{
+	return qjsky_private(ctx, val, QJSKY_IFACE_NODE);
+}
+
+static JSValue node_result(JSContext *ctx, dom_exception exc, dom_node **np)
+{
+	dom_node *n = *np;
+	JSValue ret;
+	if (exc != DOM_NO_ERR) {
+		return JS_UNDEFINED;
+	}
+	ret = qjsky_node(ctx, n);
+	if (n != NULL) {
+		dom_node_unref(n);
+	}
+	return ret;
+}
+
+%};
+};
+
+init Node(struct dom_node *node)
+%{
+	priv->node = node;
+	dom_node_ref(node);
+	priv->parent.is_node = true;
+%}
+
+fini Node()
+%{
+	dom_node_unref(priv->node);
+%}
+
+getter Node::nodeType()
+%{
+	dom_node_type ntype;
+	if (dom_node_get_node_type(priv->node, &ntype) != DOM_NO_ERR) return JS_UNDEFINED;
+	return JS_NewUint32(ctx, (uint32_t)ntype);
+%}
+
+getter Node::nodeName()
+%{
+	dom_string *str = NULL;
+	JSValue ret;
+	if (dom_node_get_node_name(priv->node, &str) != DOM_NO_ERR) return JS_UNDEFINED;
+	ret = qjsky_string(ctx, str);
+	dom_string_unref(str);
+	return ret;
+%}
+
+getter Node::baseURI()
+%{
+	dom_string *base = NULL;
+	JSValue ret;
+	if (dom_node_get_base(priv->node, &base) != DOM_NO_ERR) return JS_UNDEFINED;
+	ret = qjsky_string(ctx, base);
+	if (base != NULL) dom_string_unref(base);
+	return ret;
+%}
+
+getter Node::ownerDocument()
+%{
+	dom_node *doc = NULL;
+	return node_result(ctx, dom_node_get_owner_document(priv->node, &doc), &doc);
+%}
+
+getter Node::parentNode()
+%{
+	dom_node *pnode = NULL;
+	return node_result(ctx, dom_node_get_parent_node(priv->node, &pnode), &pnode);
+%}
+
+getter Node::parentElement()
+%{
+	dom_node *pnode = NULL;
+	dom_node_type ntype = DOM_NODE_TYPE_COUNT + 1;
+	if (dom_node_get_parent_node(priv->node, &pnode) != DOM_NO_ERR) return JS_UNDEFINED;
+	if (pnode != NULL) {
+		if (dom_node_get_node_type(pnode, &ntype) != DOM_NO_ERR) {
+			dom_node_unref(pnode);
+			return JS_UNDEFINED;
+		}
+		if (ntype != DOM_ELEMENT_NODE) {
+			dom_node_unref(pnode);
+			pnode = NULL;
+		}
+	}
+	return node_result(ctx, DOM_NO_ERR, &pnode);
+%}
+
+method Node::hasChildNodes()
+%{
+	bool res;
+	if (dom_node_has_child_nodes(priv->node, &res) != DOM_NO_ERR) return JS_UNDEFINED;
+	return JS_NewBool(ctx, res);
+%}
+
+getter Node::childNodes()
+%{
+	dom_nodelist *nlist = NULL;
+	JSValue cached, list, proxy;
+
+	cached = qjsky_hidden_get(ctx, this_val, QJSKY_HIDDEN_CHILD_NODES, false);
+	if (!JS_IsUndefined(cached)) return cached;
+
+	if (dom_node_get_child_nodes(priv->node, &nlist) != DOM_NO_ERR) return JS_UNDEFINED;
+	list = qjsky_node_list___create(ctx, nlist);
+	dom_nodelist_unref(nlist);
+	proxy = qjsky_list_proxy(ctx, "makeListProxy", list);
+	if (JS_IsException(proxy)) return proxy;
+	qjsky_hidden_set(ctx, this_val, QJSKY_HIDDEN_CHILD_NODES, JS_DupValue(ctx, proxy));
+	return proxy;
+%}
+
+getter Node::firstChild()
+%{
+	dom_node *n = NULL;
+	return node_result(ctx, dom_node_get_first_child(priv->node, &n), &n);
+%}
+
+getter Node::lastChild()
+%{
+	dom_node *n = NULL;
+	return node_result(ctx, dom_node_get_last_child(priv->node, &n), &n);
+%}
+
+getter Node::previousSibling()
+%{
+	dom_node *n = NULL;
+	return node_result(ctx, dom_node_get_previous_sibling(priv->node, &n), &n);
+%}
+
+getter Node::nextSibling()
+%{
+	dom_node *n = NULL;
+	return node_result(ctx, dom_node_get_next_sibling(priv->node, &n), &n);
+%}
+
+getter Node::nodeValue()
+%{
+	dom_string *content = NULL;
+	JSValue ret;
+	if (dom_node_get_node_value(priv->node, &content) != DOM_NO_ERR) return JS_UNDEFINED;
+	if (content == NULL) return JS_NULL;
+	ret = qjsky_string(ctx, content);
+	dom_string_unref(content);
+	return ret;
+%}
+
+setter Node::nodeValue()
+%{
+	dom_string *content = qjsky_to_dom_string(ctx, argv[0]);
+	if (content == NULL) return JS_EXCEPTION;
+	(void)dom_node_set_node_value(priv->node, content);
+	dom_string_unref(content);
+	return JS_UNDEFINED;
+%}
+
+getter Node::textContent()
+%{
+	dom_string *content = NULL;
+	JSValue ret;
+	if (dom_node_get_text_content(priv->node, &content) != DOM_NO_ERR) return JS_UNDEFINED;
+	if (content == NULL) return JS_NULL;
+	ret = qjsky_string(ctx, content);
+	dom_string_unref(content);
+	return ret;
+%}
+
+setter Node::textContent()
+%{
+	dom_string *content = qjsky_to_dom_string(ctx, argv[0]);
+	if (content == NULL) return JS_EXCEPTION;
+	(void)dom_node_set_text_content(priv->node, content);
+	dom_string_unref(content);
+	return JS_UNDEFINED;
+%}
+
+method Node::normalize()
+%{
+	(void)dom_node_normalize(priv->node);
+	return JS_UNDEFINED;
+%}
+
+method Node::cloneNode()
+%{
+	dom_node *clone = NULL;
+	int deep = JS_ToBool(ctx, argv[0]);
+	if (deep < 0) return JS_EXCEPTION;
+	return node_result(ctx, dom_node_clone_node(priv->node, deep != 0, &clone), &clone);
+%}
+
+method Node::isEqualNode()
+%{
+	bool result;
+	node_private_t *other = node_arg(ctx, argv[0]);
+	if (other == NULL) return JS_FALSE;
+	if (dom_node_is_equal(priv->node, other->node, &result) != DOM_NO_ERR) return JS_UNDEFINED;
+	return JS_NewBool(ctx, result);
+%}
+
+method Node::compareDocumentPosition()
+%{
+	uint16_t ret;
+	node_private_t *other = node_arg(ctx, argv[0]);
+	if (other == NULL) return JS_ThrowTypeError(ctx, "parameter 1 is not of type 'Node'");
+	if (dom_node_compare_document_position(priv->node, other->node, &ret) != DOM_NO_ERR) return JS_UNDEFINED;
+	return JS_NewUint32(ctx, ret);
+%}
+
+method Node::contains()
+%{
+	uint16_t ret;
+	node_private_t *other = node_arg(ctx, argv[0]);
+	if (other == NULL) return JS_FALSE;
+	if (priv->node == other->node) return JS_TRUE;
+	if (dom_node_compare_document_position(priv->node, other->node, &ret) != DOM_NO_ERR) return JS_UNDEFINED;
+	return JS_NewBool(ctx, (ret & DOM_DOCUMENT_POSITION_CONTAINED_BY) != 0);
+%}
+
+method Node::lookupPrefix()
+%{
+	dom_string *ns, *pfx = NULL;
+	JSValue ret;
+	ns = qjsky_to_dom_string(ctx, argv[0]);
+	if (ns == NULL) return JS_EXCEPTION;
+	if (dom_node_lookup_prefix(priv->node, ns, &pfx) != DOM_NO_ERR) pfx = NULL;
+	dom_string_unref(ns);
+	if (pfx == NULL) return JS_NULL;
+	ret = qjsky_string(ctx, pfx);
+	dom_string_unref(pfx);
+	return ret;
+%}
+
+method Node::lookupNamespaceURI()
+%{
+	dom_string *ns = NULL, *pfx;
+	JSValue ret;
+	pfx = qjsky_to_dom_string(ctx, argv[0]);
+	if (pfx == NULL) return JS_EXCEPTION;
+	if (dom_node_lookup_namespace(priv->node, pfx, &ns) != DOM_NO_ERR) ns = NULL;
+	dom_string_unref(pfx);
+	if (ns == NULL) return JS_NULL;
+	ret = qjsky_string(ctx, ns);
+	dom_string_unref(ns);
+	return ret;
+%}
+
+method Node::isDefaultNamespace()
+%{
+	dom_string *ns;
+	bool ret;
+	ns = qjsky_to_dom_string(ctx, argv[0]);
+	if (ns == NULL) return JS_EXCEPTION;
+	if (dom_node_is_default_namespace(priv->node, ns, &ret) != DOM_NO_ERR) ret = false;
+	dom_string_unref(ns);
+	return JS_NewBool(ctx, ret);
+%}
+
+method Node::insertBefore()
+%{
+	node_private_t *other = node_arg(ctx, argv[0]);
+	node_private_t *another = NULL;
+	dom_node *spare = NULL;
+	if (other == NULL) return JS_ThrowTypeError(ctx, "parameter 1 is not of type 'Node'");
+	if (argc > 1 && !JS_IsNull(argv[1]) && !JS_IsUndefined(argv[1])) {
+		another = node_arg(ctx, argv[1]);
+		if (another == NULL) return JS_ThrowTypeError(ctx, "parameter 2 is not of type 'Node'");
+	}
+	return node_result(ctx,
+			   dom_node_insert_before(priv->node, other->node,
+						  another != NULL ? another->node : NULL,
+						  &spare), &spare);
+%}
+
+method Node::appendChild()
+%{
+	node_private_t *other = node_arg(ctx, argv[0]);
+	dom_node *spare = NULL;
+	if (other == NULL) return JS_ThrowTypeError(ctx, "parameter 1 is not of type 'Node'");
+	return node_result(ctx, dom_node_append_child(priv->node, other->node, &spare), &spare);
+%}
+
+method Node::replaceChild()
+%{
+	node_private_t *other = node_arg(ctx, argv[0]);
+	node_private_t *old = node_arg(ctx, argv[1]);
+	dom_node *spare = NULL;
+	if (other == NULL) return JS_ThrowTypeError(ctx, "parameter 1 is not of type 'Node'");
+	if (old == NULL) return JS_ThrowTypeError(ctx, "parameter 2 is not of type 'Node'");
+	return node_result(ctx, dom_node_replace_child(priv->node, other->node, old->node, &spare), &spare);
+%}
+
+method Node::removeChild()
+%{
+	node_private_t *other = node_arg(ctx, argv[0]);
+	dom_node *spare = NULL;
+	if (other == NULL) return JS_ThrowTypeError(ctx, "parameter 1 is not of type 'Node'");
+	return node_result(ctx, dom_node_remove_child(priv->node, other->node, &spare), &spare);
+%}

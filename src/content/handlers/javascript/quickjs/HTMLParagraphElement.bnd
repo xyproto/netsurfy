@@ -1,0 +1,14 @@
+/* HTML paragraph element binding using QuickJS and libdom
+ *
+ * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+init HTMLParagraphElement(struct dom_html_element *html_paragraph_element::html_element);
+
+getter HTMLParagraphElement::align();
+setter HTMLParagraphElement::align();

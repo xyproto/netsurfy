@@ -59,12 +59,12 @@ const char *nslog_level_name(nslog_level level);
  */
 const char *nslog_short_level_name(nslog_level level);
 
-#define NSLOG_LEVEL_DD		NSLOG_LEVEL_DEEPDEBUG
-#define NSLOG_LEVEL_DBG		NSLOG_LEVEL_DEBUG
-#define NSLOG_LEVEL_CHAT	NSLOG_LEVEL_VERBOSE
-#define NSLOG_LEVEL_WARN	NSLOG_LEVEL_WARNING
-#define NSLOG_LEVEL_ERR		NSLOG_LEVEL_ERROR
-#define NSLOG_LEVEL_CRIT	NSLOG_LEVEL_CRITICAL
+#define NSLOG_LEVEL_DD NSLOG_LEVEL_DEEPDEBUG
+#define NSLOG_LEVEL_DBG NSLOG_LEVEL_DEBUG
+#define NSLOG_LEVEL_CHAT NSLOG_LEVEL_VERBOSE
+#define NSLOG_LEVEL_WARN NSLOG_LEVEL_WARNING
+#define NSLOG_LEVEL_ERR NSLOG_LEVEL_ERROR
+#define NSLOG_LEVEL_CRIT NSLOG_LEVEL_CRITICAL
 
 #ifndef NSLOG_COMPILED_MIN_LEVEL
 /**
@@ -107,8 +107,10 @@ typedef struct nslog_category_s {
  * beyond the scope of the log callback, copy it).
  */
 typedef struct nslog_entry_context_s {
-	nslog_category_t *category; /**< The category under which the log entry is being made */
-	nslog_level level; /**< The level at which the log entry is being made */
+	nslog_category_t *category; /**< The category under which the log entry
+				       is being made */
+	nslog_level
+		level; /**< The level at which the log entry is being made */
 	const char *filename; /**< The source filename where the log entry is */
 	int filenamelen; /**< The source filename name's length */
 	const char *funcname; /**< The source function where the log entry is */
@@ -124,7 +126,7 @@ typedef struct nslog_entry_context_s {
  *
  * \param catname The category leaf name (as a bareword)
  */
-#define NSLOG_DECLARE_CATEGORY(catname)				\
+#define NSLOG_DECLARE_CATEGORY(catname)                                        \
 	extern nslog_category_t __nslog_category_##catname
 
 /**
@@ -136,14 +138,14 @@ typedef struct nslog_entry_context_s {
  * \param catname The category name (as a bareword)
  * \param description The category description (as a static string)
  */
-#define NSLOG_DEFINE_CATEGORY(catname, description)	\
-	nslog_category_t __nslog_category_##catname = { \
-		#catname,				\
-		description,				\
-		NULL,					\
-		NULL,					\
-		0,					\
-		NULL,					\
+#define NSLOG_DEFINE_CATEGORY(catname, description)                            \
+	nslog_category_t __nslog_category_##catname = {                        \
+		#catname,                                                      \
+		description,                                                   \
+		NULL,                                                          \
+		NULL,                                                          \
+		0,                                                             \
+		NULL,                                                          \
 	}
 
 /**
@@ -159,14 +161,14 @@ typedef struct nslog_entry_context_s {
  * \param catname The category name (as a bareword)
  * \param description The category description (as a static string)
  */
-#define NSLOG_DEFINE_SUBCATEGORY(parentcatname, catname, description)	\
-	nslog_category_t __nslog_category_##catname = {			\
-		#catname,						\
-		description,						\
-		&__nslog_category_##parentcatname,			\
-		NULL,							\
-		0,							\
-		NULL,							\
+#define NSLOG_DEFINE_SUBCATEGORY(parentcatname, catname, description)          \
+	nslog_category_t __nslog_category_##catname = {                        \
+		#catname,                                                      \
+		description,                                                   \
+		&__nslog_category_##parentcatname,                             \
+		NULL,                                                          \
+		0,                                                             \
+		NULL,                                                          \
 	}
 
 /**
@@ -177,25 +179,26 @@ typedef struct nslog_entry_context_s {
  * NSLOG_DECLARE_CATEGORY macro.
  *
  * \param catname The category name (as a bareword)
- * \param level The level at which this is logged (as a bareword such as WARNING)
+ * \param level The level at which this is logged (as a bareword such as
+ * WARNING)
  * \param logmsg The log message itself (printf format string)
  * \param args The arguments for the log message
  */
-#define NSLOG(catname, level, logmsg, args...)				\
-	do {								\
-		if (NSLOG_LEVEL_##level >= NSLOG_COMPILED_MIN_LEVEL) {	\
-			static nslog_entry_context_t _nslog_ctx = {	\
-				&__nslog_category_##catname,		\
-				NSLOG_LEVEL_##level,			\
-				__FILE__,				\
-				sizeof(__FILE__) - 1,			\
-				__PRETTY_FUNCTION__,			\
-				sizeof(__PRETTY_FUNCTION__) - 1,	\
-				__LINE__,				\
-			};						\
-			nslog__log(&_nslog_ctx, logmsg, ##args);	\
-		}							\
-	} while(0)
+#define NSLOG(catname, level, logmsg, args...)                                 \
+	do {                                                                   \
+		if (NSLOG_LEVEL_##level >= NSLOG_COMPILED_MIN_LEVEL) {         \
+			static nslog_entry_context_t _nslog_ctx = {            \
+				&__nslog_category_##catname,                   \
+				NSLOG_LEVEL_##level,                           \
+				__FILE__,                                      \
+				sizeof(__FILE__) - 1,                          \
+				__PRETTY_FUNCTION__,                           \
+				sizeof(__PRETTY_FUNCTION__) - 1,               \
+				__LINE__,                                      \
+			};                                                     \
+			nslog__log(&_nslog_ctx, logmsg, ##args);               \
+		}                                                              \
+	} while (0)
 
 /**
  * Internal logging function
@@ -207,9 +210,8 @@ typedef struct nslog_entry_context_s {
  * \param pattern The printf message pattern
  * \param ... The arguments for the log entry
  */
-void nslog__log(nslog_entry_context_t *ctx,
-		const char *pattern,
-		...) __attribute__ ((format (printf, 2, 3)));
+void nslog__log(nslog_entry_context_t *ctx, const char *pattern, ...)
+	__attribute__((format(printf, 2, 3)));
 
 /**
  * Log error types
@@ -220,9 +222,11 @@ void nslog__log(nslog_entry_context_t *ctx,
  */
 typedef enum {
 	NSLOG_NO_ERROR = 0, /**< Nothing went wrong.  Have a party. */
-	NSLOG_NO_MEMORY = 1, /**< nslog ran out of memory.  Worry, a great deal */
+	NSLOG_NO_MEMORY =
+		1, /**< nslog ran out of memory.  Worry, a great deal */
 	NSLOG_UNCORKED = 2, /**< nslog is already uncorked, don't rush it */
-	NSLOG_PARSE_ERROR = 3, /**< nslog failed to parse the given log filter */
+	NSLOG_PARSE_ERROR =
+		3, /**< nslog failed to parse the given log filter */
 } nslog_error;
 
 /**
@@ -239,8 +243,10 @@ typedef enum {
  * \param fmt The log message (printf style format string)
  * \param args The printf arguments for the log entry
  */
-typedef void (*nslog_callback)(void *context, nslog_entry_context_t *ctx,
-			       const char *fmt, va_list args);
+typedef void (*nslog_callback)(void *context,
+			       nslog_entry_context_t *ctx,
+			       const char *fmt,
+			       va_list args);
 
 /**
  * Set the render callback for logging
@@ -315,8 +321,8 @@ typedef struct nslog_filter_s nslog_filter_t;
  * \param filter A pointer to a filter to be filled out
  * \return Whether or not this succeeds
  */
-nslog_error nslog_filter_category_new(const char *catname,
-				      nslog_filter_t **filter);
+nslog_error
+nslog_filter_category_new(const char *catname, nslog_filter_t **filter);
 /**
  * Create a log level based filter
  *
@@ -331,8 +337,7 @@ nslog_error nslog_filter_category_new(const char *catname,
  * \param filter A pointer to a filter to be filled out
  * \return Whether or not this succeeds
  */
-nslog_error nslog_filter_level_new(nslog_level level,
-				   nslog_filter_t **filter);
+nslog_error nslog_filter_level_new(nslog_level level, nslog_filter_t **filter);
 
 /**
  * Create a filename based filter
@@ -347,8 +352,8 @@ nslog_error nslog_filter_level_new(nslog_level level,
  * \param filter A pointer to a filter to be filled out
  * \return Whether or not this succeeds
  */
-nslog_error nslog_filter_filename_new(const char *filename,
-				      nslog_filter_t **filter);
+nslog_error
+nslog_filter_filename_new(const char *filename, nslog_filter_t **filter);
 
 /**
  * Create a dirname based filter
@@ -363,8 +368,8 @@ nslog_error nslog_filter_filename_new(const char *filename,
  * \param filter A pointer to a filter to be filled out
  * \return Whether or not this succeeds
  */
-nslog_error nslog_filter_dirname_new(const char *dirname,
-				     nslog_filter_t **filter);
+nslog_error
+nslog_filter_dirname_new(const char *dirname, nslog_filter_t **filter);
 
 /**
  * Create a function-name based filter
@@ -380,8 +385,8 @@ nslog_error nslog_filter_dirname_new(const char *dirname,
  * \param filter A pointer to a filter to be filled out
  * \return Whether or not this succeeds
  */
-nslog_error nslog_filter_funcname_new(const char *funcname,
-				      nslog_filter_t **filter);
+nslog_error
+nslog_filter_funcname_new(const char *funcname, nslog_filter_t **filter);
 
 /**
  * Create a logical 'and' of two filters.
@@ -440,8 +445,8 @@ nslog_error nslog_filter_xor_new(nslog_filter_t *left,
  * \param filter A pointer to a filter to be filled out
  * \return Whether or not this succeeds
  */
-nslog_error nslog_filter_not_new(nslog_filter_t *input,
-				 nslog_filter_t **filter);
+nslog_error
+nslog_filter_not_new(nslog_filter_t *input, nslog_filter_t **filter);
 
 /**
  * Take a reference to the passed in filter.
@@ -480,8 +485,8 @@ nslog_filter_t *nslog_filter_unref(nslog_filter_t *filter);
  * \param prev A pointer which will be optionally filled out
  * \return Whether or not this succeeds
  */
-nslog_error nslog_filter_set_active(nslog_filter_t *filter,
-				    nslog_filter_t **prev);
+nslog_error
+nslog_filter_set_active(nslog_filter_t *filter, nslog_filter_t **prev);
 
 
 /**
@@ -511,7 +516,6 @@ char *nslog_filter_sprintf(nslog_filter_t *filter);
  * \param output A pointer to fill out with the parsed filter
  * \return Whether or not this succeeds
  */
-nslog_error nslog_filter_from_text(const char *input,
-				   nslog_filter_t **output);
+nslog_error nslog_filter_from_text(const char *input, nslog_filter_t **output);
 
 #endif /* NSLOG_NSLOG_H_ */

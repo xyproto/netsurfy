@@ -104,8 +104,8 @@ Javascript provision is split into four parts:
 
 ## Library
 
-JavaScript is provided by integrating the duktape library. There are
-[instructions](docs/updating-duktape.md) on how to update the library.
+JavaScript is provided by the system QuickJS-ng library, found through
+its CMake package (`qjs`).
 
 ## Interface binding
 

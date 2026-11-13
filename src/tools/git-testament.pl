@@ -197,7 +197,7 @@ if ( -e $targetfile ) {
 my $newcsum = compat_md5_hex($testament);
 
 if ($oldcsum ne $newcsum) {
-   print "TESTMENT: $targetfile\n";
+   print "TESTAMENT: $targetfile\n";
    open(my $NEWVALUES, ">", $targetfile) or die "$!";
    print $NEWVALUES "/* ", $targetfile,"\n";
    print $NEWVALUES <<'EOS';
@@ -225,7 +225,7 @@ EOS
         system("rm", "-f", "--", $unwanted);
      }
 } else {
-   print "TESTMENT: unchanged\n";
+   print "TESTAMENT: unchanged\n";
 }
 
 exit 0;
