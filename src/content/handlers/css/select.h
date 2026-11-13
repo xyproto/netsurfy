@@ -64,4 +64,9 @@ css_error named_ancestor_node(void *pw,
 
 css_error node_is_visited(void *pw, void *node, bool *match);
 
+/**
+ * Drop the libcss selection data cached on every element under root.
+ */
+void nscss_clear_node_data(dom_node *root);
+
 #endif

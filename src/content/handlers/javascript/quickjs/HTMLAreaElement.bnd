@@ -24,3 +24,108 @@ setter HTMLAreaElement::shape();
 
 getter HTMLAreaElement::target();
 setter HTMLAreaElement::target();
+
+getter HTMLAreaElement::href()
+%{
+	return qjsky_element_url_get(ctx, priv->parent.parent.parent.node, QJSKY_URL_HREF);
+%}
+
+setter HTMLAreaElement::href()
+%{
+	return qjsky_element_url_set(ctx, priv->parent.parent.parent.node, QJSKY_URL_HREF, argv[0]);
+%}
+
+getter HTMLAreaElement::protocol()
+%{
+	return qjsky_element_url_get(ctx, priv->parent.parent.parent.node, QJSKY_URL_PROTOCOL);
+%}
+
+setter HTMLAreaElement::protocol()
+%{
+	return qjsky_element_url_set(ctx, priv->parent.parent.parent.node, QJSKY_URL_PROTOCOL, argv[0]);
+%}
+
+getter HTMLAreaElement::username()
+%{
+	return qjsky_element_url_get(ctx, priv->parent.parent.parent.node, QJSKY_URL_USERNAME);
+%}
+
+setter HTMLAreaElement::username()
+%{
+	return qjsky_element_url_set(ctx, priv->parent.parent.parent.node, QJSKY_URL_USERNAME, argv[0]);
+%}
+
+getter HTMLAreaElement::password()
+%{
+	return qjsky_element_url_get(ctx, priv->parent.parent.parent.node, QJSKY_URL_PASSWORD);
+%}
+
+setter HTMLAreaElement::password()
+%{
+	return qjsky_element_url_set(ctx, priv->parent.parent.parent.node, QJSKY_URL_PASSWORD, argv[0]);
+%}
+
+getter HTMLAreaElement::host()
+%{
+	return qjsky_element_url_get(ctx, priv->parent.parent.parent.node, QJSKY_URL_HOST);
+%}
+
+setter HTMLAreaElement::host()
+%{
+	return qjsky_element_url_set(ctx, priv->parent.parent.parent.node, QJSKY_URL_HOST, argv[0]);
+%}
+
+getter HTMLAreaElement::hostname()
+%{
+	return qjsky_element_url_get(ctx, priv->parent.parent.parent.node, QJSKY_URL_HOSTNAME);
+%}
+
+setter HTMLAreaElement::hostname()
+%{
+	return qjsky_element_url_set(ctx, priv->parent.parent.parent.node, QJSKY_URL_HOSTNAME, argv[0]);
+%}
+
+getter HTMLAreaElement::port()
+%{
+	return qjsky_element_url_get(ctx, priv->parent.parent.parent.node, QJSKY_URL_PORT);
+%}
+
+setter HTMLAreaElement::port()
+%{
+	return qjsky_element_url_set(ctx, priv->parent.parent.parent.node, QJSKY_URL_PORT, argv[0]);
+%}
+
+getter HTMLAreaElement::pathname()
+%{
+	return qjsky_element_url_get(ctx, priv->parent.parent.parent.node, QJSKY_URL_PATHNAME);
+%}
+
+setter HTMLAreaElement::pathname()
+%{
+	return qjsky_element_url_set(ctx, priv->parent.parent.parent.node, QJSKY_URL_PATHNAME, argv[0]);
+%}
+
+getter HTMLAreaElement::search()
+%{
+	return qjsky_element_url_get(ctx, priv->parent.parent.parent.node, QJSKY_URL_SEARCH);
+%}
+
+setter HTMLAreaElement::search()
+%{
+	return qjsky_element_url_set(ctx, priv->parent.parent.parent.node, QJSKY_URL_SEARCH, argv[0]);
+%}
+
+getter HTMLAreaElement::hash()
+%{
+	return qjsky_element_url_get(ctx, priv->parent.parent.parent.node, QJSKY_URL_HASH);
+%}
+
+setter HTMLAreaElement::hash()
+%{
+	return qjsky_element_url_set(ctx, priv->parent.parent.parent.node, QJSKY_URL_HASH, argv[0]);
+%}
+
+getter HTMLAreaElement::origin()
+%{
+	return qjsky_element_url_get(ctx, priv->parent.parent.parent.node, QJSKY_URL_ORIGIN);
+%}

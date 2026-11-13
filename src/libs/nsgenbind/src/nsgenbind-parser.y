@@ -211,6 +211,7 @@ add_method(struct genbind_node **genbind_ast,
 %token TOK_GETTER
 %token TOK_SETTER
 %token TOK_PROTOTYPE
+%token TOK_CONSTRUCTOR
 
 %token TOK_DBLCOLON
 
@@ -452,6 +453,11 @@ MethodType:
         TOK_PROTOTYPE
         {
                 $$ = GENBIND_METHOD_TYPE_PROTOTYPE;
+        }
+        |
+        TOK_CONSTRUCTOR
+        {
+                $$ = GENBIND_METHOD_TYPE_CONSTRUCTOR;
         }
         |
         BindingAndMethodType

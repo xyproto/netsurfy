@@ -586,6 +586,12 @@ static int attribute_map_new(struct webidl_node *interface,
 			cure->treatnullas = get_extended_value(at_node,
 							       "TreatNullAs");
 
+			cure->reflect_url =
+				webidl_node_find_type_ident(
+					webidl_node_getnode(at_node),
+					WEBIDL_NODE_TYPE_EXTENDED_ATTRIBUTE,
+					"URL") != NULL;
+
 			/* move to next attribute */
 			cure++;
 

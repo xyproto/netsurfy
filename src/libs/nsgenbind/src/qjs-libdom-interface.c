@@ -174,7 +174,7 @@ static int output_interface_inherit_init(struct opctx *outc,
 		inh_param_node = genbind_node_find_type(
 			genbind_node_getnode(inh_init_node),
 			inh_param_node,
-			GENBIND_NODE_TYPE_METHOD);
+			GENBIND_NODE_TYPE_PARAMETER);
 	}
 
 	outputf(outc, ");\n");
@@ -920,6 +920,27 @@ output_interface_prototype(struct opctx *outc, struct ir_entry *interfacee)
 	return 0;
 }
 
+static void
+output_interface_constructor(struct opctx *outc, struct ir_entry *interfacee)
+{
+	struct genbind_node *ctor_node;
+
+	ctor_node = genbind_node_find_method(interfacee->class,
+					     NULL,
+					     GENBIND_METHOD_TYPE_CONSTRUCTOR);
+	if (ctor_node == NULL) {
+		return;
+	}
+
+	outputf(outc,
+		"JSValue %s_%s___constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv)\n",
+		DLPFX,
+		interfacee->class_name);
+	outputf(outc, "{\n");
+	output_ccode(outc, ctor_node);
+	outputf(outc, "}\n\n");
+}
+
 int output_interface(struct ir *ir, struct ir_entry *interfacee)
 {
 	struct opctx *ifop;
@@ -963,6 +984,8 @@ int output_interface(struct ir *ir, struct ir_entry *interfacee)
 	output_interface_fini(ifop, interfacee, inherite);
 
 	output_interface_create(ifop, interfacee);
+
+	output_interface_constructor(ifop, interfacee);
 
 	output_interface_operations(ifop, interfacee);
 
@@ -1013,6 +1036,15 @@ int output_interface_declaration(struct opctx *outc,
 		DLPFX,
 		interfacee->class_name,
 		interfacee->class_name);
+
+	if (genbind_node_find_method(interfacee->class,
+				     NULL,
+				     GENBIND_METHOD_TYPE_CONSTRUCTOR) != NULL) {
+		outputf(outc,
+			"JSValue %s_%s___constructor(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv);\n",
+			DLPFX,
+			interfacee->class_name);
+	}
 
 	init_node = genbind_node_find_method(interfacee->class,
 					     NULL,

@@ -22,3 +22,44 @@ fini HTMLCollection()
 %{
 	dom_html_collection_unref(priv->coll);
 %}
+
+getter HTMLCollection::length()
+%{
+	uint32_t len = 0;
+
+	if (dom_html_collection_get_length(priv->coll, &len) != DOM_NO_ERR) return JS_ThrowOutOfMemory(ctx);
+	return JS_NewUint32(ctx, len);
+%}
+
+method HTMLCollection::item()
+%{
+	uint32_t index = 0;
+	dom_node *node = NULL;
+	JSValue ret;
+
+	if (argc > 0 && JS_ToUint32(ctx, &index, argv[0]) < 0) return JS_EXCEPTION;
+	if (dom_html_collection_item(priv->coll, index, &node) != DOM_NO_ERR || node == NULL) return JS_NULL;
+	ret = qjsky_node(ctx, node);
+	dom_node_unref(node);
+	return ret;
+%}
+
+method HTMLCollection::namedItem()
+%{
+	dom_string *name;
+	dom_node *node = NULL;
+	JSValue ret;
+
+	if (argc < 1) return JS_ThrowTypeError(ctx, "namedItem: 1 argument required");
+	name = qjsky_to_dom_string(ctx, argv[0]);
+	if (name == NULL) return JS_EXCEPTION;
+	if (dom_string_length(name) == 0 ||
+	    dom_html_collection_named_item(priv->coll, name, &node) != DOM_NO_ERR || node == NULL) {
+		dom_string_unref(name);
+		return JS_NULL;
+	}
+	dom_string_unref(name);
+	ret = qjsky_node(ctx, node);
+	dom_node_unref(node);
+	return ret;
+%}

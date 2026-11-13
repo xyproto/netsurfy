@@ -700,6 +700,32 @@ nserror html_object_close_objects(html_content *html)
 
 
 /* exported interface documented in html/object.h */
+nserror html_object_release_for_rebuild(html_content *html)
+{
+	struct content_html_object *object;
+
+	if (html->bw != NULL) {
+		html_object_close_objects(html);
+	}
+	for (object = html->object_list; object != NULL;
+	     object = object->next) {
+		content_status status;
+
+		if (object->content == NULL || object->box == NULL) {
+			continue;
+		}
+		status = content_get_status(object->content);
+		if (status != CONTENT_STATUS_DONE &&
+		    status != CONTENT_STATUS_ERROR && html->base.active > 0) {
+			html->base.active--;
+		}
+	}
+	html->num_objects = 0;
+	return html_object_free_objects(html);
+}
+
+
+/* exported interface documented in html/object.h */
 nserror html_object_free_objects(html_content *html)
 {
 	while (html->object_list != NULL) {

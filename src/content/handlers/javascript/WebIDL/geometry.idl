@@ -1,0 +1,107 @@
+// Geometry Interfaces Module Level 1 (subset)
+// https://drafts.fxtf.org/geometry/
+
+[Constructor(optional unrestricted double x, optional unrestricted double y, optional unrestricted double z, optional unrestricted double w), Exposed=(Window,Worker)]
+interface DOMPointReadOnly {
+  readonly attribute unrestricted double x;
+  readonly attribute unrestricted double y;
+  readonly attribute unrestricted double z;
+  readonly attribute unrestricted double w;
+  DOMPoint matrixTransform(optional any matrix);
+  object toJSON();
+};
+
+[Constructor(optional unrestricted double x, optional unrestricted double y, optional unrestricted double z, optional unrestricted double w), Exposed=(Window,Worker)]
+interface DOMPoint : DOMPointReadOnly {
+  attribute unrestricted double x;
+  attribute unrestricted double y;
+  attribute unrestricted double z;
+  attribute unrestricted double w;
+};
+
+[Constructor(optional unrestricted double x, optional unrestricted double y, optional unrestricted double width, optional unrestricted double height), Exposed=(Window,Worker)]
+interface DOMRectReadOnly {
+  readonly attribute unrestricted double x;
+  readonly attribute unrestricted double y;
+  readonly attribute unrestricted double width;
+  readonly attribute unrestricted double height;
+  readonly attribute unrestricted double top;
+  readonly attribute unrestricted double right;
+  readonly attribute unrestricted double bottom;
+  readonly attribute unrestricted double left;
+  object toJSON();
+};
+
+[Constructor(optional unrestricted double x, optional unrestricted double y, optional unrestricted double width, optional unrestricted double height), Exposed=(Window,Worker)]
+interface DOMRect : DOMRectReadOnly {
+  attribute unrestricted double x;
+  attribute unrestricted double y;
+  attribute unrestricted double width;
+  attribute unrestricted double height;
+};
+
+[Constructor(optional any init), Exposed=(Window,Worker)]
+interface DOMMatrixReadOnly {
+  readonly attribute unrestricted double a;
+  readonly attribute unrestricted double b;
+  readonly attribute unrestricted double c;
+  readonly attribute unrestricted double d;
+  readonly attribute unrestricted double e;
+  readonly attribute unrestricted double f;
+  readonly attribute unrestricted double m11;
+  readonly attribute unrestricted double m12;
+  readonly attribute unrestricted double m13;
+  readonly attribute unrestricted double m14;
+  readonly attribute unrestricted double m21;
+  readonly attribute unrestricted double m22;
+  readonly attribute unrestricted double m23;
+  readonly attribute unrestricted double m24;
+  readonly attribute unrestricted double m31;
+  readonly attribute unrestricted double m32;
+  readonly attribute unrestricted double m33;
+  readonly attribute unrestricted double m34;
+  readonly attribute unrestricted double m41;
+  readonly attribute unrestricted double m42;
+  readonly attribute unrestricted double m43;
+  readonly attribute unrestricted double m44;
+  readonly attribute boolean is2D;
+  readonly attribute boolean isIdentity;
+  DOMMatrix translate(optional unrestricted double tx, optional unrestricted double ty, optional unrestricted double tz);
+  DOMMatrix scale(optional unrestricted double scaleX, optional unrestricted double scaleY, optional unrestricted double scaleZ, optional unrestricted double originX, optional unrestricted double originY, optional unrestricted double originZ);
+  DOMMatrix multiply(optional any other);
+  DOMMatrix inverse();
+  DOMPoint transformPoint(optional any point);
+  object toJSON();
+  DOMString toString();
+};
+
+[Constructor(optional any init), Exposed=(Window,Worker)]
+interface DOMMatrix : DOMMatrixReadOnly {
+  attribute unrestricted double a;
+  attribute unrestricted double b;
+  attribute unrestricted double c;
+  attribute unrestricted double d;
+  attribute unrestricted double e;
+  attribute unrestricted double f;
+  attribute unrestricted double m11;
+  attribute unrestricted double m12;
+  attribute unrestricted double m13;
+  attribute unrestricted double m14;
+  attribute unrestricted double m21;
+  attribute unrestricted double m22;
+  attribute unrestricted double m23;
+  attribute unrestricted double m24;
+  attribute unrestricted double m31;
+  attribute unrestricted double m32;
+  attribute unrestricted double m33;
+  attribute unrestricted double m34;
+  attribute unrestricted double m41;
+  attribute unrestricted double m42;
+  attribute unrestricted double m43;
+  attribute unrestricted double m44;
+  DOMMatrix multiplySelf(optional any other);
+  DOMMatrix preMultiplySelf(optional any other);
+  DOMMatrix translateSelf(optional unrestricted double tx, optional unrestricted double ty, optional unrestricted double tz);
+  DOMMatrix scaleSelf(optional unrestricted double scaleX, optional unrestricted double scaleY, optional unrestricted double scaleZ, optional unrestricted double originX, optional unrestricted double originY, optional unrestricted double originZ);
+  DOMMatrix invertSelf();
+};

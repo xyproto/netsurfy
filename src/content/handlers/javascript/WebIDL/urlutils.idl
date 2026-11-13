@@ -5,8 +5,8 @@
 [Constructor(USVString url, optional USVString base),
  Exposed=(Window,Worker)]
 interface URL {
-  static USVString domainToASCII(USVString domain);
-  static USVString domainToUnicode(USVString domain);
+  USVString toJSON();
+  DOMString toString();
 };
 URL implements URLUtils;
 URL implements URLUtilsSearchParams;
@@ -31,7 +31,7 @@ interface URLUtils {
 [NoInterfaceObject,
  Exposed=(Window, Worker)]
 interface URLUtilsSearchParams {
-           attribute URLSearchParams searchParams;
+  [SameObject] readonly attribute URLSearchParams searchParams;
 };
 
 [NoInterfaceObject,
@@ -49,17 +49,18 @@ interface URLUtilsReadOnly {
   readonly attribute USVString hash;
 };
 
-[Constructor(optional (USVString or URLSearchParams) init = ""),
+[Constructor(optional any init),
  Exposed=(Window,Worker)]
 interface URLSearchParams {
+  readonly attribute unsigned long size;
   void append(USVString name, USVString value);
-  void delete(USVString name);
+  void delete(USVString name, optional USVString value);
   USVString? get(USVString name);
   sequence<USVString> getAll(USVString name);
-  boolean has(USVString name);
+  boolean has(USVString name, optional USVString value);
   void set(USVString name, USVString value);
-  iterable<USVString, USVString>;
-  stringifier;
+  void sort();
+  DOMString toString();
 };
 
 

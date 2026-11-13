@@ -253,6 +253,9 @@ if(NETSURFY_USE_QUICKJS)
   set(NETSURFY_JAVASCRIPT_SOURCES
     content/handlers/javascript/content.c
     content/handlers/javascript/quickjs/qjsky.c
+    content/handlers/javascript/quickjs/geometry.c
+    content/handlers/javascript/quickjs/mutation.c
+    content/handlers/javascript/quickjs/urlutils.c
     content/handlers/javascript/fetcher.c
     ${QUICKJS_GEN}/prelude.js.inc
     ${nsgenbind_sources})

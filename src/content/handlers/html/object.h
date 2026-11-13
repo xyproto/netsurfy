@@ -60,6 +60,8 @@ bool html_fetch_object(struct html_content *c,
  */
 nserror html_object_free_objects(struct html_content *html);
 
+nserror html_object_release_for_rebuild(struct html_content *html);
+
 /**
  * close content of content objects associated with a HTML content
  *

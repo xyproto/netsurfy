@@ -118,10 +118,6 @@ interface CSSStyleDeclaration  {
   [TreatNullAs=EmptyString] attribute DOMString cssFloat;
 };
 
-partial interface CSSStyleDeclaration {
-  [TreatNullAs=EmptyString] attribute DOMString _dashed_attribute ;
-};
-
 [NoInterfaceObject]interface ElementCSSInlineStyle  {
   [SameObject, PutForwards=cssText] readonly attribute CSSStyleDeclaration style;
 };

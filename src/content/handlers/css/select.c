@@ -19,6 +19,8 @@
 #include <assert.h>
 #include <string.h>
 #include <strings.h>
+#include <dom/dom.h>
+#include <dom/walk.h>
 
 #include "utils/nsoption.h"
 #include "utils/corestrings.h"
@@ -1834,4 +1836,49 @@ css_error get_libcss_node_data(void *pw, void *node, void **libcss_node_data)
 	}
 
 	return CSS_OK;
+}
+
+static enum dom_walk_cmd
+nscss_clear_node_data_cb(enum dom_walk_stage stage,
+			 dom_node_type type,
+			 dom_node *node,
+			 void *ctx)
+{
+	void *data = NULL;
+	void *old = NULL;
+
+	if (stage != DOM_WALK_STAGE_ENTER || type != DOM_ELEMENT_NODE) {
+		return DOM_WALK_CMD_CONTINUE;
+	}
+	if (dom_node_get_user_data(node,
+				   corestring_dom___ns_key_libcss_node_data,
+				   &data) != DOM_NO_ERR ||
+	    data == NULL) {
+		return DOM_WALK_CMD_CONTINUE;
+	}
+	(void)css_libcss_node_data_handler(&selection_handler,
+					   CSS_NODE_DELETED,
+					   NULL,
+					   node,
+					   NULL,
+					   data);
+	(void)dom_node_set_user_data(node,
+				     corestring_dom___ns_key_libcss_node_data,
+				     NULL,
+				     NULL,
+				     &old);
+	return DOM_WALK_CMD_CONTINUE;
+}
+
+/* exported function documented in css/select.h */
+void nscss_clear_node_data(dom_node *root)
+{
+	nscss_clear_node_data_cb(DOM_WALK_STAGE_ENTER,
+				 DOM_ELEMENT_NODE,
+				 root,
+				 NULL);
+	(void)libdom_treewalk(DOM_WALK_ENABLE_ENTER,
+			      nscss_clear_node_data_cb,
+			      root,
+			      NULL);
 }

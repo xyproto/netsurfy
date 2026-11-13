@@ -55,6 +55,7 @@ enum genbind_method_type {
 	GENBIND_METHOD_TYPE_PROLOGUE, /**< method is a prologue */
 	GENBIND_METHOD_TYPE_EPILOGUE, /**< method is a epilogue */
 	GENBIND_METHOD_TYPE_POSTFACE, /**< method is a postface */
+	GENBIND_METHOD_TYPE_CONSTRUCTOR, /**< method is a constructor */
 };
 
 struct genbind_node;

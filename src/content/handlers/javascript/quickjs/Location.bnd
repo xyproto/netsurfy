@@ -16,46 +16,7 @@ class Location {
 prologue Location()
 %{
 #include "netsurfy/browser_window.h"
-
-static JSValue location_affixed(JSContext *ctx, nsurl *url, nsurl_component part, const char *prefix, const char *suffix)
-{
-	char *url_s = NULL;
-	size_t url_l = 0;
-	size_t pre_l = strlen(prefix), suf_l = strlen(suffix);
-	char *buf;
-	JSValue ret;
-
-	if (nsurl_get(url, part, &url_s, &url_l) != NSERROR_OK || url_s == NULL || url_l == 0) {
-		free(url_s);
-		return JS_NewString(ctx, "");
-	}
-	buf = malloc(pre_l + url_l + suf_l);
-	if (buf == NULL) {
-		free(url_s);
-		return JS_ThrowOutOfMemory(ctx);
-	}
-	memcpy(buf, prefix, pre_l);
-	memcpy(buf + pre_l, url_s, url_l);
-	memcpy(buf + pre_l + url_l, suffix, suf_l);
-	ret = JS_NewStringLen(ctx, buf, pre_l + url_l + suf_l);
-	free(buf);
-	free(url_s);
-	return ret;
-}
-
-static JSValue location_part(JSContext *ctx, nsurl *url, nsurl_component parts)
-{
-	char *url_s = NULL;
-	size_t url_l = 0;
-	JSValue ret;
-
-	if (nsurl_get(url, parts, &url_s, &url_l) != NSERROR_OK || url_s == NULL) {
-		return JS_NewString(ctx, "");
-	}
-	ret = JS_NewStringLen(ctx, url_s, url_l);
-	free(url_s);
-	return ret;
-}
+#include "javascript/quickjs/urlutils.h"
 
 static JSValue location_navigate(JSContext *ctx, nsurl *base, JSValueConst target, enum browser_window_nav_flags flags)
 {
@@ -127,55 +88,55 @@ setter Location::href()
 
 getter Location::href()
 %{
-	return location_part(ctx, priv->url, NSURL_COMPLETE);
+	return qjsky_url_get(ctx, priv->url, QJSKY_URL_HREF);
 %}
 
 getter Location::origin()
 %{
-	return location_part(ctx, priv->url, NSURL_SCHEME | NSURL_HOST | NSURL_PORT);
+	return qjsky_url_get(ctx, priv->url, QJSKY_URL_ORIGIN);
 %}
 
 getter Location::protocol()
 %{
-	return location_affixed(ctx, priv->url, NSURL_SCHEME, "", ":");
+	return qjsky_url_get(ctx, priv->url, QJSKY_URL_PROTOCOL);
 %}
 
 getter Location::username()
 %{
-	return location_part(ctx, priv->url, NSURL_USERNAME);
+	return qjsky_url_get(ctx, priv->url, QJSKY_URL_USERNAME);
 %}
 
 getter Location::password()
 %{
-	return location_part(ctx, priv->url, NSURL_PASSWORD);
+	return qjsky_url_get(ctx, priv->url, QJSKY_URL_PASSWORD);
 %}
 
 getter Location::host()
 %{
-	return location_part(ctx, priv->url, NSURL_HOST | NSURL_PORT);
+	return qjsky_url_get(ctx, priv->url, QJSKY_URL_HOST);
 %}
 
 getter Location::hostname()
 %{
-	return location_part(ctx, priv->url, NSURL_HOST);
+	return qjsky_url_get(ctx, priv->url, QJSKY_URL_HOSTNAME);
 %}
 
 getter Location::port()
 %{
-	return location_part(ctx, priv->url, NSURL_PORT);
+	return qjsky_url_get(ctx, priv->url, QJSKY_URL_PORT);
 %}
 
 getter Location::pathname()
 %{
-	return location_part(ctx, priv->url, NSURL_PATH);
+	return qjsky_url_get(ctx, priv->url, QJSKY_URL_PATHNAME);
 %}
 
 getter Location::search()
 %{
-	return location_affixed(ctx, priv->url, NSURL_QUERY, "?", "");
+	return qjsky_url_get(ctx, priv->url, QJSKY_URL_SEARCH);
 %}
 
 getter Location::hash()
 %{
-	return location_affixed(ctx, priv->url, NSURL_FRAGMENT, "#", "");
+	return qjsky_url_get(ctx, priv->url, QJSKY_URL_HASH);
 %}

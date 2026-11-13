@@ -153,5 +153,5 @@ setter HTMLElement::onwheel();
 
 getter HTMLElement::style()
 %{
-	return qjsky_css_style_declaration___create(ctx);
+	return qjsky_element_style(ctx, this_val, (struct dom_element *)priv->parent.parent.node);
 %}

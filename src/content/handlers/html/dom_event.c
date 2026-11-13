@@ -717,6 +717,7 @@ dom_default_action_DOMNodeInserted_cb(struct dom_event *evt, void *pw)
 			}
 		}
 	}
+	html_schedule_rebuild(htmlc);
 	dom_node_unref(node);
 }
 
@@ -734,6 +735,7 @@ dom_default_action_DOMSubtreeModified_cb(struct dom_event *evt, void *pw)
 
 	exc = dom_event_get_target(evt, &node);
 	if ((exc == DOM_NO_ERR) && (node != NULL)) {
+		html_schedule_rebuild(htmlc);
 		if (htmlc->title == (dom_node *)node) {
 			/* Node is our title node */
 			html_process_title(htmlc, (dom_node *)node);

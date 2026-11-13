@@ -1,0 +1,49 @@
+/* UIEvent binding for browser using QuickJS and libdom
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+init UIEvent(struct dom_ui_event *evt::evt);
+
+constructor UIEvent ()
+%{
+	dom_event *evt;
+	dom_string *type;
+	bool bubbles = false, cancelable = false;
+	int32_t detail = 0;
+	JSValue dict = argc > 1 ? argv[1] : JS_UNDEFINED;
+	JSValue obj;
+
+	if (argc < 1) return JS_ThrowTypeError(ctx, "Failed to construct 'UIEvent': 1 argument required");
+	if (qjsky_dict_bool(ctx, dict, "bubbles", &bubbles) < 0 ||
+	    qjsky_dict_bool(ctx, dict, "cancelable", &cancelable) < 0 ||
+	    qjsky_dict_int(ctx, dict, "detail", &detail) < 0) return JS_EXCEPTION;
+	type = qjsky_to_dom_string(ctx, argv[0]);
+	if (type == NULL) return JS_EXCEPTION;
+	obj = qjsky_create_event(ctx, "UIEvent", &evt);
+	if (evt == NULL) {
+		dom_string_unref(type);
+		return obj;
+	}
+	(void)dom_ui_event_init(evt, type, bubbles, cancelable, NULL, detail);
+	dom_string_unref(type);
+	obj = qjsky_event(ctx, evt);
+	dom_event_unref(evt);
+	return qjsky_constructed(ctx, obj, new_target);
+%}
+
+getter UIEvent::detail ()
+%{
+	int32_t detail = 0;
+
+	if (dom_ui_event_get_detail(priv->parent.evt, &detail) != DOM_NO_ERR) return JS_UNDEFINED;
+	return JS_NewInt32(ctx, detail);
+%}
+
+getter UIEvent::view ()
+%{
+	return JS_GetGlobalObject(ctx);
+%}

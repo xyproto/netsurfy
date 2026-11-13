@@ -1402,8 +1402,8 @@ static nserror mouse_action_drag_none(html_content *html,
 
 	/* fire dom click event */
 	if (mouse & BROWSER_MOUSE_CLICK_1) {
-		fire_generic_dom_event(
-			corestring_dom_click, mas.node, true, true);
+		fire_dom_mouse_event(
+			corestring_dom_click, mas.node, bw, x, y, 0);
 	}
 
 	/* deferred actions that can cause this browser_window to be destroyed

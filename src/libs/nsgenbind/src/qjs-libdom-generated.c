@@ -100,13 +100,19 @@ int output_generated_attribute_getter(struct opctx *outc,
 			"\t}\n"
 			"\tif (str == NULL) {\n"
 			"\t\treturn %s;\n"
-			"\t}\n"
-			"\tret = JS_NewStringLen(ctx, dom_string_data(str), dom_string_length(str));\n"
-			"\tdom_string_unref(str);\n"
-			"\treturn ret;\n",
+			"\t}\n",
 			atributee->typev[0].nullable
 				? "JS_NULL"
 				: "JS_NewString(ctx, \"\")");
+		if (atributee->reflect_url) {
+			outputf(outc, "\tret = qjsky_reflected_url(ctx, str);\n");
+		} else {
+			outputf(outc,
+				"\tret = JS_NewStringLen(ctx, dom_string_data(str), dom_string_length(str));\n");
+		}
+		outputf(outc,
+			"\tdom_string_unref(str);\n"
+			"\treturn ret;\n");
 		break;
 
 	case WEBIDL_TYPE_LONG:

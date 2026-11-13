@@ -19,9 +19,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -38,6 +40,13 @@
 #include "content/fetch.h"
 #include "utils/nsurl.h"
 #include "html/private.h"
+#include "html/box.h"
+#include "html/box_construct.h"
+#include "html/box_inspect.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/window.h"
+#include "desktop/browser_private.h"
+#include "desktop/gui_internal.h"
 
 #include "javascript/js.h"
 #include "javascript/content.h"
@@ -47,6 +56,9 @@
 #include "quickjs/prototype.h"
 #include "quickjs/prelude.js.inc"
 
+#include "javascript/quickjs/geometry.h"
+#include "javascript/quickjs/mutation.h"
+#include "javascript/quickjs/urlutils.h"
 #include "qjsky.h"
 
 #include <dom/dom.h>
@@ -104,6 +116,7 @@ struct jsthread {
 	struct qjsky_fetch *fetches;
 	uint32_t next_fetch_id;
 	int ready_state;
+	struct qjsky_observer *observers;
 };
 
 static JSClassID qjsky_class_id;
@@ -123,6 +136,11 @@ static const char *const qjsky_hidden_names[QJSKY_HIDDEN__COUNT] = {
 	[QJSKY_HIDDEN_LOCATION] = "location",
 	[QJSKY_HIDDEN_NAVIGATOR] = "navigator",
 	[QJSKY_HIDDEN_CONTEXT2D] = "context2d",
+	[QJSKY_HIDDEN_DETAIL] = "detail",
+	[QJSKY_HIDDEN_STYLE] = "style",
+	[QJSKY_HIDDEN_ADDED_NODES] = "added nodes",
+	[QJSKY_HIDDEN_REMOVED_NODES] = "removed nodes",
+	[QJSKY_HIDDEN_SEARCH_PARAMS] = "search params",
 };
 
 static size_t qjsky_map_hash(void *key, size_t cap)
@@ -722,6 +740,48 @@ static int qjsky_node_iface_html(dom_html_element_type type)
 	}
 }
 
+static int qjsky_svg_iface(struct dom_node *node)
+{
+	static const char *const graphics[] = {
+		"g",
+		"path",
+		"rect",
+		"circle",
+		"ellipse",
+		"line",
+		"polyline",
+		"polygon",
+		"text",
+		"tspan",
+		"image",
+		"use",
+		"switch",
+		"a",
+		"foreignObject",
+	};
+	dom_string *name = NULL;
+	int iface = QJSKY_IFACE_SVGELEMENT;
+
+	if (dom_node_get_local_name(node, &name) != DOM_NO_ERR ||
+	    name == NULL) {
+		return iface;
+	}
+	if (strcasecmp(dom_string_data(name), "svg") == 0) {
+		iface = QJSKY_IFACE_SVGSVGELEMENT;
+	} else {
+		for (size_t i = 0; i < sizeof(graphics) / sizeof(graphics[0]);
+		     i++) {
+			if (strcasecmp(dom_string_data(name), graphics[i]) ==
+			    0) {
+				iface = QJSKY_IFACE_SVGGRAPHICSELEMENT;
+				break;
+			}
+		}
+	}
+	dom_string_unref(name);
+	return iface;
+}
+
 static int qjsky_node_iface(struct dom_node *node)
 {
 	dom_node_type nodetype;
@@ -740,6 +800,12 @@ static int qjsky_node_iface(struct dom_node *node)
 		}
 		is_html = dom_string_isequal(namespace,
 					     corestring_dom_html_namespace);
+		if (!is_html &&
+		    dom_string_isequal(namespace,
+				       dom_namespaces[DOM_NAMESPACE_SVG])) {
+			dom_string_unref(namespace);
+			return qjsky_svg_iface(node);
+		}
 		dom_string_unref(namespace);
 		if (!is_html) {
 			return QJSKY_IFACE_ELEMENT;
@@ -812,8 +878,16 @@ static int qjsky_event_iface(dom_event *evt)
 		return QJSKY_IFACE_EVENT;
 	}
 	switch (kind) {
+	case DOM_EVENT_KIND_UI:
+		return QJSKY_IFACE_UIEVENT;
+	case DOM_EVENT_KIND_CUSTOM:
+		return QJSKY_IFACE_CUSTOMEVENT;
 	case DOM_EVENT_KIND_KEYBOARD:
 		return QJSKY_IFACE_KEYBOARDEVENT;
+	case DOM_EVENT_KIND_MOUSE:
+	case DOM_EVENT_KIND_MOUSE_WHEEL:
+	case DOM_EVENT_KIND_MOUSE_MULTI_WHEEL:
+		return QJSKY_IFACE_MOUSEEVENT;
 	case DOM_EVENT_KIND_MUTATION:
 	case DOM_EVENT_KIND_MUTATION_NAME:
 		return QJSKY_IFACE_MUTATIONEVENT;
@@ -843,6 +917,126 @@ JSValue qjsky_event(JSContext *ctx, struct dom_event *evt)
 		return JS_ThrowOutOfMemory(ctx);
 	}
 	return obj;
+}
+
+void qjsky_event_bind(JSContext *ctx, struct dom_event *evt, JSValueConst obj)
+{
+	jsthread *thread = qjsky_thread(ctx);
+	JSValue old = qjsky_map_take(&thread->events, evt);
+
+	JSValue dup = JS_DupValue(ctx, obj);
+
+	JS_FreeValue(ctx, old);
+	if (!qjsky_map_put(&thread->events, evt, dup)) {
+		JS_FreeValue(ctx, dup);
+	}
+}
+
+JSValue qjsky_create_event(JSContext *ctx,
+			   const char *type_name,
+			   struct dom_event **evt)
+{
+	jsthread *thread = qjsky_thread(ctx);
+	dom_string *type = NULL;
+	dom_exception exc;
+
+	*evt = NULL;
+	if (thread->window_priv == NULL || thread->window_priv->htmlc == NULL ||
+	    thread->window_priv->htmlc->document == NULL) {
+		return JS_ThrowTypeError(ctx,
+					 "no document to create events in");
+	}
+	exc = dom_string_create((const uint8_t *)type_name,
+				strlen(type_name),
+				&type);
+	if (exc != DOM_NO_ERR) {
+		return JS_ThrowOutOfMemory(ctx);
+	}
+	exc = dom_document_event_create_event(
+		thread->window_priv->htmlc->document, type, evt);
+	dom_string_unref(type);
+	if (exc != DOM_NO_ERR || *evt == NULL) {
+		*evt = NULL;
+		return JS_ThrowOutOfMemory(ctx);
+	}
+	(void)dom_event_set_is_trusted(*evt, false);
+	return JS_UNDEFINED;
+}
+
+static int qjsky_dict_get(JSContext *ctx,
+			  JSValueConst dict,
+			  const char *name,
+			  JSValue *out)
+{
+	*out = JS_UNDEFINED;
+	if (JS_IsUndefined(dict) || JS_IsNull(dict)) {
+		return 0;
+	}
+	if (!JS_IsObject(dict)) {
+		JS_ThrowTypeError(ctx,
+				  "the event init dictionary is not an object");
+		return -1;
+	}
+	*out = JS_GetPropertyStr(ctx, dict, name);
+	return JS_IsException(*out) ? -1 : 0;
+}
+
+int qjsky_dict_bool(JSContext *ctx,
+		    JSValueConst dict,
+		    const char *name,
+		    bool *out)
+{
+	JSValue v;
+	int b;
+
+	if (qjsky_dict_get(ctx, dict, name, &v) < 0) {
+		return -1;
+	}
+	if (!JS_IsUndefined(v)) {
+		b = JS_ToBool(ctx, v);
+		JS_FreeValue(ctx, v);
+		if (b < 0) {
+			return -1;
+		}
+		*out = b != 0;
+	}
+	return 0;
+}
+
+int qjsky_dict_int(JSContext *ctx,
+		   JSValueConst dict,
+		   const char *name,
+		   int32_t *out)
+{
+	JSValue v;
+	int r = 0;
+
+	if (qjsky_dict_get(ctx, dict, name, &v) < 0) {
+		return -1;
+	}
+	if (!JS_IsUndefined(v)) {
+		r = JS_ToInt32(ctx, out, v);
+		JS_FreeValue(ctx, v);
+	}
+	return r;
+}
+
+dom_string *
+qjsky_dict_string(JSContext *ctx, JSValueConst dict, const char *name)
+{
+	JSValue v;
+	dom_string *ret = NULL;
+
+	if (qjsky_dict_get(ctx, dict, name, &v) < 0) {
+		return NULL;
+	}
+	if (JS_IsUndefined(v)) {
+		dom_string_create((const uint8_t *)"", 0, &ret);
+	} else {
+		ret = qjsky_to_dom_string(ctx, v);
+	}
+	JS_FreeValue(ctx, v);
+	return ret;
 }
 
 static JSValue
@@ -1244,6 +1438,333 @@ static JSValue qjsky_illegal_constructor(JSContext *ctx,
 	return JS_ThrowTypeError(ctx, "Illegal constructor");
 }
 
+bool qjsky_node_boxes(struct dom_node *node,
+		      double border[4],
+		      double content[4])
+{
+	struct box *box;
+	int x, y;
+
+	if (node == NULL || (box = box_for_node(node)) == NULL) {
+		return false;
+	}
+	box_coords(box, &x, &y);
+	border[0] = x - box->border[LEFT].width;
+	border[1] = y - box->border[TOP].width;
+	border[2] = box->border[LEFT].width + box->padding[LEFT] + box->width +
+		    box->padding[RIGHT] + box->border[RIGHT].width;
+	border[3] = box->border[TOP].width + box->padding[TOP] + box->height +
+		    box->padding[BOTTOM] + box->border[BOTTOM].width;
+	content[0] = x + box->padding[LEFT];
+	content[1] = y + box->padding[TOP];
+	content[2] = box->width;
+	content[3] = box->height;
+	return true;
+}
+
+void qjsky_viewport_scroll(JSContext *ctx, double *sx, double *sy)
+{
+	window_private_t *priv = qjsky_thread(ctx)->window_priv;
+	int x = 0, y = 0;
+	float scale;
+
+	*sx = *sy = 0;
+	if (priv == NULL || priv->closed_down || priv->win == NULL ||
+	    priv->win->window == NULL || guit->window->get_scroll == NULL ||
+	    !guit->window->get_scroll(priv->win->window, &x, &y)) {
+		return;
+	}
+	scale = browser_window_get_scale(priv->win);
+	if (scale <= 0) {
+		scale = 1;
+	}
+	*sx = x / scale;
+	*sy = y / scale;
+}
+
+JSValue qjsky_element_style(JSContext *ctx,
+			    JSValueConst obj,
+			    struct dom_element *element)
+{
+	JSValue style = qjsky_hidden_get(ctx, obj, QJSKY_HIDDEN_STYLE, false);
+
+	if (!JS_IsUndefined(style)) {
+		return style;
+	}
+	style = qjsky_css_style_declaration___create(ctx, element);
+	if (JS_IsException(style)) {
+		return style;
+	}
+	if (qjsky_hidden_set(
+		    ctx, obj, QJSKY_HIDDEN_STYLE, JS_DupValue(ctx, style)) <
+	    0) {
+		JS_FreeValue(ctx, style);
+		return JS_EXCEPTION;
+	}
+	return style;
+}
+
+static bool qjsky_is_svg(dom_node *node, const char *local)
+{
+	dom_node_type type;
+	dom_string *ns = NULL, *name = NULL;
+	bool ok = false;
+
+	if (dom_node_get_node_type(node, &type) != DOM_NO_ERR ||
+	    type != DOM_ELEMENT_NODE) {
+		return false;
+	}
+	if (dom_node_get_namespace(node, &ns) == DOM_NO_ERR && ns != NULL) {
+		ok = dom_string_isequal(ns, dom_namespaces[DOM_NAMESPACE_SVG]);
+		dom_string_unref(ns);
+	}
+	if (ok && local != NULL) {
+		ok = dom_node_get_local_name(node, &name) == DOM_NO_ERR &&
+		     name != NULL &&
+		     strcasecmp(dom_string_data(name), local) == 0;
+		if (name != NULL) {
+			dom_string_unref(name);
+		}
+	}
+	return ok;
+}
+
+dom_node *qjsky_svg_root(dom_node *node, bool include_self)
+{
+	dom_node *n = include_self ? dom_node_ref(node) : NULL;
+
+	if (n == NULL && dom_node_get_parent_node(node, &n) != DOM_NO_ERR) {
+		return NULL;
+	}
+	while (n != NULL) {
+		dom_node *parent = NULL;
+		if (qjsky_is_svg(n, "svg")) {
+			return n;
+		}
+		if (dom_node_get_parent_node(n, &parent) != DOM_NO_ERR) {
+			parent = NULL;
+		}
+		dom_node_unref(n);
+		n = parent;
+	}
+	return NULL;
+}
+
+static bool qjsky_svg_view_box(dom_node *svg, double vb[4])
+{
+	static const char *const names[2] = {"viewBox", "viewbox"};
+	bool ok = false;
+
+	for (int i = 0; i < 2 && !ok; i++) {
+		dom_string *name = NULL, *value = NULL;
+		if (dom_string_create((const uint8_t *)names[i],
+				      strlen(names[i]),
+				      &name) != DOM_NO_ERR) {
+			return false;
+		}
+		if (dom_element_get_attribute(svg, name, &value) ==
+			    DOM_NO_ERR &&
+		    value != NULL) {
+			ok = sscanf(dom_string_data(value),
+				    "%lf%*[ ,]%lf%*[ ,]%lf%*[ ,]%lf",
+				    &vb[0],
+				    &vb[1],
+				    &vb[2],
+				    &vb[3]) == 4 &&
+			     vb[2] > 0 && vb[3] > 0;
+			dom_string_unref(value);
+		}
+		dom_string_unref(name);
+	}
+	return ok;
+}
+
+bool qjsky_svg_ctm(JSContext *ctx,
+		   dom_node *node,
+		   bool screen,
+		   qjsky_matrix *out)
+{
+	dom_node *svg = qjsky_svg_root(node, true);
+	double border[4], content[4], vb[4], sx = 0, sy = 0, left = 0, top = 0;
+	bool ok;
+
+	if (svg == NULL) {
+		return false;
+	}
+	ok = qjsky_node_boxes(svg, border, content);
+	if (!ok) {
+		dom_node_unref(svg);
+		return false;
+	}
+	if (screen) {
+		qjsky_viewport_scroll(ctx, &sx, &sy);
+		left = content[0] - sx;
+		top = content[1] - sy;
+	}
+	qjsky_matrix_identity(out);
+	if (qjsky_svg_view_box(svg, vb)) {
+		double scale = fmin(content[2] / vb[2], content[3] / vb[3]);
+		*qjsky_matrix_entry(out, 1, 1) = scale;
+		*qjsky_matrix_entry(out, 2, 2) = scale;
+		*qjsky_matrix_entry(out, 4, 1) = left +
+						 (content[2] - vb[2] * scale) /
+							 2 -
+						 vb[0] * scale;
+		*qjsky_matrix_entry(out, 4, 2) = top +
+						 (content[3] - vb[3] * scale) /
+							 2 -
+						 vb[1] * scale;
+	} else {
+		*qjsky_matrix_entry(out, 4, 1) = left;
+		*qjsky_matrix_entry(out, 4, 2) = top;
+	}
+	dom_node_unref(svg);
+	return true;
+}
+
+static nsurl *qjsky_document_url(jsthread *thread);
+
+JSValue qjsky_reflected_url(JSContext *ctx, dom_string *value)
+{
+	nsurl *base = qjsky_document_url(qjsky_thread(ctx));
+	nsurl *joined = NULL;
+	JSValue ret;
+
+	if (base == NULL ||
+	    nsurl_join(base, dom_string_data(value), &joined) != NSERROR_OK) {
+		return JS_NewStringLen(ctx,
+				       dom_string_data(value),
+				       dom_string_byte_length(value));
+	}
+	ret = JS_NewString(ctx, nsurl_access(joined));
+	nsurl_unref(joined);
+	return ret;
+}
+
+static nsurl *qjsky_element_url(JSContext *ctx, dom_node *element)
+{
+	nsurl *base = qjsky_document_url(qjsky_thread(ctx));
+	dom_string *href = NULL;
+	nsurl *url = NULL;
+
+	if (dom_element_get_attribute(element, corestring_dom_href, &href) !=
+		    DOM_NO_ERR ||
+	    href == NULL) {
+		return NULL;
+	}
+	if (base != NULL) {
+		(void)nsurl_join(base, dom_string_data(href), &url);
+	} else {
+		(void)nsurl_create(dom_string_data(href), &url);
+	}
+	dom_string_unref(href);
+	return url;
+}
+
+JSValue qjsky_element_url_get(JSContext *ctx, dom_node *element, int part)
+{
+	nsurl *url = qjsky_element_url(ctx, element);
+	JSValue ret;
+
+	if (url == NULL) {
+		return JS_NewString(ctx, "");
+	}
+	ret = qjsky_url_get(ctx, url, (enum qjsky_url_part)part);
+	nsurl_unref(url);
+	return ret;
+}
+
+JSValue qjsky_element_url_set(JSContext *ctx,
+			      dom_node *element,
+			      int part,
+			      JSValueConst value)
+{
+	const char *v = JS_ToCString(ctx, value);
+	nsurl *url, *updated = NULL;
+	dom_string *ds = NULL;
+
+	if (v == NULL) {
+		return JS_EXCEPTION;
+	}
+	if (part == QJSKY_URL_HREF) {
+		if (dom_string_create((const uint8_t *)v, strlen(v), &ds) ==
+		    DOM_NO_ERR) {
+			(void)dom_element_set_attribute(element,
+							corestring_dom_href,
+							ds);
+			dom_string_unref(ds);
+		}
+		JS_FreeCString(ctx, v);
+		return JS_UNDEFINED;
+	}
+	url = qjsky_element_url(ctx, element);
+	if (url != NULL &&
+	    qjsky_url_set(url, (enum qjsky_url_part)part, v, &updated) ==
+		    NSERROR_OK) {
+		const char *text = nsurl_access(updated);
+		if (dom_string_create((const uint8_t *)text,
+				      strlen(text),
+				      &ds) == DOM_NO_ERR) {
+			(void)dom_element_set_attribute(element,
+							corestring_dom_href,
+							ds);
+			dom_string_unref(ds);
+		}
+		nsurl_unref(updated);
+	}
+	if (url != NULL) {
+		nsurl_unref(url);
+	}
+	JS_FreeCString(ctx, v);
+	return JS_UNDEFINED;
+}
+
+JSAtom qjsky_symbol_iterator(JSContext *ctx)
+{
+	JSValue global = JS_GetGlobalObject(ctx);
+	JSValue symbol = JS_GetPropertyStr(ctx, global, "Symbol");
+	JSValue iterator = JS_GetPropertyStr(ctx, symbol, "iterator");
+	JSAtom atom = JS_ValueToAtom(ctx, iterator);
+
+	JS_FreeValue(ctx, iterator);
+	JS_FreeValue(ctx, symbol);
+	JS_FreeValue(ctx, global);
+	return atom;
+}
+
+struct qjsky_observer **qjsky_observers(JSContext *ctx)
+{
+	return &qjsky_thread(ctx)->observers;
+}
+
+JSValue qjsky_constructed(JSContext *ctx, JSValue obj, JSValueConst new_target)
+{
+	JSValue proto;
+
+	if (JS_IsException(obj) || !JS_IsObject(new_target)) {
+		return obj;
+	}
+	proto = JS_GetPropertyStr(ctx, new_target, "prototype");
+	if (JS_IsException(proto)) {
+		JS_FreeValue(ctx, obj);
+		return proto;
+	}
+	if (JS_IsObject(proto)) {
+		JSValue current = JS_GetPrototype(ctx, obj);
+		bool same = JS_IsObject(current) &&
+			    JS_VALUE_GET_PTR(current) ==
+				    JS_VALUE_GET_PTR(proto);
+		JS_FreeValue(ctx, current);
+		if (!same && JS_SetPrototype(ctx, obj, proto) < 0) {
+			JS_FreeValue(ctx, proto);
+			JS_FreeValue(ctx, obj);
+			return JS_EXCEPTION;
+		}
+	}
+	JS_FreeValue(ctx, proto);
+	return obj;
+}
+
 static const int qjsky_unexposed[] = {
 	QJSKY_IFACE_MESSAGECHANNEL,
 	QJSKY_IFACE_MESSAGEPORT,
@@ -1299,12 +1820,21 @@ static int qjsky_create_proto(JSContext *ctx,
 		thread->protos[iface] = JS_UNDEFINED;
 		return -1;
 	}
-	ctors[iface] = JS_NewCFunction2(ctx,
-					qjsky_illegal_constructor,
-					qjsky_iface_name[iface],
-					0,
-					JS_CFUNC_constructor_or_func,
-					0);
+	if (qjsky_iface_ctor[iface] != NULL) {
+		ctors[iface] = JS_NewCFunction2(ctx,
+						qjsky_iface_ctor[iface],
+						qjsky_iface_name[iface],
+						0,
+						JS_CFUNC_constructor,
+						0);
+	} else {
+		ctors[iface] = JS_NewCFunction2(ctx,
+						qjsky_illegal_constructor,
+						qjsky_iface_name[iface],
+						0,
+						JS_CFUNC_constructor_or_func,
+						0);
+	}
 	if (JS_IsException(ctors[iface])) {
 		ctors[iface] = JS_UNDEFINED;
 		return -1;
@@ -2254,6 +2784,7 @@ static void qjsky_destroythread(jsthread *thread)
 	if (ctx != NULL) {
 		qjsky_window_closedown(ctx, thread->window_priv);
 		qjsky_fetch_abort_all(thread);
+		qjsky_observer_release_all(ctx);
 		qjsky_map_clear(ctx, &thread->nodes);
 		qjsky_map_clear(ctx, &thread->events);
 		for (int i = 0; i < QJSKY_IFACE__COUNT; i++) {
@@ -2428,6 +2959,9 @@ nserror js_closethread(jsthread *thread)
 	      thread->heap);
 	qjsky_window_closedown(thread->ctx, thread->window_priv);
 	qjsky_fetch_abort_all(thread);
+	if (thread->ctx != NULL) {
+		qjsky_observer_release_all(thread->ctx);
+	}
 	return NSERROR_OK;
 }
 

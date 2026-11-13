@@ -280,6 +280,10 @@ bool box_textarea_create_textarea(html_content *html,
 	       gadget->type == GADGET_TEXTBOX ||
 	       gadget->type == GADGET_PASSWORD);
 
+	if (gadget->data.text.ta != NULL) {
+		return true;
+	}
+
 	if (gadget->type == GADGET_TEXTAREA) {
 		dom_html_text_area_element *textarea =
 			(dom_html_text_area_element *)node;

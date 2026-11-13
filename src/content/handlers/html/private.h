@@ -206,6 +206,9 @@ typedef struct html_content {
 	/** Whether the autofocus box has already been given the focus */
 	bool autofocus_done;
 
+	bool rebuild_pending;
+	uint64_t rebuild_ms;
+
 	/** HTML content's own text selection object */
 	struct selection *sel;
 
@@ -366,6 +369,15 @@ bool fire_dom_keyboard_event(dom_string *type,
 			     bool bubbles,
 			     bool cancelable,
 			     uint32_t key);
+
+void html_schedule_rebuild(html_content *htmlc);
+
+bool fire_dom_mouse_event(dom_string *type,
+			  dom_node *target,
+			  struct browser_window *bw,
+			  int x,
+			  int y,
+			  unsigned short button);
 
 /* Useful dom_string pointers */
 struct dom_string;

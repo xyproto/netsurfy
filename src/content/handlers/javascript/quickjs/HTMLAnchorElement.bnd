@@ -37,3 +37,108 @@ setter HTMLAnchorElement::target();
 
 
 
+
+getter HTMLAnchorElement::href()
+%{
+	return qjsky_element_url_get(ctx, priv->parent.parent.parent.node, QJSKY_URL_HREF);
+%}
+
+setter HTMLAnchorElement::href()
+%{
+	return qjsky_element_url_set(ctx, priv->parent.parent.parent.node, QJSKY_URL_HREF, argv[0]);
+%}
+
+getter HTMLAnchorElement::protocol()
+%{
+	return qjsky_element_url_get(ctx, priv->parent.parent.parent.node, QJSKY_URL_PROTOCOL);
+%}
+
+setter HTMLAnchorElement::protocol()
+%{
+	return qjsky_element_url_set(ctx, priv->parent.parent.parent.node, QJSKY_URL_PROTOCOL, argv[0]);
+%}
+
+getter HTMLAnchorElement::username()
+%{
+	return qjsky_element_url_get(ctx, priv->parent.parent.parent.node, QJSKY_URL_USERNAME);
+%}
+
+setter HTMLAnchorElement::username()
+%{
+	return qjsky_element_url_set(ctx, priv->parent.parent.parent.node, QJSKY_URL_USERNAME, argv[0]);
+%}
+
+getter HTMLAnchorElement::password()
+%{
+	return qjsky_element_url_get(ctx, priv->parent.parent.parent.node, QJSKY_URL_PASSWORD);
+%}
+
+setter HTMLAnchorElement::password()
+%{
+	return qjsky_element_url_set(ctx, priv->parent.parent.parent.node, QJSKY_URL_PASSWORD, argv[0]);
+%}
+
+getter HTMLAnchorElement::host()
+%{
+	return qjsky_element_url_get(ctx, priv->parent.parent.parent.node, QJSKY_URL_HOST);
+%}
+
+setter HTMLAnchorElement::host()
+%{
+	return qjsky_element_url_set(ctx, priv->parent.parent.parent.node, QJSKY_URL_HOST, argv[0]);
+%}
+
+getter HTMLAnchorElement::hostname()
+%{
+	return qjsky_element_url_get(ctx, priv->parent.parent.parent.node, QJSKY_URL_HOSTNAME);
+%}
+
+setter HTMLAnchorElement::hostname()
+%{
+	return qjsky_element_url_set(ctx, priv->parent.parent.parent.node, QJSKY_URL_HOSTNAME, argv[0]);
+%}
+
+getter HTMLAnchorElement::port()
+%{
+	return qjsky_element_url_get(ctx, priv->parent.parent.parent.node, QJSKY_URL_PORT);
+%}
+
+setter HTMLAnchorElement::port()
+%{
+	return qjsky_element_url_set(ctx, priv->parent.parent.parent.node, QJSKY_URL_PORT, argv[0]);
+%}
+
+getter HTMLAnchorElement::pathname()
+%{
+	return qjsky_element_url_get(ctx, priv->parent.parent.parent.node, QJSKY_URL_PATHNAME);
+%}
+
+setter HTMLAnchorElement::pathname()
+%{
+	return qjsky_element_url_set(ctx, priv->parent.parent.parent.node, QJSKY_URL_PATHNAME, argv[0]);
+%}
+
+getter HTMLAnchorElement::search()
+%{
+	return qjsky_element_url_get(ctx, priv->parent.parent.parent.node, QJSKY_URL_SEARCH);
+%}
+
+setter HTMLAnchorElement::search()
+%{
+	return qjsky_element_url_set(ctx, priv->parent.parent.parent.node, QJSKY_URL_SEARCH, argv[0]);
+%}
+
+getter HTMLAnchorElement::hash()
+%{
+	return qjsky_element_url_get(ctx, priv->parent.parent.parent.node, QJSKY_URL_HASH);
+%}
+
+setter HTMLAnchorElement::hash()
+%{
+	return qjsky_element_url_set(ctx, priv->parent.parent.parent.node, QJSKY_URL_HASH, argv[0]);
+%}
+
+getter HTMLAnchorElement::origin()
+%{
+	return qjsky_element_url_get(ctx, priv->parent.parent.parent.node, QJSKY_URL_ORIGIN);
+%}

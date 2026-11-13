@@ -1,0 +1,767 @@
+/* Geometry interfaces (DOMPoint, DOMRect, DOMMatrix) for browser using QuickJS
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+class DOMPointReadOnly {
+	prologue %{
+#include <math.h>
+%};
+	private double x;
+	private double y;
+	private double z;
+	private double w;
+};
+
+init DOMPointReadOnly(double x, double y, double z, double w)
+%{
+	priv->x = x;
+	priv->y = y;
+	priv->z = z;
+	priv->w = w;
+%}
+
+constructor DOMPointReadOnly()
+%{
+	double v[4] = {0, 0, 0, 1};
+
+	if (qjsky_geometry_args(ctx, argc, argv, v, 4) < 0) return JS_EXCEPTION;
+	return qjsky_constructed(ctx, qjsky_dom_point_read_only___create(ctx, v[0], v[1], v[2], v[3]), new_target);
+%}
+
+getter DOMPointReadOnly::x()
+%{
+	return JS_NewFloat64(ctx, priv->x);
+%}
+
+getter DOMPointReadOnly::y()
+%{
+	return JS_NewFloat64(ctx, priv->y);
+%}
+
+getter DOMPointReadOnly::z()
+%{
+	return JS_NewFloat64(ctx, priv->z);
+%}
+
+getter DOMPointReadOnly::w()
+%{
+	return JS_NewFloat64(ctx, priv->w);
+%}
+
+method DOMPointReadOnly::matrixTransform()
+%{
+	qjsky_matrix mat;
+	double in[4] = {priv->x, priv->y, priv->z, priv->w}, res[4];
+
+	if (qjsky_matrix_from_js(ctx, argc > 0 ? argv[0] : JS_UNDEFINED, &mat) < 0) return JS_EXCEPTION;
+	qjsky_matrix_transform(&mat, in, res);
+	return qjsky_dom_point___create(ctx, res[0], res[1], res[2], res[3]);
+%}
+
+method DOMPointReadOnly::toJSON()
+%{
+	static const char *const names[4] = {"x", "y", "z", "w"};
+	double v[4] = {priv->x, priv->y, priv->z, priv->w};
+
+	return qjsky_geometry_json(ctx, names, v, 4);
+%}
+
+init DOMPoint(double x::x, double y::y, double z::z, double w::w);
+
+constructor DOMPoint()
+%{
+	double v[4] = {0, 0, 0, 1};
+
+	if (qjsky_geometry_args(ctx, argc, argv, v, 4) < 0) return JS_EXCEPTION;
+	return qjsky_constructed(ctx, qjsky_dom_point___create(ctx, v[0], v[1], v[2], v[3]), new_target);
+%}
+
+getter DOMPoint::x()
+%{
+	return JS_NewFloat64(ctx, priv->parent.x);
+%}
+
+setter DOMPoint::x()
+%{
+	if (JS_ToFloat64(ctx, &priv->parent.x, argv[0]) < 0) return JS_EXCEPTION;
+	return JS_UNDEFINED;
+%}
+
+getter DOMPoint::y()
+%{
+	return JS_NewFloat64(ctx, priv->parent.y);
+%}
+
+setter DOMPoint::y()
+%{
+	if (JS_ToFloat64(ctx, &priv->parent.y, argv[0]) < 0) return JS_EXCEPTION;
+	return JS_UNDEFINED;
+%}
+
+getter DOMPoint::z()
+%{
+	return JS_NewFloat64(ctx, priv->parent.z);
+%}
+
+setter DOMPoint::z()
+%{
+	if (JS_ToFloat64(ctx, &priv->parent.z, argv[0]) < 0) return JS_EXCEPTION;
+	return JS_UNDEFINED;
+%}
+
+getter DOMPoint::w()
+%{
+	return JS_NewFloat64(ctx, priv->parent.w);
+%}
+
+setter DOMPoint::w()
+%{
+	if (JS_ToFloat64(ctx, &priv->parent.w, argv[0]) < 0) return JS_EXCEPTION;
+	return JS_UNDEFINED;
+%}
+
+class DOMRectReadOnly {
+	prologue %{
+#include <math.h>
+%};
+	private double x;
+	private double y;
+	private double width;
+	private double height;
+};
+
+init DOMRectReadOnly(double x, double y, double width, double height)
+%{
+	priv->x = x;
+	priv->y = y;
+	priv->width = width;
+	priv->height = height;
+%}
+
+constructor DOMRectReadOnly()
+%{
+	double v[4] = {0, 0, 0, 0};
+
+	if (qjsky_geometry_args(ctx, argc, argv, v, 4) < 0) return JS_EXCEPTION;
+	return qjsky_constructed(ctx, qjsky_dom_rect_read_only___create(ctx, v[0], v[1], v[2], v[3]), new_target);
+%}
+
+getter DOMRectReadOnly::x()
+%{
+	return JS_NewFloat64(ctx, priv->x);
+%}
+
+getter DOMRectReadOnly::y()
+%{
+	return JS_NewFloat64(ctx, priv->y);
+%}
+
+getter DOMRectReadOnly::width()
+%{
+	return JS_NewFloat64(ctx, priv->width);
+%}
+
+getter DOMRectReadOnly::height()
+%{
+	return JS_NewFloat64(ctx, priv->height);
+%}
+
+getter DOMRectReadOnly::top()
+%{
+	return JS_NewFloat64(ctx, fmin(priv->y, priv->y + priv->height));
+%}
+
+getter DOMRectReadOnly::right()
+%{
+	return JS_NewFloat64(ctx, fmax(priv->x, priv->x + priv->width));
+%}
+
+getter DOMRectReadOnly::bottom()
+%{
+	return JS_NewFloat64(ctx, fmax(priv->y, priv->y + priv->height));
+%}
+
+getter DOMRectReadOnly::left()
+%{
+	return JS_NewFloat64(ctx, fmin(priv->x, priv->x + priv->width));
+%}
+
+method DOMRectReadOnly::toJSON()
+%{
+	static const char *const names[8] = {"x", "y", "width", "height", "top", "right", "bottom", "left"};
+	double v[8] = {priv->x, priv->y, priv->width, priv->height,
+		       fmin(priv->y, priv->y + priv->height), fmax(priv->x, priv->x + priv->width),
+		       fmax(priv->y, priv->y + priv->height), fmin(priv->x, priv->x + priv->width)};
+
+	return qjsky_geometry_json(ctx, names, v, 8);
+%}
+
+init DOMRect(double x::x, double y::y, double width::width, double height::height);
+
+constructor DOMRect()
+%{
+	double v[4] = {0, 0, 0, 0};
+
+	if (qjsky_geometry_args(ctx, argc, argv, v, 4) < 0) return JS_EXCEPTION;
+	return qjsky_constructed(ctx, qjsky_dom_rect___create(ctx, v[0], v[1], v[2], v[3]), new_target);
+%}
+
+getter DOMRect::x()
+%{
+	return JS_NewFloat64(ctx, priv->parent.x);
+%}
+
+setter DOMRect::x()
+%{
+	if (JS_ToFloat64(ctx, &priv->parent.x, argv[0]) < 0) return JS_EXCEPTION;
+	return JS_UNDEFINED;
+%}
+
+getter DOMRect::y()
+%{
+	return JS_NewFloat64(ctx, priv->parent.y);
+%}
+
+setter DOMRect::y()
+%{
+	if (JS_ToFloat64(ctx, &priv->parent.y, argv[0]) < 0) return JS_EXCEPTION;
+	return JS_UNDEFINED;
+%}
+
+getter DOMRect::width()
+%{
+	return JS_NewFloat64(ctx, priv->parent.width);
+%}
+
+setter DOMRect::width()
+%{
+	if (JS_ToFloat64(ctx, &priv->parent.width, argv[0]) < 0) return JS_EXCEPTION;
+	return JS_UNDEFINED;
+%}
+
+getter DOMRect::height()
+%{
+	return JS_NewFloat64(ctx, priv->parent.height);
+%}
+
+setter DOMRect::height()
+%{
+	if (JS_ToFloat64(ctx, &priv->parent.height, argv[0]) < 0) return JS_EXCEPTION;
+	return JS_UNDEFINED;
+%}
+
+class DOMMatrixReadOnly {
+	prologue %{
+#include <math.h>
+%};
+	private struct qjsky_matrix mat;
+};
+
+init DOMMatrixReadOnly(struct qjsky_matrix *mat)
+%{
+	priv->mat = *mat;
+%}
+
+constructor DOMMatrixReadOnly()
+%{
+	qjsky_matrix mat;
+
+	if (qjsky_matrix_from_init(ctx, argc > 0 ? argv[0] : JS_UNDEFINED, &mat) < 0) return JS_EXCEPTION;
+	return qjsky_constructed(ctx, qjsky_dom_matrix_read_only___create(ctx, &mat), new_target);
+%}
+
+getter DOMMatrixReadOnly::a()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->mat, 1, 1));
+%}
+
+getter DOMMatrixReadOnly::b()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->mat, 1, 2));
+%}
+
+getter DOMMatrixReadOnly::c()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->mat, 2, 1));
+%}
+
+getter DOMMatrixReadOnly::d()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->mat, 2, 2));
+%}
+
+getter DOMMatrixReadOnly::e()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->mat, 4, 1));
+%}
+
+getter DOMMatrixReadOnly::f()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->mat, 4, 2));
+%}
+
+getter DOMMatrixReadOnly::m11()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->mat, 1, 1));
+%}
+
+getter DOMMatrixReadOnly::m12()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->mat, 1, 2));
+%}
+
+getter DOMMatrixReadOnly::m13()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->mat, 1, 3));
+%}
+
+getter DOMMatrixReadOnly::m14()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->mat, 1, 4));
+%}
+
+getter DOMMatrixReadOnly::m21()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->mat, 2, 1));
+%}
+
+getter DOMMatrixReadOnly::m22()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->mat, 2, 2));
+%}
+
+getter DOMMatrixReadOnly::m23()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->mat, 2, 3));
+%}
+
+getter DOMMatrixReadOnly::m24()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->mat, 2, 4));
+%}
+
+getter DOMMatrixReadOnly::m31()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->mat, 3, 1));
+%}
+
+getter DOMMatrixReadOnly::m32()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->mat, 3, 2));
+%}
+
+getter DOMMatrixReadOnly::m33()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->mat, 3, 3));
+%}
+
+getter DOMMatrixReadOnly::m34()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->mat, 3, 4));
+%}
+
+getter DOMMatrixReadOnly::m41()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->mat, 4, 1));
+%}
+
+getter DOMMatrixReadOnly::m42()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->mat, 4, 2));
+%}
+
+getter DOMMatrixReadOnly::m43()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->mat, 4, 3));
+%}
+
+getter DOMMatrixReadOnly::m44()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->mat, 4, 4));
+%}
+
+getter DOMMatrixReadOnly::is2D()
+%{
+	return JS_NewBool(ctx, priv->mat.is2d);
+%}
+
+getter DOMMatrixReadOnly::isIdentity()
+%{
+	return JS_NewBool(ctx, qjsky_matrix_is_identity(&priv->mat));
+%}
+
+method DOMMatrixReadOnly::translate()
+%{
+	qjsky_matrix mat = priv->mat;
+
+	if (JS_IsException(qjsky_matrix_translate_args(ctx, argc, argv, &mat))) return JS_EXCEPTION;
+	return qjsky_dom_matrix___create(ctx, &mat);
+%}
+
+method DOMMatrixReadOnly::scale()
+%{
+	qjsky_matrix mat = priv->mat;
+
+	if (JS_IsException(qjsky_matrix_scale_args(ctx, argc, argv, &mat))) return JS_EXCEPTION;
+	return qjsky_dom_matrix___create(ctx, &mat);
+%}
+
+method DOMMatrixReadOnly::multiply()
+%{
+	qjsky_matrix other, mat;
+
+	if (qjsky_matrix_from_js(ctx, argc > 0 ? argv[0] : JS_UNDEFINED, &other) < 0) return JS_EXCEPTION;
+	qjsky_matrix_multiply(&mat, &priv->mat, &other);
+	return qjsky_dom_matrix___create(ctx, &mat);
+%}
+
+method DOMMatrixReadOnly::inverse()
+%{
+	qjsky_matrix mat;
+
+	qjsky_matrix_invert(&mat, &priv->mat);
+	return qjsky_dom_matrix___create(ctx, &mat);
+%}
+
+method DOMMatrixReadOnly::transformPoint()
+%{
+	double in[4], res[4];
+
+	if (qjsky_geometry_point_from_js(ctx, argc > 0 ? argv[0] : JS_UNDEFINED, in) < 0) return JS_EXCEPTION;
+	qjsky_matrix_transform(&priv->mat, in, res);
+	return qjsky_dom_point___create(ctx, res[0], res[1], res[2], res[3]);
+%}
+
+method DOMMatrixReadOnly::toString()
+%{
+	return qjsky_matrix_to_string(ctx, &priv->mat);
+%}
+
+method DOMMatrixReadOnly::toJSON()
+%{
+	static const char *const names[22] = {"a", "b", "c", "d", "e", "f",
+		"m11", "m12", "m13", "m14", "m21", "m22", "m23", "m24",
+		"m31", "m32", "m33", "m34", "m41", "m42", "m43", "m44"};
+	double v[22];
+	JSValue obj;
+	int k = 0;
+	static const int ab[6][2] = {{1, 1}, {1, 2}, {2, 1}, {2, 2}, {4, 1}, {4, 2}};
+
+	for (int n = 0; n < 6; n++) v[k++] = *qjsky_matrix_entry(&priv->mat, ab[n][0], ab[n][1]);
+	for (int i = 1; i <= 4; i++) {
+		for (int j = 1; j <= 4; j++) v[k++] = *qjsky_matrix_entry(&priv->mat, i, j);
+	}
+	obj = qjsky_geometry_json(ctx, names, v, 22);
+	if (JS_IsException(obj)) return obj;
+	JS_SetPropertyStr(ctx, obj, "is2D", JS_NewBool(ctx, priv->mat.is2d));
+	JS_SetPropertyStr(ctx, obj, "isIdentity", JS_NewBool(ctx, qjsky_matrix_is_identity(&priv->mat)));
+	return obj;
+%}
+
+init DOMMatrix(struct qjsky_matrix *mat::mat);
+
+constructor DOMMatrix()
+%{
+	qjsky_matrix mat;
+
+	if (qjsky_matrix_from_init(ctx, argc > 0 ? argv[0] : JS_UNDEFINED, &mat) < 0) return JS_EXCEPTION;
+	return qjsky_constructed(ctx, qjsky_dom_matrix___create(ctx, &mat), new_target);
+%}
+
+getter DOMMatrix::a()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->parent.mat, 1, 1));
+%}
+
+setter DOMMatrix::a()
+%{
+	if (JS_ToFloat64(ctx, qjsky_matrix_entry(&priv->parent.mat, 1, 1), argv[0]) < 0) return JS_EXCEPTION;
+	return JS_UNDEFINED;
+%}
+
+getter DOMMatrix::b()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->parent.mat, 1, 2));
+%}
+
+setter DOMMatrix::b()
+%{
+	if (JS_ToFloat64(ctx, qjsky_matrix_entry(&priv->parent.mat, 1, 2), argv[0]) < 0) return JS_EXCEPTION;
+	return JS_UNDEFINED;
+%}
+
+getter DOMMatrix::c()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->parent.mat, 2, 1));
+%}
+
+setter DOMMatrix::c()
+%{
+	if (JS_ToFloat64(ctx, qjsky_matrix_entry(&priv->parent.mat, 2, 1), argv[0]) < 0) return JS_EXCEPTION;
+	return JS_UNDEFINED;
+%}
+
+getter DOMMatrix::d()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->parent.mat, 2, 2));
+%}
+
+setter DOMMatrix::d()
+%{
+	if (JS_ToFloat64(ctx, qjsky_matrix_entry(&priv->parent.mat, 2, 2), argv[0]) < 0) return JS_EXCEPTION;
+	return JS_UNDEFINED;
+%}
+
+getter DOMMatrix::e()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->parent.mat, 4, 1));
+%}
+
+setter DOMMatrix::e()
+%{
+	if (JS_ToFloat64(ctx, qjsky_matrix_entry(&priv->parent.mat, 4, 1), argv[0]) < 0) return JS_EXCEPTION;
+	return JS_UNDEFINED;
+%}
+
+getter DOMMatrix::f()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->parent.mat, 4, 2));
+%}
+
+setter DOMMatrix::f()
+%{
+	if (JS_ToFloat64(ctx, qjsky_matrix_entry(&priv->parent.mat, 4, 2), argv[0]) < 0) return JS_EXCEPTION;
+	return JS_UNDEFINED;
+%}
+
+getter DOMMatrix::m11()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->parent.mat, 1, 1));
+%}
+
+setter DOMMatrix::m11()
+%{
+	if (JS_ToFloat64(ctx, qjsky_matrix_entry(&priv->parent.mat, 1, 1), argv[0]) < 0) return JS_EXCEPTION;
+	if (*qjsky_matrix_entry(&priv->parent.mat, 1, 1) != 1) priv->parent.mat.is2d = false;
+	return JS_UNDEFINED;
+%}
+
+getter DOMMatrix::m12()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->parent.mat, 1, 2));
+%}
+
+setter DOMMatrix::m12()
+%{
+	if (JS_ToFloat64(ctx, qjsky_matrix_entry(&priv->parent.mat, 1, 2), argv[0]) < 0) return JS_EXCEPTION;
+	if (*qjsky_matrix_entry(&priv->parent.mat, 1, 2) != 0) priv->parent.mat.is2d = false;
+	return JS_UNDEFINED;
+%}
+
+getter DOMMatrix::m13()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->parent.mat, 1, 3));
+%}
+
+setter DOMMatrix::m13()
+%{
+	if (JS_ToFloat64(ctx, qjsky_matrix_entry(&priv->parent.mat, 1, 3), argv[0]) < 0) return JS_EXCEPTION;
+	if (*qjsky_matrix_entry(&priv->parent.mat, 1, 3) != 0) priv->parent.mat.is2d = false;
+	return JS_UNDEFINED;
+%}
+
+getter DOMMatrix::m14()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->parent.mat, 1, 4));
+%}
+
+setter DOMMatrix::m14()
+%{
+	if (JS_ToFloat64(ctx, qjsky_matrix_entry(&priv->parent.mat, 1, 4), argv[0]) < 0) return JS_EXCEPTION;
+	if (*qjsky_matrix_entry(&priv->parent.mat, 1, 4) != 0) priv->parent.mat.is2d = false;
+	return JS_UNDEFINED;
+%}
+
+getter DOMMatrix::m21()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->parent.mat, 2, 1));
+%}
+
+setter DOMMatrix::m21()
+%{
+	if (JS_ToFloat64(ctx, qjsky_matrix_entry(&priv->parent.mat, 2, 1), argv[0]) < 0) return JS_EXCEPTION;
+	if (*qjsky_matrix_entry(&priv->parent.mat, 2, 1) != 0) priv->parent.mat.is2d = false;
+	return JS_UNDEFINED;
+%}
+
+getter DOMMatrix::m22()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->parent.mat, 2, 2));
+%}
+
+setter DOMMatrix::m22()
+%{
+	if (JS_ToFloat64(ctx, qjsky_matrix_entry(&priv->parent.mat, 2, 2), argv[0]) < 0) return JS_EXCEPTION;
+	if (*qjsky_matrix_entry(&priv->parent.mat, 2, 2) != 1) priv->parent.mat.is2d = false;
+	return JS_UNDEFINED;
+%}
+
+getter DOMMatrix::m23()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->parent.mat, 2, 3));
+%}
+
+setter DOMMatrix::m23()
+%{
+	if (JS_ToFloat64(ctx, qjsky_matrix_entry(&priv->parent.mat, 2, 3), argv[0]) < 0) return JS_EXCEPTION;
+	if (*qjsky_matrix_entry(&priv->parent.mat, 2, 3) != 0) priv->parent.mat.is2d = false;
+	return JS_UNDEFINED;
+%}
+
+getter DOMMatrix::m24()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->parent.mat, 2, 4));
+%}
+
+setter DOMMatrix::m24()
+%{
+	if (JS_ToFloat64(ctx, qjsky_matrix_entry(&priv->parent.mat, 2, 4), argv[0]) < 0) return JS_EXCEPTION;
+	if (*qjsky_matrix_entry(&priv->parent.mat, 2, 4) != 0) priv->parent.mat.is2d = false;
+	return JS_UNDEFINED;
+%}
+
+getter DOMMatrix::m31()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->parent.mat, 3, 1));
+%}
+
+setter DOMMatrix::m31()
+%{
+	if (JS_ToFloat64(ctx, qjsky_matrix_entry(&priv->parent.mat, 3, 1), argv[0]) < 0) return JS_EXCEPTION;
+	if (*qjsky_matrix_entry(&priv->parent.mat, 3, 1) != 0) priv->parent.mat.is2d = false;
+	return JS_UNDEFINED;
+%}
+
+getter DOMMatrix::m32()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->parent.mat, 3, 2));
+%}
+
+setter DOMMatrix::m32()
+%{
+	if (JS_ToFloat64(ctx, qjsky_matrix_entry(&priv->parent.mat, 3, 2), argv[0]) < 0) return JS_EXCEPTION;
+	if (*qjsky_matrix_entry(&priv->parent.mat, 3, 2) != 0) priv->parent.mat.is2d = false;
+	return JS_UNDEFINED;
+%}
+
+getter DOMMatrix::m33()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->parent.mat, 3, 3));
+%}
+
+setter DOMMatrix::m33()
+%{
+	if (JS_ToFloat64(ctx, qjsky_matrix_entry(&priv->parent.mat, 3, 3), argv[0]) < 0) return JS_EXCEPTION;
+	if (*qjsky_matrix_entry(&priv->parent.mat, 3, 3) != 1) priv->parent.mat.is2d = false;
+	return JS_UNDEFINED;
+%}
+
+getter DOMMatrix::m34()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->parent.mat, 3, 4));
+%}
+
+setter DOMMatrix::m34()
+%{
+	if (JS_ToFloat64(ctx, qjsky_matrix_entry(&priv->parent.mat, 3, 4), argv[0]) < 0) return JS_EXCEPTION;
+	if (*qjsky_matrix_entry(&priv->parent.mat, 3, 4) != 0) priv->parent.mat.is2d = false;
+	return JS_UNDEFINED;
+%}
+
+getter DOMMatrix::m41()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->parent.mat, 4, 1));
+%}
+
+setter DOMMatrix::m41()
+%{
+	if (JS_ToFloat64(ctx, qjsky_matrix_entry(&priv->parent.mat, 4, 1), argv[0]) < 0) return JS_EXCEPTION;
+	if (*qjsky_matrix_entry(&priv->parent.mat, 4, 1) != 0) priv->parent.mat.is2d = false;
+	return JS_UNDEFINED;
+%}
+
+getter DOMMatrix::m42()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->parent.mat, 4, 2));
+%}
+
+setter DOMMatrix::m42()
+%{
+	if (JS_ToFloat64(ctx, qjsky_matrix_entry(&priv->parent.mat, 4, 2), argv[0]) < 0) return JS_EXCEPTION;
+	if (*qjsky_matrix_entry(&priv->parent.mat, 4, 2) != 0) priv->parent.mat.is2d = false;
+	return JS_UNDEFINED;
+%}
+
+getter DOMMatrix::m43()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->parent.mat, 4, 3));
+%}
+
+setter DOMMatrix::m43()
+%{
+	if (JS_ToFloat64(ctx, qjsky_matrix_entry(&priv->parent.mat, 4, 3), argv[0]) < 0) return JS_EXCEPTION;
+	if (*qjsky_matrix_entry(&priv->parent.mat, 4, 3) != 0) priv->parent.mat.is2d = false;
+	return JS_UNDEFINED;
+%}
+
+getter DOMMatrix::m44()
+%{
+	return JS_NewFloat64(ctx, *qjsky_matrix_entry(&priv->parent.mat, 4, 4));
+%}
+
+setter DOMMatrix::m44()
+%{
+	if (JS_ToFloat64(ctx, qjsky_matrix_entry(&priv->parent.mat, 4, 4), argv[0]) < 0) return JS_EXCEPTION;
+	if (*qjsky_matrix_entry(&priv->parent.mat, 4, 4) != 1) priv->parent.mat.is2d = false;
+	return JS_UNDEFINED;
+%}
+
+method DOMMatrix::multiplySelf()
+%{
+	qjsky_matrix other;
+
+	if (qjsky_matrix_from_js(ctx, argc > 0 ? argv[0] : JS_UNDEFINED, &other) < 0) return JS_EXCEPTION;
+	qjsky_matrix_multiply(&priv->parent.mat, &priv->parent.mat, &other);
+	return JS_DupValue(ctx, this_val);
+%}
+
+method DOMMatrix::preMultiplySelf()
+%{
+	qjsky_matrix other;
+
+	if (qjsky_matrix_from_js(ctx, argc > 0 ? argv[0] : JS_UNDEFINED, &other) < 0) return JS_EXCEPTION;
+	qjsky_matrix_multiply(&priv->parent.mat, &other, &priv->parent.mat);
+	return JS_DupValue(ctx, this_val);
+%}
+
+method DOMMatrix::translateSelf()
+%{
+	if (JS_IsException(qjsky_matrix_translate_args(ctx, argc, argv, &priv->parent.mat))) return JS_EXCEPTION;
+	return JS_DupValue(ctx, this_val);
+%}
+
+method DOMMatrix::scaleSelf()
+%{
+	if (JS_IsException(qjsky_matrix_scale_args(ctx, argc, argv, &priv->parent.mat))) return JS_EXCEPTION;
+	return JS_DupValue(ctx, this_val);
+%}
+
+method DOMMatrix::invertSelf()
+%{
+	qjsky_matrix_invert(&priv->parent.mat, &priv->parent.mat);
+	return JS_DupValue(ctx, this_val);
+%}

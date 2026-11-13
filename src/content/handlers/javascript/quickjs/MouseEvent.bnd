@@ -1,0 +1,152 @@
+/* MouseEvent binding for browser using QuickJS and libdom
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+init MouseEvent (struct dom_mouse_event *evt::ui_event);
+
+constructor MouseEvent ()
+%{
+	dom_event *evt;
+	dom_string *type;
+	bool bubbles = false, cancelable = false, ctrl = false, shift = false, alt = false, meta = false;
+	int32_t detail = 0, sx = 0, sy = 0, cx = 0, cy = 0, button = 0;
+	JSValue dict = argc > 1 ? argv[1] : JS_UNDEFINED;
+	JSValue obj;
+
+	if (argc < 1) return JS_ThrowTypeError(ctx, "Failed to construct 'MouseEvent': 1 argument required");
+	if (qjsky_dict_bool(ctx, dict, "bubbles", &bubbles) < 0 ||
+	    qjsky_dict_bool(ctx, dict, "cancelable", &cancelable) < 0 ||
+	    qjsky_dict_int(ctx, dict, "detail", &detail) < 0 ||
+	    qjsky_dict_int(ctx, dict, "screenX", &sx) < 0 ||
+	    qjsky_dict_int(ctx, dict, "screenY", &sy) < 0 ||
+	    qjsky_dict_int(ctx, dict, "clientX", &cx) < 0 ||
+	    qjsky_dict_int(ctx, dict, "clientY", &cy) < 0 ||
+	    qjsky_dict_int(ctx, dict, "button", &button) < 0 ||
+	    qjsky_dict_bool(ctx, dict, "ctrlKey", &ctrl) < 0 ||
+	    qjsky_dict_bool(ctx, dict, "shiftKey", &shift) < 0 ||
+	    qjsky_dict_bool(ctx, dict, "altKey", &alt) < 0 ||
+	    qjsky_dict_bool(ctx, dict, "metaKey", &meta) < 0) return JS_EXCEPTION;
+	type = qjsky_to_dom_string(ctx, argv[0]);
+	if (type == NULL) return JS_EXCEPTION;
+	obj = qjsky_create_event(ctx, "MouseEvent", &evt);
+	if (evt == NULL) {
+		dom_string_unref(type);
+		return obj;
+	}
+	(void)dom_mouse_event_init(evt, type, bubbles, cancelable, NULL, detail, sx, sy, cx, cy, ctrl, alt, shift, meta, (unsigned short)button, NULL);
+	dom_string_unref(type);
+	obj = qjsky_event(ctx, evt);
+	dom_event_unref(evt);
+	return qjsky_constructed(ctx, obj, new_target);
+%}
+
+method MouseEvent::initMouseEvent ()
+%{
+	dom_string *type;
+	int32_t v[6] = {0, 0, 0, 0, 0, 0};
+	int b[6] = {0, 0, 0, 0, 0, 0};
+	static const int bool_args[] = {1, 2, 9, 10, 11, 12};
+	static const int int_args[] = {4, 5, 6, 7, 8, 13};
+
+	if (argc < 1) return JS_ThrowTypeError(ctx, "initMouseEvent: 1 argument required");
+	for (int i = 0; i < 6; i++) {
+		if (bool_args[i] < argc) b[i] = JS_ToBool(ctx, argv[bool_args[i]]) > 0;
+		if (int_args[i] < argc && JS_ToInt32(ctx, &v[i], argv[int_args[i]]) < 0) return JS_EXCEPTION;
+	}
+	type = qjsky_to_dom_string(ctx, argv[0]);
+	if (type == NULL) return JS_EXCEPTION;
+	(void)dom_mouse_event_init(priv->parent.parent.evt, type, b[0], b[1], NULL, v[0], v[1], v[2], v[3], v[4], b[2], b[3], b[4], b[5], (unsigned short)v[5], NULL);
+	dom_string_unref(type);
+	return JS_UNDEFINED;
+%}
+
+getter MouseEvent::screenX ()
+%{
+	int32_t v = 0;
+
+	if (dom_mouse_event_get_screen_x(priv->parent.parent.evt, &v) != DOM_NO_ERR) return JS_UNDEFINED;
+	return JS_NewInt32(ctx, v);
+%}
+
+getter MouseEvent::screenY ()
+%{
+	int32_t v = 0;
+
+	if (dom_mouse_event_get_screen_y(priv->parent.parent.evt, &v) != DOM_NO_ERR) return JS_UNDEFINED;
+	return JS_NewInt32(ctx, v);
+%}
+
+getter MouseEvent::clientX ()
+%{
+	int32_t v = 0;
+
+	if (dom_mouse_event_get_client_x(priv->parent.parent.evt, &v) != DOM_NO_ERR) return JS_UNDEFINED;
+	return JS_NewInt32(ctx, v);
+%}
+
+getter MouseEvent::clientY ()
+%{
+	int32_t v = 0;
+
+	if (dom_mouse_event_get_client_y(priv->parent.parent.evt, &v) != DOM_NO_ERR) return JS_UNDEFINED;
+	return JS_NewInt32(ctx, v);
+%}
+
+getter MouseEvent::ctrlKey ()
+%{
+	bool v = false;
+
+	if (dom_mouse_event_get_ctrl_key(priv->parent.parent.evt, &v) != DOM_NO_ERR) return JS_UNDEFINED;
+	return JS_NewBool(ctx, v);
+%}
+
+getter MouseEvent::shiftKey ()
+%{
+	bool v = false;
+
+	if (dom_mouse_event_get_shift_key(priv->parent.parent.evt, &v) != DOM_NO_ERR) return JS_UNDEFINED;
+	return JS_NewBool(ctx, v);
+%}
+
+getter MouseEvent::altKey ()
+%{
+	bool v = false;
+
+	if (dom_mouse_event_get_alt_key(priv->parent.parent.evt, &v) != DOM_NO_ERR) return JS_UNDEFINED;
+	return JS_NewBool(ctx, v);
+%}
+
+getter MouseEvent::metaKey ()
+%{
+	bool v = false;
+
+	if (dom_mouse_event_get_meta_key(priv->parent.parent.evt, &v) != DOM_NO_ERR) return JS_UNDEFINED;
+	return JS_NewBool(ctx, v);
+%}
+
+getter MouseEvent::button ()
+%{
+	unsigned short v = 0;
+
+	if (dom_mouse_event_get_button(priv->parent.parent.evt, &v) != DOM_NO_ERR) return JS_UNDEFINED;
+	return JS_NewInt32(ctx, v);
+%}
+
+getter MouseEvent::buttons ()
+%{
+	return JS_NewInt32(ctx, 0);
+%}
+
+getter MouseEvent::relatedTarget ()
+%{
+	return JS_NULL;
+%}
+
+method MouseEvent::getModifierState ()
+%{
+	return JS_FALSE;
+%}

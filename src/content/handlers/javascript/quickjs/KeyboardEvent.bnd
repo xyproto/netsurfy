@@ -10,6 +10,47 @@
 
 init KeyboardEvent (struct dom_keyboard_event *evt::ui_event);
 
+constructor KeyboardEvent ()
+%{
+	dom_event *evt;
+	dom_string *type, *key, *code;
+	bool bubbles = false, cancelable = false, ctrl = false, shift = false, alt = false, meta = false, repeat = false, composing = false;
+	int32_t location = 0;
+	JSValue dict = argc > 1 ? argv[1] : JS_UNDEFINED;
+	JSValue obj;
+
+	if (argc < 1) return JS_ThrowTypeError(ctx, "Failed to construct 'KeyboardEvent': 1 argument required");
+	if (qjsky_dict_bool(ctx, dict, "bubbles", &bubbles) < 0 ||
+	    qjsky_dict_bool(ctx, dict, "cancelable", &cancelable) < 0 ||
+	    qjsky_dict_bool(ctx, dict, "ctrlKey", &ctrl) < 0 ||
+	    qjsky_dict_bool(ctx, dict, "shiftKey", &shift) < 0 ||
+	    qjsky_dict_bool(ctx, dict, "altKey", &alt) < 0 ||
+	    qjsky_dict_bool(ctx, dict, "metaKey", &meta) < 0 ||
+	    qjsky_dict_bool(ctx, dict, "repeat", &repeat) < 0 ||
+	    qjsky_dict_bool(ctx, dict, "isComposing", &composing) < 0 ||
+	    qjsky_dict_int(ctx, dict, "location", &location) < 0) return JS_EXCEPTION;
+	type = qjsky_to_dom_string(ctx, argv[0]);
+	if (type == NULL) return JS_EXCEPTION;
+	key = qjsky_dict_string(ctx, dict, "key");
+	code = key != NULL ? qjsky_dict_string(ctx, dict, "code") : NULL;
+	if (key == NULL || code == NULL) {
+		dom_string_unref(type);
+		if (key != NULL) dom_string_unref(key);
+		return JS_EXCEPTION;
+	}
+	obj = qjsky_create_event(ctx, "KeyboardEvent", &evt);
+	if (evt != NULL) {
+		(void)dom_keyboard_event_init(evt, type, bubbles, cancelable, NULL, key, code, (dom_key_location)location, ctrl, shift, alt, meta, repeat, composing);
+		obj = qjsky_event(ctx, evt);
+		dom_event_unref(evt);
+		obj = qjsky_constructed(ctx, obj, new_target);
+	}
+	dom_string_unref(type);
+	dom_string_unref(key);
+	dom_string_unref(code);
+	return obj;
+%}
+
 getter KeyboardEvent::key ()
 %{
 	dom_string *key = NULL;

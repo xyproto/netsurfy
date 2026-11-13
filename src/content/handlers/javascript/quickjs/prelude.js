@@ -2394,18 +2394,6 @@
     defineGetter(Document.prototype, "readyState", function () {
         return ["loading", "interactive", "complete"][native.readyState()] || "loading";
     });
-    defineGetter(Document.prototype, "forms", function () {
-        return this.getElementsByTagName("form");
-    });
-    defineGetter(Document.prototype, "images", function () {
-        return this.getElementsByTagName("img");
-    });
-    defineGetter(Document.prototype, "scripts", function () {
-        return this.getElementsByTagName("script");
-    });
-    defineGetter(Document.prototype, "links", function () {
-        return this.querySelectorAll("a[href], area[href]");
-    });
     defineGetter(Document.prototype, "activeElement", function () {
         return this.body || this.documentElement;
     });

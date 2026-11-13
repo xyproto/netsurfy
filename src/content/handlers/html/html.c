@@ -47,6 +47,7 @@
 #include "netsurfy/keypress.h"
 #include "netsurfy/layout.h"
 #include "netsurfy/misc.h"
+#include "netsurfy/window.h"
 #include "content/hlcache.h"
 #include "content/content_factory.h"
 #include "content/textsearch.h"
@@ -56,11 +57,13 @@
 #include "netsurfy/bitmap.h"
 #include "javascript/js.h"
 #include "desktop/gui_internal.h"
+#include "desktop/browser_private.h"
 
 #include "html/html.h"
 #include "html/private.h"
 #include "html/dom_event.h"
 #include "html/css.h"
+#include "css/select.h"
 #include "html/object.h"
 #include "html/html_save.h"
 #include "html/interaction.h"
@@ -134,6 +137,61 @@ bool fire_generic_dom_event(dom_string *type,
 }
 
 /* Exported interface, see html_internal.h */
+bool fire_dom_mouse_event(dom_string *type,
+			  dom_node *target,
+			  struct browser_window *bw,
+			  int x,
+			  int y,
+			  unsigned short button)
+{
+	dom_mouse_event *evt;
+	dom_exception exc;
+	int sx = 0, sy = 0;
+	float scale = 1;
+	bool result;
+
+	if (bw != NULL && bw->window != NULL &&
+	    guit->window->get_scroll != NULL) {
+		if (!guit->window->get_scroll(bw->window, &sx, &sy)) {
+			sx = sy = 0;
+		}
+		scale = browser_window_get_scale(bw);
+		if (scale <= 0) {
+			scale = 1;
+		}
+	}
+	x -= (int)(sx / scale);
+	y -= (int)(sy / scale);
+
+	exc = dom_mouse_event_create(&evt);
+	if (exc != DOM_NO_ERR) {
+		return false;
+	}
+	exc = dom_mouse_event_init(evt,
+				   type,
+				   true,
+				   true,
+				   NULL,
+				   1,
+				   x,
+				   y,
+				   x,
+				   y,
+				   false,
+				   false,
+				   false,
+				   false,
+				   button,
+				   NULL);
+	if (exc != DOM_NO_ERR) {
+		dom_event_unref(evt);
+		return false;
+	}
+	result = fire_dom_event((dom_event *)evt, target);
+	dom_event_unref(evt);
+	return result;
+}
+
 bool fire_dom_keyboard_event(dom_string *type,
 			     dom_node *target,
 			     bool bubbles,
@@ -1263,6 +1321,120 @@ static void html_free_layout(html_content *htmlc)
 	}
 }
 
+static void html_rebuild_layout(html_content *htmlc)
+{
+	struct form_control *focus_gadget = NULL;
+	struct form *f;
+	struct form_control *ctl;
+	dom_exception exc;
+	dom_node *html;
+	content_status status = content__get_status(&htmlc->base);
+	uint64_t ms_before, ms_after;
+	nserror err;
+
+	if (htmlc->aborted || htmlc->layout == NULL ||
+	    htmlc->box_conversion_context != NULL || htmlc->frameset != NULL ||
+	    htmlc->iframe != NULL || htmlc->reflowing || htmlc->base.locked ||
+	    (status != CONTENT_STATUS_READY && status != CONTENT_STATUS_DONE)) {
+		return;
+	}
+
+	exc = dom_document_get_document_element(htmlc->document, (void *)&html);
+	if (exc != DOM_NO_ERR || html == NULL) {
+		return;
+	}
+
+	nsu_getmonotonic_ms(&ms_before);
+
+	if (htmlc->focus_type == HTML_FOCUS_TEXTAREA &&
+	    htmlc->focus_owner.textarea != NULL) {
+		focus_gadget = htmlc->focus_owner.textarea->gadget;
+	}
+	htmlc->focus_type = HTML_FOCUS_SELF;
+	htmlc->focus_owner.self = true;
+	htmlc->drag_type = HTML_DRAG_NONE;
+	htmlc->drag_owner.no_owner = true;
+	if (htmlc->selection_type != HTML_SELECTION_NONE) {
+		selection_clear(htmlc->sel, false);
+	}
+	htmlc->selection_type = HTML_SELECTION_NONE;
+	htmlc->selection_owner.none = true;
+	htmlc->autofocus_box = NULL;
+
+	for (f = htmlc->forms; f != NULL; f = f->prev) {
+		for (ctl = f->controls; ctl != NULL; ctl = ctl->next) {
+			ctl->box = NULL;
+		}
+	}
+
+	html_object_release_for_rebuild(htmlc);
+	html_free_layout(htmlc);
+	htmlc->bctx = NULL;
+	htmlc->layout = NULL;
+
+	nscss_clear_node_data(html);
+	err = dom_to_box_sync(html, htmlc);
+	dom_node_unref(html);
+	if (err != NSERROR_OK || htmlc->layout == NULL) {
+		NSLOG(netsurfy, ERROR, "rebuilding the layout failed");
+		content_broadcast_error(&htmlc->base,
+					NSERROR_BOX_CONVERT,
+					NULL);
+		content_set_error(&htmlc->base);
+		return;
+	}
+
+	if (focus_gadget != NULL && focus_gadget->box != NULL) {
+		htmlc->focus_type = HTML_FOCUS_TEXTAREA;
+		htmlc->focus_owner.textarea = focus_gadget->box;
+	}
+
+	content__reformat(&htmlc->base,
+			  false,
+			  htmlc->base.available_width,
+			  htmlc->base.available_height);
+
+	if (focus_gadget != NULL && focus_gadget->box != NULL &&
+	    focus_gadget->data.text.ta != NULL) {
+		textarea_refresh_caret(focus_gadget->data.text.ta);
+	}
+
+	nsu_getmonotonic_ms(&ms_after);
+	htmlc->rebuild_ms = ms_after - ms_before;
+}
+
+static void html_rebuild_cb(void *p)
+{
+	html_content *htmlc = p;
+
+	if (htmlc->drag_type != HTML_DRAG_NONE) {
+		guit->misc->schedule(100, html_rebuild_cb, htmlc);
+		return;
+	}
+	htmlc->rebuild_pending = false;
+	html_rebuild_layout(htmlc);
+}
+
+/* exported interface documented in html/private.h */
+void html_schedule_rebuild(html_content *htmlc)
+{
+	uint64_t delay;
+
+	if (htmlc->rebuild_pending || htmlc->had_initial_layout == false ||
+	    htmlc->layout == NULL) {
+		return;
+	}
+	delay = htmlc->rebuild_ms * 3;
+	if (delay < 30) {
+		delay = 30;
+	}
+	if (delay > 1000) {
+		delay = 1000;
+	}
+	htmlc->rebuild_pending = true;
+	guit->misc->schedule((int)delay, html_rebuild_cb, htmlc);
+}
+
 /**
  * Destroy a CONTENT_HTML and free all resources it owns.
  */
@@ -1273,6 +1445,11 @@ static void html_destroy(struct content *c)
 	struct form *f, *g;
 
 	NSLOG(netsurfy, INFO, "content %p", c);
+
+	if (html->rebuild_pending) {
+		guit->misc->schedule(-1, html_rebuild_cb, html);
+		html->rebuild_pending = false;
+	}
 
 	/* If we're still converting a layout, cancel it */
 	if (html->box_conversion_context != NULL) {

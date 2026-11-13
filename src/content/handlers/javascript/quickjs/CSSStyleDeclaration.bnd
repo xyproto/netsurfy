@@ -1,0 +1,799 @@
+/* CSSStyleDeclaration bound to an element's style attribute
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+class CSSStyleDeclaration {
+	private struct dom_element *element;
+	prologue %{
+#include <ctype.h>
+#include "utils/corestrings.h"
+#include <stdlib.h>
+#include <string.h>
+
+static const char *const style_properties[] = {
+	"align-content",
+	"align-items",
+	"align-self",
+	"all",
+	"animation",
+	"animation-delay",
+	"animation-direction",
+	"animation-duration",
+	"animation-fill-mode",
+	"animation-iteration-count",
+	"animation-name",
+	"animation-play-state",
+	"animation-timing-function",
+	"appearance",
+	"aspect-ratio",
+	"backface-visibility",
+	"background",
+	"background-attachment",
+	"background-blend-mode",
+	"background-clip",
+	"background-color",
+	"background-image",
+	"background-origin",
+	"background-position",
+	"background-position-x",
+	"background-position-y",
+	"background-repeat",
+	"background-size",
+	"block-size",
+	"border",
+	"border-block",
+	"border-bottom",
+	"border-bottom-color",
+	"border-bottom-left-radius",
+	"border-bottom-right-radius",
+	"border-bottom-style",
+	"border-bottom-width",
+	"border-collapse",
+	"border-color",
+	"border-image",
+	"border-inline",
+	"border-left",
+	"border-left-color",
+	"border-left-style",
+	"border-left-width",
+	"border-radius",
+	"border-right",
+	"border-right-color",
+	"border-right-style",
+	"border-right-width",
+	"border-spacing",
+	"border-style",
+	"border-top",
+	"border-top-color",
+	"border-top-left-radius",
+	"border-top-right-radius",
+	"border-top-style",
+	"border-top-width",
+	"border-width",
+	"bottom",
+	"box-shadow",
+	"box-sizing",
+	"break-after",
+	"break-before",
+	"break-inside",
+	"caption-side",
+	"caret-color",
+	"clear",
+	"clip",
+	"clip-path",
+	"color",
+	"column-count",
+	"column-fill",
+	"column-gap",
+	"column-rule",
+	"column-rule-color",
+	"column-rule-style",
+	"column-rule-width",
+	"column-span",
+	"column-width",
+	"columns",
+	"contain",
+	"content",
+	"counter-increment",
+	"counter-reset",
+	"cursor",
+	"direction",
+	"display",
+	"empty-cells",
+	"fill",
+	"filter",
+	"flex",
+	"flex-basis",
+	"flex-direction",
+	"flex-flow",
+	"flex-grow",
+	"flex-shrink",
+	"flex-wrap",
+	"float",
+	"font",
+	"font-family",
+	"font-feature-settings",
+	"font-kerning",
+	"font-size",
+	"font-size-adjust",
+	"font-stretch",
+	"font-style",
+	"font-variant",
+	"font-weight",
+	"gap",
+	"grid",
+	"grid-area",
+	"grid-auto-columns",
+	"grid-auto-flow",
+	"grid-auto-rows",
+	"grid-column",
+	"grid-column-end",
+	"grid-column-gap",
+	"grid-column-start",
+	"grid-gap",
+	"grid-row",
+	"grid-row-end",
+	"grid-row-gap",
+	"grid-row-start",
+	"grid-template",
+	"grid-template-areas",
+	"grid-template-columns",
+	"grid-template-rows",
+	"height",
+	"hyphens",
+	"image-rendering",
+	"inline-size",
+	"inset",
+	"isolation",
+	"justify-content",
+	"justify-items",
+	"justify-self",
+	"left",
+	"letter-spacing",
+	"line-break",
+	"line-height",
+	"list-style",
+	"list-style-image",
+	"list-style-position",
+	"list-style-type",
+	"margin",
+	"margin-block",
+	"margin-bottom",
+	"margin-inline",
+	"margin-left",
+	"margin-right",
+	"margin-top",
+	"mask",
+	"max-block-size",
+	"max-height",
+	"max-inline-size",
+	"max-width",
+	"min-block-size",
+	"min-height",
+	"min-inline-size",
+	"min-width",
+	"mix-blend-mode",
+	"object-fit",
+	"object-position",
+	"opacity",
+	"order",
+	"orphans",
+	"outline",
+	"outline-color",
+	"outline-offset",
+	"outline-style",
+	"outline-width",
+	"overflow",
+	"overflow-wrap",
+	"overflow-x",
+	"overflow-y",
+	"padding",
+	"padding-block",
+	"padding-bottom",
+	"padding-inline",
+	"padding-left",
+	"padding-right",
+	"padding-top",
+	"page-break-after",
+	"page-break-before",
+	"page-break-inside",
+	"perspective",
+	"perspective-origin",
+	"place-content",
+	"place-items",
+	"place-self",
+	"pointer-events",
+	"position",
+	"quotes",
+	"resize",
+	"right",
+	"rotate",
+	"row-gap",
+	"scale",
+	"scroll-behavior",
+	"scroll-margin",
+	"scroll-padding",
+	"scrollbar-color",
+	"scrollbar-width",
+	"stroke",
+	"stroke-width",
+	"tab-size",
+	"table-layout",
+	"text-align",
+	"text-align-last",
+	"text-decoration",
+	"text-decoration-color",
+	"text-decoration-line",
+	"text-decoration-style",
+	"text-indent",
+	"text-overflow",
+	"text-shadow",
+	"text-transform",
+	"text-underline-offset",
+	"top",
+	"touch-action",
+	"transform",
+	"transform-origin",
+	"transform-style",
+	"transition",
+	"transition-delay",
+	"transition-duration",
+	"transition-property",
+	"transition-timing-function",
+	"translate",
+	"unicode-bidi",
+	"user-select",
+	"vertical-align",
+	"visibility",
+	"white-space",
+	"widows",
+	"width",
+	"will-change",
+	"word-break",
+	"word-spacing",
+	"word-wrap",
+	"writing-mode",
+	"z-index",
+	"zoom"
+};
+
+struct style_decl {
+	char *name;
+	char *value;
+	bool important;
+};
+
+struct style_list {
+	struct style_decl *v;
+	size_t n;
+};
+
+static void style_list_free(struct style_list *list)
+{
+	for (size_t i = 0; i < list->n; i++) {
+		free(list->v[i].name);
+		free(list->v[i].value);
+	}
+	free(list->v);
+	list->v = NULL;
+	list->n = 0;
+}
+
+static char *style_trim(const char *s, size_t len)
+{
+	char *out;
+
+	while (len > 0 && isspace((unsigned char)*s)) {
+		s++;
+		len--;
+	}
+	while (len > 0 && isspace((unsigned char)s[len - 1])) {
+		len--;
+	}
+	out = malloc(len + 1);
+	if (out != NULL) {
+		memcpy(out, s, len);
+		out[len] = '\0';
+	}
+	return out;
+}
+
+static bool style_add(struct style_list *list, char *name, char *value, bool important)
+{
+	struct style_decl *grown;
+
+	for (size_t i = 0; i < list->n; i++) {
+		if (strcmp(list->v[i].name, name) == 0) {
+			free(list->v[i].value);
+			free(name);
+			list->v[i].value = value;
+			list->v[i].important = important;
+			return true;
+		}
+	}
+	grown = realloc(list->v, (list->n + 1) * sizeof(*grown));
+	if (grown == NULL) {
+		free(name);
+		free(value);
+		return false;
+	}
+	list->v = grown;
+	list->v[list->n].name = name;
+	list->v[list->n].value = value;
+	list->v[list->n].important = important;
+	list->n++;
+	return true;
+}
+
+static void style_parse(const char *text, struct style_list *list)
+{
+	const char *start = text;
+	int depth = 0;
+	char quote = 0;
+
+	list->v = NULL;
+	list->n = 0;
+	if (text == NULL) {
+		return;
+	}
+	for (const char *p = text;; p++) {
+		if (quote) {
+			if (*p == '\\' && p[1]) {
+				p++;
+			} else if (*p == quote) {
+				quote = 0;
+			} else if (*p == '\0') {
+				quote = 0;
+			}
+		}
+		if (*p == '"' || *p == '\'') {
+			if (!quote) {
+				quote = *p;
+			}
+		} else if (!quote && *p == '(') {
+			depth++;
+		} else if (!quote && *p == ')' && depth > 0) {
+			depth--;
+		}
+		if (*p == '\0' || (!quote && depth == 0 && *p == ';')) {
+			const char *colon = memchr(start, ':', (size_t)(p - start));
+			if (colon != NULL) {
+				char *name = style_trim(start, (size_t)(colon - start));
+				char *value = style_trim(colon + 1, (size_t)(p - colon - 1));
+				bool important = false;
+				if (name != NULL && value != NULL) {
+					char *bang = strrchr(value, '!');
+					if (bang != NULL && strncasecmp(bang + 1, "important", 9) == 0 &&
+					    bang[10] == '\0') {
+						important = true;
+						while (bang > value && isspace((unsigned char)bang[-1])) {
+							bang--;
+						}
+						*bang = '\0';
+					}
+					for (char *c = name; *c; c++) {
+						if (c[0] != '-' || c[1] != '-') {
+							*c = (char)tolower((unsigned char)*c);
+						} else {
+							break;
+						}
+					}
+				}
+				if (name != NULL && value != NULL && name[0] != '\0' && value[0] != '\0') {
+					style_add(list, name, value, important);
+				} else {
+					free(name);
+					free(value);
+				}
+			}
+			if (*p == '\0') {
+				break;
+			}
+			start = p + 1;
+		}
+	}
+}
+
+static void style_read(struct dom_element *element, struct style_list *list)
+{
+	dom_string *attr = NULL;
+
+	list->v = NULL;
+	list->n = 0;
+	if (element == NULL ||
+	    dom_element_get_attribute(element, corestring_dom_style, &attr) != DOM_NO_ERR ||
+	    attr == NULL) {
+		return;
+	}
+	style_parse(dom_string_data(attr), list);
+	dom_string_unref(attr);
+}
+
+static JSValue style_serialise(JSContext *ctx, struct style_list *list)
+{
+	size_t len = 1;
+	char *buf, *o;
+	JSValue ret;
+
+	for (size_t i = 0; i < list->n; i++) {
+		len += strlen(list->v[i].name) + strlen(list->v[i].value) + 16;
+	}
+	buf = malloc(len);
+	if (buf == NULL) {
+		return JS_ThrowOutOfMemory(ctx);
+	}
+	o = buf;
+	*o = '\0';
+	for (size_t i = 0; i < list->n; i++) {
+		o += sprintf(o,
+			     "%s%s: %s%s;",
+			     i ? " " : "",
+			     list->v[i].name,
+			     list->v[i].value,
+			     list->v[i].important ? " !important" : "");
+	}
+	ret = JS_NewString(ctx, buf);
+	free(buf);
+	return ret;
+}
+
+static JSValue style_write(JSContext *ctx, struct dom_element *element, struct style_list *list)
+{
+	JSValue text;
+	dom_string *ds;
+
+	if (element == NULL) {
+		return JS_UNDEFINED;
+	}
+	if (list->n == 0) {
+		(void)dom_element_remove_attribute(element, corestring_dom_style);
+		return JS_UNDEFINED;
+	}
+	text = style_serialise(ctx, list);
+	if (JS_IsException(text)) {
+		return text;
+	}
+	ds = qjsky_to_dom_string(ctx, text);
+	JS_FreeValue(ctx, text);
+	if (ds == NULL) {
+		return JS_EXCEPTION;
+	}
+	(void)dom_element_set_attribute(element, corestring_dom_style, ds);
+	dom_string_unref(ds);
+	return JS_UNDEFINED;
+}
+
+static char *style_property_name(JSContext *ctx, JSValueConst val)
+{
+	const char *s = JS_ToCString(ctx, val);
+	char *out;
+
+	if (s == NULL) {
+		return NULL;
+	}
+	out = style_trim(s, strlen(s));
+	JS_FreeCString(ctx, s);
+	if (out != NULL && !(out[0] == '-' && out[1] == '-')) {
+		for (char *c = out; *c; c++) {
+			*c = (char)tolower((unsigned char)*c);
+		}
+	}
+	return out;
+}
+
+static JSValue style_get_value(JSContext *ctx, struct dom_element *element, const char *name)
+{
+	struct style_list list;
+	JSValue ret = JS_NewString(ctx, "");
+
+	style_read(element, &list);
+	for (size_t i = 0; i < list.n; i++) {
+		if (strcmp(list.v[i].name, name) == 0) {
+			JS_FreeValue(ctx, ret);
+			ret = JS_NewString(ctx, list.v[i].value);
+			break;
+		}
+	}
+	style_list_free(&list);
+	return ret;
+}
+
+static JSValue style_set_value(JSContext *ctx, struct dom_element *element, const char *name, JSValueConst value, bool important)
+{
+	struct style_list list;
+	const char *v;
+	char *trimmed;
+	JSValue ret;
+
+	v = JS_IsNull(value) ? NULL : JS_ToCString(ctx, value);
+	if (!JS_IsNull(value) && v == NULL) {
+		return JS_EXCEPTION;
+	}
+	trimmed = style_trim(v != NULL ? v : "", v != NULL ? strlen(v) : 0);
+	if (v != NULL) {
+		JS_FreeCString(ctx, v);
+	}
+	if (trimmed == NULL) {
+		return JS_ThrowOutOfMemory(ctx);
+	}
+	style_read(element, &list);
+	if (trimmed[0] == '\0') {
+		free(trimmed);
+		for (size_t i = 0; i < list.n; i++) {
+			if (strcmp(list.v[i].name, name) == 0) {
+				free(list.v[i].name);
+				free(list.v[i].value);
+				memmove(&list.v[i], &list.v[i + 1], (list.n - i - 1) * sizeof(list.v[0]));
+				list.n--;
+				break;
+			}
+		}
+	} else {
+		char *n = strdup(name);
+		if (n == NULL || !style_add(&list, n, trimmed, important)) {
+			style_list_free(&list);
+			return JS_ThrowOutOfMemory(ctx);
+		}
+	}
+	ret = style_write(ctx, element, &list);
+	style_list_free(&list);
+	return ret;
+}
+
+static char *style_camel_to_dashed(const char *camel)
+{
+	size_t len = strlen(camel);
+	char *out = malloc(len * 2 + 2);
+	char *o = out;
+
+	if (out == NULL) {
+		return NULL;
+	}
+	if (strcmp(camel, "cssFloat") == 0) {
+		strcpy(out, "float");
+		return out;
+	}
+	for (const char *c = camel; *c; c++) {
+		if (isupper((unsigned char)*c)) {
+			*o++ = '-';
+			*o++ = (char)tolower((unsigned char)*c);
+		} else {
+			*o++ = *c;
+		}
+	}
+	*o = '\0';
+	return out;
+}
+
+static JSValue style_named_get(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic)
+{
+	css_style_declaration_private_t *priv = qjsky_private(ctx, this_val, QJSKY_IFACE_CSSSTYLEDECLARATION);
+
+	if (priv == NULL) {
+		return JS_ThrowTypeError(ctx, "Illegal invocation");
+	}
+	return style_get_value(ctx, priv->element, style_properties[magic]);
+}
+
+static JSValue style_named_set(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic)
+{
+	css_style_declaration_private_t *priv = qjsky_private(ctx, this_val, QJSKY_IFACE_CSSSTYLEDECLARATION);
+
+	if (priv == NULL) {
+		return JS_ThrowTypeError(ctx, "Illegal invocation");
+	}
+	return style_set_value(ctx, priv->element, style_properties[magic], argc > 0 ? argv[0] : JS_UNDEFINED, false);
+}
+%};
+};
+
+init CSSStyleDeclaration(struct dom_element *element)
+%{
+	priv->element = element;
+	if (element != NULL) {
+		dom_node_ref(element);
+	}
+%}
+
+fini CSSStyleDeclaration()
+%{
+	if (priv->element != NULL) {
+		dom_node_unref(priv->element);
+	}
+%}
+
+prototype CSSStyleDeclaration()
+%{
+	for (size_t i = 0; i < sizeof(style_properties) / sizeof(style_properties[0]); i++) {
+		char camel[64];
+		const char *names[2];
+		size_t o = 0;
+		bool upper = false;
+
+		for (const char *c = style_properties[i]; *c && o + 1 < sizeof(camel); c++) {
+			if (*c == '-') {
+				upper = true;
+			} else {
+				camel[o++] = upper ? (char)toupper((unsigned char)*c) : *c;
+				upper = false;
+			}
+		}
+		camel[o] = '\0';
+		names[0] = style_properties[i];
+		names[1] = camel;
+		for (int k = 0; k < (strcmp(names[0], names[1]) == 0 ? 1 : 2); k++) {
+			JSAtom atom = JS_NewAtom(ctx, names[k]);
+			JSValue get = JS_NewCFunctionMagic(ctx, style_named_get, names[k], 0, JS_CFUNC_generic_magic, (int)i);
+			JSValue set = JS_NewCFunctionMagic(ctx, style_named_set, names[k], 1, JS_CFUNC_generic_magic, (int)i);
+			int r = JS_DefinePropertyGetSet(ctx, proto, atom, get, set, JS_PROP_CONFIGURABLE | JS_PROP_ENUMERABLE);
+			JS_FreeAtom(ctx, atom);
+			if (r < 0) {
+				return -1;
+			}
+		}
+	}
+%}
+
+getter CSSStyleDeclaration::cssText()
+%{
+	struct style_list list;
+	JSValue ret;
+
+	style_read(priv->element, &list);
+	ret = style_serialise(ctx, &list);
+	style_list_free(&list);
+	return ret;
+%}
+
+setter CSSStyleDeclaration::cssText()
+%{
+	struct style_list list;
+	const char *text = JS_ToCString(ctx, argv[0]);
+	JSValue ret;
+
+	if (text == NULL) return JS_EXCEPTION;
+	style_parse(text, &list);
+	JS_FreeCString(ctx, text);
+	ret = style_write(ctx, priv->element, &list);
+	style_list_free(&list);
+	return ret;
+%}
+
+getter CSSStyleDeclaration::length()
+%{
+	struct style_list list;
+	size_t n;
+
+	style_read(priv->element, &list);
+	n = list.n;
+	style_list_free(&list);
+	return JS_NewUint32(ctx, (uint32_t)n);
+%}
+
+method CSSStyleDeclaration::item()
+%{
+	struct style_list list;
+	uint32_t index = 0;
+	JSValue ret = JS_NewString(ctx, "");
+
+	if (argc > 0 && JS_ToUint32(ctx, &index, argv[0]) < 0) return JS_EXCEPTION;
+	style_read(priv->element, &list);
+	if (index < list.n) {
+		JS_FreeValue(ctx, ret);
+		ret = JS_NewString(ctx, list.v[index].name);
+	}
+	style_list_free(&list);
+	return ret;
+%}
+
+method CSSStyleDeclaration::getPropertyValue()
+%{
+	char *name;
+	JSValue ret;
+
+	if (argc < 1) return JS_ThrowTypeError(ctx, "getPropertyValue: 1 argument required");
+	name = style_property_name(ctx, argv[0]);
+	if (name == NULL) return JS_EXCEPTION;
+	ret = style_get_value(ctx, priv->element, name);
+	free(name);
+	return ret;
+%}
+
+method CSSStyleDeclaration::getPropertyPriority()
+%{
+	struct style_list list;
+	char *name;
+	bool important = false;
+
+	if (argc < 1) return JS_ThrowTypeError(ctx, "getPropertyPriority: 1 argument required");
+	name = style_property_name(ctx, argv[0]);
+	if (name == NULL) return JS_EXCEPTION;
+	style_read(priv->element, &list);
+	for (size_t i = 0; i < list.n; i++) {
+		if (strcmp(list.v[i].name, name) == 0) important = list.v[i].important;
+	}
+	style_list_free(&list);
+	free(name);
+	return JS_NewString(ctx, important ? "important" : "");
+%}
+
+method CSSStyleDeclaration::setProperty()
+%{
+	char *name;
+	bool important = false;
+	JSValue ret;
+
+	if (argc < 2) return JS_ThrowTypeError(ctx, "setProperty: 2 arguments required");
+	if (argc > 2 && !JS_IsUndefined(argv[2])) {
+		const char *p = JS_ToCString(ctx, argv[2]);
+		if (p == NULL) return JS_EXCEPTION;
+		important = strcasecmp(p, "important") == 0;
+		if (!important && p[0] != '\0') {
+			JS_FreeCString(ctx, p);
+			return JS_UNDEFINED;
+		}
+		JS_FreeCString(ctx, p);
+	}
+	name = style_property_name(ctx, argv[0]);
+	if (name == NULL) return JS_EXCEPTION;
+	ret = style_set_value(ctx, priv->element, name, argv[1], important);
+	free(name);
+	return ret;
+%}
+
+method CSSStyleDeclaration::removeProperty()
+%{
+	char *name;
+	JSValue old;
+
+	if (argc < 1) return JS_ThrowTypeError(ctx, "removeProperty: 1 argument required");
+	name = style_property_name(ctx, argv[0]);
+	if (name == NULL) return JS_EXCEPTION;
+	old = style_get_value(ctx, priv->element, name);
+	if (!JS_IsException(old)) {
+		JSValue r = style_set_value(ctx, priv->element, name, JS_NULL, false);
+		if (JS_IsException(r)) {
+			JS_FreeValue(ctx, old);
+			old = r;
+		}
+	}
+	free(name);
+	return old;
+%}
+
+method CSSStyleDeclaration::setPropertyValue()
+%{
+	char *name;
+	JSValue ret;
+
+	if (argc < 2) return JS_ThrowTypeError(ctx, "setPropertyValue: 2 arguments required");
+	name = style_property_name(ctx, argv[0]);
+	if (name == NULL) return JS_EXCEPTION;
+	ret = style_set_value(ctx, priv->element, name, argv[1], false);
+	free(name);
+	return ret;
+%}
+
+method CSSStyleDeclaration::setPropertyPriority()
+%{
+	return JS_UNDEFINED;
+%}
+
+getter CSSStyleDeclaration::parentRule()
+%{
+	return JS_NULL;
+%}
+
+getter CSSStyleDeclaration::cssFloat()
+%{
+	return style_get_value(ctx, priv->element, "float");
+%}
+
+setter CSSStyleDeclaration::cssFloat()
+%{
+	return style_set_value(ctx, priv->element, "float", argv[0], false);
+%}

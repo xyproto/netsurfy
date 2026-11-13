@@ -1,0 +1,130 @@
+/* CharacterData binding for browser using QuickJS and libdom
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+class CharacterData {
+	prologue %{
+static JSValue character_data_result(JSContext *ctx, dom_exception exc)
+{
+	switch (exc) {
+	case DOM_NO_ERR:
+		return JS_UNDEFINED;
+	case DOM_INDEX_SIZE_ERR:
+		return JS_ThrowDOMException(ctx, "IndexSizeError", "The offset is out of range.");
+	case DOM_NO_MODIFICATION_ALLOWED_ERR:
+		return JS_ThrowDOMException(ctx, "NoModificationAllowedError", "The node is read-only.");
+	default:
+		return JS_ThrowOutOfMemory(ctx);
+	}
+}
+%};
+};
+
+init CharacterData(struct dom_node_character_data *character_data::node);
+
+getter CharacterData::data()
+%{
+	dom_string *data = NULL;
+	JSValue ret;
+
+	if (dom_characterdata_get_data(priv->parent.node, &data) != DOM_NO_ERR) return JS_ThrowOutOfMemory(ctx);
+	if (data == NULL) return JS_NewString(ctx, "");
+	ret = qjsky_string(ctx, data);
+	dom_string_unref(data);
+	return ret;
+%}
+
+setter CharacterData::data()
+%{
+	dom_string *data = JS_IsNull(argv[0]) ? NULL : qjsky_to_dom_string(ctx, argv[0]);
+	dom_exception exc;
+
+	if (data == NULL && JS_IsNull(argv[0])) {
+		if (dom_string_create((const uint8_t *)"", 0, &data) != DOM_NO_ERR) return JS_ThrowOutOfMemory(ctx);
+	}
+	if (data == NULL) return JS_EXCEPTION;
+	exc = dom_characterdata_set_data(priv->parent.node, data);
+	dom_string_unref(data);
+	return character_data_result(ctx, exc);
+%}
+
+getter CharacterData::length()
+%{
+	uint32_t length = 0;
+
+	if (dom_characterdata_get_length(priv->parent.node, &length) != DOM_NO_ERR) return JS_ThrowOutOfMemory(ctx);
+	return JS_NewUint32(ctx, length);
+%}
+
+method CharacterData::substringData()
+%{
+	uint32_t offset = 0, count = 0;
+	dom_string *data = NULL;
+	dom_exception exc;
+	JSValue ret;
+
+	if (argc < 2) return JS_ThrowTypeError(ctx, "substringData: 2 arguments required");
+	if (JS_ToUint32(ctx, &offset, argv[0]) < 0 || JS_ToUint32(ctx, &count, argv[1]) < 0) return JS_EXCEPTION;
+	exc = dom_characterdata_substring_data(priv->parent.node, offset, count, &data);
+	if (exc != DOM_NO_ERR) return character_data_result(ctx, exc);
+	if (data == NULL) return JS_NewString(ctx, "");
+	ret = qjsky_string(ctx, data);
+	dom_string_unref(data);
+	return ret;
+%}
+
+method CharacterData::appendData()
+%{
+	dom_string *data;
+	dom_exception exc;
+
+	if (argc < 1) return JS_ThrowTypeError(ctx, "appendData: 1 argument required");
+	data = qjsky_to_dom_string(ctx, argv[0]);
+	if (data == NULL) return JS_EXCEPTION;
+	exc = dom_characterdata_append_data(priv->parent.node, data);
+	dom_string_unref(data);
+	return character_data_result(ctx, exc);
+%}
+
+method CharacterData::insertData()
+%{
+	uint32_t offset = 0;
+	dom_string *data;
+	dom_exception exc;
+
+	if (argc < 2) return JS_ThrowTypeError(ctx, "insertData: 2 arguments required");
+	if (JS_ToUint32(ctx, &offset, argv[0]) < 0) return JS_EXCEPTION;
+	data = qjsky_to_dom_string(ctx, argv[1]);
+	if (data == NULL) return JS_EXCEPTION;
+	exc = dom_characterdata_insert_data(priv->parent.node, offset, data);
+	dom_string_unref(data);
+	return character_data_result(ctx, exc);
+%}
+
+method CharacterData::deleteData()
+%{
+	uint32_t offset = 0, count = 0;
+
+	if (argc < 2) return JS_ThrowTypeError(ctx, "deleteData: 2 arguments required");
+	if (JS_ToUint32(ctx, &offset, argv[0]) < 0 || JS_ToUint32(ctx, &count, argv[1]) < 0) return JS_EXCEPTION;
+	return character_data_result(ctx, dom_characterdata_delete_data(priv->parent.node, offset, count));
+%}
+
+method CharacterData::replaceData()
+%{
+	uint32_t offset = 0, count = 0;
+	dom_string *data;
+	dom_exception exc;
+
+	if (argc < 3) return JS_ThrowTypeError(ctx, "replaceData: 3 arguments required");
+	if (JS_ToUint32(ctx, &offset, argv[0]) < 0 || JS_ToUint32(ctx, &count, argv[1]) < 0) return JS_EXCEPTION;
+	data = qjsky_to_dom_string(ctx, argv[2]);
+	if (data == NULL) return JS_EXCEPTION;
+	exc = dom_characterdata_replace_data(priv->parent.node, offset, count, data);
+	dom_string_unref(data);
+	return character_data_result(ctx, exc);
+%}

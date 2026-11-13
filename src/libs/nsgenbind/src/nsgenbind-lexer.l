@@ -157,6 +157,7 @@ method                  return TOK_METHOD;
 getter                  return TOK_GETTER;
 setter                  return TOK_SETTER;
 prototype               return TOK_PROTOTYPE;
+constructor             return TOK_CONSTRUCTOR;
 
  /* c type terminals */
 

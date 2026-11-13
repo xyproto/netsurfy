@@ -1,0 +1,93 @@
+/* DOMParser binding for browser using QuickJS and libdom
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+class DOMParser {
+	prologue %{
+#include <string.h>
+#include <dom/bindings/hubbub/parser.h>
+#include <dom/bindings/xml/xmlparser.h>
+
+static void dom_parser_msg(uint32_t severity, void *ctx, const char *msg, ...)
+{
+}
+
+static dom_document *dom_parser_html(const char *data, size_t len)
+{
+	dom_hubbub_parser_params params;
+	dom_hubbub_parser *parser = NULL;
+	dom_document *doc = NULL;
+
+	memset(&params, 0, sizeof(params));
+	params.enc = "UTF-8";
+	params.fix_enc = true;
+	params.enable_script = false;
+	if (dom_hubbub_parser_create(&params, &parser, &doc) != DOM_HUBBUB_OK) {
+		return NULL;
+	}
+	(void)dom_hubbub_parser_parse_chunk(parser, (const uint8_t *)data, len);
+	(void)dom_hubbub_parser_completed(parser);
+	dom_hubbub_parser_destroy(parser);
+	return doc;
+}
+
+static dom_document *dom_parser_xml(const char *data, size_t len)
+{
+	dom_document *doc = NULL;
+	dom_xml_parser *parser = dom_xml_parser_create("UTF-8", "UTF-8", dom_parser_msg, NULL, &doc);
+
+	if (parser == NULL) {
+		return NULL;
+	}
+	(void)dom_xml_parser_parse_chunk(parser, (uint8_t *)data, len);
+	(void)dom_xml_parser_completed(parser);
+	dom_xml_parser_destroy(parser);
+	return doc;
+}
+%};
+};
+
+init DOMParser()
+%{
+%}
+
+constructor DOMParser()
+%{
+	return qjsky_constructed(ctx, qjsky_dom_parser___create(ctx), new_target);
+%}
+
+method DOMParser::parseFromString()
+%{
+	static const char *const xml_types[] = {
+		"text/xml", "application/xml", "application/xhtml+xml", "image/svg+xml",
+	};
+	const char *data, *type;
+	size_t len = 0;
+	dom_document *doc = NULL;
+	bool xml = false, html;
+	JSValue ret;
+
+	if (argc < 2) return JS_ThrowTypeError(ctx, "parseFromString: 2 arguments required");
+	type = JS_ToCString(ctx, argv[1]);
+	if (type == NULL) return JS_EXCEPTION;
+	html = strcmp(type, "text/html") == 0;
+	for (size_t i = 0; i < sizeof(xml_types) / sizeof(xml_types[0]); i++) {
+		xml = xml || strcmp(type, xml_types[i]) == 0;
+	}
+	JS_FreeCString(ctx, type);
+	if (!html && !xml) {
+		return JS_ThrowTypeError(ctx, "Failed to execute 'parseFromString' on 'DOMParser': unsupported type");
+	}
+	data = JS_ToCStringLen(ctx, &len, argv[0]);
+	if (data == NULL) return JS_EXCEPTION;
+	doc = html ? dom_parser_html(data, len) : dom_parser_xml(data, len);
+	JS_FreeCString(ctx, data);
+	if (doc == NULL) return JS_ThrowOutOfMemory(ctx);
+	ret = qjsky_node(ctx, (dom_node *)doc);
+	dom_node_unref(doc);
+	return ret;
+%}

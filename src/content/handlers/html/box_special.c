@@ -26,9 +26,13 @@
  * Implementation of special element handling conversion.
  */
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <stdbool.h>
 #include <dom/dom.h>
+#include <nsutils/base64.h>
 
 #include "utils/nsoption.h"
 #include "utils/corestrings.h"
@@ -1920,6 +1924,10 @@ static bool box_select(dom_node *n,
 		form_free_control(gadget);
 		return false;
 	}
+	if (gadget->data.select.num_items > 0 && c != NULL) {
+		dom_node_unref(c);
+		c = NULL;
+	}
 
 	while (c != NULL) {
 		dom_string *name;
@@ -2090,6 +2098,309 @@ static bool box_textarea(dom_node *n,
 
 
 /* exported interface documented in html/box_special.h */
+
+struct svg_buf {
+	char *data;
+	size_t len;
+	size_t cap;
+	bool ok;
+};
+
+static void svg_buf_add(struct svg_buf *b, const char *s, size_t n)
+{
+	if (!b->ok) {
+		return;
+	}
+	if (b->len + n + 1 > b->cap) {
+		size_t cap = b->cap ? b->cap : 4096;
+		char *grown;
+		while (b->len + n + 1 > cap) {
+			cap *= 2;
+		}
+		grown = realloc(b->data, cap);
+		if (grown == NULL) {
+			b->ok = false;
+			return;
+		}
+		b->data = grown;
+		b->cap = cap;
+	}
+	memcpy(b->data + b->len, s, n);
+	b->len += n;
+	b->data[b->len] = '\0';
+}
+
+static void svg_buf_str(struct svg_buf *b, const char *s)
+{
+	svg_buf_add(b, s, strlen(s));
+}
+
+static void svg_buf_escape(struct svg_buf *b, const char *s, size_t n)
+{
+	size_t start = 0;
+
+	for (size_t i = 0; i < n; i++) {
+		const char *rep = NULL;
+		switch (s[i]) {
+		case '&':
+			rep = "&amp;";
+			break;
+		case '<':
+			rep = "&lt;";
+			break;
+		case '>':
+			rep = "&gt;";
+			break;
+		case '"':
+			rep = "&quot;";
+			break;
+		default:
+			break;
+		}
+		if (rep != NULL) {
+			svg_buf_add(b, s + start, i - start);
+			svg_buf_str(b, rep);
+			start = i + 1;
+		}
+	}
+	svg_buf_add(b, s + start, n - start);
+}
+
+static const char *svg_element_name(const char *lower)
+{
+	static const char *const names[] = {
+		"clipPath",
+		"linearGradient",
+		"radialGradient",
+		"textPath",
+		"foreignObject",
+		"feGaussianBlur",
+		"feOffset",
+		"feBlend",
+		"feColorMatrix",
+		"feFlood",
+		"feComposite",
+		"feMerge",
+		"feMergeNode",
+		"animateTransform",
+		"animateMotion",
+	};
+
+	for (size_t i = 0; i < sizeof(names) / sizeof(names[0]); i++) {
+		if (strcasecmp(names[i], lower) == 0) {
+			return names[i];
+		}
+	}
+	return lower;
+}
+
+static void svg_serialize(dom_node *n, struct svg_buf *b, bool root)
+{
+	dom_node_type type;
+	dom_exception err;
+	dom_node *child, *next;
+
+	if (dom_node_get_node_type(n, &type) != DOM_NO_ERR) {
+		b->ok = false;
+		return;
+	}
+	if (type == DOM_TEXT_NODE || type == DOM_CDATA_SECTION_NODE) {
+		dom_string *text = NULL;
+		if (dom_characterdata_get_data(n, &text) == DOM_NO_ERR &&
+		    text != NULL) {
+			svg_buf_escape(b,
+				       dom_string_data(text),
+				       dom_string_byte_length(text));
+			dom_string_unref(text);
+		}
+		return;
+	}
+	if (type != DOM_ELEMENT_NODE) {
+		return;
+	}
+
+	{
+		dom_string *ds = NULL;
+		dom_namednodemap *attrs = NULL;
+		char lname[64];
+		const char *name;
+		bool has_xmlns = false, has_width = false, has_height = false;
+		double vb[4] = {0, 0, 0, 0};
+		bool has_vb = false;
+		uint32_t count = 0;
+		size_t len;
+
+		if (dom_node_get_node_name(n, &ds) != DOM_NO_ERR ||
+		    ds == NULL) {
+			b->ok = false;
+			return;
+		}
+		len = dom_string_byte_length(ds);
+		if (len >= sizeof(lname)) {
+			len = sizeof(lname) - 1;
+		}
+		for (size_t i = 0; i < len; i++) {
+			lname[i] = ascii_to_lower(dom_string_data(ds)[i]);
+		}
+		lname[len] = '\0';
+		dom_string_unref(ds);
+		name = svg_element_name(lname);
+
+		svg_buf_str(b, "<");
+		svg_buf_str(b, name);
+
+		if (dom_node_get_attributes(n, &attrs) == DOM_NO_ERR &&
+		    attrs != NULL) {
+			dom_namednodemap_get_length(attrs, &count);
+			for (uint32_t i = 0; i < count; i++) {
+				dom_attr *attr = NULL;
+				dom_string *an = NULL, *av = NULL;
+
+				if (dom_namednodemap_item(
+					    attrs, i, (void *)&attr) !=
+					    DOM_NO_ERR ||
+				    attr == NULL) {
+					continue;
+				}
+				if (dom_attr_get_name(attr, &an) ==
+					    DOM_NO_ERR &&
+				    an != NULL &&
+				    dom_attr_get_value(attr, &av) ==
+					    DOM_NO_ERR &&
+				    av != NULL) {
+					const char *a = dom_string_data(an);
+					if (strcmp(a, "xmlns") == 0) {
+						has_xmlns = true;
+					} else if (strcmp(a, "width") == 0) {
+						has_width = true;
+					} else if (strcmp(a, "height") == 0) {
+						has_height = true;
+					} else if (strcasecmp(a, "viewbox") ==
+						   0) {
+						has_vb =
+							sscanf(dom_string_data(
+								       av),
+							       "%lf%*[ ,]%lf%*[ ,]%lf%*[ ,]%lf",
+							       &vb[0],
+							       &vb[1],
+							       &vb[2],
+							       &vb[3]) == 4;
+						a = "viewBox";
+					}
+					svg_buf_str(b, " ");
+					svg_buf_str(b, a);
+					svg_buf_str(b, "=\"");
+					svg_buf_escape(b,
+						       dom_string_data(av),
+						       dom_string_byte_length(
+							       av));
+					svg_buf_str(b, "\"");
+				}
+				if (an != NULL) {
+					dom_string_unref(an);
+				}
+				if (av != NULL) {
+					dom_string_unref(av);
+				}
+				dom_node_unref(attr);
+			}
+			dom_namednodemap_unref(attrs);
+		}
+
+		if (root) {
+			char num[64];
+			if (!has_xmlns) {
+				svg_buf_str(
+					b,
+					" xmlns=\"http://www.w3.org/2000/svg\"");
+			}
+			if (has_vb && vb[2] > 0 && vb[3] > 0) {
+				if (!has_width) {
+					snprintf(num,
+						 sizeof(num),
+						 " width=\"%g\"",
+						 vb[2]);
+					svg_buf_str(b, num);
+				}
+				if (!has_height) {
+					snprintf(num,
+						 sizeof(num),
+						 " height=\"%g\"",
+						 vb[3]);
+					svg_buf_str(b, num);
+				}
+			}
+		}
+		svg_buf_str(b, ">");
+
+		err = dom_node_get_first_child(n, &child);
+		while (err == DOM_NO_ERR && child != NULL) {
+			svg_serialize(child, b, false);
+			err = dom_node_get_next_sibling(child, &next);
+			dom_node_unref(child);
+			child = next;
+		}
+
+		svg_buf_str(b, "</");
+		svg_buf_str(b, name);
+		svg_buf_str(b, ">");
+	}
+}
+
+/**
+ * Inline svg element: serialise it and show it as an image object.
+ */
+static bool box_svg(dom_node *n,
+		    html_content *content,
+		    struct box *box,
+		    bool *convert_children)
+{
+	struct svg_buf b = {NULL, 0, 0, true};
+	static const char prefix[] = "data:image/svg+xml;base64,";
+	size_t enc_len;
+	char *url_s;
+	nsurl *url = NULL;
+	bool ok = true;
+
+	*convert_children = false;
+
+	if (box->style &&
+	    ns_computed_display(box->style, box_is_root(n)) == CSS_DISPLAY_NONE)
+		return true;
+
+	svg_serialize(n, &b, true);
+	if (!b.ok || b.data == NULL) {
+		free(b.data);
+		return b.ok;
+	}
+
+	enc_len = ((b.len + 2) / 3) * 4;
+	url_s = malloc(sizeof(prefix) + enc_len + 1);
+	if (url_s == NULL) {
+		free(b.data);
+		return false;
+	}
+	memcpy(url_s, prefix, sizeof(prefix) - 1);
+	if (nsu_base64_encode((const uint8_t *)b.data,
+			      b.len,
+			      (uint8_t *)url_s + sizeof(prefix) - 1,
+			      &enc_len) != NSUERROR_OK) {
+		free(url_s);
+		free(b.data);
+		return true;
+	}
+	url_s[sizeof(prefix) - 1 + enc_len] = '\0';
+	free(b.data);
+
+	if (nsurl_create(url_s, &url) == NSERROR_OK) {
+		box->flags |= IS_REPLACED;
+		ok = html_fetch_object(content, url, box, image_types, false);
+		nsurl_unref(url);
+	}
+	free(url_s);
+	return ok;
+}
+
 bool convert_special_elements(dom_node *node,
 			      html_content *content,
 			      struct box *box,
@@ -2098,6 +2409,35 @@ bool convert_special_elements(dom_node *node,
 	dom_exception exc;
 	dom_html_element_type tag_type;
 	bool res;
+
+	{
+		dom_string *ns = NULL;
+		bool svg = false;
+
+		if (dom_node_get_namespace(node, &ns) == DOM_NO_ERR &&
+		    ns != NULL) {
+			svg = dom_string_isequal(
+				ns, dom_namespaces[DOM_NAMESPACE_SVG]);
+			dom_string_unref(ns);
+		}
+		if (svg) {
+			dom_string *name = NULL;
+			bool root = false;
+
+			if (dom_node_get_node_name(node, &name) == DOM_NO_ERR &&
+			    name != NULL) {
+				root = dom_string_byte_length(name) == 3 &&
+				       strncasecmp(dom_string_data(name),
+						   "svg",
+						   3) == 0;
+				dom_string_unref(name);
+			}
+			if (root) {
+				return box_svg(
+					node, content, box, convert_children);
+			}
+		}
+	}
 
 	exc = dom_html_element_get_tag_type(node, &tag_type);
 	if (exc != DOM_NO_ERR) {

@@ -92,6 +92,8 @@ nserror dom_to_box(struct dom_node *n,
  */
 nserror cancel_dom_to_box(void *box_conversion_context);
 
+nserror dom_to_box_sync(struct dom_node *n, struct html_content *c);
+
 
 /**
  * Retrieve the box for a dom node, if there is one

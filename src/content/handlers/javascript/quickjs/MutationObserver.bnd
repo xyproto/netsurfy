@@ -1,0 +1,59 @@
+/* MutationObserver binding for browser using QuickJS and libdom
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+class MutationObserver {
+	private struct qjsky_observer *mo;
+	prologue %{
+#include "javascript/quickjs/mutation.h"
+%};
+};
+
+init MutationObserver(struct qjsky_observer *mo)
+%{
+	priv->mo = mo;
+%}
+
+fini MutationObserver()
+%{
+	qjsky_observer_free(rt, priv->mo);
+%}
+
+constructor MutationObserver()
+%{
+	struct qjsky_observer *mo;
+	JSValue obj;
+
+	if (argc < 1 || !JS_IsFunction(ctx, argv[0])) {
+		return JS_ThrowTypeError(ctx, "Failed to construct 'MutationObserver': parameter 1 is not a function.");
+	}
+	mo = qjsky_observer_create(ctx, argv[0]);
+	if (mo == NULL) return JS_ThrowOutOfMemory(ctx);
+	obj = qjsky_mutation_observer___create(ctx, mo);
+	return qjsky_constructed(ctx, obj, new_target);
+%}
+
+method MutationObserver::observe()
+%{
+	node_private_t *target = argc > 0 ? qjsky_private(ctx, argv[0], QJSKY_IFACE_NODE) : NULL;
+
+	if (target == NULL) {
+		return JS_ThrowTypeError(ctx, "Failed to execute 'observe' on 'MutationObserver': parameter 1 is not of type 'Node'.");
+	}
+	return qjsky_observer_observe(ctx, priv->mo, this_val, target->node, argc > 1 ? argv[1] : JS_UNDEFINED);
+%}
+
+method MutationObserver::disconnect()
+%{
+	qjsky_observer_disconnect(priv->mo);
+	return JS_UNDEFINED;
+%}
+
+method MutationObserver::takeRecords()
+%{
+	return qjsky_observer_take_records(ctx, priv->mo);
+%}

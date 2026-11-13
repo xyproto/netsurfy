@@ -234,6 +234,8 @@ const char *textarea_data(struct textarea *ta, unsigned int *len);
  */
 bool textarea_set_caret(struct textarea *ta, int caret);
 
+void textarea_refresh_caret(struct textarea *ta);
+
 
 /**
  * Handle redraw requests for text areas

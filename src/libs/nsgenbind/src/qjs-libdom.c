@@ -251,7 +251,9 @@ static int output_binding_header(struct ir *ir)
 	outputf(bindc,
 		"typedef JSValue (*%s_create_fn)(JSContext *ctx, void *ptr);\n"
 		"typedef void (*%s_fini_fn)(JSRuntime *rt, void *priv);\n"
-		"typedef int (*%s_proto_fn)(JSContext *ctx, JSValueConst proto, JSValueConst ctor);\n\n",
+		"typedef int (*%s_proto_fn)(JSContext *ctx, JSValueConst proto, JSValueConst ctor);\n"
+		"typedef JSValue (*%s_ctor_fn)(JSContext *ctx, JSValueConst new_target, int argc, JSValueConst *argv);\n\n",
+		DLPFX,
 		DLPFX,
 		DLPFX,
 		DLPFX);
@@ -262,7 +264,10 @@ static int output_binding_header(struct ir *ir)
 		"extern const %s_create_fn %s_iface_create[QJSKY_IFACE__COUNT];\n"
 		"extern const %s_fini_fn %s_iface_fini[QJSKY_IFACE__COUNT];\n"
 		"extern const %s_proto_fn %s_iface_proto[QJSKY_IFACE__COUNT];\n"
+		"extern const %s_ctor_fn %s_iface_ctor[QJSKY_IFACE__COUNT];\n"
 		"extern const int %s_iface_global;\n\n",
+		DLPFX,
+		DLPFX,
 		DLPFX,
 		DLPFX,
 		DLPFX,
@@ -356,6 +361,31 @@ static int output_binding_src(struct ir *ir)
 		}
 		ename = iface_enum_name(entry->name);
 		outputf(bindc, "\t[%s] = \"%s\",\n", ename, entry->name);
+		free(ename);
+	}
+	outputf(bindc, "};\n\n");
+
+	outputf(bindc,
+		"const %s_ctor_fn %s_iface_ctor[QJSKY_IFACE__COUNT] = {\n",
+		DLPFX,
+		DLPFX);
+	for (idx = 0; idx < ir->entryc; idx++) {
+		struct ir_entry *entry = ir->entries + idx;
+		char *ename;
+
+		if (!entry_has_object(entry) ||
+		    genbind_node_find_method(entry->class,
+					     NULL,
+					     GENBIND_METHOD_TYPE_CONSTRUCTOR) ==
+			    NULL) {
+			continue;
+		}
+		ename = iface_enum_name(entry->name);
+		outputf(bindc,
+			"\t[%s] = %s_%s___constructor,\n",
+			ename,
+			DLPFX,
+			entry->class_name);
 		free(ename);
 	}
 	outputf(bindc, "};\n\n");

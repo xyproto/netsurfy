@@ -2572,8 +2572,6 @@ dom_exception _dom_node_dispatch_event(dom_event_target *et,
 	/* To test whether this event is in dispatch */
 	if (evt->in_dispatch == true) {
 		return DOM_DISPATCH_REQUEST_ERR;
-	} else {
-		evt->in_dispatch = true;
 	}
 
 	if (evt->type == NULL || dom_string_byte_length(evt->type) == 0) {
@@ -2586,6 +2584,8 @@ dom_exception _dom_node_dispatch_event(dom_event_target *et,
 		 * no document at all, do nothing for this kind of node */
 		return DOM_NO_ERR;
 	}
+
+	evt->in_dispatch = true;
 
 	/* Increment semaphore if mutation event (c.f. _dom_node_readonly) */
 	if (_event_is_mutation(doc, evt)) {
@@ -2726,6 +2726,12 @@ cleanup:
 	if (_event_is_mutation(doc, evt)) {
 		doc->dispatching_mutation--;
 	}
+
+	evt->in_dispatch = false;
+	evt->stop = false;
+	evt->stop_now = false;
+	evt->current = NULL;
+	evt->phase = (dom_event_flow_phase)0;
 
 	if (evt->prevent_default == true) {
 		*success = false;

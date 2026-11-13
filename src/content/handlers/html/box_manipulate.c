@@ -29,6 +29,7 @@
 #include "utils/errors.h"
 #include "utils/talloc.h"
 #include "utils/nsurl.h"
+#include "utils/corestrings.h"
 #include "netsurfy/types.h"
 #include "netsurfy/mouse.h"
 #include "desktop/scrollbar.h"
@@ -66,6 +67,22 @@ static int box_talloc_destructor(struct box *b)
 	lwc_string_unref(b->id);
 
 	if (b->node != NULL) {
+		void *current = NULL;
+
+		if (dom_node_get_user_data(
+			    b->node,
+			    corestring_dom___ns_key_box_node_data,
+			    &current) == DOM_NO_ERR &&
+		    current == b) {
+			void *old = NULL;
+
+			dom_node_set_user_data(
+				b->node,
+				corestring_dom___ns_key_box_node_data,
+				NULL,
+				NULL,
+				&old);
+		}
 		dom_node_unref(b->node);
 	}
 

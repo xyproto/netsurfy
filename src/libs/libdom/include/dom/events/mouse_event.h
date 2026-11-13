@@ -17,6 +17,10 @@ struct dom_abstract_view;
 
 typedef struct dom_mouse_event dom_mouse_event;
 
+dom_exception _dom_mouse_event_create(dom_mouse_event **evt);
+#define dom_mouse_event_create(n)                                              \
+	_dom_mouse_event_create((dom_mouse_event **)(n))
+
 dom_exception _dom_mouse_event_get_screen_x(dom_mouse_event *evt, int32_t *x);
 #define dom_mouse_event_get_screen_x(e, x)                                     \
 	_dom_mouse_event_get_screen_x((dom_mouse_event *)(e), (int32_t *)(x))

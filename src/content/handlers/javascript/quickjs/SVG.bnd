@@ -1,0 +1,63 @@
+/* SVG element interfaces for browser using QuickJS and libdom
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+init SVGElement(struct dom_element *element::element);
+
+getter SVGElement::style()
+%{
+	return qjsky_element_style(ctx, this_val, (struct dom_element *)priv->parent.parent.node);
+%}
+
+getter SVGElement::ownerSVGElement()
+%{
+	dom_node *root = qjsky_svg_root(priv->parent.parent.node, false);
+	JSValue ret;
+
+	if (root == NULL) return JS_NULL;
+	ret = qjsky_node(ctx, root);
+	dom_node_unref(root);
+	return ret;
+%}
+
+init SVGGraphicsElement(struct dom_element *element::element);
+
+method SVGGraphicsElement::getScreenCTM()
+%{
+	qjsky_matrix mat;
+
+	if (!qjsky_svg_ctm(ctx, priv->parent.parent.parent.node, true, &mat)) return JS_NULL;
+	return qjsky_dom_matrix___create(ctx, &mat);
+%}
+
+method SVGGraphicsElement::getCTM()
+%{
+	qjsky_matrix mat;
+
+	if (!qjsky_svg_ctm(ctx, priv->parent.parent.parent.node, false, &mat)) return JS_NULL;
+	return qjsky_dom_matrix___create(ctx, &mat);
+%}
+
+init SVGSVGElement(struct dom_element *element::element);
+
+method SVGSVGElement::createSVGPoint()
+%{
+	return qjsky_dom_point___create(ctx, 0, 0, 0, 1);
+%}
+
+method SVGSVGElement::createSVGMatrix()
+%{
+	qjsky_matrix mat;
+
+	qjsky_matrix_identity(&mat);
+	return qjsky_dom_matrix___create(ctx, &mat);
+%}
+
+method SVGSVGElement::createSVGRect()
+%{
+	return qjsky_dom_rect___create(ctx, 0, 0, 0, 0);
+%}

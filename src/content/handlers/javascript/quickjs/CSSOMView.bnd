@@ -1,0 +1,216 @@
+/* CSSOM View extensions to Element, HTMLElement and MouseEvent
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+method Element::getBoundingClientRect()
+%{
+	double border[4] = {0, 0, 0, 0}, content[4], sx, sy;
+
+	if (!qjsky_node_boxes(priv->parent.node, border, content)) {
+		return qjsky_dom_rect___create(ctx, 0, 0, 0, 0);
+	}
+	qjsky_viewport_scroll(ctx, &sx, &sy);
+	return qjsky_dom_rect___create(ctx, border[0] - sx, border[1] - sy, border[2], border[3]);
+%}
+
+method Element::getClientRects()
+%{
+	double border[4], content[4], sx, sy;
+	JSValue list = JS_NewArray(ctx);
+
+	if (JS_IsException(list) || !qjsky_node_boxes(priv->parent.node, border, content)) {
+		return list;
+	}
+	qjsky_viewport_scroll(ctx, &sx, &sy);
+	if (JS_SetPropertyUint32(ctx, list, 0, qjsky_dom_rect___create(ctx, border[0] - sx, border[1] - sy, border[2], border[3])) < 0) {
+		JS_FreeValue(ctx, list);
+		return JS_EXCEPTION;
+	}
+	return list;
+%}
+
+method Element::scrollIntoView()
+%{
+	double border[4], content[4], y;
+	window_private_t *win = qjsky_global_private(ctx);
+	bool top = true;
+	struct rect rect;
+	float scale;
+	int sx = 0, sy = 0;
+
+	if (!qjsky_node_boxes(priv->parent.node, border, content) || win == NULL ||
+	    win->closed_down || win->win == NULL || win->win->window == NULL ||
+	    guit->window->set_scroll == NULL) {
+		return JS_UNDEFINED;
+	}
+	if (argc > 0 && JS_IsBool(argv[0])) {
+		top = JS_ToBool(ctx, argv[0]) > 0;
+	} else if (argc > 0 && JS_IsObject(argv[0])) {
+		const char *block;
+		JSValue v = JS_GetPropertyStr(ctx, argv[0], "block");
+		if (JS_IsException(v)) return v;
+		block = JS_IsString(v) ? JS_ToCString(ctx, v) : NULL;
+		if (block != NULL) {
+			top = strcmp(block, "end") != 0 && strcmp(block, "nearest") != 0;
+			JS_FreeCString(ctx, block);
+		}
+		JS_FreeValue(ctx, v);
+	}
+	scale = browser_window_get_scale(win->win);
+	if (scale <= 0) scale = 1;
+	if (guit->window->get_scroll != NULL) {
+		guit->window->get_scroll(win->win->window, &sx, &sy);
+	}
+	y = border[1];
+	if (!top) {
+		int width = 0, height = 0;
+		browser_window_get_dimensions(win->win, &width, &height);
+		y = border[1] + border[3] - height / scale;
+	}
+	rect.x0 = rect.x1 = sx;
+	rect.y0 = rect.y1 = (int)(y > 0 ? y * scale : 0);
+	guit->window->set_scroll(win->win->window, &rect);
+	return JS_UNDEFINED;
+%}
+
+getter Element::clientTop()
+%{
+	struct box *box = box_for_node(priv->parent.node);
+	return JS_NewInt32(ctx, box != NULL ? box->border[TOP].width : 0);
+%}
+
+getter Element::clientLeft()
+%{
+	struct box *box = box_for_node(priv->parent.node);
+	return JS_NewInt32(ctx, box != NULL ? box->border[LEFT].width : 0);
+%}
+
+getter Element::clientWidth()
+%{
+	struct box *box = box_for_node(priv->parent.node);
+	return JS_NewInt32(ctx, box != NULL ? box->padding[LEFT] + box->width + box->padding[RIGHT] : 0);
+%}
+
+getter Element::clientHeight()
+%{
+	struct box *box = box_for_node(priv->parent.node);
+	return JS_NewInt32(ctx, box != NULL ? box->padding[TOP] + box->height + box->padding[BOTTOM] : 0);
+%}
+
+getter HTMLElement::offsetParent()
+%{
+	dom_node *node = priv->parent.parent.node;
+	dom_html_element_type type;
+	dom_html_document *doc = NULL;
+	dom_html_element *body = NULL;
+	JSValue ret;
+
+	if (box_for_node(node) == NULL) return JS_NULL;
+	if (dom_html_element_get_tag_type(node, &type) == DOM_NO_ERR &&
+	    (type == DOM_HTML_ELEMENT_TYPE_BODY || type == DOM_HTML_ELEMENT_TYPE_HTML)) {
+		return JS_NULL;
+	}
+	if (dom_node_get_owner_document(node, (dom_document **)&doc) != DOM_NO_ERR || doc == NULL) return JS_NULL;
+	if (dom_html_document_get_body(doc, &body) != DOM_NO_ERR) body = NULL;
+	dom_node_unref(doc);
+	if (body == NULL) return JS_NULL;
+	ret = qjsky_node(ctx, (dom_node *)body);
+	dom_node_unref(body);
+	return ret;
+%}
+
+getter HTMLElement::offsetTop()
+%{
+	double border[4], content[4];
+	return JS_NewInt32(ctx, qjsky_node_boxes(priv->parent.parent.node, border, content) ? (int32_t)border[1] : 0);
+%}
+
+getter HTMLElement::offsetLeft()
+%{
+	double border[4], content[4];
+	return JS_NewInt32(ctx, qjsky_node_boxes(priv->parent.parent.node, border, content) ? (int32_t)border[0] : 0);
+%}
+
+getter HTMLElement::offsetWidth()
+%{
+	double border[4], content[4];
+	return JS_NewInt32(ctx, qjsky_node_boxes(priv->parent.parent.node, border, content) ? (int32_t)border[2] : 0);
+%}
+
+getter HTMLElement::offsetHeight()
+%{
+	double border[4], content[4];
+	return JS_NewInt32(ctx, qjsky_node_boxes(priv->parent.parent.node, border, content) ? (int32_t)border[3] : 0);
+%}
+
+getter MouseEvent::pageX()
+%{
+	int32_t v = 0;
+	double sx, sy;
+
+	if (dom_mouse_event_get_client_x(priv->parent.parent.evt, &v) != DOM_NO_ERR) return JS_UNDEFINED;
+	qjsky_viewport_scroll(ctx, &sx, &sy);
+	return JS_NewFloat64(ctx, v + sx);
+%}
+
+getter MouseEvent::pageY()
+%{
+	int32_t v = 0;
+	double sx, sy;
+
+	if (dom_mouse_event_get_client_y(priv->parent.parent.evt, &v) != DOM_NO_ERR) return JS_UNDEFINED;
+	qjsky_viewport_scroll(ctx, &sx, &sy);
+	return JS_NewFloat64(ctx, v + sy);
+%}
+
+getter MouseEvent::x()
+%{
+	int32_t v = 0;
+
+	if (dom_mouse_event_get_client_x(priv->parent.parent.evt, &v) != DOM_NO_ERR) return JS_UNDEFINED;
+	return JS_NewFloat64(ctx, v);
+%}
+
+getter MouseEvent::y()
+%{
+	int32_t v = 0;
+
+	if (dom_mouse_event_get_client_y(priv->parent.parent.evt, &v) != DOM_NO_ERR) return JS_UNDEFINED;
+	return JS_NewFloat64(ctx, v);
+%}
+
+getter MouseEvent::offsetX()
+%{
+	int32_t v = 0;
+	double border[4], content[4], sx, sy, edge;
+	dom_event_target *target = NULL;
+	bool ok;
+
+	if (dom_mouse_event_get_client_x(priv->parent.parent.evt, &v) != DOM_NO_ERR) return JS_UNDEFINED;
+	if (dom_event_get_target(priv->parent.parent.evt, &target) != DOM_NO_ERR || target == NULL) return JS_NewFloat64(ctx, v);
+	ok = qjsky_node_boxes((dom_node *)target, border, content);
+	edge = ok ? box_for_node((dom_node *)target)->border[LEFT].width : 0;
+	dom_node_unref(target);
+	qjsky_viewport_scroll(ctx, &sx, &sy);
+	return JS_NewFloat64(ctx, ok ? v + sx - (border[0] + edge) : v);
+%}
+
+getter MouseEvent::offsetY()
+%{
+	int32_t v = 0;
+	double border[4], content[4], sx, sy, edge;
+	dom_event_target *target = NULL;
+	bool ok;
+
+	if (dom_mouse_event_get_client_y(priv->parent.parent.evt, &v) != DOM_NO_ERR) return JS_UNDEFINED;
+	if (dom_event_get_target(priv->parent.parent.evt, &target) != DOM_NO_ERR || target == NULL) return JS_NewFloat64(ctx, v);
+	ok = qjsky_node_boxes((dom_node *)target, border, content);
+	edge = ok ? box_for_node((dom_node *)target)->border[TOP].width : 0;
+	dom_node_unref(target);
+	qjsky_viewport_scroll(ctx, &sx, &sy);
+	return JS_NewFloat64(ctx, ok ? v + sy - (border[1] + edge) : v);
+%}

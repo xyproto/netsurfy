@@ -17,6 +17,8 @@ binding qjs_libdom {
 	webidl "urlutils.idl";
 	webidl "console.idl";
 	webidl "cssom-view.idl";
+	webidl "geometry.idl";
+	webidl "svg.idl";
 
 	preface	%{
 /* QuickJS JavaScript bindings for NetSurfy browser
@@ -35,7 +37,12 @@ binding qjs_libdom {
 #include <stdbool.h>
 #include <quickjs.h>
 
+#include "javascript/quickjs/geometry.h"
+#include "javascript/quickjs/urlutils.h"
+
 struct browser_window;
+struct qjsky_observer;
+struct dom_string;
 struct html_content;
 struct dom_node;
 struct dom_element;
@@ -51,7 +58,15 @@ struct dom_html_br_element;
 %};
 
 	prologue %{
+#include <string.h>
 #include "javascript/quickjs/qjsky.h"
+#include "netsurfy/types.h"
+#include "html/box.h"
+#include "html/box_construct.h"
+#include "netsurfy/browser_window.h"
+#include "netsurfy/window.h"
+#include "desktop/browser_private.h"
+#include "desktop/gui_internal.h"
 %};
 
 };
@@ -76,16 +91,16 @@ struct dom_html_br_element;
 
 #include "Event.bnd"
 #include "KeyboardEvent.bnd"
+#include "MouseEvent.bnd"
+#include "UIEvent.bnd"
+#include "CustomEvent.bnd"
 #include "MutationEvent.bnd"
 
-init UIEvent(struct dom_ui_event *evt::evt);
 init TextEvent(struct dom_text_event *evt::evt);
 init MutationNameEvent(struct dom_mutation_name_event *evt::evt);
 init MouseWheelEvent(struct dom_mouse_wheel_event *evt::evt);
 init MouseMultiWheelEvent(struct dom_mouse_multi_wheel_event *evt::evt);
-init MouseEvent(struct dom_mouse_event *evt::evt);
 init DocumentEvent(struct dom_document_event *evt::evt);
-init CustomEvent(struct dom_custom_event *evt::evt);
 init CompositionEvent(struct dom_ui_event *evt::evt);
 init WheelEvent(struct dom_mouse_event *evt::evt);
 init FocusEvent(struct dom_ui_event *evt::evt);
@@ -193,7 +208,6 @@ init ProcessingInstruction(struct dom_node_text *text::character_data);
 
 init XMLDocument(struct dom_document *document);
 
-init CharacterData(struct dom_node_character_data *character_data::node);
 init DocumentFragment(struct dom_document *document::node);
 init DocumentType(struct dom_document *document::node);
 
@@ -209,6 +223,16 @@ init HTMLPropertiesCollection(struct dom_html_collection *coll);
 
 #include "CanvasRenderingContext2D.bnd"
 #include "ImageData.bnd"
+#include "Geometry.bnd"
+#include "CSSOMView.bnd"
+#include "CSSStyleDeclaration.bnd"
+#include "SVG.bnd"
+#include "MutationObserver.bnd"
+#include "MutationRecord.bnd"
+#include "CharacterData.bnd"
+#include "URL.bnd"
+#include "URLSearchParams.bnd"
+#include "DOMParser.bnd"
 
 /* CSS Object model */
 

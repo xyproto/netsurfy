@@ -188,6 +188,7 @@ method EventTarget::dispatchEvent()
 	if (priv->is_node == false) return JS_UNDEFINED;
 
 	bool success;
+	qjsky_event_bind(ctx, evt, argv[0]);
 	exc = dom_event_target_dispatch_event(
 		((node_private_t *)priv)->node,
 		evt,

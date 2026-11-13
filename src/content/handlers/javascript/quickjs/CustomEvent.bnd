@@ -1,0 +1,68 @@
+/* CustomEvent binding for browser using QuickJS and libdom
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+init CustomEvent(struct dom_custom_event *evt::evt);
+
+constructor CustomEvent ()
+%{
+	dom_event *evt;
+	dom_string *type;
+	bool bubbles = false, cancelable = false;
+	JSValue dict = argc > 1 ? argv[1] : JS_UNDEFINED;
+	JSValue detail = JS_NULL;
+	JSValue obj;
+
+	if (argc < 1) return JS_ThrowTypeError(ctx, "Failed to construct 'CustomEvent': 1 argument required");
+	if (qjsky_dict_bool(ctx, dict, "bubbles", &bubbles) < 0 ||
+	    qjsky_dict_bool(ctx, dict, "cancelable", &cancelable) < 0) return JS_EXCEPTION;
+	if (JS_IsObject(dict)) {
+		detail = JS_GetPropertyStr(ctx, dict, "detail");
+		if (JS_IsException(detail)) return detail;
+		if (JS_IsUndefined(detail)) detail = JS_NULL;
+	}
+	type = qjsky_to_dom_string(ctx, argv[0]);
+	if (type == NULL) {
+		JS_FreeValue(ctx, detail);
+		return JS_EXCEPTION;
+	}
+	obj = qjsky_create_event(ctx, "CustomEvent", &evt);
+	if (evt == NULL) {
+		dom_string_unref(type);
+		JS_FreeValue(ctx, detail);
+		return obj;
+	}
+	(void)dom_event_init(evt, type, bubbles, cancelable);
+	dom_string_unref(type);
+	obj = qjsky_event(ctx, evt);
+	dom_event_unref(evt);
+	if (!JS_IsException(obj) && qjsky_hidden_set(ctx, obj, QJSKY_HIDDEN_DETAIL, detail) < 0) {
+		JS_FreeValue(ctx, obj);
+		return JS_EXCEPTION;
+	}
+	if (JS_IsException(obj)) JS_FreeValue(ctx, detail);
+	return qjsky_constructed(ctx, obj, new_target);
+%}
+
+getter CustomEvent::detail ()
+%{
+	JSValue detail = qjsky_hidden_get(ctx, this_val, QJSKY_HIDDEN_DETAIL, false);
+	return JS_IsUndefined(detail) ? JS_NULL : detail;
+%}
+
+method CustomEvent::initCustomEvent ()
+%{
+	dom_string *type;
+
+	if (argc < 1) return JS_ThrowTypeError(ctx, "initCustomEvent: 1 argument required");
+	type = qjsky_to_dom_string(ctx, argv[0]);
+	if (type == NULL) return JS_EXCEPTION;
+	(void)dom_event_init(priv->parent.evt, type, argc > 1 && JS_ToBool(ctx, argv[1]) > 0, argc > 2 && JS_ToBool(ctx, argv[2]) > 0);
+	dom_string_unref(type);
+	if (qjsky_hidden_set(ctx, this_val, QJSKY_HIDDEN_DETAIL, argc > 3 ? JS_DupValue(ctx, argv[3]) : JS_NULL) < 0) return JS_EXCEPTION;
+	return JS_UNDEFINED;
+%}

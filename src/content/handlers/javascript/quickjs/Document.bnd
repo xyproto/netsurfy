@@ -337,13 +337,17 @@ setter Document::cookie()
 method Document::createEvent ()
 %{
 	dom_event *evt = NULL;
+	dom_string *type;
+	dom_exception exc;
 	JSValue ret;
 
-	if (dom_event_create(&evt) != DOM_NO_ERR) return JS_UNDEFINED;
-	if (dom_event_set_is_trusted(evt, false) != DOM_NO_ERR) {
-		dom_event_unref(evt);
-		return JS_UNDEFINED;
-	}
+	if (argc < 1) return JS_ThrowTypeError(ctx, "createEvent: 1 argument required");
+	type = qjsky_to_dom_string(ctx, argv[0]);
+	if (type == NULL) return JS_EXCEPTION;
+	exc = dom_document_event_create_event(priv->parent.node, type, &evt);
+	dom_string_unref(type);
+	if (exc != DOM_NO_ERR || evt == NULL) return JS_ThrowOutOfMemory(ctx);
+	(void)dom_event_set_is_trusted(evt, false);
 	ret = qjsky_event(ctx, evt);
 	dom_event_unref(evt);
 	return ret;
@@ -506,4 +510,96 @@ method Document::getElementsByClassName()
 getter Document::currentScript()
 %{
 	return qjsky_current_script(ctx);
+%}
+
+getter Document::images()
+%{
+	struct dom_html_collection *coll = NULL;
+	JSValue list;
+
+	if (dom_html_document_get_images(((node_private_t *)priv)->node, &coll) != DOM_NO_ERR || coll == NULL) return JS_NULL;
+	list = qjsky_html_collection___create(ctx, coll);
+	dom_html_collection_unref(coll);
+	return qjsky_list_proxy(ctx, "makeListProxy", list);
+%}
+
+getter Document::links()
+%{
+	struct dom_html_collection *coll = NULL;
+	JSValue list;
+
+	if (dom_html_document_get_links(((node_private_t *)priv)->node, &coll) != DOM_NO_ERR || coll == NULL) return JS_NULL;
+	list = qjsky_html_collection___create(ctx, coll);
+	dom_html_collection_unref(coll);
+	return qjsky_list_proxy(ctx, "makeListProxy", list);
+%}
+
+getter Document::forms()
+%{
+	struct dom_html_collection *coll = NULL;
+	JSValue list;
+
+	if (dom_html_document_get_forms(((node_private_t *)priv)->node, &coll) != DOM_NO_ERR || coll == NULL) return JS_NULL;
+	list = qjsky_html_collection___create(ctx, coll);
+	dom_html_collection_unref(coll);
+	return qjsky_list_proxy(ctx, "makeListProxy", list);
+%}
+
+getter Document::anchors()
+%{
+	struct dom_html_collection *coll = NULL;
+	JSValue list;
+
+	if (dom_html_document_get_anchors(((node_private_t *)priv)->node, &coll) != DOM_NO_ERR || coll == NULL) return JS_NULL;
+	list = qjsky_html_collection___create(ctx, coll);
+	dom_html_collection_unref(coll);
+	return qjsky_list_proxy(ctx, "makeListProxy", list);
+%}
+
+getter Document::scripts()
+%{
+	dom_nodelist *nodes = NULL;
+	dom_string *tag = NULL;
+	dom_exception err;
+	JSValue list;
+
+	if (dom_string_create((const uint8_t *)"script", 6, &tag) != DOM_NO_ERR) return JS_ThrowOutOfMemory(ctx);
+	err = dom_document_get_elements_by_tag_name(((node_private_t *)priv)->node, tag, &nodes);
+	dom_string_unref(tag);
+	if (err != DOM_NO_ERR || nodes == NULL) return JS_NULL;
+	list = qjsky_node_list___create(ctx, nodes);
+	dom_nodelist_unref(nodes);
+	return qjsky_list_proxy(ctx, "makeListProxy", list);
+%}
+
+getter Document::embeds()
+%{
+	dom_nodelist *nodes = NULL;
+	dom_string *tag = NULL;
+	dom_exception err;
+	JSValue list;
+
+	if (dom_string_create((const uint8_t *)"embed", 5, &tag) != DOM_NO_ERR) return JS_ThrowOutOfMemory(ctx);
+	err = dom_document_get_elements_by_tag_name(((node_private_t *)priv)->node, tag, &nodes);
+	dom_string_unref(tag);
+	if (err != DOM_NO_ERR || nodes == NULL) return JS_NULL;
+	list = qjsky_node_list___create(ctx, nodes);
+	dom_nodelist_unref(nodes);
+	return qjsky_list_proxy(ctx, "makeListProxy", list);
+%}
+
+getter Document::plugins()
+%{
+	dom_nodelist *nodes = NULL;
+	dom_string *tag = NULL;
+	dom_exception err;
+	JSValue list;
+
+	if (dom_string_create((const uint8_t *)"embed", 5, &tag) != DOM_NO_ERR) return JS_ThrowOutOfMemory(ctx);
+	err = dom_document_get_elements_by_tag_name(((node_private_t *)priv)->node, tag, &nodes);
+	dom_string_unref(tag);
+	if (err != DOM_NO_ERR || nodes == NULL) return JS_NULL;
+	list = qjsky_node_list___create(ctx, nodes);
+	dom_nodelist_unref(nodes);
+	return qjsky_list_proxy(ctx, "makeListProxy", list);
 %}

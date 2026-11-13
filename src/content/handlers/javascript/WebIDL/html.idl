@@ -156,12 +156,12 @@ interface HTMLTitleElement : HTMLElement {
 };
 
 interface HTMLBaseElement : HTMLElement {
-  attribute DOMString href;
+  [URL] attribute DOMString href;
   attribute DOMString target;
 };
 
 interface HTMLLinkElement : HTMLElement {
-  attribute DOMString href;
+  [URL] attribute DOMString href;
   attribute DOMString? crossOrigin;
   attribute DOMString rel;
   readonly attribute DOMTokenList relList;
@@ -213,7 +213,7 @@ interface HTMLPreElement : HTMLElement {
 };
 
 interface HTMLQuoteElement : HTMLElement {
-  attribute DOMString cite;
+  [URL] attribute DOMString cite;
 };
 
 interface HTMLOListElement : HTMLElement {
@@ -272,7 +272,7 @@ interface HTMLBRElement : HTMLElement {
 };
 
 interface HTMLModElement : HTMLElement {
-  attribute DOMString cite;
+  [URL] attribute DOMString cite;
   attribute DOMString dateTime;
 };
 
@@ -287,7 +287,7 @@ partial interface HTMLSourceElement {
 [NamedConstructor=Image(optional unsigned long width, optional unsigned long height)]
 interface HTMLImageElement : HTMLElement {
            attribute DOMString alt;
-           attribute DOMString src;
+           [URL] attribute DOMString src;
            attribute DOMString srcset;
            attribute DOMString sizes;
            attribute DOMString? crossOrigin;
@@ -304,7 +304,7 @@ interface HTMLImageElement : HTMLElement {
 };
 
 interface HTMLIFrameElement : HTMLElement {
-  attribute DOMString src;
+  [URL] attribute DOMString src;
   attribute DOMString srcdoc;
   attribute DOMString name;
   [PutForwards=value] readonly attribute DOMSettableTokenList sandbox;
@@ -320,7 +320,7 @@ interface HTMLIFrameElement : HTMLElement {
 };
 
 interface HTMLEmbedElement : HTMLElement {
-  attribute DOMString src;
+  [URL] attribute DOMString src;
   attribute DOMString type;
   attribute DOMString width;
   attribute DOMString height;
@@ -331,7 +331,7 @@ interface HTMLEmbedElement : HTMLElement {
 };
 
 interface HTMLObjectElement : HTMLElement {
-  attribute DOMString data;
+  [URL] attribute DOMString data;
   attribute DOMString type;
   attribute boolean typeMustMatch;
   attribute DOMString name;
@@ -367,14 +367,14 @@ interface HTMLVideoElement : HTMLMediaElement {
   attribute unsigned long height;
   readonly attribute unsigned long videoWidth;
   readonly attribute unsigned long videoHeight;
-  attribute DOMString poster;
+  [URL] attribute DOMString poster;
 };
 
 [NamedConstructor=Audio(optional DOMString src)]
 interface HTMLAudioElement : HTMLMediaElement {};
 
 interface HTMLSourceElement : HTMLElement {
-  attribute DOMString src;
+  [URL] attribute DOMString src;
   attribute DOMString type;
 
   // also has obsolete members
@@ -382,7 +382,7 @@ interface HTMLSourceElement : HTMLElement {
 
 interface HTMLTrackElement : HTMLElement {
   attribute DOMString kind;
-  attribute DOMString src;
+  [URL] attribute DOMString src;
   attribute DOMString srclang;
   attribute DOMString label;
   attribute boolean default;
@@ -404,7 +404,7 @@ interface HTMLMediaElement : HTMLElement {
   readonly attribute MediaError? error;
 
   // network state
-  attribute DOMString src;
+  [URL] attribute DOMString src;
   attribute MediaProvider? srcObject;
   readonly attribute DOMString currentSrc;
   attribute DOMString? crossOrigin;
@@ -702,7 +702,7 @@ interface HTMLTableCellElement : HTMLElement {
 [OverrideBuiltins]
 interface HTMLFormElement : HTMLElement {
   attribute DOMString acceptCharset;
-  attribute DOMString action;
+  [URL] attribute DOMString action;
   attribute DOMString autocomplete;
   attribute DOMString enctype;
   attribute DOMString encoding;
@@ -741,7 +741,7 @@ interface HTMLInputElement : HTMLElement {
   attribute boolean disabled;
   readonly attribute HTMLFormElement? form;
   readonly attribute FileList? files;
-  attribute DOMString formAction;
+  [URL] attribute DOMString formAction;
   attribute DOMString formEnctype;
   attribute DOMString formMethod;
   attribute boolean formNoValidate;
@@ -761,7 +761,7 @@ interface HTMLInputElement : HTMLElement {
   attribute boolean readOnly;
   attribute boolean required;
   attribute unsigned long size;
-  attribute DOMString src;
+  [URL] attribute DOMString src;
   attribute DOMString step;
   attribute DOMString type;
   attribute DOMString defaultValue;
@@ -799,7 +799,7 @@ interface HTMLButtonElement : HTMLElement {
   attribute boolean autofocus;
   attribute boolean disabled;
   readonly attribute HTMLFormElement? form;
-  attribute DOMString formAction;
+  [URL] attribute DOMString formAction;
   attribute DOMString formEnctype;
   attribute DOMString formMethod;
   attribute boolean formNoValidate;
@@ -1067,7 +1067,7 @@ interface HTMLDialogElement : HTMLElement {
 };
 
 interface HTMLScriptElement : HTMLElement {
-  attribute DOMString src;
+  [URL] attribute DOMString src;
   attribute DOMString type;
   attribute DOMString charset;
   attribute boolean async;
@@ -2002,7 +2002,7 @@ interface HTMLAppletElement : HTMLElement {
   attribute DOMString alt;
   attribute DOMString archive;
   attribute DOMString code;
-  attribute DOMString codeBase;
+  [URL] attribute DOMString codeBase;
   attribute DOMString height;
   attribute unsigned long hspace;
   attribute DOMString name;
@@ -2041,9 +2041,9 @@ HTMLFrameSetElement implements WindowEventHandlers;
 interface HTMLFrameElement : HTMLElement {
   attribute DOMString name;
   attribute DOMString scrolling;
-  attribute DOMString src;
+  [URL] attribute DOMString src;
   attribute DOMString frameBorder;
-  attribute DOMString longDesc;
+  [URL] attribute DOMString longDesc;
   attribute boolean noResize;
   readonly attribute Document? contentDocument;
   readonly attribute WindowProxy? contentWindow;
@@ -2132,7 +2132,7 @@ partial interface HTMLIFrameElement {
   attribute DOMString align;
   attribute DOMString scrolling;
   attribute DOMString frameBorder;
-  attribute DOMString longDesc;
+  [URL] attribute DOMString longDesc;
 
   [TreatNullAs=EmptyString] attribute DOMString marginHeight;
   [TreatNullAs=EmptyString] attribute DOMString marginWidth;
@@ -2144,7 +2144,7 @@ partial interface HTMLImageElement {
   attribute DOMString align;
   attribute unsigned long hspace;
   attribute unsigned long vspace;
-  attribute DOMString longDesc;
+  [URL] attribute DOMString longDesc;
 
   [TreatNullAs=EmptyString] attribute DOMString border;
 };
@@ -2184,7 +2184,7 @@ partial interface HTMLObjectElement {
   attribute unsigned long hspace;
   attribute DOMString standby;
   attribute unsigned long vspace;
-  attribute DOMString codeBase;
+  [URL] attribute DOMString codeBase;
   attribute DOMString codeType;
 
   [TreatNullAs=EmptyString] attribute DOMString border;

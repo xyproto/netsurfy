@@ -1,0 +1,120 @@
+/* MutationRecord binding for browser using QuickJS and libdom
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+class MutationRecord {
+	private struct dom_string *kind;
+	private struct dom_node *target;
+	private struct dom_node *added;
+	private struct dom_node *removed;
+	private struct dom_node *prev;
+	private struct dom_node *next;
+	private struct dom_string *attr_name;
+	private struct dom_string *old_value;
+	prologue %{
+static JSValue record_node_list(JSContext *ctx, JSValueConst this_val, qjsky_hidden key, dom_node *node)
+{
+	JSValue list = qjsky_hidden_get(ctx, this_val, key, false);
+
+	if (!JS_IsUndefined(list)) {
+		return list;
+	}
+	list = JS_NewArray(ctx);
+	if (JS_IsException(list)) {
+		return list;
+	}
+	if (node != NULL && JS_SetPropertyUint32(ctx, list, 0, qjsky_node(ctx, node)) < 0) {
+		JS_FreeValue(ctx, list);
+		return JS_EXCEPTION;
+	}
+	if (qjsky_hidden_set(ctx, this_val, key, JS_DupValue(ctx, list)) < 0) {
+		JS_FreeValue(ctx, list);
+		return JS_EXCEPTION;
+	}
+	return list;
+}
+
+static JSValue record_string(JSContext *ctx, dom_string *s)
+{
+	return s == NULL ? JS_NULL : qjsky_string(ctx, s);
+}
+
+static JSValue record_node(JSContext *ctx, dom_node *n)
+{
+	return n == NULL ? JS_NULL : qjsky_node(ctx, n);
+}
+%};
+};
+
+init MutationRecord(struct dom_string *kind, struct dom_node *target, struct dom_node *added, struct dom_node *removed, struct dom_node *prev, struct dom_node *next, struct dom_string *attr_name, struct dom_string *old_value)
+%{
+	priv->kind = kind != NULL ? dom_string_ref(kind) : NULL;
+	priv->target = target != NULL ? dom_node_ref(target) : NULL;
+	priv->added = added != NULL ? dom_node_ref(added) : NULL;
+	priv->removed = removed != NULL ? dom_node_ref(removed) : NULL;
+	priv->prev = prev != NULL ? dom_node_ref(prev) : NULL;
+	priv->next = next != NULL ? dom_node_ref(next) : NULL;
+	priv->attr_name = attr_name != NULL ? dom_string_ref(attr_name) : NULL;
+	priv->old_value = old_value != NULL ? dom_string_ref(old_value) : NULL;
+%}
+
+fini MutationRecord()
+%{
+	if (priv->kind != NULL) dom_string_unref(priv->kind);
+	if (priv->target != NULL) dom_node_unref(priv->target);
+	if (priv->added != NULL) dom_node_unref(priv->added);
+	if (priv->removed != NULL) dom_node_unref(priv->removed);
+	if (priv->prev != NULL) dom_node_unref(priv->prev);
+	if (priv->next != NULL) dom_node_unref(priv->next);
+	if (priv->attr_name != NULL) dom_string_unref(priv->attr_name);
+	if (priv->old_value != NULL) dom_string_unref(priv->old_value);
+%}
+
+getter MutationRecord::type()
+%{
+	return record_string(ctx, priv->kind);
+%}
+
+getter MutationRecord::target()
+%{
+	return record_node(ctx, priv->target);
+%}
+
+getter MutationRecord::addedNodes()
+%{
+	return record_node_list(ctx, this_val, QJSKY_HIDDEN_ADDED_NODES, priv->added);
+%}
+
+getter MutationRecord::removedNodes()
+%{
+	return record_node_list(ctx, this_val, QJSKY_HIDDEN_REMOVED_NODES, priv->removed);
+%}
+
+getter MutationRecord::previousSibling()
+%{
+	return record_node(ctx, priv->prev);
+%}
+
+getter MutationRecord::nextSibling()
+%{
+	return record_node(ctx, priv->next);
+%}
+
+getter MutationRecord::attributeName()
+%{
+	return record_string(ctx, priv->attr_name);
+%}
+
+getter MutationRecord::attributeNamespace()
+%{
+	return JS_NULL;
+%}
+
+getter MutationRecord::oldValue()
+%{
+	return record_string(ctx, priv->old_value);
+%}

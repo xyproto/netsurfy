@@ -1,0 +1,429 @@
+/* URLSearchParams binding for browser using QuickJS
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+class URLSearchParams {
+	private struct qjsky_query query;
+	private void *owner;
+	prologue %{
+#include <stdlib.h>
+#include <string.h>
+#include "javascript/quickjs/urlutils.h"
+
+static void params_changed(url_search_params_private_t *priv)
+{
+	url_private_t *owner = priv->owner;
+	char *text;
+	nsurl *updated = NULL;
+
+	if (owner == NULL) {
+		return;
+	}
+	text = qjsky_query_serialise(&priv->query);
+	if (text == NULL) {
+		return;
+	}
+	if (nsurl_replace_query(owner->url, text, &updated) == NSERROR_OK) {
+		nsurl_unref(owner->url);
+		owner->url = updated;
+	}
+	free(text);
+}
+
+static JSValue params_pairs(JSContext *ctx, url_search_params_private_t *priv, int what)
+{
+	JSValue list = JS_NewArray(ctx);
+
+	if (JS_IsException(list)) {
+		return list;
+	}
+	for (size_t i = 0; i < priv->query.n; i++) {
+		JSValue item;
+		if (what == 0) {
+			item = JS_NewArray(ctx);
+			JS_SetPropertyUint32(ctx, item, 0, JS_NewString(ctx, priv->query.names[i]));
+			JS_SetPropertyUint32(ctx, item, 1, JS_NewString(ctx, priv->query.values[i]));
+		} else {
+			item = JS_NewString(ctx, what == 1 ? priv->query.names[i] : priv->query.values[i]);
+		}
+		if (JS_SetPropertyUint32(ctx, list, (uint32_t)i, item) < 0) {
+			JS_FreeValue(ctx, list);
+			return JS_EXCEPTION;
+		}
+	}
+	return list;
+}
+
+static JSValue params_iterate(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int what)
+{
+	url_search_params_private_t *priv = qjsky_private(ctx, this_val, QJSKY_IFACE_URLSEARCHPARAMS);
+	JSValue list, values, iter;
+
+	if (priv == NULL) {
+		return JS_ThrowTypeError(ctx, "Illegal invocation");
+	}
+	list = params_pairs(ctx, priv, what);
+	if (JS_IsException(list)) {
+		return list;
+	}
+	values = JS_GetPropertyStr(ctx, list, "values");
+	iter = JS_IsException(values) ? values : JS_Call(ctx, values, list, 0, NULL);
+	JS_FreeValue(ctx, values);
+	JS_FreeValue(ctx, list);
+	return iter;
+}
+
+static JSValue params_for_each(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)
+{
+	url_search_params_private_t *priv = qjsky_private(ctx, this_val, QJSKY_IFACE_URLSEARCHPARAMS);
+	JSValue list;
+	int64_t len = 0;
+
+	if (priv == NULL) {
+		return JS_ThrowTypeError(ctx, "Illegal invocation");
+	}
+	if (argc < 1 || !JS_IsFunction(ctx, argv[0])) {
+		return JS_ThrowTypeError(ctx, "forEach: parameter 1 is not a function");
+	}
+	list = params_pairs(ctx, priv, 0);
+	if (JS_IsException(list) || JS_GetLength(ctx, list, &len) < 0) {
+		JS_FreeValue(ctx, list);
+		return JS_EXCEPTION;
+	}
+	for (int64_t i = 0; i < len; i++) {
+		JSValue pair = JS_GetPropertyInt64(ctx, list, i);
+		JSValue args[3] = {JS_GetPropertyUint32(ctx, pair, 1), JS_GetPropertyUint32(ctx, pair, 0), JS_DupValue(ctx, this_val)};
+		JSValue r = JS_Call(ctx, argv[0], argc > 1 ? argv[1] : JS_UNDEFINED, 3, args);
+		for (int k = 0; k < 3; k++) JS_FreeValue(ctx, args[k]);
+		JS_FreeValue(ctx, pair);
+		if (JS_IsException(r)) {
+			JS_FreeValue(ctx, list);
+			return r;
+		}
+		JS_FreeValue(ctx, r);
+	}
+	JS_FreeValue(ctx, list);
+	return JS_UNDEFINED;
+}
+
+static int params_add_value(JSContext *ctx, url_search_params_private_t *priv, JSValueConst name, JSValueConst value)
+{
+	const char *n = JS_ToCString(ctx, name);
+	const char *v = n != NULL ? JS_ToCString(ctx, value) : NULL;
+	bool ok = n != NULL && v != NULL && qjsky_query_append(&priv->query, n, v);
+
+	if (n != NULL) JS_FreeCString(ctx, n);
+	if (v != NULL) JS_FreeCString(ctx, v);
+	if (!ok && !JS_HasException(ctx)) JS_ThrowOutOfMemory(ctx);
+	return ok ? 0 : -1;
+}
+
+static int params_init(JSContext *ctx, url_search_params_private_t *priv, JSValueConst init)
+{
+	JSValue iter_fn;
+
+	if (JS_IsUndefined(init) || JS_IsNull(init)) {
+		return 0;
+	}
+	if (!JS_IsObject(init)) {
+		const char *s = JS_ToCString(ctx, init);
+		bool ok;
+		if (s == NULL) return -1;
+		ok = qjsky_query_parse(&priv->query, s);
+		JS_FreeCString(ctx, s);
+		return ok ? 0 : (JS_ThrowOutOfMemory(ctx), -1);
+	}
+	{
+		url_search_params_private_t *other = qjsky_private(ctx, init, QJSKY_IFACE_URLSEARCHPARAMS);
+		if (other != NULL) {
+			for (size_t i = 0; i < other->query.n; i++) {
+				if (!qjsky_query_append(&priv->query, other->query.names[i], other->query.values[i])) {
+					JS_ThrowOutOfMemory(ctx);
+					return -1;
+				}
+			}
+			return 0;
+		}
+	}
+	{
+		JSAtom iterator = qjsky_symbol_iterator(ctx);
+		iter_fn = JS_GetProperty(ctx, init, iterator);
+		JS_FreeAtom(ctx, iterator);
+	}
+	if (JS_IsException(iter_fn)) return -1;
+	if (JS_IsFunction(ctx, iter_fn)) {
+		JSValue array = JS_NewArray(ctx), from, arr;
+		JSValue global = JS_GetGlobalObject(ctx);
+		JSValue array_ctor = JS_GetPropertyStr(ctx, global, "Array");
+		int64_t len = 0;
+		JS_FreeValue(ctx, global);
+		JS_FreeValue(ctx, array);
+		from = JS_GetPropertyStr(ctx, array_ctor, "from");
+		arr = JS_Call(ctx, from, array_ctor, 1, &init);
+		JS_FreeValue(ctx, from);
+		JS_FreeValue(ctx, array_ctor);
+		JS_FreeValue(ctx, iter_fn);
+		if (JS_IsException(arr) || JS_GetLength(ctx, arr, &len) < 0) {
+			JS_FreeValue(ctx, arr);
+			return -1;
+		}
+		for (int64_t i = 0; i < len; i++) {
+			JSValue pair = JS_GetPropertyInt64(ctx, arr, i);
+			int64_t plen = 0;
+			JSValue n, v;
+			int r;
+			if (JS_IsException(pair) || JS_GetLength(ctx, pair, &plen) < 0 || plen != 2) {
+				JS_FreeValue(ctx, pair);
+				JS_FreeValue(ctx, arr);
+				if (!JS_HasException(ctx)) JS_ThrowTypeError(ctx, "Each query pair must be an iterable [name, value] tuple");
+				return -1;
+			}
+			n = JS_GetPropertyInt64(ctx, pair, 0);
+			v = JS_GetPropertyInt64(ctx, pair, 1);
+			r = params_add_value(ctx, priv, n, v);
+			JS_FreeValue(ctx, n);
+			JS_FreeValue(ctx, v);
+			JS_FreeValue(ctx, pair);
+			if (r < 0) {
+				JS_FreeValue(ctx, arr);
+				return -1;
+			}
+		}
+		JS_FreeValue(ctx, arr);
+		return 0;
+	}
+	JS_FreeValue(ctx, iter_fn);
+	{
+		JSPropertyEnum *props = NULL;
+		uint32_t count = 0;
+		if (JS_GetOwnPropertyNames(ctx, &props, &count, init, JS_GPN_STRING_MASK | JS_GPN_ENUM_ONLY) < 0) return -1;
+		for (uint32_t i = 0; i < count; i++) {
+			JSValue n = JS_AtomToString(ctx, props[i].atom);
+			JSValue v = JS_GetProperty(ctx, init, props[i].atom);
+			int r = JS_IsException(v) ? -1 : params_add_value(ctx, priv, n, v);
+			JS_FreeValue(ctx, n);
+			JS_FreeValue(ctx, v);
+			if (r < 0) {
+				JS_FreePropertyEnum(ctx, props, count);
+				return -1;
+			}
+		}
+		JS_FreePropertyEnum(ctx, props, count);
+	}
+	return 0;
+}
+
+static int params_find_args(JSContext *ctx, int argc, JSValueConst *argv, const char **name, const char **value)
+{
+	*name = NULL;
+	*value = NULL;
+	if (argc < 1) {
+		JS_ThrowTypeError(ctx, "1 argument required");
+		return -1;
+	}
+	*name = JS_ToCString(ctx, argv[0]);
+	if (*name == NULL) return -1;
+	if (argc > 1 && !JS_IsUndefined(argv[1])) {
+		*value = JS_ToCString(ctx, argv[1]);
+		if (*value == NULL) {
+			JS_FreeCString(ctx, *name);
+			return -1;
+		}
+	}
+	return 0;
+}
+%};
+};
+
+init URLSearchParams()
+%{
+	memset(&priv->query, 0, sizeof(priv->query));
+	priv->owner = NULL;
+%}
+
+fini URLSearchParams()
+%{
+	if (priv->owner != NULL) {
+		((url_private_t *)priv->owner)->params = NULL;
+	}
+	qjsky_query_clear(&priv->query);
+%}
+
+constructor URLSearchParams()
+%{
+	JSValue obj = qjsky_url_search_params___create(ctx);
+	url_search_params_private_t *pp;
+
+	if (JS_IsException(obj)) return obj;
+	pp = qjsky_private(ctx, obj, QJSKY_IFACE_URLSEARCHPARAMS);
+	if (pp != NULL && argc > 0 && params_init(ctx, pp, argv[0]) < 0) {
+		JS_FreeValue(ctx, obj);
+		return JS_EXCEPTION;
+	}
+	return qjsky_constructed(ctx, obj, new_target);
+%}
+
+prototype URLSearchParams()
+%{
+	static const char *const names[3] = {"entries", "keys", "values"};
+	JSValue entries = JS_UNDEFINED;
+
+	for (int i = 0; i < 3; i++) {
+		JSValue fn = JS_NewCFunctionMagic(ctx, params_iterate, names[i], 0, JS_CFUNC_generic_magic, i);
+		if (i == 0) entries = JS_DupValue(ctx, fn);
+		if (JS_SetPropertyStr(ctx, proto, names[i], fn) < 0) {
+			JS_FreeValue(ctx, entries);
+			return -1;
+		}
+	}
+	{
+		JSAtom iterator = qjsky_symbol_iterator(ctx);
+		int r = JS_SetProperty(ctx, proto, iterator, entries);
+		JS_FreeAtom(ctx, iterator);
+		if (r < 0) return -1;
+	}
+	if (JS_SetPropertyStr(ctx, proto, "forEach", JS_NewCFunction(ctx, params_for_each, "forEach", 1)) < 0) return -1;
+%}
+
+getter URLSearchParams::size()
+%{
+	return JS_NewUint32(ctx, (uint32_t)priv->query.n);
+%}
+
+method URLSearchParams::append()
+%{
+	if (argc < 2) return JS_ThrowTypeError(ctx, "append: 2 arguments required");
+	if (params_add_value(ctx, priv, argv[0], argv[1]) < 0) return JS_EXCEPTION;
+	params_changed(priv);
+	return JS_UNDEFINED;
+%}
+
+method URLSearchParams::delete()
+%{
+	const char *name, *value;
+
+	if (params_find_args(ctx, argc, argv, &name, &value) < 0) return JS_EXCEPTION;
+	for (size_t i = priv->query.n; i-- > 0;) {
+		if (strcmp(priv->query.names[i], name) == 0 && (value == NULL || strcmp(priv->query.values[i], value) == 0)) {
+			qjsky_query_remove(&priv->query, i);
+		}
+	}
+	JS_FreeCString(ctx, name);
+	if (value != NULL) JS_FreeCString(ctx, value);
+	params_changed(priv);
+	return JS_UNDEFINED;
+%}
+
+method URLSearchParams::get()
+%{
+	const char *name, *value;
+	JSValue ret = JS_NULL;
+
+	if (params_find_args(ctx, argc > 0 ? 1 : 0, argv, &name, &value) < 0) return JS_EXCEPTION;
+	for (size_t i = 0; i < priv->query.n; i++) {
+		if (strcmp(priv->query.names[i], name) == 0) {
+			ret = JS_NewString(ctx, priv->query.values[i]);
+			break;
+		}
+	}
+	JS_FreeCString(ctx, name);
+	return ret;
+%}
+
+method URLSearchParams::getAll()
+%{
+	const char *name, *value;
+	JSValue list;
+	uint32_t n = 0;
+
+	if (params_find_args(ctx, argc > 0 ? 1 : 0, argv, &name, &value) < 0) return JS_EXCEPTION;
+	list = JS_NewArray(ctx);
+	for (size_t i = 0; !JS_IsException(list) && i < priv->query.n; i++) {
+		if (strcmp(priv->query.names[i], name) == 0) {
+			JS_SetPropertyUint32(ctx, list, n++, JS_NewString(ctx, priv->query.values[i]));
+		}
+	}
+	JS_FreeCString(ctx, name);
+	return list;
+%}
+
+method URLSearchParams::has()
+%{
+	const char *name, *value;
+	bool found = false;
+
+	if (params_find_args(ctx, argc, argv, &name, &value) < 0) return JS_EXCEPTION;
+	for (size_t i = 0; i < priv->query.n && !found; i++) {
+		found = strcmp(priv->query.names[i], name) == 0 && (value == NULL || strcmp(priv->query.values[i], value) == 0);
+	}
+	JS_FreeCString(ctx, name);
+	if (value != NULL) JS_FreeCString(ctx, value);
+	return JS_NewBool(ctx, found);
+%}
+
+method URLSearchParams::set()
+%{
+	const char *name, *value;
+	bool done = false;
+
+	if (argc < 2) return JS_ThrowTypeError(ctx, "set: 2 arguments required");
+	name = JS_ToCString(ctx, argv[0]);
+	if (name == NULL) return JS_EXCEPTION;
+	value = JS_ToCString(ctx, argv[1]);
+	if (value == NULL) {
+		JS_FreeCString(ctx, name);
+		return JS_EXCEPTION;
+	}
+	for (size_t i = 0; i < priv->query.n;) {
+		if (strcmp(priv->query.names[i], name) == 0) {
+			if (!done) {
+				char *v = strdup(value);
+				if (v != NULL) {
+					free(priv->query.values[i]);
+					priv->query.values[i] = v;
+				}
+				done = true;
+				i++;
+			} else {
+				qjsky_query_remove(&priv->query, i);
+			}
+		} else {
+			i++;
+		}
+	}
+	if (!done) qjsky_query_append(&priv->query, name, value);
+	JS_FreeCString(ctx, name);
+	JS_FreeCString(ctx, value);
+	params_changed(priv);
+	return JS_UNDEFINED;
+%}
+
+method URLSearchParams::sort()
+%{
+	for (size_t i = 1; i < priv->query.n; i++) {
+		for (size_t j = i; j > 0 && strcmp(priv->query.names[j - 1], priv->query.names[j]) > 0; j--) {
+			char *n = priv->query.names[j], *v = priv->query.values[j];
+			priv->query.names[j] = priv->query.names[j - 1];
+			priv->query.values[j] = priv->query.values[j - 1];
+			priv->query.names[j - 1] = n;
+			priv->query.values[j - 1] = v;
+		}
+	}
+	params_changed(priv);
+	return JS_UNDEFINED;
+%}
+
+method URLSearchParams::toString()
+%{
+	char *text = qjsky_query_serialise(&priv->query);
+	JSValue ret;
+
+	if (text == NULL) return JS_ThrowOutOfMemory(ctx);
+	ret = JS_NewString(ctx, text);
+	free(text);
+	return ret;
+%}

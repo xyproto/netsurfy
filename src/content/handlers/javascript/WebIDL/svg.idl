@@ -1,0 +1,17 @@
+// SVG 2 (subset)
+// https://www.w3.org/TR/SVG2/
+
+interface SVGElement : Element {
+  readonly attribute SVGSVGElement? ownerSVGElement;
+};
+
+interface SVGGraphicsElement : SVGElement {
+  DOMMatrix? getCTM();
+  DOMMatrix? getScreenCTM();
+};
+
+interface SVGSVGElement : SVGGraphicsElement {
+  DOMPoint createSVGPoint();
+  DOMMatrix createSVGMatrix();
+  DOMRect createSVGRect();
+};

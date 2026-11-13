@@ -1,0 +1,288 @@
+/* URL binding for browser using QuickJS
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+class URL {
+	private nsurl *url;
+	private void *params;
+	prologue %{
+#include <ctype.h>
+#include <string.h>
+#include "javascript/quickjs/urlutils.h"
+
+static bool url_has_scheme(const char *s)
+{
+	if (!isalpha((unsigned char)s[0])) {
+		return false;
+	}
+	for (const char *c = s + 1; *c; c++) {
+		if (*c == ':') {
+			return true;
+		}
+		if (!isalnum((unsigned char)*c) && *c != '+' && *c != '-' && *c != '.') {
+			return false;
+		}
+	}
+	return false;
+}
+
+static nserror url_parse(JSContext *ctx, JSValueConst input, JSValueConst base, nsurl **out)
+{
+	const char *u = JS_ToCString(ctx, input);
+	nserror err;
+
+	*out = NULL;
+	if (u == NULL) {
+		return NSERROR_NOMEM;
+	}
+	if (!JS_IsUndefined(base)) {
+		const char *b = JS_ToCString(ctx, base);
+		nsurl *base_url = NULL;
+		if (b == NULL) {
+			JS_FreeCString(ctx, u);
+			return NSERROR_NOMEM;
+		}
+		err = url_has_scheme(b) ? nsurl_create(b, &base_url) : NSERROR_BAD_URL;
+		JS_FreeCString(ctx, b);
+		if (err == NSERROR_OK) {
+			err = nsurl_join(base_url, u, out);
+			nsurl_unref(base_url);
+		}
+	} else {
+		err = url_has_scheme(u) ? nsurl_create(u, out) : NSERROR_BAD_URL;
+	}
+	JS_FreeCString(ctx, u);
+	return err;
+}
+
+static void url_sync_params(url_private_t *priv)
+{
+	url_search_params_private_t *params = priv->params;
+	char *query = NULL;
+	size_t len = 0;
+
+	if (params == NULL) {
+		return;
+	}
+	if (nsurl_get(priv->url, NSURL_QUERY, &query, &len) != NSERROR_OK) {
+		query = NULL;
+	}
+	qjsky_query_parse(&params->query, query != NULL ? query : "");
+	free(query);
+}
+
+static JSValue url_set_part(JSContext *ctx, url_private_t *priv, enum qjsky_url_part part, JSValueConst value)
+{
+	const char *v = JS_ToCString(ctx, value);
+	nsurl *updated = NULL;
+	nserror err;
+
+	if (v == NULL) {
+		return JS_EXCEPTION;
+	}
+	err = qjsky_url_set(priv->url, part, v, &updated);
+	JS_FreeCString(ctx, v);
+	if (err != NSERROR_OK) {
+		if (part == QJSKY_URL_HREF) {
+			return JS_ThrowTypeError(ctx, "Failed to set the 'href' property on 'URL': Invalid URL");
+		}
+		return JS_UNDEFINED;
+	}
+	nsurl_unref(priv->url);
+	priv->url = updated;
+	url_sync_params(priv);
+	return JS_UNDEFINED;
+}
+
+static JSValue url_can_parse(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv)
+{
+	nsurl *url = NULL;
+	nserror err;
+
+	if (argc < 1) {
+		return JS_ThrowTypeError(ctx, "canParse: 1 argument required");
+	}
+	err = url_parse(ctx, argv[0], argc > 1 ? argv[1] : JS_UNDEFINED, &url);
+	if (url != NULL) {
+		nsurl_unref(url);
+	}
+	return JS_NewBool(ctx, err == NSERROR_OK);
+}
+%};
+};
+
+init URL(nsurl *url)
+%{
+	priv->url = nsurl_ref(url);
+	priv->params = NULL;
+%}
+
+fini URL()
+%{
+	if (priv->params != NULL) {
+		((url_search_params_private_t *)priv->params)->owner = NULL;
+	}
+	nsurl_unref(priv->url);
+%}
+
+constructor URL()
+%{
+	nsurl *url = NULL;
+	JSValue obj;
+	nserror err;
+
+	if (argc < 1) return JS_ThrowTypeError(ctx, "Failed to construct 'URL': 1 argument required");
+	err = url_parse(ctx, argv[0], argc > 1 ? argv[1] : JS_UNDEFINED, &url);
+	if (err == NSERROR_NOMEM && url == NULL && JS_HasException(ctx)) return JS_EXCEPTION;
+	if (err != NSERROR_OK) return JS_ThrowTypeError(ctx, "Failed to construct 'URL': Invalid URL");
+	obj = qjsky_url___create(ctx, url);
+	nsurl_unref(url);
+	return qjsky_constructed(ctx, obj, new_target);
+%}
+
+prototype URL()
+%{
+	if (JS_SetPropertyStr(ctx, ctor, "canParse", JS_NewCFunction(ctx, url_can_parse, "canParse", 1)) < 0) {
+		return -1;
+	}
+%}
+
+method URL::toString()
+%{
+	return qjsky_url_get(ctx, priv->url, QJSKY_URL_HREF);
+%}
+
+method URL::toJSON()
+%{
+	return qjsky_url_get(ctx, priv->url, QJSKY_URL_HREF);
+%}
+
+getter URL::searchParams()
+%{
+	JSValue params = qjsky_hidden_get(ctx, this_val, QJSKY_HIDDEN_SEARCH_PARAMS, false);
+	url_search_params_private_t *pp;
+
+	if (!JS_IsUndefined(params)) return params;
+	params = qjsky_url_search_params___create(ctx);
+	if (JS_IsException(params)) return params;
+	pp = qjsky_private(ctx, params, QJSKY_IFACE_URLSEARCHPARAMS);
+	if (pp != NULL) {
+		pp->owner = priv;
+		priv->params = pp;
+		url_sync_params(priv);
+	}
+	if (qjsky_hidden_set(ctx, this_val, QJSKY_HIDDEN_SEARCH_PARAMS, JS_DupValue(ctx, params)) < 0) {
+		JS_FreeValue(ctx, params);
+		return JS_EXCEPTION;
+	}
+	return params;
+%}
+
+getter URL::href()
+%{
+	return qjsky_url_get(ctx, priv->url, QJSKY_URL_HREF);
+%}
+
+setter URL::href()
+%{
+	return url_set_part(ctx, priv, QJSKY_URL_HREF, argv[0]);
+%}
+
+getter URL::protocol()
+%{
+	return qjsky_url_get(ctx, priv->url, QJSKY_URL_PROTOCOL);
+%}
+
+setter URL::protocol()
+%{
+	return url_set_part(ctx, priv, QJSKY_URL_PROTOCOL, argv[0]);
+%}
+
+getter URL::username()
+%{
+	return qjsky_url_get(ctx, priv->url, QJSKY_URL_USERNAME);
+%}
+
+setter URL::username()
+%{
+	return url_set_part(ctx, priv, QJSKY_URL_USERNAME, argv[0]);
+%}
+
+getter URL::password()
+%{
+	return qjsky_url_get(ctx, priv->url, QJSKY_URL_PASSWORD);
+%}
+
+setter URL::password()
+%{
+	return url_set_part(ctx, priv, QJSKY_URL_PASSWORD, argv[0]);
+%}
+
+getter URL::host()
+%{
+	return qjsky_url_get(ctx, priv->url, QJSKY_URL_HOST);
+%}
+
+setter URL::host()
+%{
+	return url_set_part(ctx, priv, QJSKY_URL_HOST, argv[0]);
+%}
+
+getter URL::hostname()
+%{
+	return qjsky_url_get(ctx, priv->url, QJSKY_URL_HOSTNAME);
+%}
+
+setter URL::hostname()
+%{
+	return url_set_part(ctx, priv, QJSKY_URL_HOSTNAME, argv[0]);
+%}
+
+getter URL::port()
+%{
+	return qjsky_url_get(ctx, priv->url, QJSKY_URL_PORT);
+%}
+
+setter URL::port()
+%{
+	return url_set_part(ctx, priv, QJSKY_URL_PORT, argv[0]);
+%}
+
+getter URL::pathname()
+%{
+	return qjsky_url_get(ctx, priv->url, QJSKY_URL_PATHNAME);
+%}
+
+setter URL::pathname()
+%{
+	return url_set_part(ctx, priv, QJSKY_URL_PATHNAME, argv[0]);
+%}
+
+getter URL::search()
+%{
+	return qjsky_url_get(ctx, priv->url, QJSKY_URL_SEARCH);
+%}
+
+setter URL::search()
+%{
+	return url_set_part(ctx, priv, QJSKY_URL_SEARCH, argv[0]);
+%}
+
+getter URL::hash()
+%{
+	return qjsky_url_get(ctx, priv->url, QJSKY_URL_HASH);
+%}
+
+setter URL::hash()
+%{
+	return url_set_part(ctx, priv, QJSKY_URL_HASH, argv[0]);
+%}
+
+getter URL::origin()
+%{
+	return qjsky_url_get(ctx, priv->url, QJSKY_URL_ORIGIN);
+%}
