@@ -65,12 +65,14 @@ struct dom_document {
 	/* Memoised event strings */
 	dom_string *_memo_domnodeinserted; /**< DOMNodeInserted */
 	dom_string *_memo_domnoderemoved; /**< DOMNodeRemoved */
-	dom_string *_memo_domnodeinsertedintodocument; /**<
-							  DOMNodeInsertedIntoDocument
-							*/
-	dom_string *_memo_domnoderemovedfromdocument; /**<
-							 DOMNodeRemovedFromDocument
-						       */
+	dom_string *
+		_memo_domnodeinsertedintodocument; /**<
+						      DOMNodeInsertedIntoDocument
+						    */
+	dom_string
+		*_memo_domnoderemovedfromdocument; /**<
+						      DOMNodeRemovedFromDocument
+						    */
 	dom_string *_memo_domattrmodified; /**< DOMAttrModified */
 	dom_string *
 		_memo_domcharacterdatamodified; /**< DOMCharacterDataModified */
