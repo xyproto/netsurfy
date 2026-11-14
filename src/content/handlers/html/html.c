@@ -58,6 +58,7 @@
 #include "javascript/js.h"
 #include "desktop/gui_internal.h"
 #include "desktop/browser_private.h"
+#include "desktop/frames.h"
 
 #include "html/html.h"
 #include "html/private.h"
@@ -1321,9 +1322,98 @@ static void html_free_layout(html_content *htmlc)
 	}
 }
 
+static dom_node **html_detach_iframes(html_content *htmlc, int *count)
+{
+	struct browser_window *bw = htmlc->bw;
+	dom_node **nodes;
+
+	*count = 0;
+	if (bw == NULL || bw->iframe_count == 0) {
+		return NULL;
+	}
+	nodes = calloc((size_t)bw->iframe_count, sizeof(*nodes));
+	if (nodes == NULL) {
+		browser_window_destroy_iframes(bw);
+		return NULL;
+	}
+	for (int i = 0; i < bw->iframe_count; i++) {
+		struct browser_window *w = &bw->iframes[i];
+		if (w->box != NULL) {
+			if (w->box->node != NULL) {
+				nodes[i] = dom_node_ref(w->box->node);
+			}
+			w->box->iframe = NULL;
+			w->box = NULL;
+		}
+	}
+	*count = bw->iframe_count;
+	return nodes;
+}
+
+static void
+html_attach_iframes(html_content *htmlc, dom_node **nodes, int count)
+{
+	struct browser_window *bw = htmlc->bw;
+	struct content_html_iframe *cur;
+	bool same = true;
+	int n = 0;
+
+	if (bw == NULL) {
+		goto out;
+	}
+	for (cur = htmlc->iframe; cur != NULL; cur = cur->next) {
+		bool found = false;
+		n++;
+		for (int i = 0; i < count && !found; i++) {
+			found = nodes[i] != NULL && cur->box != NULL &&
+				cur->box->node == nodes[i];
+		}
+		same = same && found;
+	}
+	if (n != count) {
+		same = false;
+	}
+	if (!same) {
+		browser_window_destroy_iframes(bw);
+		if (htmlc->iframe != NULL) {
+			browser_window_create_iframes(bw);
+		}
+		goto out;
+	}
+	for (cur = htmlc->iframe; cur != NULL; cur = cur->next) {
+		for (int i = 0; i < count; i++) {
+			if (nodes[i] != NULL && cur->box->node == nodes[i]) {
+				struct browser_window *w = &bw->iframes[i];
+				struct rect rect;
+				w->box = cur->box;
+				cur->box->iframe = w;
+				box_bounds(cur->box, &rect);
+				browser_window_set_position(w,
+							    rect.x0,
+							    rect.y0);
+				browser_window_set_dimensions(w,
+							      rect.x1 - rect.x0,
+							      rect.y1 -
+								      rect.y0);
+				break;
+			}
+		}
+	}
+	browser_window_recalculate_iframes(bw);
+out:
+	for (int i = 0; i < count; i++) {
+		if (nodes[i] != NULL) {
+			dom_node_unref(nodes[i]);
+		}
+	}
+	free(nodes);
+}
+
 static void html_rebuild_layout(html_content *htmlc)
 {
 	struct form_control *focus_gadget = NULL;
+	dom_node **iframe_nodes = NULL;
+	int iframe_count = 0;
 	struct form *f;
 	struct form_control *ctl;
 	dom_exception exc;
@@ -1334,7 +1424,7 @@ static void html_rebuild_layout(html_content *htmlc)
 
 	if (htmlc->aborted || htmlc->layout == NULL ||
 	    htmlc->box_conversion_context != NULL || htmlc->frameset != NULL ||
-	    htmlc->iframe != NULL || htmlc->reflowing || htmlc->base.locked ||
+	    htmlc->reflowing || htmlc->base.locked ||
 	    (status != CONTENT_STATUS_READY && status != CONTENT_STATUS_DONE)) {
 		return;
 	}
@@ -1367,7 +1457,10 @@ static void html_rebuild_layout(html_content *htmlc)
 		}
 	}
 
+	iframe_nodes = html_detach_iframes(htmlc, &iframe_count);
+
 	html_object_release_for_rebuild(htmlc);
+	htmlc->iframe = NULL;
 	html_free_layout(htmlc);
 	htmlc->bctx = NULL;
 	htmlc->layout = NULL;
@@ -1398,6 +1491,8 @@ static void html_rebuild_layout(html_content *htmlc)
 	    focus_gadget->data.text.ta != NULL) {
 		textarea_refresh_caret(focus_gadget->data.text.ta);
 	}
+
+	html_attach_iframes(htmlc, iframe_nodes, iframe_count);
 
 	nsu_getmonotonic_ms(&ms_after);
 	htmlc->rebuild_ms = ms_after - ms_before;
