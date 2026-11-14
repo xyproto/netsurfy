@@ -539,6 +539,9 @@ static gboolean nsgtk_window_key_pressed(GtkEventControllerKey *controller,
 	uint32_t nskey;
 	double value;
 
+	if (state & GDK_ALT_MASK)
+		return FALSE;
+
 	nskey = gtk_gui_gdkkey_to_nskey(keyval, state);
 
 	if (browser_window_key_press(g->bw, nskey))
