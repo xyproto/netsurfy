@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(NetSurfy VERSION 1.1.3 LANGUAGES C)
+project(NetSurfy VERSION 1.1.4 LANGUAGES C)
 
 if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
   message(FATAL_ERROR "NetSurfy only supports Linux")
