@@ -1530,6 +1530,24 @@ void html_schedule_rebuild(html_content *htmlc)
 	guit->misc->schedule((int)delay, html_rebuild_cb, htmlc);
 }
 
+/* exported interface documented in html/private.h */
+void html_flush_layout(html_content *htmlc)
+{
+	if (htmlc == NULL || htmlc->layout == NULL || htmlc->reflowing) {
+		return;
+	}
+	if (htmlc->rebuild_pending) {
+		guit->misc->schedule(-1, html_rebuild_cb, htmlc);
+		htmlc->rebuild_pending = false;
+		html_rebuild_layout(htmlc);
+	} else if (!htmlc->had_initial_layout && htmlc->base.available_width > 0) {
+		content__reformat(&htmlc->base,
+				  false,
+				  htmlc->base.available_width,
+				  htmlc->base.available_height);
+	}
+}
+
 /**
  * Destroy a CONTENT_HTML and free all resources it owns.
  */

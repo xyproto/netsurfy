@@ -41,6 +41,7 @@
 #include "desktop/gui_internal.h"
 
 #include "html/private.h"
+#include "html/css.h"
 #include "html/object.h"
 #include "html/box.h"
 #include "html/box_manipulate.h"
@@ -295,6 +296,68 @@ static css_select_results *box_get_style(html_content *c,
 		css_stylesheet_destroy(inline_style);
 
 	return styles;
+}
+
+
+/* exported function documented in html/box_construct.h */
+css_select_results *box_select_style(html_content *c, dom_node *n)
+{
+	dom_node *chain[64];
+	css_select_results *root = NULL, *prev = NULL, *cur = NULL;
+	css_select_ctx *temporary = NULL;
+	int depth = 0, i;
+
+	if (c == NULL || n == NULL) {
+		return NULL;
+	}
+	if (c->select_ctx == NULL) {
+		if (html_css_new_selection_context(c, &temporary) != NSERROR_OK) {
+			return NULL;
+		}
+		c->select_ctx = temporary;
+	}
+	chain[depth++] = dom_node_ref(n);
+	while (depth < (int)(sizeof(chain) / sizeof(chain[0]))) {
+		dom_node *parent = NULL;
+		dom_node_type type;
+
+		if (dom_node_get_parent_node(chain[depth - 1], &parent) != DOM_NO_ERR || parent == NULL) {
+			break;
+		}
+		if (dom_node_get_node_type(parent, &type) != DOM_NO_ERR || type != DOM_ELEMENT_NODE) {
+			dom_node_unref(parent);
+			break;
+		}
+		chain[depth++] = parent;
+	}
+	for (i = depth - 1; i >= 0; i--) {
+		cur = box_get_style(c,
+				    prev != NULL ? prev->styles[CSS_PSEUDO_ELEMENT_NONE] : NULL,
+				    root != NULL ? root->styles[CSS_PSEUDO_ELEMENT_NONE] : NULL,
+				    chain[i]);
+		if (prev != NULL && prev != root) {
+			css_select_results_destroy(prev);
+		}
+		prev = cur;
+		if (cur == NULL) {
+			break;
+		}
+		if (root == NULL) {
+			root = cur;
+		}
+	}
+	if (root != NULL && root != cur) {
+		css_select_results_destroy(root);
+	}
+	for (i = 0; i < depth; i++) {
+		nscss_clear_one_node_data(chain[i]);
+		dom_node_unref(chain[i]);
+	}
+	if (temporary != NULL) {
+		c->select_ctx = NULL;
+		css_select_ctx_destroy(temporary);
+	}
+	return cur;
 }
 
 

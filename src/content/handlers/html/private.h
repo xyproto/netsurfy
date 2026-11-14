@@ -372,6 +372,13 @@ bool fire_dom_keyboard_event(dom_string *type,
 
 void html_schedule_rebuild(html_content *htmlc);
 
+/**
+ * Bring the layout up to date now, for scripts that ask for geometry or computed styles
+ *
+ * \param htmlc html content
+ */
+void html_flush_layout(html_content *htmlc);
+
 bool fire_dom_mouse_event(dom_string *type,
 			  dom_node *target,
 			  struct browser_window *bw,

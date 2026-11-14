@@ -104,6 +104,15 @@ nserror dom_to_box_sync(struct dom_node *n, struct html_content *c);
 struct box *box_for_node(struct dom_node *node);
 
 /**
+ * Select the computed style of an element, also before it has a box
+ *
+ * \param c html content the element belongs to
+ * \param n element
+ * \return the selection results, to destroy with css_select_results_destroy, or NULL
+ */
+struct css_select_results *box_select_style(struct html_content *c, struct dom_node *n);
+
+/**
  * Extract a URL from a relative link, handling junk like whitespace and
  * attempting to read a real URL from "javascript:" links.
  *

@@ -4346,6 +4346,19 @@ nsurl *llcache_handle_get_url(const llcache_handle *handle)
 }
 
 /* See llcache.h for documentation */
+nsurl *llcache_handle_get_referer(const llcache_handle *handle)
+{
+	char *header = NULL;
+
+	if (handle->object == NULL || handle->object->fetch.referer == NULL ||
+	    get_referer_header(handle->object->url, handle->object->fetch.referer, &header) != NSERROR_OK) {
+		return NULL;
+	}
+	free(header);
+	return handle->object->fetch.referer;
+}
+
+/* See llcache.h for documentation */
 const uint8_t *
 llcache_handle_get_source_data(const llcache_handle *handle, size_t *size)
 {

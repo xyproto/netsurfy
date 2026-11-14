@@ -6,6 +6,17 @@
  *         http://www.opensource.org/licenses/mit-license
  */
 
+method Window::getComputedStyle()
+%{
+	node_private_t *n = argc > 0 ? qjsky_private(ctx, argv[0], QJSKY_IFACE_NODE) : NULL;
+	dom_node_type type;
+
+	if (n == NULL || dom_node_get_node_type(n->node, &type) != DOM_NO_ERR || type != DOM_ELEMENT_NODE) {
+		return JS_ThrowTypeError(ctx, "Failed to execute 'getComputedStyle' on 'Window': parameter 1 is not of type 'Element'.");
+	}
+	return qjsky_computed_style(ctx, n->node);
+%}
+
 method Element::getBoundingClientRect()
 %{
 	double border[4] = {0, 0, 0, 0}, content[4], sx, sy;

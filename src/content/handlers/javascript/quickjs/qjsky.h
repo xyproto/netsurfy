@@ -60,6 +60,7 @@ JSValue qjsky_event(JSContext *ctx, struct dom_event *evt);
 JSValue qjsky_constructed(JSContext *ctx, JSValue obj, JSValueConst new_target);
 bool qjsky_node_boxes(struct dom_node *node, double border[4], double content[4]);
 void qjsky_viewport_scroll(JSContext *ctx, double *sx, double *sy);
+JSValue qjsky_computed_style(JSContext *ctx, struct dom_node *node);
 JSValue qjsky_element_style(JSContext *ctx, JSValueConst obj, struct dom_element *element);
 struct qjsky_matrix;
 struct qjsky_observer;

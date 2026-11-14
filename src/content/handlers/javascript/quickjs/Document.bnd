@@ -295,6 +295,14 @@ method Document::getElementsByTagName()
 	return qjsky_list_proxy(ctx, "makeListProxy", list);
 %}
 
+getter Document::referrer()
+%{
+	struct html_content *htmlc = document_htmlc(priv->parent.node);
+	nsurl *referer = htmlc != NULL ? llcache_handle_get_referer(htmlc->base.llcache) : NULL;
+
+	return JS_NewString(ctx, referer != NULL ? nsurl_access(referer) : "");
+%}
+
 getter Document::cookie()
 %{
 	char *cookie_str;

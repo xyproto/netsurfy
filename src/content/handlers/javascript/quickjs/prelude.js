@@ -30,7 +30,12 @@
         }
         var target = args[0];
         if (args.length === 1 || typeof target !== "string") {
-            return args.map(function (a) { return String(a); });
+            return args.map(function (a) {
+                if (a instanceof Error && typeof a.stack === "string" && a.stack !== "") {
+                    return String(a) + "\n" + a.stack.replace(/\n$/, "");
+                }
+                return String(a);
+            });
         }
         var result = "";
         var next = 1;
@@ -3442,7 +3447,70 @@
     define(XMLHttpRequest.prototype, Symbol.toStringTag, "XMLHttpRequest");
     defineMissing(global, "XMLHttpRequest", XMLHttpRequest);
 
+    var computedDefaults = {
+        "transform": "none", "pointer-events": "auto", "box-sizing": "content-box",
+        "top": "auto", "right": "auto", "bottom": "auto", "left": "auto",
+        "min-width": "0px", "min-height": "0px", "max-width": "none", "max-height": "none",
+        "text-align": "start", "white-space": "normal", "clear": "none", "cursor": "auto",
+        "transition-duration": "0s", "animation-name": "none", "content": "normal"
+    };
+
+    function hyphenate(name) {
+        return name.replace(/[A-Z]/g, function (c) { return "-" + c.toLowerCase(); });
+    }
+
     return {
+        makeComputedStyle: function (values) {
+            var names = Object.keys(computedDefaults).concat(Object.keys(values)).filter(function (n, i, a) {
+                return a.indexOf(n) === i;
+            });
+            var decl = Object.create(null);
+            names.forEach(function (n) {
+                decl[n] = n in values ? values[n] : computedDefaults[n];
+            });
+            var target = {
+                getPropertyValue: function (name) {
+                    name = String(name).toLowerCase();
+                    return name in decl ? decl[name] : "";
+                },
+                getPropertyPriority: function () { return ""; },
+                item: function (i) { return names[i] || ""; },
+                setProperty: function () {
+                    throw new DOMException("The computed style is read-only", "NoModificationAllowedError");
+                },
+                removeProperty: function () {
+                    throw new DOMException("The computed style is read-only", "NoModificationAllowedError");
+                },
+                length: names.length,
+                cssText: "",
+                parentRule: null
+            };
+            target[Symbol.toStringTag] = "CSSStyleDeclaration";
+            return new Proxy(target, {
+                get: function (t, key) {
+                    if (typeof key === "string") {
+                        if (key in t) {
+                            return t[key];
+                        }
+                        var index = listIndex(key);
+                        if (index >= 0) {
+                            return names[index];
+                        }
+                        var h = key.indexOf("-") >= 0 ? key : hyphenate(key);
+                        if (h in decl) {
+                            return decl[h];
+                        }
+                    }
+                    return t[key];
+                },
+                has: function (t, key) {
+                    return key in t || (typeof key === "string" && (key in decl || hyphenate(key) in decl));
+                },
+                set: function () {
+                    return true;
+                }
+            });
+        },
         makeListProxy: function (inner) {
             return new Proxy(inner, {
                 has: function (target, key) {

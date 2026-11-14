@@ -726,7 +726,9 @@ html_css_new_selection_context(html_content *c, css_select_ctx **ret_select_ctx)
 			origin = CSS_ORIGIN_USER;
 		}
 
-		if (hsheet->sheet != NULL) {
+		if (hsheet->sheet != NULL &&
+		    hlcache_handle_get_content(hsheet->sheet) != NULL &&
+		    content_get_status(hsheet->sheet) == CONTENT_STATUS_DONE) {
 			sheet = nscss_get_stylesheet(hsheet->sheet);
 		}
 

@@ -261,6 +261,14 @@ nserror llcache_handle_invalidate_cache_data(llcache_handle *handle);
 nsurl *llcache_handle_get_url(const llcache_handle *handle);
 
 /**
+ * Retrieve the referring URL that was sent when fetching a handle's object
+ *
+ * \param handle Handle to retrieve the referrer from
+ * \return The referring URL, or NULL if none was sent
+ */
+nsurl *llcache_handle_get_referer(const llcache_handle *handle);
+
+/**
  * Retrieve source data of a low-level cache object
  *
  * \param handle  Handle to retrieve source data from

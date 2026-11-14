@@ -314,21 +314,34 @@ void qjsky_dump_error(JSContext *ctx)
 	if (msg == NULL) {
 		JS_FreeValue(ctx, JS_GetException(ctx));
 	}
+	JSValue causeval = JS_UNDEFINED;
+	const char *cause = NULL;
+
 	if (JS_IsError(exc)) {
 		stackval = JS_GetPropertyStr(ctx, exc, "stack");
 		if (JS_IsString(stackval)) {
 			stack = JS_ToCString(ctx, stackval);
 		}
+		causeval = JS_GetPropertyStr(ctx, exc, "cause");
+		if (!JS_IsUndefined(causeval) && !JS_IsException(causeval)) {
+			cause = JS_ToCString(ctx, causeval);
+		}
 	}
 	NSLOG(jserrors,
 	      WARNING,
-	      "Uncaught error in JS: %s%s%s",
+	      "Uncaught error in JS: %s%s%s%s%s",
 	      msg != NULL ? msg : "(unprintable)",
 	      stack != NULL ? "\n" : "",
-	      stack != NULL ? stack : "");
+	      stack != NULL ? stack : "",
+	      cause != NULL ? "\nCaused by: " : "",
+	      cause != NULL ? cause : "");
 	if (stack != NULL) {
 		JS_FreeCString(ctx, stack);
 	}
+	if (cause != NULL) {
+		JS_FreeCString(ctx, cause);
+	}
+	JS_FreeValue(ctx, causeval);
 	if (msg != NULL) {
 		JS_FreeCString(ctx, msg);
 	}
@@ -460,7 +473,7 @@ JSValue qjsky_string(JSContext *ctx, dom_string *str)
 	}
 	return JS_NewStringLen(ctx,
 			       dom_string_data(str),
-			       dom_string_length(str));
+			       dom_string_byte_length(str));
 }
 
 dom_string *qjsky_to_dom_string(JSContext *ctx, JSValueConst val)
@@ -1068,7 +1081,7 @@ qjsky_compile_handler(JSContext *ctx, dom_string *name, dom_event_target *et)
 	}
 	dom_string_unref(onname);
 
-	len = SLEN(prefix) + dom_string_length(val) + SLEN(suffix);
+	len = SLEN(prefix) + dom_string_byte_length(val) + SLEN(suffix);
 	src = malloc(len + 1);
 	if (src == NULL) {
 		dom_string_unref(val);
@@ -1077,8 +1090,8 @@ qjsky_compile_handler(JSContext *ctx, dom_string *name, dom_event_target *et)
 	memcpy(src, prefix, SLEN(prefix));
 	memcpy(src + SLEN(prefix),
 	       dom_string_data(val),
-	       dom_string_length(val));
-	memcpy(src + SLEN(prefix) + dom_string_length(val),
+	       dom_string_byte_length(val));
+	memcpy(src + SLEN(prefix) + dom_string_byte_length(val),
 	       suffix,
 	       SLEN(suffix));
 	src[len] = '\0';
@@ -1105,7 +1118,7 @@ JSValue qjsky_get_event_handler(JSContext *ctx,
 	if (JS_IsObject(handlers)) {
 		JSAtom atom = JS_NewAtomLen(ctx,
 					    dom_string_data(name),
-					    dom_string_length(name));
+					    dom_string_byte_length(name));
 		int has = JS_HasProperty(ctx, handlers, atom);
 		if (has > 0) {
 			JSValue handler = JS_GetProperty(ctx, handlers, atom);
@@ -1385,7 +1398,7 @@ static void qjsky_add_dom_listener(jsthread *thread,
 		      DEBUG,
 		      "Unable to register listener for %p.%.*s",
 		      ele,
-		      (int)dom_string_length(name),
+		      (int)dom_string_byte_length(name),
 		      dom_string_data(name));
 	}
 	dom_event_listener_unref(listen);
@@ -1416,7 +1429,7 @@ void qjsky_register_event_listener_for(JSContext *ctx,
 	}
 	atom = JS_NewAtomLen(ctx,
 			     dom_string_data(name),
-			     dom_string_length(name));
+			     dom_string_byte_length(name));
 	has = JS_HasProperty(ctx, registered, atom);
 	if (has == 0) {
 		JS_SetProperty(ctx, registered, atom, JS_TRUE);
@@ -1438,6 +1451,19 @@ static JSValue qjsky_illegal_constructor(JSContext *ctx,
 	return JS_ThrowTypeError(ctx, "Illegal constructor");
 }
 
+static html_content *qjsky_node_htmlc(struct dom_node *node)
+{
+	struct dom_document *doc = NULL;
+	void *htmlc = NULL;
+
+	if (dom_node_get_owner_document(node, &doc) != DOM_NO_ERR || doc == NULL) {
+		return NULL;
+	}
+	(void)dom_node_get_user_data((dom_node *)doc, corestring_dom___ns_key_html_content_data, &htmlc);
+	dom_node_unref(doc);
+	return htmlc;
+}
+
 bool qjsky_node_boxes(struct dom_node *node,
 		      double border[4],
 		      double content[4])
@@ -1445,6 +1471,9 @@ bool qjsky_node_boxes(struct dom_node *node,
 	struct box *box;
 	int x, y;
 
+	if (node != NULL) {
+		html_flush_layout(qjsky_node_htmlc(node));
+	}
 	if (node == NULL || (box = box_for_node(node)) == NULL) {
 		return false;
 	}
@@ -1460,6 +1489,262 @@ bool qjsky_node_boxes(struct dom_node *node,
 	content[2] = box->width;
 	content[3] = box->height;
 	return true;
+}
+
+static const char *qjsky_css_display(uint8_t v)
+{
+	switch (v) {
+	case CSS_DISPLAY_INLINE: return "inline";
+	case CSS_DISPLAY_BLOCK: return "block";
+	case CSS_DISPLAY_LIST_ITEM: return "list-item";
+	case CSS_DISPLAY_RUN_IN: return "run-in";
+	case CSS_DISPLAY_INLINE_BLOCK: return "inline-block";
+	case CSS_DISPLAY_TABLE: return "table";
+	case CSS_DISPLAY_INLINE_TABLE: return "inline-table";
+	case CSS_DISPLAY_TABLE_ROW_GROUP: return "table-row-group";
+	case CSS_DISPLAY_TABLE_HEADER_GROUP: return "table-header-group";
+	case CSS_DISPLAY_TABLE_FOOTER_GROUP: return "table-footer-group";
+	case CSS_DISPLAY_TABLE_ROW: return "table-row";
+	case CSS_DISPLAY_TABLE_COLUMN_GROUP: return "table-column-group";
+	case CSS_DISPLAY_TABLE_COLUMN: return "table-column";
+	case CSS_DISPLAY_TABLE_CELL: return "table-cell";
+	case CSS_DISPLAY_TABLE_CAPTION: return "table-caption";
+	case CSS_DISPLAY_FLEX: return "flex";
+	case CSS_DISPLAY_INLINE_FLEX: return "inline-flex";
+	case CSS_DISPLAY_GRID: return "grid";
+	case CSS_DISPLAY_INLINE_GRID: return "inline-grid";
+	default: return "none";
+	}
+}
+
+static const char *qjsky_css_overflow(uint8_t v)
+{
+	switch (v) {
+	case CSS_OVERFLOW_HIDDEN: return "hidden";
+	case CSS_OVERFLOW_SCROLL: return "scroll";
+	case CSS_OVERFLOW_AUTO: return "auto";
+	default: return "visible";
+	}
+}
+
+static const char *qjsky_css_position(uint8_t v)
+{
+	switch (v) {
+	case CSS_POSITION_RELATIVE: return "relative";
+	case CSS_POSITION_ABSOLUTE: return "absolute";
+	case CSS_POSITION_FIXED: return "fixed";
+	case CSS_POSITION_STICKY: return "sticky";
+	default: return "static";
+	}
+}
+
+static const char *qjsky_css_font_weight(uint8_t v)
+{
+	switch (v) {
+	case CSS_FONT_WEIGHT_100: return "100";
+	case CSS_FONT_WEIGHT_200: return "200";
+	case CSS_FONT_WEIGHT_300: return "300";
+	case CSS_FONT_WEIGHT_500: return "500";
+	case CSS_FONT_WEIGHT_600: return "600";
+	case CSS_FONT_WEIGHT_BOLD:
+	case CSS_FONT_WEIGHT_700: return "700";
+	case CSS_FONT_WEIGHT_800: return "800";
+	case CSS_FONT_WEIGHT_900: return "900";
+	default: return "400";
+	}
+}
+
+static void qjsky_css_set(JSContext *ctx, JSValueConst obj, const char *name, const char *value)
+{
+	JS_SetPropertyStr(ctx, obj, name, JS_NewString(ctx, value));
+}
+
+static void qjsky_css_number(char *buf, size_t size, double v, const char *suffix)
+{
+	long long scaled = llround(v * 1000);
+	unsigned long long a = scaled < 0 ? -(unsigned long long)scaled : (unsigned long long)scaled;
+	unsigned long long frac = a % 1000;
+
+	if (frac == 0) {
+		snprintf(buf, size, "%s%llu%s", scaled < 0 ? "-" : "", a / 1000, suffix);
+		return;
+	}
+	if (frac % 100 == 0) {
+		snprintf(buf, size, "%s%llu.%llu%s", scaled < 0 ? "-" : "", a / 1000, frac / 100, suffix);
+	} else if (frac % 10 == 0) {
+		snprintf(buf, size, "%s%llu.%02llu%s", scaled < 0 ? "-" : "", a / 1000, frac / 10, suffix);
+	} else {
+		snprintf(buf, size, "%s%llu.%03llu%s", scaled < 0 ? "-" : "", a / 1000, frac, suffix);
+	}
+}
+
+static void qjsky_css_set_px(JSContext *ctx, JSValueConst obj, const char *name, double px)
+{
+	char buf[32];
+	qjsky_css_number(buf, sizeof(buf), px, "px");
+	qjsky_css_set(ctx, obj, name, buf);
+}
+
+static void qjsky_css_set_len(JSContext *ctx,
+			      JSValueConst obj,
+			      const char *name,
+			      const css_computed_style *style,
+			      const css_unit_ctx *unit_ctx,
+			      bool set,
+			      css_fixed len,
+			      css_unit unit)
+{
+	char buf[32];
+
+	if (!set) {
+		qjsky_css_set(ctx, obj, name, "auto");
+	} else if (unit == CSS_UNIT_PCT) {
+		qjsky_css_number(buf, sizeof(buf), FIXTOFLT(len), "%");
+		qjsky_css_set(ctx, obj, name, buf);
+	} else if (unit == CSS_UNIT_PX) {
+		qjsky_css_set_px(ctx, obj, name, FIXTOFLT(len));
+	} else {
+		qjsky_css_set_px(ctx, obj, name, FIXTOFLT(css_unit_len2css_px(style, unit_ctx, len, unit)));
+	}
+}
+
+static void qjsky_css_set_colour(JSContext *ctx, JSValueConst obj, const char *name, css_color c)
+{
+	char buf[48];
+	unsigned a = (c >> 24) & 0xff, r = (c >> 16) & 0xff, g = (c >> 8) & 0xff, b = c & 0xff;
+	if (a == 0xff) {
+		snprintf(buf, sizeof(buf), "rgb(%u, %u, %u)", r, g, b);
+	} else {
+		char alpha[16];
+		qjsky_css_number(alpha, sizeof(alpha), a / 255.0, "");
+		snprintf(buf, sizeof(buf), "rgba(%u, %u, %u, %s)", r, g, b, alpha);
+	}
+	qjsky_css_set(ctx, obj, name, buf);
+}
+
+JSValue qjsky_computed_style(JSContext *ctx, struct dom_node *node)
+{
+	static const char *sides[4] = { "top", "right", "bottom", "left" };
+	static const int index[4] = { TOP, RIGHT, BOTTOM, LEFT };
+	JSValue values = JS_NewObject(ctx), fn, ret;
+	struct box *box;
+	const css_computed_style *style;
+	css_select_results *selected = NULL;
+	jsthread *thread = qjsky_thread(ctx);
+	char buf[64];
+
+	if (JS_IsException(values)) {
+		return values;
+	}
+	if (thread->window_priv != NULL) {
+		html_flush_layout(thread->window_priv->htmlc);
+	}
+	box = node != NULL ? box_for_node(node) : NULL;
+	style = box != NULL ? box->style : NULL;
+	if (style == NULL && node != NULL && thread->window_priv != NULL) {
+		selected = box_select_style(thread->window_priv->htmlc, node);
+		if (selected != NULL) {
+			style = selected->styles[CSS_PSEUDO_ELEMENT_NONE];
+		}
+	}
+	if (style == NULL) {
+		qjsky_css_set(ctx, values, "display", "none");
+	} else {
+		css_color colour;
+		css_fixed len, opacity;
+		css_unit unit;
+		int32_t z;
+		uint8_t v;
+		int i;
+
+		qjsky_css_set(ctx, values, "display", qjsky_css_display(css_computed_display(style, false)));
+		v = css_computed_visibility(style);
+		qjsky_css_set(ctx, values, "visibility", v == CSS_VISIBILITY_HIDDEN ? "hidden" : v == CSS_VISIBILITY_COLLAPSE ? "collapse" : "visible");
+		qjsky_css_set(ctx, values, "position", qjsky_css_position(css_computed_position(style)));
+		v = css_computed_float(style);
+		qjsky_css_set(ctx, values, "float", v == CSS_FLOAT_LEFT ? "left" : v == CSS_FLOAT_RIGHT ? "right" : "none");
+		qjsky_css_set(ctx, values, "overflow-x", qjsky_css_overflow(css_computed_overflow_x(style)));
+		qjsky_css_set(ctx, values, "overflow-y", qjsky_css_overflow(css_computed_overflow_y(style)));
+		if (css_computed_overflow_x(style) == css_computed_overflow_y(style)) {
+			qjsky_css_set(ctx, values, "overflow", qjsky_css_overflow(css_computed_overflow_x(style)));
+		} else {
+			snprintf(buf, sizeof(buf), "%s %s", qjsky_css_overflow(css_computed_overflow_x(style)), qjsky_css_overflow(css_computed_overflow_y(style)));
+			qjsky_css_set(ctx, values, "overflow", buf);
+		}
+		css_computed_opacity(style, &opacity);
+		qjsky_css_number(buf, sizeof(buf), FIXTOFLT(opacity), "");
+		qjsky_css_set(ctx, values, "opacity", buf);
+		if (css_computed_z_index(style, &z) == CSS_Z_INDEX_SET) {
+			snprintf(buf, sizeof(buf), "%d", (int)FIXTOINT(z));
+			qjsky_css_set(ctx, values, "z-index", buf);
+		} else {
+			qjsky_css_set(ctx, values, "z-index", "auto");
+		}
+		css_computed_color(style, &colour);
+		qjsky_css_set_colour(ctx, values, "color", colour);
+		css_computed_background_color(style, &colour);
+		qjsky_css_set_colour(ctx, values, "background-color", colour);
+		if (css_computed_font_size(style, &len, &unit) == CSS_FONT_SIZE_DIMENSION) {
+			double size = FIXTOFLT(len);
+			if (unit == CSS_UNIT_PT) {
+				size = size * 96 / 72;
+			}
+			qjsky_css_set_px(ctx, values, "font-size", size);
+		}
+		qjsky_css_set(ctx, values, "font-weight", qjsky_css_font_weight(css_computed_font_weight(style)));
+		v = css_computed_font_style(style);
+		qjsky_css_set(ctx, values, "font-style", v == CSS_FONT_STYLE_ITALIC ? "italic" : v == CSS_FONT_STYLE_OBLIQUE ? "oblique" : "normal");
+		if (box != NULL && thread->window_priv != NULL && thread->window_priv->htmlc != NULL &&
+		    thread->window_priv->htmlc->had_initial_layout) {
+			qjsky_css_set_px(ctx, values, "width", box->width);
+			qjsky_css_set_px(ctx, values, "height", box->height);
+			for (i = 0; i < 4; i++) {
+				snprintf(buf, sizeof(buf), "margin-%s", sides[i]);
+				qjsky_css_set_px(ctx, values, buf, box->margin[index[i]]);
+				snprintf(buf, sizeof(buf), "padding-%s", sides[i]);
+				qjsky_css_set_px(ctx, values, buf, box->padding[index[i]]);
+				snprintf(buf, sizeof(buf), "border-%s-width", sides[i]);
+				qjsky_css_set_px(ctx, values, buf, box->border[index[i]].width);
+			}
+		} else if (thread->window_priv != NULL && thread->window_priv->htmlc != NULL) {
+			const css_unit_ctx *uc = &thread->window_priv->htmlc->unit_len_ctx;
+			uint8_t (*margin[4])(const css_computed_style *, css_fixed *, css_unit *) = {
+				css_computed_margin_top, css_computed_margin_right, css_computed_margin_bottom, css_computed_margin_left };
+			uint8_t (*padding[4])(const css_computed_style *, css_fixed *, css_unit *) = {
+				css_computed_padding_top, css_computed_padding_right, css_computed_padding_bottom, css_computed_padding_left };
+			uint8_t (*border[4])(const css_computed_style *, css_fixed *, css_unit *) = {
+				css_computed_border_top_width, css_computed_border_right_width, css_computed_border_bottom_width, css_computed_border_left_width };
+
+			bool set;
+
+			set = css_computed_width(style, &len, &unit) == CSS_WIDTH_SET;
+			qjsky_css_set_len(ctx, values, "width", style, uc, set, len, unit);
+			set = css_computed_height(style, &len, &unit) == CSS_HEIGHT_SET;
+			qjsky_css_set_len(ctx, values, "height", style, uc, set, len, unit);
+			for (i = 0; i < 4; i++) {
+				snprintf(buf, sizeof(buf), "margin-%s", sides[i]);
+				set = margin[i](style, &len, &unit) == CSS_MARGIN_SET;
+				qjsky_css_set_len(ctx, values, buf, style, uc, set, len, unit);
+				snprintf(buf, sizeof(buf), "padding-%s", sides[i]);
+				padding[i](style, &len, &unit);
+				qjsky_css_set_len(ctx, values, buf, style, uc, true, len, unit);
+				snprintf(buf, sizeof(buf), "border-%s-width", sides[i]);
+				if (border[i](style, &len, &unit) == CSS_BORDER_WIDTH_WIDTH) {
+					qjsky_css_set_len(ctx, values, buf, style, uc, true, len, unit);
+				} else {
+					qjsky_css_set(ctx, values, buf, "0px");
+				}
+			}
+		}
+	}
+	if (selected != NULL) {
+		css_select_results_destroy(selected);
+	}
+	fn = qjsky_generic(ctx, "makeComputedStyle");
+	ret = JS_Call(ctx, fn, JS_UNDEFINED, 1, (JSValueConst *)&values);
+	JS_FreeValue(ctx, fn);
+	JS_FreeValue(ctx, values);
+	return ret;
 }
 
 void qjsky_viewport_scroll(JSContext *ctx, double *sx, double *sy)

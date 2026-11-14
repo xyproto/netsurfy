@@ -1871,6 +1871,11 @@ nscss_clear_node_data_cb(enum dom_walk_stage stage,
 }
 
 /* exported function documented in css/select.h */
+void nscss_clear_one_node_data(dom_node *node)
+{
+	nscss_clear_node_data_cb(DOM_WALK_STAGE_ENTER, DOM_ELEMENT_NODE, node, NULL);
+}
+
 void nscss_clear_node_data(dom_node *root)
 {
 	nscss_clear_node_data_cb(DOM_WALK_STAGE_ENTER,
