@@ -433,6 +433,11 @@ static nserror nsgtk_plot_path(const struct redraw_context *ctx,
 	if (n == 0)
 		return NSERROR_OK;
 
+	if (!isfinite(transform[0] * transform[3] - transform[1] * transform[2]) ||
+	    transform[0] * transform[3] - transform[1] * transform[2] == 0 ||
+	    !isfinite(transform[4]) || !isfinite(transform[5]))
+		return NSERROR_OK;
+
 	if (p[0] != PLOTTER_PATH_MOVE) {
 		NSLOG(netsurfy, INFO, "Path does not start with move");
 		return NSERROR_INVALID;
