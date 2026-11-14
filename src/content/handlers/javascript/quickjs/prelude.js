@@ -1342,10 +1342,14 @@
     }
 
     function HTMLElementConstructor() {
-        if (new.target === undefined) {
-            throw new TypeError("Failed to construct 'HTMLElement': Please use the 'new' operator");
+        var target = new.target;
+        if (target === undefined) {
+            if (this === null || typeof this !== "object" || !(this instanceof HTMLElementConstructor)) {
+                throw new TypeError("Failed to construct 'HTMLElement': Please use the 'new' operator");
+            }
+            target = this.constructor;
         }
-        var def = definitionsByCtor.get(new.target);
+        var def = definitionsByCtor.get(target);
         if (def === undefined) {
             throw new TypeError("Illegal constructor");
         }
@@ -1359,7 +1363,7 @@
             el = nativeCreateElement.call(document, def.name);
             customState.set(el, def);
         }
-        Object.setPrototypeOf(el, new.target.prototype);
+        Object.setPrototypeOf(el, new.target === undefined ? Object.getPrototypeOf(this) : new.target.prototype);
         return el;
     }
     HTMLElementConstructor.prototype = nativeHTMLElement.prototype;
