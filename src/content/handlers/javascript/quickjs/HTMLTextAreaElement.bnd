@@ -25,6 +25,18 @@ setter HTMLTextAreaElement::readOnly();
 getter HTMLTextAreaElement::type();
 
 getter HTMLTextAreaElement::value();
-setter HTMLTextAreaElement::value();
+setter HTMLTextAreaElement::value()
+%{
+	dom_node *node = ((node_private_t *)priv)->node;
+	JSValue v = JS_IsNull(argv[0]) ? JS_NewString(ctx, "") : JS_DupValue(ctx, argv[0]);
+	dom_string *str = qjsky_to_dom_string(ctx, v);
+
+	JS_FreeValue(ctx, v);
+	if (str == NULL) return JS_EXCEPTION;
+	(void)dom_html_text_area_element_set_value((struct dom_html_text_area_element *)node, str);
+	dom_string_unref(str);
+	qjsky_node_state_changed(node);
+	return JS_UNDEFINED;
+%}
 
 

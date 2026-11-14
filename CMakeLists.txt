@@ -27,6 +27,7 @@ option(NETSURFY_USE_HARU_PDF "PDF export (libharu)" OFF)
 option(NETSURFY_FS_BACKING_STORE "Disc cache backing store" ON)
 option(NETSURFY_USE_SANITIZERS "Build with ASan and UBSan" OFF)
 option(NETSURFY_RECOVER_SANITIZERS "Continue after sanitizer errors" ON)
+option(NETSURFY_BUILD_MONKEY "Headless monkey frontend for automated testing" OFF)
 option(BUILD_TESTING "Build the unit tests (requires check)" ON)
 
 set(NETSURFY_LOG_LEVEL "VERBOSE" CACHE STRING "Compiled-in log level")

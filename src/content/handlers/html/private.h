@@ -96,6 +96,7 @@ typedef struct html_content {
 	dom_hubbub_parser *parser; /**< Parser object handle */
 	bool parse_completed; /**< Whether the parse has been completed */
 	bool conversion_begun; /**< Whether or not the conversion has begun */
+	bool load_fired;
 
 	/** Document tree */
 	dom_document *document;
@@ -207,6 +208,7 @@ typedef struct html_content {
 	bool autofocus_done;
 
 	bool rebuild_pending;
+	bool styles_dirty;
 	uint64_t rebuild_ms;
 
 	/** HTML content's own text selection object */

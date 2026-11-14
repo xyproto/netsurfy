@@ -919,6 +919,56 @@ static nserror browser_window_content_ready(struct browser_window *bw)
 /**
  * handle message for content done on browser window
  */
+static bool browser_window_loaded(struct browser_window *bw)
+{
+	if (bw->loading_content != NULL) {
+		return false;
+	}
+	if (bw->current_content == NULL) {
+		return true;
+	}
+	switch (content_get_status(bw->current_content)) {
+	case CONTENT_STATUS_DONE:
+		break;
+	case CONTENT_STATUS_ERROR:
+		return true;
+	default:
+		return false;
+	}
+	return content_get_type(bw->current_content) != CONTENT_HTML ||
+	       html_load_fired(bw->current_content);
+}
+
+static void browser_window_check_load(struct browser_window *bw)
+{
+	for (; bw != NULL; bw = bw->parent) {
+		if (bw->current_content == NULL ||
+		    content_get_type(bw->current_content) != CONTENT_HTML) {
+			if (!browser_window_loaded(bw)) {
+				return;
+			}
+			continue;
+		}
+		if (content_get_status(bw->current_content) !=
+		    CONTENT_STATUS_DONE) {
+			return;
+		}
+		for (int i = 0; i < bw->iframe_count; i++) {
+			if (!browser_window_loaded(&bw->iframes[i])) {
+				return;
+			}
+		}
+		if (bw->children != NULL) {
+			for (int i = 0; i < bw->rows * bw->cols; i++) {
+				if (!browser_window_loaded(&bw->children[i])) {
+					return;
+				}
+			}
+		}
+		html_fire_load(bw->current_content);
+	}
+}
+
 static nserror browser_window_content_done(struct browser_window *bw)
 {
 	float sx, sy;
@@ -968,6 +1018,8 @@ static nserror browser_window_content_done(struct browser_window *bw)
 				     browser_window_refresh,
 				     bw);
 	}
+
+	browser_window_check_load(bw);
 
 	return NSERROR_OK;
 }
@@ -1427,6 +1479,8 @@ static nserror browser_window__handle_error(struct browser_window *bw,
 		res = browser_window__handle_fetcherror(bw, message, url);
 		break;
 	}
+
+	browser_window_check_load(bw);
 
 	return res;
 }

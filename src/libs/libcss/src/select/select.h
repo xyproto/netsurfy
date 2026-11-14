@@ -14,6 +14,7 @@
 #include <libcss/select.h>
 
 #include "stylesheet.h"
+#include "select/vars.h"
 
 /**
  * Item in the reject cache (only class and id types are valid)
@@ -97,6 +98,9 @@ typedef struct css_select_state {
 	struct css_node_data *node_data; /* Data we'll store on node */
 
 	prop_state props[CSS_N_PROPERTIES][CSS_PSEUDO_ELEMENT_COUNT];
+
+	css_select_vars vars;
+	uint32_t var_owner[CSS_N_PROPERTIES][CSS_PSEUDO_ELEMENT_COUNT];
 } css_select_state;
 
 static inline void advance_bytecode(css_style *style, uint32_t n_bytes)

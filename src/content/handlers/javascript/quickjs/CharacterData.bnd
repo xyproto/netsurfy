@@ -10,16 +10,10 @@ class CharacterData {
 	prologue %{
 static JSValue character_data_result(JSContext *ctx, dom_exception exc)
 {
-	switch (exc) {
-	case DOM_NO_ERR:
-		return JS_UNDEFINED;
-	case DOM_INDEX_SIZE_ERR:
-		return JS_ThrowDOMException(ctx, "IndexSizeError", "The offset is out of range.");
-	case DOM_NO_MODIFICATION_ALLOWED_ERR:
-		return JS_ThrowDOMException(ctx, "NoModificationAllowedError", "The node is read-only.");
-	default:
-		return JS_ThrowOutOfMemory(ctx);
+	if (exc != DOM_NO_ERR) {
+		return qjsky_throw_dom(ctx, exc);
 	}
+	return JS_UNDEFINED;
 }
 %};
 };

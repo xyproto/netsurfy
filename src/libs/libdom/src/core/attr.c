@@ -626,6 +626,11 @@ dom_exception _dom_attr_set_value(struct dom_attr *attr, dom_string *value)
 	/* Now the attribute node is specified */
 	attr->specified = true;
 
+	if (a->parent != NULL && a->parent->type == DOM_ELEMENT_NODE) {
+		_dom_element_attr_value_changed(
+			(struct dom_element *)a->parent, attr, false);
+	}
+
 	return DOM_NO_ERR;
 }
 

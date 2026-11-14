@@ -58,10 +58,8 @@ dom_exception _dom_html_input_element_initialise(
 	struct dom_html_input_element *ele)
 {
 	ele->form = NULL;
-	ele->default_checked = false;
-	ele->default_checked_set = false;
-	ele->default_value = NULL;
-	ele->default_value_set = false;
+	ele->value = NULL;
+	ele->value_set = false;
 	ele->checked = false;
 	ele->checked_set = false;
 
@@ -75,9 +73,9 @@ dom_exception _dom_html_input_element_initialise(
  */
 void _dom_html_input_element_finalise(struct dom_html_input_element *ele)
 {
-	if (ele->default_value != NULL) {
-		dom_string_unref(ele->default_value);
-		ele->default_value = NULL;
+	if (ele->value != NULL) {
+		dom_string_unref(ele->value);
+		ele->value = NULL;
 	}
 
 	_dom_html_element_finalise(&ele->base);
@@ -182,8 +180,10 @@ dom_html_input_element_get_checked(dom_html_input_element *ele, bool *checked)
 dom_exception
 dom_html_input_element_set_checked(dom_html_input_element *ele, bool checked)
 {
-	return dom_html_element_set_bool_property(
-		&ele->base, "checked", SLEN("checked"), checked);
+	ele->checked = checked;
+	ele->checked_set = true;
+
+	return DOM_NO_ERR;
 }
 
 /**
@@ -197,12 +197,12 @@ dom_exception
 dom_html_input_element_get_default_value(dom_html_input_element *ele,
 					 dom_string **default_value)
 {
-	*default_value = ele->default_value;
-
-	if (*default_value != NULL)
-		dom_string_ref(*default_value);
-
-	return DOM_NO_ERR;
+	return dom_element_get_attribute(
+		ele,
+		((struct dom_html_document *)((struct dom_node_internal *)ele)
+			 ->owner)
+			->memoised[hds_value],
+		default_value);
 }
 
 /**
@@ -216,16 +216,12 @@ dom_exception
 dom_html_input_element_set_default_value(dom_html_input_element *ele,
 					 dom_string *default_value)
 {
-	if (ele->default_value != NULL)
-		dom_string_unref(ele->default_value);
-
-	ele->default_value = default_value;
-	ele->default_value_set = true;
-
-	if (ele->default_value != NULL)
-		dom_string_ref(ele->default_value);
-
-	return DOM_NO_ERR;
+	return dom_element_set_attribute(
+		ele,
+		((struct dom_html_document *)((struct dom_node_internal *)ele)
+			 ->owner)
+			->memoised[hds_value],
+		default_value);
 }
 
 /**
@@ -239,9 +235,8 @@ dom_exception
 dom_html_input_element_get_default_checked(dom_html_input_element *ele,
 					   bool *default_checked)
 {
-	*default_checked = ele->default_checked;
-
-	return DOM_NO_ERR;
+	return dom_html_element_get_bool_property(
+		&ele->base, "checked", SLEN("checked"), default_checked);
 }
 
 /**
@@ -255,10 +250,8 @@ dom_exception
 dom_html_input_element_set_default_checked(dom_html_input_element *ele,
 					   bool default_checked)
 {
-	ele->default_checked = default_checked;
-	ele->default_checked_set = true;
-
-	return DOM_NO_ERR;
+	return dom_html_element_set_bool_property(
+		&ele->base, "checked", SLEN("checked"), default_checked);
 }
 
 /*------------------------------------------------------------------------*/
@@ -271,26 +264,8 @@ dom_exception _dom_html_input_element_parse_attribute(dom_element *ele,
 						      dom_string *value,
 						      dom_string **parsed)
 {
-	dom_html_input_element *input = (dom_html_input_element *)ele;
-	dom_html_document *html = (dom_html_document *)(ele->base.owner);
-
-	/** \todo Find some way to do the equiv for default_checked to be
-	 * false instead of true.  Some end-tag hook in the binding perhaps?
-	 */
-	if (dom_string_caseless_isequal(name, html->memoised[hds_checked])) {
-		if (input->default_checked_set == false) {
-			input->default_checked = true;
-			input->default_checked_set = true;
-		}
-	}
-
-	if (dom_string_caseless_isequal(name, html->memoised[hds_value])) {
-		if (input->default_value_set == false) {
-			input->default_value = value;
-			dom_string_ref(value);
-			input->default_value_set = true;
-		}
-	}
+	UNUSED(ele);
+	UNUSED(name);
 
 	dom_string_ref(value);
 	*parsed = value;
@@ -340,12 +315,8 @@ dom_exception _dom_html_input_element_copy_internal(dom_html_input_element *old,
 	 *       copy the pointer for now. */
 	new->form = old->form;
 
-	new->default_checked = old->default_checked;
-	new->default_checked_set = old->default_checked_set;
-	new->default_value = old->default_value == NULL
-				     ? NULL
-				     : dom_string_ref(old->default_value);
-	new->default_value_set = old->default_value_set;
+	new->value = old->value == NULL ? NULL : dom_string_ref(old->value);
+	new->value_set = old->value_set;
 	new->checked = old->checked;
 	new->checked_set = old->checked_set;
 
@@ -400,7 +371,29 @@ SIMPLE_GET_SET(name);
 SIMPLE_GET_SET(src);
 SIMPLE_GET(type);
 SIMPLE_GET_SET(use_map);
-SIMPLE_GET_SET(value);
+
+dom_exception dom_html_input_element_get_value(dom_html_input_element *ele,
+					       dom_string **value)
+{
+	if (ele->value_set) {
+		*value = ele->value == NULL ? NULL : dom_string_ref(ele->value);
+		return DOM_NO_ERR;
+	}
+
+	return dom_html_input_element_get_default_value(ele, value);
+}
+
+dom_exception
+dom_html_input_element_set_value(dom_html_input_element *ele, dom_string *value)
+{
+	if (ele->value != NULL)
+		dom_string_unref(ele->value);
+
+	ele->value = value == NULL ? NULL : dom_string_ref(value);
+	ele->value_set = true;
+
+	return DOM_NO_ERR;
+}
 
 dom_exception
 dom_html_input_element_get_size(dom_html_input_element *input, dom_ulong *size)

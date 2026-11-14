@@ -15,8 +15,8 @@
 struct dom_html_option_element {
 	struct dom_html_element base;
 	/**< The base class */
-	bool default_selected; /**< Initial selected value */
-	bool default_selected_set; /**< Whether default_selected has been set */
+	bool selected; /**< The dirty selectedness */
+	bool selected_set; /**< Whether the selectedness is dirty */
 };
 
 /* Create a dom_html_option_element object */

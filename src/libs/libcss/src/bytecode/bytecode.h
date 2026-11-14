@@ -20,6 +20,9 @@ typedef uint32_t css_code_t;
 
 typedef enum css_properties_e opcode_t;
 
+#define CSS_OP_VAR 0x3fd
+#define CSS_OP_CUSTOM 0x3fe
+
 enum flag_value {
 	FLAG_VALUE__NONE = 0,
 	FLAG_VALUE_INHERIT = 1,

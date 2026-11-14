@@ -47,3 +47,20 @@ getter UIEvent::view ()
 %{
 	return JS_GetGlobalObject(ctx);
 %}
+
+method UIEvent::initUIEvent ()
+%{
+	dom_string *type;
+	int32_t detail = 0;
+
+	if (argc < 1) return JS_ThrowTypeError(ctx, "initUIEvent: 1 argument required");
+	if (argc > 4 && JS_ToInt32(ctx, &detail, argv[4]) < 0) return JS_EXCEPTION;
+	type = qjsky_to_dom_string(ctx, argv[0]);
+	if (type == NULL) return JS_EXCEPTION;
+	(void)dom_ui_event_init(priv->parent.evt, type,
+				argc > 1 && JS_ToBool(ctx, argv[1]) > 0,
+				argc > 2 && JS_ToBool(ctx, argv[2]) > 0,
+				NULL, detail);
+	dom_string_unref(type);
+	return JS_UNDEFINED;
+%}

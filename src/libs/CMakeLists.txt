@@ -289,6 +289,7 @@ nslib(libcss
   libcss/src/select/font_face.c
   libcss/src/select/format_list_style.c
   libcss/src/select/unit.c
+  libcss/src/select/vars.c
   libcss/src/select/properties/helpers.c
   libcss/src/select/properties/align_content.c
   libcss/src/select/properties/align_items.c

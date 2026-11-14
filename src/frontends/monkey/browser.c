@@ -669,7 +669,7 @@ static void monkey_window_handle_exec(int argc, char **argv)
 		moutf(MOUT_WINDOW,
 		      "JS WIN %d RET %s",
 		      atoi(argv[2]),
-		      browser_window_exec(gw->bw, cmd, total - 1) ? "TRUE"
+		      browser_window_exec(gw->bw, cmd, strlen(cmd)) ? "TRUE"
 								  : "FALSE");
 
 		free(cmd);

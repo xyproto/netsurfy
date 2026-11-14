@@ -22,7 +22,7 @@ static JSValue node_result(JSContext *ctx, dom_exception exc, dom_node **np)
 	dom_node *n = *np;
 	JSValue ret;
 	if (exc != DOM_NO_ERR) {
-		return JS_UNDEFINED;
+		return qjsky_throw_dom(ctx, exc);
 	}
 	ret = qjsky_node(ctx, n);
 	if (n != NULL) {

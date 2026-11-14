@@ -39,3 +39,8 @@ setter HTMLIFrameElement::src();
 
 getter HTMLIFrameElement::width();
 setter HTMLIFrameElement::width();
+
+getter HTMLIFrameElement::contentDocument()
+%{
+	return qjsky_content_document(ctx, priv->parent.parent.parent.node);
+%}

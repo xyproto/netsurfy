@@ -77,6 +77,48 @@ init Element(struct dom_element *element::node);
 
 getter Element::tagName();
 
+getter Element::namespaceURI()
+%{
+	dom_string *str = NULL;
+	JSValue ret;
+	if (dom_node_get_namespace(((node_private_t *)priv)->node, &str) != DOM_NO_ERR || str == NULL) return JS_NULL;
+	ret = qjsky_string(ctx, str);
+	dom_string_unref(str);
+	return ret;
+%}
+
+getter Element::prefix()
+%{
+	dom_string *str = NULL;
+	JSValue ret;
+	if (dom_node_get_prefix(((node_private_t *)priv)->node, &str) != DOM_NO_ERR || str == NULL) return JS_NULL;
+	ret = qjsky_string(ctx, str);
+	dom_string_unref(str);
+	return ret;
+%}
+
+getter Element::localName()
+%{
+	dom_string *str = NULL;
+	JSValue ret;
+	dom_string *ns = NULL;
+	if (dom_node_get_local_name(((node_private_t *)priv)->node, &str) != DOM_NO_ERR || str == NULL) return JS_NULL;
+	if (dom_node_get_namespace(((node_private_t *)priv)->node, &ns) == DOM_NO_ERR && ns != NULL) {
+		if (dom_string_byte_length(ns) == (sizeof("http://www.w3.org/1999/xhtml") - 1) &&
+		    memcmp(dom_string_data(ns), "http://www.w3.org/1999/xhtml", (sizeof("http://www.w3.org/1999/xhtml") - 1)) == 0) {
+			dom_string *lower = NULL;
+			if (dom_string_tolower(str, true, &lower) == DOM_NO_ERR) {
+				dom_string_unref(str);
+				str = lower;
+			}
+		}
+		dom_string_unref(ns);
+	}
+	ret = qjsky_string(ctx, str);
+	dom_string_unref(str);
+	return ret;
+%}
+
 getter Element::firstElementChild()
 %{
 	return element_walk(ctx, ((node_private_t *)priv)->node,

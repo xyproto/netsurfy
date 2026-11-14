@@ -101,6 +101,10 @@ static inline bool css__arena_style_is_equal(struct css_computed_style *a,
 		return false;
 	}
 
+	if (a->vars != b->vars) {
+		return false;
+	}
+
 	if (!arena__compare_string_list(a->font_family, b->font_family)) {
 		return false;
 	}

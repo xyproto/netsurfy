@@ -37,12 +37,15 @@
 #include "utils/log.h"
 #include "utils/corestrings.h"
 #include "content/content.h"
+#include "content/hlcache.h"
+#include "netsurfy/content.h"
 #include "content/fetch.h"
 #include "utils/nsurl.h"
 #include "html/private.h"
 #include "html/box.h"
 #include "html/box_construct.h"
 #include "html/box_inspect.h"
+#include "html/form_internal.h"
 #include "netsurfy/browser_window.h"
 #include "netsurfy/window.h"
 #include "desktop/browser_private.h"
@@ -272,9 +275,22 @@ static void qjsky_finalizer(JSRuntime *rt, JSValueConst val)
 	free(priv);
 }
 
+static void
+qjsky_gc_mark(JSRuntime *rt, JSValueConst val, JS_MarkFunc *mark_func)
+{
+	qjsky_object_t *priv = JS_GetOpaque(val, qjsky_class_id);
+
+	if (priv != NULL && priv->iface == QJSKY_IFACE_MUTATIONOBSERVER) {
+		qjsky_observer_mark(rt,
+				    ((mutation_observer_private_t *)priv)->mo,
+				    mark_func);
+	}
+}
+
 static const JSClassDef qjsky_class = {
 	.class_name = "NetSurfyObject",
 	.finalizer = qjsky_finalizer,
+	.gc_mark = qjsky_gc_mark,
 };
 
 static int qjsky_interrupt(JSContext *ctx, void *opaque)
@@ -474,6 +490,38 @@ JSValue qjsky_string(JSContext *ctx, dom_string *str)
 	return JS_NewStringLen(ctx,
 			       dom_string_data(str),
 			       dom_string_byte_length(str));
+}
+
+JSValue qjsky_throw_dom(JSContext *ctx, dom_exception exc)
+{
+	static const char *const names[] = {
+		NULL,
+		"IndexSizeError",
+		"DOMStringSizeError",
+		"HierarchyRequestError",
+		"WrongDocumentError",
+		"InvalidCharacterError",
+		"NoDataAllowedError",
+		"NoModificationAllowedError",
+		"NotFoundError",
+		"NotSupportedError",
+		"InUseAttributeError",
+		"InvalidStateError",
+		"SyntaxError",
+		"InvalidModificationError",
+		"NamespaceError",
+		"InvalidAccessError",
+		"ValidationError",
+		"TypeMismatchError",
+	};
+
+	if (exc > DOM_NO_ERR && exc < sizeof(names) / sizeof(names[0])) {
+		return JS_ThrowDOMException(ctx, names[exc], "%s", names[exc]);
+	}
+	if (exc == DOM_NO_MEM_ERR) {
+		return JS_ThrowOutOfMemory(ctx);
+	}
+	return JS_ThrowInternalError(ctx, "DOM error %d", (int)exc);
 }
 
 dom_string *qjsky_to_dom_string(JSContext *ctx, JSValueConst val)
@@ -795,6 +843,20 @@ static int qjsky_svg_iface(struct dom_node *node)
 	return iface;
 }
 
+static bool qjsky_in_html_document(struct dom_node *node)
+{
+	dom_document *doc = NULL;
+	bool ret;
+
+	if (dom_node_get_owner_document(node, &doc) != DOM_NO_ERR ||
+	    doc == NULL) {
+		return false;
+	}
+	ret = dom_document_is_html(doc);
+	dom_node_unref(doc);
+	return ret;
+}
+
 static int qjsky_node_iface(struct dom_node *node)
 {
 	dom_node_type nodetype;
@@ -820,7 +882,7 @@ static int qjsky_node_iface(struct dom_node *node)
 			return qjsky_svg_iface(node);
 		}
 		dom_string_unref(namespace);
-		if (!is_html) {
+		if (!is_html || !qjsky_in_html_document(node)) {
 			return QJSKY_IFACE_ELEMENT;
 		}
 		if (dom_html_element_get_tag_type(node, &type) != DOM_NO_ERR) {
@@ -1451,17 +1513,39 @@ static JSValue qjsky_illegal_constructor(JSContext *ctx,
 	return JS_ThrowTypeError(ctx, "Illegal constructor");
 }
 
-static html_content *qjsky_node_htmlc(struct dom_node *node)
+struct html_content *qjsky_node_htmlc(struct dom_node *node)
 {
-	struct dom_document *doc = NULL;
-	void *htmlc = NULL;
+	struct html_content *htmlc = NULL;
+	dom_document *doc = NULL;
+	dom_node_type type;
 
-	if (dom_node_get_owner_document(node, &doc) != DOM_NO_ERR || doc == NULL) {
+	if (node == NULL || dom_node_get_node_type(node, &type) != DOM_NO_ERR) {
 		return NULL;
 	}
-	(void)dom_node_get_user_data((dom_node *)doc, corestring_dom___ns_key_html_content_data, &htmlc);
+	if (type == DOM_DOCUMENT_NODE) {
+		doc = (dom_document *)dom_node_ref(node);
+	} else if (dom_node_get_owner_document(node, &doc) != DOM_NO_ERR) {
+		return NULL;
+	}
+	if (doc == NULL) {
+		return NULL;
+	}
+	if (dom_node_get_user_data(doc,
+				   corestring_dom___ns_key_html_content_data,
+				   &htmlc) != DOM_NO_ERR) {
+		htmlc = NULL;
+	}
 	dom_node_unref(doc);
 	return htmlc;
+}
+
+void qjsky_node_state_changed(struct dom_node *node)
+{
+	struct html_content *htmlc = qjsky_node_htmlc(node);
+
+	if (htmlc != NULL) {
+		html_schedule_rebuild(htmlc);
+	}
 }
 
 bool qjsky_node_boxes(struct dom_node *node,
@@ -1622,6 +1706,108 @@ static void qjsky_css_set_colour(JSContext *ctx, JSValueConst obj, const char *n
 	qjsky_css_set(ctx, obj, name, buf);
 }
 
+
+static char *qjsky_attr_cstr(dom_node *node, const char *name)
+{
+	dom_string *key = NULL, *value = NULL;
+	char *out = NULL;
+
+	if (dom_string_create((const uint8_t *)name, strlen(name), &key) !=
+	    DOM_NO_ERR) {
+		return NULL;
+	}
+	if (dom_element_get_attribute(node, key, &value) == DOM_NO_ERR &&
+	    value != NULL) {
+		out = strndup(dom_string_data(value),
+			      dom_string_byte_length(value));
+		dom_string_unref(value);
+	}
+	dom_string_unref(key);
+	return out;
+}
+
+JSValue qjsky_form_submit(JSContext *ctx, struct dom_node *node)
+{
+	struct html_content *htmlc = qjsky_node_htmlc(node);
+	jsthread *thread = qjsky_thread(ctx);
+	struct browser_window *bw;
+	char *action, *method, *enctype, *target, *charset;
+	form_method fm = method_GET;
+	nsurl *url = NULL;
+	struct form *form;
+
+	if (htmlc == NULL) {
+		return JS_UNDEFINED;
+	}
+	bw = htmlc->bw;
+	if (bw == NULL && thread->window_priv != NULL &&
+	    thread->window_priv->htmlc == htmlc) {
+		bw = thread->window_priv->win;
+	}
+	if (bw == NULL) {
+		return JS_UNDEFINED;
+	}
+	action = qjsky_attr_cstr(node, "action");
+	method = qjsky_attr_cstr(node, "method");
+	enctype = qjsky_attr_cstr(node, "enctype");
+	target = qjsky_attr_cstr(node, "target");
+	charset = qjsky_attr_cstr(node, "accept-charset");
+	if (method != NULL && strcasecmp(method, "post") == 0) {
+		fm = enctype != NULL && strcasecmp(enctype,
+						   "multipart/form-data") == 0
+			     ? method_POST_MULTIPART
+			     : method_POST_URLENC;
+	}
+	if (action != NULL && action[0] != '\0') {
+		(void)nsurl_join(htmlc->base_url, action, &url);
+	} else {
+		url = nsurl_ref(content_get_url(&htmlc->base));
+	}
+	if (url != NULL) {
+		form = form_new(node,
+				nsurl_access(url),
+				target,
+				fm,
+				charset,
+				htmlc->encoding);
+		if (form != NULL) {
+			(void)form_submit(
+				content_get_url(&htmlc->base),
+				browser_window_find_target(bw, target, 0),
+				form,
+				NULL);
+			form_free(form);
+		}
+		nsurl_unref(url);
+	}
+	free(action);
+	free(method);
+	free(enctype);
+	free(target);
+	free(charset);
+	return JS_UNDEFINED;
+}
+
+JSValue qjsky_content_document(JSContext *ctx, struct dom_node *element)
+{
+	struct box *box = box_for_node(element);
+	struct hlcache_handle *h;
+	struct html_content *htmlc;
+
+	if (box == NULL || box->iframe == NULL) {
+		return JS_NULL;
+	}
+	h = browser_window_get_content(box->iframe);
+	if (h == NULL || content_get_type(h) != CONTENT_HTML) {
+		return JS_NULL;
+	}
+	htmlc = (struct html_content *)hlcache_handle_get_content(h);
+	if (htmlc == NULL || htmlc->document == NULL) {
+		return JS_NULL;
+	}
+	return qjsky_node(ctx, (dom_node *)htmlc->document);
+}
+
 JSValue qjsky_computed_style(JSContext *ctx, struct dom_node *node)
 {
 	static const char *sides[4] = { "top", "right", "bottom", "left" };
@@ -1630,19 +1816,19 @@ JSValue qjsky_computed_style(JSContext *ctx, struct dom_node *node)
 	struct box *box;
 	const css_computed_style *style;
 	css_select_results *selected = NULL;
-	jsthread *thread = qjsky_thread(ctx);
+	struct html_content *htmlc = qjsky_node_htmlc(node);
 	char buf[64];
 
 	if (JS_IsException(values)) {
 		return values;
 	}
-	if (thread->window_priv != NULL) {
-		html_flush_layout(thread->window_priv->htmlc);
+	if (htmlc != NULL) {
+		html_flush_layout(htmlc);
 	}
 	box = node != NULL ? box_for_node(node) : NULL;
 	style = box != NULL ? box->style : NULL;
-	if (style == NULL && node != NULL && thread->window_priv != NULL) {
-		selected = box_select_style(thread->window_priv->htmlc, node);
+	if (style == NULL && node != NULL && htmlc != NULL) {
+		selected = box_select_style(htmlc, node);
 		if (selected != NULL) {
 			style = selected->styles[CSS_PSEUDO_ELEMENT_NONE];
 		}
@@ -1694,8 +1880,7 @@ JSValue qjsky_computed_style(JSContext *ctx, struct dom_node *node)
 		qjsky_css_set(ctx, values, "font-weight", qjsky_css_font_weight(css_computed_font_weight(style)));
 		v = css_computed_font_style(style);
 		qjsky_css_set(ctx, values, "font-style", v == CSS_FONT_STYLE_ITALIC ? "italic" : v == CSS_FONT_STYLE_OBLIQUE ? "oblique" : "normal");
-		if (box != NULL && thread->window_priv != NULL && thread->window_priv->htmlc != NULL &&
-		    thread->window_priv->htmlc->had_initial_layout) {
+		if (box != NULL && htmlc != NULL && htmlc->had_initial_layout) {
 			qjsky_css_set_px(ctx, values, "width", box->width);
 			qjsky_css_set_px(ctx, values, "height", box->height);
 			for (i = 0; i < 4; i++) {
@@ -1706,8 +1891,8 @@ JSValue qjsky_computed_style(JSContext *ctx, struct dom_node *node)
 				snprintf(buf, sizeof(buf), "border-%s-width", sides[i]);
 				qjsky_css_set_px(ctx, values, buf, box->border[index[i]].width);
 			}
-		} else if (thread->window_priv != NULL && thread->window_priv->htmlc != NULL) {
-			const css_unit_ctx *uc = &thread->window_priv->htmlc->unit_len_ctx;
+		} else if (htmlc != NULL) {
+			const css_unit_ctx *uc = &htmlc->unit_len_ctx;
 			uint8_t (*margin[4])(const css_computed_style *, css_fixed *, css_unit *) = {
 				css_computed_margin_top, css_computed_margin_right, css_computed_margin_bottom, css_computed_margin_left };
 			uint8_t (*padding[4])(const css_computed_style *, css_fixed *, css_unit *) = {
@@ -2747,6 +2932,168 @@ static JSValue qjsky_native_utf8_decode(JSContext *ctx,
 	return JS_NewStringLen(ctx, (const char *)data + offset, length);
 }
 
+static bool qjsky_candidate_matches(dom_node *node,
+				    lwc_string *tag,
+				    dom_string *id,
+				    lwc_string **classes,
+				    uint32_t nclasses)
+{
+	dom_string *str = NULL;
+	bool match = true;
+
+	if (tag != NULL) {
+		if (dom_node_get_node_name(node, &str) != DOM_NO_ERR ||
+		    str == NULL) {
+			return false;
+		}
+		match = dom_string_caseless_lwc_isequal(str, tag);
+		dom_string_unref(str);
+		str = NULL;
+	}
+	if (match && id != NULL) {
+		if (dom_element_get_attribute(node, corestring_dom_id, &str) !=
+			    DOM_NO_ERR ||
+		    str == NULL) {
+			return false;
+		}
+		match = dom_string_isequal(str, id);
+		dom_string_unref(str);
+	}
+	for (uint32_t i = 0; match && i < nclasses; i++) {
+		if (dom_element_has_class(node, classes[i], &match) !=
+		    DOM_NO_ERR) {
+			return false;
+		}
+	}
+	return match;
+}
+
+static JSValue qjsky_native_candidates(JSContext *ctx,
+				       JSValueConst this_val,
+				       int argc,
+				       JSValueConst *argv)
+{
+	node_private_t *priv = qjsky_private(ctx, argv[0], QJSKY_IFACE_NODE);
+	lwc_string *tag = NULL;
+	dom_string *id = NULL;
+	lwc_string **classes = NULL;
+	uint32_t nclasses = 0, count = 0;
+	dom_node *root, *node, *next;
+	JSValue out = JS_EXCEPTION;
+	int64_t len = 0;
+
+	if (priv == NULL) {
+		return JS_ThrowTypeError(ctx, "not a node");
+	}
+	root = priv->node;
+	if (JS_IsString(argv[1])) {
+		const char *s = JS_ToCString(ctx, argv[1]);
+		lwc_error err;
+		if (s == NULL) {
+			return JS_EXCEPTION;
+		}
+		err = lwc_intern_string(s, strlen(s), &tag);
+		JS_FreeCString(ctx, s);
+		if (err != lwc_error_ok) {
+			return JS_ThrowOutOfMemory(ctx);
+		}
+	}
+	if (JS_IsString(argv[2])) {
+		id = qjsky_to_dom_string(ctx, argv[2]);
+		if (id == NULL) {
+			goto done;
+		}
+	}
+	if (JS_GetLength(ctx, argv[3], &len) < 0) {
+		goto done;
+	}
+	if (len > 0) {
+		classes = calloc((size_t)len, sizeof(*classes));
+		if (classes == NULL) {
+			JS_ThrowOutOfMemory(ctx);
+			goto done;
+		}
+		for (; nclasses < (uint32_t)len; nclasses++) {
+			JSValue v = JS_GetPropertyUint32(ctx,
+							 argv[3],
+							 nclasses);
+			const char *s = JS_ToCString(ctx, v);
+			lwc_error err;
+			JS_FreeValue(ctx, v);
+			if (s == NULL) {
+				goto done;
+			}
+			err = lwc_intern_string(s,
+						strlen(s),
+						&classes[nclasses]);
+			JS_FreeCString(ctx, s);
+			if (err != lwc_error_ok) {
+				JS_ThrowOutOfMemory(ctx);
+				goto done;
+			}
+		}
+	}
+	out = JS_NewArray(ctx);
+	if (JS_IsException(out)) {
+		goto done;
+	}
+	if (dom_node_get_first_child(root, &node) != DOM_NO_ERR) {
+		goto done;
+	}
+	while (node != NULL) {
+		dom_node_type type = DOM_TEXT_NODE;
+		if (dom_node_get_node_type(node, &type) == DOM_NO_ERR &&
+		    type == DOM_ELEMENT_NODE &&
+		    qjsky_candidate_matches(node, tag, id, classes, nclasses)) {
+			JSValue el = qjsky_node(ctx, node);
+			if (JS_IsException(el) ||
+			    JS_SetPropertyUint32(ctx, out, count++, el) < 0) {
+				dom_node_unref(node);
+				JS_FreeValue(ctx, out);
+				out = JS_EXCEPTION;
+				goto done;
+			}
+		}
+		next = NULL;
+		if (type == DOM_ELEMENT_NODE &&
+		    dom_node_get_first_child(node, &next) != DOM_NO_ERR) {
+			next = NULL;
+		}
+		while (next == NULL && node != NULL) {
+			if (dom_node_get_next_sibling(node, &next) !=
+			    DOM_NO_ERR) {
+				next = NULL;
+			}
+			if (next == NULL) {
+				dom_node *parent = NULL;
+				(void)dom_node_get_parent_node(node, &parent);
+				dom_node_unref(node);
+				node = parent;
+				if (node == root) {
+					dom_node_unref(node);
+					node = NULL;
+				}
+			}
+		}
+		if (node != NULL) {
+			dom_node_unref(node);
+		}
+		node = next;
+	}
+done:
+	if (tag != NULL) {
+		lwc_string_unref(tag);
+	}
+	if (id != NULL) {
+		dom_string_unref(id);
+	}
+	for (uint32_t i = 0; i < nclasses; i++) {
+		lwc_string_unref(classes[i]);
+	}
+	free(classes);
+	return out;
+}
+
 static JSValue qjsky_native_ready_state(JSContext *ctx,
 					JSValueConst this_val,
 					int argc,
@@ -3031,6 +3378,7 @@ static JSValue qjsky_native_object(JSContext *ctx)
 		{"utf8Decode", qjsky_native_utf8_decode, 1},
 		{"origin", qjsky_native_origin, 1},
 		{"readyState", qjsky_native_ready_state, 0},
+		{"candidates", qjsky_native_candidates, 4},
 		{"language", qjsky_native_language, 0},
 		{"random", qjsky_native_random, 1},
 		{"storageRead", qjsky_native_storage_read, 1},
@@ -3486,18 +3834,21 @@ bool js_fire_event(jsthread *thread,
 
 	NSLOG(qjsky, DEBUG, "Event: %s (doc=%p, target=%p)", type, doc, target);
 
-	if (target != NULL || strcmp(type, "load") != 0 ||
-	    thread->pending_destroy) {
+	if (target != NULL || thread->pending_destroy ||
+	    (strcmp(type, "load") != 0 &&
+	     strcmp(type, "DOMContentLoaded") != 0)) {
 		return true;
 	}
 
 	qjsky_enter_thread(thread);
 
-	thread->ready_state = 1;
-	qjsky_fire_content_loaded(thread, doc);
-	thread->ready_state = 2;
-
-	if (!thread->pending_destroy && dom_event_create(&evt) == DOM_NO_ERR) {
+	if (thread->ready_state == 0) {
+		thread->ready_state = 1;
+		qjsky_fire_content_loaded(thread, doc);
+	}
+	if (strcmp(type, "load") == 0 && thread->ready_state == 1 &&
+	    !thread->pending_destroy && dom_event_create(&evt) == DOM_NO_ERR) {
+		thread->ready_state = 2;
 		if (dom_event_init(evt, corestring_dom_load, false, false) ==
 		    DOM_NO_ERR) {
 			qjsky_fire_window_event(

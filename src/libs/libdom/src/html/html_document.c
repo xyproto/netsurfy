@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#include <dom/dom.h>
 #include <dom/html/html_elements.h>
 
 #include "html/html_document.h"
@@ -106,6 +107,12 @@ dom_exception _dom_html_document_create(dom_events_default_action_fetcher daf,
 
 	*doc = result;
 	return DOM_NO_ERR;
+}
+
+bool(dom_document_is_html)(dom_document *doc)
+{
+	return doc != NULL &&
+	       ((dom_node *)doc)->vtable == (const void *)&html_document_vtable;
 }
 
 /* Initialise a HTMLDocument */
@@ -384,6 +391,12 @@ _dom_html_document_create_element_internal(dom_html_document *html,
 		return exc;
 
 	params.type = _dom_html_document_get_element_type(html, params.name);
+	if (namespace != NULL && dom_namespaces[DOM_NAMESPACE_HTML] != NULL &&
+	    !dom_string_isequal(namespace,
+				dom_namespaces[DOM_NAMESPACE_HTML])) {
+		dom_string_unref(params.name);
+		params.name = dom_string_ref(in_tag_name);
+	}
 	params.doc = html;
 	params.namespace = namespace;
 	params.prefix = prefix;

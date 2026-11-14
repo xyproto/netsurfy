@@ -59,8 +59,8 @@ dom_exception _dom_html_option_element_initialise(
 	struct dom_html_element_create_params *params,
 	struct dom_html_option_element *ele)
 {
-	ele->default_selected = false;
-	ele->default_selected_set = false;
+	ele->selected = false;
+	ele->selected_set = false;
 
 	return _dom_html_element_initialise(params, &ele->base);
 }
@@ -129,9 +129,8 @@ dom_exception
 dom_html_option_element_get_default_selected(dom_html_option_element *option,
 					     bool *default_selected)
 {
-	*default_selected = option->default_selected;
-
-	return DOM_NO_ERR;
+	return dom_html_element_get_bool_property(
+		&option->base, "selected", SLEN("selected"), default_selected);
 }
 
 /**
@@ -145,10 +144,8 @@ dom_exception
 dom_html_option_element_set_default_selected(dom_html_option_element *option,
 					     bool default_selected)
 {
-	option->default_selected = default_selected;
-	option->default_selected_set = true;
-
-	return DOM_NO_ERR;
+	return dom_html_element_set_bool_property(
+		&option->base, "selected", SLEN("selected"), default_selected);
 }
 
 /**
@@ -354,6 +351,11 @@ dom_exception dom_html_option_element_set_label(dom_html_option_element *option,
 dom_exception dom_html_option_element_get_selected(dom_html_option_element *ele,
 						   bool *selected)
 {
+	if (ele->selected_set) {
+		*selected = ele->selected;
+		return DOM_NO_ERR;
+	}
+
 	return dom_html_element_get_bool_property(
 		&ele->base, "selected", SLEN("selected"), selected);
 }
@@ -368,8 +370,10 @@ dom_exception dom_html_option_element_get_selected(dom_html_option_element *ele,
 dom_exception dom_html_option_element_set_selected(dom_html_option_element *ele,
 						   bool selected)
 {
-	return dom_html_element_set_bool_property(
-		&ele->base, "selected", SLEN("selected"), selected);
+	ele->selected = selected;
+	ele->selected_set = true;
+
+	return DOM_NO_ERR;
 }
 
 /**
@@ -432,18 +436,8 @@ dom_exception _dom_html_option_element_parse_attribute(dom_element *ele,
 						       dom_string *value,
 						       dom_string **parsed)
 {
-	dom_html_option_element *option = (dom_html_option_element *)ele;
-	dom_html_document *html = (dom_html_document *)(ele->base.owner);
-
-	/** \todo Find some way to do the equiv for default_selected to be
-	 * false instead of true.  Some end-tag hook in the binding perhaps?
-	 */
-	if (dom_string_caseless_isequal(name, html->memoised[hds_selected])) {
-		if (option->default_selected_set == false) {
-			option->default_selected = true;
-			option->default_selected_set = true;
-		}
-	}
+	UNUSED(ele);
+	UNUSED(name);
 
 	dom_string_ref(value);
 	*parsed = value;
@@ -491,8 +485,8 @@ _dom_html_option_element_copy_internal(dom_html_option_element *old,
 		return err;
 	}
 
-	new->default_selected = old->default_selected;
-	new->default_selected_set = old->default_selected_set;
+	new->selected = old->selected;
+	new->selected_set = old->selected_set;
 
 	return DOM_NO_ERR;
 }

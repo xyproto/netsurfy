@@ -304,6 +304,9 @@ static void html_box_convert_done(html_content *c, bool success)
 	NSLOG(netsurfy, INFO, "DOM to box conversion complete (content %p)", c);
 
 	c->box_conversion_context = NULL;
+	if (c->styles_dirty) {
+		html_css_styles_changed(c);
+	}
 
 	/* Clean up and report error if unsuccessful or aborted */
 	if ((success == false) || (c->aborted)) {
@@ -364,6 +367,28 @@ static void html_box_convert_done(html_content *c, bool success)
 	html_proceed_to_done(c);
 
 	dom_node_unref(html);
+}
+
+/* exported function documented in html/html.h */
+void html_fire_load(struct hlcache_handle *h)
+{
+	html_content *htmlc = (html_content *)hlcache_handle_get_content(h);
+
+	if (htmlc == NULL || htmlc->load_fired) {
+		return;
+	}
+	htmlc->load_fired = true;
+	if (htmlc->jsthread != NULL) {
+		js_fire_event(htmlc->jsthread, "load", htmlc->document, NULL);
+	}
+}
+
+/* exported function documented in html/html.h */
+bool html_load_fired(struct hlcache_handle *h)
+{
+	html_content *htmlc = (html_content *)hlcache_handle_get_content(h);
+
+	return htmlc == NULL || htmlc->load_fired;
 }
 
 /* Documented in html_internal.h */
@@ -469,12 +494,11 @@ void html_finish_conversion(html_content *htmlc)
 	}
 
 
-	/* fire a simple event named load at the Document's Window
-	 * object, but with its target set to the Document object (and
-	 * the currentTarget set to the Window object)
-	 */
 	if (htmlc->jsthread != NULL) {
-		js_fire_event(htmlc->jsthread, "load", htmlc->document, NULL);
+		js_fire_event(htmlc->jsthread,
+			      "DOMContentLoaded",
+			      htmlc->document,
+			      NULL);
 	}
 
 	/* convert dom tree to box tree */
@@ -1465,6 +1489,7 @@ static void html_rebuild_layout(html_content *htmlc)
 	htmlc->bctx = NULL;
 	htmlc->layout = NULL;
 
+	html_css_refresh_detached(htmlc);
 	nscss_clear_node_data(html);
 	err = dom_to_box_sync(html, htmlc);
 	dom_node_unref(html);

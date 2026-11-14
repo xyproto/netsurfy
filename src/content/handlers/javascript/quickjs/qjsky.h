@@ -63,6 +63,10 @@ void qjsky_viewport_scroll(JSContext *ctx, double *sx, double *sy);
 JSValue qjsky_computed_style(JSContext *ctx, struct dom_node *node);
 JSValue qjsky_element_style(JSContext *ctx, JSValueConst obj, struct dom_element *element);
 struct qjsky_matrix;
+struct html_content *qjsky_node_htmlc(struct dom_node *node);
+void qjsky_node_state_changed(struct dom_node *node);
+JSValue qjsky_content_document(JSContext *ctx, struct dom_node *element);
+JSValue qjsky_form_submit(JSContext *ctx, struct dom_node *node);
 struct qjsky_observer;
 struct qjsky_observer **qjsky_observers(JSContext *ctx);
 JSAtom qjsky_symbol_iterator(JSContext *ctx);
@@ -136,5 +140,6 @@ void qjsky_window_closedown(JSContext *ctx, void *window_priv);
 
 JSValue qjsky_string(JSContext *ctx, dom_string *str);
 dom_string *qjsky_to_dom_string(JSContext *ctx, JSValueConst val);
+JSValue qjsky_throw_dom(JSContext *ctx, dom_exception exc);
 
 #endif

@@ -7,6 +7,7 @@
 
 #include <assert.h>
 #include <string.h>
+#include <strings.h>
 
 #include <libwapcaplet/libwapcaplet.h>
 
@@ -95,25 +96,26 @@ dom_exception _dom_document_event_create_event(dom_document_event *de,
 					       dom_string *type,
 					       struct dom_event **evt)
 {
-	lwc_string *t = NULL;
+	const char *data = dom_string_data(type);
+	size_t len = dom_string_byte_length(type);
 	dom_exception err;
-	int i, et = 0;
+	int i, et = DOM_EVENT_COUNT;
 	dom_document_event_internal *dei;
-
-	err = dom_string_intern(type, &t);
-	if (err != DOM_NO_ERR)
-		return err;
-
-	assert(t != NULL);
 
 	dei = &de->dei;
 	for (i = 0; i < DOM_EVENT_COUNT; i++) {
-		if (dei->event_types[i] == t) {
+		const char *name = lwc_string_data(dei->event_types[i]);
+		size_t n = lwc_string_length(dei->event_types[i]);
+
+		if ((len == n || (len == n + 1 && (data[n] | 0x20) == 's')) &&
+		    strncasecmp(data, name, n) == 0) {
 			et = i;
 			break;
 		}
 	}
-	lwc_string_unref(t);
+	if (et == DOM_EVENT_COUNT) {
+		et = DOM_EVENT;
+	}
 
 	switch (et) {
 	case DOM_EVENT:

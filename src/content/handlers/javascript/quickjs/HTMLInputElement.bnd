@@ -20,7 +20,16 @@ getter HTMLInputElement::alt();
 setter HTMLInputElement::alt();
 
 getter HTMLInputElement::checked();
-setter HTMLInputElement::checked();
+setter HTMLInputElement::checked()
+%{
+	dom_node *node = ((node_private_t *)priv)->node;
+	int b = JS_ToBool(ctx, argv[0]);
+
+	if (b < 0) return JS_EXCEPTION;
+	(void)dom_html_input_element_set_checked((struct dom_html_input_element *)node, b != 0);
+	qjsky_node_state_changed(node);
+	return JS_UNDEFINED;
+%}
 
 getter HTMLInputElement::defaultChecked();
 setter HTMLInputElement::defaultChecked();
@@ -53,7 +62,19 @@ getter HTMLInputElement::valueLow();
 setter HTMLInputElement::valueLow();
 
 getter HTMLInputElement::value();
-setter HTMLInputElement::value();
+setter HTMLInputElement::value()
+%{
+	dom_node *node = ((node_private_t *)priv)->node;
+	JSValue v = JS_IsNull(argv[0]) ? JS_NewString(ctx, "") : JS_DupValue(ctx, argv[0]);
+	dom_string *str = qjsky_to_dom_string(ctx, v);
+
+	JS_FreeValue(ctx, v);
+	if (str == NULL) return JS_EXCEPTION;
+	(void)dom_html_input_element_set_value((struct dom_html_input_element *)node, str);
+	dom_string_unref(str);
+	qjsky_node_state_changed(node);
+	return JS_UNDEFINED;
+%}
 
 getter HTMLInputElement::maxLength();
 setter HTMLInputElement::maxLength();

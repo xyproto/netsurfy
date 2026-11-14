@@ -23,6 +23,9 @@ JSValue qjsky_observer_observe(JSContext *ctx,
 void qjsky_observer_disconnect(struct qjsky_observer *mo);
 JSValue qjsky_observer_take_records(JSContext *ctx, struct qjsky_observer *mo);
 void qjsky_observer_free(JSRuntime *rt, struct qjsky_observer *mo);
+void qjsky_observer_mark(JSRuntime *rt,
+			 struct qjsky_observer *mo,
+			 JS_MarkFunc *mark_func);
 void qjsky_observer_release_all(JSContext *ctx);
 
 #endif

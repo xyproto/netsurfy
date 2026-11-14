@@ -1066,6 +1066,8 @@ static void css_select__finalise_selection_state(css_select_state *state)
 	lwc_string_unref(state->element.ns);
 	lwc_string_unref(state->element.name);
 
+	css__vars_select_cleanup(state);
+
 	if (state->revert != NULL) {
 		for (size_t i = 0; i < CSS_ORIGIN_AUTHOR; i++) {
 			for (size_t j = 0; j < CSS_PSEUDO_ELEMENT_COUNT; j++) {
@@ -1526,6 +1528,20 @@ css_error css_select_style(css_select_ctx *ctx,
 					goto cleanup;
 			}
 		}
+	}
+
+	error = css__vars_finish_select(&state);
+	if (error != CSS_OK)
+		goto cleanup;
+	if (parent == NULL &&
+	    state.results->styles[CSS_PSEUDO_ELEMENT_NONE]->vars != NULL) {
+		css_computed_style *root =
+			state.results->styles[CSS_PSEUDO_ELEMENT_NONE];
+		css_computed_vars *own = css__vars_ref(root->vars);
+		error = css__vars_resolve(NULL, own, root);
+		css__vars_unref(own);
+		if (error != CSS_OK)
+			goto cleanup;
 	}
 
 	/* If this is the root element, then we must ensure that all
@@ -2875,6 +2891,29 @@ css_error cascade_style(const css_style *style, css_select_state *state)
 
 		op = getOpcode(opv);
 
+		if (op == CSS_OP_CUSTOM || op == CSS_OP_VAR) {
+			lwc_string *name = NULL, *value = NULL;
+			if (op == CSS_OP_CUSTOM) {
+				css__stylesheet_string_get(s.sheet, *s.bytecode, &name);
+				advance_bytecode(&s, sizeof(css_code_t));
+			}
+			css__stylesheet_string_get(s.sheet, *s.bytecode, &value);
+			advance_bytecode(&s, sizeof(css_code_t));
+			if (value == NULL) {
+				continue;
+			}
+			if (op == CSS_OP_CUSTOM) {
+				error = name == NULL ? CSS_OK :
+					css__vars_cascade_custom(state, name, value, isImportant(opv));
+			} else {
+				error = css__vars_cascade_pending(state, getValue(opv), value,
+								  isImportant(opv), s.sheet);
+			}
+			if (error != CSS_OK)
+				return error;
+			continue;
+		}
+
 		error = prop_dispatch[op].cascade(opv, &s, state);
 		if (error != CSS_OK)
 			return error;
@@ -2982,6 +3021,7 @@ bool css__outranks_existing(uint16_t op,
 		existing->origin = state->current_origin;
 		existing->important = important;
 		existing->explicit_default = explicit_default;
+		state->var_owner[op][state->current_pseudo] = 0;
 	}
 
 	return outranks;

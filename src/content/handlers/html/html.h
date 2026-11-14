@@ -58,8 +58,10 @@ struct plot_font_style;
 struct html_stylesheet {
 	struct dom_node *node; /**< dom node associated with sheet */
 	struct hlcache_handle *sheet;
+	struct css_stylesheet *inline_sheet;
 	bool modified;
 	bool unused;
+	bool detached;
 };
 
 
@@ -181,6 +183,8 @@ struct content_html_frames *html_get_frameset(struct hlcache_handle *h);
  * used by core browser
  */
 struct content_html_iframe *html_get_iframe(struct hlcache_handle *h);
+void html_fire_load(struct hlcache_handle *h);
+bool html_load_fired(struct hlcache_handle *h);
 
 /**
  * obtain html base target from handle

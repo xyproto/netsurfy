@@ -774,6 +774,13 @@ dom_default_action_DOMSubtreeModified_cb(struct dom_event *evt, void *pw)
 }
 
 
+static void
+dom_default_action_DOMAttrModified_cb(struct dom_event *evt, void *pw)
+{
+	html_schedule_rebuild(pw);
+}
+
+
 /**
  * callback for default action finished
  */
@@ -804,6 +811,9 @@ html_dom_event_fetcher(dom_string *type,
 		} else if (dom_string_isequal(
 				   type, corestring_dom_DOMSubtreeModified)) {
 			return dom_default_action_DOMSubtreeModified_cb;
+		} else if (dom_string_isequal(
+				   type, corestring_dom_DOMAttrModified)) {
+			return dom_default_action_DOMAttrModified_cb;
 		}
 	} else if (phase == DOM_DEFAULT_ACTION_FINISHED) {
 		return dom_default_action_finished_cb;

@@ -350,6 +350,44 @@ target_link_libraries(netsurfy PRIVATE
 
 install(TARGETS netsurfy RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
+if(NETSURFY_BUILD_MONKEY)
+  add_executable(netsurfy-monkey
+    ${NETSURFY_CORE_SOURCES}
+    ${NETSURFY_JAVASCRIPT_SOURCES}
+    frontends/monkey/401login.c
+    frontends/monkey/bitmap.c
+    frontends/monkey/browser.c
+    frontends/monkey/dispatch.c
+    frontends/monkey/download.c
+    frontends/monkey/fetch.c
+    frontends/monkey/filetype.c
+    frontends/monkey/layout.c
+    frontends/monkey/main.c
+    frontends/monkey/output.c
+    frontends/monkey/plot.c
+    frontends/monkey/schedule.c)
+  add_dependencies(netsurfy-monkey testament)
+  set_target_properties(netsurfy-monkey PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+  target_include_directories(netsurfy-monkey PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/frontends
+    ${CMAKE_CURRENT_SOURCE_DIR}/content/handlers
+    ${NETSURFY_GEN})
+  target_compile_definitions(netsurfy-monkey PRIVATE
+    ${NETSURFY_CORE_DEFINES}
+    nsmonkey
+    _XOPEN_SOURCE=700
+    _POSIX_C_SOURCE=200809L
+    _BSD_SOURCE
+    _DEFAULT_SOURCE
+    "MONKEY_RESPATH=\"${MESSAGES_DIR}:${GTK_RES_DIR}\"")
+  target_compile_options(netsurfy-monkey PRIVATE ${NETSURFY_WARNING_FLAGS} -include ${NETSURFY_CONFIG_HEADER})
+  target_link_libraries(netsurfy-monkey PRIVATE
+    ${NETSURFY_CORE_LIBRARIES}
+    $<$<BOOL:${NETSURFY_USE_QUICKJS}>:qjs>)
+endif()
+
 set(NETSURFY_DATADIR ${CMAKE_INSTALL_DATADIR}/netsurfy)
 function(netsurfy_install_resolved destination)
   foreach(path ${ARGN})

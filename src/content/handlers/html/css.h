@@ -104,6 +104,8 @@ bool html_css_process_style(struct html_content *htmlc, dom_node *node);
  * \return true on success else false.
  */
 bool html_css_update_style(struct html_content *htmlc, dom_node *node);
+void html_css_styles_changed(struct html_content *c);
+void html_css_refresh_detached(struct html_content *c);
 
 
 #endif

@@ -108,7 +108,7 @@ int output_generated_attribute_getter(struct opctx *outc,
 			outputf(outc, "\tret = qjsky_reflected_url(ctx, str);\n");
 		} else {
 			outputf(outc,
-				"\tret = JS_NewStringLen(ctx, dom_string_data(str), dom_string_length(str));\n");
+				"\tret = JS_NewStringLen(ctx, dom_string_data(str), dom_string_byte_length(str));\n");
 		}
 		outputf(outc,
 			"\tdom_string_unref(str);\n"

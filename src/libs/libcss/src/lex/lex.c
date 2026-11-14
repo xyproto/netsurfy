@@ -634,6 +634,11 @@ css_error CDCOrIdentOrFunctionOrNPD(css_lexer *lexer, css_token **token)
 			APPEND(lexer, cptr, clen);
 
 			t->type = CSS_TOKEN_CDC;
+		} else if (c != '\\' && startNMChar(c)) {
+			APPEND(lexer, cptr, clen);
+			lexer->state = sIDENT;
+			lexer->substate = 0;
+			return IdentOrFunction(lexer, token);
 		} else {
 			/* Remove the '-' we read above */
 			lexer->bytesReadForToken -= 1;

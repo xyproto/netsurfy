@@ -20,7 +20,16 @@ getter HTMLOptionElement::label();
 setter HTMLOptionElement::label();
 
 getter HTMLOptionElement::selected();
-setter HTMLOptionElement::selected();
+setter HTMLOptionElement::selected()
+%{
+	dom_node *node = ((node_private_t *)priv)->node;
+	int b = JS_ToBool(ctx, argv[0]);
+
+	if (b < 0) return JS_EXCEPTION;
+	(void)dom_html_option_element_set_selected((struct dom_html_option_element *)node, b != 0);
+	qjsky_node_state_changed(node);
+	return JS_UNDEFINED;
+%}
 
 getter HTMLOptionElement::text();
 

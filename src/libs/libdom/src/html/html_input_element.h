@@ -17,10 +17,8 @@ struct dom_html_input_element {
 	/**< The base class */
 	struct dom_html_form_element *form;
 	/**< The form associated with the input */
-	bool default_checked; /**< Initial checked value */
-	bool default_checked_set; /**< Whether default_checked has been set */
-	dom_string *default_value; /**< Initial value */
-	bool default_value_set; /**< Whether default_value has been set */
+	dom_string *value; /**< The dirty value */
+	bool value_set; /**< Whether the value is dirty */
 	bool checked; /**< Whether the element has been checked by a click */
 	bool checked_set;
 };

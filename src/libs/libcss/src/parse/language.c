@@ -6,7 +6,10 @@
  */
 
 #include <assert.h>
+#include <ctype.h>
+#include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
 #include <parserutils/utils/stack.h>
 
@@ -1921,6 +1924,229 @@ css_error parseSelectorList(css_language *c,
  * Property parsing functions						      *
  ******************************************************************************/
 
+static bool vars_buf_append(char **buf, size_t *len, size_t *alloc,
+			    const char *data, size_t n)
+{
+	if (*len + n + 1 > *alloc) {
+		size_t want = (*alloc == 0 ? 64 : *alloc * 2);
+		char *grown;
+		while (want < *len + n + 1) {
+			want *= 2;
+		}
+		grown = realloc(*buf, want);
+		if (grown == NULL) {
+			return false;
+		}
+		*buf = grown;
+		*alloc = want;
+	}
+	memcpy(*buf + *len, data, n);
+	*len += n;
+	(*buf)[*len] = '\0';
+	return true;
+}
+
+static bool vars_token_append(char **buf, size_t *len, size_t *alloc,
+			      const css_token *token)
+{
+	const char *pre = "", *post = "";
+	const char *data = NULL;
+	size_t n = 0;
+
+	if (token->idata != NULL) {
+		data = lwc_string_data(token->idata);
+		n = lwc_string_length(token->idata);
+	}
+	switch (token->type) {
+	case CSS_TOKEN_ATKEYWORD:
+		pre = "@";
+		break;
+	case CSS_TOKEN_HASH:
+		pre = "#";
+		break;
+	case CSS_TOKEN_FUNCTION:
+		post = "(";
+		break;
+	case CSS_TOKEN_STRING:
+	case CSS_TOKEN_INVALID_STRING:
+		pre = "\"";
+		post = "\"";
+		break;
+	case CSS_TOKEN_URI:
+		pre = "url(\"";
+		post = "\")";
+		break;
+	case CSS_TOKEN_UNICODE_RANGE:
+		pre = "U+";
+		break;
+	case CSS_TOKEN_PERCENTAGE:
+		post = "%";
+		break;
+	case CSS_TOKEN_S:
+		data = " ";
+		n = 1;
+		break;
+	case CSS_TOKEN_INCLUDES:
+		data = "~=";
+		n = 2;
+		break;
+	case CSS_TOKEN_DASHMATCH:
+		data = "|=";
+		n = 2;
+		break;
+	case CSS_TOKEN_PREFIXMATCH:
+		data = "^=";
+		n = 2;
+		break;
+	case CSS_TOKEN_SUFFIXMATCH:
+		data = "$=";
+		n = 2;
+		break;
+	case CSS_TOKEN_SUBSTRINGMATCH:
+		data = "*=";
+		n = 2;
+		break;
+	case CSS_TOKEN_COMMENT:
+	case CSS_TOKEN_CDO:
+	case CSS_TOKEN_CDC:
+	case CSS_TOKEN_EOF:
+		return true;
+	default:
+		break;
+	}
+	return vars_buf_append(buf, len, alloc, pre, strlen(pre)) &&
+	       (data == NULL || vars_buf_append(buf, len, alloc, data, n)) &&
+	       vars_buf_append(buf, len, alloc, post, strlen(post));
+}
+
+static bool vars_strip_important(char *buf, size_t *len)
+{
+	size_t n = *len;
+	static const char important[] = "important";
+	size_t ilen = sizeof(important) - 1;
+
+	while (n > 0 && isspace((unsigned char)buf[n - 1])) {
+		n--;
+	}
+	if (n < ilen + 1 || strncasecmp(buf + n - ilen, important, ilen) != 0) {
+		*len = n;
+		buf[n] = '\0';
+		return false;
+	}
+	n -= ilen;
+	while (n > 0 && isspace((unsigned char)buf[n - 1])) {
+		n--;
+	}
+	if (n == 0 || buf[n - 1] != '!') {
+		*len = n + ilen;
+		buf[*len] = '\0';
+		return false;
+	}
+	n--;
+	while (n > 0 && isspace((unsigned char)buf[n - 1])) {
+		n--;
+	}
+	*len = n;
+	buf[n] = '\0';
+	return true;
+}
+
+static css_error parseVarDeclaration(css_language *c,
+				     const css_token *property,
+				     const parserutils_vector *vector,
+				     int32_t *ctx,
+				     css_rule *rule,
+				     int prop)
+{
+	const css_token *token;
+	char *buf = NULL;
+	size_t len = 0, alloc = 0, start = 0;
+	bool important;
+	lwc_string *value = NULL;
+	uint32_t name_idx = 0, value_idx = 0;
+	css_style *style = NULL;
+	css_error error;
+
+	vars_buf_append(&buf, &len, &alloc, "", 0);
+	while ((token = parserutils_vector_iterate(vector, ctx)) != NULL) {
+		if (!vars_token_append(&buf, &len, &alloc, token)) {
+			free(buf);
+			return CSS_NOMEM;
+		}
+	}
+	if (buf == NULL) {
+		return CSS_NOMEM;
+	}
+	important = vars_strip_important(buf, &len);
+	while (start < len && isspace((unsigned char)buf[start])) {
+		start++;
+	}
+	if (start == len && prop >= 0) {
+		free(buf);
+		return CSS_INVALID;
+	}
+	if (lwc_intern_string(buf + start, len - start, &value) != lwc_error_ok) {
+		free(buf);
+		return CSS_NOMEM;
+	}
+	free(buf);
+
+	error = css__stylesheet_string_add(c->sheet, value, &value_idx);
+	if (error != CSS_OK) {
+		return error;
+	}
+	if (prop < 0) {
+		error = css__stylesheet_string_add(
+			c->sheet, lwc_string_ref(property->idata), &name_idx);
+		if (error != CSS_OK) {
+			return error;
+		}
+	}
+
+	error = css__stylesheet_style_create(c->sheet, &style);
+	if (error != CSS_OK) {
+		return error;
+	}
+	if (prop < 0) {
+		error = css__stylesheet_style_append(
+			style,
+			buildOPV(CSS_OP_CUSTOM, important ? FLAG_IMPORTANT : 0, 0));
+		if (error == CSS_OK) {
+			error = css__stylesheet_style_append(style, name_idx);
+		}
+	} else {
+		error = css__stylesheet_style_append(
+			style,
+			buildOPV(CSS_OP_VAR,
+				 important ? FLAG_IMPORTANT : 0,
+				 (uint16_t)prop));
+	}
+	if (error == CSS_OK) {
+		error = css__stylesheet_style_append(style, value_idx);
+	}
+	if (error == CSS_OK) {
+		error = css__stylesheet_rule_append_style(c->sheet, rule, style);
+	}
+	if (error != CSS_OK) {
+		css__stylesheet_style_destroy(style);
+	}
+	return error;
+}
+
+static bool vectorHasVar(const parserutils_vector *vector, int32_t ctx)
+{
+	const css_token *token;
+
+	while ((token = parserutils_vector_iterate(vector, &ctx)) != NULL) {
+		if (token->type == CSS_TOKEN_FUNCTION && token->idata != NULL &&
+		    lwc_string_length(token->idata) == 3 &&
+		    strncasecmp(lwc_string_data(token->idata), "var", 3) == 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
 css_error parseProperty(css_language *c,
 			const css_token *property,
 			const parserutils_vector *vector,
@@ -1933,6 +2159,12 @@ css_error parseProperty(css_language *c,
 	uint8_t flags = 0;
 	css_style *style = NULL;
 	const css_token *token;
+
+	if (lwc_string_length(property->idata) > 2 &&
+	    lwc_string_data(property->idata)[0] == '-' &&
+	    lwc_string_data(property->idata)[1] == '-') {
+		return parseVarDeclaration(c, property, vector, ctx, rule, -1);
+	}
 
 	/* Find property index */
 	/** \todo improve on this linear search */
@@ -1947,6 +2179,10 @@ css_error parseProperty(css_language *c,
 	}
 	if (i == LAST_PROP + 1)
 		return CSS_INVALID;
+
+	if (vectorHasVar(vector, *ctx)) {
+		return parseVarDeclaration(c, property, vector, ctx, rule, i - FIRST_PROP);
+	}
 
 	/* Get handler */
 	handler = property_handlers[i - FIRST_PROP];

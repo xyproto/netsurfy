@@ -24,3 +24,8 @@ setter HTMLFormElement::method();
 
 getter HTMLFormElement::target();
 setter HTMLFormElement::target();
+
+method HTMLFormElement::submit()
+%{
+	return qjsky_form_submit(ctx, priv->parent.parent.parent.node);
+%}

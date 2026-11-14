@@ -114,3 +114,74 @@ out:
 	}
 	return JS_UNDEFINED;
 %}
+
+method DOMImplementation::createDocumentType ()
+%{
+	const char *qname, *public_id, *system_id;
+	struct dom_document_type *doctype = NULL;
+	dom_exception exc;
+	JSValue ret;
+
+	if (argc < 3) return JS_ThrowTypeError(ctx, "createDocumentType: 3 arguments required");
+	qname = JS_ToCString(ctx, argv[0]);
+	public_id = JS_ToCString(ctx, argv[1]);
+	system_id = JS_ToCString(ctx, argv[2]);
+	if (qname == NULL || public_id == NULL || system_id == NULL) {
+		exc = DOM_NO_MEM_ERR;
+	} else {
+		exc = dom_implementation_create_document_type(qname, public_id, system_id, &doctype);
+	}
+	JS_FreeCString(ctx, qname);
+	JS_FreeCString(ctx, public_id);
+	JS_FreeCString(ctx, system_id);
+	if (exc != DOM_NO_ERR) return qjsky_throw_dom(ctx, exc);
+	ret = qjsky_node(ctx, (struct dom_node *)doctype);
+	dom_node_unref(doctype);
+	return ret;
+%}
+
+method DOMImplementation::createDocument ()
+%{
+	const char *ns = NULL, *qname = NULL;
+	node_private_t *doctype = NULL;
+	struct dom_document *doc = NULL;
+	dom_exception exc;
+	JSValue ret;
+
+	if (argc > 0 && !JS_IsNull(argv[0]) && !JS_IsUndefined(argv[0])) {
+		ns = JS_ToCString(ctx, argv[0]);
+		if (ns == NULL) return JS_EXCEPTION;
+		if (ns[0] == '\0') {
+			JS_FreeCString(ctx, ns);
+			ns = NULL;
+		}
+	}
+	if (argc > 1 && !JS_IsNull(argv[1]) && !JS_IsUndefined(argv[1])) {
+		qname = JS_ToCString(ctx, argv[1]);
+		if (qname == NULL) {
+			JS_FreeCString(ctx, ns);
+			return JS_EXCEPTION;
+		}
+		if (qname[0] == '\0') {
+			JS_FreeCString(ctx, qname);
+			qname = NULL;
+		}
+	}
+	if (argc > 2 && !JS_IsNull(argv[2]) && !JS_IsUndefined(argv[2])) {
+		doctype = qjsky_private(ctx, argv[2], QJSKY_IFACE_NODE);
+		if (doctype == NULL) {
+			JS_FreeCString(ctx, ns);
+			JS_FreeCString(ctx, qname);
+			return JS_ThrowTypeError(ctx, "parameter 3 is not of type 'DocumentType'");
+		}
+	}
+	exc = dom_implementation_create_document(DOM_IMPLEMENTATION_XML, ns, qname,
+						 doctype != NULL ? (struct dom_document_type *)doctype->node : NULL,
+						 NULL, NULL, &doc);
+	JS_FreeCString(ctx, ns);
+	JS_FreeCString(ctx, qname);
+	if (exc != DOM_NO_ERR) return qjsky_throw_dom(ctx, exc);
+	ret = qjsky_node(ctx, (struct dom_node *)doc);
+	dom_node_unref(doc);
+	return ret;
+%}

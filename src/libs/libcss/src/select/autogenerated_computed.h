@@ -295,6 +295,7 @@ struct css_computed_style {
 	lwc_string **cursor;
 	lwc_string **font_family;
 	lwc_string **quotes;
+	struct css_computed_vars *vars;
 
 	struct css_computed_style *next;
 	uint32_t count;

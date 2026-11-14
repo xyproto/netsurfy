@@ -348,6 +348,29 @@ static dom_attr_list *_dom_element_attr_list_node_create(dom_attr *attr,
 	return new_list_node;
 }
 
+void _dom_element_attr_value_changed(struct dom_element *ele,
+				     struct dom_attr *attr,
+				     bool removed)
+{
+	dom_node_internal *a = (dom_node_internal *)attr;
+	dom_string *value = NULL;
+
+	if (a->namespace != NULL ||
+	    !dom_string_isequal(a->name, a->owner->class_string)) {
+		return;
+	}
+	if (removed || _dom_attr_get_value(attr, &value) != DOM_NO_ERR ||
+	    value == NULL) {
+		_dom_element_destroy_classes(ele);
+		return;
+	}
+	if (_dom_element_create_classes(ele, dom_string_data(value)) !=
+	    DOM_NO_ERR) {
+		_dom_element_destroy_classes(ele);
+	}
+	dom_string_unref(value);
+}
+
 /**
  * Destroy an entire attribute list, and its attributes
  *
@@ -1878,6 +1901,7 @@ dom_exception _dom_element_remove_attr(struct dom_element *element,
 			element->attributes = NULL;
 		}
 		_dom_element_attr_list_node_unlink(match);
+		_dom_element_attr_value_changed(element, a, true);
 		_dom_element_attr_list_node_destroy(match);
 
 		/* Dispatch a DOMAttrModified event */
@@ -2019,6 +2043,7 @@ dom_exception _dom_element_set_attr_node(struct dom_element *element,
 		dom_node_ref(old_attr);
 
 		_dom_element_attr_list_node_unlink(match);
+		_dom_element_attr_value_changed(element, old_attr, true);
 		_dom_element_attr_list_node_destroy(match);
 
 		/* Dispatch a DOMAttrModified event */
@@ -2193,6 +2218,7 @@ dom_exception _dom_element_remove_attr_node(struct dom_element *element,
 		element->attributes = NULL;
 	}
 	_dom_element_attr_list_node_unlink(match);
+	_dom_element_attr_value_changed(element, a, true);
 	_dom_element_attr_list_node_destroy(match);
 
 	/* Now, cleaup the dom_string */

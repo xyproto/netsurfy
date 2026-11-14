@@ -473,13 +473,17 @@ JSValue qjsky_observer_observe(JSContext *ctx,
 void qjsky_observer_disconnect(struct qjsky_observer *mo)
 {
 	JSContext *ctx = mo->ctx;
+	JSValue self = mo->self;
 
 	while (mo->regs != NULL) {
 		struct qjsky_registration *reg = mo->regs;
 		mo->regs = reg->next;
 		registration_free(reg);
 	}
-	if (!JS_IsUndefined(mo->self)) {
+	JS_FreeValue(ctx, mo->records);
+	mo->records = JS_NewArray(ctx);
+	mo->nrecords = 0;
+	if (!JS_IsUndefined(self)) {
 		struct qjsky_observer **list = qjsky_observers(ctx);
 		while (*list != NULL && *list != mo) {
 			list = &(*list)->next;
@@ -488,12 +492,9 @@ void qjsky_observer_disconnect(struct qjsky_observer *mo)
 			*list = mo->next;
 		}
 		mo->next = NULL;
-		JS_FreeValue(ctx, mo->self);
 		mo->self = JS_UNDEFINED;
+		JS_FreeValue(ctx, self);
 	}
-	JS_FreeValue(ctx, mo->records);
-	mo->records = JS_NewArray(ctx);
-	mo->nrecords = 0;
 }
 
 JSValue qjsky_observer_take_records(JSContext *ctx, struct qjsky_observer *mo)
@@ -521,6 +522,16 @@ void qjsky_observer_free(JSRuntime *rt, struct qjsky_observer *mo)
 	JS_FreeValueRT(rt, mo->callback);
 	JS_FreeValueRT(rt, mo->records);
 	free(mo);
+}
+
+void qjsky_observer_mark(JSRuntime *rt,
+			 struct qjsky_observer *mo,
+			 JS_MarkFunc *mark_func)
+{
+	if (mo != NULL) {
+		JS_MarkValue(rt, mo->callback, mark_func);
+		JS_MarkValue(rt, mo->records, mark_func);
+	}
 }
 
 void qjsky_observer_release_all(JSContext *ctx)

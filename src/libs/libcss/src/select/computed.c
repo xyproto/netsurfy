@@ -10,6 +10,7 @@
 #include "select/arena.h"
 #include "select/calc.h"
 #include "select/computed.h"
+#include "select/vars.h"
 #include "select/dispatch.h"
 #include "select/propget.h"
 #include "select/propset.h"
@@ -142,6 +143,8 @@ css_error css_computed_style_destroy(css_computed_style *style)
 	} else if (style->count == 1) {
 		css__arena_remove_style(style);
 	}
+
+	css__vars_unref(style->vars);
 
 	if (style->counter_increment != NULL) {
 		css_computed_counter *c;
@@ -301,6 +304,8 @@ css_error css__computed_style_clone(const css_computed_style *orig,
 		}
 	}
 
+	clone->vars = css__vars_ref(orig->vars);
+
 	*clone_out = clone;
 	return CSS_OK;
 }
@@ -343,6 +348,15 @@ css_error css_computed_style_compose(const css_computed_style *restrict parent,
 		error = prop_dispatch[i].compose(parent, child, composed);
 		if (error != CSS_OK)
 			break;
+	}
+
+	if (error == CSS_OK && (child->vars != NULL ||
+				(parent != NULL && parent->vars != NULL))) {
+		error = css__vars_resolve(parent, child->vars, composed);
+	}
+	if (error != CSS_OK) {
+		css_computed_style_destroy(composed);
+		return error;
 	}
 
 	/* Finally, compute absolute values for everything */

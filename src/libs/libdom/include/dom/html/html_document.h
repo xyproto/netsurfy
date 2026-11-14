@@ -57,6 +57,9 @@ typedef struct dom_html_document_vtable {
 					      struct dom_nodelist **list);
 } dom_html_document_vtable;
 
+bool dom_document_is_html(struct dom_document *doc);
+#define dom_document_is_html(d) dom_document_is_html((struct dom_document *)(d))
+
 static inline dom_exception
 dom_html_document_get_title(dom_html_document *doc, dom_string **title)
 {
