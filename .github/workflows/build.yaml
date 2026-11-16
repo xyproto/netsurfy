@@ -30,6 +30,7 @@ jobs:
                libwebp
                ninja
                openssl
+               python
                quickjs-ng
                words
 
