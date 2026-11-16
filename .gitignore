@@ -14,11 +14,11 @@
 *~
 .DS_Store
 .venv/
+/build*/
+/codedocs
+/libs/
+/netsurfy
+/src/frontends/*/res/*/Messages
 \#*#
 __pycache__/
 venv/
-/build*/
-/codedocs
-/netsurfy
-/src/frontends/*/res/*/Messages
-/libs/
