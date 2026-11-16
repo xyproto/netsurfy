@@ -4,10 +4,9 @@
 
 This is a lightweight browser written in C that uses GTK4. It's a fork of NetSurf.
 
-### Building NetSurfy
+### Building
 
-* Read the [Quick Start](docs/quick-start.md) document for instructions.
-* In short: `cmake -B build && cmake --build build && ./build/netsurfy`
+cmake -B build && cmake --build build
 
 ### General info
 
