@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>CSS</title><script src="harness.js"></script>
+<style id="st"></style>
+<style>
+#cs { white-space: pre-wrap; text-transform: uppercase; text-align: center; cursor: pointer; display: flex; flex-direction: column; box-sizing: border-box; position: relative; top: 5px; text-decoration: underline; border: 2px dashed red; max-width: 50%; letter-spacing: 1px; font-family: "Times New Roman", serif; }
+</style></head>
+<body><div id="a"></div><div></div><div><div id="p"><div id="n"></div><div id="q"><div id="r"></div></div></div></div>
+<div id="lang" lang="en-GB"><p id="lp">x</p></div>
+<form><input id="in"><input id="dis" disabled><input id="chk" type="checkbox" checked><select><option id="opt">o</select>
+<fieldset disabled><legend><input id="inlegend"></legend><input id="infield"></fieldset></form>
+<p id="empty"></p><div id="cs">x</div>
+<script>
+var st = document.getElementById("st");
+function z(id, rule) {
+    st.textContent = "* { z-index: 0; position: absolute; } " + rule + " { z-index: 7 }";
+    return getComputedStyle(document.getElementById(id)).zIndex === "7";
+}
+test("selector backtracking over descendant and sibling combinators", function () {
+    assert(z("r", "#a ~ div div"));
+    assert(z("r", "#a ~ div div + div > div"));
+    assert(z("r", "body > div ~ div div + div > div"));
+    assert(!z("r", "#a ~ div div + div"));
+});
+test("attribute selector case sensitivity", function () {
+    var a = document.getElementById("a");
+    a.setAttribute("title", "Foo");
+    assert(z("a", "[title=Foo]"));
+    assert(!z("a", "[title=foo]"));
+    a.setAttribute("type", "Foo");
+    assert(z("a", "[type=foo]"));
+    a.setAttribute("data-e", "");
+    assert(z("a", "[data-e=\"\"]"));
+});
+test("class selectors with newline separated classes", function () {
+    document.getElementById("a").className = "x\ny";
+    assert(z("a", ".x.y"));
+});
+test(":lang", function () {
+    assert(z("lp", ":lang(en)"));
+    assert(!z("lp", ":lang(fr)"));
+});
+test(":enabled :disabled :checked", function () {
+    assert(z("in", "input:enabled"));
+    assert(z("dis", "input:disabled"));
+    assert(z("chk", ":checked"));
+    assert(z("opt", "option:checked"));
+    assert(z("infield", ":disabled"));
+    assert(z("inlegend", ":enabled"));
+});
+test(":empty ignores comments and empty text", function () {
+    var e = document.getElementById("empty");
+    e.appendChild(document.createComment("c"));
+    e.appendChild(document.createTextNode(""));
+    assert(z("empty", ":empty"));
+    e.appendChild(document.createTextNode(" "));
+    assert(!z("empty", ":empty"));
+});
+test("media queries", function () {
+    assert(z("a", "@media all, (bogus) { #a"));
+    assert(z("a", "@media (min-color: 1) { #a"));
+    assert(z("a", "@media not all and (monochrome) { #a"));
+    assert(z("a", "@media (hover: hover) and (pointer: fine) { #a"));
+    assert(!z("a", "@media (prefers-reduced-motion: reduce) { #a"));
+    assert(!z("a", "@media all and min-color: 0 { #a"));
+});
+test("getComputedStyle reports keyword and length properties", function () {
+    var cs = getComputedStyle(document.getElementById("cs"));
+    assertEquals(cs.whiteSpace, "pre-wrap");
+    assertEquals(cs.textTransform, "uppercase");
+    assertEquals(cs.textAlign, "center");
+    assertEquals(cs.cursor, "pointer");
+    assertEquals(cs.flexDirection, "column");
+    assertEquals(cs.boxSizing, "border-box");
+    assertEquals(cs.top, "5px");
+    assertEquals(cs.textDecoration, "underline");
+    assertEquals(cs.borderTopStyle, "dashed");
+    assertEquals(cs.borderTopColor, "rgb(255, 0, 0)");
+    assertEquals(cs.maxWidth, "50%");
+    assertEquals(cs.letterSpacing, "1px");
+    assertEquals(cs.fontFamily, "\"Times New Roman\", serif");
+});
+test("custom properties with UA defaults do not crash", function () {
+    st.textContent = "#a { color: var(--missing); font-family: var(--missing), monospace; quotes: var(--missing); }";
+    getComputedStyle(document.getElementById("a")).color;
+});
+done();
+</script></body></html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Events</title><script src="harness.js"></script></head>
+<body><script>
+test("event constructors", function () {
+    ["FocusEvent", "ErrorEvent", "MessageEvent", "PopStateEvent", "InputEvent", "WheelEvent",
+     "HashChangeEvent", "ProgressEvent", "SubmitEvent", "CloseEvent"].forEach(function (name) {
+        var e = new window[name]("x", { bubbles: true });
+        assert(e instanceof window[name], name);
+        assert(e instanceof Event, name);
+        assert(e.bubbles, name);
+    });
+    assertEquals(new ErrorEvent("error", { message: "m" }).message, "m");
+    assertEquals(new WheelEvent("wheel", { deltaY: 3 }).deltaY, 3);
+});
+test("interfaces the engine never fires are not exposed", function () {
+    assertEquals(typeof window.PointerEvent, "undefined");
+    assertEquals(typeof window.TouchEvent, "undefined");
+});
+test("window.dispatchEvent reaches window listeners", function () {
+    var seen = null;
+    window.addEventListener("custom-x", function (e) { seen = e; });
+    var e = new CustomEvent("custom-x", { detail: 7, cancelable: true });
+    window.addEventListener("custom-x", function (ev) { ev.preventDefault(); });
+    assertEquals(window.dispatchEvent(e), false);
+    assertEquals(seen && seen.detail, 7);
+});
+test("legacy keyboard codes", function () {
+    assertEquals(new KeyboardEvent("keydown", { key: "Enter" }).keyCode, 13);
+    assertEquals(new KeyboardEvent("keydown", { key: "a" }).keyCode, 65);
+    assertEquals(new KeyboardEvent("keypress", { key: "a" }).charCode, 97);
+});
+test("window compatibility members", function () {
+    assertEquals(confirm("x"), false);
+    assertEquals(prompt("x"), null);
+    assertEquals(open("about:blank"), null);
+    assertEquals(document.execCommand("copy"), false);
+});
+test("media elements reject play()", function () {
+    var v = document.createElement("video");
+    assert(v.play() instanceof Promise);
+    assertEquals(v.canPlayType("video/mp4"), "");
+});
+var pending = 2;
+function finish() {
+    if (--pending === 0) {
+        done();
+    }
+}
+window.addEventListener("message", function (e) {
+    test("postMessage delivers a cloned message", function () {
+        assertEquals(e.data.a, 1);
+        assertEquals(e.source, window);
+    });
+    finish();
+});
+postMessage({ a: 1 }, "*");
+var dialog = document.body.appendChild(document.createElement("dialog"));
+dialog.addEventListener("close", function () {
+    test("dialog close event and returnValue", function () {
+        assertEquals(dialog.returnValue, "ok");
+        assert(!dialog.open);
+    });
+    finish();
+});
+dialog.showModal();
+dialog.close("ok");
+</script></body></html>

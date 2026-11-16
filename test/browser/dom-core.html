@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>DOM core</title><script src="harness.js"></script></head>
+<body><div id="d" class="a b" data-x="1"><span>x</span>text</div><script>
+var d = document.getElementById("d");
+test("detached text nodes are writable", function () {
+    var t = document.createTextNode("a");
+    t.data = "b";
+    t.appendData("c");
+    assertEquals(t.data, "bc");
+});
+test("inline script inserted at runtime can modify the DOM", function () {
+    window.inserted = null;
+    var s = document.createElement("script");
+    s.textContent = "var e = document.createElement('i'); document.body.appendChild(e); e.remove(); window.inserted = 'ok';";
+    document.body.appendChild(s);
+    assertEquals(window.inserted, "ok");
+});
+test("ChildNode and ParentNode mixins", function () {
+    var p = document.createElement("p");
+    p.append("b", document.createElement("i"));
+    p.prepend("a");
+    p.lastChild.before("x");
+    p.lastChild.after("y");
+    p.lastChild.replaceWith("z");
+    assertEquals(p.textContent, "abxz");
+    p.firstChild.remove();
+    assertEquals(p.firstChild.data, "b");
+    p.replaceChildren("only");
+    assertEquals(p.childNodes.length, 1);
+});
+test("insertAdjacent*", function () {
+    var p = document.createElement("p");
+    var c = p.appendChild(document.createElement("span"));
+    c.insertAdjacentHTML("afterbegin", "<b>1</b>");
+    c.insertAdjacentText("beforeend", "2");
+    c.insertAdjacentElement("afterend", document.createElement("i"));
+    assertEquals(p.innerHTML.toLowerCase(), "<span><b>1</b>2</span><i></i>");
+});
+test("document factories", function () {
+    assert(document.createComment("c") instanceof Comment);
+    assertEquals(document.createComment("c").nodeType, 8);
+    assertEquals(document.createAttribute("X").name, "x");
+    assertEquals(document.createProcessingInstruction("t", "d").nodeType, 7);
+    assertEquals(document.importNode(d, true).firstChild.nodeName, "SPAN");
+    assertEquals(document.adoptNode(document.createElement("x")).ownerDocument, document);
+});
+test("namespaced attributes and attribute nodes", function () {
+    var e = document.createElement("div");
+    e.setAttributeNS("http://example.org/ns", "p:foo", "bar");
+    assertEquals(e.getAttributeNS("http://example.org/ns", "foo"), "bar");
+    assert(e.hasAttributeNS("http://example.org/ns", "foo"));
+    e.removeAttributeNS("http://example.org/ns", "foo");
+    assert(!e.hasAttributes());
+    e.setAttribute("a", "1");
+    assertEquals(e.getAttributeNode("a").value, "1");
+    var attr = document.createAttribute("b");
+    attr.value = "2";
+    e.setAttributeNode(attr);
+    assertEquals(e.getAttribute("b"), "2");
+    e.attributes.removeNamedItem("a");
+    assert(!e.hasAttribute("a"));
+});
+test("replaceChild fires mutation events", function () {
+    var p = document.createElement("p");
+    var a = p.appendChild(document.createElement("a"));
+    var seen = 0;
+    p.addEventListener("DOMNodeInserted", function () { seen++; });
+    p.replaceChild(document.createElement("b"), a);
+    assertEquals(seen, 1);
+    assertEquals(a.parentNode, null);
+});
+test("normalize recurses into the first child and drops empty text", function () {
+    var p = document.createElement("p");
+    var s = p.appendChild(document.createElement("span"));
+    s.appendChild(document.createTextNode("a"));
+    s.appendChild(document.createTextNode(""));
+    s.appendChild(document.createTextNode("b"));
+    p.normalize();
+    assertEquals(s.childNodes.length, 1);
+    assertEquals(s.firstChild.data, "ab");
+});
+test("class attribute splits on all ASCII whitespace", function () {
+    var e = document.createElement("div");
+    e.className = "a\tb\nc\fd\re";
+    assertEquals(e.classList.length, 5);
+    e.className = "élève x";
+    assert(e.classList.contains("x"));
+    assertEquals(document.getElementsByClassName("b").length, 1);
+});
+test("text node element siblings", function () {
+    assertEquals(d.lastChild.previousElementSibling.nodeName, "SPAN");
+    assertEquals(d.firstChild.nextElementSibling, null);
+});
+test("relList", function () {
+    var a = document.createElement("a");
+    a.rel = "nofollow noopener";
+    assert(a.relList.contains("noopener"));
+});
+test("dataset stringifies", function () {
+    assertEquals(String(d.dataset), "[object DOMStringMap]");
+    assertEquals(d.dataset.x, "1");
+});
+test("unimplemented members are absent, not stubs", function () {
+    assert(typeof document.createRange === "function");
+    assert(!("selectedStyleSheetSet" in document));
+});
+test("XHTML documents from createDocument", function () {
+    var doc = document.implementation.createDocument("http://www.w3.org/1999/xhtml", "html", null);
+    var ns = "http://www.w3.org/1999/xhtml";
+    doc.documentElement.appendChild(doc.createElementNS(ns, "head"));
+    doc.documentElement.appendChild(doc.createElementNS(ns, "body"));
+    var t = doc.documentElement.firstChild.appendChild(doc.createElementNS(ns, "title"));
+    t.textContent = "Sparrow";
+    assertEquals(doc.title, "Sparrow");
+    doc.body.appendChild(doc.createElementNS(ns, "form"));
+    assertEquals(doc.forms.length, 1);
+});
+test("meta httpEquiv", function () {
+    var m = document.createElement("meta");
+    m.httpEquiv = "refresh";
+    assertEquals(m.getAttribute("http-equiv"), "refresh");
+});
+done();
+</script></body></html>

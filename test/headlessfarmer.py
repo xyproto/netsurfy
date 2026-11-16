@@ -15,10 +15,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Monkey Farmer
+Headless Farmer
 
-The monkey farmer is a wrapper around `nsmonkey` which can be used to simplify
-access to the monkey behaviours and ultimately to write useful tests in an
+The headless farmer is a wrapper around `nsheadless` which can be used to simplify
+access to the headless behaviours and ultimately to write useful tests in an
 expressive but not overcomplicated DSLish way.  Tests are, ultimately, still
 Python code.
 
@@ -43,7 +43,7 @@ class StderrEcho(asyncore.dispatcher):
         pass
 
     def handle_close(self):
-        # the pipe to the monkey process has closed
+        # the pipe to the headless process has closed
         self.close()
 
     def handle_read(self):
@@ -71,40 +71,40 @@ class StderrEcho(asyncore.dispatcher):
                 sys.stderr.write("{}\n".format(line))
 
 
-class MonkeyFarmer(asyncore.dispatcher):
+class HeadlessFarmer(asyncore.dispatcher):
 
     # pylint: disable=locally-disabled, too-many-instance-attributes
 
-    def __init__(self, monkey_cmd, monkey_env, online, quiet=False, *, wrapper=None):
-        (mine, monkeys) = socket.socketpair()
+    def __init__(self, headless_cmd, headless_env, online, quiet=False, *, wrapper=None):
+        (mine, headlesss) = socket.socketpair()
 
         asyncore.dispatcher.__init__(self, sock=mine)
 
-        (mine2, monkeyserr) = socket.socketpair()
+        (mine2, headlessserr) = socket.socketpair()
 
         self._errwrapper = StderrEcho(mine2)
 
         if wrapper is not None:
             new_cmd = list(wrapper)
-            new_cmd.extend(monkey_cmd)
-            monkey_cmd = new_cmd
+            new_cmd.extend(headless_cmd)
+            headless_cmd = new_cmd
 
-        self.monkey = subprocess.Popen(
-            monkey_cmd,
-            env=monkey_env,
-            stdin=monkeys,
-            stdout=monkeys,
-            stderr=monkeyserr,
+        self.headless = subprocess.Popen(
+            headless_cmd,
+            env=headless_env,
+            stdin=headlesss,
+            stdout=headlesss,
+            stderr=headlessserr,
             close_fds=[mine, mine2])
 
-        monkeys.close()
-        monkeyserr.close()
+        headlesss.close()
+        headlessserr.close()
 
         self.buffer = b""
         self.incoming = b""
         self.lines = []
         self.scheduled = []
-        self.deadmonkey = False
+        self.deadheadless = False
         self.online = online
         self.quiet = quiet
         self.discussion = []
@@ -114,22 +114,22 @@ class MonkeyFarmer(asyncore.dispatcher):
         pass
 
     def handle_close(self):
-        # the pipe to the monkey process has closed
+        # the pipe to the headless process has closed
         self.close()
 
     def handle_read(self):
         try:
             got = self.recv(8192)
             if not got:
-                self.deadmonkey = True
+                self.deadheadless = True
                 #  ensure the child process is finished and report the exit
-                if self.monkey.poll() is None:
-                    self.monkey.terminate()
-                    self.monkey.wait()
-                print("Handling an exit {}".format(self.monkey.returncode))
+                if self.headless.poll() is None:
+                    self.headless.terminate()
+                    self.headless.wait()
+                print("Handling an exit {}".format(self.headless.returncode))
                 print("The following are present in the queue: {}".format(self.lines))
                 self.lines.append("GENERIC EXIT {}".format(
-                    self.monkey.returncode).encode('utf-8'))
+                    self.headless.returncode).encode('utf-8'))
                 print("The queue is now: {}".format(self.lines))
                 return
         except socket.error as error:
@@ -151,7 +151,7 @@ class MonkeyFarmer(asyncore.dispatcher):
         sent = self.send(self.buffer)
         self.buffer = self.buffer[sent:]
 
-    def tell_monkey(self, *args):
+    def tell_headless(self, *args):
         cmd = (" ".join(args))
         if not self.quiet:
             print(">>> {}".format(cmd))
@@ -159,7 +159,7 @@ class MonkeyFarmer(asyncore.dispatcher):
         cmd = cmd + "\n"
         self.buffer += cmd.encode('utf-8')
 
-    def monkey_says(self, line):
+    def headless_says(self, line):
         try:
             line = line.decode('utf-8')
         except UnicodeDecodeError:
@@ -182,10 +182,10 @@ class MonkeyFarmer(asyncore.dispatcher):
 
     def loop(self, once=False):
         if len(self.lines) > 0:
-            self.monkey_says(self.lines.pop(0))
+            self.headless_says(self.lines.pop(0))
             if once:
                 return
-        while not self.deadmonkey:
+        while not self.deadheadless:
             now = time.time()
             while len(self.scheduled) > 0 and now >= self.scheduled[0][0]:
                 func = self.scheduled[0][1]
@@ -198,8 +198,8 @@ class MonkeyFarmer(asyncore.dispatcher):
             else:
                 asyncore.loop(count=1)
             while len(self.lines) > 0:
-                self.monkey_says(self.lines.pop(0))
-                if once or self.deadmonkey:
+                self.headless_says(self.lines.pop(0))
+                if once or self.deadheadless:
                     return
 
 
@@ -207,11 +207,11 @@ class Browser:
 
     # pylint: disable=locally-disabled, too-many-instance-attributes, dangerous-default-value, invalid-name
 
-    def __init__(self, monkey_cmd=["./nsmonkey"], monkey_env=None, quiet=False, *, wrapper=None):
-        self.farmer = MonkeyFarmer(
-            monkey_cmd=monkey_cmd,
-            monkey_env=monkey_env,
-            online=self.on_monkey_line,
+    def __init__(self, headless_cmd=["./nsheadless"], headless_env=None, quiet=False, *, wrapper=None):
+        self.farmer = HeadlessFarmer(
+            headless_cmd=headless_cmd,
+            headless_env=headless_env,
+            online=self.on_headless_line,
             quiet=quiet,
             wrapper=wrapper)
         self.windows = {}
@@ -233,16 +233,16 @@ class Browser:
 
     def pass_options(self, *opts):
         if len(opts) > 0:
-            self.farmer.tell_monkey("OPTIONS " + (" ".join(['--' + opt for opt in opts])))
+            self.farmer.tell_headless("OPTIONS " + (" ".join(['--' + opt for opt in opts])))
 
-    def on_monkey_line(self, line):
+    def on_headless_line(self, line):
         parts = line.split(" ")
         handler = getattr(self, "handle_" + parts[0], None)
         if handler is not None:
             handler(*parts[1:])
 
     def quit(self):
-        self.farmer.tell_monkey("QUIT")
+        self.farmer.tell_headless("QUIT")
 
     def quit_and_wait(self):
         self.quit()
@@ -258,7 +258,7 @@ class Browser:
             self.launchurl = args[1]
         elif what == 'EXIT':
             if not self.stopped:
-                print("Unexpected exit of monkey process with code {}".format(args[0]))
+                print("Unexpected exit of headless process with code {}".format(args[0]))
             assert self.stopped
         else:
             pass
@@ -293,9 +293,9 @@ class Browser:
 
     def new_window(self, url=None):
         if url is None:
-            self.farmer.tell_monkey("WINDOW NEW")
+            self.farmer.tell_headless("WINDOW NEW")
         else:
-            self.farmer.tell_monkey("WINDOW NEW %s" % url)
+            self.farmer.tell_headless("WINDOW NEW %s" % url)
         wins_known = set(self.windows.keys())
         while len(set(self.windows.keys()).difference(wins_known)) == 0:
             self.farmer.loop(once=True)
@@ -343,13 +343,13 @@ class LoginWindow:
         assert self.alive
         if username is None:
             username = self.username
-        self.browser.farmer.tell_monkey("LOGIN USERNAME {} {}".format(self.winid, username))
+        self.browser.farmer.tell_headless("LOGIN USERNAME {} {}".format(self.winid, username))
 
     def send_password(self, password=None):
         assert self.alive
         if password is None:
             password = self.password
-        self.browser.farmer.tell_monkey("LOGIN PASSWORD {} {}".format(self.winid, password))
+        self.browser.farmer.tell_headless("LOGIN PASSWORD {} {}".format(self.winid, password))
 
     def _wait_dead(self):
         while self.alive:
@@ -357,12 +357,12 @@ class LoginWindow:
 
     def go(self):
         assert self.alive
-        self.browser.farmer.tell_monkey("LOGIN GO {}".format(self.winid))
+        self.browser.farmer.tell_headless("LOGIN GO {}".format(self.winid))
         self._wait_dead()
 
     def destroy(self):
         assert self.alive
-        self.browser.farmer.tell_monkey("LOGIN DESTROY {}".format(self.winid))
+        self.browser.farmer.tell_headless("LOGIN DESTROY {}".format(self.winid))
         self._wait_dead()
 
 
@@ -408,7 +408,7 @@ class BrowserWindow:
         self.page_info_state = "UNKNOWN"
 
     def kill(self):
-        self.browser.farmer.tell_monkey("WINDOW DESTROY %s" % self.winid)
+        self.browser.farmer.tell_headless("WINDOW DESTROY %s" % self.winid)
 
     def wait_until_dead(self, timeout=1):
         now = time.time()
@@ -423,26 +423,26 @@ class BrowserWindow:
 
     def go(self, url, referer=None):
         if referer is None:
-            self.browser.farmer.tell_monkey("WINDOW GO %s %s" % (
+            self.browser.farmer.tell_headless("WINDOW GO %s %s" % (
                 self.winid, url))
         else:
-            self.browser.farmer.tell_monkey("WINDOW GO %s %s %s" % (
+            self.browser.farmer.tell_headless("WINDOW GO %s %s %s" % (
                 self.winid, url, referer))
         self.wait_start_loading()
 
     def stop(self):
-        self.browser.farmer.tell_monkey("WINDOW STOP %s" % (self.winid))
+        self.browser.farmer.tell_headless("WINDOW STOP %s" % (self.winid))
 
     def reload(self, all=False):
         all = " ALL" if all else ""
-        self.browser.farmer.tell_monkey("WINDOW RELOAD %s%s" % (self.winid, all))
+        self.browser.farmer.tell_headless("WINDOW RELOAD %s%s" % (self.winid, all))
         self.wait_start_loading()
 
     def click(self, x, y, button="LEFT", kind="SINGLE"):
-        self.browser.farmer.tell_monkey("WINDOW CLICK WIN %s X %s Y %s BUTTON %s KIND %s" % (self.winid, x, y, button, kind))
+        self.browser.farmer.tell_headless("WINDOW CLICK WIN %s X %s Y %s BUTTON %s KIND %s" % (self.winid, x, y, button, kind))
 
     def js_exec(self, src):
-        self.browser.farmer.tell_monkey("WINDOW EXEC WIN %s %s" % (self.winid, src))
+        self.browser.farmer.tell_headless("WINDOW EXEC WIN %s %s" % (self.winid, src))
 
     def handle(self, action, *args):
         handler = getattr(self, "handle_window_" + action, None)
@@ -545,9 +545,9 @@ class BrowserWindow:
 
     def redraw(self, coords=None):
         if coords is None:
-            self.browser.farmer.tell_monkey("WINDOW REDRAW %s" % self.winid)
+            self.browser.farmer.tell_headless("WINDOW REDRAW %s" % self.winid)
         else:
-            self.browser.farmer.tell_monkey("WINDOW REDRAW %s %s" % (
+            self.browser.farmer.tell_headless("WINDOW REDRAW %s %s" % (
                 self.winid, (" ".join(coords))))
         while not self.plotting:
             self.browser.farmer.loop(once=True)

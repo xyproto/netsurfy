@@ -4,7 +4,7 @@
 NetSurfy automated test runner
 
 This script retrives a test plan from the NetSurfy infrastructure and
-  executes it using the monkey frontend
+  executes it using the headless frontend
 '''
 
 # If you have any poo, fling it now!
@@ -15,12 +15,12 @@ import multiprocessing as mp
 from urllib import request, parse
 from io import StringIO
 import yaml
-import monkey_driver as driver
+import headless_driver as driver
 
 # Otherwise let's begin...
 
-BASE_PATH = "https://test.netsurf-browser.org/cgi-bin/monkey-index.cgi"
-MONKEY_PATH = "./nsmonkey"
+BASE_PATH = "https://test.netsurf-browser.org/cgi-bin/headless-index.cgi"
+HEADLESS_PATH = "./nsheadless"
 
 mp.set_start_method('fork')
 
@@ -28,15 +28,15 @@ def decode_trace_line(l):
     from re import findall, match
     from subprocess import getstatusoutput
 
-    caps = findall(r'./nsmonkey\(\+(0x[0-9a-f]+)\)', l);
+    caps = findall(r'./nsheadless\(\+(0x[0-9a-f]+)\)', l);
     if not caps:
         return l
 
     exitcode, output = getstatusoutput(
         "addr2line -e {} -a -p -f -C {} 2>/dev/null".format(
-            MONKEY_PATH, caps[0]))
+            HEADLESS_PATH, caps[0]))
     if exitcode != 0:
-        return './nsmonkey(+{})'.format(caps[0])
+        return './nsheadless(+{})'.format(caps[0])
 
     m = match(r'0x(.+): (.+) at (.+):(.+)', output)
 
@@ -54,7 +54,7 @@ def child_run_test(verbose, parts):
     sys.stdout = outcapture
     sys.stderr = errcapture
     try:
-        driver.run_preloaded_test(MONKEY_PATH, parts)
+        driver.run_preloaded_test(HEADLESS_PATH, parts)
     except:
         sys.stdout = oldout
         sys.stderr = olderr

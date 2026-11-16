@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Parser</title><script src="harness.js"></script></head>
+<body><p id="ent">&amp;&lt;&gt;&notit;&AMP&zscr;&#x41;&bogus;</p>
+<script>document.write('<map name="m"><area id="area" shape="rect" coords="2,2,4,4" href="#"></map><img usemap="#m" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">');</script>
+<table id="t1"><tr><td><p></tbody> </table>
+<table id="t2"> <tr><td>x</td></tr> </table>
+<script>
+function kids(n) {
+    return Array.prototype.map.call(n.childNodes, function (c) { return c.nodeName; }).join(",");
+}
+test("named character references", function () {
+    var points = Array.from(document.getElementById("ent").textContent).map(function (c) { return c.codePointAt(0).toString(16); });
+    assertEquals(points.join(" "), "26 3c 3e ac 69 74 3b 26 1d4cf 41 26 62 6f 67 75 73 3b");
+});
+test("image maps keep their coords attribute", function () {
+    assertEquals(document.getElementById("area").getAttribute("coords"), "2,2,4,4");
+});
+test("end tag tbody inside a cell closes the row", function () {
+    assertEquals(kids(document.getElementById("t1")), "TBODY,#text");
+});
+test("whitespace in tables is kept", function () {
+    assertEquals(kids(document.getElementById("t2")), "#text,TBODY");
+    assertEquals(kids(document.getElementById("t2").tBodies[0]), "TR,#text");
+});
+test("innerHTML and outerHTML serialisation", function () {
+    var d = document.createElement("div");
+    d.innerHTML = "<p class=\"a\">x &amp; y</p><br><!--c--><script>1 < 2</" + "script>";
+    assertEquals(d.innerHTML, "<p class=\"a\">x &amp; y</p><br><!--c--><script>1 < 2</" + "script>");
+    assertEquals(d.firstChild.outerHTML, "<p class=\"a\">x &amp; y</p>");
+});
+test("XMLSerializer", function () {
+    var d = document.createElement("div");
+    d.appendChild(document.createElement("br"));
+    assertEquals(new XMLSerializer().serializeToString(d), "<div xmlns=\"http://www.w3.org/1999/xhtml\"><br/></div>");
+});
+done();
+</script></body></html>

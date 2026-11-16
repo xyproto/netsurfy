@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Forms</title><script src="harness.js"></script></head>
+<body>
+<form id="f" name="ff" action="javascript:">
+<input id="q" name="q" value="1"><input id="c" type="checkbox"><label id="l" for="c">label</label>
+<input id="t" name="t" required><input id="e" type="email" value="nope"><input id="n" type="number" min="1" max="5" step="2" value="3">
+<select id="s1" name="s1"><option>a<option>b</select>
+<select id="s2"><option>a<option selected>b<option selected>c</select>
+<select id="s3" multiple><option>a<option>b</select>
+<select id="s4"><optgroup label="g"><option disabled>x<option>y</optgroup></select>
+<button id="b">go</button>
+</form>
+<script>
+var f = document.getElementById("f");
+test("named access on forms", function () {
+    assertEquals(f.q, document.getElementById("q"));
+    assertEquals(f[0], document.getElementById("q"));
+    assertEquals(f.elements.q, document.getElementById("q"));
+    assertEquals(f.name, "ff");
+});
+test("elements of a form outside the document", function () {
+    var g = document.createElement("form");
+    var i = g.appendChild(document.createElement("input"));
+    i.name = "first";
+    assertEquals(g.elements.length, 1);
+    assertEquals(g.elements.first, i);
+});
+test("select selectedness", function () {
+    assertEquals(document.getElementById("s1").selectedIndex, 0);
+    assertEquals(document.getElementById("s1").value, "a");
+    assertEquals(document.getElementById("s2").selectedIndex, 2);
+    assertEquals(document.getElementById("s3").selectedIndex, -1);
+    assertEquals(document.getElementById("s4").value, "y");
+    var s = document.getElementById("s1");
+    s.options[1].selected = true;
+    assertEquals(s.selectedIndex, 1);
+    assert(!s.options[0].selected);
+});
+test("select type", function () {
+    assertEquals(document.getElementById("s1").type, "select-one");
+    assertEquals(document.getElementById("s3").type, "select-multiple");
+});
+test("constraint validation", function () {
+    var t = document.getElementById("t");
+    assert(t.validity.valueMissing);
+    assert(!t.checkValidity());
+    assert(document.getElementById("e").validity.typeMismatch);
+    var n = document.getElementById("n");
+    assert(n.validity.valid);
+    n.value = "4";
+    assert(n.validity.stepMismatch);
+    n.value = "9";
+    assert(n.validity.rangeOverflow);
+    n.value = "3";
+    n.stepUp();
+    assertEquals(n.value, "5");
+    t.setCustomValidity("custom");
+    assertEquals(t.validationMessage, "custom");
+    t.setCustomValidity("");
+});
+test("click activation: label, checkbox events", function () {
+    var c = document.getElementById("c"), log = [];
+    c.addEventListener("click", function (e) { log.push("click:" + (e instanceof MouseEvent)); });
+    c.addEventListener("change", function () { log.push("change:" + c.checked); });
+    document.getElementById("l").click();
+    assertEquals(log.join(" "), "click:true change:true");
+});
+test("submit button runs validation then submit", function () {
+    var log = [];
+    f.addEventListener("invalid", function () { log.push("invalid"); }, true);
+    f.onsubmit = function (e) { e.preventDefault(); log.push("submit:" + e.submitter.id); };
+    document.getElementById("b").click();
+    document.getElementById("t").value = "x";
+    document.getElementById("e").value = "a@b.c";
+    document.getElementById("b").click();
+    assertEquals(log.join(" "), "invalid invalid submit:b");
+});
+test("reset restores defaults", function () {
+    var q = document.getElementById("q");
+    q.value = "changed";
+    f.reset();
+    assertEquals(q.value, "1");
+});
+test("selection API on inputs", function () {
+    var q = document.getElementById("q");
+    q.value = "hello";
+    q.setSelectionRange(1, 3);
+    assertEquals(q.selectionStart, 1);
+    assertEquals(q.selectionEnd, 3);
+    q.setRangeText("XY");
+    assertEquals(q.value, "hXYlo");
+});
+test("focus and activeElement", function () {
+    var q = document.getElementById("q"), log = [];
+    q.addEventListener("focus", function () { log.push("focus"); });
+    q.focus();
+    assertEquals(document.activeElement, q);
+    q.blur();
+    assertEquals(document.activeElement, document.body);
+    assertEquals(log.join(), "focus");
+});
+done();
+</script></body></html>

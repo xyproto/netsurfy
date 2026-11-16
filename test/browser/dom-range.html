@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>DOM Range</title><script src="harness.js"></script></head>
+<body><p id="p">hello <b>bold</b> world</p><script>
+function para() {
+    var p = document.createElement("p");
+    p.innerHTML = "hello <b>bold</b> world";
+    return p;
+}
+test("createRange is a collapsed range at the document", function () {
+    var r = document.createRange();
+    assert(r instanceof Range);
+    assert(r.collapsed);
+    assertEquals(r.startContainer, document);
+    assertEquals(r.commonAncestorContainer, document);
+});
+test("new Range()", function () {
+    assertEquals(new Range().startOffset, 0);
+});
+test("toString and selectNodeContents", function () {
+    var r = document.createRange();
+    r.selectNodeContents(document.getElementById("p"));
+    assertEquals(r.toString(), "hello bold world");
+});
+test("extractContents across elements", function () {
+    var p = para();
+    var r = document.createRange();
+    r.setStart(p.firstChild, 2);
+    r.setEnd(p.lastChild, 3);
+    var f = r.extractContents();
+    assertEquals(f.textContent, "llo bold wo");
+    assertEquals(p.textContent, "herld");
+    assert(r.collapsed);
+    assertEquals(r.startContainer, p);
+    assertEquals(r.startOffset, 1);
+});
+test("cloneContents leaves the tree alone", function () {
+    var p = para();
+    var r = document.createRange();
+    r.setStart(p.firstChild, 0);
+    r.setEnd(p.lastChild, 6);
+    assertEquals(r.cloneContents().textContent, "hello bold world");
+    assertEquals(p.childNodes.length, 3);
+});
+test("deleteContents", function () {
+    var p = para();
+    var r = document.createRange();
+    r.setStart(p.firstChild, 5);
+    r.setEnd(p.lastChild, 0);
+    r.deleteContents();
+    assertEquals(p.textContent, "hello world");
+});
+test("insertNode splits text", function () {
+    var p = document.createElement("p");
+    p.textContent = "abcd";
+    var r = document.createRange();
+    r.setStart(p.firstChild, 2);
+    r.insertNode(document.createElement("i"));
+    assertEquals(p.innerHTML.toLowerCase(), "ab<i></i>cd");
+});
+test("surroundContents", function () {
+    var p = document.createElement("p");
+    p.textContent = "abcd";
+    var r = document.createRange();
+    r.setStart(p.firstChild, 1);
+    r.setEnd(p.firstChild, 3);
+    r.surroundContents(document.createElement("em"));
+    assertEquals(p.innerHTML.toLowerCase(), "a<em>bc</em>d");
+});
+test("compareBoundaryPoints and comparePoint", function () {
+    var p = para();
+    var a = document.createRange(), b = document.createRange();
+    a.selectNodeContents(p);
+    b.selectNode(p.childNodes[1]);
+    assertEquals(a.compareBoundaryPoints(Range.START_TO_START, b), -1);
+    assertEquals(a.compareBoundaryPoints(Range.END_TO_END, b), 1);
+    assertEquals(a.comparePoint(p.childNodes[1], 0), 0);
+    assert(a.isPointInRange(p.firstChild, 3));
+    assert(a.intersectsNode(p.childNodes[1]));
+});
+test("setStart validates offsets", function () {
+    var r = document.createRange();
+    assertThrows("IndexSizeError", function () { r.setStart(document.body, 1000); });
+});
+test("ranges follow removal", function () {
+    var p = para();
+    var r = document.createRange();
+    r.setStart(p.childNodes[1].firstChild, 2);
+    p.removeChild(p.childNodes[1]);
+    assertEquals(r.startContainer, p);
+    assertEquals(r.startOffset, 1);
+});
+test("ranges follow insertion", function () {
+    var p = para();
+    var r = document.createRange();
+    r.setStart(p, 2);
+    p.insertBefore(document.createElement("i"), p.firstChild);
+    assertEquals(r.startOffset, 3);
+});
+test("ranges follow text edits", function () {
+    var t = document.createTextNode("abcdef");
+    var r = document.createRange();
+    r.setStart(t, 4);
+    t.deleteData(1, 2);
+    assertEquals(r.startOffset, 2);
+    t.insertData(0, "xx");
+    assertEquals(r.startOffset, 4);
+});
+test("ranges follow splitText and normalize", function () {
+    var p = document.createElement("p");
+    p.textContent = "abcdef";
+    var r = document.createRange();
+    r.setStart(p.firstChild, 4);
+    var tail = p.firstChild.splitText(2);
+    assertEquals(p.childNodes.length, 2);
+    assertEquals(r.startContainer, tail);
+    assertEquals(r.startOffset, 2);
+    p.normalize();
+    assertEquals(p.childNodes.length, 1);
+    assertEquals(r.startContainer, p.firstChild);
+    assertEquals(r.startOffset, 4);
+});
+test("getSelection", function () {
+    var s = window.getSelection();
+    assertEquals(s, document.getSelection());
+    s.selectAllChildren(document.getElementById("p"));
+    assertEquals(s.rangeCount, 1);
+    assertEquals(s.type, "Range");
+    assertEquals(s.toString(), "hello bold world");
+    s.collapseToStart();
+    assert(s.isCollapsed);
+    s.removeAllRanges();
+    assertEquals(s.rangeCount, 0);
+});
+done();
+</script></body></html>
