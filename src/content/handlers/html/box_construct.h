@@ -108,9 +108,11 @@ struct box *box_for_node(struct dom_node *node);
  *
  * \param c html content the element belongs to
  * \param n element
- * \return the selection results, to destroy with css_select_results_destroy, or NULL
+ * \return the selection results, to destroy with css_select_results_destroy, or
+ * NULL
  */
-struct css_select_results *box_select_style(struct html_content *c, struct dom_node *n);
+struct css_select_results *
+box_select_style(struct html_content *c, struct dom_node *n);
 
 /**
  * Extract a URL from a relative link, handling junk like whitespace and

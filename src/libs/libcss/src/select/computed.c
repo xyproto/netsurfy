@@ -350,9 +350,10 @@ css_error css_computed_style_compose(const css_computed_style *restrict parent,
 			break;
 	}
 
-	if (error == CSS_OK && (child->vars != NULL ||
-				(parent != NULL && parent->vars != NULL))) {
-		error = css__vars_resolve(parent, child->vars, composed);
+	if (error == CSS_OK &&
+	    (child->vars != NULL || (parent != NULL && parent->vars != NULL))) {
+		error = css__vars_resolve(
+			parent, child->vars, composed, NULL, NULL);
 	}
 	if (error != CSS_OK) {
 		css_computed_style_destroy(composed);

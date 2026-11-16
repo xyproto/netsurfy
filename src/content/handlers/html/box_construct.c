@@ -311,7 +311,8 @@ css_select_results *box_select_style(html_content *c, dom_node *n)
 		return NULL;
 	}
 	if (c->select_ctx == NULL) {
-		if (html_css_new_selection_context(c, &temporary) != NSERROR_OK) {
+		if (html_css_new_selection_context(c, &temporary) !=
+		    NSERROR_OK) {
 			return NULL;
 		}
 		c->select_ctx = temporary;
@@ -321,20 +322,26 @@ css_select_results *box_select_style(html_content *c, dom_node *n)
 		dom_node *parent = NULL;
 		dom_node_type type;
 
-		if (dom_node_get_parent_node(chain[depth - 1], &parent) != DOM_NO_ERR || parent == NULL) {
+		if (dom_node_get_parent_node(chain[depth - 1], &parent) !=
+			    DOM_NO_ERR ||
+		    parent == NULL) {
 			break;
 		}
-		if (dom_node_get_node_type(parent, &type) != DOM_NO_ERR || type != DOM_ELEMENT_NODE) {
+		if (dom_node_get_node_type(parent, &type) != DOM_NO_ERR ||
+		    type != DOM_ELEMENT_NODE) {
 			dom_node_unref(parent);
 			break;
 		}
 		chain[depth++] = parent;
 	}
 	for (i = depth - 1; i >= 0; i--) {
-		cur = box_get_style(c,
-				    prev != NULL ? prev->styles[CSS_PSEUDO_ELEMENT_NONE] : NULL,
-				    root != NULL ? root->styles[CSS_PSEUDO_ELEMENT_NONE] : NULL,
-				    chain[i]);
+		cur = box_get_style(
+			c,
+			prev != NULL ? prev->styles[CSS_PSEUDO_ELEMENT_NONE]
+				     : NULL,
+			root != NULL ? root->styles[CSS_PSEUDO_ELEMENT_NONE]
+				     : NULL,
+			chain[i]);
 		if (prev != NULL && prev != root) {
 			css_select_results_destroy(prev);
 		}

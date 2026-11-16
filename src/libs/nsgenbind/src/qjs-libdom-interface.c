@@ -517,6 +517,21 @@ output_interface_plain_operation(struct opctx *outc,
 	return 0;
 }
 
+static bool has_ccode(struct genbind_node *node)
+{
+	return node != NULL &&
+	       genbind_node_gettext(
+		       genbind_node_find_type(genbind_node_getnode(node),
+					      NULL,
+					      GENBIND_NODE_TYPE_CDATA)) != NULL;
+}
+
+static bool attribute_implemented(struct ir_attribute_entry *atributee)
+{
+	return atributee->getter != NULL || atributee->setter != NULL ||
+	       atributee->putforwards != NULL;
+}
+
 static int output_interface_operation(struct opctx *outc,
 				      struct ir_entry *interfacee,
 				      struct ir_operation_entry *operatione)
@@ -533,6 +548,14 @@ static int output_interface_operation(struct opctx *outc,
 		     "Special operation on interface %s (operation entry %p)",
 		     interfacee->name,
 		     operatione);
+		return 0;
+	}
+
+	if (!has_ccode(operatione->method)) {
+		WARN(WARNING_UNIMPLEMENTED,
+		     "Unimplemented: method %s::%s();",
+		     interfacee->name,
+		     operatione->name);
 		return 0;
 	}
 
@@ -799,6 +822,14 @@ static int output_interface_attribute(struct opctx *outc,
 		atributee->property_name = gen_idl2c_name(atributee->name);
 	}
 
+	if (!attribute_implemented(atributee)) {
+		WARN(WARNING_UNIMPLEMENTED,
+		     "Unimplemented: attribute %s::%s;",
+		     interfacee->name,
+		     atributee->name);
+		return 0;
+	}
+
 	res = output_attribute_getter(outc, interfacee, atributee);
 
 	if (attribute_has_setter(atributee)) {
@@ -854,7 +885,8 @@ output_interface_prototype(struct opctx *outc, struct ir_entry *interfacee)
 	for (idx = 0; idx < interfacee->u.interface.operationc; idx++) {
 		struct ir_operation_entry *operatione;
 		operatione = interfacee->u.interface.operationv + idx;
-		if (operatione->name == NULL) {
+		if (operatione->name == NULL ||
+		    !has_ccode(operatione->method)) {
 			continue;
 		}
 		outputf(outc,
@@ -872,6 +904,9 @@ output_interface_prototype(struct opctx *outc, struct ir_entry *interfacee)
 	for (idx = 0; idx < interfacee->u.interface.attributec; idx++) {
 		struct ir_attribute_entry *atributee;
 		atributee = interfacee->u.interface.attributev + idx;
+		if (!attribute_implemented(atributee)) {
+			continue;
+		}
 		if (attribute_has_setter(atributee)) {
 			outputf(outc,
 				"\tif (%s_define_accessor(ctx, proto, \"%s\", %s_%s_%s_getter, %s_%s_%s_setter) < 0) {\n",

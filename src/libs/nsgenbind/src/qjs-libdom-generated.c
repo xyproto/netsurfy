@@ -105,7 +105,8 @@ int output_generated_attribute_getter(struct opctx *outc,
 				? "JS_NULL"
 				: "JS_NewString(ctx, \"\")");
 		if (atributee->reflect_url) {
-			outputf(outc, "\tret = qjsky_reflected_url(ctx, str);\n");
+			outputf(outc,
+				"\tret = qjsky_reflected_url(ctx, str);\n");
 		} else {
 			outputf(outc,
 				"\tret = JS_NewStringLen(ctx, dom_string_data(str), dom_string_byte_length(str));\n");

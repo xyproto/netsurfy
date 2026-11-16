@@ -33,3 +33,8 @@ setter HTMLLinkElement::target();
 
 getter HTMLLinkElement::type();
 setter HTMLLinkElement::type();
+
+getter HTMLLinkElement::relList()
+%{
+	return qjsky_rel_list(ctx, this_val, ((node_private_t *)priv)->node);
+%}

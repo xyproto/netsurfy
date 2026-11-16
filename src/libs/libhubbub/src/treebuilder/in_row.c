@@ -152,6 +152,10 @@ handle_in_row(hubbub_treebuilder *treebuilder, const hubbub_token *token)
 			(void)act_as_if_end_tag_tr(treebuilder);
 		} else if (type == TABLE) {
 			err = act_as_if_end_tag_tr(treebuilder);
+		} else if (type == TBODY || type == TFOOT || type == THEAD) {
+			if (element_in_scope(treebuilder, type, true)) {
+				err = act_as_if_end_tag_tr(treebuilder);
+			}
 		} else if (type == BODY || type == CAPTION || type == COL ||
 			   type == COLGROUP || type == HTML || type == TD ||
 			   type == TH) {

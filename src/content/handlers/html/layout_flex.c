@@ -277,7 +277,7 @@ static inline bool layout_flex__base_and_main_sizes(const struct flex_ctx *ctx,
 
 	if (item->basis == CSS_FLEX_BASIS_SET) {
 		if (item->basis_unit == CSS_UNIT_PCT) {
-			item->base_size = FPCT_OF_INT_TOINT(item->basis_length,
+			item->base_size = layout_percent_of(item->basis_length,
 							    available_width);
 		} else {
 			item->base_size = FIXTOINT(
@@ -869,8 +869,13 @@ static bool layout_flex__place_line_items_main(struct flex_ctx *ctx,
 	size_t placed = 0;
 
 	if (ctx->main_reversed) {
-		main_pos = lh__box_size_main(ctx->horizontal, ctx->flex) -
-			   main_pos;
+		int size = lh__box_size_main(ctx->horizontal, ctx->flex);
+
+		if (size == AUTO || size == UNKNOWN_WIDTH) {
+			main_pos += line->used_main_size + line->gap_total;
+		} else {
+			main_pos = size - main_pos;
+		}
 	}
 
 	if (ctx->available_main != AUTO &&

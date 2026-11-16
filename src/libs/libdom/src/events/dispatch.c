@@ -227,6 +227,9 @@ dom_exception __dom_dispatch_subtree_modified_event(dom_document *doc,
 	dom_string *type = NULL;
 	dom_exception err;
 
+	if (et == NULL)
+		return DOM_NO_ERR;
+
 	err = _dom_mutation_event_create(&evt);
 	if (err != DOM_NO_ERR)
 		return err;

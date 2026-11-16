@@ -92,7 +92,8 @@ static bool node_is_attribute(dom_node *node)
 {
 	dom_node_type type;
 
-	return dom_node_get_node_type(node, &type) == DOM_NO_ERR && type == DOM_ATTRIBUTE_NODE;
+	return dom_node_get_node_type(node, &type) == DOM_NO_ERR &&
+	       type == DOM_ATTRIBUTE_NODE;
 }
 
 static void queue_record(struct qjsky_observer *mo, JSValue record)

@@ -40,7 +40,7 @@ set(NETSURFY_HOST_C_COMPILER "" CACHE FILEPATH "C compiler for build-time tools 
 set(NETSURFY_MESSAGES_LANGUAGES de en fr it nl zh_CN)
 
 find_package(PkgConfig REQUIRED)
-find_package(Perl REQUIRED)
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
 find_package(BISON REQUIRED)
 find_package(FLEX REQUIRED)
 find_package(ZLIB REQUIRED)

@@ -129,3 +129,8 @@ getter HTMLAreaElement::origin()
 %{
 	return qjsky_element_url_get(ctx, priv->parent.parent.parent.node, QJSKY_URL_ORIGIN);
 %}
+
+getter HTMLAreaElement::relList()
+%{
+	return qjsky_rel_list(ctx, this_val, ((node_private_t *)priv)->node);
+%}

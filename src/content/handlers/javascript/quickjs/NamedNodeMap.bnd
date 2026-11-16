@@ -59,3 +59,93 @@ method NamedNodeMap::getNamedItem()
 	if (attr != NULL) dom_node_unref(attr);
 	return ret;
 %}
+
+method NamedNodeMap::getNamedItemNS()
+%{
+	dom_string *ns, *local;
+	dom_node *attr = NULL;
+	dom_exception exc;
+	JSValue ret;
+
+	if (!qjsky_to_dom_namespace(ctx, argv[0], &ns)) return JS_EXCEPTION;
+	local = qjsky_to_dom_string(ctx, argv[1]);
+	if (local == NULL) {
+		if (ns != NULL) dom_string_unref(ns);
+		return JS_EXCEPTION;
+	}
+	exc = dom_namednodemap_get_named_item_ns(priv->map, ns, local, &attr);
+	if (ns != NULL) dom_string_unref(ns);
+	dom_string_unref(local);
+	if (exc != DOM_NO_ERR) return qjsky_throw_dom(ctx, exc);
+	ret = qjsky_node(ctx, attr);
+	if (attr != NULL) dom_node_unref(attr);
+	return ret;
+%}
+
+method NamedNodeMap::setNamedItem()
+%{
+	node_private_t *np = qjsky_private(ctx, argv[0], QJSKY_IFACE_NODE);
+	dom_node *old = NULL;
+	dom_exception exc;
+	JSValue ret;
+
+	if (np == NULL) return JS_ThrowTypeError(ctx, "parameter 1 is not of type 'Attr'");
+	exc = dom_namednodemap_set_named_item(priv->map, np->node, &old);
+	if (exc != DOM_NO_ERR) return qjsky_throw_dom(ctx, exc);
+	ret = qjsky_node(ctx, old);
+	if (old != NULL) dom_node_unref(old);
+	return ret;
+%}
+
+method NamedNodeMap::setNamedItemNS()
+%{
+	node_private_t *np = qjsky_private(ctx, argv[0], QJSKY_IFACE_NODE);
+	dom_node *old = NULL;
+	dom_exception exc;
+	JSValue ret;
+
+	if (np == NULL) return JS_ThrowTypeError(ctx, "parameter 1 is not of type 'Attr'");
+	exc = dom_namednodemap_set_named_item_ns(priv->map, np->node, &old);
+	if (exc != DOM_NO_ERR) return qjsky_throw_dom(ctx, exc);
+	ret = qjsky_node(ctx, old);
+	if (old != NULL) dom_node_unref(old);
+	return ret;
+%}
+
+method NamedNodeMap::removeNamedItem()
+%{
+	dom_string *name = qjsky_to_dom_string(ctx, argv[0]);
+	dom_node *removed = NULL;
+	dom_exception exc;
+	JSValue ret;
+
+	if (name == NULL) return JS_EXCEPTION;
+	exc = dom_namednodemap_remove_named_item(priv->map, name, &removed);
+	dom_string_unref(name);
+	if (exc != DOM_NO_ERR) return qjsky_throw_dom(ctx, exc);
+	ret = qjsky_node(ctx, removed);
+	if (removed != NULL) dom_node_unref(removed);
+	return ret;
+%}
+
+method NamedNodeMap::removeNamedItemNS()
+%{
+	dom_string *ns, *local;
+	dom_node *removed = NULL;
+	dom_exception exc;
+	JSValue ret;
+
+	if (!qjsky_to_dom_namespace(ctx, argv[0], &ns)) return JS_EXCEPTION;
+	local = qjsky_to_dom_string(ctx, argv[1]);
+	if (local == NULL) {
+		if (ns != NULL) dom_string_unref(ns);
+		return JS_EXCEPTION;
+	}
+	exc = dom_namednodemap_remove_named_item_ns(priv->map, ns, local, &removed);
+	if (ns != NULL) dom_string_unref(ns);
+	dom_string_unref(local);
+	if (exc != DOM_NO_ERR) return qjsky_throw_dom(ctx, exc);
+	ret = qjsky_node(ctx, removed);
+	if (removed != NULL) dom_node_unref(removed);
+	return ret;
+%}

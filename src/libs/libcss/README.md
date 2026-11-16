@@ -15,7 +15,6 @@ LibCSS requires the following tools:
 * A C99 capable C compiler
 * GNU make or compatible
 * Pkg-config
-* Perl (for the testcases)
 * Python3 (minimum 3.6, for generated selection code)
 
 LibCSS also requires the following libraries to be installed:

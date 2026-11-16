@@ -26,6 +26,22 @@
 
 #define AUTO INT_MIN
 
+static inline int layout_percent_of(css_fixed percent, int available)
+{
+	int64_t v;
+
+	if (available == INT_MAX || available == AUTO) {
+		return 0;
+	}
+	v = ((int64_t)percent * available) / (100 << CSS_RADIX_POINT);
+	return v > INT_MAX ? INT_MAX : v < INT_MIN + 1 ? INT_MIN + 1 : (int)v;
+}
+
+static inline int layout_collapse_margin(int margin)
+{
+	return margin == AUTO ? 0 : margin;
+}
+
 /**
  * Layout a block formatting context.
  *
@@ -518,7 +534,7 @@ static inline void layout_find_dimensions(const css_unit_ctx *unit_len_ctx,
 					box, viewport_height);
 
 				if (base >= 0) {
-					*height = FPCT_OF_INT_TOINT(value,
+					*height = layout_percent_of(value,
 								    base);
 				} else {
 					/* precentage height not permissible
@@ -551,7 +567,7 @@ static inline void layout_find_dimensions(const css_unit_ctx *unit_len_ctx,
 
 		if (type == CSS_MAX_WIDTH_SET) {
 			if (unit == CSS_UNIT_PCT) {
-				*max_width = FPCT_OF_INT_TOINT(value,
+				*max_width = layout_percent_of(value,
 							       available_width);
 			} else {
 				*max_width = FIXTOINT(css_unit_len2device_px(
@@ -580,7 +596,7 @@ static inline void layout_find_dimensions(const css_unit_ctx *unit_len_ctx,
 
 		if (type == CSS_MIN_WIDTH_SET) {
 			if (unit == CSS_UNIT_PCT) {
-				*min_width = FPCT_OF_INT_TOINT(value,
+				*min_width = layout_percent_of(value,
 							       available_width);
 			} else {
 				*min_width = FIXTOINT(css_unit_len2device_px(
@@ -613,7 +629,7 @@ static inline void layout_find_dimensions(const css_unit_ctx *unit_len_ctx,
 					box, viewport_height);
 
 				*max_height = base >= 0
-						      ? FPCT_OF_INT_TOINT(value,
+						      ? layout_percent_of(value,
 									  base)
 						      : -1;
 			} else {
@@ -639,7 +655,7 @@ static inline void layout_find_dimensions(const css_unit_ctx *unit_len_ctx,
 					box, viewport_height);
 
 				*min_height = base >= 0
-						      ? FPCT_OF_INT_TOINT(value,
+						      ? layout_percent_of(value,
 									  base)
 						      : 0;
 			} else {
@@ -662,7 +678,7 @@ static inline void layout_find_dimensions(const css_unit_ctx *unit_len_ctx,
 
 			if (type == CSS_MARGIN_SET) {
 				if (unit == CSS_UNIT_PCT) {
-					margin[i] = FPCT_OF_INT_TOINT(
+					margin[i] = layout_percent_of(
 						value, available_width);
 				} else {
 					margin[i] = FIXTOINT(
@@ -684,7 +700,7 @@ static inline void layout_find_dimensions(const css_unit_ctx *unit_len_ctx,
 			padding_funcs[i](style, &value, &unit);
 
 			if (unit == CSS_UNIT_PCT) {
-				padding[i] = FPCT_OF_INT_TOINT(value,
+				padding[i] = layout_percent_of(value,
 							       available_width);
 			} else {
 				padding[i] = FIXTOINT(css_unit_len2device_px(

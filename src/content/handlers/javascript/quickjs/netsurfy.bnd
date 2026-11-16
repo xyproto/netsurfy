@@ -230,6 +230,8 @@ init HTMLPropertiesCollection(struct dom_html_collection *coll);
 #include "MutationObserver.bnd"
 #include "MutationRecord.bnd"
 #include "CharacterData.bnd"
+#include "Text.bnd"
+#include "Range.bnd"
 #include "URL.bnd"
 #include "URLSearchParams.bnd"
 #include "DOMParser.bnd"

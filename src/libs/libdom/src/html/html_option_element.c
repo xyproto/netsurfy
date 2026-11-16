@@ -348,28 +348,154 @@ dom_exception dom_html_option_element_set_label(dom_html_option_element *option,
  * \param selected  The returned status
  * \return DOM_NO_ERR on success, appropriate dom_exception on failure.
  */
+static bool option_has_tag(dom_html_document *doc,
+			   dom_node_internal *node,
+			   dom_html_element_type type)
+{
+	return node != NULL && node->type == DOM_ELEMENT_NODE &&
+	       dom_string_isequal(node->name, doc->elements[type]);
+}
+
+static bool option_explicitly_selected(dom_html_option_element *ele)
+{
+	bool selected = false;
+
+	if (ele->selected_set) {
+		return ele->selected;
+	}
+	(void)dom_html_element_get_bool_property(
+		&ele->base, "selected", SLEN("selected"), &selected);
+	return selected;
+}
+
+static bool option_disabled(dom_html_document *doc, dom_node_internal *node)
+{
+	bool disabled = false;
+
+	(void)dom_element_has_attribute(node,
+					doc->memoised[hds_disabled],
+					&disabled);
+	if (!disabled &&
+	    option_has_tag(doc, node->parent, DOM_HTML_ELEMENT_TYPE_OPTGROUP)) {
+		(void)dom_element_has_attribute(node->parent,
+						doc->memoised[hds_disabled],
+						&disabled);
+	}
+	return disabled;
+}
+
+static dom_node_internal *
+option_select(dom_html_document *doc, dom_node_internal *node)
+{
+	dom_node_internal *parent = node->parent;
+
+	if (option_has_tag(doc, parent, DOM_HTML_ELEMENT_TYPE_OPTGROUP)) {
+		parent = parent->parent;
+	}
+	return option_has_tag(doc, parent, DOM_HTML_ELEMENT_TYPE_SELECT)
+		       ? parent
+		       : NULL;
+}
+
+static dom_node_internal *option_next(dom_html_document *doc,
+				      dom_node_internal *select,
+				      dom_node_internal *node)
+{
+	dom_node_internal *n, *group = NULL;
+
+	if (node == NULL) {
+		n = select->first_child;
+	} else {
+		if (node->parent != select) {
+			group = node->parent;
+		}
+		n = node->next;
+	}
+	for (;;) {
+		if (n == NULL) {
+			if (group == NULL) {
+				return NULL;
+			}
+			n = group->next;
+			group = NULL;
+			continue;
+		}
+		if (option_has_tag(doc, n, DOM_HTML_ELEMENT_TYPE_OPTION)) {
+			return n;
+		}
+		if (group == NULL &&
+		    option_has_tag(doc, n, DOM_HTML_ELEMENT_TYPE_OPTGROUP) &&
+		    n->first_child != NULL) {
+			group = n;
+			n = n->first_child;
+			continue;
+		}
+		n = n->next;
+	}
+}
+
+static bool select_is_single(dom_html_document *doc,
+			     dom_node_internal *select,
+			     int32_t *size)
+{
+	bool multiple = false;
+
+	(void)dom_element_has_attribute(select,
+					doc->memoised[hds_multiple],
+					&multiple);
+	*size = 0;
+	(void)dom_html_element_get_int32_t_property(
+		(dom_html_element *)select, "size", SLEN("size"), size);
+	return !multiple;
+}
+
 dom_exception dom_html_option_element_get_selected(dom_html_option_element *ele,
 						   bool *selected)
 {
-	if (ele->selected_set) {
-		*selected = ele->selected;
+	dom_node_internal *node = (dom_node_internal *)ele;
+	dom_html_document *doc = (dom_html_document *)node->owner;
+	dom_node_internal *select = option_select(doc, node);
+	dom_node_internal *o, *last = NULL, *first = NULL;
+	int32_t size;
+
+	*selected = option_explicitly_selected(ele);
+	if (select == NULL || !select_is_single(doc, select, &size)) {
 		return DOM_NO_ERR;
 	}
-
-	return dom_html_element_get_bool_property(
-		&ele->base, "selected", SLEN("selected"), selected);
+	for (o = option_next(doc, select, NULL); o != NULL;
+	     o = option_next(doc, select, o)) {
+		if (option_explicitly_selected((dom_html_option_element *)o)) {
+			last = o;
+		}
+		if (first == NULL && !option_disabled(doc, o)) {
+			first = o;
+		}
+	}
+	if (last != NULL) {
+		*selected = last == node;
+	} else {
+		*selected = size <= 1 && first == node;
+	}
+	return DOM_NO_ERR;
 }
 
-/**
- * Set the selected property
- *
- * \param ele       The dom_html_option_element object
- * \param selected  The status
- * \return DOM_NO_ERR on success, appropriate dom_exception on failure.
- */
 dom_exception dom_html_option_element_set_selected(dom_html_option_element *ele,
 						   bool selected)
 {
+	dom_node_internal *node = (dom_node_internal *)ele;
+	dom_html_document *doc = (dom_html_document *)node->owner;
+	dom_node_internal *select = option_select(doc, node);
+	dom_node_internal *o;
+	int32_t size;
+
+	if (selected && select != NULL &&
+	    select_is_single(doc, select, &size)) {
+		for (o = option_next(doc, select, NULL); o != NULL;
+		     o = option_next(doc, select, o)) {
+			((dom_html_option_element *)o)->selected = false;
+			((dom_html_option_element *)o)->selected_set = true;
+		}
+	}
 	ele->selected = selected;
 	ele->selected_set = true;
 

@@ -4351,7 +4351,9 @@ nsurl *llcache_handle_get_referer(const llcache_handle *handle)
 	char *header = NULL;
 
 	if (handle->object == NULL || handle->object->fetch.referer == NULL ||
-	    get_referer_header(handle->object->url, handle->object->fetch.referer, &header) != NSERROR_OK) {
+	    get_referer_header(handle->object->url,
+			       handle->object->fetch.referer,
+			       &header) != NSERROR_OK) {
 		return NULL;
 	}
 	free(header);

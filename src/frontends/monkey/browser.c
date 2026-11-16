@@ -670,7 +670,7 @@ static void monkey_window_handle_exec(int argc, char **argv)
 		      "JS WIN %d RET %s",
 		      atoi(argv[2]),
 		      browser_window_exec(gw->bw, cmd, strlen(cmd)) ? "TRUE"
-								  : "FALSE");
+								    : "FALSE");
 
 		free(cmd);
 	}

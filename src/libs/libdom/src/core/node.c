@@ -33,6 +33,7 @@
 #include "core/entity_ref.h"
 #include "core/node.h"
 #include "core/pi.h"
+#include "core/range.h"
 #include "core/text.h"
 #include "utils/utils.h"
 #include "utils/validate.h"
@@ -52,8 +53,6 @@ static inline dom_exception _dom_node_attach_range(dom_node_internal *first,
 						   dom_node_internal *next);
 static inline dom_exception
 _dom_node_detach_range(dom_node_internal *first, dom_node_internal *last);
-static inline void
-_dom_node_replace(dom_node_internal *old, dom_node_internal *replacement);
 
 static const struct dom_node_vtable node_vtable = {
 	{DOM_NODE_EVENT_TARGET_VTABLE},
@@ -870,7 +869,8 @@ dom_exception _dom_node_replace_child(dom_node_internal *node,
 				      dom_node_internal *old_child,
 				      dom_node_internal **result)
 {
-	dom_node_internal *n;
+	dom_node_internal *n, *next;
+	dom_exception err = DOM_NO_ERR;
 
 	/* We don't support replacement of DocumentType or root Elements */
 	if (node->type == DOM_DOCUMENT_NODE &&
@@ -934,16 +934,42 @@ dom_exception _dom_node_replace_child(dom_node_internal *node,
 	 * list */
 	dom_node_remove_pending(new_child);
 
-	/* Perform the replacement */
-	_dom_node_replace(old_child, new_child);
+	next = old_child->next;
+	dom_node_ref(next);
+	_dom_node_detach(old_child);
+	if (next != NULL && next->parent != node) {
+		dom_node_unref(next);
+		next = NULL;
+	}
 
-	/* Sort out the return value */
+	if (new_child->type == DOM_DOCUMENT_FRAGMENT_NODE) {
+		if (new_child->first_child != NULL) {
+			dom_node_internal *first = new_child->first_child;
+			dom_node_internal *last = new_child->last_child;
+
+			new_child->first_child = NULL;
+			new_child->last_child = NULL;
+			err = _dom_node_attach_range(first,
+						     last,
+						     node,
+						     next == NULL
+							     ? node->last_child
+							     : next->previous,
+						     next);
+		}
+	} else {
+		err = _dom_node_attach(new_child,
+				       node,
+				       next == NULL ? node->last_child
+						    : next->previous,
+				       next);
+	}
+	dom_node_unref(next);
+
 	dom_node_ref(old_child);
-	/* The replaced node should be marded pending */
-	dom_node_mark_pending(old_child);
 	*result = old_child;
 
-	return DOM_NO_ERR;
+	return err;
 }
 
 /**
@@ -1157,36 +1183,51 @@ dom_exception _dom_node_clone_node(dom_node_internal *node,
  */
 dom_exception _dom_node_normalize(dom_node_internal *node)
 {
-	dom_node_internal *n, *p;
+	dom_node_internal *n, *next, *sibling;
 	dom_exception err;
+	uint32_t length;
 
 	if (_dom_node_readonly(node)) {
 		return DOM_NO_MODIFICATION_ALLOWED_ERR;
 	}
 
-	p = node->first_child;
-	if (p == NULL)
-		return DOM_NO_ERR;
-
-	n = p->next;
-
+	n = node->first_child;
 	while (n != NULL) {
-		if (n->type == DOM_TEXT_NODE && p->type == DOM_TEXT_NODE) {
-			err = _dom_merge_adjacent_text(p, n);
-			if (err != DOM_NO_ERR)
-				return err;
-
-			_dom_node_detach(n);
-			dom_node_try_destroy(n);
-			n = p->next;
-			continue;
-		}
 		if (n->type != DOM_TEXT_NODE) {
 			err = dom_node_normalize(n);
 			if (err != DOM_NO_ERR)
 				return err;
+			n = n->next;
+			continue;
 		}
-		p = n;
+
+		length = n->value != NULL ? dom_string_length(n->value) : 0;
+		if (length == 0) {
+			next = n->next;
+			_dom_node_detach(n);
+			dom_node_try_destroy(n);
+			n = next;
+			continue;
+		}
+
+		while ((sibling = n->next) != NULL &&
+		       sibling->type == DOM_TEXT_NODE) {
+			uint32_t sibling_length =
+				sibling->value != NULL
+					? dom_string_length(sibling->value)
+					: 0;
+
+			err = _dom_merge_adjacent_text(n, sibling);
+			if (err != DOM_NO_ERR)
+				return err;
+			if (sibling != n->next)
+				continue;
+
+			_dom_range_merge_text(n, sibling, length);
+			length += sibling_length;
+			_dom_node_detach(sibling);
+			dom_node_try_destroy(sibling);
+		}
 		n = n->next;
 	}
 
@@ -2213,6 +2254,11 @@ dom_exception _dom_node_attach_range(dom_node_internal *first,
 
 	for (n = first; n != last->next; n = n->next) {
 		n->parent = parent;
+	}
+
+	_dom_range_inserted(first, last);
+
+	for (n = first; n != last->next; n = n->next) {
 		/* Dispatch a DOMNodeInserted event */
 		err = dom_node_dispatch_node_change_event(parent->owner,
 							  n,
@@ -2249,6 +2295,9 @@ _dom_node_detach_range(dom_node_internal *first, dom_node_internal *last)
 	dom_node_internal *n;
 	dom_exception err = DOM_NO_ERR;
 
+	for (n = last; n != first->previous; n = n->previous)
+		_dom_range_pre_remove(n);
+
 	if (first->previous != NULL)
 		first->previous->next = last->next;
 	else
@@ -2275,66 +2324,6 @@ _dom_node_detach_range(dom_node_internal *first, dom_node_internal *last)
 	last->next = NULL;
 
 	return err;
-}
-
-/**
- * Replace a node in the tree
- *
- * \param old          Node to replace
- * \param replacement  Replacement node
- *
- * This is not implemented in terms of attach/detach in case
- * we want to perform any special replacement-related behaviour
- * at a later date.  If the replacement is essentially empty (either NULL
- * or an empty document fragment node) then this essentially just removes
- * the old node from its parent.  It is up to the caller to deal with that.
- */
-void _dom_node_replace(dom_node_internal *old, dom_node_internal *replacement)
-{
-	dom_node_internal *first, *last;
-	dom_node_internal *n;
-
-	if (replacement->type == DOM_DOCUMENT_FRAGMENT_NODE) {
-		first = replacement->first_child;
-		last = replacement->last_child;
-
-		replacement->first_child = replacement->last_child = NULL;
-	} else {
-		first = replacement;
-		last = replacement;
-	}
-
-	if (first == NULL) {
-		/* All we're doing is removing old */
-		if (old->previous == NULL) {
-			old->parent->first_child = old->next;
-		}
-		if (old->next == NULL) {
-			old->parent->last_child = old->previous;
-		}
-		old->previous = old->next = old->parent = NULL;
-		return;
-	}
-
-	/* We're replacing old with first-to-last */
-	first->previous = old->previous;
-	last->next = old->next;
-
-	if (old->previous != NULL)
-		old->previous->next = first;
-	else
-		old->parent->first_child = first;
-
-	if (old->next != NULL)
-		old->next->previous = last;
-	else
-		old->parent->last_child = last;
-
-	for (n = first; n != NULL && n != last->next; n = n->next) {
-		n->parent = old->parent;
-	}
-
-	old->previous = old->next = old->parent = NULL;
 }
 
 /**
@@ -2564,6 +2553,7 @@ dom_exception _dom_node_dispatch_event(dom_event_target *et,
 	dom_document_event_internal *dei = NULL;
 	dom_event_target **targets;
 	uint32_t ntargets, ntargets_allocated, targetnr;
+	bool mutation;
 	void *pw;
 
 	assert(et != NULL);
@@ -2588,7 +2578,8 @@ dom_exception _dom_node_dispatch_event(dom_event_target *et,
 	evt->in_dispatch = true;
 
 	/* Increment semaphore if mutation event (c.f. _dom_node_readonly) */
-	if (_event_is_mutation(doc, evt)) {
+	mutation = _event_is_mutation(doc, evt);
+	if (mutation) {
 		doc->dispatching_mutation++;
 	}
 
@@ -2710,6 +2701,11 @@ dom_exception _dom_node_dispatch_event(dom_event_target *et,
 	if (dei->actions == NULL)
 		goto cleanup;
 
+	if (mutation) {
+		doc->dispatching_mutation--;
+		mutation = false;
+	}
+
 	if (dei->actions != NULL) {
 		dom_default_action_phase phase = DOM_DEFAULT_ACTION_END;
 		if (evt->prevent_default == true)
@@ -2723,7 +2719,7 @@ dom_exception _dom_node_dispatch_event(dom_event_target *et,
 	}
 
 cleanup:
-	if (_event_is_mutation(doc, evt)) {
+	if (mutation) {
 		doc->dispatching_mutation--;
 	}
 

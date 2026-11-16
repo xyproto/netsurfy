@@ -438,6 +438,11 @@ static void html_get_dimensions(html_content *htmlc)
 
 	htmlc->media.width = w;
 	htmlc->media.height = h;
+	htmlc->media.aspect_ratio = h > 0 ? FDIV(w, h) : 0;
+	htmlc->media.orientation = w > h ? CSS_MEDIA_ORIENTATION_LANDSCAPE
+					 : CSS_MEDIA_ORIENTATION_PORTRAIT;
+	htmlc->media.resolution.value = FDIV(device_dpi, F_96);
+	htmlc->media.resolution.unit = CSS_UNIT_PX;
 	htmlc->unit_len_ctx.viewport_width = w;
 	htmlc->unit_len_ctx.viewport_height = h;
 	htmlc->unit_len_ctx.device_dpi = device_dpi;
@@ -601,6 +606,13 @@ html_create_html_data(html_content *c, const http_parameter *params)
 	c->stylesheets = NULL;
 	c->select_ctx = NULL;
 	c->media.type = CSS_MEDIA_SCREEN;
+	c->media.color = INTTOFIX(8);
+	c->media.pointer = CSS_MEDIA_POINTER_FINE;
+	c->media.any_pointer = CSS_MEDIA_POINTER_FINE;
+	c->media.hover = CSS_MEDIA_HOVER_HOVER;
+	c->media.any_hover = CSS_MEDIA_HOVER_HOVER;
+	c->media.resolution.value = INTTOFIX(1);
+	c->media.resolution.unit = CSS_UNIT_PX;
 	c->universal = NULL;
 	c->num_objects = 0;
 	c->object_list = NULL;
@@ -1338,6 +1350,7 @@ static void html_destroy_iframe(struct content_html_iframe *iframe)
 
 static void html_free_layout(html_content *htmlc)
 {
+	htmlc->unit_len_ctx.root_style = NULL;
 	if (htmlc->bctx != NULL) {
 		/* freeing talloc context should let the entire box
 		 * set be destroyed
@@ -1565,7 +1578,8 @@ void html_flush_layout(html_content *htmlc)
 		guit->misc->schedule(-1, html_rebuild_cb, htmlc);
 		htmlc->rebuild_pending = false;
 		html_rebuild_layout(htmlc);
-	} else if (!htmlc->had_initial_layout && htmlc->base.available_width > 0) {
+	} else if (!htmlc->had_initial_layout &&
+		   htmlc->base.available_width > 0) {
 		content__reformat(&htmlc->base,
 				  false,
 				  htmlc->base.available_width,

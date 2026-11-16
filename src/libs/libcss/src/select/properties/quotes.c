@@ -119,6 +119,10 @@ css_error css__initial_quotes(css_select_state *state)
 	css_hint hint;
 	css_error error;
 
+	if (state->handler == NULL) {
+		return set_quotes(state->computed, CSS_QUOTES_NONE, NULL);
+	}
+
 	error = state->handler->ua_default_for_property(state->pw,
 							CSS_PROP_QUOTES,
 							&hint);

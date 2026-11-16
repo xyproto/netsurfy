@@ -1538,7 +1538,8 @@ css_error css_select_style(css_select_ctx *ctx,
 		css_computed_style *root =
 			state.results->styles[CSS_PSEUDO_ELEMENT_NONE];
 		css_computed_vars *own = css__vars_ref(root->vars);
-		error = css__vars_resolve(NULL, own, root);
+		error = css__vars_resolve(
+			NULL, own, root, state.handler, state.pw);
 		css__vars_unref(own);
 		if (error != CSS_OK)
 			goto cleanup;
@@ -2230,6 +2231,81 @@ static void update_reject_cache(css_select_state *state,
 	state->next_reject--;
 }
 
+static css_error match_combinators(css_select_ctx *ctx,
+				   const css_selector *selector,
+				   const css_selector *s,
+				   css_select_state *state,
+				   void *node,
+				   bool may_optimise,
+				   bool *matched)
+{
+	bool named;
+	void *candidate = node;
+	css_error error;
+
+	*matched = false;
+
+	if (s->data.comb == CSS_COMBINATOR_NONE) {
+		*matched = true;
+		return CSS_OK;
+	}
+
+	named = s->combinator->data.qname.name != ctx->str.universal;
+	may_optimise &= (s->data.comb == CSS_COMBINATOR_ANCESTOR ||
+			 s->data.comb == CSS_COMBINATOR_PARENT);
+
+	for (;;) {
+		void *next_node = NULL;
+		bool rejected_by_cache = false;
+
+		if (named) {
+			error = match_named_combinator(ctx,
+						       s->data.comb,
+						       s->combinator,
+						       state,
+						       candidate,
+						       &next_node);
+		} else {
+			error = match_universal_combinator(ctx,
+							   s->data.comb,
+							   s->combinator,
+							   state,
+							   candidate,
+							   may_optimise,
+							   &rejected_by_cache,
+							   &next_node);
+		}
+		if (error != CSS_OK)
+			return error;
+
+		if (next_node == NULL) {
+			if (!named && candidate == node && may_optimise &&
+			    s == selector && rejected_by_cache == false) {
+				update_reject_cache(state,
+						    s->data.comb,
+						    s->combinator);
+			}
+			return CSS_OK;
+		}
+
+		error = match_combinators(ctx,
+					  selector,
+					  s->combinator,
+					  state,
+					  next_node,
+					  may_optimise,
+					  matched);
+		if (error != CSS_OK || *matched)
+			return error;
+
+		if (s->data.comb != CSS_COMBINATOR_ANCESTOR &&
+		    s->data.comb != CSS_COMBINATOR_GENERIC_SIBLING)
+			return CSS_OK;
+
+		candidate = next_node;
+	}
+}
+
 css_error match_selector_chain(css_select_ctx *ctx,
 			       const css_selector *selector,
 			       css_select_state *state)
@@ -2237,8 +2313,7 @@ css_error match_selector_chain(css_select_ctx *ctx,
 	const css_selector *s = selector;
 	void *node = state->node;
 	const css_selector_detail *detail = &s->data;
-	bool match = false, may_optimise = true;
-	bool rejected_by_cache;
+	bool match = false;
 	css_pseudo_element pseudo;
 	css_error error;
 
@@ -2263,64 +2338,9 @@ css_error match_selector_chain(css_select_ctx *ctx,
 	if (match == false)
 		return CSS_OK;
 
-	/* Iterate up the selector chain, matching combinators */
-	do {
-		void *next_node = NULL;
-
-		/* Consider any combinator on this selector */
-		if (s->data.comb != CSS_COMBINATOR_NONE &&
-		    s->combinator->data.qname.name != ctx->str.universal) {
-			/* Named combinator */
-			may_optimise &= (s->data.comb ==
-						 CSS_COMBINATOR_ANCESTOR ||
-					 s->data.comb == CSS_COMBINATOR_PARENT);
-
-			error = match_named_combinator(ctx,
-						       s->data.comb,
-						       s->combinator,
-						       state,
-						       node,
-						       &next_node);
-			if (error != CSS_OK)
-				return error;
-
-			/* No match for combinator, so reject selector chain */
-			if (next_node == NULL)
-				return CSS_OK;
-		} else if (s->data.comb != CSS_COMBINATOR_NONE) {
-			/* Universal combinator */
-			may_optimise &= (s->data.comb ==
-						 CSS_COMBINATOR_ANCESTOR ||
-					 s->data.comb == CSS_COMBINATOR_PARENT);
-
-			error = match_universal_combinator(ctx,
-							   s->data.comb,
-							   s->combinator,
-							   state,
-							   node,
-							   may_optimise,
-							   &rejected_by_cache,
-							   &next_node);
-			if (error != CSS_OK)
-				return error;
-
-			/* No match for combinator, so reject selector chain */
-			if (next_node == NULL) {
-				if (may_optimise && s == selector &&
-				    rejected_by_cache == false) {
-					update_reject_cache(state,
-							    s->data.comb,
-							    s->combinator);
-				}
-
-				return CSS_OK;
-			}
-		}
-
-		/* Details matched, so progress to combining selector */
-		s = s->combinator;
-		node = next_node;
-	} while (s != NULL);
+	error = match_combinators(ctx, selector, s, state, node, true, &match);
+	if (error != CSS_OK || match == false)
+		return error;
 
 	/* If we got here, then the entire selector chain matched, so cascade */
 	state->current_specificity = selector->specificity;
@@ -2894,20 +2914,33 @@ css_error cascade_style(const css_style *style, css_select_state *state)
 		if (op == CSS_OP_CUSTOM || op == CSS_OP_VAR) {
 			lwc_string *name = NULL, *value = NULL;
 			if (op == CSS_OP_CUSTOM) {
-				css__stylesheet_string_get(s.sheet, *s.bytecode, &name);
+				css__stylesheet_string_get(s.sheet,
+							   *s.bytecode,
+							   &name);
 				advance_bytecode(&s, sizeof(css_code_t));
 			}
-			css__stylesheet_string_get(s.sheet, *s.bytecode, &value);
+			css__stylesheet_string_get(s.sheet,
+						   *s.bytecode,
+						   &value);
 			advance_bytecode(&s, sizeof(css_code_t));
 			if (value == NULL) {
 				continue;
 			}
 			if (op == CSS_OP_CUSTOM) {
-				error = name == NULL ? CSS_OK :
-					css__vars_cascade_custom(state, name, value, isImportant(opv));
+				error = name == NULL
+						? CSS_OK
+						: css__vars_cascade_custom(
+							  state,
+							  name,
+							  value,
+							  isImportant(opv));
 			} else {
-				error = css__vars_cascade_pending(state, getValue(opv), value,
-								  isImportant(opv), s.sheet);
+				error = css__vars_cascade_pending(state,
+								  getValue(opv),
+								  value,
+								  isImportant(
+									  opv),
+								  s.sheet);
 			}
 			if (error != CSS_OK)
 				return error;

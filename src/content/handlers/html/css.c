@@ -436,9 +436,10 @@ static css_stylesheet *html_css_parse_inline(html_content *c, dom_node *node)
 	}
 	err = CSS_OK;
 	if (text != NULL) {
-		err = css_stylesheet_append_data(sheet,
-						 (const uint8_t *)dom_string_data(text),
-						 dom_string_byte_length(text));
+		err = css_stylesheet_append_data(
+			sheet,
+			(const uint8_t *)dom_string_data(text),
+			dom_string_byte_length(text));
 		dom_string_unref(text);
 	}
 	if (err == CSS_OK || err == CSS_NEEDDATA) {
@@ -708,7 +709,8 @@ nserror html_css_free_stylesheets(html_content *html)
 			dom_node_unref(html->stylesheets[i].node);
 		}
 		if (html->stylesheets[i].inline_sheet != NULL) {
-			css_stylesheet_destroy(html->stylesheets[i].inline_sheet);
+			css_stylesheet_destroy(
+				html->stylesheets[i].inline_sheet);
 		}
 	}
 	free(html->stylesheets);
@@ -870,7 +872,8 @@ html_css_new_selection_context(html_content *c, css_select_ctx **ret_select_ctx)
 		if (hsheet->unused) {
 			continue;
 		}
-		hsheet->detached = i >= STYLESHEET_START && hsheet->node != NULL &&
+		hsheet->detached = i >= STYLESHEET_START &&
+				   hsheet->node != NULL &&
 				   html_css_node_detached(c, hsheet->node);
 		if (hsheet->detached) {
 			continue;
@@ -885,8 +888,9 @@ html_css_new_selection_context(html_content *c, css_select_ctx **ret_select_ctx)
 		if (hsheet->inline_sheet != NULL) {
 			sheet = hsheet->inline_sheet;
 		} else if (hsheet->sheet != NULL &&
-		    hlcache_handle_get_content(hsheet->sheet) != NULL &&
-		    content_get_status(hsheet->sheet) == CONTENT_STATUS_DONE) {
+			   hlcache_handle_get_content(hsheet->sheet) != NULL &&
+			   content_get_status(hsheet->sheet) ==
+				   CONTENT_STATUS_DONE) {
 			sheet = nscss_get_stylesheet(hsheet->sheet);
 		}
 

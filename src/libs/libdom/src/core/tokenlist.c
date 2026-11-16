@@ -25,6 +25,11 @@
 
 #define DOM_TOKENLIST_GROW_INCREMENT 4
 
+static inline bool _dom_tokenlist_space(char c)
+{
+	return c == ' ' || c == '\t' || c == '\n' || c == '\f' || c == '\r';
+}
+
 struct dom_tokenlist {
 	uint32_t refcnt;
 	dom_element *ele;
@@ -137,16 +142,17 @@ static dom_exception _dom_tokenlist_reparse(dom_tokenlist *list)
 	/* OK, there's something here to do, so let's do it... */
 
 	/* Count number of entries */
-	for (pos = dom_string_data(value), remaining = dom_string_length(value);
+	for (pos = dom_string_data(value),
+	    remaining = dom_string_byte_length(value);
 	     remaining > 0;) {
-		if (*pos != ' ') {
-			while (*pos != ' ' && remaining > 0) {
+		if (!_dom_tokenlist_space(*pos)) {
+			while (remaining > 0 && !_dom_tokenlist_space(*pos)) {
 				remaining--;
 				pos++;
 			}
 			n_entries++;
 		} else {
-			while (*pos == ' ' && remaining > 0) {
+			while (remaining > 0 && _dom_tokenlist_space(*pos)) {
 				remaining--;
 				pos++;
 			}
@@ -174,12 +180,12 @@ static dom_exception _dom_tokenlist_reparse(dom_tokenlist *list)
 
 	/* And now parse those entries into the buffer */
 	for (pos = dom_string_data(value),
-	    remaining = dom_string_length(value),
+	    remaining = dom_string_byte_length(value),
 	    n_entries = 0;
 	     remaining > 0;) {
-		if (*pos != ' ') {
+		if (!_dom_tokenlist_space(*pos)) {
 			const char *s = pos;
-			while (*pos != ' ' && remaining > 0) {
+			while (remaining > 0 && !_dom_tokenlist_space(*pos)) {
 				pos++;
 				remaining--;
 			}
@@ -205,7 +211,7 @@ static dom_exception _dom_tokenlist_reparse(dom_tokenlist *list)
 				list->len++;
 			}
 		} else {
-			while (*pos == ' ' && remaining > 0) {
+			while (remaining > 0 && _dom_tokenlist_space(*pos)) {
 				pos++;
 				remaining--;
 			}

@@ -26,12 +26,12 @@ nslib(libwapcaplet
 add_custom_command(
   OUTPUT ${NSLIBS_GEN}/libparserutils/aliases.inc
   COMMAND ${CMAKE_COMMAND} -E make_directory ${NSLIBS_GEN}/libparserutils
-  COMMAND ${PERL_EXECUTABLE}
-    ${CMAKE_CURRENT_SOURCE_DIR}/libparserutils/build/make-aliases.pl
+  COMMAND ${Python3_EXECUTABLE}
+    ${CMAKE_CURRENT_SOURCE_DIR}/libparserutils/build/make-aliases.py
     ${CMAKE_CURRENT_SOURCE_DIR}/libparserutils/build/Aliases
     ${NSLIBS_GEN}/libparserutils/aliases.inc
   DEPENDS
-    ${CMAKE_CURRENT_SOURCE_DIR}/libparserutils/build/make-aliases.pl
+    ${CMAKE_CURRENT_SOURCE_DIR}/libparserutils/build/make-aliases.py
     ${CMAKE_CURRENT_SOURCE_DIR}/libparserutils/build/Aliases
   VERBATIM)
 
@@ -59,12 +59,12 @@ nslib(libparserutils
 add_custom_command(
   OUTPUT ${NSLIBS_GEN}/libhubbub/entities.inc
   COMMAND ${CMAKE_COMMAND} -E make_directory ${NSLIBS_GEN}/libhubbub
-  COMMAND ${PERL_EXECUTABLE}
-    ${CMAKE_CURRENT_SOURCE_DIR}/libhubbub/build/make-entities.pl
+  COMMAND ${Python3_EXECUTABLE}
+    ${CMAKE_CURRENT_SOURCE_DIR}/libhubbub/build/make-entities.py
     ${CMAKE_CURRENT_SOURCE_DIR}/libhubbub/build/Entities
     ${NSLIBS_GEN}/libhubbub/entities.inc
   DEPENDS
-    ${CMAKE_CURRENT_SOURCE_DIR}/libhubbub/build/make-entities.pl
+    ${CMAKE_CURRENT_SOURCE_DIR}/libhubbub/build/make-entities.py
     ${CMAKE_CURRENT_SOURCE_DIR}/libhubbub/build/Entities
   VERBATIM)
 
@@ -132,6 +132,7 @@ nslib(libdom
   libdom/src/core/doc_fragment.c
   libdom/src/core/document.c
   libdom/src/core/tokenlist.c
+  libdom/src/core/range.c
   libdom/src/events/event.c
   libdom/src/events/dispatch.c
   libdom/src/events/event_target.c

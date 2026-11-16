@@ -101,7 +101,10 @@ css_error css__cascade_font_family(uint32_t opv,
 
 		fonts[n_fonts] = NULL;
 
-		if (value == CSS_FONT_FAMILY_INHERIT) {
+		if (value == CSS_FONT_FAMILY_INHERIT &&
+		    state->handler == NULL) {
+			value = CSS_FONT_FAMILY_SANS_SERIF;
+		} else if (value == CSS_FONT_FAMILY_INHERIT) {
 			/* The stylesheet doesn't specify a generic family,
 			 * but it has specified named fonts.
 			 * Fall back to the user agent's default family.

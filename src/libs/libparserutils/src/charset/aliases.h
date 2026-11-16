@@ -13,7 +13,7 @@
 #include <parserutils/charset/mibenum.h>
 
 typedef struct parserutils_charset_aliases_canon {
-	/* Do not change the ordering here without changing make-aliases.pl */
+	/* Do not change the ordering here without changing make-aliases.py */
 	uint16_t mib_enum;
 	uint16_t name_len;
 	const char *name;

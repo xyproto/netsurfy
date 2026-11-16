@@ -811,8 +811,8 @@ html_dom_event_fetcher(dom_string *type,
 		} else if (dom_string_isequal(
 				   type, corestring_dom_DOMSubtreeModified)) {
 			return dom_default_action_DOMSubtreeModified_cb;
-		} else if (dom_string_isequal(
-				   type, corestring_dom_DOMAttrModified)) {
+		} else if (dom_string_isequal(type,
+					      corestring_dom_DOMAttrModified)) {
 			return dom_default_action_DOMAttrModified_cb;
 		}
 	} else if (phase == DOM_DEFAULT_ACTION_FINISHED) {

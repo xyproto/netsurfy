@@ -32,7 +32,7 @@ hostname passed must be normalised (i.e. lower case and domain labels
 in punycode)
 
 The data tables are staticly generated from a given input with the
-genpubsuffix.pl perl program. This program takes a downloaded suffix
+genpubsuffix.py Python program. This program takes a downloaded suffix
 database and generates a file the main library lookup code directly
 includes.
 

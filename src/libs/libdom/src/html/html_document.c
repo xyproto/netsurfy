@@ -148,8 +148,8 @@ _dom_html_document_initialise(dom_html_document *doc,
 	}
 
 #define HTML_DOCUMENT_STRINGS_ACTION(attr, str)                                \
-	error = dom_string_create_interned((const uint8_t *)#str,              \
-					   SLEN(#str),                         \
+	error = dom_string_create_interned((const uint8_t *)str,               \
+					   SLEN(str),                          \
 					   &doc->memoised[hds_##attr]);        \
 	if (error != DOM_NO_ERR) {                                             \
 		goto out;                                                      \

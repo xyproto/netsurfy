@@ -16,6 +16,8 @@
 
 #include "core/characterdata.h"
 #include "core/document.h"
+#include "core/node.h"
+#include "core/range.h"
 #include "core/text.h"
 #include "utils/utils.h"
 
@@ -188,7 +190,7 @@ _dom_text_split_text(dom_text *text, uint32_t offset, dom_text **result)
 		return err;
 	}
 
-	if (offset >= len) {
+	if (offset > len) {
 		return DOM_INDEX_SIZE_ERR;
 	}
 
@@ -209,6 +211,19 @@ _dom_text_split_text(dom_text *text, uint32_t offset, dom_text **result)
 
 	/* Release our reference on the value (the new node has its own) */
 	dom_string_unref(value);
+
+	if (t->parent != NULL) {
+		dom_node_internal *inserted = NULL;
+
+		err = dom_node_insert_before(
+			t->parent, res, t->next, &inserted);
+		if (err != DOM_NO_ERR) {
+			dom_node_unref(res);
+			return err;
+		}
+		dom_node_unref(inserted);
+		_dom_range_split_text(t, (dom_node_internal *)res, offset);
+	}
 
 	/* Delete the data after the split point */
 	err = dom_characterdata_delete_data(&text->base, offset, len - offset);

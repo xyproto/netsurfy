@@ -80,6 +80,11 @@ static void _dom_element_destroy_classes(struct dom_element *ele)
  *
  * Destroys any existing cached classes.
  */
+static inline bool _dom_element_class_space(char c)
+{
+	return c == ' ' || c == '\t' || c == '\n' || c == '\f' || c == '\r';
+}
+
 static dom_exception
 _dom_element_create_classes(struct dom_element *ele, const char *value)
 {
@@ -92,12 +97,12 @@ _dom_element_create_classes(struct dom_element *ele, const char *value)
 
 	/* Count number of classes */
 	for (pos = value; *pos != '\0';) {
-		if (*pos != ' ') {
-			while (*pos != ' ' && *pos != '\0')
+		if (!_dom_element_class_space(*pos)) {
+			while (!_dom_element_class_space(*pos) && *pos != '\0')
 				pos++;
 			n_classes++;
 		} else {
-			while (*pos == ' ')
+			while (_dom_element_class_space(*pos))
 				pos++;
 		}
 	}
@@ -109,9 +114,10 @@ _dom_element_create_classes(struct dom_element *ele, const char *value)
 			return DOM_NO_MEM_ERR;
 
 		for (pos = value, n_classes = 0; *pos != '\0';) {
-			if (*pos != ' ') {
+			if (!_dom_element_class_space(*pos)) {
 				const char *s = pos;
-				while (*pos != ' ' && *pos != '\0')
+				while (!_dom_element_class_space(*pos) &&
+				       *pos != '\0')
 					pos++;
 				if (lwc_intern_string(s,
 						      pos - s,
@@ -119,7 +125,7 @@ _dom_element_create_classes(struct dom_element *ele, const char *value)
 				    lwc_error_ok)
 					goto error;
 			} else {
-				while (*pos == ' ')
+				while (_dom_element_class_space(*pos))
 					pos++;
 			}
 		}

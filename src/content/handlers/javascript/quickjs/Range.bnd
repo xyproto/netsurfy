@@ -1,0 +1,313 @@
+/* Range binding for browser using QuickJS and libdom
+ *
+ * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ *
+ * Released under the terms of the MIT License,
+ *         http://www.opensource.org/licenses/mit-license
+ */
+
+class Range {
+	private struct dom_range *range;
+	prologue %{
+#include <dom/core/range.h>
+
+static dom_node *range_node_arg(JSContext *ctx, JSValueConst val, int index)
+{
+	node_private_t *np = qjsky_private(ctx, val, QJSKY_IFACE_NODE);
+
+	if (np == NULL) {
+		JS_ThrowTypeError(ctx, "parameter %d is not of type 'Node'", index);
+		return NULL;
+	}
+	return np->node;
+}
+
+static JSValue range_point(JSContext *ctx, dom_range *range, bool start, bool want_offset)
+{
+	dom_node *node = NULL;
+	uint32_t offset = 0;
+	JSValue ret;
+
+	if (start) {
+		dom_range_get_start(range, &node, &offset);
+	} else {
+		dom_range_get_end(range, &node, &offset);
+	}
+	ret = want_offset ? JS_NewUint32(ctx, offset) : qjsky_node(ctx, node);
+	dom_node_unref(node);
+	return ret;
+}
+
+static JSValue range_new(JSContext *ctx, dom_node *container)
+{
+	dom_range *range = NULL;
+	JSValue obj;
+
+	if (dom_range_create(container, &range) != DOM_NO_ERR) {
+		return JS_ThrowOutOfMemory(ctx);
+	}
+	obj = qjsky_range___create(ctx, range);
+	if (JS_IsException(obj)) {
+		dom_range_destroy(range);
+	}
+	return obj;
+}
+
+JSValue qjsky_range_create(JSContext *ctx, dom_node *document)
+{
+	return range_new(ctx, document);
+}
+
+static int range_compare_to(dom_range *range, dom_node *node, uint32_t offset, bool start)
+{
+	dom_node *container = NULL;
+	uint32_t point = 0;
+	int cmp;
+
+	if (start) {
+		dom_range_get_start(range, &container, &point);
+	} else {
+		dom_range_get_end(range, &container, &point);
+	}
+	cmp = dom_boundary_point_compare(node, offset, container, point);
+	dom_node_unref(container);
+	return cmp;
+}
+
+static dom_node *range_root(dom_range *range)
+{
+	dom_node *container = NULL;
+	dom_node *root;
+	uint32_t offset;
+
+	dom_range_get_start(range, &container, &offset);
+	root = dom_node_root(container);
+	dom_node_unref(container);
+	return root;
+}
+
+static JSValue range_check_point(JSContext *ctx, dom_node *node, uint32_t offset)
+{
+	dom_node_type type;
+
+	if (dom_node_get_node_type(node, &type) == DOM_NO_ERR && type == DOM_DOCUMENT_TYPE_NODE) {
+		return qjsky_throw_dom(ctx, DOM_INVALID_NODE_TYPE_ERR);
+	}
+	if (offset > dom_node_length(node)) {
+		return qjsky_throw_dom(ctx, DOM_INDEX_SIZE_ERR);
+	}
+	return JS_UNDEFINED;
+}
+%};
+};
+
+init Range(struct dom_range *range)
+%{
+	priv->range = range;
+%}
+
+fini Range()
+%{
+	dom_range_destroy(priv->range);
+%}
+
+constructor Range()
+%{
+	JSValue global = JS_GetGlobalObject(ctx);
+	JSValue doc = JS_GetPropertyStr(ctx, global, "document");
+	node_private_t *np = qjsky_private(ctx, doc, QJSKY_IFACE_NODE);
+	JSValue obj;
+
+	JS_FreeValue(ctx, global);
+	if (np == NULL) {
+		JS_FreeValue(ctx, doc);
+		return JS_ThrowTypeError(ctx, "Illegal constructor");
+	}
+	obj = range_new(ctx, np->node);
+	JS_FreeValue(ctx, doc);
+	if (JS_IsException(obj)) return obj;
+	return qjsky_constructed(ctx, obj, new_target);
+%}
+
+getter Range::startContainer()
+%{
+	return range_point(ctx, priv->range, true, false);
+%}
+
+getter Range::startOffset()
+%{
+	return range_point(ctx, priv->range, true, true);
+%}
+
+getter Range::endContainer()
+%{
+	return range_point(ctx, priv->range, false, false);
+%}
+
+getter Range::endOffset()
+%{
+	return range_point(ctx, priv->range, false, true);
+%}
+
+getter Range::collapsed()
+%{
+	dom_node *start = NULL, *end = NULL;
+	uint32_t so, eo;
+	bool collapsed;
+
+	dom_range_get_start(priv->range, &start, &so);
+	dom_range_get_end(priv->range, &end, &eo);
+	collapsed = start == end && so == eo;
+	dom_node_unref(start);
+	dom_node_unref(end);
+	return JS_NewBool(ctx, collapsed);
+%}
+
+getter Range::commonAncestorContainer()
+%{
+	dom_node *start = NULL, *end = NULL, *container;
+	uint32_t so, eo;
+	bool contains = false;
+	JSValue ret;
+
+	dom_range_get_start(priv->range, &start, &so);
+	dom_range_get_end(priv->range, &end, &eo);
+	container = dom_node_ref(start);
+	while (container != NULL) {
+		dom_node *parent = NULL;
+		if (container == end || (dom_node_contains(container, end, &contains) == DOM_NO_ERR && contains)) {
+			break;
+		}
+		(void)dom_node_get_parent_node(container, &parent);
+		dom_node_unref(container);
+		container = parent;
+	}
+	ret = qjsky_node(ctx, container);
+	dom_node_unref(container);
+	dom_node_unref(start);
+	dom_node_unref(end);
+	return ret;
+%}
+
+method Range::setStart()
+%{
+	dom_node *node;
+	uint32_t offset;
+	dom_exception exc;
+
+	if (argc < 2) return JS_ThrowTypeError(ctx, "setStart: 2 arguments required");
+	node = range_node_arg(ctx, argv[0], 1);
+	if (node == NULL) return JS_EXCEPTION;
+	if (JS_ToUint32(ctx, &offset, argv[1]) < 0) return JS_EXCEPTION;
+	exc = dom_range_set_start(priv->range, node, offset);
+	return exc == DOM_NO_ERR ? JS_UNDEFINED : qjsky_throw_dom(ctx, exc);
+%}
+
+method Range::setEnd()
+%{
+	dom_node *node;
+	uint32_t offset;
+	dom_exception exc;
+
+	if (argc < 2) return JS_ThrowTypeError(ctx, "setEnd: 2 arguments required");
+	node = range_node_arg(ctx, argv[0], 1);
+	if (node == NULL) return JS_EXCEPTION;
+	if (JS_ToUint32(ctx, &offset, argv[1]) < 0) return JS_EXCEPTION;
+	exc = dom_range_set_end(priv->range, node, offset);
+	return exc == DOM_NO_ERR ? JS_UNDEFINED : qjsky_throw_dom(ctx, exc);
+%}
+
+method Range::collapse()
+%{
+	int to_start = argc > 0 ? JS_ToBool(ctx, argv[0]) : 0;
+
+	if (to_start < 0) return JS_EXCEPTION;
+	dom_range_collapse(priv->range, to_start != 0);
+	return JS_UNDEFINED;
+%}
+
+method Range::compareBoundaryPoints()
+%{
+	range_private_t *other;
+	uint32_t how;
+	dom_node *node = NULL;
+	uint32_t offset = 0;
+	int cmp;
+
+	if (argc < 2) return JS_ThrowTypeError(ctx, "compareBoundaryPoints: 2 arguments required");
+	if (JS_ToUint32(ctx, &how, argv[0]) < 0) return JS_EXCEPTION;
+	other = qjsky_private(ctx, argv[1], QJSKY_IFACE_RANGE);
+	if (other == NULL) return JS_ThrowTypeError(ctx, "parameter 2 is not of type 'Range'");
+	how &= 0xffff;
+	if (how > 3) return qjsky_throw_dom(ctx, DOM_NOT_SUPPORTED_ERR);
+	if (range_root(priv->range) != range_root(other->range)) return qjsky_throw_dom(ctx, DOM_WRONG_DOCUMENT_ERR);
+	if (how == 0 || how == 1) {
+		dom_range_get_start(other->range, &node, &offset);
+	} else {
+		dom_range_get_end(other->range, &node, &offset);
+	}
+	cmp = -range_compare_to(priv->range, node, offset, how == 0 || how == 3);
+	dom_node_unref(node);
+	return JS_NewInt32(ctx, cmp);
+%}
+
+method Range::comparePoint()
+%{
+	dom_node *node;
+	uint32_t offset;
+	JSValue err;
+
+	if (argc < 2) return JS_ThrowTypeError(ctx, "comparePoint: 2 arguments required");
+	node = range_node_arg(ctx, argv[0], 1);
+	if (node == NULL) return JS_EXCEPTION;
+	if (JS_ToUint32(ctx, &offset, argv[1]) < 0) return JS_EXCEPTION;
+	if (dom_node_root(node) != range_root(priv->range)) return qjsky_throw_dom(ctx, DOM_WRONG_DOCUMENT_ERR);
+	err = range_check_point(ctx, node, offset);
+	if (JS_IsException(err)) return err;
+	if (range_compare_to(priv->range, node, offset, true) < 0) return JS_NewInt32(ctx, -1);
+	if (range_compare_to(priv->range, node, offset, false) > 0) return JS_NewInt32(ctx, 1);
+	return JS_NewInt32(ctx, 0);
+%}
+
+method Range::isPointInRange()
+%{
+	dom_node *node;
+	uint32_t offset;
+	JSValue err;
+
+	if (argc < 2) return JS_ThrowTypeError(ctx, "isPointInRange: 2 arguments required");
+	node = range_node_arg(ctx, argv[0], 1);
+	if (node == NULL) return JS_EXCEPTION;
+	if (JS_ToUint32(ctx, &offset, argv[1]) < 0) return JS_EXCEPTION;
+	if (dom_node_root(node) != range_root(priv->range)) return JS_FALSE;
+	err = range_check_point(ctx, node, offset);
+	if (JS_IsException(err)) return err;
+	return JS_NewBool(ctx, range_compare_to(priv->range, node, offset, true) >= 0 &&
+				       range_compare_to(priv->range, node, offset, false) <= 0);
+%}
+
+method Range::cloneRange()
+%{
+	dom_node *node = NULL;
+	uint32_t offset = 0;
+	range_private_t *copy;
+	JSValue obj;
+
+	dom_range_get_start(priv->range, &node, &offset);
+	obj = range_new(ctx, node);
+	dom_node_unref(node);
+	if (JS_IsException(obj)) return obj;
+	copy = qjsky_private(ctx, obj, QJSKY_IFACE_RANGE);
+	dom_range_get_start(priv->range, &node, &offset);
+	(void)dom_range_set_start(copy->range, node, offset);
+	dom_node_unref(node);
+	dom_range_get_end(priv->range, &node, &offset);
+	(void)dom_range_set_end(copy->range, node, offset);
+	dom_node_unref(node);
+	return obj;
+%}
+
+method Range::detach()
+%{
+	return JS_UNDEFINED;
+%}

@@ -169,7 +169,8 @@ static bool vars_substitute(vars_scope *scope,
 			p++;
 		}
 		name_start = p;
-		while (p < close && s[p] != ',' && !isspace((unsigned char)s[p])) {
+		while (p < close && s[p] != ',' &&
+		       !isspace((unsigned char)s[p])) {
 			p++;
 		}
 		name_end = p;
@@ -225,7 +226,8 @@ static bool vars_scope_lookup(vars_scope *scope,
 						    lwc_string_length(raw),
 						    depth + 1,
 						    &b) &&
-				    lwc_intern_string(b.data != NULL ? b.data : "",
+				    lwc_intern_string(b.data != NULL ? b.data
+								     : "",
 						      b.len,
 						      &scope->resolved[k]) ==
 					    lwc_error_ok) {
@@ -248,8 +250,10 @@ static bool vars_scope_lookup(vars_scope *scope,
 			lwc_string *n = scope->parent->custom[k].name;
 			if (lwc_string_length(n) == len &&
 			    memcmp(lwc_string_data(n), name, len) == 0) {
-				*value = lwc_string_data(scope->parent->custom[k].value);
-				*value_len = lwc_string_length(scope->parent->custom[k].value);
+				*value = lwc_string_data(
+					scope->parent->custom[k].value);
+				*value_len = lwc_string_length(
+					scope->parent->custom[k].value);
 				return true;
 			}
 		}
@@ -257,10 +261,8 @@ static bool vars_scope_lookup(vars_scope *scope,
 	return false;
 }
 
-static css_stylesheet *vars_parse(uint16_t prop,
-				  const char *text,
-				  size_t len,
-				  const css_var_params *p)
+static css_stylesheet *
+vars_parse(uint16_t prop, const char *text, size_t len, const css_var_params *p)
 {
 	css_stylesheet_params params;
 	css_stylesheet *sheet = NULL;
@@ -268,7 +270,8 @@ static css_stylesheet *vars_parse(uint16_t prop,
 	lwc_string *name;
 	css_error error;
 
-	if (propstrings == NULL && css__propstrings_get(&propstrings) != CSS_OK) {
+	if (propstrings == NULL &&
+	    css__propstrings_get(&propstrings) != CSS_OK) {
 		return NULL;
 	}
 	name = propstrings[FIRST_PROP + prop];
@@ -294,7 +297,9 @@ static css_stylesheet *vars_parse(uint16_t prop,
 		free(b.data);
 		return NULL;
 	}
-	error = css_stylesheet_append_data(sheet, (const uint8_t *)b.data, b.len);
+	error = css_stylesheet_append_data(sheet,
+					   (const uint8_t *)b.data,
+					   b.len);
 	free(b.data);
 	if (error == CSS_OK || error == CSS_NEEDDATA) {
 		error = css_stylesheet_data_done(sheet);
@@ -310,7 +315,8 @@ static const css_style *vars_sheet_style(const css_stylesheet *sheet)
 {
 	const css_rule_selector *rule;
 
-	if (sheet == NULL || sheet->rule_count != 1 || sheet->rule_list == NULL ||
+	if (sheet == NULL || sheet->rule_count != 1 ||
+	    sheet->rule_list == NULL ||
 	    sheet->rule_list->type != CSS_RULE_SELECTOR) {
 		return NULL;
 	}
@@ -330,7 +336,8 @@ static const css_style *vars_parse_cached(uint16_t prop,
 	if (lwc_intern_string(text, len, &key) != lwc_error_ok) {
 		return NULL;
 	}
-	h = ((uintptr_t)key >> 4) ^ ((uintptr_t)p->url >> 4) ^ (prop * 2654435761u);
+	h = ((uintptr_t)key >> 4) ^ ((uintptr_t)p->url >> 4) ^
+	    (prop * 2654435761u);
 	e = &vars_cache[h % VARS_CACHE_SIZE];
 	if (e->text == key && e->prop == prop && e->url == p->url) {
 		lwc_string_unref(key);
@@ -407,7 +414,8 @@ css_error css__vars_cascade_custom(css_select_state *state,
 			continue;
 		}
 		if (rank > d->rank ||
-		    (rank == d->rank && state->current_specificity >= d->specificity)) {
+		    (rank == d->rank &&
+		     state->current_specificity >= d->specificity)) {
 			lwc_string_unref(d->value);
 			d->value = lwc_string_ref(value);
 			d->rank = rank;
@@ -417,7 +425,8 @@ css_error css__vars_cascade_custom(css_select_state *state,
 	}
 	if (v->n_decls == v->alloc_decls) {
 		uint32_t n = v->alloc_decls == 0 ? 8 : v->alloc_decls * 2;
-		css_select_var_decl *grown = realloc(v->decls, n * sizeof(*grown));
+		css_select_var_decl *grown = realloc(v->decls,
+						     n * sizeof(*grown));
 		if (grown == NULL) {
 			return CSS_NOMEM;
 		}
@@ -450,7 +459,8 @@ css_error css__vars_cascade_pending(css_select_state *state,
 	vars_prop_ops(prop);
 	if (v->n_pends == v->alloc_pends) {
 		uint32_t n = v->alloc_pends == 0 ? 8 : v->alloc_pends * 2;
-		css_select_var_pend *grown = realloc(v->pends, n * sizeof(*grown));
+		css_select_var_pend *grown = realloc(v->pends,
+						     n * sizeof(*grown));
 		if (grown == NULL) {
 			return CSS_NOMEM;
 		}
@@ -460,7 +470,8 @@ css_error css__vars_cascade_pending(css_select_state *state,
 	index = v->n_pends;
 	for (uint16_t i = 0; i < prop_n_ops[prop]; i++) {
 		uint16_t op = prop_ops[prop][i];
-		if (css__outranks_existing(op, important, state, FLAG_VALUE__NONE)) {
+		if (css__outranks_existing(
+			    op, important, state, FLAG_VALUE__NONE)) {
 			state->var_owner[op][state->current_pseudo] = index + 1;
 			claimed = true;
 		}
@@ -477,9 +488,8 @@ css_error css__vars_cascade_pending(css_select_state *state,
 	return CSS_OK;
 }
 
-static css_error vars_build(css_select_state *state,
-			    uint8_t pseudo,
-			    css_computed_vars **out)
+static css_error
+vars_build(css_select_state *state, uint8_t pseudo, css_computed_vars **out)
 {
 	css_select_vars *v = &state->vars;
 	css_computed_vars *cv;
@@ -508,8 +518,10 @@ static css_error vars_build(css_select_state *state,
 	}
 	for (uint32_t i = 0; i < v->n_decls; i++) {
 		if (v->decls[i].pseudo == pseudo) {
-			cv->custom[cv->n_custom].name = lwc_string_ref(v->decls[i].name);
-			cv->custom[cv->n_custom].value = lwc_string_ref(v->decls[i].value);
+			cv->custom[cv->n_custom].name = lwc_string_ref(
+				v->decls[i].name);
+			cv->custom[cv->n_custom].value = lwc_string_ref(
+				v->decls[i].value);
 			cv->n_custom++;
 		}
 	}
@@ -601,10 +613,20 @@ void css__vars_select_cleanup(css_select_state *state)
 	memset(v, 0, sizeof(*v));
 }
 
+static void vars_initial(css_select_state *st, uint16_t op)
+{
+	if (st->handler == NULL && prop_dispatch[op].inherited) {
+		return;
+	}
+	prop_dispatch[op].initial(st);
+}
+
 static void vars_apply(const css_computed_style *parent,
 		       css_computed_style *target,
 		       const css_var_pending *p,
-		       const css_style *style)
+		       const css_style *style,
+		       css_select_handler *handler,
+		       void *pw)
 {
 	css_select_state *st = calloc(1, sizeof(*st));
 	css_computed_style *scratch = NULL;
@@ -613,6 +635,8 @@ static void vars_apply(const css_computed_style *parent,
 	if (st == NULL) {
 		return;
 	}
+	st->handler = handler;
+	st->pw = pw;
 	if (css__computed_style_create(&scratch, target->calc) != CSS_OK) {
 		free(st);
 		return;
@@ -645,10 +669,10 @@ static void vars_apply(const css_computed_style *parent,
 			if (parent != NULL) {
 				prop_dispatch[op].copy(parent, target);
 			} else {
-				prop_dispatch[op].initial(st);
+				vars_initial(st, op);
 			}
 		} else if (d != FLAG_VALUE__NONE) {
-			prop_dispatch[op].initial(st);
+			vars_initial(st, op);
 		}
 	}
 	css_computed_style_destroy(scratch);
@@ -657,20 +681,24 @@ static void vars_apply(const css_computed_style *parent,
 
 static void vars_unset(const css_computed_style *parent,
 		       css_computed_style *target,
-		       const css_var_pending *p)
+		       const css_var_pending *p,
+		       css_select_handler *handler,
+		       void *pw)
 {
 	css_select_state *st = calloc(1, sizeof(*st));
 
 	if (st == NULL) {
 		return;
 	}
+	st->handler = handler;
+	st->pw = pw;
 	st->computed = target;
 	for (uint16_t k = 0; k < p->n_ops; k++) {
 		uint16_t op = p->ops[k];
 		if (prop_dispatch[op].inherited && parent != NULL) {
 			prop_dispatch[op].copy(parent, target);
 		} else {
-			prop_dispatch[op].initial(st);
+			vars_initial(st, op);
 		}
 	}
 	free(st);
@@ -678,9 +706,12 @@ static void vars_unset(const css_computed_style *parent,
 
 css_error css__vars_resolve(const css_computed_style *parent,
 			    const css_computed_vars *own,
-			    css_computed_style *target)
+			    css_computed_style *target,
+			    css_select_handler *handler,
+			    void *pw)
 {
-	const css_computed_vars *inherited = parent != NULL ? parent->vars : NULL;
+	const css_computed_vars *inherited = parent != NULL ? parent->vars
+							    : NULL;
 	css_computed_vars *table = NULL;
 	css_computed_vars *old = target->vars;
 	vars_scope scope;
@@ -711,15 +742,18 @@ css_error css__vars_resolve(const css_computed_style *parent,
 					    0,
 					    &b)) {
 				style = vars_parse_cached(p->prop,
-							  b.data != NULL ? b.data : "",
+							  b.data != NULL
+								  ? b.data
+								  : "",
 							  b.len,
 							  &p->params);
 			}
 			free(b.data);
 			if (style != NULL) {
-				vars_apply(parent, target, p, style);
+				vars_apply(
+					parent, target, p, style, handler, pw);
 			} else {
-				vars_unset(parent, target, p);
+				vars_unset(parent, target, p, handler, pw);
 			}
 		}
 	}
@@ -732,7 +766,8 @@ css_error css__vars_resolve(const css_computed_style *parent,
 		table = calloc(1, sizeof(*table));
 		if (table != NULL) {
 			table->refcnt = 1;
-			table->custom = calloc(n_parent + n_own, sizeof(*table->custom));
+			table->custom = calloc(n_parent + n_own,
+					       sizeof(*table->custom));
 			if (table->custom == NULL) {
 				free(table);
 				table = NULL;
@@ -751,20 +786,25 @@ css_error css__vars_resolve(const css_computed_style *parent,
 						       &vl)) {
 					continue;
 				}
-				table->custom[table->n_custom].name = lwc_string_ref(name);
-				table->custom[table->n_custom].value = lwc_string_ref(scope.resolved[k]);
+				table->custom[table->n_custom].name =
+					lwc_string_ref(name);
+				table->custom[table->n_custom].value =
+					lwc_string_ref(scope.resolved[k]);
 				table->n_custom++;
 			}
 			for (uint32_t k = 0; k < n_parent; k++) {
 				lwc_string *name = inherited->custom[k].name;
 				bool shadowed = false;
-				for (uint32_t m = 0; m < n_own && !shadowed; m++) {
+				for (uint32_t m = 0; m < n_own && !shadowed;
+				     m++) {
 					shadowed = own->custom[m].name == name;
 				}
 				if (!shadowed) {
-					table->custom[table->n_custom].name = lwc_string_ref(name);
-					table->custom[table->n_custom].value =
-						lwc_string_ref(inherited->custom[k].value);
+					table->custom[table->n_custom].name =
+						lwc_string_ref(name);
+					table->custom[table->n_custom]
+						.value = lwc_string_ref(
+						inherited->custom[k].value);
 					table->n_custom++;
 				}
 			}

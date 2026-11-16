@@ -15,6 +15,7 @@
 
 #include "core/characterdata.h"
 #include "core/document.h"
+#include "core/range.h"
 #include "core/node.h"
 #include "utils/utils.h"
 #include "events/mutation_event.h"
@@ -137,6 +138,11 @@ _dom_characterdata_set_data(struct dom_characterdata *cdata, dom_string *data)
 		return err;
 
 	if (c->value != NULL) {
+		_dom_range_replace_data(c,
+					0,
+					dom_string_length(c->value),
+					data != NULL ? dom_string_length(data)
+						     : 0);
 		dom_string_unref(c->value);
 	}
 
@@ -317,6 +323,7 @@ dom_exception _dom_characterdata_insert_data(struct dom_characterdata *cdata,
 	}
 
 	c->value = temp;
+	_dom_range_replace_data(c, offset, 0, dom_string_length(data));
 
 	success = true;
 	return _dom_dispatch_subtree_modified_event(doc, c->parent, &success);
@@ -386,6 +393,7 @@ dom_exception _dom_characterdata_delete_data(struct dom_characterdata *cdata,
 	}
 
 	c->value = temp;
+	_dom_range_replace_data(c, offset, end - offset, 0);
 
 	success = true;
 	return _dom_dispatch_subtree_modified_event(doc, c->parent, &success);
@@ -453,6 +461,8 @@ dom_exception _dom_characterdata_replace_data(struct dom_characterdata *cdata,
 	}
 
 	c->value = temp;
+	_dom_range_replace_data(
+		c, offset, end - offset, dom_string_length(data));
 
 	success = true;
 	return _dom_dispatch_subtree_modified_event(doc, c->parent, &success);

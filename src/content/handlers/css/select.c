@@ -890,6 +890,60 @@ node_has_attribute(void *pw, void *node, const css_qname *qname, bool *match)
 	return CSS_OK;
 }
 
+static bool attribute_value_caseless(const css_qname *qname)
+{
+	static const char *const names[] = {
+		"accept",    "accept-charset",
+		"align",     "alink",
+		"axis",	     "bgcolor",
+		"charset",   "checked",
+		"clear",     "codetype",
+		"color",     "compact",
+		"declare",   "defer",
+		"dir",	     "direction",
+		"disabled",  "enctype",
+		"face",	     "frame",
+		"hreflang",  "http-equiv",
+		"lang",	     "language",
+		"link",	     "media",
+		"method",    "multiple",
+		"nohref",    "noresize",
+		"noshade",   "nowrap",
+		"readonly",  "rel",
+		"rev",	     "rules",
+		"scope",     "scrolling",
+		"selected",  "shape",
+		"target",    "text",
+		"type",	     "valign",
+		"valuetype", "vlink",
+	};
+	const char *name = lwc_string_data(qname->name);
+	size_t len = lwc_string_length(qname->name);
+
+	for (size_t i = 0; i < sizeof(names) / sizeof(names[0]); i++) {
+		if (strlen(names[i]) == len &&
+		    strncasecmp(names[i], name, len) == 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
+static bool
+attribute_value_equal(dom_string *attr, lwc_string *value, bool caseless)
+{
+	if (caseless) {
+		return dom_string_caseless_lwc_isequal(attr, value);
+	}
+	return dom_string_lwc_isequal(attr, value);
+}
+
+static int
+attribute_value_ncmp(const char *a, const char *b, size_t n, bool caseless)
+{
+	return caseless ? strncasecmp(a, b, n) : strncmp(a, b, n);
+}
+
 /**
  * Callback to determine if a node has an attribute with given name and value.
  *
@@ -909,17 +963,11 @@ css_error node_has_attribute_equal(void *pw,
 				   lwc_string *value,
 				   bool *match)
 {
+	bool caseless = attribute_value_caseless(qname);
 	dom_node *n = node;
 	dom_string *name;
 	dom_string *atr_val;
 	dom_exception err;
-
-	size_t vlen = lwc_string_length(value);
-
-	if (vlen == 0) {
-		*match = false;
-		return CSS_OK;
-	}
 
 	err = dom_string_create_interned((const uint8_t *)lwc_string_data(
 						 qname->name),
@@ -937,7 +985,7 @@ css_error node_has_attribute_equal(void *pw,
 
 	dom_string_unref(name);
 
-	*match = dom_string_caseless_lwc_isequal(atr_val, value);
+	*match = attribute_value_equal(atr_val, value, caseless);
 
 	dom_string_unref(atr_val);
 
@@ -964,6 +1012,7 @@ css_error node_has_attribute_dashmatch(void *pw,
 				       lwc_string *value,
 				       bool *match)
 {
+	bool caseless = attribute_value_caseless(qname);
 	dom_node *n = node;
 	dom_string *name;
 	dom_string *atr_val;
@@ -993,7 +1042,7 @@ css_error node_has_attribute_dashmatch(void *pw,
 	dom_string_unref(name);
 
 	/* check for exact match */
-	*match = dom_string_caseless_lwc_isequal(atr_val, value);
+	*match = attribute_value_equal(atr_val, value, caseless);
 
 	/* check for dashmatch */
 	if (*match == false) {
@@ -1002,7 +1051,7 @@ css_error node_has_attribute_dashmatch(void *pw,
 		size_t len = dom_string_byte_length(atr_val);
 
 		if (len > vlen && data[vlen] == '-' &&
-		    strncasecmp(data, vdata, vlen) == 0) {
+		    attribute_value_ncmp(data, vdata, vlen, caseless) == 0) {
 			*match = true;
 		}
 	}
@@ -1032,6 +1081,7 @@ css_error node_has_attribute_includes(void *pw,
 				      lwc_string *value,
 				      bool *match)
 {
+	bool caseless = attribute_value_caseless(qname);
 	dom_node *n = node;
 	dom_string *name;
 	dom_string *atr_val;
@@ -1070,8 +1120,10 @@ css_error node_has_attribute_includes(void *pw,
 	for (p = start; p <= end; p++) {
 		if (*p == ' ' || *p == '\0') {
 			if ((size_t)(p - start) == vlen &&
-			    strncasecmp(start, lwc_string_data(value), vlen) ==
-				    0) {
+			    attribute_value_ncmp(start,
+						 lwc_string_data(value),
+						 vlen,
+						 caseless) == 0) {
 				*match = true;
 				break;
 			}
@@ -1105,6 +1157,7 @@ css_error node_has_attribute_prefix(void *pw,
 				    lwc_string *value,
 				    bool *match)
 {
+	bool caseless = attribute_value_caseless(qname);
 	dom_node *n = node;
 	dom_string *name;
 	dom_string *atr_val;
@@ -1134,7 +1187,7 @@ css_error node_has_attribute_prefix(void *pw,
 	dom_string_unref(name);
 
 	/* check for exact match */
-	*match = dom_string_caseless_lwc_isequal(atr_val, value);
+	*match = attribute_value_equal(atr_val, value, caseless);
 
 	/* check for prefix match */
 	if (*match == false) {
@@ -1142,7 +1195,9 @@ css_error node_has_attribute_prefix(void *pw,
 		size_t len = dom_string_byte_length(atr_val);
 
 		if ((len >= vlen) &&
-		    (strncasecmp(data, lwc_string_data(value), vlen) == 0)) {
+		    (attribute_value_ncmp(
+			     data, lwc_string_data(value), vlen, caseless) ==
+		     0)) {
 			*match = true;
 		}
 	}
@@ -1172,6 +1227,7 @@ css_error node_has_attribute_suffix(void *pw,
 				    lwc_string *value,
 				    bool *match)
 {
+	bool caseless = attribute_value_caseless(qname);
 	dom_node *n = node;
 	dom_string *name;
 	dom_string *atr_val;
@@ -1201,7 +1257,7 @@ css_error node_has_attribute_suffix(void *pw,
 	dom_string_unref(name);
 
 	/* check for exact match */
-	*match = dom_string_caseless_lwc_isequal(atr_val, value);
+	*match = attribute_value_equal(atr_val, value, caseless);
 
 	/* check for prefix match */
 	if (*match == false) {
@@ -1211,7 +1267,9 @@ css_error node_has_attribute_suffix(void *pw,
 		const char *start = (char *)data + len - vlen;
 
 		if ((len >= vlen) &&
-		    (strncasecmp(start, lwc_string_data(value), vlen) == 0)) {
+		    (attribute_value_ncmp(
+			     start, lwc_string_data(value), vlen, caseless) ==
+		     0)) {
 			*match = true;
 		}
 	}
@@ -1241,6 +1299,7 @@ css_error node_has_attribute_substring(void *pw,
 				       lwc_string *value,
 				       bool *match)
 {
+	bool caseless = attribute_value_caseless(qname);
 	dom_node *n = node;
 	dom_string *name;
 	dom_string *atr_val;
@@ -1270,7 +1329,7 @@ css_error node_has_attribute_substring(void *pw,
 	dom_string_unref(name);
 
 	/* check for exact match */
-	*match = dom_string_caseless_lwc_isequal(atr_val, value);
+	*match = attribute_value_equal(atr_val, value, caseless);
 
 	/* check for prefix match */
 	if (*match == false) {
@@ -1281,7 +1340,9 @@ css_error node_has_attribute_substring(void *pw,
 
 		if (len >= vlen) {
 			while (start <= last_start) {
-				if (strncasecmp(start, vdata, vlen) == 0) {
+				if (attribute_value_ncmp(
+					    start, vdata, vlen, caseless) ==
+				    0) {
 					*match = true;
 					break;
 				}
@@ -1473,7 +1534,15 @@ css_error node_is_empty(void *pw, void *node, bool *match)
 			return CSS_BADPARM;
 		}
 
-		if (ntype == DOM_ELEMENT_NODE || ntype == DOM_TEXT_NODE) {
+		if (ntype == DOM_TEXT_NODE || ntype == DOM_CDATA_SECTION_NODE) {
+			uint32_t len = 0;
+			(void)dom_characterdata_get_length(n, &len);
+			if (len > 0) {
+				ntype = DOM_ELEMENT_NODE;
+			}
+		}
+
+		if (ntype == DOM_ELEMENT_NODE) {
 			*match = false;
 			dom_node_unref(n);
 			break;
@@ -1657,6 +1726,111 @@ css_error node_is_focus(void *pw, void *node, bool *match)
 	return CSS_OK;
 }
 
+static bool node_tag_is(dom_node *node, lwc_string *tag)
+{
+	dom_string *name = NULL;
+	bool match;
+
+	if (node == NULL || dom_node_get_node_name(node, &name) != DOM_NO_ERR ||
+	    name == NULL) {
+		return false;
+	}
+	match = dom_string_caseless_lwc_isequal(name, tag);
+	dom_string_unref(name);
+	return match;
+}
+
+static bool node_has_disabled_attr(dom_node *node)
+{
+	bool has = false;
+
+	return dom_element_has_attribute(node, corestring_dom_disabled, &has) ==
+		       DOM_NO_ERR &&
+	       has;
+}
+
+static bool node_is_form_control(dom_node *node)
+{
+	return node_tag_is(node, corestring_lwc_button) ||
+	       node_tag_is(node, corestring_lwc_input) ||
+	       node_tag_is(node, corestring_lwc_select) ||
+	       node_tag_is(node, corestring_lwc_textarea) ||
+	       node_tag_is(node, corestring_lwc_fieldset);
+}
+
+static dom_node *node_first_legend(dom_node *fieldset)
+{
+	dom_node *child = NULL, *next;
+	dom_node_type type;
+
+	(void)dom_node_get_first_child(fieldset, &child);
+	while (child != NULL) {
+		if (dom_node_get_node_type(child, &type) == DOM_NO_ERR &&
+		    type == DOM_ELEMENT_NODE &&
+		    node_tag_is(child, corestring_lwc_legend)) {
+			return child;
+		}
+		if (dom_node_get_next_sibling(child, &next) != DOM_NO_ERR) {
+			next = NULL;
+		}
+		dom_node_unref(child);
+		child = next;
+	}
+	return NULL;
+}
+
+static bool node_in_disabled_fieldset(dom_node *node)
+{
+	dom_node *child = dom_node_ref(node);
+	dom_node *parent = NULL;
+	bool disabled = false;
+
+	while (!disabled &&
+	       dom_node_get_parent_node(child, &parent) == DOM_NO_ERR &&
+	       parent != NULL) {
+		if (node_tag_is(parent, corestring_lwc_fieldset) &&
+		    node_has_disabled_attr(parent)) {
+			dom_node *legend = node_first_legend(parent);
+			disabled = legend != child;
+			dom_node_unref(legend);
+		}
+		dom_node_unref(child);
+		child = parent;
+	}
+	dom_node_unref(child);
+	return disabled;
+}
+
+static bool node_disabled_state(dom_node *node, bool *applicable)
+{
+	dom_node *parent = NULL;
+	bool disabled;
+
+	*applicable = true;
+	if (node_is_form_control(node)) {
+		return node_has_disabled_attr(node) ||
+		       node_in_disabled_fieldset(node);
+	}
+	if (node_tag_is(node, corestring_lwc_optgroup)) {
+		return node_has_disabled_attr(node);
+	}
+	if (node_tag_is(node, corestring_lwc_option)) {
+		if (node_has_disabled_attr(node)) {
+			return true;
+		}
+		if (dom_node_get_parent_node(node, &parent) != DOM_NO_ERR ||
+		    parent == NULL) {
+			return false;
+		}
+		disabled = node_tag_is(parent, corestring_lwc_optgroup) &&
+			   node_has_disabled_attr(parent);
+		dom_node_unref(parent);
+		return disabled;
+	}
+	*applicable = false;
+	return false;
+}
+
 /**
  * Callback to determine if a node is enabled.
  *
@@ -1669,9 +1843,10 @@ css_error node_is_focus(void *pw, void *node, bool *match)
  */
 css_error node_is_enabled(void *pw, void *node, bool *match)
 {
-	/** \todo Support enabled nodes */
+	bool applicable;
+	bool disabled = node_disabled_state(node, &applicable);
 
-	*match = false;
+	*match = applicable && !disabled;
 
 	return CSS_OK;
 }
@@ -1688,9 +1863,9 @@ css_error node_is_enabled(void *pw, void *node, bool *match)
  */
 css_error node_is_disabled(void *pw, void *node, bool *match)
 {
-	/** \todo Support disabled nodes */
+	bool applicable;
 
-	*match = false;
+	*match = node_disabled_state(node, &applicable);
 
 	return CSS_OK;
 }
@@ -1707,9 +1882,26 @@ css_error node_is_disabled(void *pw, void *node, bool *match)
  */
 css_error node_is_checked(void *pw, void *node, bool *match)
 {
-	/** \todo Support checked nodes */
+	dom_string *type = NULL;
 
 	*match = false;
+
+	if (node_tag_is(node, corestring_lwc_input)) {
+		if (dom_html_input_element_get_type(node, &type) !=
+			    DOM_NO_ERR ||
+		    type == NULL) {
+			return CSS_OK;
+		}
+		if (dom_string_caseless_lwc_isequal(type,
+						    corestring_lwc_checkbox) ||
+		    dom_string_caseless_lwc_isequal(type,
+						    corestring_lwc_radio)) {
+			(void)dom_html_input_element_get_checked(node, match);
+		}
+		dom_string_unref(type);
+	} else if (node_tag_is(node, corestring_lwc_option)) {
+		(void)dom_html_option_element_get_selected(node, match);
+	}
 
 	return CSS_OK;
 }
@@ -1734,7 +1926,7 @@ css_error node_is_target(void *pw, void *node, bool *match)
 }
 
 /**
- * Callback to determine if a node has the given language
+ * Callback to determine if a node has the given language.
  *
  * \param pw     HTML document
  * \param node   DOM node
@@ -1746,9 +1938,42 @@ css_error node_is_target(void *pw, void *node, bool *match)
  */
 css_error node_is_lang(void *pw, void *node, lwc_string *lang, bool *match)
 {
-	/** \todo Support languages */
+	dom_node *n = dom_node_ref(node);
+	dom_string *value = NULL;
+	size_t want = lwc_string_length(lang);
 
 	*match = false;
+
+	while (n != NULL) {
+		dom_node *parent = NULL;
+		dom_node_type type;
+
+		if (dom_node_get_node_type(n, &type) == DOM_NO_ERR &&
+		    type == DOM_ELEMENT_NODE &&
+		    dom_element_get_attribute(n, corestring_dom_lang, &value) ==
+			    DOM_NO_ERR &&
+		    value != NULL) {
+			break;
+		}
+		if (dom_node_get_parent_node(n, &parent) != DOM_NO_ERR) {
+			parent = NULL;
+		}
+		dom_node_unref(n);
+		n = parent;
+	}
+	dom_node_unref(n);
+
+	if (value == NULL) {
+		return CSS_OK;
+	}
+	if (dom_string_byte_length(value) >= want &&
+	    strncasecmp(dom_string_data(value), lwc_string_data(lang), want) ==
+		    0 &&
+	    (dom_string_byte_length(value) == want ||
+	     dom_string_data(value)[want] == '-')) {
+		*match = true;
+	}
+	dom_string_unref(value);
 
 	return CSS_OK;
 }
@@ -1846,11 +2071,10 @@ css_error get_libcss_node_data(void *pw, void *node, void **libcss_node_data)
 	return CSS_OK;
 }
 
-static enum dom_walk_cmd
-nscss_clear_node_data_cb(enum dom_walk_stage stage,
-			 dom_node_type type,
-			 dom_node *node,
-			 void *ctx)
+static enum dom_walk_cmd nscss_clear_node_data_cb(enum dom_walk_stage stage,
+						  dom_node_type type,
+						  dom_node *node,
+						  void *ctx)
 {
 	void *data = NULL;
 	void *old = NULL;
@@ -1864,12 +2088,8 @@ nscss_clear_node_data_cb(enum dom_walk_stage stage,
 	    data == NULL) {
 		return DOM_WALK_CMD_CONTINUE;
 	}
-	(void)css_libcss_node_data_handler(&selection_handler,
-					   CSS_NODE_DELETED,
-					   NULL,
-					   node,
-					   NULL,
-					   data);
+	(void)css_libcss_node_data_handler(
+		&selection_handler, CSS_NODE_DELETED, NULL, node, NULL, data);
 	(void)dom_node_set_user_data(node,
 				     corestring_dom___ns_key_libcss_node_data,
 				     NULL,
@@ -1881,17 +2101,14 @@ nscss_clear_node_data_cb(enum dom_walk_stage stage,
 /* exported function documented in css/select.h */
 void nscss_clear_one_node_data(dom_node *node)
 {
-	nscss_clear_node_data_cb(DOM_WALK_STAGE_ENTER, DOM_ELEMENT_NODE, node, NULL);
+	nscss_clear_node_data_cb(
+		DOM_WALK_STAGE_ENTER, DOM_ELEMENT_NODE, node, NULL);
 }
 
 void nscss_clear_node_data(dom_node *root)
 {
-	nscss_clear_node_data_cb(DOM_WALK_STAGE_ENTER,
-				 DOM_ELEMENT_NODE,
-				 root,
-				 NULL);
-	(void)libdom_treewalk(DOM_WALK_ENABLE_ENTER,
-			      nscss_clear_node_data_cb,
-			      root,
-			      NULL);
+	nscss_clear_node_data_cb(
+		DOM_WALK_STAGE_ENTER, DOM_ELEMENT_NODE, root, NULL);
+	(void)libdom_treewalk(
+		DOM_WALK_ENABLE_ENTER, nscss_clear_node_data_cb, root, NULL);
 }

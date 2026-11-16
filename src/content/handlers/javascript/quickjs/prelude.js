@@ -238,7 +238,7 @@
         accessor(iface, "form", function () {
             var id = this.getAttribute("form");
             if (id !== null) {
-                var f = this.ownerDocument.getElementById(id);
+                var f = this.isConnected ? this.ownerDocument.getElementById(id) : null;
                 return f !== null && f.tagName === "FORM" ? f : null;
             }
             return this.closest("form");
@@ -288,7 +288,12 @@
     accessor(global.HTMLFormElement, "elements", function () {
         var form = this;
         var out = [];
-        var nodes = this.ownerDocument.getElementsByTagName("*");
+        var root = form;
+        while (root.parentNode !== null) {
+            root = root.parentNode;
+        }
+        var nodes = root.nodeType === 1 ? [root].concat(Array.prototype.slice.call(root.getElementsByTagName("*"))) :
+            root.querySelectorAll("*");
         for (var i = 0; i < nodes.length; i++) {
             var n = nodes[i];
             if (listedControls.test(n.tagName) && !(n.tagName === "INPUT" && (n.getAttribute("type") || "").toLowerCase() === "image") &&
@@ -326,9 +331,15 @@
             if (submitter !== undefined && submitter !== null && submitter.form !== this) {
                 throw domException("The specified element is not owned by this form element", "NotFoundError");
             }
-            var evt = new Event("submit", { bubbles: true, cancelable: true });
-            if (submitter) {
-                define(evt, "submitter", submitter);
+            var novalidate = this.hasAttribute("novalidate") || (submitter && submitter.hasAttribute("formnovalidate"));
+            if (!novalidate && !this.checkValidity()) {
+                return;
+            }
+            var evt = typeof SubmitEvent === "function" ?
+                new SubmitEvent("submit", { bubbles: true, cancelable: true, submitter: submitter || null }) :
+                new Event("submit", { bubbles: true, cancelable: true });
+            if (!("submitter" in evt)) {
+                define(evt, "submitter", submitter || null);
             }
             if (this.dispatchEvent(evt)) {
                 this.submit();
@@ -1507,6 +1518,490 @@
         var w = makeTraversal(TreeWalker.prototype, root, whatToShow, filter);
         define(w, "_current", root);
         return w;
+    });
+
+    var comparePoints = native.comparePoints;
+
+    function isCharacterData(node) {
+        var t = node.nodeType;
+        return t === 3 || t === 4 || t === 7 || t === 8;
+    }
+
+    function nodeLength(node) {
+        if (node.nodeType === 10) {
+            return 0;
+        }
+        return isCharacterData(node) ? node.length : node.childNodes.length;
+    }
+
+    function nodeIndex(node) {
+        var index = 0;
+        while ((node = node.previousSibling) !== null) {
+            index++;
+        }
+        return index;
+    }
+
+    function rootOf(node) {
+        while (node.parentNode !== null) {
+            node = node.parentNode;
+        }
+        return node;
+    }
+
+    function requireNode(node) {
+        if (!(node instanceof Node)) {
+            throw new TypeError("parameter 1 is not of type 'Node'");
+        }
+        return node;
+    }
+
+    function parentOrThrow(node) {
+        var parent = requireNode(node).parentNode;
+        if (parent === null) {
+            throw domException("The node has no parent", "InvalidNodeTypeError");
+        }
+        return parent;
+    }
+
+    function rangeContainsNode(range, node) {
+        return comparePoints(node, 0, range.startContainer, range.startOffset) > 0 &&
+            comparePoints(node, nodeLength(node), range.endContainer, range.endOffset) < 0;
+    }
+
+    function containedNodes(range, includeDescendants) {
+        var out = [];
+        var common = range.commonAncestorContainer;
+        var n = common.firstChild;
+        while (n !== null) {
+            var inside = rangeContainsNode(range, n);
+            if (inside) {
+                out.push(n);
+            }
+            n = followingIn(n, common, inside && !includeDescendants);
+        }
+        return out;
+    }
+
+    function cutPoint(sc, so, ec) {
+        if (isInclusiveAncestor(sc, ec)) {
+            return [sc, so];
+        }
+        var ref = sc;
+        while (!isInclusiveAncestor(ref.parentNode, ec)) {
+            ref = ref.parentNode;
+        }
+        return [ref.parentNode, nodeIndex(ref) + 1];
+    }
+
+    function cloneData(node, offset, count) {
+        var c = node.cloneNode(false);
+        c.data = node.substringData(offset, count);
+        return c;
+    }
+
+    function rangeContents(range, extract) {
+        var sc = range.startContainer, so = range.startOffset;
+        var ec = range.endContainer, eo = range.endOffset;
+        var doc = sc.nodeType === 9 ? sc : sc.ownerDocument;
+        var frag = doc.createDocumentFragment();
+        if (sc === ec && so === eo) {
+            return frag;
+        }
+        if (sc === ec && isCharacterData(sc)) {
+            frag.appendChild(cloneData(sc, so, eo - so));
+            if (extract) {
+                sc.replaceData(so, eo - so, "");
+            }
+            return frag;
+        }
+        var common = range.commonAncestorContainer;
+        var first = null, last = null, contained = [];
+        for (var n = common.firstChild; n !== null; n = n.nextSibling) {
+            var hasStart = isInclusiveAncestor(n, sc), hasEnd = isInclusiveAncestor(n, ec);
+            if (hasStart && !hasEnd) {
+                first = n;
+            } else if (hasEnd && !hasStart) {
+                last = n;
+            } else if (!hasStart && rangeContainsNode(range, n)) {
+                contained.push(n);
+            }
+        }
+        if (contained.some(function (c) { return c.nodeType === 10; })) {
+            throw domException("A DocumentType node cannot be extracted", "HierarchyRequestError");
+        }
+        var cut = extract ? cutPoint(sc, so, ec) : null;
+        var sub;
+        if (first !== null) {
+            if (isCharacterData(first)) {
+                frag.appendChild(cloneData(sc, so, nodeLength(sc) - so));
+                if (extract) {
+                    sc.replaceData(so, nodeLength(sc) - so, "");
+                }
+            } else {
+                sub = new Range();
+                sub.setStart(sc, so);
+                sub.setEnd(first, nodeLength(first));
+                frag.appendChild(first.cloneNode(false)).appendChild(rangeContents(sub, extract));
+            }
+        }
+        contained.forEach(function (c) {
+            frag.appendChild(extract ? c : c.cloneNode(true));
+        });
+        if (last !== null) {
+            if (isCharacterData(last)) {
+                frag.appendChild(cloneData(ec, 0, eo));
+                if (extract) {
+                    ec.replaceData(0, eo, "");
+                }
+            } else {
+                sub = new Range();
+                sub.setStart(last, 0);
+                sub.setEnd(ec, eo);
+                frag.appendChild(last.cloneNode(false)).appendChild(rangeContents(sub, extract));
+            }
+        }
+        if (extract) {
+            range.setStart(cut[0], cut[1]);
+            range.collapse(true);
+        }
+        return frag;
+    }
+
+    function hierarchyError(message) {
+        return domException(message, "HierarchyRequestError");
+    }
+
+    var RangeMethods = {
+        setStartBefore: function (node) {
+            this.setStart(parentOrThrow(node), nodeIndex(node));
+        },
+        setStartAfter: function (node) {
+            this.setStart(parentOrThrow(node), nodeIndex(node) + 1);
+        },
+        setEndBefore: function (node) {
+            this.setEnd(parentOrThrow(node), nodeIndex(node));
+        },
+        setEndAfter: function (node) {
+            this.setEnd(parentOrThrow(node), nodeIndex(node) + 1);
+        },
+        selectNode: function (node) {
+            var parent = parentOrThrow(node);
+            var index = nodeIndex(node);
+            this.setStart(parent, index);
+            this.setEnd(parent, index + 1);
+        },
+        selectNodeContents: function (node) {
+            if (requireNode(node).nodeType === 10) {
+                throw domException("Cannot select a DocumentType", "InvalidNodeTypeError");
+            }
+            this.setStart(node, 0);
+            this.setEnd(node, nodeLength(node));
+        },
+        deleteContents: function () {
+            if (this.collapsed) {
+                return;
+            }
+            var sc = this.startContainer, so = this.startOffset;
+            var ec = this.endContainer, eo = this.endOffset;
+            if (sc === ec && isCharacterData(sc)) {
+                sc.replaceData(so, eo - so, "");
+                return;
+            }
+            var doomed = containedNodes(this, false);
+            var cut = cutPoint(sc, so, ec);
+            if (isCharacterData(sc)) {
+                sc.replaceData(so, nodeLength(sc) - so, "");
+            }
+            doomed.forEach(function (n) {
+                if (n.parentNode !== null) {
+                    n.parentNode.removeChild(n);
+                }
+            });
+            if (isCharacterData(ec)) {
+                ec.replaceData(0, eo, "");
+            }
+            this.setStart(cut[0], cut[1]);
+            this.collapse(true);
+        },
+        extractContents: function () {
+            return rangeContents(this, true);
+        },
+        cloneContents: function () {
+            return rangeContents(this, false);
+        },
+        insertNode: function (node) {
+            requireNode(node);
+            var sc = this.startContainer, so = this.startOffset;
+            var t = sc.nodeType;
+            if (t === 7 || t === 8 || (t === 3 && sc.parentNode === null) || sc === node) {
+                throw hierarchyError("Cannot insert a node here");
+            }
+            var ref = t === 3 ? sc : sc.childNodes.item(so);
+            var parent = ref === null ? sc : ref.parentNode;
+            var pt = parent.nodeType;
+            if ((pt !== 1 && pt !== 9 && pt !== 11) || isInclusiveAncestor(node, parent)) {
+                throw hierarchyError("Cannot insert a node here");
+            }
+            if (t === 3) {
+                ref = sc.splitText(so);
+            }
+            if (node === ref) {
+                ref = ref.nextSibling;
+            }
+            if (node.parentNode !== null) {
+                node.parentNode.removeChild(node);
+            }
+            var newOffset = (ref === null ? nodeLength(parent) : nodeIndex(ref)) +
+                (node.nodeType === 11 ? nodeLength(node) : 1);
+            parent.insertBefore(node, ref);
+            if (this.collapsed) {
+                this.setEnd(parent, newOffset);
+            }
+        },
+        surroundContents: function (newParent) {
+            requireNode(newParent);
+            var sc = this.startContainer, ec = this.endContainer;
+            [sc, ec].forEach(function (from) {
+                for (var n = from; n !== null; n = n.parentNode) {
+                    if (n.nodeType !== 3 && isInclusiveAncestor(n, sc) !== isInclusiveAncestor(n, ec)) {
+                        throw domException("The range partially contains a non-Text node", "InvalidStateError");
+                    }
+                }
+            });
+            var t = newParent.nodeType;
+            if (t === 9 || t === 10 || t === 11) {
+                throw domException("Invalid parent node type", "InvalidNodeTypeError");
+            }
+            var frag = this.extractContents();
+            while (newParent.firstChild !== null) {
+                newParent.removeChild(newParent.firstChild);
+            }
+            this.insertNode(newParent);
+            newParent.appendChild(frag);
+            this.selectNode(newParent);
+        },
+        intersectsNode: function (node) {
+            requireNode(node);
+            if (rootOf(node) !== rootOf(this.startContainer)) {
+                return false;
+            }
+            var parent = node.parentNode;
+            if (parent === null) {
+                return true;
+            }
+            var index = nodeIndex(node);
+            return comparePoints(parent, index, this.endContainer, this.endOffset) < 0 &&
+                comparePoints(parent, index + 1, this.startContainer, this.startOffset) > 0;
+        },
+        createContextualFragment: function (html) {
+            var sc = this.startContainer;
+            var el = sc.nodeType === 1 ? sc : sc.parentElement;
+            var doc = sc.nodeType === 9 ? sc : sc.ownerDocument;
+            if (el === null || el.localName === "html") {
+                el = doc.createElement("body");
+            }
+            var holder = doc.createElement(el.localName);
+            holder.innerHTML = String(html);
+            var frag = doc.createDocumentFragment();
+            while (holder.firstChild !== null) {
+                frag.appendChild(holder.firstChild);
+            }
+            return frag;
+        },
+        getBoundingClientRect: function () {
+            var c = this.commonAncestorContainer;
+            var el = c.nodeType === 1 ? c : c.parentElement;
+            return el !== null ? el.getBoundingClientRect() : new DOMRect(0, 0, 0, 0);
+        },
+        getClientRects: function () {
+            return [this.getBoundingClientRect()];
+        },
+        toString: function () {
+            var sc = this.startContainer, so = this.startOffset;
+            var ec = this.endContainer, eo = this.endOffset;
+            if (sc === ec && sc.nodeType === 3) {
+                return sc.substringData(so, eo - so);
+            }
+            var s = sc.nodeType === 3 ? sc.substringData(so, nodeLength(sc) - so) : "";
+            containedNodes(this, true).forEach(function (n) {
+                if (n.nodeType === 3) {
+                    s += n.data;
+                }
+            });
+            if (ec.nodeType === 3) {
+                s += ec.substringData(0, eo);
+            }
+            return s;
+        }
+    };
+    Object.keys(RangeMethods).forEach(function (name) {
+        define(Range.prototype, name, RangeMethods[name]);
+    });
+
+    var selections = new WeakMap();
+
+    function Selection() {
+        throw new TypeError("Illegal constructor");
+    }
+
+    function selectionRange(node, offset) {
+        var r = new Range();
+        r.setStart(node, offset);
+        return r;
+    }
+
+    function setSelection(sel, range, backward) {
+        sel._range = range;
+        sel._backward = backward;
+    }
+
+    Selection.prototype = {
+        constructor: Selection,
+        get anchorNode() {
+            return this._range === null ? null : this._backward ? this._range.endContainer : this._range.startContainer;
+        },
+        get anchorOffset() {
+            return this._range === null ? 0 : this._backward ? this._range.endOffset : this._range.startOffset;
+        },
+        get focusNode() {
+            return this._range === null ? null : this._backward ? this._range.startContainer : this._range.endContainer;
+        },
+        get focusOffset() {
+            return this._range === null ? 0 : this._backward ? this._range.startOffset : this._range.endOffset;
+        },
+        get isCollapsed() {
+            return this._range === null || this._range.collapsed;
+        },
+        get rangeCount() {
+            return this._range === null ? 0 : 1;
+        },
+        get type() {
+            return this._range === null ? "None" : this._range.collapsed ? "Caret" : "Range";
+        },
+        get direction() {
+            return this._range === null || this._range.collapsed ? "none" : this._backward ? "backward" : "forward";
+        },
+        getRangeAt: function (index) {
+            if (index !== 0 || this._range === null) {
+                throw domException("Index out of range", "IndexSizeError");
+            }
+            return this._range;
+        },
+        addRange: function (range) {
+            if (!(range instanceof Range)) {
+                throw new TypeError("parameter 1 is not of type 'Range'");
+            }
+            if (this._range === null) {
+                setSelection(this, range, false);
+            }
+        },
+        removeRange: function (range) {
+            if (range !== this._range || range === null) {
+                throw domException("The range is not selected", "NotFoundError");
+            }
+            setSelection(this, null, false);
+        },
+        removeAllRanges: function () {
+            setSelection(this, null, false);
+        },
+        empty: function () {
+            setSelection(this, null, false);
+        },
+        collapse: function (node, offset) {
+            if (node === null || node === undefined) {
+                setSelection(this, null, false);
+                return;
+            }
+            setSelection(this, selectionRange(node, offset === undefined ? 0 : offset >>> 0), false);
+        },
+        setPosition: function (node, offset) {
+            this.collapse(node, offset);
+        },
+        collapseToStart: function () {
+            if (this._range === null) {
+                throw domException("No selection", "InvalidStateError");
+            }
+            setSelection(this, selectionRange(this._range.startContainer, this._range.startOffset), false);
+        },
+        collapseToEnd: function () {
+            if (this._range === null) {
+                throw domException("No selection", "InvalidStateError");
+            }
+            setSelection(this, selectionRange(this._range.endContainer, this._range.endOffset), false);
+        },
+        extend: function (node, offset) {
+            if (this._range === null) {
+                throw domException("No selection", "InvalidStateError");
+            }
+            this.setBaseAndExtent(this.anchorNode, this.anchorOffset, node, offset === undefined ? 0 : offset >>> 0);
+        },
+        setBaseAndExtent: function (anchorNode, anchorOffset, focusNode, focusOffset) {
+            var r = new Range();
+            anchorOffset >>>= 0;
+            focusOffset >>>= 0;
+            if (rootOf(requireNode(anchorNode)) === rootOf(requireNode(focusNode)) &&
+                comparePoints(focusNode, focusOffset, anchorNode, anchorOffset) < 0) {
+                r.setStart(focusNode, focusOffset);
+                r.setEnd(anchorNode, anchorOffset);
+                setSelection(this, r, true);
+            } else {
+                r.setStart(anchorNode, anchorOffset);
+                r.setEnd(focusNode, focusOffset);
+                setSelection(this, r, false);
+            }
+        },
+        selectAllChildren: function (node) {
+            var r = new Range();
+            r.selectNodeContents(node);
+            setSelection(this, r, false);
+        },
+        deleteFromDocument: function () {
+            if (this._range !== null) {
+                this._range.deleteContents();
+            }
+        },
+        containsNode: function (node, allowPartial) {
+            var r = this._range;
+            requireNode(node);
+            if (r === null || rootOf(node) !== rootOf(r.startContainer)) {
+                return false;
+            }
+            if (allowPartial) {
+                return r.intersectsNode(node);
+            }
+            var parent = node.parentNode;
+            if (parent === null) {
+                return false;
+            }
+            var index = nodeIndex(node);
+            return comparePoints(parent, index, r.startContainer, r.startOffset) >= 0 &&
+                comparePoints(parent, index + 1, r.endContainer, r.endOffset) <= 0;
+        },
+        modify: function () {
+        },
+        toString: function () {
+            return this._range === null ? "" : this._range.toString();
+        }
+    };
+    define(global, "Selection", Selection);
+
+    function selectionOf(doc) {
+        var sel = selections.get(doc);
+        if (sel === undefined) {
+            sel = Object.create(Selection.prototype);
+            define(sel, "_range", null);
+            define(sel, "_backward", false);
+            selections.set(doc, sel);
+        }
+        return sel;
+    }
+
+    define(Document.prototype, "getSelection", function () {
+        return selectionOf(this);
+    });
+    define(global, "getSelection", function () {
+        return selectionOf(global.document);
     });
 
     /* Selectors */
@@ -3844,9 +4339,6 @@
     defineGetter(Document.prototype, "readyState", function () {
         return ["loading", "interactive", "complete"][native.readyState()] || "loading";
     });
-    defineGetter(Document.prototype, "activeElement", function () {
-        return this.body || this.documentElement;
-    });
     defineGetter(Document.prototype, "hidden", function () {
         return false;
     });
@@ -3915,6 +4407,899 @@
         }
         return n;
     });
+
+    function convertNodes(doc, nodes) {
+        var list = Array.prototype.map.call(nodes, function (n) {
+            return n instanceof Node ? n : doc.createTextNode(String(n));
+        });
+        if (list.length === 1) {
+            return list[0];
+        }
+        var frag = doc.createDocumentFragment();
+        list.forEach(function (n) {
+            frag.appendChild(n);
+        });
+        return frag;
+    }
+
+    function docOf(node) {
+        return node.nodeType === 9 ? node : node.ownerDocument;
+    }
+
+    function viableSibling(node, nodes, forward) {
+        var set = Array.prototype.slice.call(nodes);
+        var n = forward ? node.nextSibling : node.previousSibling;
+        while (n !== null && set.indexOf(n) >= 0) {
+            n = forward ? n.nextSibling : n.previousSibling;
+        }
+        return n;
+    }
+
+    var ChildNodeMethods = {
+        before: function () {
+            var parent = this.parentNode;
+            if (parent === null) {
+                return;
+            }
+            var prev = viableSibling(this, arguments, false);
+            var node = convertNodes(docOf(this), arguments);
+            parent.insertBefore(node, prev === null ? parent.firstChild : prev.nextSibling);
+        },
+        after: function () {
+            var parent = this.parentNode;
+            if (parent === null) {
+                return;
+            }
+            var next = viableSibling(this, arguments, true);
+            parent.insertBefore(convertNodes(docOf(this), arguments), next);
+        },
+        replaceWith: function () {
+            var parent = this.parentNode;
+            if (parent === null) {
+                return;
+            }
+            var next = viableSibling(this, arguments, true);
+            var node = convertNodes(docOf(this), arguments);
+            if (this.parentNode === parent) {
+                parent.replaceChild(node, this);
+            } else {
+                parent.insertBefore(node, next);
+            }
+        },
+        remove: function () {
+            if (this.parentNode !== null) {
+                this.parentNode.removeChild(this);
+            }
+        }
+    };
+    [Element, CharacterData, global.DocumentType].forEach(function (iface) {
+        if (typeof iface !== "function") {
+            return;
+        }
+        Object.keys(ChildNodeMethods).forEach(function (name) {
+            define(iface.prototype, name, ChildNodeMethods[name]);
+        });
+    });
+
+    var ParentNodeMethods = {
+        append: function () {
+            this.appendChild(convertNodes(docOf(this), arguments));
+        },
+        prepend: function () {
+            this.insertBefore(convertNodes(docOf(this), arguments), this.firstChild);
+        },
+        replaceChildren: function () {
+            var node = convertNodes(docOf(this), arguments);
+            while (this.firstChild !== null) {
+                this.removeChild(this.firstChild);
+            }
+            this.appendChild(node);
+        }
+    };
+    [Element, Document, DocumentFragment].forEach(function (iface) {
+        Object.keys(ParentNodeMethods).forEach(function (name) {
+            define(iface.prototype, name, ParentNodeMethods[name]);
+        });
+    });
+
+    define(DocumentFragment.prototype, "getElementById", function (id) {
+        id = String(id);
+        for (var n = this.firstChild; n !== null; n = followingIn(n, this, false)) {
+            if (n.nodeType === 1 && n.id === id) {
+                return n;
+            }
+        }
+        return null;
+    });
+
+    function adjacentTarget(el, where, node) {
+        var parent = el.parentNode;
+        switch (String(where).toLowerCase()) {
+        case "beforebegin":
+            if (parent === null) {
+                return null;
+            }
+            parent.insertBefore(node, el);
+            return node;
+        case "afterbegin":
+            el.insertBefore(node, el.firstChild);
+            return node;
+        case "beforeend":
+            el.appendChild(node);
+            return node;
+        case "afterend":
+            if (parent === null) {
+                return null;
+            }
+            parent.insertBefore(node, el.nextSibling);
+            return node;
+        }
+        throw domException("The value provided ('" + where + "') is not one of 'beforeBegin', 'afterBegin', 'beforeEnd', or 'afterEnd'.", "SyntaxError");
+    }
+
+    define(Element.prototype, "insertAdjacentElement", function (where, el) {
+        if (!(el instanceof Element)) {
+            throw new TypeError("parameter 2 is not of type 'Element'");
+        }
+        return adjacentTarget(this, where, el);
+    });
+    define(Element.prototype, "insertAdjacentText", function (where, text) {
+        adjacentTarget(this, where, this.ownerDocument.createTextNode(String(text)));
+    });
+    define(Element.prototype, "insertAdjacentHTML", function (where, html) {
+        var pos = String(where).toLowerCase();
+        var context = pos === "beforebegin" || pos === "afterend" ? this.parentElement : this;
+        if ((pos === "beforebegin" || pos === "afterend") && (this.parentNode === null || this.parentNode.nodeType === 9)) {
+            throw domException("The element has no parent", "NoModificationAllowedError");
+        }
+        var doc = this.ownerDocument;
+        var holder = doc.createElement(context === null || context.localName === "html" ? "body" : context.localName);
+        holder.innerHTML = String(html);
+        var frag = doc.createDocumentFragment();
+        while (holder.firstChild !== null) {
+            frag.appendChild(holder.firstChild);
+        }
+        adjacentTarget(this, pos, frag);
+    });
+
+    var focused = new WeakMap();
+
+    function focusEvent(type, related, bubbles) {
+        var init = { bubbles: bubbles, cancelable: false, relatedTarget: related };
+        return typeof FocusEvent === "function" ? new FocusEvent(type, init) : new Event(type, init);
+    }
+
+    function setFocus(doc, el) {
+        var old = focused.get(doc) || null;
+        if (old === el) {
+            return;
+        }
+        focused.set(doc, el);
+        if (old !== null && old.isConnected) {
+            old.dispatchEvent(focusEvent("blur", el, false));
+            old.dispatchEvent(focusEvent("focusout", el, true));
+        }
+        if (el !== null) {
+            el.dispatchEvent(focusEvent("focus", old, false));
+            el.dispatchEvent(focusEvent("focusin", old, true));
+        }
+    }
+
+    define(HTMLElement.prototype, "focus", function () {
+        if (this.isConnected && !this.disabled) {
+            setFocus(this.ownerDocument, this);
+        }
+    });
+    define(HTMLElement.prototype, "blur", function () {
+        if (focused.get(this.ownerDocument) === this) {
+            setFocus(this.ownerDocument, null);
+        }
+    });
+    defineGetter(Document.prototype, "activeElement", function () {
+        var el = focused.get(this) || null;
+        return el !== null && el.isConnected && el.ownerDocument === this ? el : this.body || this.documentElement;
+    });
+    defineGetter(Document.prototype, "origin", function () {
+        return this.location ? this.location.origin : "null";
+    });
+
+    var documentNoops = {
+        open: function () {
+            return this;
+        },
+        close: function () {
+        },
+        clear: function () {
+        },
+        captureEvents: function () {
+        },
+        releaseEvents: function () {
+        },
+        execCommand: function () {
+            return false;
+        },
+        queryCommandEnabled: function () {
+            return false;
+        },
+        queryCommandIndeterm: function () {
+            return false;
+        },
+        queryCommandState: function () {
+            return false;
+        },
+        queryCommandSupported: function () {
+            return false;
+        },
+        queryCommandValue: function () {
+            return "";
+        },
+        getElementsByName: function (name) {
+            name = String(name);
+            var out = [];
+            var all = this.getElementsByTagName("*");
+            for (var i = 0; i < all.length; i++) {
+                if (all[i].getAttribute("name") === name) {
+                    out.push(all[i]);
+                }
+            }
+            return new StaticNodeList(out);
+        }
+    };
+    Object.keys(documentNoops).forEach(function (name) {
+        defineMissing(Document.prototype, name, documentNoops[name]);
+    });
+
+    var windowCompat = {
+        focus: function () {
+        },
+        blur: function () {
+        },
+        stop: function () {
+        },
+        print: function () {
+        },
+        close: function () {
+        },
+        captureEvents: function () {
+        },
+        releaseEvents: function () {
+        },
+        open: function () {
+            return null;
+        },
+        alert: function () {
+        },
+        confirm: function () {
+            return false;
+        },
+        prompt: function () {
+            return null;
+        },
+        postMessage: function (message, targetOrigin) {
+            var data = structuredClone(message);
+            var origin = native.origin(global.location.href);
+            var target = typeof targetOrigin === "object" && targetOrigin !== null ? targetOrigin.targetOrigin : targetOrigin;
+            if (target !== undefined && target !== "*" && target !== "/" && native.origin(String(target)) !== origin) {
+                return;
+            }
+            setTimeout(function () {
+                var evt = typeof MessageEvent === "function" ? new MessageEvent("message", { data: data, origin: origin, source: global }) : new Event("message");
+                if (!("data" in evt) || evt.data !== data) {
+                    define(evt, "data", data);
+                    define(evt, "origin", origin);
+                    define(evt, "source", global);
+                }
+                global.dispatchEvent(evt);
+            }, 0);
+        }
+    };
+    Object.keys(windowCompat).forEach(function (name) {
+        if (typeof global[name] !== "function") {
+            define(global, name, windowCompat[name]);
+        }
+    });
+
+    function controlValue(el) {
+        return el.value === undefined || el.value === null ? "" : String(el.value);
+    }
+
+    function numericValue(el, attr) {
+        var v = el.getAttribute(attr);
+        if (v === null || v === "") {
+            return NaN;
+        }
+        return Number(v);
+    }
+
+    function radioGroupChecked(el) {
+        if (el.name === "") {
+            return el.checked;
+        }
+        var scope = el.form || el.ownerDocument;
+        var radios = scope.getElementsByTagName("input");
+        for (var i = 0; i < radios.length; i++) {
+            var r = radios[i];
+            if (r.type === "radio" && r.name === el.name && r.form === el.form && r.checked) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    var emailPattern = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+
+    function computeValidity(el) {
+        var v = {
+            valueMissing: false, typeMismatch: false, patternMismatch: false, tooLong: false,
+            tooShort: false, rangeUnderflow: false, rangeOverflow: false, stepMismatch: false,
+            badInput: false, customError: typeof el._customValidity === "string" && el._customValidity !== ""
+        };
+        var tag = el.tagName;
+        var type = tag === "INPUT" ? el.type : "";
+        var value = tag === "SELECT" || tag === "INPUT" || tag === "TEXTAREA" ? controlValue(el) : "";
+        if (el.willValidate && el.required) {
+            if (type === "checkbox") {
+                v.valueMissing = !el.checked;
+            } else if (type === "radio") {
+                v.valueMissing = !radioGroupChecked(el);
+            } else if (tag === "SELECT") {
+                v.valueMissing = el.selectedIndex < 0 || value === "";
+            } else if (tag !== "BUTTON") {
+                v.valueMissing = value === "";
+            }
+        }
+        if (tag === "INPUT" && value !== "") {
+            if (type === "email") {
+                v.typeMismatch = (el.multiple ? value.split(",") : [value]).some(function (s) {
+                    return !emailPattern.test(s.trim());
+                });
+            } else if (type === "url") {
+                try {
+                    new URL(value);
+                } catch (e) {
+                    v.typeMismatch = true;
+                }
+            }
+            var pattern = el.getAttribute("pattern");
+            if (pattern !== null && /^(text|search|url|tel|email|password)$/.test(type)) {
+                try {
+                    v.patternMismatch = !new RegExp("^(?:" + pattern + ")$", "v").test(value);
+                } catch (e) {
+                    v.patternMismatch = false;
+                }
+            }
+            if (type === "number" || type === "range") {
+                var n = Number(value);
+                if (isNaN(n)) {
+                    v.badInput = true;
+                } else {
+                    v.rangeUnderflow = n < numericValue(el, "min");
+                    v.rangeOverflow = n > numericValue(el, "max");
+                    var step = numericValue(el, "step");
+                    var base = numericValue(el, "min");
+                    if (el.getAttribute("step") !== "any" && !isNaN(step) && step > 0) {
+                        var q = (n - (isNaN(base) ? 0 : base)) / step;
+                        v.stepMismatch = Math.abs(q - Math.round(q)) > 1e-9;
+                    }
+                }
+            }
+        }
+        v.valid = !Object.keys(v).some(function (k) {
+            return v[k];
+        });
+        return v;
+    }
+
+    function validationMessage(el, v) {
+        if (v.customError) {
+            return el._customValidity;
+        }
+        if (v.valueMissing) {
+            return "Please fill out this field.";
+        }
+        if (v.typeMismatch) {
+            return el.type === "email" ? "Please enter an email address." : "Please enter a URL.";
+        }
+        if (v.patternMismatch) {
+            return "Please match the requested format.";
+        }
+        if (v.rangeUnderflow || v.rangeOverflow || v.stepMismatch || v.badInput) {
+            return "Please enter a valid value.";
+        }
+        return "";
+    }
+
+    function checkControl(el) {
+        if (!el.willValidate || computeValidity(el).valid) {
+            return true;
+        }
+        el.dispatchEvent(new Event("invalid", { cancelable: true }));
+        return false;
+    }
+
+    var validatedControls = [global.HTMLInputElement, global.HTMLTextAreaElement, global.HTMLSelectElement,
+        global.HTMLButtonElement, global.HTMLFieldSetElement, global.HTMLOutputElement, global.HTMLObjectElement];
+    validatedControls.forEach(function (iface) {
+        if (typeof iface !== "function") {
+            return;
+        }
+        accessor(iface, "validity", function () {
+            var v = computeValidity(this);
+            var state = Object.create(typeof ValidityState === "function" ? ValidityState.prototype : Object.prototype);
+            Object.keys(v).forEach(function (k) {
+                Object.defineProperty(state, k, { value: v[k], enumerable: true });
+            });
+            return state;
+        });
+        accessor(iface, "validationMessage", function () {
+            return this.willValidate ? validationMessage(this, computeValidity(this)) : "";
+        });
+        define(iface.prototype, "setCustomValidity", function (message) {
+            define(this, "_customValidity", String(message));
+        });
+        define(iface.prototype, "checkValidity", function () {
+            return checkControl(this);
+        });
+        define(iface.prototype, "reportValidity", function () {
+            return checkControl(this);
+        });
+    });
+    accessor(global.HTMLFieldSetElement, "willValidate", function () {
+        return false;
+    });
+    accessor(global.HTMLOutputElement, "willValidate", function () {
+        return false;
+    });
+    accessor(global.HTMLObjectElement, "willValidate", function () {
+        return false;
+    });
+    accessor(global.HTMLButtonElement, "willValidate", function () {
+        return !this.disabled && this.type === "submit";
+    });
+
+    function formValid(form) {
+        var ok = true;
+        Array.prototype.forEach.call(form.elements, function (el) {
+            if (!checkControl(el)) {
+                ok = false;
+            }
+        });
+        return ok;
+    }
+
+    if (typeof global.HTMLFormElement === "function") {
+        define(global.HTMLFormElement.prototype, "checkValidity", function () {
+            return formValid(this);
+        });
+        define(global.HTMLFormElement.prototype, "reportValidity", function () {
+            return formValid(this);
+        });
+        define(global.HTMLFormElement.prototype, "reset", function () {
+            if (!this.dispatchEvent(new Event("reset", { bubbles: true, cancelable: true }))) {
+                return;
+            }
+            Array.prototype.forEach.call(this.elements, function (el) {
+                if (el.tagName === "INPUT") {
+                    if (el.type === "checkbox" || el.type === "radio") {
+                        el.checked = el.defaultChecked;
+                    } else if (el.type !== "file") {
+                        el.value = el.defaultValue;
+                    }
+                } else if (el.tagName === "TEXTAREA") {
+                    el.value = el.defaultValue;
+                } else if (el.tagName === "SELECT") {
+                    Array.prototype.forEach.call(el.options, function (o) {
+                        o.selected = o.defaultSelected;
+                    });
+                }
+            });
+        });
+        reflectString(global.HTMLFormElement, "name", "name");
+        reflectString(global.HTMLFormElement, "autocomplete", "autocomplete");
+        reflectBool(global.HTMLFormElement, "noValidate", "novalidate");
+        accessor(global.HTMLFormElement, "encoding", function () {
+            return this.enctype;
+        }, function (v) {
+            this.enctype = v;
+        });
+    }
+
+    [global.HTMLInputElement, global.HTMLTextAreaElement].forEach(function (iface) {
+        if (typeof iface !== "function") {
+            return;
+        }
+        define(iface.prototype, "setSelectionRange", function (start, end, direction) {
+            var len = controlValue(this).length;
+            start = Math.min(start >>> 0, len);
+            end = Math.min(end >>> 0, len);
+            define(this, "_selStart", Math.min(start, end));
+            define(this, "_selEnd", end);
+            this.dispatchEvent(new Event("select", { bubbles: true }));
+        });
+        define(iface.prototype, "select", function () {
+            this.setSelectionRange(0, controlValue(this).length);
+        });
+        define(iface.prototype, "setRangeText", function (replacement, start, end, mode) {
+            var value = controlValue(this);
+            var selStart = this.selectionStart, selEnd = this.selectionEnd;
+            if (start === undefined) {
+                start = selStart;
+                end = selEnd;
+            }
+            start = Math.min(start >>> 0, value.length);
+            end = Math.min(end >>> 0, value.length);
+            if (start > end) {
+                throw domException("The provided start value is larger than the end value", "IndexSizeError");
+            }
+            replacement = String(replacement);
+            this.value = value.slice(0, start) + replacement + value.slice(end);
+            var newEnd = start + replacement.length;
+            if (mode === "select") {
+                selStart = start;
+                selEnd = newEnd;
+            } else if (mode === "start") {
+                selStart = selEnd = start;
+            } else if (mode === "end") {
+                selStart = selEnd = newEnd;
+            } else {
+                var delta = replacement.length - (end - start);
+                if (selStart > end) {
+                    selStart += delta;
+                } else if (selStart > start) {
+                    selStart = start;
+                }
+                if (selEnd > end) {
+                    selEnd += delta;
+                } else if (selEnd > start) {
+                    selEnd = newEnd;
+                }
+            }
+            define(this, "_selStart", selStart);
+            define(this, "_selEnd", selEnd);
+        });
+    });
+    reflectString(global.HTMLTextAreaElement, "wrap", "wrap");
+    [["cols", 20], ["rows", 2]].forEach(function (pair) {
+        accessor(global.HTMLTextAreaElement, pair[0], function () {
+            var n = parseInt(this.getAttribute(pair[0]), 10);
+            return n > 0 ? n : pair[1];
+        }, function (v) {
+            this.setAttribute(pair[0], String(v >>> 0 || pair[1]));
+        });
+    });
+    accessor(global.HTMLTextAreaElement, "textLength", function () {
+        return controlValue(this).length;
+    });
+    ["maxLength", "minLength"].forEach(function (name) {
+        [global.HTMLInputElement, global.HTMLTextAreaElement].forEach(function (iface) {
+            accessor(iface, name, function () {
+                var n = parseInt(this.getAttribute(name.toLowerCase()), 10);
+                return n >= 0 ? n : -1;
+            }, function (v) {
+                v = Number(v) | 0;
+                if (v < 0) {
+                    throw domException("The value provided is negative", "IndexSizeError");
+                }
+                this.setAttribute(name.toLowerCase(), String(v));
+            });
+        });
+    });
+
+    function isNumericInput(el) {
+        return el.type === "number" || el.type === "range";
+    }
+
+    accessor(global.HTMLInputElement, "valueAsNumber", function () {
+        var v = controlValue(this);
+        if (isNumericInput(this)) {
+            return v === "" ? NaN : Number(v);
+        }
+        if (this.type === "date" || this.type === "datetime-local" || this.type === "month") {
+            var t = Date.parse(v + (this.type === "date" ? "T00:00:00Z" : this.type === "month" ? "-01T00:00:00Z" : "Z"));
+            return isNaN(t) ? NaN : t;
+        }
+        return NaN;
+    }, function (n) {
+        n = Number(n);
+        if (isNumericInput(this)) {
+            this.value = isNaN(n) ? "" : String(n);
+        } else if (this.type === "date") {
+            this.value = isNaN(n) ? "" : new Date(n).toISOString().slice(0, 10);
+        } else {
+            throw domException("This input element does not support Number values.", "InvalidStateError");
+        }
+    });
+    accessor(global.HTMLInputElement, "valueAsDate", function () {
+        var n = this.valueAsNumber;
+        return this.type === "date" && !isNaN(n) ? new Date(n) : null;
+    }, function (d) {
+        this.valueAsNumber = d === null ? NaN : d.getTime();
+    });
+    ["stepUp", "stepDown"].forEach(function (name, i) {
+        define(global.HTMLInputElement.prototype, name, function (count) {
+            if (!isNumericInput(this)) {
+                throw domException("This form element is not steppable.", "InvalidStateError");
+            }
+            var step = numericValue(this, "step");
+            if (isNaN(step) || step <= 0) {
+                step = 1;
+            }
+            var value = Number(controlValue(this)) || 0;
+            value += (i === 0 ? 1 : -1) * step * (count === undefined ? 1 : Number(count));
+            var min = numericValue(this, "min"), max = numericValue(this, "max");
+            if (!isNaN(min) && value < min) {
+                value = min;
+            }
+            if (!isNaN(max) && value > max) {
+                value = max;
+            }
+            this.value = String(value);
+        });
+    });
+
+    if (typeof global.HTMLDialogElement === "function") {
+        reflectBool(global.HTMLDialogElement, "open", "open");
+        accessor(global.HTMLDialogElement, "returnValue", function () {
+            return typeof this._returnValue === "string" ? this._returnValue : "";
+        }, function (v) {
+            define(this, "_returnValue", String(v));
+        });
+        define(global.HTMLDialogElement.prototype, "show", function () {
+            this.setAttribute("open", "");
+        });
+        define(global.HTMLDialogElement.prototype, "showModal", function () {
+            this.setAttribute("open", "");
+        });
+        define(global.HTMLDialogElement.prototype, "close", function (value) {
+            if (!this.hasAttribute("open")) {
+                return;
+            }
+            this.removeAttribute("open");
+            if (value !== undefined) {
+                this.returnValue = value;
+            }
+            var self = this;
+            setTimeout(function () {
+                self.dispatchEvent(new Event("close"));
+            }, 0);
+        });
+    }
+
+    if (typeof global.HTMLMediaElement === "function") {
+        var mediaMethods = {
+            play: function () {
+                return Promise.reject(domException("Media playback is not supported", "NotSupportedError"));
+            },
+            pause: function () {
+            },
+            load: function () {
+            },
+            canPlayType: function () {
+                return "";
+            },
+            fastSeek: function () {
+            },
+            addTextTrack: function () {
+                throw domException("Text tracks are not supported", "NotSupportedError");
+            }
+        };
+        Object.keys(mediaMethods).forEach(function (name) {
+            define(global.HTMLMediaElement.prototype, name, mediaMethods[name]);
+        });
+        [["paused", true], ["ended", false], ["seeking", false], ["currentTime", 0], ["duration", NaN],
+            ["readyState", 0], ["networkState", 0], ["volume", 1], ["muted", false], ["playbackRate", 1],
+            ["defaultPlaybackRate", 1]].forEach(function (pair) {
+            if (!(pair[0] in global.HTMLMediaElement.prototype)) {
+                accessor(global.HTMLMediaElement, pair[0], function () {
+                    var own = this["_" + pair[0]];
+                    return own === undefined ? pair[1] : own;
+                }, function (v) {
+                    define(this, "_" + pair[0], v);
+                });
+            }
+        });
+        ["src", "poster"].forEach(function (name) {
+            if (!(name in global.HTMLMediaElement.prototype)) {
+                reflectString(global.HTMLMediaElement, name, name);
+            }
+        });
+        ["autoplay", "loop", "controls"].forEach(function (name) {
+            if (!(name in global.HTMLMediaElement.prototype)) {
+                reflectBool(global.HTMLMediaElement, name, name);
+            }
+        });
+    }
+
+    function escapeMarkup(text, attr) {
+        text = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        return attr ? text.replace(/"/g, "&quot;") : text;
+    }
+
+    function serializeNode(node) {
+        switch (node.nodeType) {
+        case 1:
+            var name = node.tagName;
+            if (node.namespaceURI === "http://www.w3.org/1999/xhtml") {
+                name = node.localName;
+            }
+            var s = "<" + name;
+            if (node.parentNode === null || node.parentNode.namespaceURI !== node.namespaceURI) {
+                if (node.namespaceURI !== null && !node.hasAttribute("xmlns")) {
+                    s += " xmlns=\"" + escapeMarkup(node.namespaceURI, true) + "\"";
+                }
+            }
+            for (var i = 0; i < node.attributes.length; i++) {
+                var a = node.attributes[i];
+                s += " " + a.name + "=\"" + escapeMarkup(a.value, true) + "\"";
+            }
+            if (node.firstChild === null) {
+                return s + "/>";
+            }
+            s += ">";
+            for (var c = node.firstChild; c !== null; c = c.nextSibling) {
+                s += serializeNode(c);
+            }
+            return s + "</" + name + ">";
+        case 3:
+            return escapeMarkup(node.data, false);
+        case 4:
+            return "<![CDATA[" + node.data + "]]>";
+        case 7:
+            return "<?" + node.target + " " + node.data + "?>";
+        case 8:
+            return "<!--" + node.data + "-->";
+        case 10:
+            return "<!DOCTYPE " + node.name + (node.publicId ? " PUBLIC \"" + node.publicId + "\"" : node.systemId ? " SYSTEM" : "") +
+                (node.systemId ? " \"" + node.systemId + "\"" : "") + ">";
+        case 9:
+        case 11:
+            var out = "";
+            for (var k = node.firstChild; k !== null; k = k.nextSibling) {
+                out += serializeNode(k);
+            }
+            return out;
+        }
+        return "";
+    }
+
+    if (typeof global.XMLSerializer === "function") {
+        define(global.XMLSerializer.prototype, "serializeToString", function (node) {
+            return serializeNode(requireNode(node));
+        });
+    }
+
+    function defineEventInterface(name, base, fields) {
+        var old = global[name];
+        var proto = typeof old === "function" && old.prototype ? old.prototype : Object.create(base.prototype);
+        function EventInterface(type, init) {
+            if (new.target === undefined) {
+                throw new TypeError("Failed to construct '" + name + "': Please use the 'new' operator.");
+            }
+            if (arguments.length < 1) {
+                throw new TypeError("Failed to construct '" + name + "': 1 argument required, but only 0 present.");
+            }
+            var dict = init === undefined || init === null ? {} : init;
+            var evt = Reflect.construct(base, [type, dict], new.target);
+            Object.keys(fields).forEach(function (key) {
+                var value = dict[key];
+                Object.defineProperty(evt, key, {
+                    value: value === undefined ? fields[key] : value,
+                    enumerable: true,
+                    configurable: true
+                });
+            });
+            return evt;
+        }
+        EventInterface.prototype = proto;
+        define(proto, "constructor", EventInterface);
+        Object.defineProperty(EventInterface, "name", { value: name });
+        define(global, name, EventInterface);
+    }
+
+    [
+        ["FocusEvent", UIEvent, { relatedTarget: null }],
+        ["CompositionEvent", UIEvent, { data: "" }],
+        ["InputEvent", UIEvent, { data: null, isComposing: false, inputType: "", dataTransfer: null }],
+        ["ErrorEvent", Event, { message: "", filename: "", lineno: 0, colno: 0, error: undefined }],
+        ["MessageEvent", Event, { data: null, origin: "", lastEventId: "", source: null, ports: [] }],
+        ["HashChangeEvent", Event, { oldURL: "", newURL: "" }],
+        ["PopStateEvent", Event, { state: null }],
+        ["ProgressEvent", Event, { lengthComputable: false, loaded: 0, total: 0 }],
+        ["PromiseRejectionEvent", Event, { promise: undefined, reason: undefined }],
+        ["StorageEvent", Event, { key: null, oldValue: null, newValue: null, url: "", storageArea: null }],
+        ["SubmitEvent", Event, { submitter: null }],
+        ["PageTransitionEvent", Event, { persisted: false }],
+        ["CloseEvent", Event, { wasClean: false, code: 0, reason: "" }],
+        ["WheelEvent", MouseEvent, { deltaX: 0, deltaY: 0, deltaZ: 0, deltaMode: 0 }],
+        ["DragEvent", MouseEvent, { dataTransfer: null }]
+    ].forEach(function (spec) {
+        var existing = global[spec[0]];
+        if (typeof existing === "function") {
+            try {
+                new existing("probe");
+                return;
+            } catch (e) {
+            }
+        }
+        defineEventInterface(spec[0], spec[1], spec[2]);
+    });
+
+    [Element, CharacterData].forEach(function (iface) {
+        if (!Object.getOwnPropertyDescriptor(iface.prototype, "nextElementSibling")) {
+            defineGetter(iface.prototype, "nextElementSibling", function () {
+                var n = this.nextSibling;
+                while (n !== null && n.nodeType !== 1) {
+                    n = n.nextSibling;
+                }
+                return n;
+            });
+        }
+        if (!Object.getOwnPropertyDescriptor(iface.prototype, "previousElementSibling")) {
+            defineGetter(iface.prototype, "previousElementSibling", function () {
+                var n = this.previousSibling;
+                while (n !== null && n.nodeType !== 1) {
+                    n = n.previousSibling;
+                }
+                return n;
+            });
+        }
+    });
+
+    var legacyKeyCodes = {
+        Backspace: 8, Tab: 9, Enter: 13, Shift: 16, Control: 17, Alt: 18, Pause: 19, CapsLock: 20,
+        Escape: 27, " ": 32, PageUp: 33, PageDown: 34, End: 35, Home: 36, ArrowLeft: 37, ArrowUp: 38,
+        ArrowRight: 39, ArrowDown: 40, Insert: 45, Delete: 46, Meta: 91, ContextMenu: 93,
+        ";": 186, "=": 187, ",": 188, "-": 189, ".": 190, "/": 191, "`": 192, "[": 219, "\\": 220, "]": 221, "'": 222
+    };
+
+    function legacyKeyCode(evt) {
+        var key = evt.key;
+        if (typeof key !== "string") {
+            return 0;
+        }
+        if (Object.prototype.hasOwnProperty.call(legacyKeyCodes, key)) {
+            return legacyKeyCodes[key];
+        }
+        if (/^F([1-9]|1[0-2])$/.test(key)) {
+            return 111 + Number(key.slice(1));
+        }
+        if (key.length === 1) {
+            var c = key.toUpperCase();
+            if (/[A-Z0-9]/.test(c)) {
+                return c.charCodeAt(0);
+            }
+        }
+        return 0;
+    }
+
+    function legacyCharCode(evt) {
+        var key = evt.key;
+        if (evt.type !== "keypress" || typeof key !== "string") {
+            return 0;
+        }
+        if (key === "Enter") {
+            return 13;
+        }
+        return Array.from(key).length === 1 ? key.codePointAt(0) : 0;
+    }
+
+    if (typeof global.KeyboardEvent === "function") {
+        accessor(global.KeyboardEvent, "keyCode", function () {
+            return this.type === "keypress" ? legacyCharCode(this) : legacyKeyCode(this);
+        });
+        accessor(global.KeyboardEvent, "charCode", function () {
+            return legacyCharCode(this);
+        });
+        accessor(global.KeyboardEvent, "which", function () {
+            return this.type === "keypress" ? legacyCharCode(this) : legacyKeyCode(this);
+        });
+        accessor(global.KeyboardEvent, "repeat", function () {
+            return false;
+        });
+        accessor(global.KeyboardEvent, "isComposing", function () {
+            return false;
+        });
+    }
     defineGetter(HTMLElement.prototype, "hidden", function () {
         return this.hasAttribute("hidden");
     }, function (v) {
@@ -3940,13 +5325,10 @@
         if (map) {
             return map;
         }
-        map = new Proxy(Object.create(null), {
+        map = new Proxy(Object.create(typeof DOMStringMap === "function" ? DOMStringMap.prototype : Object.prototype), {
             get: function (target, prop) {
-                if (typeof prop !== "string") {
-                    return undefined;
-                }
-                var v = el.getAttribute(dataAttrName(prop));
-                return v === null ? undefined : v;
+                var v = typeof prop === "string" ? el.getAttribute(dataAttrName(prop)) : null;
+                return v === null ? target[prop] : v;
             },
             set: function (target, prop, value) {
                 if (typeof prop === "string") {
@@ -3982,25 +5364,67 @@
         return map;
     });
 
+    var clicking = new WeakSet();
+
+    function labelControl(label) {
+        var id = label.getAttribute("for");
+        if (id !== null) {
+            var target = label.ownerDocument.getElementById(id);
+            return target !== null && /^(BUTTON|INPUT|METER|OUTPUT|PROGRESS|SELECT|TEXTAREA)$/.test(target.tagName) ? target : null;
+        }
+        return label.querySelector("button, input:not([type=hidden]), meter, output, progress, select, textarea");
+    }
+
     define(HTMLElement.prototype, "click", function () {
         var tag = this.tagName;
-        var type = tag === "INPUT" ? String(this.getAttribute("type") || "").toLowerCase() : "";
-        var before = type === "checkbox" || type === "radio" ? this.checked : null;
-        if (type === "checkbox") {
-            this.checked = !before;
-        } else if (type === "radio") {
-            this.checked = true;
+        if (clicking.has(this) || (/^(BUTTON|INPUT|SELECT|TEXTAREA)$/.test(tag) && this.disabled)) {
+            return;
         }
-        var ev = document.createEvent("Event");
-        ev.initEvent("click", true, true);
-        var go = this.dispatchEvent(ev);
-        if (!go && before !== null) {
-            this.checked = before;
+        var type = tag === "INPUT" ? String(this.getAttribute("type") || "").toLowerCase() :
+            tag === "BUTTON" ? String(this.getAttribute("type") || "submit").toLowerCase() : "";
+        var before = tag === "INPUT" && (type === "checkbox" || type === "radio") ? this.checked : null;
+        if (before !== null) {
+            this.checked = type === "checkbox" ? !before : true;
         }
-        if (go && tag === "A" && this.hasAttribute("href")) {
-            var href = native.resolve(this.getAttribute("href"));
-            if (href !== null && !/^javascript:/i.test(href)) {
-                location.href = href;
+        clicking.add(this);
+        var go;
+        try {
+            var ev = typeof MouseEvent === "function" ?
+                new MouseEvent("click", { bubbles: true, cancelable: true, composed: true, view: global, detail: 1 }) :
+                new Event("click", { bubbles: true, cancelable: true });
+            go = this.dispatchEvent(ev);
+        } finally {
+            clicking.delete(this);
+        }
+        if (before !== null) {
+            if (!go) {
+                this.checked = before;
+            } else if (this.checked !== before) {
+                this.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+                this.dispatchEvent(new Event("change", { bubbles: true }));
+            }
+            return;
+        }
+        if (!go) {
+            return;
+        }
+        if (tag === "A" || tag === "AREA") {
+            if (this.hasAttribute("href")) {
+                var href = native.resolve(this.getAttribute("href"));
+                if (href !== null && !/^javascript:/i.test(href)) {
+                    location.href = href;
+                }
+            }
+        } else if (tag === "LABEL") {
+            var control = labelControl(this);
+            if (control !== null) {
+                control.click();
+            }
+        } else if ((tag === "INPUT" || tag === "BUTTON") && this.form !== null) {
+            if (type === "submit" || type === "image") {
+                this.form.requestSubmit(this);
+            } else if (type === "reset") {
+                this.form.reset();
             }
         }
     });
@@ -4975,6 +6399,33 @@
                     return target[key];
                 }
             });
+        },
+        makeFormProxy: function (inner) {
+            var proxy;
+            function named(target, key) {
+                if (typeof key !== "string" || key === "" || key in target) {
+                    return undefined;
+                }
+                var elements = Reflect.get(target, "elements", proxy);
+                var index = listIndex(key);
+                if (index >= 0) {
+                    return elements[index];
+                }
+                return elements.namedItem(key) || undefined;
+            }
+            proxy = new Proxy(inner, {
+                has: function (target, key) {
+                    return key in target || named(target, key) !== undefined;
+                },
+                get: function (target, key, receiver) {
+                    var n = named(target, key);
+                    return n !== undefined ? n : Reflect.get(target, key, receiver);
+                },
+                set: function (target, key, value, receiver) {
+                    return Reflect.set(target, key, value, receiver);
+                }
+            });
+            return proxy;
         },
         makeNodeMapProxy: function (inner) {
             return new Proxy(inner, {

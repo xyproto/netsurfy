@@ -213,8 +213,9 @@ set(NETSURFY_GTK_SOURCES
 )
 
 add_custom_target(testament
-  COMMAND ${PERL_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/git-testament.pl
-    ${PROJECT_SOURCE_DIR} ${NETSURFY_GEN}/testament.h
+  COMMAND ${CMAKE_COMMAND} -DROOT=${PROJECT_SOURCE_DIR}
+    -DTARGET=${NETSURFY_GEN}/testament.h
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/git-testament.cmake
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   BYPRODUCTS ${NETSURFY_GEN}/testament.h
   VERBATIM)

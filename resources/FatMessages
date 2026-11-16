@@ -19,7 +19,7 @@
 #  set. As a result of this conversion process, unrepresentable characters are
 #  stripped from the displayed string.
 #
-# This file gets processed by utils/split-messages.pl at build-time, which gets
+# This file gets processed by tools/split-messages at build-time, which gets
 #  told the language and the platform.  It then emits only messages that are
 #  in the right language, and are either in the specific platform or 'all'.
 #

@@ -544,31 +544,6 @@ static JSValue style_set_value(JSContext *ctx, struct dom_element *element, cons
 	return ret;
 }
 
-static char *style_camel_to_dashed(const char *camel)
-{
-	size_t len = strlen(camel);
-	char *out = malloc(len * 2 + 2);
-	char *o = out;
-
-	if (out == NULL) {
-		return NULL;
-	}
-	if (strcmp(camel, "cssFloat") == 0) {
-		strcpy(out, "float");
-		return out;
-	}
-	for (const char *c = camel; *c; c++) {
-		if (isupper((unsigned char)*c)) {
-			*o++ = '-';
-			*o++ = (char)tolower((unsigned char)*c);
-		} else {
-			*o++ = *c;
-		}
-	}
-	*o = '\0';
-	return out;
-}
-
 static JSValue style_named_get(JSContext *ctx, JSValueConst this_val, int argc, JSValueConst *argv, int magic)
 {
 	css_style_declaration_private_t *priv = qjsky_private(ctx, this_val, QJSKY_IFACE_CSSSTYLEDECLARATION);

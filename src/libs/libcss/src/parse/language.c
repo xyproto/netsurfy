@@ -1924,8 +1924,11 @@ css_error parseSelectorList(css_language *c,
  * Property parsing functions						      *
  ******************************************************************************/
 
-static bool vars_buf_append(char **buf, size_t *len, size_t *alloc,
-			    const char *data, size_t n)
+static bool vars_buf_append(char **buf,
+			    size_t *len,
+			    size_t *alloc,
+			    const char *data,
+			    size_t n)
 {
 	if (*len + n + 1 > *alloc) {
 		size_t want = (*alloc == 0 ? 64 : *alloc * 2);
@@ -1946,7 +1949,9 @@ static bool vars_buf_append(char **buf, size_t *len, size_t *alloc,
 	return true;
 }
 
-static bool vars_token_append(char **buf, size_t *len, size_t *alloc,
+static bool vars_token_append(char **buf,
+			      size_t *len,
+			      size_t *alloc,
 			      const css_token *token)
 {
 	const char *pre = "", *post = "";
@@ -2085,7 +2090,8 @@ static css_error parseVarDeclaration(css_language *c,
 		free(buf);
 		return CSS_INVALID;
 	}
-	if (lwc_intern_string(buf + start, len - start, &value) != lwc_error_ok) {
+	if (lwc_intern_string(buf + start, len - start, &value) !=
+	    lwc_error_ok) {
 		free(buf);
 		return CSS_NOMEM;
 	}
@@ -2110,7 +2116,9 @@ static css_error parseVarDeclaration(css_language *c,
 	if (prop < 0) {
 		error = css__stylesheet_style_append(
 			style,
-			buildOPV(CSS_OP_CUSTOM, important ? FLAG_IMPORTANT : 0, 0));
+			buildOPV(CSS_OP_CUSTOM,
+				 important ? FLAG_IMPORTANT : 0,
+				 0));
 		if (error == CSS_OK) {
 			error = css__stylesheet_style_append(style, name_idx);
 		}
@@ -2125,7 +2133,9 @@ static css_error parseVarDeclaration(css_language *c,
 		error = css__stylesheet_style_append(style, value_idx);
 	}
 	if (error == CSS_OK) {
-		error = css__stylesheet_rule_append_style(c->sheet, rule, style);
+		error = css__stylesheet_rule_append_style(c->sheet,
+							  rule,
+							  style);
 	}
 	if (error != CSS_OK) {
 		css__stylesheet_style_destroy(style);
@@ -2181,7 +2191,8 @@ css_error parseProperty(css_language *c,
 		return CSS_INVALID;
 
 	if (vectorHasVar(vector, *ctx)) {
-		return parseVarDeclaration(c, property, vector, ctx, rule, i - FIRST_PROP);
+		return parseVarDeclaration(
+			c, property, vector, ctx, rule, i - FIRST_PROP);
 	}
 
 	/* Get handler */

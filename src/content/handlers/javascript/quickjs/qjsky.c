@@ -133,6 +133,7 @@ static const char *const qjsky_hidden_names[QJSKY_HIDDEN__COUNT] = {
 	[QJSKY_HIDDEN_ATTRIBUTES] = "attributes",
 	[QJSKY_HIDDEN_CHILD_NODES] = "child nodes",
 	[QJSKY_HIDDEN_CLASS_LIST] = "class list",
+	[QJSKY_HIDDEN_REL_LIST] = "rel list",
 	[QJSKY_HIDDEN_CONSOLE] = "console",
 	[QJSKY_HIDDEN_DATA] = "data",
 	[QJSKY_HIDDEN_DOM_IMPLEMENTATION] = "dom implementation",
@@ -513,6 +514,14 @@ JSValue qjsky_throw_dom(JSContext *ctx, dom_exception exc)
 		"InvalidAccessError",
 		"ValidationError",
 		"TypeMismatchError",
+		"SecurityError",
+		"NetworkError",
+		"AbortError",
+		"URLMismatchError",
+		"QuotaExceededError",
+		"TimeoutError",
+		"InvalidNodeTypeError",
+		"DataCloneError",
 	};
 
 	if (exc > DOM_NO_ERR && exc < sizeof(names) / sizeof(names[0])) {
@@ -539,6 +548,25 @@ dom_string *qjsky_to_dom_string(JSContext *ctx, JSValueConst val)
 	}
 	JS_FreeCString(ctx, s);
 	return str;
+}
+
+bool qjsky_to_dom_namespace(JSContext *ctx,
+			    JSValueConst val,
+			    dom_string **result)
+{
+	*result = NULL;
+	if (JS_IsNull(val) || JS_IsUndefined(val)) {
+		return true;
+	}
+	*result = qjsky_to_dom_string(ctx, val);
+	if (*result == NULL) {
+		return false;
+	}
+	if (dom_string_byte_length(*result) == 0) {
+		dom_string_unref(*result);
+		*result = NULL;
+	}
+	return true;
 }
 
 JSValue qjsky_hidden_get(JSContext *ctx,
@@ -937,6 +965,17 @@ JSValue qjsky_node(JSContext *ctx, struct dom_node *node)
 	obj = qjsky_iface_create[iface](ctx, node);
 	if (JS_IsException(obj)) {
 		return obj;
+	}
+	if (iface == QJSKY_IFACE_HTMLFORMELEMENT) {
+		JSValue proxy = qjsky_list_proxy(ctx,
+						 "makeFormProxy",
+						 JS_DupValue(ctx, obj));
+		if (JS_IsException(proxy)) {
+			JS_FreeValue(ctx, JS_GetException(ctx));
+		} else {
+			JS_FreeValue(ctx, obj);
+			obj = proxy;
+		}
 	}
 	if (!qjsky_map_put(&thread->nodes, node, JS_DupValue(ctx, obj))) {
 		JS_FreeValue(ctx, obj);
@@ -1578,91 +1617,158 @@ bool qjsky_node_boxes(struct dom_node *node,
 static const char *qjsky_css_display(uint8_t v)
 {
 	switch (v) {
-	case CSS_DISPLAY_INLINE: return "inline";
-	case CSS_DISPLAY_BLOCK: return "block";
-	case CSS_DISPLAY_LIST_ITEM: return "list-item";
-	case CSS_DISPLAY_RUN_IN: return "run-in";
-	case CSS_DISPLAY_INLINE_BLOCK: return "inline-block";
-	case CSS_DISPLAY_TABLE: return "table";
-	case CSS_DISPLAY_INLINE_TABLE: return "inline-table";
-	case CSS_DISPLAY_TABLE_ROW_GROUP: return "table-row-group";
-	case CSS_DISPLAY_TABLE_HEADER_GROUP: return "table-header-group";
-	case CSS_DISPLAY_TABLE_FOOTER_GROUP: return "table-footer-group";
-	case CSS_DISPLAY_TABLE_ROW: return "table-row";
-	case CSS_DISPLAY_TABLE_COLUMN_GROUP: return "table-column-group";
-	case CSS_DISPLAY_TABLE_COLUMN: return "table-column";
-	case CSS_DISPLAY_TABLE_CELL: return "table-cell";
-	case CSS_DISPLAY_TABLE_CAPTION: return "table-caption";
-	case CSS_DISPLAY_FLEX: return "flex";
-	case CSS_DISPLAY_INLINE_FLEX: return "inline-flex";
-	case CSS_DISPLAY_GRID: return "grid";
-	case CSS_DISPLAY_INLINE_GRID: return "inline-grid";
-	default: return "none";
+	case CSS_DISPLAY_INLINE:
+		return "inline";
+	case CSS_DISPLAY_BLOCK:
+		return "block";
+	case CSS_DISPLAY_LIST_ITEM:
+		return "list-item";
+	case CSS_DISPLAY_RUN_IN:
+		return "run-in";
+	case CSS_DISPLAY_INLINE_BLOCK:
+		return "inline-block";
+	case CSS_DISPLAY_TABLE:
+		return "table";
+	case CSS_DISPLAY_INLINE_TABLE:
+		return "inline-table";
+	case CSS_DISPLAY_TABLE_ROW_GROUP:
+		return "table-row-group";
+	case CSS_DISPLAY_TABLE_HEADER_GROUP:
+		return "table-header-group";
+	case CSS_DISPLAY_TABLE_FOOTER_GROUP:
+		return "table-footer-group";
+	case CSS_DISPLAY_TABLE_ROW:
+		return "table-row";
+	case CSS_DISPLAY_TABLE_COLUMN_GROUP:
+		return "table-column-group";
+	case CSS_DISPLAY_TABLE_COLUMN:
+		return "table-column";
+	case CSS_DISPLAY_TABLE_CELL:
+		return "table-cell";
+	case CSS_DISPLAY_TABLE_CAPTION:
+		return "table-caption";
+	case CSS_DISPLAY_FLEX:
+		return "flex";
+	case CSS_DISPLAY_INLINE_FLEX:
+		return "inline-flex";
+	case CSS_DISPLAY_GRID:
+		return "grid";
+	case CSS_DISPLAY_INLINE_GRID:
+		return "inline-grid";
+	default:
+		return "none";
 	}
 }
 
 static const char *qjsky_css_overflow(uint8_t v)
 {
 	switch (v) {
-	case CSS_OVERFLOW_HIDDEN: return "hidden";
-	case CSS_OVERFLOW_SCROLL: return "scroll";
-	case CSS_OVERFLOW_AUTO: return "auto";
-	default: return "visible";
+	case CSS_OVERFLOW_HIDDEN:
+		return "hidden";
+	case CSS_OVERFLOW_SCROLL:
+		return "scroll";
+	case CSS_OVERFLOW_AUTO:
+		return "auto";
+	default:
+		return "visible";
 	}
 }
 
 static const char *qjsky_css_position(uint8_t v)
 {
 	switch (v) {
-	case CSS_POSITION_RELATIVE: return "relative";
-	case CSS_POSITION_ABSOLUTE: return "absolute";
-	case CSS_POSITION_FIXED: return "fixed";
-	case CSS_POSITION_STICKY: return "sticky";
-	default: return "static";
+	case CSS_POSITION_RELATIVE:
+		return "relative";
+	case CSS_POSITION_ABSOLUTE:
+		return "absolute";
+	case CSS_POSITION_FIXED:
+		return "fixed";
+	case CSS_POSITION_STICKY:
+		return "sticky";
+	default:
+		return "static";
 	}
 }
 
 static const char *qjsky_css_font_weight(uint8_t v)
 {
 	switch (v) {
-	case CSS_FONT_WEIGHT_100: return "100";
-	case CSS_FONT_WEIGHT_200: return "200";
-	case CSS_FONT_WEIGHT_300: return "300";
-	case CSS_FONT_WEIGHT_500: return "500";
-	case CSS_FONT_WEIGHT_600: return "600";
+	case CSS_FONT_WEIGHT_100:
+		return "100";
+	case CSS_FONT_WEIGHT_200:
+		return "200";
+	case CSS_FONT_WEIGHT_300:
+		return "300";
+	case CSS_FONT_WEIGHT_500:
+		return "500";
+	case CSS_FONT_WEIGHT_600:
+		return "600";
 	case CSS_FONT_WEIGHT_BOLD:
-	case CSS_FONT_WEIGHT_700: return "700";
-	case CSS_FONT_WEIGHT_800: return "800";
-	case CSS_FONT_WEIGHT_900: return "900";
-	default: return "400";
+	case CSS_FONT_WEIGHT_700:
+		return "700";
+	case CSS_FONT_WEIGHT_800:
+		return "800";
+	case CSS_FONT_WEIGHT_900:
+		return "900";
+	default:
+		return "400";
 	}
 }
 
-static void qjsky_css_set(JSContext *ctx, JSValueConst obj, const char *name, const char *value)
+static void qjsky_css_set(JSContext *ctx,
+			  JSValueConst obj,
+			  const char *name,
+			  const char *value)
 {
 	JS_SetPropertyStr(ctx, obj, name, JS_NewString(ctx, value));
 }
 
-static void qjsky_css_number(char *buf, size_t size, double v, const char *suffix)
+static void
+qjsky_css_number(char *buf, size_t size, double v, const char *suffix)
 {
 	long long scaled = llround(v * 1000);
-	unsigned long long a = scaled < 0 ? -(unsigned long long)scaled : (unsigned long long)scaled;
+	unsigned long long a = scaled < 0 ? -(unsigned long long)scaled
+					  : (unsigned long long)scaled;
 	unsigned long long frac = a % 1000;
 
 	if (frac == 0) {
-		snprintf(buf, size, "%s%llu%s", scaled < 0 ? "-" : "", a / 1000, suffix);
+		snprintf(buf,
+			 size,
+			 "%s%llu%s",
+			 scaled < 0 ? "-" : "",
+			 a / 1000,
+			 suffix);
 		return;
 	}
 	if (frac % 100 == 0) {
-		snprintf(buf, size, "%s%llu.%llu%s", scaled < 0 ? "-" : "", a / 1000, frac / 100, suffix);
+		snprintf(buf,
+			 size,
+			 "%s%llu.%llu%s",
+			 scaled < 0 ? "-" : "",
+			 a / 1000,
+			 frac / 100,
+			 suffix);
 	} else if (frac % 10 == 0) {
-		snprintf(buf, size, "%s%llu.%02llu%s", scaled < 0 ? "-" : "", a / 1000, frac / 10, suffix);
+		snprintf(buf,
+			 size,
+			 "%s%llu.%02llu%s",
+			 scaled < 0 ? "-" : "",
+			 a / 1000,
+			 frac / 10,
+			 suffix);
 	} else {
-		snprintf(buf, size, "%s%llu.%03llu%s", scaled < 0 ? "-" : "", a / 1000, frac, suffix);
+		snprintf(buf,
+			 size,
+			 "%s%llu.%03llu%s",
+			 scaled < 0 ? "-" : "",
+			 a / 1000,
+			 frac,
+			 suffix);
 	}
 }
 
-static void qjsky_css_set_px(JSContext *ctx, JSValueConst obj, const char *name, double px)
+static void
+qjsky_css_set_px(JSContext *ctx, JSValueConst obj, const char *name, double px)
 {
 	char buf[32];
 	qjsky_css_number(buf, sizeof(buf), px, "px");
@@ -1688,20 +1794,34 @@ static void qjsky_css_set_len(JSContext *ctx,
 	} else if (unit == CSS_UNIT_PX) {
 		qjsky_css_set_px(ctx, obj, name, FIXTOFLT(len));
 	} else {
-		qjsky_css_set_px(ctx, obj, name, FIXTOFLT(css_unit_len2css_px(style, unit_ctx, len, unit)));
+		qjsky_css_set_px(ctx,
+				 obj,
+				 name,
+				 FIXTOFLT(css_unit_len2css_px(
+					 style, unit_ctx, len, unit)));
 	}
 }
 
-static void qjsky_css_set_colour(JSContext *ctx, JSValueConst obj, const char *name, css_color c)
+static void qjsky_css_set_colour(JSContext *ctx,
+				 JSValueConst obj,
+				 const char *name,
+				 css_color c)
 {
 	char buf[48];
-	unsigned a = (c >> 24) & 0xff, r = (c >> 16) & 0xff, g = (c >> 8) & 0xff, b = c & 0xff;
+	unsigned a = (c >> 24) & 0xff, r = (c >> 16) & 0xff,
+		 g = (c >> 8) & 0xff, b = c & 0xff;
 	if (a == 0xff) {
 		snprintf(buf, sizeof(buf), "rgb(%u, %u, %u)", r, g, b);
 	} else {
 		char alpha[16];
 		qjsky_css_number(alpha, sizeof(alpha), a / 255.0, "");
-		snprintf(buf, sizeof(buf), "rgba(%u, %u, %u, %s)", r, g, b, alpha);
+		snprintf(buf,
+			 sizeof(buf),
+			 "rgba(%u, %u, %u, %s)",
+			 r,
+			 g,
+			 b,
+			 alpha);
 	}
 	qjsky_css_set(ctx, obj, name, buf);
 }
@@ -1808,10 +1928,631 @@ JSValue qjsky_content_document(JSContext *ctx, struct dom_node *element)
 	return qjsky_node(ctx, (dom_node *)htmlc->document);
 }
 
+static const char *const qjsky_kw_white_space[] =
+	{"", "normal", "pre", "nowrap", "pre-wrap", "pre-line"};
+static const char *const qjsky_kw_text_transform[] = {"",
+						      "capitalize",
+						      "uppercase",
+						      "lowercase",
+						      "none"};
+static const char *const qjsky_kw_text_align[] = {"",
+						  "start",
+						  "left",
+						  "right",
+						  "center",
+						  "justify",
+						  "start",
+						  "left",
+						  "center",
+						  "right"};
+static const char *const qjsky_kw_direction[] = {"", "ltr", "rtl"};
+static const char *const qjsky_kw_unicode_bidi[] = {"",
+						    "normal",
+						    "embed",
+						    "bidi-override"};
+static const char *const qjsky_kw_table_layout[] = {"", "auto", "fixed"};
+static const char *const qjsky_kw_border_collapse[] = {"",
+						       "separate",
+						       "collapse"};
+static const char *const qjsky_kw_empty_cells[] = {"", "show", "hide"};
+static const char *const qjsky_kw_caption_side[] = {"", "top", "bottom"};
+static const char *const qjsky_kw_clear[] = {"",
+					     "none",
+					     "left",
+					     "right",
+					     "both"};
+static const char *const qjsky_kw_font_variant[] = {"", "normal", "small-caps"};
+static const char *const qjsky_kw_list_style_position[] = {"",
+							   "inside",
+							   "outside"};
+static const char *const qjsky_kw_list_style_type[] = {"",
+						       "disc",
+						       "circle",
+						       "square",
+						       "decimal",
+						       "decimal-leading-zero",
+						       "lower-roman",
+						       "upper-roman",
+						       "lower-greek",
+						       "lower-latin",
+						       "upper-latin",
+						       "armenian",
+						       "georgian",
+						       "lower-alpha",
+						       "upper-alpha",
+						       "none",
+						       "binary",
+						       "octal",
+						       "lower-hexadecimal",
+						       "upper-hexadecimal",
+						       "arabic-indic",
+						       "lower-armenian",
+						       "upper-armenian",
+						       "bengali",
+						       "cambodian",
+						       "khmer",
+						       "cjk-decimal",
+						       "devanagari",
+						       "gujarati",
+						       "gurmukhi",
+						       "hebrew",
+						       "kannada",
+						       "lao",
+						       "malayalam",
+						       "mongolian",
+						       "myanmar",
+						       "oriya",
+						       "persian",
+						       "tamil",
+						       "telugu",
+						       "thai",
+						       "tibetan",
+						       "cjk-earthly-branch",
+						       "cjk-heavenly-stem",
+						       "hiagana",
+						       "hiagana-iroha",
+						       "katakana",
+						       "katakana-iroha",
+						       "japanese-informal",
+						       "japanese-formal",
+						       "korean-hangul-formal",
+						       "korean-hanja-informal",
+						       "korean-hanja-formal"};
+static const char *const qjsky_kw_flex_direction[] = {"",
+						      "row",
+						      "row-reverse",
+						      "column",
+						      "column-reverse"};
+static const char *const qjsky_kw_flex_wrap[] = {"",
+						 "nowrap",
+						 "wrap",
+						 "wrap-reverse"};
+static const char *const qjsky_kw_justify_content[] = {"",
+						       "flex-start",
+						       "flex-end",
+						       "center",
+						       "space-between",
+						       "space-around",
+						       "space-evenly"};
+static const char *const qjsky_kw_align_items[] =
+	{"", "stretch", "flex-start", "flex-end", "center", "baseline"};
+static const char *const qjsky_kw_align_self[] =
+	{"", "stretch", "flex-start", "flex-end", "center", "baseline", "auto"};
+static const char *const qjsky_kw_align_content[] = {"",
+						     "stretch",
+						     "flex-start",
+						     "flex-end",
+						     "center",
+						     "space-between",
+						     "space-around",
+						     "space-evenly"};
+static const char *const qjsky_kw_box_sizing[] = {"",
+						  "content-box",
+						  "border-box"};
+static const char *const qjsky_kw_background_attachment[] = {"",
+							     "fixed",
+							     "scroll"};
+static const char *const qjsky_kw_background_repeat[] = {"",
+							 "repeat-x",
+							 "repeat-y",
+							 "repeat",
+							 "no-repeat"};
+static const char *const qjsky_kw_border_top_style[] = {"",
+							"none",
+							"hidden",
+							"dotted",
+							"dashed",
+							"solid",
+							"double",
+							"groove",
+							"ridge",
+							"inset",
+							"outset"};
+static const char *const qjsky_kw_border_right_style[] = {"",
+							  "none",
+							  "hidden",
+							  "dotted",
+							  "dashed",
+							  "solid",
+							  "double",
+							  "groove",
+							  "ridge",
+							  "inset",
+							  "outset"};
+static const char *const qjsky_kw_border_bottom_style[] = {"",
+							   "none",
+							   "hidden",
+							   "dotted",
+							   "dashed",
+							   "solid",
+							   "double",
+							   "groove",
+							   "ridge",
+							   "inset",
+							   "outset"};
+static const char *const qjsky_kw_border_left_style[] = {"",
+							 "none",
+							 "hidden",
+							 "dotted",
+							 "dashed",
+							 "solid",
+							 "double",
+							 "groove",
+							 "ridge",
+							 "inset",
+							 "outset"};
+static const char *const qjsky_kw_outline_style[] = {"",
+						     "none",
+						     "",
+						     "dotted",
+						     "dashed",
+						     "solid",
+						     "double",
+						     "groove",
+						     "ridge",
+						     "inset",
+						     "outset"};
+static const char *const qjsky_kw_writing_mode[] = {"",
+						    "horizontal-tb",
+						    "vertical-rl",
+						    "vertical-lr"};
+
+static const struct {
+	const char *name;
+	uint8_t (*get)(const css_computed_style *style);
+	const char *const *values;
+	size_t count;
+} qjsky_css_keywords[] = {
+	{"white-space",
+	 css_computed_white_space,
+	 qjsky_kw_white_space,
+	 sizeof(qjsky_kw_white_space) / sizeof(qjsky_kw_white_space[0])},
+	{"text-transform",
+	 css_computed_text_transform,
+	 qjsky_kw_text_transform,
+	 sizeof(qjsky_kw_text_transform) / sizeof(qjsky_kw_text_transform[0])},
+	{"text-align",
+	 css_computed_text_align,
+	 qjsky_kw_text_align,
+	 sizeof(qjsky_kw_text_align) / sizeof(qjsky_kw_text_align[0])},
+	{"direction",
+	 css_computed_direction,
+	 qjsky_kw_direction,
+	 sizeof(qjsky_kw_direction) / sizeof(qjsky_kw_direction[0])},
+	{"unicode-bidi",
+	 css_computed_unicode_bidi,
+	 qjsky_kw_unicode_bidi,
+	 sizeof(qjsky_kw_unicode_bidi) / sizeof(qjsky_kw_unicode_bidi[0])},
+	{"table-layout",
+	 css_computed_table_layout,
+	 qjsky_kw_table_layout,
+	 sizeof(qjsky_kw_table_layout) / sizeof(qjsky_kw_table_layout[0])},
+	{"border-collapse",
+	 css_computed_border_collapse,
+	 qjsky_kw_border_collapse,
+	 sizeof(qjsky_kw_border_collapse) /
+		 sizeof(qjsky_kw_border_collapse[0])},
+	{"empty-cells",
+	 css_computed_empty_cells,
+	 qjsky_kw_empty_cells,
+	 sizeof(qjsky_kw_empty_cells) / sizeof(qjsky_kw_empty_cells[0])},
+	{"caption-side",
+	 css_computed_caption_side,
+	 qjsky_kw_caption_side,
+	 sizeof(qjsky_kw_caption_side) / sizeof(qjsky_kw_caption_side[0])},
+	{"clear",
+	 css_computed_clear,
+	 qjsky_kw_clear,
+	 sizeof(qjsky_kw_clear) / sizeof(qjsky_kw_clear[0])},
+	{"font-variant",
+	 css_computed_font_variant,
+	 qjsky_kw_font_variant,
+	 sizeof(qjsky_kw_font_variant) / sizeof(qjsky_kw_font_variant[0])},
+	{"list-style-position",
+	 css_computed_list_style_position,
+	 qjsky_kw_list_style_position,
+	 sizeof(qjsky_kw_list_style_position) /
+		 sizeof(qjsky_kw_list_style_position[0])},
+	{"list-style-type",
+	 css_computed_list_style_type,
+	 qjsky_kw_list_style_type,
+	 sizeof(qjsky_kw_list_style_type) /
+		 sizeof(qjsky_kw_list_style_type[0])},
+	{"flex-direction",
+	 css_computed_flex_direction,
+	 qjsky_kw_flex_direction,
+	 sizeof(qjsky_kw_flex_direction) / sizeof(qjsky_kw_flex_direction[0])},
+	{"flex-wrap",
+	 css_computed_flex_wrap,
+	 qjsky_kw_flex_wrap,
+	 sizeof(qjsky_kw_flex_wrap) / sizeof(qjsky_kw_flex_wrap[0])},
+	{"justify-content",
+	 css_computed_justify_content,
+	 qjsky_kw_justify_content,
+	 sizeof(qjsky_kw_justify_content) /
+		 sizeof(qjsky_kw_justify_content[0])},
+	{"align-items",
+	 css_computed_align_items,
+	 qjsky_kw_align_items,
+	 sizeof(qjsky_kw_align_items) / sizeof(qjsky_kw_align_items[0])},
+	{"align-self",
+	 css_computed_align_self,
+	 qjsky_kw_align_self,
+	 sizeof(qjsky_kw_align_self) / sizeof(qjsky_kw_align_self[0])},
+	{"align-content",
+	 css_computed_align_content,
+	 qjsky_kw_align_content,
+	 sizeof(qjsky_kw_align_content) / sizeof(qjsky_kw_align_content[0])},
+	{"box-sizing",
+	 css_computed_box_sizing,
+	 qjsky_kw_box_sizing,
+	 sizeof(qjsky_kw_box_sizing) / sizeof(qjsky_kw_box_sizing[0])},
+	{"background-attachment",
+	 css_computed_background_attachment,
+	 qjsky_kw_background_attachment,
+	 sizeof(qjsky_kw_background_attachment) /
+		 sizeof(qjsky_kw_background_attachment[0])},
+	{"background-repeat",
+	 css_computed_background_repeat,
+	 qjsky_kw_background_repeat,
+	 sizeof(qjsky_kw_background_repeat) /
+		 sizeof(qjsky_kw_background_repeat[0])},
+	{"border-top-style",
+	 css_computed_border_top_style,
+	 qjsky_kw_border_top_style,
+	 sizeof(qjsky_kw_border_top_style) /
+		 sizeof(qjsky_kw_border_top_style[0])},
+	{"border-right-style",
+	 css_computed_border_right_style,
+	 qjsky_kw_border_right_style,
+	 sizeof(qjsky_kw_border_right_style) /
+		 sizeof(qjsky_kw_border_right_style[0])},
+	{"border-bottom-style",
+	 css_computed_border_bottom_style,
+	 qjsky_kw_border_bottom_style,
+	 sizeof(qjsky_kw_border_bottom_style) /
+		 sizeof(qjsky_kw_border_bottom_style[0])},
+	{"border-left-style",
+	 css_computed_border_left_style,
+	 qjsky_kw_border_left_style,
+	 sizeof(qjsky_kw_border_left_style) /
+		 sizeof(qjsky_kw_border_left_style[0])},
+	{"outline-style",
+	 css_computed_outline_style,
+	 qjsky_kw_outline_style,
+	 sizeof(qjsky_kw_outline_style) / sizeof(qjsky_kw_outline_style[0])},
+	{"writing-mode",
+	 css_computed_writing_mode,
+	 qjsky_kw_writing_mode,
+	 sizeof(qjsky_kw_writing_mode) / sizeof(qjsky_kw_writing_mode[0])},
+};
+
+static const char *const qjsky_kw_cursor[] = {"",
+					      "auto",
+					      "crosshair",
+					      "default",
+					      "pointer",
+					      "move",
+					      "e-resize",
+					      "ne-resize",
+					      "nw-resize",
+					      "n-resize",
+					      "se-resize",
+					      "sw-resize",
+					      "s-resize",
+					      "w-resize",
+					      "text",
+					      "wait",
+					      "help",
+					      "progress"};
+
+static const char *const qjsky_kw_vertical_align[] = {"",
+						      "baseline",
+						      "sub",
+						      "super",
+						      "top",
+						      "text-top",
+						      "middle",
+						      "bottom",
+						      "text-bottom",
+						      "set"};
+
+static void qjsky_css_set_keyword(JSContext *ctx,
+				  JSValueConst obj,
+				  const char *name,
+				  const char *const *values,
+				  size_t count,
+				  uint8_t v)
+{
+	if (v < count && values[v][0] != '\0') {
+		qjsky_css_set(ctx, obj, name, values[v]);
+	}
+}
+
+static void qjsky_css_set_border_colour(JSContext *ctx,
+					JSValueConst obj,
+					const char *name,
+					uint8_t type,
+					css_color colour,
+					css_color current)
+{
+	qjsky_css_set_colour(ctx,
+			     obj,
+			     name,
+			     type == CSS_BORDER_COLOR_COLOR ? colour : current);
+}
+
+static void qjsky_css_set_font_family(JSContext *ctx,
+				      JSValueConst obj,
+				      const css_computed_style *style)
+{
+	static const char *const generic[] = {
+		"", "serif", "sans-serif", "cursive", "fantasy", "monospace"};
+	lwc_string **names = NULL;
+	uint8_t family = css_computed_font_family(style, &names);
+	char buf[512];
+	size_t used = 0;
+
+	buf[0] = '\0';
+	for (; names != NULL && *names != NULL; names++) {
+		const char *n = lwc_string_data(*names);
+		bool quote = strchr(n, ' ') != NULL;
+		int w = snprintf(buf + used,
+				 sizeof(buf) - used,
+				 "%s%s%s%s",
+				 used > 0 ? ", " : "",
+				 quote ? "\"" : "",
+				 n,
+				 quote ? "\"" : "");
+		if (w < 0 || (size_t)w >= sizeof(buf) - used) {
+			break;
+		}
+		used += (size_t)w;
+	}
+	if (family > 0 && family < sizeof(generic) / sizeof(generic[0]) &&
+	    used < sizeof(buf)) {
+		snprintf(buf + used,
+			 sizeof(buf) - used,
+			 "%s%s",
+			 used > 0 ? ", " : "",
+			 generic[family]);
+	}
+	if (buf[0] != '\0') {
+		qjsky_css_set(ctx, obj, "font-family", buf);
+	}
+}
+
+static void qjsky_css_set_keywords(JSContext *ctx,
+				   JSValueConst obj,
+				   const css_computed_style *style,
+				   const css_unit_ctx *uc)
+{
+	static const char *const sides[4] = {"top", "right", "bottom", "left"};
+	uint8_t (*offset[4])(const css_computed_style *,
+			     css_fixed *,
+			     css_unit *) = {css_computed_top,
+					    css_computed_right,
+					    css_computed_bottom,
+					    css_computed_left};
+	uint8_t (*border_colour[4])(const css_computed_style *, css_color *) = {
+		css_computed_border_top_color,
+		css_computed_border_right_color,
+		css_computed_border_bottom_color,
+		css_computed_border_left_color};
+	lwc_string **urls = NULL;
+	css_color colour, current;
+	css_fixed len, number;
+	css_unit unit;
+	int32_t order;
+	char buf[96];
+	uint8_t v;
+
+	for (size_t i = 0;
+	     i < sizeof(qjsky_css_keywords) / sizeof(qjsky_css_keywords[0]);
+	     i++) {
+		qjsky_css_set_keyword(ctx,
+				      obj,
+				      qjsky_css_keywords[i].name,
+				      qjsky_css_keywords[i].values,
+				      qjsky_css_keywords[i].count,
+				      qjsky_css_keywords[i].get(style));
+	}
+
+	v = css_computed_text_decoration(style);
+	buf[0] = '\0';
+	if (v & CSS_TEXT_DECORATION_UNDERLINE) {
+		strcat(buf, "underline");
+	}
+	if (v & CSS_TEXT_DECORATION_OVERLINE) {
+		strcat(buf, buf[0] ? " overline" : "overline");
+	}
+	if (v & CSS_TEXT_DECORATION_LINE_THROUGH) {
+		strcat(buf, buf[0] ? " line-through" : "line-through");
+	}
+	if (v & CSS_TEXT_DECORATION_BLINK) {
+		strcat(buf, buf[0] ? " blink" : "blink");
+	}
+	qjsky_css_set(ctx, obj, "text-decoration-line", buf[0] ? buf : "none");
+	qjsky_css_set(ctx, obj, "text-decoration", buf[0] ? buf : "none");
+
+	v = css_computed_cursor(style, &urls);
+	qjsky_css_set_keyword(ctx,
+			      obj,
+			      "cursor",
+			      qjsky_kw_cursor,
+			      sizeof(qjsky_kw_cursor) /
+				      sizeof(qjsky_kw_cursor[0]),
+			      v);
+
+	css_computed_color(style, &current);
+	for (int i = 0; i < 4; i++) {
+		snprintf(buf, sizeof(buf), "border-%s-color", sides[i]);
+		v = border_colour[i](style, &colour);
+		qjsky_css_set_border_colour(ctx, obj, buf, v, colour, current);
+	}
+	v = css_computed_outline_color(style, &colour);
+	qjsky_css_set_colour(ctx,
+			     obj,
+			     "outline-color",
+			     v == CSS_OUTLINE_COLOR_COLOR ? colour : current);
+
+	if (css_computed_flex_grow(style, &number) == CSS_FLEX_GROW_SET) {
+		qjsky_css_number(buf, sizeof(buf), FIXTOFLT(number), "");
+		qjsky_css_set(ctx, obj, "flex-grow", buf);
+	}
+	if (css_computed_flex_shrink(style, &number) == CSS_FLEX_SHRINK_SET) {
+		qjsky_css_number(buf, sizeof(buf), FIXTOFLT(number), "");
+		qjsky_css_set(ctx, obj, "flex-shrink", buf);
+	}
+	if (css_computed_order(style, &order) == CSS_ORDER_SET) {
+		snprintf(buf, sizeof(buf), "%d", (int)order);
+		qjsky_css_set(ctx, obj, "order", buf);
+	}
+	qjsky_css_set_font_family(ctx, obj, style);
+
+	v = css_computed_vertical_align(style, &len, &unit);
+	if (v == CSS_VERTICAL_ALIGN_SET) {
+		if (uc != NULL) {
+			qjsky_css_set_len(ctx,
+					  obj,
+					  "vertical-align",
+					  style,
+					  uc,
+					  true,
+					  len,
+					  unit);
+		}
+	} else {
+		qjsky_css_set_keyword(
+			ctx,
+			obj,
+			"vertical-align",
+			qjsky_kw_vertical_align,
+			sizeof(qjsky_kw_vertical_align) /
+				sizeof(qjsky_kw_vertical_align[0]),
+			v);
+	}
+
+	if (uc == NULL) {
+		return;
+	}
+	for (int i = 0; i < 4; i++) {
+		v = offset[i](style, &len, &unit);
+		qjsky_css_set_len(ctx,
+				  obj,
+				  sides[i],
+				  style,
+				  uc,
+				  v == CSS_TOP_SET,
+				  len,
+				  unit);
+	}
+	v = css_computed_min_width(style, &len, &unit);
+	qjsky_css_set_len(ctx,
+			  obj,
+			  "min-width",
+			  style,
+			  uc,
+			  v == CSS_MIN_WIDTH_SET,
+			  len,
+			  unit);
+	v = css_computed_min_height(style, &len, &unit);
+	qjsky_css_set_len(ctx,
+			  obj,
+			  "min-height",
+			  style,
+			  uc,
+			  v == CSS_MIN_HEIGHT_SET,
+			  len,
+			  unit);
+	v = css_computed_max_width(style, &len, &unit);
+	if (v == CSS_MAX_WIDTH_SET) {
+		qjsky_css_set_len(
+			ctx, obj, "max-width", style, uc, true, len, unit);
+	} else {
+		qjsky_css_set(ctx, obj, "max-width", "none");
+	}
+	v = css_computed_max_height(style, &len, &unit);
+	if (v == CSS_MAX_HEIGHT_SET) {
+		qjsky_css_set_len(
+			ctx, obj, "max-height", style, uc, true, len, unit);
+	} else {
+		qjsky_css_set(ctx, obj, "max-height", "none");
+	}
+	v = css_computed_line_height(style, &len, &unit);
+	if (v == CSS_LINE_HEIGHT_NUMBER) {
+		css_fixed size;
+		css_unit size_unit;
+		if (css_computed_font_size(style, &size, &size_unit) ==
+		    CSS_FONT_SIZE_DIMENSION) {
+			double px = FIXTOFLT(css_unit_len2css_px(
+				style, uc, size, size_unit));
+			qjsky_css_set_px(
+				ctx, obj, "line-height", px * FIXTOFLT(len));
+		}
+	} else if (v == CSS_LINE_HEIGHT_DIMENSION) {
+		qjsky_css_set_len(
+			ctx, obj, "line-height", style, uc, true, len, unit);
+	} else {
+		qjsky_css_set(ctx, obj, "line-height", "normal");
+	}
+	v = css_computed_letter_spacing(style, &len, &unit);
+	if (v == CSS_LETTER_SPACING_SET) {
+		qjsky_css_set_len(
+			ctx, obj, "letter-spacing", style, uc, true, len, unit);
+	} else {
+		qjsky_css_set(ctx, obj, "letter-spacing", "normal");
+	}
+	v = css_computed_word_spacing(style, &len, &unit);
+	if (v == CSS_WORD_SPACING_SET) {
+		qjsky_css_set_len(
+			ctx, obj, "word-spacing", style, uc, true, len, unit);
+	} else {
+		qjsky_css_set(ctx, obj, "word-spacing", "0px");
+	}
+	css_computed_text_indent(style, &len, &unit);
+	qjsky_css_set_len(ctx, obj, "text-indent", style, uc, true, len, unit);
+	v = css_computed_flex_basis(style, &len, &unit);
+	if (v == CSS_FLEX_BASIS_SET) {
+		qjsky_css_set_len(
+			ctx, obj, "flex-basis", style, uc, true, len, unit);
+	} else {
+		qjsky_css_set(ctx,
+			      obj,
+			      "flex-basis",
+			      v == CSS_FLEX_BASIS_CONTENT ? "content" : "auto");
+	}
+	v = css_computed_outline_width(style, &len, &unit);
+	if (v == CSS_OUTLINE_WIDTH_WIDTH) {
+		qjsky_css_set_len(
+			ctx, obj, "outline-width", style, uc, true, len, unit);
+	}
+}
+
 JSValue qjsky_computed_style(JSContext *ctx, struct dom_node *node)
 {
-	static const char *sides[4] = { "top", "right", "bottom", "left" };
-	static const int index[4] = { TOP, RIGHT, BOTTOM, LEFT };
+	static const char *sides[4] = {"top", "right", "bottom", "left"};
+	static const int index[4] = {TOP, RIGHT, BOTTOM, LEFT};
 	JSValue values = JS_NewObject(ctx), fn, ret;
 	struct box *box;
 	const css_computed_style *style;
@@ -1843,18 +2584,54 @@ JSValue qjsky_computed_style(JSContext *ctx, struct dom_node *node)
 		uint8_t v;
 		int i;
 
-		qjsky_css_set(ctx, values, "display", qjsky_css_display(css_computed_display(style, false)));
+		qjsky_css_set(ctx,
+			      values,
+			      "display",
+			      qjsky_css_display(
+				      css_computed_display(style, false)));
 		v = css_computed_visibility(style);
-		qjsky_css_set(ctx, values, "visibility", v == CSS_VISIBILITY_HIDDEN ? "hidden" : v == CSS_VISIBILITY_COLLAPSE ? "collapse" : "visible");
-		qjsky_css_set(ctx, values, "position", qjsky_css_position(css_computed_position(style)));
+		qjsky_css_set(ctx,
+			      values,
+			      "visibility",
+			      v == CSS_VISIBILITY_HIDDEN     ? "hidden"
+			      : v == CSS_VISIBILITY_COLLAPSE ? "collapse"
+							     : "visible");
+		qjsky_css_set(ctx,
+			      values,
+			      "position",
+			      qjsky_css_position(css_computed_position(style)));
 		v = css_computed_float(style);
-		qjsky_css_set(ctx, values, "float", v == CSS_FLOAT_LEFT ? "left" : v == CSS_FLOAT_RIGHT ? "right" : "none");
-		qjsky_css_set(ctx, values, "overflow-x", qjsky_css_overflow(css_computed_overflow_x(style)));
-		qjsky_css_set(ctx, values, "overflow-y", qjsky_css_overflow(css_computed_overflow_y(style)));
-		if (css_computed_overflow_x(style) == css_computed_overflow_y(style)) {
-			qjsky_css_set(ctx, values, "overflow", qjsky_css_overflow(css_computed_overflow_x(style)));
+		qjsky_css_set(ctx,
+			      values,
+			      "float",
+			      v == CSS_FLOAT_LEFT    ? "left"
+			      : v == CSS_FLOAT_RIGHT ? "right"
+						     : "none");
+		qjsky_css_set(ctx,
+			      values,
+			      "overflow-x",
+			      qjsky_css_overflow(
+				      css_computed_overflow_x(style)));
+		qjsky_css_set(ctx,
+			      values,
+			      "overflow-y",
+			      qjsky_css_overflow(
+				      css_computed_overflow_y(style)));
+		if (css_computed_overflow_x(style) ==
+		    css_computed_overflow_y(style)) {
+			qjsky_css_set(ctx,
+				      values,
+				      "overflow",
+				      qjsky_css_overflow(
+					      css_computed_overflow_x(style)));
 		} else {
-			snprintf(buf, sizeof(buf), "%s %s", qjsky_css_overflow(css_computed_overflow_x(style)), qjsky_css_overflow(css_computed_overflow_y(style)));
+			snprintf(buf,
+				 sizeof(buf),
+				 "%s %s",
+				 qjsky_css_overflow(
+					 css_computed_overflow_x(style)),
+				 qjsky_css_overflow(
+					 css_computed_overflow_y(style)));
 			qjsky_css_set(ctx, values, "overflow", buf);
 		}
 		css_computed_opacity(style, &opacity);
@@ -1870,52 +2647,148 @@ JSValue qjsky_computed_style(JSContext *ctx, struct dom_node *node)
 		qjsky_css_set_colour(ctx, values, "color", colour);
 		css_computed_background_color(style, &colour);
 		qjsky_css_set_colour(ctx, values, "background-color", colour);
-		if (css_computed_font_size(style, &len, &unit) == CSS_FONT_SIZE_DIMENSION) {
+		if (css_computed_font_size(style, &len, &unit) ==
+		    CSS_FONT_SIZE_DIMENSION) {
 			double size = FIXTOFLT(len);
 			if (unit == CSS_UNIT_PT) {
 				size = size * 96 / 72;
 			}
 			qjsky_css_set_px(ctx, values, "font-size", size);
 		}
-		qjsky_css_set(ctx, values, "font-weight", qjsky_css_font_weight(css_computed_font_weight(style)));
+		qjsky_css_set(ctx,
+			      values,
+			      "font-weight",
+			      qjsky_css_font_weight(
+				      css_computed_font_weight(style)));
 		v = css_computed_font_style(style);
-		qjsky_css_set(ctx, values, "font-style", v == CSS_FONT_STYLE_ITALIC ? "italic" : v == CSS_FONT_STYLE_OBLIQUE ? "oblique" : "normal");
+		qjsky_css_set(ctx,
+			      values,
+			      "font-style",
+			      v == CSS_FONT_STYLE_ITALIC    ? "italic"
+			      : v == CSS_FONT_STYLE_OBLIQUE ? "oblique"
+							    : "normal");
+		qjsky_css_set_keywords(ctx,
+				       values,
+				       style,
+				       htmlc != NULL ? &htmlc->unit_len_ctx
+						     : NULL);
 		if (box != NULL && htmlc != NULL && htmlc->had_initial_layout) {
 			qjsky_css_set_px(ctx, values, "width", box->width);
 			qjsky_css_set_px(ctx, values, "height", box->height);
 			for (i = 0; i < 4; i++) {
-				snprintf(buf, sizeof(buf), "margin-%s", sides[i]);
-				qjsky_css_set_px(ctx, values, buf, box->margin[index[i]]);
-				snprintf(buf, sizeof(buf), "padding-%s", sides[i]);
-				qjsky_css_set_px(ctx, values, buf, box->padding[index[i]]);
-				snprintf(buf, sizeof(buf), "border-%s-width", sides[i]);
-				qjsky_css_set_px(ctx, values, buf, box->border[index[i]].width);
+				snprintf(buf,
+					 sizeof(buf),
+					 "margin-%s",
+					 sides[i]);
+				qjsky_css_set_px(ctx,
+						 values,
+						 buf,
+						 box->margin[index[i]]);
+				snprintf(buf,
+					 sizeof(buf),
+					 "padding-%s",
+					 sides[i]);
+				qjsky_css_set_px(ctx,
+						 values,
+						 buf,
+						 box->padding[index[i]]);
+				snprintf(buf,
+					 sizeof(buf),
+					 "border-%s-width",
+					 sides[i]);
+				qjsky_css_set_px(ctx,
+						 values,
+						 buf,
+						 box->border[index[i]].width);
 			}
 		} else if (htmlc != NULL) {
 			const css_unit_ctx *uc = &htmlc->unit_len_ctx;
-			uint8_t (*margin[4])(const css_computed_style *, css_fixed *, css_unit *) = {
-				css_computed_margin_top, css_computed_margin_right, css_computed_margin_bottom, css_computed_margin_left };
-			uint8_t (*padding[4])(const css_computed_style *, css_fixed *, css_unit *) = {
-				css_computed_padding_top, css_computed_padding_right, css_computed_padding_bottom, css_computed_padding_left };
-			uint8_t (*border[4])(const css_computed_style *, css_fixed *, css_unit *) = {
-				css_computed_border_top_width, css_computed_border_right_width, css_computed_border_bottom_width, css_computed_border_left_width };
+			uint8_t (*margin[4])(const css_computed_style *,
+					     css_fixed *,
+					     css_unit *) = {
+				css_computed_margin_top,
+				css_computed_margin_right,
+				css_computed_margin_bottom,
+				css_computed_margin_left};
+			uint8_t (*padding[4])(const css_computed_style *,
+					      css_fixed *,
+					      css_unit *) = {
+				css_computed_padding_top,
+				css_computed_padding_right,
+				css_computed_padding_bottom,
+				css_computed_padding_left};
+			uint8_t (*border[4])(const css_computed_style *,
+					     css_fixed *,
+					     css_unit *) = {
+				css_computed_border_top_width,
+				css_computed_border_right_width,
+				css_computed_border_bottom_width,
+				css_computed_border_left_width};
 
 			bool set;
 
-			set = css_computed_width(style, &len, &unit) == CSS_WIDTH_SET;
-			qjsky_css_set_len(ctx, values, "width", style, uc, set, len, unit);
-			set = css_computed_height(style, &len, &unit) == CSS_HEIGHT_SET;
-			qjsky_css_set_len(ctx, values, "height", style, uc, set, len, unit);
+			set = css_computed_width(style, &len, &unit) ==
+			      CSS_WIDTH_SET;
+			qjsky_css_set_len(ctx,
+					  values,
+					  "width",
+					  style,
+					  uc,
+					  set,
+					  len,
+					  unit);
+			set = css_computed_height(style, &len, &unit) ==
+			      CSS_HEIGHT_SET;
+			qjsky_css_set_len(ctx,
+					  values,
+					  "height",
+					  style,
+					  uc,
+					  set,
+					  len,
+					  unit);
 			for (i = 0; i < 4; i++) {
-				snprintf(buf, sizeof(buf), "margin-%s", sides[i]);
-				set = margin[i](style, &len, &unit) == CSS_MARGIN_SET;
-				qjsky_css_set_len(ctx, values, buf, style, uc, set, len, unit);
-				snprintf(buf, sizeof(buf), "padding-%s", sides[i]);
+				snprintf(buf,
+					 sizeof(buf),
+					 "margin-%s",
+					 sides[i]);
+				set = margin[i](style, &len, &unit) ==
+				      CSS_MARGIN_SET;
+				qjsky_css_set_len(ctx,
+						  values,
+						  buf,
+						  style,
+						  uc,
+						  set,
+						  len,
+						  unit);
+				snprintf(buf,
+					 sizeof(buf),
+					 "padding-%s",
+					 sides[i]);
 				padding[i](style, &len, &unit);
-				qjsky_css_set_len(ctx, values, buf, style, uc, true, len, unit);
-				snprintf(buf, sizeof(buf), "border-%s-width", sides[i]);
-				if (border[i](style, &len, &unit) == CSS_BORDER_WIDTH_WIDTH) {
-					qjsky_css_set_len(ctx, values, buf, style, uc, true, len, unit);
+				qjsky_css_set_len(ctx,
+						  values,
+						  buf,
+						  style,
+						  uc,
+						  true,
+						  len,
+						  unit);
+				snprintf(buf,
+					 sizeof(buf),
+					 "border-%s-width",
+					 sides[i]);
+				if (border[i](style, &len, &unit) ==
+				    CSS_BORDER_WIDTH_WIDTH) {
+					qjsky_css_set_len(ctx,
+							  values,
+							  buf,
+							  style,
+							  uc,
+							  true,
+							  len,
+							  unit);
 				} else {
 					qjsky_css_set(ctx, values, buf, "0px");
 				}
@@ -2968,6 +3841,27 @@ static bool qjsky_candidate_matches(dom_node *node,
 	return match;
 }
 
+static JSValue qjsky_native_compare_points(JSContext *ctx,
+					   JSValueConst this_val,
+					   int argc,
+					   JSValueConst *argv)
+{
+	node_private_t *a = qjsky_private(ctx, argv[0], QJSKY_IFACE_NODE);
+	node_private_t *b = qjsky_private(ctx, argv[2], QJSKY_IFACE_NODE);
+	uint32_t a_offset, b_offset;
+
+	if (a == NULL || b == NULL) {
+		return JS_ThrowTypeError(ctx, "not a node");
+	}
+	if (JS_ToUint32(ctx, &a_offset, argv[1]) < 0 ||
+	    JS_ToUint32(ctx, &b_offset, argv[3]) < 0) {
+		return JS_EXCEPTION;
+	}
+	return JS_NewInt32(ctx,
+			   dom_boundary_point_compare(
+				   a->node, a_offset, b->node, b_offset));
+}
+
 static JSValue qjsky_native_candidates(JSContext *ctx,
 				       JSValueConst this_val,
 				       int argc,
@@ -3379,6 +4273,7 @@ static JSValue qjsky_native_object(JSContext *ctx)
 		{"origin", qjsky_native_origin, 1},
 		{"readyState", qjsky_native_ready_state, 0},
 		{"candidates", qjsky_native_candidates, 4},
+		{"comparePoints", qjsky_native_compare_points, 4},
 		{"language", qjsky_native_language, 0},
 		{"random", qjsky_native_random, 1},
 		{"storageRead", qjsky_native_storage_read, 1},

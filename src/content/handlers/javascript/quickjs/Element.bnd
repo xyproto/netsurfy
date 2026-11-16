@@ -59,6 +59,81 @@ static JSValue element_get_attribute_string(JSContext *ctx, dom_node *node, dom_
 	return ret;
 }
 
+static JSValue element_node_result(JSContext *ctx, dom_exception exc, dom_node *node)
+{
+	JSValue ret;
+
+	if (exc != DOM_NO_ERR) {
+		return qjsky_throw_dom(ctx, exc);
+	}
+	ret = qjsky_node(ctx, node);
+	if (node != NULL) {
+		dom_node_unref(node);
+	}
+	return ret;
+}
+
+static dom_node *element_attr_arg(JSContext *ctx, JSValueConst val)
+{
+	node_private_t *np = qjsky_private(ctx, val, QJSKY_IFACE_NODE);
+	dom_node_type type;
+
+	if (np == NULL || dom_node_get_node_type(np->node, &type) != DOM_NO_ERR || type != DOM_ATTRIBUTE_NODE) {
+		JS_ThrowTypeError(ctx, "parameter 1 is not of type 'Attr'");
+		return NULL;
+	}
+	return np->node;
+}
+
+static bool element_ns_args(JSContext *ctx, JSValueConst *argv, dom_string **ns, dom_string **name)
+{
+	if (!qjsky_to_dom_namespace(ctx, argv[0], ns)) {
+		return false;
+	}
+	*name = qjsky_to_dom_string(ctx, argv[1]);
+	if (*name == NULL) {
+		if (*ns != NULL) {
+			dom_string_unref(*ns);
+		}
+		return false;
+	}
+	return true;
+}
+
+static void element_ns_free(dom_string *ns, dom_string *name)
+{
+	if (ns != NULL) {
+		dom_string_unref(ns);
+	}
+	dom_string_unref(name);
+}
+
+JSValue qjsky_element_token_list(JSContext *ctx, JSValueConst this_val, dom_node *node, dom_string *attr, int hidden)
+{
+	dom_tokenlist *tokens;
+	JSValue list;
+
+	list = qjsky_hidden_get(ctx, this_val, hidden, false);
+	if (!JS_IsUndefined(list)) {
+		return list;
+	}
+	if (dom_tokenlist_create((dom_element *)node, attr, &tokens) != DOM_NO_ERR) {
+		return JS_ThrowOutOfMemory(ctx);
+	}
+	list = qjsky_dom_settable_token_list___create(ctx, tokens);
+	dom_tokenlist_unref(tokens);
+	if (JS_IsException(list)) {
+		return list;
+	}
+	qjsky_hidden_set(ctx, this_val, hidden, JS_DupValue(ctx, list));
+	return list;
+}
+
+JSValue qjsky_rel_list(JSContext *ctx, JSValueConst this_val, dom_node *node)
+{
+	return qjsky_element_token_list(ctx, this_val, node, corestring_dom_rel, QJSKY_HIDDEN_REL_LIST);
+}
+
 static JSValue element_set_attribute_string(JSContext *ctx, dom_node *node, dom_string *name, JSValueConst val)
 {
 	dom_string *str = qjsky_to_dom_string(ctx, val);
@@ -264,20 +339,7 @@ setter Element::className ()
 
 getter Element::classList ()
 %{
-	dom_tokenlist *tokens;
-	JSValue list;
-
-	list = qjsky_hidden_get(ctx, this_val, QJSKY_HIDDEN_CLASS_LIST, false);
-	if (!JS_IsUndefined(list)) return list;
-
-	if (dom_tokenlist_create((dom_element *)priv->parent.node, corestring_dom_class, &tokens) != DOM_NO_ERR) {
-		return JS_UNDEFINED;
-	}
-	list = qjsky_dom_settable_token_list___create(ctx, tokens);
-	dom_tokenlist_unref(tokens);
-	if (JS_IsException(list)) return list;
-	qjsky_hidden_set(ctx, this_val, QJSKY_HIDDEN_CLASS_LIST, JS_DupValue(ctx, list));
-	return list;
+	return qjsky_element_token_list(ctx, this_val, priv->parent.node, corestring_dom_class, QJSKY_HIDDEN_CLASS_LIST);
 %}
 
 getter Element::innerHTML()
@@ -410,6 +472,138 @@ getter Element::attributes()
 	if (JS_IsException(proxy)) return proxy;
 	qjsky_hidden_set(ctx, this_val, QJSKY_HIDDEN_ATTRIBUTES, JS_DupValue(ctx, proxy));
 	return proxy;
+%}
+
+method Element::hasAttributes()
+%{
+	bool result = false;
+
+	if (dom_node_has_attributes(priv->parent.node, &result) != DOM_NO_ERR) return JS_FALSE;
+	return JS_NewBool(ctx, result);
+%}
+
+method Element::getAttributeNS()
+%{
+	dom_string *ns, *local, *value = NULL;
+	dom_exception exc;
+	JSValue ret;
+
+	if (!element_ns_args(ctx, argv, &ns, &local)) return JS_EXCEPTION;
+	exc = dom_element_get_attribute_ns(priv->parent.node, ns, local, &value);
+	element_ns_free(ns, local);
+	if (exc != DOM_NO_ERR) return qjsky_throw_dom(ctx, exc);
+	if (value == NULL) return JS_NULL;
+	ret = qjsky_string(ctx, value);
+	dom_string_unref(value);
+	return ret;
+%}
+
+method Element::setAttributeNS()
+%{
+	dom_string *ns, *qname, *value;
+	dom_exception exc;
+
+	if (!element_ns_args(ctx, argv, &ns, &qname)) return JS_EXCEPTION;
+	value = qjsky_to_dom_string(ctx, argv[2]);
+	if (value == NULL) {
+		element_ns_free(ns, qname);
+		return JS_EXCEPTION;
+	}
+	exc = dom_element_set_attribute_ns(priv->parent.node, ns, qname, value);
+	element_ns_free(ns, qname);
+	dom_string_unref(value);
+	return exc == DOM_NO_ERR ? JS_UNDEFINED : qjsky_throw_dom(ctx, exc);
+%}
+
+method Element::removeAttributeNS()
+%{
+	dom_string *ns, *local;
+	dom_exception exc;
+
+	if (!element_ns_args(ctx, argv, &ns, &local)) return JS_EXCEPTION;
+	exc = dom_element_remove_attribute_ns(priv->parent.node, ns, local);
+	element_ns_free(ns, local);
+	return exc == DOM_NO_ERR ? JS_UNDEFINED : qjsky_throw_dom(ctx, exc);
+%}
+
+method Element::hasAttributeNS()
+%{
+	dom_string *ns, *local;
+	bool result = false;
+	dom_exception exc;
+
+	if (!element_ns_args(ctx, argv, &ns, &local)) return JS_EXCEPTION;
+	exc = dom_element_has_attribute_ns(priv->parent.node, ns, local, &result);
+	element_ns_free(ns, local);
+	if (exc != DOM_NO_ERR) return qjsky_throw_dom(ctx, exc);
+	return JS_NewBool(ctx, result);
+%}
+
+method Element::getAttributeNode()
+%{
+	dom_string *name = qjsky_to_dom_string(ctx, argv[0]);
+	dom_attr *attr = NULL;
+	dom_exception exc;
+
+	if (name == NULL) return JS_EXCEPTION;
+	exc = dom_element_get_attribute_node(priv->parent.node, name, &attr);
+	dom_string_unref(name);
+	return element_node_result(ctx, exc, (dom_node *)attr);
+%}
+
+method Element::getAttributeNodeNS()
+%{
+	dom_string *ns, *local;
+	dom_attr *attr = NULL;
+	dom_exception exc;
+
+	if (!element_ns_args(ctx, argv, &ns, &local)) return JS_EXCEPTION;
+	exc = dom_element_get_attribute_node_ns(priv->parent.node, ns, local, &attr);
+	element_ns_free(ns, local);
+	return element_node_result(ctx, exc, (dom_node *)attr);
+%}
+
+method Element::setAttributeNode()
+%{
+	dom_node *attr = element_attr_arg(ctx, argv[0]);
+	dom_attr *old = NULL;
+
+	if (attr == NULL) return JS_EXCEPTION;
+	return element_node_result(ctx, dom_element_set_attribute_node(priv->parent.node, attr, &old), (dom_node *)old);
+%}
+
+method Element::setAttributeNodeNS()
+%{
+	dom_node *attr = element_attr_arg(ctx, argv[0]);
+	dom_attr *old = NULL;
+
+	if (attr == NULL) return JS_EXCEPTION;
+	return element_node_result(ctx, dom_element_set_attribute_node_ns(priv->parent.node, attr, &old), (dom_node *)old);
+%}
+
+method Element::removeAttributeNode()
+%{
+	dom_node *attr = element_attr_arg(ctx, argv[0]);
+	dom_attr *removed = NULL;
+
+	if (attr == NULL) return JS_EXCEPTION;
+	return element_node_result(ctx, dom_element_remove_attribute_node(priv->parent.node, attr, &removed), (dom_node *)removed);
+%}
+
+method Element::getElementsByTagNameNS()
+%{
+	dom_nodelist *nodes = NULL;
+	dom_string *ns, *local;
+	dom_exception exc;
+	JSValue list;
+
+	if (!element_ns_args(ctx, argv, &ns, &local)) return JS_EXCEPTION;
+	exc = dom_element_get_elements_by_tag_name_ns(priv->parent.node, ns, local, &nodes);
+	element_ns_free(ns, local);
+	if (exc != DOM_NO_ERR) return qjsky_throw_dom(ctx, exc);
+	list = qjsky_node_list___create(ctx, nodes);
+	dom_nodelist_unref(nodes);
+	return qjsky_list_proxy(ctx, "makeListProxy", list);
 %}
 
 method Element::getElementsByClassName()

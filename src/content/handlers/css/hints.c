@@ -484,7 +484,8 @@ bool nscss_parse_colour(const char *data, css_color *result)
 		g |= (g << 4);
 		b |= (b << 4);
 
-		*result = (0xff << 24) | (r << 16) | (g << 8) | b;
+		*result = (0xffu << 24) | ((uint32_t)r << 16) |
+			  ((uint32_t)g << 8) | b;
 
 		return true;
 	} else if (len == 6 && isHex(data[0]) && isHex(data[1]) &&
@@ -494,7 +495,8 @@ bool nscss_parse_colour(const char *data, css_color *result)
 		g = (charToHex(data[2]) << 4) | charToHex(data[3]);
 		b = (charToHex(data[4]) << 4) | charToHex(data[5]);
 
-		*result = (0xff << 24) | (r << 16) | (g << 8) | b;
+		*result = (0xffu << 24) | ((uint32_t)r << 16) |
+			  ((uint32_t)g << 8) | b;
 
 		return true;
 	}

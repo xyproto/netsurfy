@@ -12,6 +12,7 @@
 
 #include <libwapcaplet/libwapcaplet.h>
 #include <libcss/computed.h>
+#include <libcss/select.h>
 
 #include "stylesheet.h"
 
@@ -93,6 +94,8 @@ void css__vars_select_cleanup(struct css_select_state *state);
 
 css_error css__vars_resolve(const css_computed_style *parent,
 			    const css_computed_vars *own,
-			    css_computed_style *target);
+			    css_computed_style *target,
+			    css_select_handler *handler,
+			    void *pw);
 
 #endif

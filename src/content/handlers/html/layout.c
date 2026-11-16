@@ -239,7 +239,7 @@ static int layout_text_indent(const css_unit_ctx *unit_len_ctx,
 	css_computed_text_indent(style, &value, &unit);
 
 	if (unit == CSS_UNIT_PCT) {
-		return FPCT_OF_INT_TOINT(value, width);
+		return layout_percent_of(value, width);
 	} else {
 		return FIXTOINT(css_unit_len2device_px(
 			style, unit_len_ctx, value, unit));
@@ -1316,10 +1316,17 @@ static struct box *layout_next_margin_block(const css_unit_ctx *unit_len_ctx,
 						       box->border);
 
 				/* Apply top margin */
-				if (*max_pos_margin < box->margin[TOP])
-					*max_pos_margin = box->margin[TOP];
-				else if (*max_neg_margin < -box->margin[TOP])
-					*max_neg_margin = -box->margin[TOP];
+				if (*max_pos_margin <
+				    layout_collapse_margin(box->margin[TOP]))
+					*max_pos_margin =
+						layout_collapse_margin(
+							box->margin[TOP]);
+				else if (*max_neg_margin <
+					 -layout_collapse_margin(
+						 box->margin[TOP]))
+					*max_neg_margin =
+						-layout_collapse_margin(
+							box->margin[TOP]);
 			}
 
 			/* Check whether box is the box current margin collapses
@@ -1353,11 +1360,16 @@ static struct box *layout_next_margin_block(const css_unit_ctx *unit_len_ctx,
 					if (*max_pos_margin <
 					    box->margin[BOTTOM])
 						*max_pos_margin =
-							box->margin[BOTTOM];
+							layout_collapse_margin(
+								box->margin
+									[BOTTOM]);
 					else if (*max_neg_margin <
-						 -box->margin[BOTTOM])
+						 -layout_collapse_margin(
+							 box->margin[BOTTOM]))
 						*max_neg_margin =
-							-box->margin[BOTTOM];
+							-layout_collapse_margin(
+								box->margin
+									[BOTTOM]);
 
 					box = box->parent;
 				} while (box != block && !box->next);
@@ -1371,10 +1383,14 @@ static struct box *layout_next_margin_block(const css_unit_ctx *unit_len_ctx,
 			}
 
 			/* Apply bottom margin */
-			if (*max_pos_margin < box->margin[BOTTOM])
-				*max_pos_margin = box->margin[BOTTOM];
-			else if (*max_neg_margin < -box->margin[BOTTOM])
-				*max_neg_margin = -box->margin[BOTTOM];
+			if (*max_pos_margin <
+			    layout_collapse_margin(box->margin[BOTTOM]))
+				*max_pos_margin = layout_collapse_margin(
+					box->margin[BOTTOM]);
+			else if (*max_neg_margin <
+				 -layout_collapse_margin(box->margin[BOTTOM]))
+				*max_neg_margin = -layout_collapse_margin(
+					box->margin[BOTTOM]);
 
 			/* To next sibling. */
 			box = box->next;
@@ -2009,7 +2025,7 @@ bool layout_table(struct box *table, int available_width, html_content *content)
 				/* Table is absolutely positioned or its
 				 * containing block has a valid specified
 				 * height. (CSS 2.1 Section 10.5) */
-				min_height = FPCT_OF_INT_TOINT(
+				min_height = layout_percent_of(
 					value, containing_block->height);
 			}
 		} else {
@@ -2470,7 +2486,7 @@ static bool layout_apply_minmax_height(const css_unit_ctx *unit_len_ctx,
 					 * containing block has a valid
 					 * specified height. (CSS 2.1
 					 * Section 10.5) */
-					h = FPCT_OF_INT_TOINT(
+					h = layout_percent_of(
 						value,
 						containing_block->height);
 					if (h < box->height) {
@@ -2501,7 +2517,7 @@ static bool layout_apply_minmax_height(const css_unit_ctx *unit_len_ctx,
 					 * containing block has a valid
 					 * specified height. (CSS 2.1
 					 * Section 10.5) */
-					h = FPCT_OF_INT_TOINT(
+					h = layout_percent_of(
 						value,
 						containing_block->height);
 					if (h > box->height) {
@@ -4252,10 +4268,16 @@ bool layout_block_context(struct box *block,
 				}
 
 				/* Apply bottom margin */
-				if (max_pos_margin < box->margin[BOTTOM])
-					max_pos_margin = box->margin[BOTTOM];
-				else if (max_neg_margin < -box->margin[BOTTOM])
-					max_neg_margin = -box->margin[BOTTOM];
+				if (max_pos_margin <
+				    layout_collapse_margin(box->margin[BOTTOM]))
+					max_pos_margin = layout_collapse_margin(
+						box->margin[BOTTOM]);
+				else if (max_neg_margin <
+					 -layout_collapse_margin(
+						 box->margin[BOTTOM]))
+					max_neg_margin =
+						-layout_collapse_margin(
+							box->margin[BOTTOM]);
 
 				box = box->parent;
 				if (box == block)
@@ -4315,10 +4337,14 @@ bool layout_block_context(struct box *block,
 			margin_collapse = NULL;
 		}
 
-		if (max_pos_margin < box->margin[BOTTOM])
-			max_pos_margin = box->margin[BOTTOM];
-		else if (max_neg_margin < -box->margin[BOTTOM])
-			max_neg_margin = -box->margin[BOTTOM];
+		if (max_pos_margin <
+		    layout_collapse_margin(box->margin[BOTTOM]))
+			max_pos_margin = layout_collapse_margin(
+				box->margin[BOTTOM]);
+		else if (max_neg_margin <
+			 -layout_collapse_margin(box->margin[BOTTOM]))
+			max_neg_margin = -layout_collapse_margin(
+				box->margin[BOTTOM]);
 
 		box = box->next;
 		box->y = y;
@@ -4837,7 +4863,7 @@ static void layout_compute_offsets(const css_unit_ctx *unit_len_ctx,
 	type = css_computed_left(box->style, &value, &unit);
 	if (type == CSS_LEFT_SET) {
 		if (unit == CSS_UNIT_PCT) {
-			*left = FPCT_OF_INT_TOINT(value,
+			*left = layout_percent_of(value,
 						  containing_block->width);
 		} else {
 			*left = FIXTOINT(css_unit_len2device_px(
@@ -4851,7 +4877,7 @@ static void layout_compute_offsets(const css_unit_ctx *unit_len_ctx,
 	type = css_computed_right(box->style, &value, &unit);
 	if (type == CSS_RIGHT_SET) {
 		if (unit == CSS_UNIT_PCT) {
-			*right = FPCT_OF_INT_TOINT(value,
+			*right = layout_percent_of(value,
 						   containing_block->width);
 		} else {
 			*right = FIXTOINT(css_unit_len2device_px(
@@ -4865,7 +4891,7 @@ static void layout_compute_offsets(const css_unit_ctx *unit_len_ctx,
 	type = css_computed_top(box->style, &value, &unit);
 	if (type == CSS_TOP_SET) {
 		if (unit == CSS_UNIT_PCT) {
-			*top = FPCT_OF_INT_TOINT(value,
+			*top = layout_percent_of(value,
 						 containing_block->height);
 		} else {
 			*top = FIXTOINT(css_unit_len2device_px(
@@ -4879,7 +4905,7 @@ static void layout_compute_offsets(const css_unit_ctx *unit_len_ctx,
 	type = css_computed_bottom(box->style, &value, &unit);
 	if (type == CSS_BOTTOM_SET) {
 		if (unit == CSS_UNIT_PCT) {
-			*bottom = FPCT_OF_INT_TOINT(value,
+			*bottom = layout_percent_of(value,
 						    containing_block->height);
 		} else {
 			*bottom = FIXTOINT(css_unit_len2device_px(

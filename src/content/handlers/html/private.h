@@ -375,7 +375,8 @@ bool fire_dom_keyboard_event(dom_string *type,
 void html_schedule_rebuild(html_content *htmlc);
 
 /**
- * Bring the layout up to date now, for scripts that ask for geometry or computed styles
+ * Bring the layout up to date now, for scripts that ask for geometry or
+ * computed styles
  *
  * \param htmlc html content
  */

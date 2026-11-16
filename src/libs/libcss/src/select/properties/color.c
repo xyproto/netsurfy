@@ -58,6 +58,10 @@ css_error css__initial_color(css_select_state *state)
 	css_hint hint;
 	css_error error;
 
+	if (state->handler == NULL) {
+		return set_color(state->computed, CSS_COLOR_COLOR, 0xff000000);
+	}
+
 	error = state->handler->ua_default_for_property(state->pw,
 							CSS_PROP_COLOR,
 							&hint);

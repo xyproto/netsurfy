@@ -93,8 +93,11 @@ JSValue qjsky_url_get(JSContext *ctx, nsurl *url, enum qjsky_url_part part)
 {
 	switch (part) {
 	case QJSKY_URL_HREF:
-		return url_string(
-			ctx, "", url_component(url, NSURL_WITH_FRAGMENT), "", false);
+		return url_string(ctx,
+				  "",
+				  url_component(url, NSURL_WITH_FRAGMENT),
+				  "",
+				  false);
 	case QJSKY_URL_ORIGIN: {
 		char *scheme = url_component(url, NSURL_SCHEME);
 		JSValue ret;

@@ -317,6 +317,8 @@ static bool imagemap_addtolist(const struct html_content *c,
 	dom_exception exc;
 	dom_string *href = NULL, *target = NULL, *shape = NULL;
 	dom_string *coords = NULL;
+	char *coords_copy = NULL;
+	char *save = NULL;
 	struct mapentry *new_map, *temp;
 	bool ret = true;
 
@@ -403,8 +405,15 @@ static bool imagemap_addtolist(const struct html_content *c,
 		int x, y;
 		float *xcoords, *ycoords;
 		/* coordinates are a comma-separated list of values */
-		char *val = strtok((char *)dom_string_data(coords), ",");
+		char *val;
 		int num = 1;
+
+		coords_copy = strndup(dom_string_data(coords),
+				      dom_string_byte_length(coords));
+		if (coords_copy == NULL) {
+			goto bad_out;
+		}
+		val = strtok_r(coords_copy, ",", &save);
 
 		switch (new_map->type) {
 		case IMAGEMAP_RECT:
@@ -426,7 +435,7 @@ static bool imagemap_addtolist(const struct html_content *c,
 				}
 
 				num++;
-				val = strtok(NULL, ",");
+				val = strtok_r(NULL, ",", &save);
 			}
 			break;
 		case IMAGEMAP_CIRCLE:
@@ -445,7 +454,7 @@ static bool imagemap_addtolist(const struct html_content *c,
 				}
 
 				num++;
-				val = strtok(NULL, ",");
+				val = strtok_r(NULL, ",", &save);
 			}
 			break;
 		case IMAGEMAP_POLY:
@@ -455,7 +464,7 @@ static bool imagemap_addtolist(const struct html_content *c,
 			while (val != NULL) {
 				x = atoi(val);
 
-				val = strtok(NULL, ",");
+				val = strtok_r(NULL, ",", &save);
 				if (val == NULL)
 					break;
 
@@ -479,7 +488,7 @@ static bool imagemap_addtolist(const struct html_content *c,
 				new_map->bounds.poly.ycoords[num - 1] = y;
 
 				num++;
-				val = strtok(NULL, ",");
+				val = strtok_r(NULL, ",", &save);
 			}
 
 			new_map->bounds.poly.num = num - 1;
@@ -530,6 +539,7 @@ ok_out:
 		dom_string_unref(shape);
 	if (coords != NULL)
 		dom_string_unref(coords);
+	free(coords_copy);
 
 	return ret;
 }

@@ -10,7 +10,7 @@
 
 /** Node in our entity tree */
 typedef struct hubbub_entity_node {
-	/* Do not reorder this without fixing make-entities.pl */
+	/* Do not reorder this without fixing make-entities.py */
 	uint8_t split; /**< Data to split on */
 	int32_t lt; /**< Subtree for data less than split */
 	int32_t eq; /**< Subtree for data equal to split */

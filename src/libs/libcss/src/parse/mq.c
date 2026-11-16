@@ -1099,8 +1099,9 @@ static css_error mq_parse_media_query(lwc_string **strings,
 
 	consumeWhitespace(vector, ctx);
 
-	token = parserutils_vector_iterate(vector, ctx);
-	if (token != NULL) {
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token != NULL && tokenIsChar(token, ',') == false) {
+		parserutils_vector_iterate(vector, ctx);
 		if (token->type != CSS_TOKEN_IDENT ||
 		    lwc_string_caseless_isequal(token->idata,
 						strings[AND],
@@ -1152,6 +1153,28 @@ static css_error css__mq_parse__create_not_all(css_mq_query **not_all_out)
 	return CSS_OK;
 }
 
+static void mq_skip_query(const parserutils_vector *vector, int32_t *ctx)
+{
+	const css_token *token;
+	int depth = 0;
+
+	while ((token = parserutils_vector_peek(vector, *ctx)) != NULL) {
+		if (depth == 0 && tokenIsChar(token, ',')) {
+			return;
+		}
+		if (token->type == CSS_TOKEN_FUNCTION ||
+		    tokenIsChar(token, '(') || tokenIsChar(token, '[') ||
+		    tokenIsChar(token, '{')) {
+			depth++;
+		} else if (depth > 0 && (tokenIsChar(token, ')') ||
+					 tokenIsChar(token, ']') ||
+					 tokenIsChar(token, '}'))) {
+			depth--;
+		}
+		parserutils_vector_iterate(vector, ctx);
+	}
+}
+
 css_error css__mq_parse_media_list(lwc_string **strings,
 				   const parserutils_vector *vector,
 				   int32_t *ctx,
@@ -1174,9 +1197,12 @@ css_error css__mq_parse_media_list(lwc_string **strings,
 	token = parserutils_vector_peek(vector, *ctx);
 	while (token != NULL) {
 		css_mq_query *query = NULL;
+		int32_t start = *ctx;
 
 		error = mq_parse_media_query(strings, vector, ctx, &query);
 		if (error == CSS_INVALID) {
+			*ctx = start;
+			mq_skip_query(vector, ctx);
 			error = css__mq_parse__create_not_all(&query);
 		}
 

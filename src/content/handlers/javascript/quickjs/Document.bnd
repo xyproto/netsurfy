@@ -10,6 +10,7 @@
 
 prologue Document()
 %{
+#include <strings.h>
 #include "utils/corestrings.h"
 #include "utils/libdom.h"
 #include "utils/utils.h"
@@ -68,6 +69,72 @@ static JSValue document_node(JSContext *ctx, dom_exception err, dom_node *node)
 	return ret;
 }
 
+static JSValue document_new_node(JSContext *ctx, dom_exception err, dom_node *node)
+{
+	if (err != DOM_NO_ERR) {
+		return qjsky_throw_dom(ctx, err);
+	}
+	return document_node(ctx, err, node);
+}
+
+static JSValue document_list(JSContext *ctx, dom_exception err, dom_nodelist *nodes)
+{
+	JSValue list;
+
+	if (err != DOM_NO_ERR) {
+		return qjsky_throw_dom(ctx, err);
+	}
+	if (nodes == NULL) {
+		return JS_ThrowOutOfMemory(ctx);
+	}
+	list = qjsky_node_list___create(ctx, nodes);
+	dom_nodelist_unref(nodes);
+	return qjsky_list_proxy(ctx, "makeListProxy", list);
+}
+
+static bool document_name_is(dom_node *node, const char *name)
+{
+	dom_string *local = NULL;
+	bool match;
+
+	if (dom_node_get_local_name(node, &local) != DOM_NO_ERR || local == NULL) {
+		return false;
+	}
+	match = dom_string_byte_length(local) == strlen(name) &&
+		strncasecmp(dom_string_data(local), name, strlen(name)) == 0;
+	dom_string_unref(local);
+	return match;
+}
+
+static JSValue document_html_child(JSContext *ctx, dom_node *doc, const char *name, const char *alt)
+{
+	dom_element *root = NULL;
+	dom_node *child = NULL, *next;
+	dom_node_type type;
+
+	if (dom_document_get_document_element(doc, &root) != DOM_NO_ERR || root == NULL) {
+		return JS_NULL;
+	}
+	if (!document_name_is((dom_node *)root, "html")) {
+		dom_node_unref(root);
+		return JS_NULL;
+	}
+	(void)dom_node_get_first_child(root, &child);
+	dom_node_unref(root);
+	while (child != NULL) {
+		if (dom_node_get_node_type(child, &type) == DOM_NO_ERR && type == DOM_ELEMENT_NODE &&
+		    (document_name_is(child, name) || (alt != NULL && document_name_is(child, alt)))) {
+			return document_node(ctx, DOM_NO_ERR, child);
+		}
+		if (dom_node_get_next_sibling(child, &next) != DOM_NO_ERR) {
+			next = NULL;
+		}
+		dom_node_unref(child);
+		child = next;
+	}
+	return JS_NULL;
+}
+
 static dom_node *document_title_element(dom_node *doc)
 {
 	struct dom_nodelist *nodes;
@@ -80,22 +147,15 @@ static dom_node *document_title_element(dom_node *doc)
 		title = NULL;
 	}
 	dom_nodelist_unref(nodes);
+	if (title == NULL && dom_document_get_elements_by_tag_name_ns(doc, corestring_dom_html_namespace, corestring_dom_title, &nodes) == DOM_NO_ERR) {
+		if (dom_nodelist_item(nodes, 0, &title) != DOM_NO_ERR) {
+			title = NULL;
+		}
+		dom_nodelist_unref(nodes);
+	}
 	return title;
 }
 
-static JSValue document_first_by_tag(JSContext *ctx, dom_node *doc, dom_string *tag)
-{
-	struct dom_nodelist *nodes;
-	struct dom_node *retnode = NULL;
-	dom_exception err;
-
-	if (dom_document_get_elements_by_tag_name(doc, tag, &nodes) != DOM_NO_ERR) {
-		return JS_UNDEFINED;
-	}
-	err = dom_nodelist_item(nodes, 0, &retnode);
-	dom_nodelist_unref(nodes);
-	return document_node(ctx, err, retnode);
-}
 %}
 
 
@@ -164,6 +224,127 @@ method Document::createElementNS()
 		return qjsky_throw_dom(ctx, err);
 	}
 	return document_node(ctx, err, newnode);
+%}
+
+method Document::createRange()
+%{
+	return qjsky_range_create(ctx, priv->parent.node);
+%}
+
+method Document::createComment()
+%{
+	dom_node *newnode = NULL;
+	dom_exception err;
+	dom_string *data = qjsky_to_dom_string(ctx, argv[0]);
+
+	if (data == NULL) return JS_EXCEPTION;
+	err = dom_document_create_comment(priv->parent.node, data, &newnode);
+	dom_string_unref(data);
+	return document_new_node(ctx, err, newnode);
+%}
+
+method Document::createProcessingInstruction()
+%{
+	dom_node *newnode = NULL;
+	dom_exception err;
+	dom_string *target, *data;
+
+	target = qjsky_to_dom_string(ctx, argv[0]);
+	if (target == NULL) return JS_EXCEPTION;
+	data = qjsky_to_dom_string(ctx, argv[1]);
+	if (data == NULL) {
+		dom_string_unref(target);
+		return JS_EXCEPTION;
+	}
+	err = dom_document_create_processing_instruction(priv->parent.node, target, data, &newnode);
+	dom_string_unref(target);
+	dom_string_unref(data);
+	return document_new_node(ctx, err, newnode);
+%}
+
+method Document::createAttribute()
+%{
+	dom_node *newnode = NULL;
+	dom_exception err;
+	dom_string *name = qjsky_to_dom_string(ctx, argv[0]);
+	dom_string *lower = NULL;
+
+	if (name == NULL) return JS_EXCEPTION;
+	if (dom_string_tolower(name, true, &lower) == DOM_NO_ERR) {
+		dom_string_unref(name);
+		name = lower;
+	}
+	err = dom_document_create_attribute(priv->parent.node, name, &newnode);
+	dom_string_unref(name);
+	return document_new_node(ctx, err, newnode);
+%}
+
+method Document::createAttributeNS()
+%{
+	dom_node *newnode = NULL;
+	dom_exception err;
+	dom_string *ns, *qname;
+
+	if (!qjsky_to_dom_namespace(ctx, argv[0], &ns)) return JS_EXCEPTION;
+	qname = qjsky_to_dom_string(ctx, argv[1]);
+	if (qname == NULL) {
+		if (ns != NULL) dom_string_unref(ns);
+		return JS_EXCEPTION;
+	}
+	err = dom_document_create_attribute_ns(priv->parent.node, ns, qname, &newnode);
+	if (ns != NULL) dom_string_unref(ns);
+	dom_string_unref(qname);
+	return document_new_node(ctx, err, newnode);
+%}
+
+method Document::importNode()
+%{
+	node_private_t *np = qjsky_private(ctx, argv[0], QJSKY_IFACE_NODE);
+	dom_node *newnode = NULL;
+	dom_node_type type;
+	dom_exception err;
+	int deep = JS_ToBool(ctx, argv[1]);
+
+	if (np == NULL) return JS_ThrowTypeError(ctx, "parameter 1 is not of type 'Node'");
+	if (deep < 0) return JS_EXCEPTION;
+	if (dom_node_get_node_type(np->node, &type) == DOM_NO_ERR && type == DOM_DOCUMENT_NODE) {
+		return qjsky_throw_dom(ctx, DOM_NOT_SUPPORTED_ERR);
+	}
+	err = dom_document_import_node(priv->parent.node, np->node, deep != 0, &newnode);
+	return document_new_node(ctx, err, newnode);
+%}
+
+method Document::adoptNode()
+%{
+	node_private_t *np = qjsky_private(ctx, argv[0], QJSKY_IFACE_NODE);
+	dom_node *newnode = NULL;
+	dom_node_type type;
+	dom_exception err;
+
+	if (np == NULL) return JS_ThrowTypeError(ctx, "parameter 1 is not of type 'Node'");
+	if (dom_node_get_node_type(np->node, &type) == DOM_NO_ERR && type == DOM_DOCUMENT_NODE) {
+		return qjsky_throw_dom(ctx, DOM_NOT_SUPPORTED_ERR);
+	}
+	err = dom_document_adopt_node(priv->parent.node, np->node, &newnode);
+	return document_new_node(ctx, err, newnode);
+%}
+
+method Document::getElementsByTagNameNS()
+%{
+	dom_nodelist *nodes = NULL;
+	dom_string *ns, *local;
+	dom_exception err;
+
+	if (!qjsky_to_dom_namespace(ctx, argv[0], &ns)) return JS_EXCEPTION;
+	local = qjsky_to_dom_string(ctx, argv[1]);
+	if (local == NULL) {
+		if (ns != NULL) dom_string_unref(ns);
+		return JS_EXCEPTION;
+	}
+	err = dom_document_get_elements_by_tag_name_ns(priv->parent.node, ns, local, &nodes);
+	if (ns != NULL) dom_string_unref(ns);
+	dom_string_unref(local);
+	return document_list(ctx, err, nodes);
 %}
 
 method Document::createDocumentFragment()
@@ -239,12 +420,12 @@ setter Document::title()
 
 getter Document::head()
 %{
-	return document_first_by_tag(ctx, priv->parent.node, corestring_dom_HEAD);
+	return document_html_child(ctx, priv->parent.node, "head", NULL);
 %}
 
 getter Document::body()
 %{
-	return document_first_by_tag(ctx, priv->parent.node, corestring_dom_BODY);
+	return document_html_child(ctx, priv->parent.node, "body", "frameset");
 %}
 
 getter Document::doctype()
@@ -591,7 +772,12 @@ getter Document::forms()
 	struct dom_html_collection *coll = NULL;
 	JSValue list;
 
-	if (!dom_document_is_html(((node_private_t *)priv)->node)) return JS_NULL;
+	if (!dom_document_is_html(((node_private_t *)priv)->node)) {
+		dom_nodelist *nodes = NULL;
+		dom_exception err = dom_document_get_elements_by_tag_name_ns(
+			priv->parent.node, corestring_dom_html_namespace, corestring_dom_form, &nodes);
+		return document_list(ctx, err, nodes);
+	}
 	if (dom_html_document_get_forms(((node_private_t *)priv)->node, &coll) != DOM_NO_ERR || coll == NULL) return JS_NULL;
 	list = qjsky_html_collection___create(ctx, coll);
 	dom_html_collection_unref(coll);
