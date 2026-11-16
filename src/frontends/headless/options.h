@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Daniel Silverstone <dsilvers@digital-scurf.org>
+ * Copyright 2012 Vincent Sanders <vince@netsurf-browser.org>
  *
  * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
@@ -16,15 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NETSURFY_MONKEY_DISPATCH_H
-#define NETSURFY_MONKEY_DISPATCH_H 1
+#ifndef NETSURFY_HEADLESS_OPTIONS_H_
+#define NETSURFY_HEADLESS_OPTIONS_H_
 
-typedef void (*handle_command_fn)(int argc, char **argv);
+/* currently nothing here */
 
-nserror monkey_register_handler(const char *cmd, handle_command_fn fn);
+#endif
 
-void monkey_process_command(void);
-
-void monkey_free_handlers(void);
-
-#endif /* NETSURFY_MONKEY_DISPATCH_H */
+NSOPTION_BOOL(downloads_clear, false)
+NSOPTION_BOOL(request_overwrite, true)
+NSOPTION_STRING(downloads_directory, NULL)
+NSOPTION_STRING(url_file, NULL)
+NSOPTION_BOOL(show_single_tab, false)
+NSOPTION_INTEGER(button_type, 0)
+NSOPTION_INTEGER(history_age, 0)
+NSOPTION_BOOL(hover_urls, false)
+NSOPTION_BOOL(new_blank, false)
+NSOPTION_STRING(hotlist_path, NULL)
+NSOPTION_BOOL(source_tab, false)
+NSOPTION_INTEGER(current_theme, 0)

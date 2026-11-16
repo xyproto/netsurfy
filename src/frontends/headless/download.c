@@ -25,8 +25,8 @@
 #include "netsurfy/download.h"
 #include "desktop/download.h"
 
-#include "monkey/output.h"
-#include "monkey/browser.h"
+#include "headless/output.h"
+#include "headless/browser.h"
 
 static uint32_t dwin_ctr = 0;
 
@@ -94,4 +94,4 @@ static struct gui_download_table download_table = {
 	.done = gui_download_window_done,
 };
 
-struct gui_download_table *monkey_download_table = &download_table;
+struct gui_download_table *headless_download_table = &download_table;

@@ -22,7 +22,7 @@
 #include "utils/sys_time.h"
 #include "utils/log.h"
 
-#include "monkey/schedule.h"
+#include "headless/schedule.h"
 
 /* linked list of scheduled callbacks */
 static struct nscallback *schedule_list = NULL;
@@ -98,8 +98,8 @@ static nserror schedule_remove(void (*callback)(void *p), void *p)
 	return NSERROR_OK;
 }
 
-/* exported function documented in monkey/schedule.h */
-nserror monkey_schedule(int tival, void (*callback)(void *p), void *p)
+/* exported function documented in headless/schedule.h */
+nserror headless_schedule(int tival, void (*callback)(void *p), void *p)
 {
 	struct nscallback *nscb;
 	struct timeval tv;
@@ -131,8 +131,8 @@ nserror monkey_schedule(int tival, void (*callback)(void *p), void *p)
 	return NSERROR_OK;
 }
 
-/* exported function documented in monkey/schedule.h */
-int monkey_schedule_run(void)
+/* exported function documented in headless/schedule.h */
+int headless_schedule_run(void)
 {
 	struct timeval tv;
 	struct timeval nexttime;
@@ -201,7 +201,7 @@ int monkey_schedule_run(void)
 	return (rettime.tv_sec * 1000) + (rettime.tv_usec / 1000);
 }
 
-void monkey_schedule_list(void)
+void headless_schedule_list(void)
 {
 	struct timeval tv;
 	struct nscallback *cur_nscb;

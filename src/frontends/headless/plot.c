@@ -22,7 +22,7 @@
 #include "utils/errors.h"
 #include "netsurfy/plotters.h"
 
-#include "monkey/output.h"
+#include "headless/output.h"
 
 /**
  * \brief Sets a clip rectangle for subsequent plot operations.
@@ -33,7 +33,7 @@
  * \return NSERROR_OK on success else error code.
  */
 static nserror
-monkey_plot_clip(const struct redraw_context *ctx, const struct rect *clip)
+headless_plot_clip(const struct redraw_context *ctx, const struct rect *clip)
 {
 	moutf(MOUT_PLOT,
 	      "CLIP X0 %d Y0 %d X1 %d Y1 %d",
@@ -61,13 +61,13 @@ monkey_plot_clip(const struct redraw_context *ctx, const struct rect *clip)
  * \param angle2 The finish angle of the arc.
  * \return NSERROR_OK on success else error code.
  */
-static nserror monkey_plot_arc(const struct redraw_context *ctx,
-			       const plot_style_t *style,
-			       int x,
-			       int y,
-			       int radius,
-			       int angle1,
-			       int angle2)
+static nserror headless_plot_arc(const struct redraw_context *ctx,
+				 const plot_style_t *style,
+				 int x,
+				 int y,
+				 int radius,
+				 int angle1,
+				 int angle2)
 {
 	moutf(MOUT_PLOT,
 	      "ARC X %d Y %d RADIUS %d ANGLE1 %d ANGLE2 %d",
@@ -92,11 +92,11 @@ static nserror monkey_plot_arc(const struct redraw_context *ctx,
  * \param radius circle radius.
  * \return NSERROR_OK on success else error code.
  */
-static nserror monkey_plot_disc(const struct redraw_context *ctx,
-				const plot_style_t *style,
-				int x,
-				int y,
-				int radius)
+static nserror headless_plot_disc(const struct redraw_context *ctx,
+				  const plot_style_t *style,
+				  int x,
+				  int y,
+				  int radius)
 {
 	moutf(MOUT_PLOT, "DISC X %d Y %d RADIUS %d", x, y, radius);
 	return NSERROR_OK;
@@ -114,9 +114,9 @@ static nserror monkey_plot_disc(const struct redraw_context *ctx,
  * \param line A rectangle defining the line to be drawn
  * \return NSERROR_OK on success else error code.
  */
-static nserror monkey_plot_line(const struct redraw_context *ctx,
-				const plot_style_t *style,
-				const struct rect *line)
+static nserror headless_plot_line(const struct redraw_context *ctx,
+				  const plot_style_t *style,
+				  const struct rect *line)
 {
 	moutf(MOUT_PLOT,
 	      "LINE X0 %d Y0 %d X1 %d Y1 %d",
@@ -141,9 +141,9 @@ static nserror monkey_plot_line(const struct redraw_context *ctx,
  * \param rect A rectangle defining the line to be drawn
  * \return NSERROR_OK on success else error code.
  */
-static nserror monkey_plot_rectangle(const struct redraw_context *ctx,
-				     const plot_style_t *style,
-				     const struct rect *rect)
+static nserror headless_plot_rectangle(const struct redraw_context *ctx,
+				       const plot_style_t *style,
+				       const struct rect *rect)
 {
 	moutf(MOUT_PLOT,
 	      "RECT X0 %d Y0 %d X1 %d Y1 %d",
@@ -169,10 +169,10 @@ static nserror monkey_plot_rectangle(const struct redraw_context *ctx,
  * \param n number of verticies.
  * \return NSERROR_OK on success else error code.
  */
-static nserror monkey_plot_polygon(const struct redraw_context *ctx,
-				   const plot_style_t *style,
-				   const int *p,
-				   unsigned int n)
+static nserror headless_plot_polygon(const struct redraw_context *ctx,
+				     const plot_style_t *style,
+				     const int *p,
+				     unsigned int n)
 {
 	moutf(MOUT_PLOT, "POLYGON VERTICIES %d", n);
 	return NSERROR_OK;
@@ -192,11 +192,11 @@ static nserror monkey_plot_polygon(const struct redraw_context *ctx,
  * \param transform A transform to apply to the path.
  * \return NSERROR_OK on success else error code.
  */
-static nserror monkey_plot_path(const struct redraw_context *ctx,
-				const plot_style_t *pstyle,
-				const float *p,
-				unsigned int n,
-				const float transform[6])
+static nserror headless_plot_path(const struct redraw_context *ctx,
+				  const plot_style_t *pstyle,
+				  const float *p,
+				  unsigned int n,
+				  const float transform[6])
 {
 	moutf(MOUT_PLOT,
 	      "PATH VERTICIES %d WIDTH %f",
@@ -230,14 +230,14 @@ static nserror monkey_plot_path(const struct redraw_context *ctx,
  * \param flags the flags controlling the type of plot operation
  * \return NSERROR_OK on success else error code.
  */
-static nserror monkey_plot_bitmap(const struct redraw_context *ctx,
-				  struct bitmap *bitmap,
-				  int x,
-				  int y,
-				  int width,
-				  int height,
-				  colour bg,
-				  bitmap_flags_t flags)
+static nserror headless_plot_bitmap(const struct redraw_context *ctx,
+				    struct bitmap *bitmap,
+				    int x,
+				    int y,
+				    int width,
+				    int height,
+				    colour bg,
+				    bitmap_flags_t flags)
 {
 	moutf(MOUT_PLOT,
 	      "BITMAP X %d Y %d WIDTH %d HEIGHT %d",
@@ -260,30 +260,30 @@ static nserror monkey_plot_bitmap(const struct redraw_context *ctx,
  * \param length length of string, in bytes
  * \return NSERROR_OK on success else error code.
  */
-static nserror monkey_plot_text(const struct redraw_context *ctx,
-				const struct plot_font_style *fstyle,
-				int x,
-				int y,
-				const char *text,
-				size_t length)
+static nserror headless_plot_text(const struct redraw_context *ctx,
+				  const struct plot_font_style *fstyle,
+				  int x,
+				  int y,
+				  const char *text,
+				  size_t length)
 {
 	moutf(MOUT_PLOT, "TEXT X %d Y %d STR %.*s", x, y, (int)length, text);
 	return NSERROR_OK;
 }
 
 
-/** monkey plotter operations table */
+/** headless plotter operations table */
 static const struct plotter_table plotters = {
-	.clip = monkey_plot_clip,
-	.arc = monkey_plot_arc,
-	.disc = monkey_plot_disc,
-	.line = monkey_plot_line,
-	.rectangle = monkey_plot_rectangle,
-	.polygon = monkey_plot_polygon,
-	.path = monkey_plot_path,
-	.bitmap = monkey_plot_bitmap,
-	.text = monkey_plot_text,
+	.clip = headless_plot_clip,
+	.arc = headless_plot_arc,
+	.disc = headless_plot_disc,
+	.line = headless_plot_line,
+	.rectangle = headless_plot_rectangle,
+	.polygon = headless_plot_polygon,
+	.path = headless_plot_path,
+	.bitmap = headless_plot_bitmap,
+	.text = headless_plot_text,
 	.option_knockout = true,
 };
 
-const struct plotter_table *monkey_plotters = &plotters;
+const struct plotter_table *headless_plotters = &plotters;

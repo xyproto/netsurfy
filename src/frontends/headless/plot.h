@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
+ * Copyright 2016 Vincent Sanders <vince@netsurf-browser.org>
  *
  * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
@@ -16,9 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NS_MONKEY_BITMAP_H
-#define NS_MONKEY_BITMAP_H
+#ifndef NS_HEADLESS_PLOT_H
+#define NS_HEADLESS_PLOT_H
 
-extern struct gui_bitmap_table *monkey_bitmap_table;
+struct plotter_table;
 
-#endif /* NS_MONKEY_BITMAP_H */
+extern const struct plotter_table *headless_plotters;
+
+#endif

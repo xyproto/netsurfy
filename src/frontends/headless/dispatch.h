@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Vincent Sanders <vince@netsurf-browser.org>
+ * Copyright 2011 Daniel Silverstone <dsilvers@digital-scurf.org>
  *
  * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
@@ -16,11 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NS_MONKEY_PLOT_H
-#define NS_MONKEY_PLOT_H
+#ifndef NETSURFY_HEADLESS_DISPATCH_H
+#define NETSURFY_HEADLESS_DISPATCH_H 1
 
-struct plotter_table;
+typedef void (*handle_command_fn)(int argc, char **argv);
 
-extern const struct plotter_table *monkey_plotters;
+nserror headless_register_handler(const char *cmd, handle_command_fn fn);
 
-#endif
+void headless_process_command(void);
+
+void headless_free_handlers(void);
+
+#endif /* NETSURFY_HEADLESS_DISPATCH_H */

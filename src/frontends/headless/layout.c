@@ -18,7 +18,7 @@
 
 /**
  * \file
- * monkey implementation of font layout.
+ * headless implementation of font layout.
  */
 
 #include <stddef.h>
@@ -27,7 +27,7 @@
 #include "netsurfy/plot_style.h"
 #include "netsurfy/layout.h"
 
-#include "monkey/layout.h"
+#include "headless/layout.h"
 
 static nserror nsfont_width(const plot_font_style_t *fstyle,
 			    const char *string,
@@ -123,4 +123,4 @@ static struct gui_layout_table layout_table = {
 	.split = nsfont_split,
 };
 
-struct gui_layout_table *monkey_layout_table = &layout_table;
+struct gui_layout_table *headless_layout_table = &layout_table;

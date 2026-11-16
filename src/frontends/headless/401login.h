@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Vincent Sanders <vince@nexturf-browser.org>
+ * Copyright 2018 Vincent Sanders <vince@netsurf-browser.org>
  *
  * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
@@ -16,38 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
-#include <stdarg.h>
+#ifndef NS_HEADLESS_401LOGIN_H
+#define NS_HEADLESS_401LOGIN_H
 
-#include "monkey/output.h"
+#include "utils/errors.h"
 
-/**
- * output type prefixes
- */
-static const char *type_text[] = {
-	"DIE",
-	"ERROR",
-	"WARN",
-	"GENERIC",
-	"WINDOW",
-	"LOGIN",
-	"DOWNLOAD",
-	"PLOT",
-};
+struct nsurl;
 
-/* exported interface documented in monkey/output.h */
-int moutf(enum monkey_output_type mout_type, const char *fmt, ...)
-{
-	va_list ap;
-	int res;
+nserror gui_401login_open(struct nsurl *url,
+			  const char *realm,
+			  const char *username,
+			  const char *password,
+			  nserror (*cb)(struct nsurl *url,
+					const char *realm,
+					const char *username,
+					const char *password,
+					void *pw),
+			  void *cbpw);
 
-	res = fprintf(stdout, "%s ", type_text[mout_type]);
+void headless_login_handle_command(int argc, char **argv);
 
-	va_start(ap, fmt);
-	res += vfprintf(stdout, fmt, ap);
-	va_end(ap);
-
-	fputc('\n', stdout);
-
-	return res + 1;
-}
+#endif

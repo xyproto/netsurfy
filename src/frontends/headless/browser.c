@@ -32,22 +32,22 @@
 #include "netsurfy/browser_window.h"
 #include "netsurfy/plotters.h"
 
-#include "monkey/output.h"
-#include "monkey/browser.h"
-#include "monkey/plot.h"
+#include "headless/output.h"
+#include "headless/browser.h"
+#include "headless/plot.h"
 
 static uint32_t win_ctr = 0;
 
 static struct gui_window *gw_ring = NULL;
 
-/* exported function documented in monkey/browser.h */
-nserror monkey_warn_user(const char *warning, const char *detail)
+/* exported function documented in headless/browser.h */
+nserror headless_warn_user(const char *warning, const char *detail)
 {
 	moutf(MOUT_WARNING, "%s %s", warning, detail);
 	return NSERROR_OK;
 }
 
-struct gui_window *monkey_find_window_by_num(uint32_t win_num)
+struct gui_window *headless_find_window_by_num(uint32_t win_num)
 {
 	struct gui_window *ret = NULL;
 
@@ -63,7 +63,7 @@ struct gui_window *monkey_find_window_by_num(uint32_t win_num)
 	return ret;
 }
 
-void monkey_kill_browser_windows(void)
+void headless_kill_browser_windows(void)
 {
 	while (gw_ring != NULL) {
 		browser_window_destroy(gw_ring->bw);
@@ -115,7 +115,7 @@ static void gui_window_set_title(struct gui_window *g, const char *title)
 }
 
 /**
- * Find the current dimensions of a monkey browser window content area.
+ * Find the current dimensions of a headless browser window content area.
  *
  * \param g The gui window to measure content area of.
  * \param width receives width of window
@@ -160,7 +160,7 @@ static void gui_window_stop_throbber(struct gui_window *g)
 
 
 /**
- * Set the scroll position of a monkey browser window.
+ * Set the scroll position of a headless browser window.
  *
  * Scrolls the viewport to ensure the specified rectangle of the
  *   content is shown.
@@ -185,14 +185,14 @@ gui_window_set_scroll(struct gui_window *gw, const struct rect *rect)
 
 
 /**
- * Invalidates an area of a monkey browser window
+ * Invalidates an area of a headless browser window
  *
  * \param gw gui_window
  * \param rect area to redraw or NULL for the entire window area
  * \return NSERROR_OK on success or appropriate error code
  */
 static nserror
-monkey_window_invalidate_area(struct gui_window *gw, const struct rect *rect)
+headless_window_invalidate_area(struct gui_window *gw, const struct rect *rect)
 {
 	if (rect != NULL) {
 		moutf(MOUT_WINDOW,
@@ -461,7 +461,7 @@ static void gui_window_report_page_info(struct gui_window *g)
 		break;
 
 	default:
-		assert(0 && "Monkey needs some lovin' here");
+		assert(0 && "Headless needs some lovin' here");
 		break;
 	}
 	moutf(MOUT_WINDOW, "PAGE_STATUS WIN %u STATUS %s", g->win_num, state);
@@ -469,7 +469,7 @@ static void gui_window_report_page_info(struct gui_window *g)
 
 /**** Handlers ****/
 
-static void monkey_window_handle_new(int argc, char **argv)
+static void headless_window_handle_new(int argc, char **argv)
 {
 	nsurl *url = NULL;
 	nserror error = NSERROR_OK;
@@ -488,16 +488,16 @@ static void monkey_window_handle_new(int argc, char **argv)
 		}
 	}
 	if (error != NSERROR_OK) {
-		monkey_warn_user(messages_get_errorcode(error), 0);
+		headless_warn_user(messages_get_errorcode(error), 0);
 	}
 }
 
-static void monkey_window_handle_destroy(int argc, char **argv)
+static void headless_window_handle_destroy(int argc, char **argv)
 {
 	struct gui_window *gw;
 	uint32_t nr = atoi((argc > 2) ? argv[2] : "-1");
 
-	gw = monkey_find_window_by_num(nr);
+	gw = headless_find_window_by_num(nr);
 
 	if (gw == NULL) {
 		moutf(MOUT_ERROR, "WINDOW NUM BAD");
@@ -506,7 +506,7 @@ static void monkey_window_handle_destroy(int argc, char **argv)
 	}
 }
 
-static void monkey_window_handle_go(int argc, char **argv)
+static void headless_window_handle_go(int argc, char **argv)
 {
 	struct gui_window *gw;
 	nsurl *url;
@@ -518,7 +518,7 @@ static void monkey_window_handle_go(int argc, char **argv)
 		return;
 	}
 
-	gw = monkey_find_window_by_num(atoi(argv[2]));
+	gw = headless_find_window_by_num(atoi(argv[2]));
 
 	if (gw == NULL) {
 		moutf(MOUT_ERROR, "WINDOW NUM BAD");
@@ -547,14 +547,14 @@ static void monkey_window_handle_go(int argc, char **argv)
 	}
 
 	if (error != NSERROR_OK) {
-		monkey_warn_user(messages_get_errorcode(error), 0);
+		headless_warn_user(messages_get_errorcode(error), 0);
 	}
 }
 
 /**
  * handle WINDOW STOP command
  */
-static void monkey_window_handle_stop(int argc, char **argv)
+static void headless_window_handle_stop(int argc, char **argv)
 {
 	struct gui_window *gw;
 	if (argc != 3) {
@@ -562,7 +562,7 @@ static void monkey_window_handle_stop(int argc, char **argv)
 		return;
 	}
 
-	gw = monkey_find_window_by_num(atoi(argv[2]));
+	gw = headless_find_window_by_num(atoi(argv[2]));
 
 	if (gw == NULL) {
 		moutf(MOUT_ERROR, "WINDOW NUM BAD");
@@ -572,20 +572,20 @@ static void monkey_window_handle_stop(int argc, char **argv)
 }
 
 
-static void monkey_window_handle_redraw(int argc, char **argv)
+static void headless_window_handle_redraw(int argc, char **argv)
 {
 	struct gui_window *gw;
 	struct rect clip;
 	struct redraw_context ctx = {.interactive = true,
 				     .background_images = true,
-				     .plot = monkey_plotters};
+				     .plot = headless_plotters};
 
 	if (argc != 3 && argc != 7) {
 		moutf(MOUT_ERROR, "WINDOW REDRAW ARGS BAD");
 		return;
 	}
 
-	gw = monkey_find_window_by_num(atoi(argv[2]));
+	gw = headless_find_window_by_num(atoi(argv[2]));
 
 	if (gw == NULL) {
 		moutf(MOUT_ERROR, "WINDOW NUM BAD");
@@ -610,7 +610,7 @@ static void monkey_window_handle_redraw(int argc, char **argv)
 	moutf(MOUT_WINDOW, "REDRAW WIN %d STOP", atoi(argv[2]));
 }
 
-static void monkey_window_handle_reload(int argc, char **argv)
+static void headless_window_handle_reload(int argc, char **argv)
 {
 	struct gui_window *gw;
 	if (argc != 3 && argc != 4) {
@@ -618,7 +618,7 @@ static void monkey_window_handle_reload(int argc, char **argv)
 		return;
 	}
 
-	gw = monkey_find_window_by_num(atoi(argv[2]));
+	gw = headless_find_window_by_num(atoi(argv[2]));
 
 	if (gw == NULL) {
 		moutf(MOUT_ERROR, "WINDOW NUM BAD");
@@ -627,14 +627,14 @@ static void monkey_window_handle_reload(int argc, char **argv)
 	}
 }
 
-static void monkey_window_handle_exec(int argc, char **argv)
+static void headless_window_handle_exec(int argc, char **argv)
 {
 	struct gui_window *gw;
 	if (argc < 5) {
 		moutf(MOUT_ERROR, "WINDOW EXEC ARGS BAD\n");
 	}
 
-	gw = monkey_find_window_by_num(atoi(argv[2]));
+	gw = headless_find_window_by_num(atoi(argv[2]));
 
 	if (gw == NULL) {
 		moutf(MOUT_ERROR, "WINDOW NUM BAD");
@@ -677,7 +677,7 @@ static void monkey_window_handle_exec(int argc, char **argv)
 }
 
 
-static void monkey_window_handle_click(int argc, char **argv)
+static void headless_window_handle_click(int argc, char **argv)
 {
 	/* `WINDOW CLICK WIN` _%id%_ `X` _%num%_ `Y` _%num%_ `BUTTON` _%str%_
 	 * `KIND` _%str%_ */
@@ -688,7 +688,7 @@ static void monkey_window_handle_click(int argc, char **argv)
 		moutf(MOUT_ERROR, "WINDOW CLICK ARGS BAD\n");
 	}
 
-	gw = monkey_find_window_by_num(atoi(argv[2]));
+	gw = headless_find_window_by_num(atoi(argv[2]));
 
 	if (gw == NULL) {
 		moutf(MOUT_ERROR, "WINDOW NUM BAD");
@@ -720,27 +720,27 @@ static void monkey_window_handle_click(int argc, char **argv)
 	}
 }
 
-void monkey_window_handle_command(int argc, char **argv)
+void headless_window_handle_command(int argc, char **argv)
 {
 	if (argc == 1)
 		return;
 
 	if (strcmp(argv[1], "NEW") == 0) {
-		monkey_window_handle_new(argc, argv);
+		headless_window_handle_new(argc, argv);
 	} else if (strcmp(argv[1], "DESTROY") == 0) {
-		monkey_window_handle_destroy(argc, argv);
+		headless_window_handle_destroy(argc, argv);
 	} else if (strcmp(argv[1], "GO") == 0) {
-		monkey_window_handle_go(argc, argv);
+		headless_window_handle_go(argc, argv);
 	} else if (strcmp(argv[1], "STOP") == 0) {
-		monkey_window_handle_stop(argc, argv);
+		headless_window_handle_stop(argc, argv);
 	} else if (strcmp(argv[1], "REDRAW") == 0) {
-		monkey_window_handle_redraw(argc, argv);
+		headless_window_handle_redraw(argc, argv);
 	} else if (strcmp(argv[1], "RELOAD") == 0) {
-		monkey_window_handle_reload(argc, argv);
+		headless_window_handle_reload(argc, argv);
 	} else if (strcmp(argv[1], "EXEC") == 0) {
-		monkey_window_handle_exec(argc, argv);
+		headless_window_handle_exec(argc, argv);
 	} else if (strcmp(argv[1], "CLICK") == 0) {
-		monkey_window_handle_click(argc, argv);
+		headless_window_handle_click(argc, argv);
 	} else {
 		moutf(MOUT_ERROR, "WINDOW COMMAND UNKNOWN %s\n", argv[1]);
 	}
@@ -794,7 +794,7 @@ gui_window_event(struct gui_window *gw, enum gui_window_event event)
 static struct gui_window_table window_table = {
 	.create = gui_window_create,
 	.destroy = gui_window_destroy,
-	.invalidate = monkey_window_invalidate_area,
+	.invalidate = headless_window_invalidate_area,
 	.get_scroll = gui_window_get_scroll,
 	.set_scroll = gui_window_set_scroll,
 	.get_dimensions = gui_window_get_dimensions,
@@ -812,4 +812,4 @@ static struct gui_window_table window_table = {
 	.console_log = gui_window_console_log,
 };
 
-struct gui_window_table *monkey_window_table = &window_table;
+struct gui_window_table *headless_window_table = &window_table;

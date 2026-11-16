@@ -25,19 +25,19 @@
 #include "utils/utils.h"
 #include "utils/ring.h"
 
-#include "monkey/dispatch.h"
+#include "headless/dispatch.h"
 
 typedef struct cmdhandler {
 	struct cmdhandler *r_next, *r_prev;
 	char *cmd;
 	handle_command_fn fn;
-} monkey_cmdhandler_t;
+} headless_cmdhandler_t;
 
-static monkey_cmdhandler_t *handler_ring = NULL;
+static headless_cmdhandler_t *handler_ring = NULL;
 
-nserror monkey_register_handler(const char *cmd, handle_command_fn fn)
+nserror headless_register_handler(const char *cmd, handle_command_fn fn)
 {
-	monkey_cmdhandler_t *ret = calloc(1, sizeof(*ret));
+	headless_cmdhandler_t *ret = calloc(1, sizeof(*ret));
 	if (ret == NULL) {
 		NSLOG(netsurfy, INFO, "Unable to allocate handler");
 		return NSERROR_NOMEM;
@@ -48,17 +48,17 @@ nserror monkey_register_handler(const char *cmd, handle_command_fn fn)
 	return NSERROR_OK;
 }
 
-void monkey_free_handlers(void)
+void headless_free_handlers(void)
 {
 	while (handler_ring != NULL) {
-		monkey_cmdhandler_t *handler = handler_ring;
+		headless_cmdhandler_t *handler = handler_ring;
 		RING_REMOVE(handler_ring, handler);
 		free(handler->cmd);
 		free(handler);
 	}
 }
 
-void monkey_process_command(void)
+void headless_process_command(void)
 {
 	char buffer[PATH_MAX];
 	int argc = 0;
@@ -98,7 +98,7 @@ void monkey_process_command(void)
 		}
 	}
 
-	RING_ITERATE_START(monkey_cmdhandler_t, handler_ring, handler)
+	RING_ITERATE_START(headless_cmdhandler_t, handler_ring, handler)
 	{
 		if (strcmp(argv[0], handler->cmd) == 0) {
 			fn = handler->fn;

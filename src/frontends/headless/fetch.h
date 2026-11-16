@@ -16,9 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NS_MONKEY_FETCH_H
-#define NS_MONKEY_FETCH_H
+#ifndef NS_HEADLESS_FETCH_H
+#define NS_HEADLESS_FETCH_H
 
-extern struct gui_fetch_table *monkey_fetch_table;
+extern struct gui_fetch_table *headless_fetch_table;
 
-#endif /* NS_MONKEY_FETCH_H */
+#endif /* NS_HEADLESS_FETCH_H */

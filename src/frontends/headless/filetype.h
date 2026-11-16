@@ -1,5 +1,6 @@
 /*
- * Copyright 2012 Vincent Sanders <vince@netsurf-browser.org>
+ * Copyright 2007 Rob Kendrick <rjek@netsurf-browser.org>
+ * Copyright 2007 Vincent Sanders <vince@debian.org>
  *
  * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
@@ -16,22 +17,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NETSURFY_MONKEY_OPTIONS_H_
-#define NETSURFY_MONKEY_OPTIONS_H_
-
-/* currently nothing here */
-
-#endif
-
-NSOPTION_BOOL(downloads_clear, false)
-NSOPTION_BOOL(request_overwrite, true)
-NSOPTION_STRING(downloads_directory, NULL)
-NSOPTION_STRING(url_file, NULL)
-NSOPTION_BOOL(show_single_tab, false)
-NSOPTION_INTEGER(button_type, 0)
-NSOPTION_INTEGER(history_age, 0)
-NSOPTION_BOOL(hover_urls, false)
-NSOPTION_BOOL(new_blank, false)
-NSOPTION_STRING(hotlist_path, NULL)
-NSOPTION_BOOL(source_tab, false)
-NSOPTION_INTEGER(current_theme, 0)
+void headless_fetch_filetype_init(const char *mimefile);
+void headless_fetch_filetype_fin(void);
+const char *headless_fetch_filetype(const char *unix_path);

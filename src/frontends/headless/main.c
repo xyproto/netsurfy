@@ -40,15 +40,15 @@
 #include "content/fetch.h"
 #include "content/backing_store.h"
 
-#include "monkey/output.h"
-#include "monkey/dispatch.h"
-#include "monkey/browser.h"
-#include "monkey/401login.h"
-#include "monkey/filetype.h"
-#include "monkey/fetch.h"
-#include "monkey/schedule.h"
-#include "monkey/bitmap.h"
-#include "monkey/layout.h"
+#include "headless/output.h"
+#include "headless/dispatch.h"
+#include "headless/browser.h"
+#include "headless/401login.h"
+#include "headless/filetype.h"
+#include "headless/fetch.h"
+#include "headless/schedule.h"
+#include "headless/bitmap.h"
+#include "headless/layout.h"
 
 /** maximum number of languages in language vector */
 #define LANGV_SIZE 32
@@ -58,7 +58,7 @@
 /** resource search path vector */
 char **respaths;
 
-static bool monkey_done = false;
+static bool headless_done = false;
 
 /**
  * Cause an abnormal program termination.
@@ -187,7 +187,7 @@ static const char *const *get_languagev(void)
  * \param resource_path A shell style colon separated path list
  * \return A string vector of valid paths where resources can be found
  */
-static char **nsmonkey_init_resource(const char *resource_path)
+static char **nsheadless_init_resource(const char *resource_path)
 {
 	const char *const *langv;
 	char **pathv; /* resource path string vector */
@@ -204,11 +204,11 @@ static char **nsmonkey_init_resource(const char *resource_path)
 	return respath;
 }
 
-static void monkey_quit(void)
+static void headless_quit(void)
 {
 	urldb_save_cookies(nsoption_charp(cookie_jar));
 	urldb_save(nsoption_charp(url_file));
-	monkey_fetch_filetype_fin();
+	headless_fetch_filetype_fin();
 }
 
 static nserror gui_launch_url(struct nsurl *url)
@@ -229,16 +229,16 @@ static nserror gui_present_cookies(const char *search_term)
 
 static void quit_handler(int argc, char **argv)
 {
-	monkey_done = true;
+	headless_done = true;
 }
 
-static void monkey_options_handle_command(int argc, char **argv)
+static void headless_options_handle_command(int argc, char **argv)
 {
 	nsoption_commandline(&argc, argv, nsoptions);
 }
 
 /**
- * Set option defaults for monkey frontend
+ * Set option defaults for headless frontend
  *
  * @param defaults The option table to update.
  * @return error status.
@@ -265,16 +265,16 @@ static bool nslog_stream_configure(FILE *fptr)
 	return true;
 }
 
-static struct gui_misc_table monkey_misc_table = {
-	.schedule = monkey_schedule,
+static struct gui_misc_table headless_misc_table = {
+	.schedule = headless_schedule,
 
-	.quit = monkey_quit,
+	.quit = headless_quit,
 	.launch_url = gui_launch_url,
 	.login = gui_401login_open,
 	.present_cookies = gui_present_cookies,
 };
 
-static void monkey_run(void)
+static void headless_run(void)
 {
 	fd_set read_fd_set, write_fd_set, exc_fd_set;
 	int max_fd;
@@ -283,10 +283,10 @@ static void monkey_run(void)
 	struct timeval tv;
 	struct timeval *timeout;
 
-	while (!monkey_done) {
+	while (!headless_done) {
 
 		/* discover the next scheduled event time */
-		schedtm = monkey_schedule_run();
+		schedtm = headless_schedule_run();
 
 		/* clears fdset */
 		fetch_fdset(&read_fd_set, &write_fd_set, &exc_fd_set, &max_fd);
@@ -333,10 +333,10 @@ static void monkey_run(void)
 			      CRITICAL,
 			      "Unable to select: %s",
 			      strerror(errno));
-			monkey_done = true;
+			headless_done = true;
 		} else if (rdy_fd > 0) {
 			if (FD_ISSET(0, &read_fd_set)) {
-				monkey_process_command();
+				headless_process_command();
 			}
 		}
 	}
@@ -353,7 +353,7 @@ void __assert_fail(const char *__assertion,
 {
 	int frames;
 	fprintf(stderr,
-		"MONKEY: Assertion failure!\n"
+		"HEADLESS: Assertion failure!\n"
 		"%s:%d: %s: Assertion `%s` failed.\n",
 		__file,
 		__line,
@@ -403,13 +403,13 @@ int main(int argc, char **argv)
 	char *options;
 	char buf[PATH_MAX];
 	nserror ret;
-	struct netsurfy_table monkey_table = {
-		.misc = &monkey_misc_table,
-		.window = monkey_window_table,
-		.download = monkey_download_table,
-		.fetch = monkey_fetch_table,
-		.bitmap = monkey_bitmap_table,
-		.layout = monkey_layout_table,
+	struct netsurfy_table headless_table = {
+		.misc = &headless_misc_table,
+		.window = headless_window_table,
+		.download = headless_download_table,
+		.fetch = headless_fetch_table,
+		.bitmap = headless_bitmap_table,
+		.layout = headless_layout_table,
 		.llcache = filesystem_llcache_table,
 	};
 
@@ -422,7 +422,7 @@ int main(int argc, char **argv)
 	signal(SIGBUS, signal_handler);
 #endif
 
-	ret = netsurfy_register(&monkey_table);
+	ret = netsurfy_register(&headless_table);
 	if (ret != NSERROR_OK) {
 		die("NetSurfy operation table failed registration");
 	}
@@ -433,9 +433,9 @@ int main(int argc, char **argv)
 	setbuf(stderr, NULL);
 
 	/* Prep the search paths */
-	respaths = nsmonkey_init_resource(
-		"${HOME}/.netsurfy/:${NETSURFYRES}:" MONKEY_RESPATH
-		":./frontends/monkey/res");
+	respaths = nsheadless_init_resource(
+		"${HOME}/.netsurfy/:${NETSURFYRES}:" HEADLESS_RESPATH
+		":./frontends/headless/res");
 
 	/* initialise logging. Not fatal if it fails but not much we can do
 	 * about it either.
@@ -466,7 +466,7 @@ int main(int argc, char **argv)
 	}
 
 	filepath_sfinddef(respaths, buf, "mime.types", "/etc/");
-	monkey_fetch_filetype_init(buf);
+	headless_fetch_filetype_init(buf);
 
 	urldb_load(nsoption_charp(url_file));
 	urldb_load_cookies(nsoption_charp(cookie_file));
@@ -477,32 +477,34 @@ int main(int argc, char **argv)
 	}
 	free(respaths);
 
-	ret = monkey_register_handler("QUIT", quit_handler);
+	ret = headless_register_handler("QUIT", quit_handler);
 	if (ret != NSERROR_OK) {
 		die("quit handler failed to register");
 	}
 
-	ret = monkey_register_handler("WINDOW", monkey_window_handle_command);
+	ret = headless_register_handler("WINDOW",
+					headless_window_handle_command);
 	if (ret != NSERROR_OK) {
 		die("window handler failed to register");
 	}
 
-	ret = monkey_register_handler("OPTIONS", monkey_options_handle_command);
+	ret = headless_register_handler("OPTIONS",
+					headless_options_handle_command);
 	if (ret != NSERROR_OK) {
 		die("options handler failed to register");
 	}
 
-	ret = monkey_register_handler("LOGIN", monkey_login_handle_command);
+	ret = headless_register_handler("LOGIN", headless_login_handle_command);
 	if (ret != NSERROR_OK) {
 		die("login handler failed to register");
 	}
 
 
 	moutf(MOUT_GENERIC, "STARTED");
-	monkey_run();
+	headless_run();
 
 	moutf(MOUT_GENERIC, "CLOSING_DOWN");
-	monkey_kill_browser_windows();
+	headless_kill_browser_windows();
 
 	netsurfy_exit();
 	moutf(MOUT_GENERIC, "FINISHED");
@@ -513,8 +515,8 @@ int main(int argc, char **argv)
 	/* finalise logging */
 	nslog_finalise();
 
-	/* And free any monkey-specific bits */
-	monkey_free_handlers();
+	/* And free any headless-specific bits */
+	headless_free_handlers();
 
 	return 0;
 }

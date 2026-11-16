@@ -24,11 +24,11 @@
 #include "utils/ring.h"
 #include "utils/nsurl.h"
 
-#include "monkey/output.h"
-#include "monkey/401login.h"
+#include "headless/output.h"
+#include "headless/401login.h"
 
-struct monkey401 {
-	struct monkey401 *r_next, *r_prev;
+struct headless401 {
+	struct headless401 *r_next, *r_prev;
 	uint32_t num;
 	nserror (*cb)(struct nsurl *,
 		      const char *,
@@ -42,7 +42,7 @@ struct monkey401 {
 	struct nsurl *url;
 };
 
-static struct monkey401 *m401_ring = NULL;
+static struct headless401 *m401_ring = NULL;
 static uint32_t m401_ctr = 0;
 
 
@@ -57,7 +57,7 @@ nserror gui_401login_open(struct nsurl *url,
 					void *pw),
 			  void *cbpw)
 {
-	struct monkey401 *m401_ctx;
+	struct headless401 *m401_ctx;
 
 	m401_ctx = calloc(1, sizeof(*m401_ctx));
 	if (m401_ctx == NULL) {
@@ -94,11 +94,11 @@ nserror gui_401login_open(struct nsurl *url,
 	return NSERROR_OK;
 }
 
-static struct monkey401 *monkey_find_login_by_num(uint32_t login_num)
+static struct headless401 *headless_find_login_by_num(uint32_t login_num)
 {
-	struct monkey401 *ret = NULL;
+	struct headless401 *ret = NULL;
 
-	RING_ITERATE_START(struct monkey401, m401_ring, c_ring)
+	RING_ITERATE_START(struct headless401, m401_ring, c_ring)
 	{
 		if (c_ring->num == login_num) {
 			ret = c_ring;
@@ -110,7 +110,7 @@ static struct monkey401 *monkey_find_login_by_num(uint32_t login_num)
 	return ret;
 }
 
-static void free_login_context(struct monkey401 *m401_ctx)
+static void free_login_context(struct headless401 *m401_ctx)
 {
 	moutf(MOUT_LOGIN, "DESTROY LWIN %u", m401_ctx->num);
 	RING_REMOVE(m401_ring, m401_ctx);
@@ -125,16 +125,16 @@ static void free_login_context(struct monkey401 *m401_ctx)
 	free(m401_ctx);
 }
 
-static void monkey_login_handle_go(int argc, char **argv)
+static void headless_login_handle_go(int argc, char **argv)
 {
-	struct monkey401 *m401_ctx;
+	struct headless401 *m401_ctx;
 
 	if (argc != 3) {
 		moutf(MOUT_ERROR, "LOGIN GO ARGS BAD");
 		return;
 	}
 
-	m401_ctx = monkey_find_login_by_num(atoi(argv[2]));
+	m401_ctx = headless_find_login_by_num(atoi(argv[2]));
 	if (m401_ctx == NULL) {
 		moutf(MOUT_ERROR, "LOGIN NUM BAD");
 		return;
@@ -149,16 +149,16 @@ static void monkey_login_handle_go(int argc, char **argv)
 	free_login_context(m401_ctx);
 }
 
-static void monkey_login_handle_destroy(int argc, char **argv)
+static void headless_login_handle_destroy(int argc, char **argv)
 {
-	struct monkey401 *m401_ctx;
+	struct headless401 *m401_ctx;
 
 	if (argc != 3) {
 		moutf(MOUT_ERROR, "LOGIN DESTROY ARGS BAD");
 		return;
 	}
 
-	m401_ctx = monkey_find_login_by_num(atoi(argv[2]));
+	m401_ctx = headless_find_login_by_num(atoi(argv[2]));
 	if (m401_ctx == NULL) {
 		moutf(MOUT_ERROR, "LOGIN NUM BAD");
 		return;
@@ -167,16 +167,16 @@ static void monkey_login_handle_destroy(int argc, char **argv)
 	free_login_context(m401_ctx);
 }
 
-static void monkey_login_handle_username(int argc, char **argv)
+static void headless_login_handle_username(int argc, char **argv)
 {
-	struct monkey401 *m401_ctx;
+	struct headless401 *m401_ctx;
 
 	if (argc != 4) {
 		moutf(MOUT_ERROR, "LOGIN USERNAME ARGS BAD");
 		return;
 	}
 
-	m401_ctx = monkey_find_login_by_num(atoi(argv[2]));
+	m401_ctx = headless_find_login_by_num(atoi(argv[2]));
 	if (m401_ctx == NULL) {
 		moutf(MOUT_ERROR, "LOGIN NUM BAD");
 		return;
@@ -189,16 +189,16 @@ static void monkey_login_handle_username(int argc, char **argv)
 	m401_ctx->username = strdup(argv[3]);
 }
 
-static void monkey_login_handle_password(int argc, char **argv)
+static void headless_login_handle_password(int argc, char **argv)
 {
-	struct monkey401 *m401_ctx;
+	struct headless401 *m401_ctx;
 
 	if (argc != 4) {
 		moutf(MOUT_ERROR, "LOGIN PASSWORD ARGS BAD");
 		return;
 	}
 
-	m401_ctx = monkey_find_login_by_num(atoi(argv[2]));
+	m401_ctx = headless_find_login_by_num(atoi(argv[2]));
 	if (m401_ctx == NULL) {
 		moutf(MOUT_ERROR, "LOGIN NUM BAD");
 		return;
@@ -211,19 +211,19 @@ static void monkey_login_handle_password(int argc, char **argv)
 	m401_ctx->password = strdup(argv[3]);
 }
 
-void monkey_login_handle_command(int argc, char **argv)
+void headless_login_handle_command(int argc, char **argv)
 {
 	if (argc == 1)
 		return;
 
 	if (strcmp(argv[1], "USERNAME") == 0) {
-		monkey_login_handle_username(argc, argv);
+		headless_login_handle_username(argc, argv);
 	} else if (strcmp(argv[1], "PASSWORD") == 0) {
-		monkey_login_handle_password(argc, argv);
+		headless_login_handle_password(argc, argv);
 	} else if (strcmp(argv[1], "DESTROY") == 0) {
-		monkey_login_handle_destroy(argc, argv);
+		headless_login_handle_destroy(argc, argv);
 	} else if (strcmp(argv[1], "GO") == 0) {
-		monkey_login_handle_go(argc, argv);
+		headless_login_handle_go(argc, argv);
 	} else {
 		moutf(MOUT_ERROR, "LOGIN COMMAND UNKNOWN %s\n", argv[1]);
 	}

@@ -16,10 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NS_MONKEY_OUTPUT_H
-#define NS_MONKEY_OUTPUT_H
+#ifndef NS_HEADLESS_OUTPUT_H
+#define NS_HEADLESS_OUTPUT_H
 
-enum monkey_output_type {
+enum headless_output_type {
 	MOUT_DIE,
 	MOUT_ERROR,
 	MOUT_WARNING,
@@ -30,6 +30,6 @@ enum monkey_output_type {
 	MOUT_PLOT,
 };
 
-int moutf(enum monkey_output_type mout_type, const char *fmt, ...);
+int moutf(enum headless_output_type mout_type, const char *fmt, ...);
 
 #endif

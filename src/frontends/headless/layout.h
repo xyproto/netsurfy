@@ -16,9 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NS_MONKEY_LAYOUT_H
-#define NS_MONKEY_LAYOUT_H
+#ifndef NS_HEADLESS_LAYOUT_H
+#define NS_HEADLESS_LAYOUT_H
 
-extern struct gui_layout_table *monkey_layout_table;
+extern struct gui_layout_table *headless_layout_table;
 
-#endif /* NS_MONKEY_LAYOUT_H */
+#endif /* NS_HEADLESS_LAYOUT_H */

@@ -16,13 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NETSURFY_MONKEY_BROWSER_H
-#define NETSURFY_MONKEY_BROWSER_H
+#ifndef NETSURFY_HEADLESS_BROWSER_H
+#define NETSURFY_HEADLESS_BROWSER_H
 
 struct hlcache_handle;
 
-extern struct gui_window_table *monkey_window_table;
-extern struct gui_download_table *monkey_download_table;
+extern struct gui_window_table *headless_window_table;
+extern struct gui_download_table *headless_download_table;
 
 struct gui_window {
 	struct gui_window *r_next;
@@ -38,14 +38,14 @@ struct gui_window {
 		       fetchers */
 };
 
-struct gui_window *monkey_find_window_by_num(uint32_t win_num);
+struct gui_window *headless_find_window_by_num(uint32_t win_num);
 struct gui_window *
-monkey_find_window_by_content(struct hlcache_handle *content);
-void monkey_window_process_reformats(void);
+headless_find_window_by_content(struct hlcache_handle *content);
+void headless_window_process_reformats(void);
 
-void monkey_window_handle_command(int argc, char **argv);
-void monkey_kill_browser_windows(void);
+void headless_window_handle_command(int argc, char **argv);
+void headless_kill_browser_windows(void);
 
-nserror monkey_warn_user(const char *warning, const char *detail);
+nserror headless_warn_user(const char *warning, const char *detail);
 
-#endif /* NETSURFY_MONKEY_BROWSER_H */
+#endif /* NETSURFY_HEADLESS_BROWSER_H */

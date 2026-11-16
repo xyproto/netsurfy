@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NETSURFY_MONKEY_SCHEDULE_H
-#define NETSURFY_MONKEY_SCHEDULE_H
+#ifndef NETSURFY_HEADLESS_SCHEDULE_H
+#define NETSURFY_HEADLESS_SCHEDULE_H
 
 /**
  * Schedule a callback.
@@ -30,7 +30,7 @@
  * passed.
  */
 
-nserror monkey_schedule(int tival, void (*callback)(void *p), void *p);
+nserror headless_schedule(int tival, void (*callback)(void *p), void *p);
 
 /**
  * Process scheduled callbacks up to current time.
@@ -38,11 +38,11 @@ nserror monkey_schedule(int tival, void (*callback)(void *p), void *p);
  * @return The number of milliseconds untill the next scheduled event
  * or -1 for no event.
  */
-int monkey_schedule_run(void);
+int headless_schedule_run(void);
 
 /**
  * Log a list of all scheduled callbacks.
  */
-void monkey_schedule_list(void);
+void headless_schedule_list(void);
 
 #endif

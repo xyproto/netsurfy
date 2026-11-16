@@ -1,6 +1,5 @@
 /*
- * Copyright 2007 Rob Kendrick <rjek@netsurf-browser.org>
- * Copyright 2007 Vincent Sanders <vince@debian.org>
+ * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
  *
  * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
  *
@@ -17,6 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-void monkey_fetch_filetype_init(const char *mimefile);
-void monkey_fetch_filetype_fin(void);
-const char *monkey_fetch_filetype(const char *unix_path);
+#ifndef NS_HEADLESS_BITMAP_H
+#define NS_HEADLESS_BITMAP_H
+
+extern struct gui_bitmap_table *headless_bitmap_table;
+
+#endif /* NS_HEADLESS_BITMAP_H */
