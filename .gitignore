@@ -21,3 +21,4 @@ venv/
 /codedocs
 /netsurfy
 /src/frontends/*/res/*/Messages
+/libs/
