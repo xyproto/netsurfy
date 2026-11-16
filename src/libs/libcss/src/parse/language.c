@@ -30,6 +30,8 @@
 typedef struct context_entry {
 	css_parser_event type; /**< Type of entry */
 	void *data; /**< Data for context */
+	bool nested;
+	bool pending;
 } context_entry;
 
 /* Event handlers */
@@ -117,6 +119,7 @@ static css_error parseSelectorList(css_language *c,
 				   css_rule *rule);
 
 /* Declaration parsing */
+static bool vectorHasVar(const parserutils_vector *vector, int32_t ctx);
 static css_error parseProperty(css_language *c,
 			       const css_token *property,
 			       const parserutils_vector *vector,
@@ -255,6 +258,287 @@ css_error language_handle_event(css_parser_event type,
  * Parser stages							      *
  ******************************************************************************/
 
+static css_error dropPending(css_language *c)
+{
+	context_entry *cur = parserutils_stack_get_current(c->context);
+
+	if (cur != NULL && cur->pending) {
+		parserutils_error perror = parserutils_stack_pop(c->context,
+								 NULL);
+		if (perror != PARSERUTILS_OK) {
+			return css_error_from_parserutils_error(perror);
+		}
+	}
+
+	return CSS_OK;
+}
+
+static css_error collectParens(const parserutils_vector *vector,
+			       int32_t *ctx,
+			       parserutils_vector **result)
+{
+	const css_token *token;
+	parserutils_vector *sub;
+	parserutils_error perror;
+	int depth = 0;
+
+	perror = parserutils_vector_create(sizeof(css_token), 16, &sub);
+	if (perror != PARSERUTILS_OK) {
+		return css_error_from_parserutils_error(perror);
+	}
+
+	while ((token = parserutils_vector_iterate(vector, ctx)) != NULL) {
+		if (token->type == CSS_TOKEN_FUNCTION || tokenIsChar(token, '(')) {
+			depth++;
+		} else if (tokenIsChar(token, ')')) {
+			if (depth == 0) {
+				*result = sub;
+				return CSS_OK;
+			}
+			depth--;
+		}
+		perror = parserutils_vector_append(sub, (void *)token);
+		if (perror != PARSERUTILS_OK) {
+			parserutils_vector_destroy(sub);
+			return css_error_from_parserutils_error(perror);
+		}
+	}
+
+	parserutils_vector_destroy(sub);
+	return CSS_INVALID;
+}
+
+static bool supportsCondition(css_language *c,
+			      const parserutils_vector *vector,
+			      int32_t *ctx,
+			      bool *valid);
+
+static bool supportsDeclaration(css_language *c,
+				const parserutils_vector *vector)
+{
+	const css_token *ident, *token;
+	css_style *style = NULL;
+	css_prop_handler handler;
+	uint8_t flags = 0;
+	int32_t ctx = 0;
+	css_error error;
+	int i;
+
+	consumeWhitespace(vector, &ctx);
+	ident = parserutils_vector_iterate(vector, &ctx);
+	if (ident == NULL || ident->type != CSS_TOKEN_IDENT) {
+		return false;
+	}
+	consumeWhitespace(vector, &ctx);
+	token = parserutils_vector_iterate(vector, &ctx);
+	if (token == NULL || !tokenIsChar(token, ':')) {
+		return false;
+	}
+	consumeWhitespace(vector, &ctx);
+
+	if (lwc_string_length(ident->idata) > 2 &&
+	    lwc_string_data(ident->idata)[0] == '-' &&
+	    lwc_string_data(ident->idata)[1] == '-') {
+		return true;
+	}
+
+	for (i = FIRST_PROP; i <= LAST_PROP; i++) {
+		bool match = false;
+
+		if (lwc_string_caseless_isequal(ident->idata,
+						c->strings[i],
+						&match) == lwc_error_ok &&
+		    match)
+			break;
+	}
+	if (i == LAST_PROP + 1) {
+		return false;
+	}
+	if (vectorHasVar(vector, ctx)) {
+		return true;
+	}
+
+	handler = property_handlers[i - FIRST_PROP];
+	if (css__stylesheet_style_create(c->sheet, &style) != CSS_OK) {
+		return false;
+	}
+	error = handler(c, vector, &ctx, style);
+	if (error == CSS_OK) {
+		error = css__parse_important(c, vector, &ctx, &flags);
+	}
+	css__stylesheet_style_destroy(style);
+	if (error != CSS_OK) {
+		return false;
+	}
+	consumeWhitespace(vector, &ctx);
+	return parserutils_vector_iterate(vector, &ctx) == NULL;
+}
+
+static bool supportsSelector(css_language *c, const parserutils_vector *vector)
+{
+	css_selector *selector = NULL;
+	int32_t ctx = 0;
+	bool ok;
+
+	consumeWhitespace(vector, &ctx);
+	if (parseSelector(c, vector, &ctx, &selector) != CSS_OK) {
+		return false;
+	}
+	consumeWhitespace(vector, &ctx);
+	ok = parserutils_vector_iterate(vector, &ctx) == NULL;
+	css__stylesheet_selector_destroy(c->sheet, selector);
+	return ok;
+}
+
+static bool supportsInParens(css_language *c,
+			     const parserutils_vector *vector,
+			     int32_t *ctx,
+			     bool *valid)
+{
+	const css_token *token = parserutils_vector_iterate(vector, ctx);
+	parserutils_vector *sub = NULL;
+	bool result = false;
+	bool match = false;
+
+	if (token == NULL ||
+	    (token->type != CSS_TOKEN_FUNCTION && !tokenIsChar(token, '('))) {
+		*valid = false;
+		return false;
+	}
+	if (collectParens(vector, ctx, &sub) != CSS_OK) {
+		*valid = false;
+		return false;
+	}
+
+	if (token->type == CSS_TOKEN_FUNCTION) {
+		if (lwc_string_caseless_isequal(token->idata,
+						c->strings[SUPPORTS_SELECTOR],
+						&match) == lwc_error_ok &&
+		    match) {
+			result = supportsSelector(c, sub);
+		}
+	} else {
+		int32_t sub_ctx = 0;
+		const css_token *first;
+
+		consumeWhitespace(sub, &sub_ctx);
+		first = parserutils_vector_peek(sub, sub_ctx);
+		if (first != NULL && first->type == CSS_TOKEN_IDENT) {
+			int32_t look = sub_ctx + 1;
+			const css_token *next;
+
+			consumeWhitespace(sub, &look);
+			next = parserutils_vector_peek(sub, look);
+			if (next != NULL && tokenIsChar(next, ':')) {
+				result = supportsDeclaration(c, sub);
+				parserutils_vector_destroy(sub);
+				return result;
+			}
+		}
+		{
+			bool sub_valid = true;
+
+			result = supportsCondition(c, sub, &sub_ctx, &sub_valid);
+			if (!sub_valid ||
+			    parserutils_vector_peek(sub, sub_ctx) != NULL) {
+				result = false;
+			}
+		}
+	}
+
+	parserutils_vector_destroy(sub);
+	return result;
+}
+
+static bool supportsCondition(css_language *c,
+			      const parserutils_vector *vector,
+			      int32_t *ctx,
+			      bool *valid)
+{
+	const css_token *token;
+	bool result;
+	int op = 0;
+	bool match = false;
+
+	consumeWhitespace(vector, ctx);
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
+	    lwc_string_caseless_isequal(token->idata,
+					c->strings[NOT],
+					&match) == lwc_error_ok &&
+	    match) {
+		parserutils_vector_iterate(vector, ctx);
+		consumeWhitespace(vector, ctx);
+		result = !supportsInParens(c, vector, ctx, valid);
+		consumeWhitespace(vector, ctx);
+		return result;
+	}
+
+	result = supportsInParens(c, vector, ctx, valid);
+	while (*valid) {
+		int this_op = 0;
+		bool next;
+
+		consumeWhitespace(vector, ctx);
+		token = parserutils_vector_peek(vector, *ctx);
+		if (token == NULL || token->type != CSS_TOKEN_IDENT) {
+			break;
+		}
+		if (lwc_string_caseless_isequal(token->idata,
+						c->strings[AND],
+						&match) == lwc_error_ok &&
+		    match) {
+			this_op = 1;
+		} else if (lwc_string_caseless_isequal(token->idata,
+						       c->strings[OR],
+						       &match) == lwc_error_ok &&
+			   match) {
+			this_op = 2;
+		}
+		if (this_op == 0 || (op != 0 && op != this_op)) {
+			*valid = false;
+			break;
+		}
+		op = this_op;
+		parserutils_vector_iterate(vector, ctx);
+		consumeWhitespace(vector, ctx);
+		next = supportsInParens(c, vector, ctx, valid);
+		result = op == 1 ? (result && next) : (result || next);
+	}
+
+	return result;
+}
+
+static css_error createConditionalRule(css_language *c,
+				       bool applies,
+				       css_rule **result)
+{
+	css_mq_query *media;
+	css_rule *rule;
+	css_error error;
+
+	media = calloc(1, sizeof(*media));
+	if (media == NULL) {
+		return CSS_NOMEM;
+	}
+	media->type = CSS_MEDIA_ALL;
+	media->negate_type = applies ? 0 : 1;
+
+	error = css__stylesheet_rule_create(c->sheet, CSS_RULE_MEDIA, &rule);
+	if (error != CSS_OK) {
+		css__mq_query_destroy(media);
+		return error;
+	}
+	error = css__stylesheet_rule_set_media(c->sheet, rule, media);
+	if (error != CSS_OK) {
+		css__stylesheet_rule_destroy(c->sheet, rule);
+		css__mq_query_destroy(media);
+		return error;
+	}
+	*result = rule;
+	return CSS_OK;
+}
+
 css_error
 handleStartStylesheet(css_language *c, const parserutils_vector *vector)
 {
@@ -309,6 +593,10 @@ css_error handleStartRuleset(css_language *c, const parserutils_vector *vector)
 	cur = parserutils_stack_get_current(c->context);
 	if (cur != NULL && cur->type != CSS_PARSER_START_STYLESHEET)
 		parent_rule = cur->data;
+	if (cur != NULL && cur->type == CSS_PARSER_START_BLOCK) {
+		entry.nested = true;
+		entry.pending = true;
+	}
 
 	error = css__stylesheet_rule_create(c->sheet, CSS_RULE_SELECTOR, &rule);
 	if (error != CSS_OK)
@@ -377,13 +665,29 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 	int32_t ctx = 0;
 	bool match = false;
 	css_rule *rule;
+	css_rule *parent = NULL;
+	context_entry *cur;
 	css_error error;
 
 	/* vector contains: ATKEYWORD ws any0 */
 
 	assert(c != NULL);
 
+	cur = parserutils_stack_get_current(c->context);
+	if (cur != NULL && cur->type == CSS_PARSER_START_BLOCK) {
+		parent = cur->data;
+		if (parent == NULL || parent->type != CSS_RULE_MEDIA) {
+			return CSS_INVALID;
+		}
+		entry.nested = true;
+		entry.pending = true;
+	}
+
+	consumeWhitespace(vector, &ctx);
 	atkeyword = parserutils_vector_iterate(vector, &ctx);
+	if (atkeyword == NULL || atkeyword->type != CSS_TOKEN_ATKEYWORD) {
+		return CSS_INVALID;
+	}
 
 	consumeWhitespace(vector, &ctx);
 
@@ -595,7 +899,7 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 			return error;
 		}
 
-		error = css__stylesheet_add_rule(c->sheet, rule, NULL);
+		error = css__stylesheet_add_rule(c->sheet, rule, parent);
 		if (error != CSS_OK) {
 			css__stylesheet_rule_destroy(c->sheet, rule);
 			return error;
@@ -617,7 +921,7 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 
 		consumeWhitespace(vector, &ctx);
 
-		error = css__stylesheet_add_rule(c->sheet, rule, NULL);
+		error = css__stylesheet_add_rule(c->sheet, rule, parent);
 		if (error != CSS_OK) {
 			css__stylesheet_rule_destroy(c->sheet, rule);
 			return error;
@@ -663,7 +967,7 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 			}
 		}
 
-		error = css__stylesheet_add_rule(c->sheet, rule, NULL);
+		error = css__stylesheet_add_rule(c->sheet, rule, parent);
 		if (error != CSS_OK) {
 			css__stylesheet_rule_destroy(c->sheet, rule);
 			return error;
@@ -671,6 +975,44 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 
 		/* Rule is now owned by the sheet,
 		 * so no need to destroy it */
+
+		c->state = HAD_RULE;
+	} else if (lwc_string_caseless_isequal(atkeyword->idata,
+					       c->strings[LAYER],
+					       &match) == lwc_error_ok &&
+		   match) {
+		error = createConditionalRule(c, true, &rule);
+		if (error != CSS_OK)
+			return error;
+
+		error = css__stylesheet_add_rule(c->sheet, rule, parent);
+		if (error != CSS_OK) {
+			css__stylesheet_rule_destroy(c->sheet, rule);
+			return error;
+		}
+
+		c->state = HAD_RULE;
+	} else if (lwc_string_caseless_isequal(atkeyword->idata,
+					       c->strings[SUPPORTS],
+					       &match) == lwc_error_ok &&
+		   match) {
+		bool valid = true;
+		bool applies = supportsCondition(c, vector, &ctx, &valid);
+
+		consumeWhitespace(vector, &ctx);
+		if (parserutils_vector_peek(vector, ctx) != NULL) {
+			valid = false;
+		}
+
+		error = createConditionalRule(c, valid && applies, &rule);
+		if (error != CSS_OK)
+			return error;
+
+		error = css__stylesheet_add_rule(c->sheet, rule, parent);
+		if (error != CSS_OK) {
+			css__stylesheet_rule_destroy(c->sheet, rule);
+			return error;
+		}
 
 		c->state = HAD_RULE;
 	} else {
@@ -722,6 +1064,8 @@ css_error handleStartBlock(css_language *c, const parserutils_vector *vector)
 	cur = parserutils_stack_get_current(c->context);
 	if (cur != NULL && cur->type != CSS_PARSER_START_BLOCK)
 		entry.data = cur->data;
+	if (cur != NULL)
+		cur->pending = false;
 
 	perror = parserutils_stack_push(c->context, (void *)&entry);
 	if (perror != PARSERUTILS_OK) {
@@ -749,11 +1093,15 @@ css_error handleEndBlock(css_language *c, const parserutils_vector *vector)
 	}
 
 	/* If the block we just popped off the stack was associated with a
-	 * non-block stack entry, and that entry is not a top-level statement,
-	 * then report the end of that entry, too. */
-	if (rule != NULL && rule->ptype != CSS_RULE_PARENT_STYLESHEET) {
-		if (rule->type == CSS_RULE_SELECTOR)
-			return handleEndRuleset(c, vector);
+	 * stack entry that was opened inside another block, then report the
+	 * end of that entry, too. */
+	entry = parserutils_stack_get_current(c->context);
+	if (rule != NULL && entry != NULL && entry->nested &&
+	    entry->data == rule) {
+		perror = parserutils_stack_pop(c->context, NULL);
+		if (perror != PARSERUTILS_OK) {
+			return css_error_from_parserutils_error(perror);
+		}
 	}
 
 	return CSS_OK;
@@ -763,10 +1111,15 @@ css_error handleBlockContent(css_language *c, const parserutils_vector *vector)
 {
 	context_entry *entry;
 	css_rule *rule;
+	css_error error;
 
 	/* Block content comprises either declarations (if the current block is
 	 * associated with @page, @font-face or a selector), or rulesets (if the
 	 * current block is associated with @media). */
+
+	error = dropPending(c);
+	if (error != CSS_OK)
+		return error;
 
 	entry = parserutils_stack_get_current(c->context);
 	if (entry == NULL || entry->data == NULL)
@@ -779,6 +1132,14 @@ css_error handleBlockContent(css_language *c, const parserutils_vector *vector)
 		return CSS_INVALID;
 
 	if (rule->type == CSS_RULE_MEDIA) {
+		int32_t ctx = 0;
+		const css_token *token;
+
+		consumeWhitespace(vector, &ctx);
+		token = parserutils_vector_peek(vector, ctx);
+		if (token != NULL && token->type == CSS_TOKEN_ATKEYWORD) {
+			return handleStartAtRule(c, vector);
+		}
 		/* Expect rulesets */
 		return handleStartRuleset(c, vector);
 	} else {
@@ -1333,6 +1694,119 @@ css_error parseNth(css_language *c,
 	return CSS_OK;
 }
 
+static void skipToComma(const parserutils_vector *vector, int32_t *ctx)
+{
+	const css_token *token;
+	int depth = 0;
+
+	while ((token = parserutils_vector_peek(vector, *ctx)) != NULL) {
+		if (depth == 0 && tokenIsChar(token, ',')) {
+			return;
+		}
+		if (token->type == CSS_TOKEN_FUNCTION || tokenIsChar(token, '(')) {
+			depth++;
+		} else if (tokenIsChar(token, ')') && depth > 0) {
+			depth--;
+		}
+		parserutils_vector_iterate(vector, ctx);
+	}
+}
+
+static css_error parseSelectorListArgument(css_language *c,
+					   const parserutils_vector *vector,
+					   int32_t *ctx,
+					   css_selector_list_kind kind,
+					   css_selector_list **result)
+{
+	bool forgiving = kind == CSS_SELECTOR_LIST_IS ||
+			 kind == CSS_SELECTOR_LIST_WHERE;
+	parserutils_vector *sub = NULL;
+	css_selector_list *list;
+	const css_token *token;
+	int32_t sub_ctx = 0;
+	uint32_t capacity = 1;
+	css_error error;
+
+	error = collectParens(vector, ctx, &sub);
+	if (error != CSS_OK)
+		return error;
+
+	while ((token = parserutils_vector_iterate(sub, &sub_ctx)) != NULL) {
+		if (tokenIsChar(token, ','))
+			capacity++;
+	}
+	sub_ctx = 0;
+
+	list = calloc(1, sizeof(*list) + capacity * sizeof(list->items[0]));
+	if (list == NULL) {
+		parserutils_vector_destroy(sub);
+		return CSS_NOMEM;
+	}
+	list->kind = kind;
+
+	for (;;) {
+		css_combinator comb = CSS_COMBINATOR_ANCESTOR;
+		css_selector *selector = NULL;
+
+		consumeWhitespace(sub, &sub_ctx);
+		token = parserutils_vector_peek(sub, sub_ctx);
+		if (kind == CSS_SELECTOR_LIST_HAS && token != NULL) {
+			if (tokenIsChar(token, '>')) {
+				comb = CSS_COMBINATOR_PARENT;
+			} else if (tokenIsChar(token, '+')) {
+				comb = CSS_COMBINATOR_SIBLING;
+			} else if (tokenIsChar(token, '~')) {
+				comb = CSS_COMBINATOR_GENERIC_SIBLING;
+			}
+			if (comb != CSS_COMBINATOR_ANCESTOR) {
+				parserutils_vector_iterate(sub, &sub_ctx);
+				consumeWhitespace(sub, &sub_ctx);
+			}
+		}
+
+		error = parseSelector(c, sub, &sub_ctx, &selector);
+		if (error == CSS_OK) {
+			consumeWhitespace(sub, &sub_ctx);
+			token = parserutils_vector_peek(sub, sub_ctx);
+			if (token != NULL && !tokenIsChar(token, ',')) {
+				css__stylesheet_selector_destroy(c->sheet,
+								 selector);
+				selector = NULL;
+				error = CSS_INVALID;
+			}
+		}
+		if (error == CSS_OK) {
+			if (kind != CSS_SELECTOR_LIST_WHERE &&
+			    selector->specificity > list->specificity) {
+				list->specificity = selector->specificity;
+			}
+			list->items[list->count].selector = selector;
+			list->items[list->count].comb = comb;
+			list->count++;
+		} else if (error == CSS_NOMEM || !forgiving) {
+			css__stylesheet_selector_list_destroy(c->sheet, list);
+			parserutils_vector_destroy(sub);
+			return error;
+		} else {
+			skipToComma(sub, &sub_ctx);
+		}
+
+		token = parserutils_vector_iterate(sub, &sub_ctx);
+		if (token == NULL)
+			break;
+	}
+
+	parserutils_vector_destroy(sub);
+
+	if (list->count == 0 && !forgiving) {
+		css__stylesheet_selector_list_destroy(c->sheet, list);
+		return CSS_INVALID;
+	}
+
+	*result = list;
+	return CSS_OK;
+}
+
 css_error parsePseudo(css_language *c,
 		      const parserutils_vector *vector,
 		      int32_t *ctx,
@@ -1368,6 +1842,9 @@ css_error parsePseudo(css_language *c,
 			  {DISABLED, CSS_SELECTOR_PSEUDO_CLASS},
 			  {CHECKED, CSS_SELECTOR_PSEUDO_CLASS},
 			  {NOT, CSS_SELECTOR_PSEUDO_CLASS},
+			  {IS, CSS_SELECTOR_PSEUDO_CLASS},
+			  {WHERE, CSS_SELECTOR_PSEUDO_CLASS},
+			  {HAS, CSS_SELECTOR_PSEUDO_CLASS},
 
 			  {FIRST_LINE, CSS_SELECTOR_PSEUDO_ELEMENT},
 			  {FIRST_LETTER, CSS_SELECTOR_PSEUDO_ELEMENT},
@@ -1460,50 +1937,31 @@ css_error parsePseudo(css_language *c,
 				return error;
 
 			value_type = CSS_SELECTOR_DETAIL_VALUE_NTH;
-		} else if (fun_type == NOT) {
-			/* type_selector | specific */
-			token = parserutils_vector_peek(vector, *ctx);
-			if (token == NULL)
-				return CSS_INVALID;
+		} else if (fun_type == NOT || fun_type == IS ||
+			   fun_type == WHERE || fun_type == HAS) {
+			css_selector_list *list = NULL;
 
-			if (token->type == CSS_TOKEN_IDENT ||
-			    tokenIsChar(token, '*') ||
-			    tokenIsChar(token, '|')) {
-				/* Have type selector */
-				error = parseTypeSelector(
-					c, vector, ctx, &qname);
-				if (error != CSS_OK)
-					return error;
+			error = parseSelectorListArgument(
+				c,
+				vector,
+				ctx,
+				fun_type == NOT	    ? CSS_SELECTOR_LIST_NOT
+				: fun_type == IS    ? CSS_SELECTOR_LIST_IS
+				: fun_type == WHERE ? CSS_SELECTOR_LIST_WHERE
+						    : CSS_SELECTOR_LIST_HAS,
+				&list);
+			if (error != CSS_OK)
+				return error;
 
-				type = CSS_SELECTOR_ELEMENT;
-
-				/* Ensure lwc insensitive string is available
-				 * for element names */
-				if (qname.name->insensitive == NULL &&
-				    lwc__intern_caseless_string(qname.name) !=
-					    lwc_error_ok)
-					return CSS_NOMEM;
-
-				detail_value.string = NULL;
-				value_type = CSS_SELECTOR_DETAIL_VALUE_STRING;
-			} else {
-				/* specific */
-				css_selector_detail det;
-
-				error = parseSpecific(
-					c, vector, ctx, true, &det);
-				if (error != CSS_OK)
-					return error;
-
-				qname = det.qname;
-				type = det.type;
-				detail_value = det.value;
-				value_type = det.value_type;
-			}
-
-			negate = true;
-
-			consumeWhitespace(vector, ctx);
+			detail_value.list = list;
+			return css__stylesheet_selector_detail_init(
+				c->sheet,
+				CSS_SELECTOR_PSEUDO_CLASS,
+				&qname,
+				detail_value,
+				CSS_SELECTOR_DETAIL_VALUE_LIST,
+				false,
+				specific);
 		}
 
 		token = parserutils_vector_iterate(vector, ctx);
@@ -1592,9 +2050,15 @@ css_error parseAppendSpecific(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	return css__stylesheet_selector_append_specific(c->sheet,
-							parent,
-							&specific);
+	error = css__stylesheet_selector_append_specific(c->sheet,
+							 parent,
+							 &specific);
+	if (error != CSS_OK &&
+	    specific.value_type == CSS_SELECTOR_DETAIL_VALUE_LIST) {
+		css__stylesheet_selector_list_destroy(c->sheet,
+						      specific.value.list);
+	}
+	return error;
 }
 
 css_error parseSelectorSpecifics(css_language *c,

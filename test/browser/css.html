@@ -83,5 +83,77 @@ test("custom properties with UA defaults do not crash", function () {
     st.textContent = "#a { color: var(--missing); font-family: var(--missing), monospace; quotes: var(--missing); }";
     getComputedStyle(document.getElementById("a")).color;
 });
+function zs(id, css) {
+    st.textContent = "* { z-index: 0; position: absolute; } " + css;
+    return getComputedStyle(document.getElementById(id)).zIndex === "7";
+}
+test("@layer and @supports blocks", function () {
+    assert(zs("a", "@layer base { #a { z-index: 7 } }"));
+    assert(zs("a", "@layer x, y; @layer y { #a { z-index: 7 } }"));
+    assert(zs("a", "@supports (display: flex) { #a { z-index: 7 } }"));
+    assert(zs("a", "@supports not (display: banana) { #a { z-index: 7 } }"));
+    assert(zs("a", "@supports (display: flex) and ((color: red) or (foo: bar)) { #a { z-index: 7 } }"));
+    assert(zs("a", "@supports (--x: 1) { #a { z-index: 7 } }"));
+    assert(zs("a", "@supports selector(div > p) { #a { z-index: 7 } }"));
+    assert(!zs("a", "@supports (display: banana) { #a { z-index: 7 } }"));
+    assert(!zs("a", "@supports (foo: bar) { #a { z-index: 7 } }"));
+    assert(!zs("a", "@supports (display: flex) or and (x) { #a { z-index: 7 } }"));
+});
+test("nested conditional rules", function () {
+    assert(zs("a", "@layer l { @media screen { @supports (color: red) { #a { z-index: 7 } } } }"));
+    assert(!zs("a", "@layer l { @media print { #a { z-index: 7 } } }"));
+    assert(zs("a", "@media screen { @layer a; junk; #a { z-index: 7 } }"));
+    assert(zs("a", "@media screen { @unknown { #a { z-index: 3 } } #a { z-index: 7 } }"));
+    assert(zs("a", "@layer { #x { } } #a { z-index: 7 }"));
+});
+test("logical properties", function () {
+    st.textContent = "#a { position: absolute; margin-inline: 1px 2px; padding-block: 3px; inset: 4px 5px; border-inline-start: 6px solid red; inline-size: 50px; } #p { position: relative; margin-block: 7px; inset-inline-end: 8px; max-inline-size: 9px; }";
+    var a = getComputedStyle(document.getElementById("a"));
+    assertEquals(a.marginLeft, "1px");
+    assertEquals(a.marginRight, "2px");
+    assertEquals(a.paddingTop, "3px");
+    assertEquals(a.paddingBottom, "3px");
+    assertEquals(a.top, "4px");
+    assertEquals(a.right, "5px");
+    assertEquals(a.bottom, "4px");
+    assertEquals(a.left, "5px");
+    assertEquals(a.borderLeftWidth, "6px");
+    assertEquals(a.width, "50px");
+    var p = getComputedStyle(document.getElementById("p"));
+    assertEquals(p.marginTop, "7px");
+    assertEquals(p.marginBottom, "7px");
+    assertEquals(p.right, "8px");
+    assertEquals(p.maxWidth, "9px");
+});
+test(":is, :where, :not with selector lists", function () {
+    assert(z("r", ":is(#q, #zz) > div"));
+    assert(z("r", "div:where(#r, .nope)"));
+    assert(z("r", "#q > :is(span, div)"));
+    assert(z("r", ":is(#p :is(#q)) #r"));
+    assert(z("r", ":is(::before, #r)"));
+    assert(z("r", ":is(%%bad, #r)"));
+    assert(!z("r", ":is(#q)"));
+    assert(z("r", "div:not(#a, #q)"));
+    assert(!z("r", "div:not(#a, #r)"));
+    assert(z("r", ":not(#p #n)"));
+    assert(!z("r", ":not(#p #r)"));
+    assert(z("n", "#p > :not(:is(#q, #r))"));
+});
+test(":has", function () {
+    assert(z("p", "#p:has(#r)"));
+    assert(z("p", "#p:has(> #q)"));
+    assert(!z("p", "#p:has(> #r)"));
+    assert(z("p", "#p:has(> #q > #r)"));
+    assert(z("n", "#n:has(+ #q)"));
+    assert(z("n", "#n:has(~ div #r)"));
+    assert(!z("q", "#q:has(+ #n)"));
+    assert(z("p", "div:has(#zz, #r)"));
+    assert(!z("p", "div:has(#zz)"));
+    assert(z("a", "div:not(:has(div))"));
+});
+test("selector list specificity", function () {
+    st.textContent = "* { position: absolute; } #r { z-index: 1 } :is(div, #r) { z-index: 7 } :where(#r) { z-index: 9 }";
+    assertEquals(getComputedStyle(document.getElementById("r")).zIndex, "7");
+});
 done();
 </script></body></html>

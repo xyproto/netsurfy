@@ -268,6 +268,7 @@ nslib(libcss
   libcss/src/parse/properties/list_style.c
   libcss/src/parse/properties/list_style_type.c
   libcss/src/parse/properties/margin.c
+  libcss/src/parse/properties/logical.c
   libcss/src/parse/properties/opacity.c
   libcss/src/parse/properties/outline.c
   libcss/src/parse/properties/overflow.c

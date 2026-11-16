@@ -2613,6 +2613,145 @@ static inline bool match_nth(int32_t a, int32_t b, int32_t count)
 	}
 }
 
+static css_error match_sub_selector(css_select_ctx *ctx,
+				    const css_selector *selector,
+				    void *node,
+				    css_select_state *state,
+				    bool *match)
+{
+	css_pseudo_element pseudo = CSS_PSEUDO_ELEMENT_NONE;
+	css_error error;
+
+	*match = false;
+
+	if (selector->data.qname.name != ctx->str.universal) {
+		error = state->handler->node_has_name(
+			state->pw, node, &selector->data.qname, match);
+		if (error != CSS_OK || *match == false)
+			return error;
+	}
+
+	error = match_details(ctx, node, &selector->data, state, match, &pseudo);
+	if (error != CSS_OK || *match == false)
+		return error;
+	if (pseudo != CSS_PSEUDO_ELEMENT_NONE) {
+		*match = false;
+		return CSS_OK;
+	}
+
+	return match_combinators(
+		ctx, selector, selector, state, node, false, match);
+}
+
+static css_error match_has_region(css_select_ctx *ctx,
+				  const css_selector *selector,
+				  void *node,
+				  bool deep,
+				  css_select_state *state,
+				  bool *match)
+{
+	void *child = NULL;
+	css_error error;
+
+	error = state->handler->first_child_node(state->pw, node, &child);
+	while (error == CSS_OK && child != NULL) {
+		error = match_sub_selector(ctx, selector, child, state, match);
+		if (error != CSS_OK || *match)
+			return error;
+		if (deep) {
+			error = match_has_region(
+				ctx, selector, child, true, state, match);
+			if (error != CSS_OK || *match)
+				return error;
+		}
+		error = state->handler->next_sibling_node(state->pw,
+							  child,
+							  &child);
+	}
+
+	return error;
+}
+
+static css_error match_has(css_select_ctx *ctx,
+			   const css_selector_list_item *item,
+			   void *node,
+			   css_select_state *state,
+			   bool *match)
+{
+	bool simple = item->selector->combinator == NULL;
+	void *sibling = NULL;
+	css_error error;
+
+	*match = false;
+
+	if (state->handler->first_child_node == NULL ||
+	    state->handler->next_sibling_node == NULL)
+		return CSS_OK;
+
+	switch (item->comb) {
+	case CSS_COMBINATOR_PARENT:
+		return match_has_region(
+			ctx, item->selector, node, !simple, state, match);
+	case CSS_COMBINATOR_SIBLING:
+	case CSS_COMBINATOR_GENERIC_SIBLING:
+		error = state->handler->next_sibling_node(state->pw,
+							  node,
+							  &sibling);
+		while (error == CSS_OK && sibling != NULL) {
+			error = match_sub_selector(
+				ctx, item->selector, sibling, state, match);
+			if (error != CSS_OK || *match)
+				return error;
+			if (!simple) {
+				error = match_has_region(ctx,
+							 item->selector,
+							 sibling,
+							 true,
+							 state,
+							 match);
+				if (error != CSS_OK || *match)
+					return error;
+			}
+			if (item->comb == CSS_COMBINATOR_SIBLING && simple)
+				break;
+			error = state->handler->next_sibling_node(
+				state->pw, sibling, &sibling);
+		}
+		return error;
+	default:
+		return match_has_region(
+			ctx, item->selector, node, true, state, match);
+	}
+}
+
+static css_error match_selector_list(css_select_ctx *ctx,
+				     const css_selector_list *list,
+				     void *node,
+				     css_select_state *state,
+				     bool *match)
+{
+	bool found = false;
+	css_error error = CSS_OK;
+
+	for (uint32_t i = 0; i < list->count && !found; i++) {
+		if (list->kind == CSS_SELECTOR_LIST_HAS) {
+			error = match_has(
+				ctx, &list->items[i], node, state, &found);
+		} else {
+			error = match_sub_selector(ctx,
+						   list->items[i].selector,
+						   node,
+						   state,
+						   &found);
+		}
+		if (error != CSS_OK)
+			return error;
+	}
+
+	*match = list->kind == CSS_SELECTOR_LIST_NOT ? !found : found;
+	return CSS_OK;
+}
+
 css_error match_detail(css_select_ctx *ctx,
 		       void *node,
 		       const css_selector_detail *detail,
@@ -2643,6 +2782,15 @@ css_error match_detail(css_select_ctx *ctx,
 			state->pw, node, detail->qname.name, match);
 		break;
 	case CSS_SELECTOR_PSEUDO_CLASS:
+		if (detail->value_type == CSS_SELECTOR_DETAIL_VALUE_LIST) {
+			error = match_selector_list(
+				ctx, detail->value.list, node, state, match);
+			add_node_flags(node,
+				       state,
+				       CSS_NODE_FLAGS_TAINT_PSEUDO_CLASS |
+					       CSS_NODE_FLAGS_TAINT_SIBLING);
+			break;
+		}
 		error = state->handler->node_is_root(state->pw, node, &is_root);
 		if (error != CSS_OK)
 			return error;

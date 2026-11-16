@@ -766,7 +766,7 @@ static bool html_redraw_background(int x,
 			 * is no need to plot underneath it.
 			 */
 			if ((r.x0 >= r.x1) || (r.y0 >= r.y1) ||
-			    (nscss_color_is_transparent(bgcol) == false) ||
+			    ((bgcol >> 24) == 0xff) ||
 			    ((clip_box->background != NULL) &&
 			     content_get_opaque(clip_box->background)))
 				continue;

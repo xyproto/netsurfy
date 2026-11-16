@@ -163,3 +163,30 @@ details, summary {
 details:not([open]) > :not(summary) {
 	display: none;
 }
+
+[hidden], area, base, basefont, datalist, link, meta, param, rp, source,
+track, template, dialog:not([open]), input[type=hidden] {
+	display: none;
+}
+
+dialog[open] {
+	display: block;
+	position: absolute;
+	left: 0;
+	right: 0;
+	margin: auto;
+	border: solid;
+	padding: 1em;
+	background-color: #fff;
+	color: #000;
+}
+
+hgroup, legend, search, address, listing, plaintext, xmp {
+	display: block;
+}
+
+listing, plaintext, xmp {
+	font-family: monospace;
+	white-space: pre;
+	margin: 1em 0;
+}

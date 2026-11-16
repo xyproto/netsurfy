@@ -21,6 +21,67 @@ typedef css_error (*css_prop_handler)(css_language *c,
 				      int32_t *ctx,
 				      css_style *result);
 
+css_error css__parse_border_block(css_language *c,
+	const parserutils_vector *vector,
+	int32_t *ctx,
+	css_style *result);
+css_error css__parse_border_block_color(css_language *c,
+	const parserutils_vector *vector,
+	int32_t *ctx,
+	css_style *result);
+css_error css__parse_border_block_style(css_language *c,
+	const parserutils_vector *vector,
+	int32_t *ctx,
+	css_style *result);
+css_error css__parse_border_block_width(css_language *c,
+	const parserutils_vector *vector,
+	int32_t *ctx,
+	css_style *result);
+css_error css__parse_border_inline(css_language *c,
+	const parserutils_vector *vector,
+	int32_t *ctx,
+	css_style *result);
+css_error css__parse_border_inline_color(css_language *c,
+	const parserutils_vector *vector,
+	int32_t *ctx,
+	css_style *result);
+css_error css__parse_border_inline_style(css_language *c,
+	const parserutils_vector *vector,
+	int32_t *ctx,
+	css_style *result);
+css_error css__parse_border_inline_width(css_language *c,
+	const parserutils_vector *vector,
+	int32_t *ctx,
+	css_style *result);
+css_error css__parse_inset(css_language *c,
+	const parserutils_vector *vector,
+	int32_t *ctx,
+	css_style *result);
+css_error css__parse_inset_block(css_language *c,
+	const parserutils_vector *vector,
+	int32_t *ctx,
+	css_style *result);
+css_error css__parse_inset_inline(css_language *c,
+	const parserutils_vector *vector,
+	int32_t *ctx,
+	css_style *result);
+css_error css__parse_margin_block(css_language *c,
+	const parserutils_vector *vector,
+	int32_t *ctx,
+	css_style *result);
+css_error css__parse_margin_inline(css_language *c,
+	const parserutils_vector *vector,
+	int32_t *ctx,
+	css_style *result);
+css_error css__parse_padding_block(css_language *c,
+	const parserutils_vector *vector,
+	int32_t *ctx,
+	css_style *result);
+css_error css__parse_padding_inline(css_language *c,
+	const parserutils_vector *vector,
+	int32_t *ctx,
+	css_style *result);
+
 extern const css_prop_handler property_handlers[LAST_PROP + 1 - FIRST_PROP];
 
 css_error css__parse_align_content(css_language *c,

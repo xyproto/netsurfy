@@ -184,6 +184,9 @@ typedef struct css_select_handler {
 	css_error (*get_libcss_node_data)(void *pw,
 					  void *node,
 					  void **libcss_node_data);
+
+	css_error (*first_child_node)(void *pw, void *node, void **child);
+	css_error (*next_sibling_node)(void *pw, void *node, void **sibling);
 } css_select_handler;
 
 /**

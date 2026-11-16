@@ -50,6 +50,8 @@ static css_error named_generic_sibling_node(void *pw,
 					    void **sibling);
 static css_error parent_node(void *pw, void *node, void **parent);
 static css_error sibling_node(void *pw, void *node, void **sibling);
+static css_error first_child_node(void *pw, void *node, void **child);
+static css_error next_sibling_node(void *pw, void *node, void **sibling);
 static css_error
 node_has_name(void *pw, void *node, const css_qname *qname, bool *match);
 static css_error
@@ -154,6 +156,8 @@ static css_select_handler selection_handler = {
 	ua_default_for_property,
 	set_libcss_node_data,
 	get_libcss_node_data,
+	first_child_node,
+	next_sibling_node,
 };
 
 /**
@@ -756,6 +760,55 @@ css_error sibling_node(void *pw, void *node, void **sibling)
 		*sibling = n;
 	}
 
+	return CSS_OK;
+}
+
+static void *element_from(dom_node *n)
+{
+	dom_node *next;
+	dom_exception err;
+
+	while (n != NULL) {
+		dom_node_type type;
+
+		err = dom_node_get_node_type(n, &type);
+		if (err != DOM_NO_ERR) {
+			dom_node_unref(n);
+			return NULL;
+		}
+		if (type == DOM_ELEMENT_NODE) {
+			dom_node_unref(n);
+			return n;
+		}
+		err = dom_node_get_next_sibling(n, &next);
+		dom_node_unref(n);
+		if (err != DOM_NO_ERR) {
+			return NULL;
+		}
+		n = next;
+	}
+	return NULL;
+}
+
+css_error first_child_node(void *pw, void *node, void **child)
+{
+	dom_node *n = NULL;
+
+	*child = NULL;
+	if (dom_node_get_first_child((dom_node *)node, &n) == DOM_NO_ERR) {
+		*child = element_from(n);
+	}
+	return CSS_OK;
+}
+
+css_error next_sibling_node(void *pw, void *node, void **sibling)
+{
+	dom_node *n = NULL;
+
+	*sibling = NULL;
+	if (dom_node_get_next_sibling((dom_node *)node, &n) == DOM_NO_ERR) {
+		*sibling = element_from(n);
+	}
 	return CSS_OK;
 }
 

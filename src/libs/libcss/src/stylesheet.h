@@ -58,8 +58,28 @@ typedef enum css_combinator {
 
 typedef enum css_selector_detail_value_type {
 	CSS_SELECTOR_DETAIL_VALUE_STRING,
-	CSS_SELECTOR_DETAIL_VALUE_NTH
+	CSS_SELECTOR_DETAIL_VALUE_NTH,
+	CSS_SELECTOR_DETAIL_VALUE_LIST
 } css_selector_detail_value_type;
+
+typedef enum css_selector_list_kind {
+	CSS_SELECTOR_LIST_IS,
+	CSS_SELECTOR_LIST_WHERE,
+	CSS_SELECTOR_LIST_NOT,
+	CSS_SELECTOR_LIST_HAS
+} css_selector_list_kind;
+
+typedef struct css_selector_list_item {
+	css_selector *selector;
+	css_combinator comb;
+} css_selector_list_item;
+
+typedef struct css_selector_list {
+	css_selector_list_kind kind;
+	uint32_t specificity;
+	uint32_t count;
+	css_selector_list_item items[];
+} css_selector_list;
 
 typedef union css_selector_detail_value {
 	lwc_string *string; /**< Interned string, or NULL */
@@ -67,6 +87,7 @@ typedef union css_selector_detail_value {
 		int32_t a;
 		int32_t b;
 	} nth; /**< Data for x = an + b */
+	css_selector_list *list;
 } css_selector_detail_value;
 
 typedef struct css_selector_detail {
@@ -77,7 +98,7 @@ typedef struct css_selector_detail {
 		comb : 3, /**< Type of combinator */
 		next : 1, /**< Another selector detail
 			   * follows */
-		value_type : 1, /**< Type of value field */
+		value_type : 2, /**< Type of value field */
 		negate : 1; /**< Detail match is inverted */
 } css_selector_detail;
 
@@ -288,6 +309,8 @@ css_error css__stylesheet_selector_create(css_stylesheet *sheet,
 					  css_selector **selector);
 css_error
 css__stylesheet_selector_destroy(css_stylesheet *sheet, css_selector *selector);
+void css__stylesheet_selector_list_destroy(css_stylesheet *sheet,
+					   css_selector_list *list);
 
 css_error
 css__stylesheet_selector_detail_init(css_stylesheet *sheet,

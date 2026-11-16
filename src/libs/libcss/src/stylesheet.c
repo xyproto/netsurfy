@@ -869,6 +869,11 @@ css__stylesheet_selector_destroy(css_stylesheet *sheet, css_selector *selector)
 			    detail->value.string != NULL) {
 				lwc_string_unref(detail->value.string);
 			}
+			if (detail->value_type ==
+			    CSS_SELECTOR_DETAIL_VALUE_LIST) {
+				css__stylesheet_selector_list_destroy(
+					sheet, detail->value.list);
+			}
 
 			if (detail->next)
 				detail++;
@@ -887,6 +892,10 @@ css__stylesheet_selector_destroy(css_stylesheet *sheet, css_selector *selector)
 		    detail->value.string != NULL) {
 			lwc_string_unref(detail->value.string);
 		}
+		if (detail->value_type == CSS_SELECTOR_DETAIL_VALUE_LIST) {
+			css__stylesheet_selector_list_destroy(
+				sheet, detail->value.list);
+		}
 
 		if (detail->next)
 			detail++;
@@ -899,6 +908,18 @@ css__stylesheet_selector_destroy(css_stylesheet *sheet, css_selector *selector)
 	free(selector);
 
 	return CSS_OK;
+}
+
+void css__stylesheet_selector_list_destroy(css_stylesheet *sheet,
+					   css_selector_list *list)
+{
+	if (list == NULL)
+		return;
+
+	for (uint32_t i = 0; i < list->count; i++) {
+		css__stylesheet_selector_destroy(sheet, list->items[i].selector);
+	}
+	free(list);
 }
 
 /**
@@ -991,6 +1012,11 @@ css__stylesheet_selector_append_specific(css_stylesheet *sheet,
 		d->value.string = lwc_string_ref(detail->value.string);
 
 	(*parent) = temp;
+
+	if (detail->value_type == CSS_SELECTOR_DETAIL_VALUE_LIST) {
+		(*parent)->specificity += detail->value.list->specificity;
+		return CSS_OK;
+	}
 
 	/* Update parent's specificity */
 	switch (detail->type) {
