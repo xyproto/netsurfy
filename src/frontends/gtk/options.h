@@ -36,7 +36,7 @@ NSOPTION_STRING(downloads_directory, NULL)
 NSOPTION_STRING(url_file, NULL)
 
 /* Always show tabs even if there is only one */
-NSOPTION_BOOL(show_single_tab, false)
+NSOPTION_BOOL(show_single_tab, true)
 
 /* size of buttons */
 NSOPTION_INTEGER(button_type, 0)

@@ -820,6 +820,40 @@ static int qjsky_node_iface_html(dom_html_element_type type)
 		return QJSKY_IFACE_HTMLIFRAMEELEMENT;
 	case DOM_HTML_ELEMENT_TYPE_CANVAS:
 		return QJSKY_IFACE_HTMLCANVASELEMENT;
+	case DOM_HTML_ELEMENT_TYPE_AUDIO:
+		return QJSKY_IFACE_HTMLAUDIOELEMENT;
+	case DOM_HTML_ELEMENT_TYPE_VIDEO:
+		return QJSKY_IFACE_HTMLVIDEOELEMENT;
+	case DOM_HTML_ELEMENT_TYPE_DIALOG:
+		return QJSKY_IFACE_HTMLDIALOGELEMENT;
+	case DOM_HTML_ELEMENT_TYPE_DETAILS:
+		return QJSKY_IFACE_HTMLDETAILSELEMENT;
+	case DOM_HTML_ELEMENT_TYPE_TEMPLATE:
+		return QJSKY_IFACE_HTMLTEMPLATEELEMENT;
+	case DOM_HTML_ELEMENT_TYPE_SPAN:
+		return QJSKY_IFACE_HTMLSPANELEMENT;
+	case DOM_HTML_ELEMENT_TYPE_DATA:
+		return QJSKY_IFACE_HTMLDATAELEMENT;
+	case DOM_HTML_ELEMENT_TYPE_DATALIST:
+		return QJSKY_IFACE_HTMLDATALISTELEMENT;
+	case DOM_HTML_ELEMENT_TYPE_METER:
+		return QJSKY_IFACE_HTMLMETERELEMENT;
+	case DOM_HTML_ELEMENT_TYPE_OUTPUT:
+		return QJSKY_IFACE_HTMLOUTPUTELEMENT;
+	case DOM_HTML_ELEMENT_TYPE_PROGRESS:
+		return QJSKY_IFACE_HTMLPROGRESSELEMENT;
+	case DOM_HTML_ELEMENT_TYPE_PICTURE:
+		return QJSKY_IFACE_HTMLPICTUREELEMENT;
+	case DOM_HTML_ELEMENT_TYPE_SOURCE:
+		return QJSKY_IFACE_HTMLSOURCEELEMENT;
+	case DOM_HTML_ELEMENT_TYPE_TIME:
+		return QJSKY_IFACE_HTMLTIMEELEMENT;
+	case DOM_HTML_ELEMENT_TYPE_TRACK:
+		return QJSKY_IFACE_HTMLTRACKELEMENT;
+	case DOM_HTML_ELEMENT_TYPE_EMBED:
+		return QJSKY_IFACE_HTMLEMBEDELEMENT;
+	case DOM_HTML_ELEMENT_TYPE_MARQUEE:
+		return QJSKY_IFACE_HTMLMARQUEEELEMENT;
 	case DOM_HTML_ELEMENT_TYPE_ISINDEX:
 	case DOM_HTML_ELEMENT_TYPE__COUNT:
 	case DOM_HTML_ELEMENT_TYPE__UNKNOWN:
@@ -1396,6 +1430,42 @@ static void qjsky_run_listeners(JSContext *ctx,
 	}
 	free(entries);
 	JS_FreeValue(ctx, listeners);
+}
+
+bool qjsky_dispatch_window_event(JSContext *ctx,
+				 struct dom_event *evt,
+				 JSValueConst event)
+{
+	jsthread *thread = qjsky_thread(ctx);
+	dom_string *name = NULL;
+	bool prevented = false;
+	JSValue type, handler;
+
+	if (dom_event_get_type(evt, &name) != DOM_NO_ERR || name == NULL) {
+		return true;
+	}
+	type = qjsky_string(ctx, name);
+	handler = qjsky_get_event_handler(ctx, thread->global, name, NULL);
+	dom_string_unref(name);
+	if (JS_IsException(type) || JS_IsException(handler)) {
+		JS_FreeValue(ctx, JS_GetException(ctx));
+		JS_FreeValue(ctx, type);
+		JS_FreeValue(ctx, handler);
+		return true;
+	}
+	if (JS_IsFunction(ctx, handler)) {
+		JSValue ret = qjsky_call(
+			ctx, handler, thread->global, 1, &event, true);
+		if (JS_IsBool(ret) && !JS_ToBool(ctx, ret)) {
+			(void)dom_event_prevent_default(evt);
+		}
+		JS_FreeValue(ctx, ret);
+	}
+	JS_FreeValue(ctx, handler);
+	qjsky_run_listeners(ctx, thread->global, type, event, DOM_AT_TARGET);
+	JS_FreeValue(ctx, type);
+	(void)dom_event_is_default_prevented(evt, &prevented);
+	return !prevented;
 }
 
 static void qjsky_run_handler(JSContext *ctx,

@@ -59,6 +59,7 @@ static const struct {
 	{"gtkNextTab", "win.nexttab"},
 	{"gtkPrevTab", "win.prevtab"},
 	{"gtkCloseTab", "win.closetab"},
+	{"gtkReopenTab", "win.reopentab"},
 	{"gtkSaveWindowSize", "win.savewindowsize"},
 	{"gtkBack", "win.back"},
 	{"gtkForward", "win.forward"},
@@ -80,6 +81,19 @@ static const struct {
 	{"gtkGuide", "win.guide"},
 	{"gtkUserInformation", "win.info"},
 	{"gtkAbout", "win.about"},
+};
+
+static const struct {
+	const char *accel;
+	const char *action;
+} extra_shortcuts[] = {
+	{"<Control>Tab", "win.nexttab"},
+	{"<Control><Shift>ISO_Left_Tab", "win.prevtab"},
+	{"<Control>r", "win.reload"},
+	{"<Control>equal", "win.zoomplus"},
+	{"<Alt>Home", "win.home"},
+	{"<Alt>d", "win.openlocation"},
+	{"F6", "win.openlocation"},
 };
 
 static void add_item(GMenu *menu, const char *key, const char *action)
@@ -132,6 +146,7 @@ static GMenu *tabs_menu(void)
 	add_item(menu, "gtkNextTab", "win.nexttab");
 	add_item(menu, "gtkPrevTab", "win.prevtab");
 	add_item(menu, "gtkCloseTab", "win.closetab");
+	add_item(menu, "gtkReopenTab", "win.reopentab");
 	return menu;
 }
 
@@ -359,6 +374,35 @@ void nsgtk_menu_add_shortcuts(GtkWidget *window)
 			gtk_shortcut_new(trigger,
 					 gtk_named_action_new(
 						 shortcuts[idx].action)));
+	}
+	for (idx = 0; idx < G_N_ELEMENTS(extra_shortcuts); idx++) {
+		GtkShortcutTrigger *trigger = gtk_shortcut_trigger_parse_string(
+			extra_shortcuts[idx].accel);
+		if (trigger == NULL) {
+			continue;
+		}
+		gtk_shortcut_controller_add_shortcut(
+			GTK_SHORTCUT_CONTROLLER(controller),
+			gtk_shortcut_new(trigger,
+					 gtk_named_action_new(
+						 extra_shortcuts[idx].action)));
+	}
+	for (int tab = 1; tab <= 9; tab++) {
+		char accel[16];
+		GtkShortcut *shortcut;
+		GtkShortcutTrigger *trigger;
+
+		snprintf(accel, sizeof(accel), "<Control>%d", tab);
+		trigger = gtk_shortcut_trigger_parse_string(accel);
+		if (trigger == NULL) {
+			continue;
+		}
+		shortcut = gtk_shortcut_new(
+			trigger, gtk_named_action_new("win.selecttab"));
+		gtk_shortcut_set_arguments(
+			shortcut, g_variant_new_int32(tab == 9 ? -1 : tab - 1));
+		gtk_shortcut_controller_add_shortcut(
+			GTK_SHORTCUT_CONTROLLER(controller), shortcut);
 	}
 	gtk_widget_add_controller(window, controller);
 }

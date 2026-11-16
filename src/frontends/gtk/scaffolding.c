@@ -647,6 +647,37 @@ nsgtk_on_closetab_activate_menu(GtkWidget *widget, gpointer data)
 	return TRUE;
 }
 
+static gboolean
+nsgtk_on_reopentab_activate_menu(GtkWidget *widget, gpointer data)
+{
+	struct nsgtk_scaffolding *g = (struct nsgtk_scaffolding *)data;
+	struct nsurl *url = nsgtk_tab_take_closed();
+	struct browser_window *bw;
+
+	if (url == NULL) {
+		return TRUE;
+	}
+	bw = nsgtk_get_browser_window(g->top_level);
+	browser_window_create(BW_CREATE_HISTORY | BW_CREATE_TAB |
+				      BW_CREATE_FOREGROUND,
+			      url,
+			      NULL,
+			      bw,
+			      NULL);
+	nsurl_unref(url);
+
+	return TRUE;
+}
+
+static void nsgtk_select_tab_activate(GSimpleAction *action,
+				      GVariant *parameter,
+				      gpointer data)
+{
+	struct nsgtk_scaffolding *g = data;
+
+	nsgtk_tab_select(g->notebook, g_variant_get_int32(parameter));
+}
+
 /* end of menu callback handlers */
 
 
@@ -736,6 +767,18 @@ static nserror nsgtk_menu_initialise(struct nsgtk_scaffolding *g)
 			      "link-bookmark",
 			      nsgtk_on_link_bookmark_activate_menu);
 	nsgtk_menu_add_action(g, "link-copy", nsgtk_on_link_copy_activate_menu);
+	nsgtk_menu_add_action(g, "reopentab", nsgtk_on_reopentab_activate_menu);
+	{
+		GSimpleAction *select = g_simple_action_new(
+			"selecttab", G_VARIANT_TYPE_INT32);
+		g_signal_connect(select,
+				 "activate",
+				 G_CALLBACK(nsgtk_select_tab_activate),
+				 g);
+		g_action_map_add_action(G_ACTION_MAP(g->actions),
+					G_ACTION(select));
+		g_object_unref(select);
+	}
 
 	return NSERROR_OK;
 }

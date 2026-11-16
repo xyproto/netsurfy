@@ -1,14 +1,14 @@
-Usage Instructions for Monkey NetSurfy
+Usage Instructions for Headless NetSurfy
 =====================================
 
-This document provides usage instructions for the Monkey version of NetSurfy.
+This document provides usage instructions for the Headless version of NetSurfy.
 
-Monkey NetSurfy has been tested on Ubuntu and Debian.
+Headless NetSurfy has been tested on Ubuntu and Debian.
 
 Automated testing
 -----------------
 
-If you want to run the monkey_driver.py or monkey-see-monkey-do tools then
+If you want to run the headless_driver.py or headless-integration tools then
 you will need python3 and pyyaml installed.  The latter also needs internet
 access to test.netsurf-browser.org to acquire test data.
 
@@ -17,30 +17,30 @@ Overview
 
 ### What it is
 
-The NetSurfy Monkey front end is a developer debug tool used to test how the
+The NetSurfy Headless front end is a developer debug tool used to test how the
 core interacts with the user interface.  It allows the developers to profile
 NetSurfy and to interact with the core directly as though the developer were a
 front end.
  
 ### What it is not
 
-Monkey is not a tool for building web-crawling robots or indeed anything other
+Headless is not a tool for building web-crawling robots or indeed anything other
 than a debug tool for the NetSurfy developers.
 
-### How to interact with `nsmonkey`
+### How to interact with `nsheadless`
 
-In brief, `nsmonkey` will produce tagged output on stdout and expect
+In brief, `nsheadless` will produce tagged output on stdout and expect
 commands on stdin.  Windows are numbered and for the most part
 tokens are space separated.  In some cases (e.g. title or status)
 the final element on the output line is a string which might have
-spaces embedded within it.  As such, output from `nsmonkey` should be
+spaces embedded within it.  As such, output from `nsheadless` should be
 parsed a token at a time, so that when such a string is encountered,
 the parser can stop splitting and return the rest.
 
-Commands to `nsmonkey` are namespaced.  For example commands related to
+Commands to `nsheadless` are namespaced.  For example commands related to
 browser windows are prefixed by `WINDOW`.
 
-### Top level tags for `nsmonkey`
+### Top level tags for `nsheadless`
 
 * `QUIT`
 
@@ -48,7 +48,7 @@ browser windows are prefixed by `WINDOW`.
 
 * `OPTIONS`
 
-### Top level response tags for nsmonkey
+### Top level response tags for nsheadless
 
 * `GENERIC`: Generic messages such as poll loops etc.
 
@@ -64,7 +64,7 @@ browser windows are prefixed by `WINDOW`.
 
 * `PLOT`: Plot calls which come from the core.
 
-In the below, _%something%_ indicates a substitution made by Monkey.
+In the below, _%something%_ indicates a substitution made by Headless.
 
 * _%url%_ will be a URL
 * _%id%_ will be an opaque ID
@@ -75,8 +75,8 @@ In the below, _%something%_ indicates a substitution made by Monkey.
 ### Warnings, errors etc
 
 *  Warnings (tagged `WARN`) come from the NetSurfy core.
-*  Errors (tagged `ERROR`) tend to come from Monkey's parsers
-*  Death (tagged `DIE`) comes from the core and kills Monkey dead.
+*  Errors (tagged `ERROR`) tend to come from Headless's parsers
+*  Death (tagged `DIE`) comes from the core and kills Headless dead.
 
 Commands
 --------
@@ -85,12 +85,12 @@ Commands
 
 *   `QUIT`
 
-    Cause monkey to quit cleanly.
+    Cause headless to quit cleanly.
     This will cleanly destroy open windows etc.
 
 *   `OPTIONS` _%str_
 
-    Cause monkey to set options.  The passed options should be in the same
+    Cause headless to set options.  The passed options should be in the same
     form as the command line, e.g. `OPTIONS --enable_javascript=1`
     
 
@@ -197,29 +197,29 @@ Responses
 
 *   `GENERIC STARTED`
 
-    Monkey has started and is ready for commands
+    Headless has started and is ready for commands
 
 *   `GENERIC CLOSING_DOWN`
 
-    Monkey has been told to shut down and is doing so
+    Headless has been told to shut down and is doing so
 
 *   `GENERIC FINISHED`
 
-    Monkey has finished and will now exit
+    Headless has finished and will now exit
 
 *   `GENERIC LAUNCH URL` _%url%_
 
-    The core asked monkey to launch the given URL
+    The core asked headless to launch the given URL
 
 *   `GENERIC THUMBNAIL URL` _%url%_
 
-    The core asked monkey to thumbnail a content without
+    The core asked headless to thumbnail a content without
     a window.
 
 *   `GENERIC POLL BLOCKING`
 *   `GENERIC POLL TIMED` _%n%_
 
-    Monkey reached a point where it could sleep waiting for
+    Headless reached a point where it could sleep waiting for
     commands or scheduled timeouts.  No fetches nor redraws
     were pending.  If there are no timeouts or other pending
     jobs then this will be a BLOCKING poll, otherwise the number
@@ -229,8 +229,8 @@ Responses
 
 *   `WINDOW NEW WIN` _%id%_ `FOR` _%id%_ `CLONE` _%id%_ `NEWTAB` _%bool%_
 
-    The core asked Monkey to open a new window.  The IDs for `FOR` and
-    `CLONE` are core window IDs, the `WIN` id is a Monkey window ID.
+    The core asked Headless to open a new window.  The IDs for `FOR` and
+    `CLONE` are core window IDs, the `WIN` id is a Headless window ID.
 
 *   `WINDOW SIZE WIN` _%id%_ `WIDTH` _%n%_ `HEIGHT` _%n%_
 
@@ -238,7 +238,7 @@ Responses
 
 *   `WINDOW DESTROY WIN` _%id%_
 
-    The core has instructed Monkey to destroy the named window.
+    The core has instructed Headless to destroy the named window.
 
 *   `WINDOW TITLE WIN` _%id%_ `STR` _%str%_
 
@@ -246,44 +246,44 @@ Responses
 
 *   `WINDOW REDRAW WIN` _%id%_
 
-    The core asked that Monkey redraw the given window.
+    The core asked that Headless redraw the given window.
 
 *   `WINDOW GET_DIMENSIONS WIN` _%id%_ `WIDTH` _%n%_ `HEIGHT` _%n%_
 
-    The core asked Monkey what the dimensions of the window are.
-    Monkey has to respond immediately and returned the supplied width
+    The core asked Headless what the dimensions of the window are.
+    Headless has to respond immediately and returned the supplied width
     and height values to the core.
 
 *   `WINDOW NEW_CONTENT WIN` _%id%_
 
-    The core has informed Monkey that the named window has a new
+    The core has informed Headless that the named window has a new
     content object.
 
 *   `WINDOW NEW_ICON WIN` _%id%_
 
-    The core has informed Monkey that the named window has a new
+    The core has informed Headless that the named window has a new
     icon (favicon) available.
 
 *   `WINDOW START_THROBBER WIN` _%id%_
 
-    The core asked Monkey to start the throbber for the named
+    The core asked Headless to start the throbber for the named
     window.  This indicates to the user that the window is busy.
 
 *   `WINDOW STOP_THROBBER WIN` _%id%_
 
-    The core asked Monkey to stop the throbber for the named
+    The core asked Headless to stop the throbber for the named
     window.  This indicates to the user that the window is finished.
 
 *   `WINDOW SET_SCROLL WIN` _%id%_ `X` _%n%_ `Y` _%n%_
 
-    The core asked Monkey to set the named window's scroll offsets
+    The core asked Headless to set the named window's scroll offsets
     to the given X and Y position.
 
 *   `WINDOW UPDATE_BOX WIN` _%id%_ `X` _%n%_ `Y` _%n%_ `WIDTH` _%n%_ `HEIGHT` _%n%_
 
-    The core asked Monkey to redraw the given portion of the content
+    The core asked Headless to redraw the given portion of the content
     display.  Note these coordinates refer to the content, not the
-    viewport which Monkey is simulating.
+    viewport which Headless is simulating.
 
 *   `WINDOW UPDATE_EXTENT WIN` _%id%_ `WIDTH` _%n%_ `HEIGHT` _%n%_
 
@@ -313,50 +313,50 @@ Responses
 
 *   `WINDOW GET_SCROLL WIN` _%id%_ `X` _%n%_ `Y` _%n%_
 
-    The core asked Monkey for the scroll offsets.  Monkey returned the
+    The core asked Headless for the scroll offsets.  Headless returned the
     numbers shown for the window named.
 
 *   `WINDOW SCROLL_START WIN` _%id%_
 
-    The core asked Monkey to scroll the named window to the top/left.
+    The core asked Headless to scroll the named window to the top/left.
 
 *   `WINDOW POSITION_FRAME WIN` _%id%_ `X0` _%n%_ `Y0` _%n%_ `X1` _%n%_ `Y1` _%n%_
 
-    The core asked Monkey to position the named window as a frame at
+    The core asked Headless to position the named window as a frame at
     the given coordinates of its parent.
 
 *   `WINDOW SCROLL_VISIBLE WIN` _%id%_ `X0` _%n%_ `Y0` _%n%_ `X1` _%n%_ `Y1` _%n%_
 
-    The core asked Monkey to scroll the named window until the
+    The core asked Headless to scroll the named window until the
     indicated box is visible.
 
 *   `WINDOW PLACE_CARET WIN` _%id%_ `X` _%n%_ `Y` _%n%_ `HEIGHT` _%n%_
 
-    The core asked Monkey to render a caret in the named window at the
+    The core asked Headless to render a caret in the named window at the
     indicated position with the indicated height.
 
 *   `WINDOW REMOVE_CARET WIN` _%id%_
 
-    The core asked Monkey to remove any caret in the named window.
+    The core asked Headless to remove any caret in the named window.
 
 *   `WINDOW SCROLL_START WIN` _%id%_ `X0` _%n%_ `Y0` _%n%_ `X1` _%n%_ `Y1` _%n%_
 
-    The core asked Monkey to scroll the named window to the start of
+    The core asked Headless to scroll the named window to the start of
     the given box.
 
 *   `WINDOW SELECT_MENU WIN` _%id%_
 
-    The core asked Monkey to produce a selection menu for the named
+    The core asked Headless to produce a selection menu for the named
     window.
 
 *   `WINDOW SAVE_LINK WIN` _%id%_ `URL` _%url%_ `TITLE` _%str%_
 
-    The core asked Monkey to save a link from the given window with
+    The core asked Headless to save a link from the given window with
     the given URL and anchor title.
 
 *   `WINDOW THUMBNAIL WIN` _%id%_ `URL` _%url%_
 
-    The core asked Monkey to render a thumbnail for the given window
+    The core asked Headless to render a thumbnail for the given window
     which is currently at the given URL.
 
 *   `WINDOW REDRAW WIN` _%id%_ `START`
@@ -384,28 +384,28 @@ Responses
 
 *   `DOWNLOAD CREATE DWIN` _%id%_ `WIN` _%id%_
 
-    The core asked Monkey to create a download window owned by the
+    The core asked Headless to create a download window owned by the
     given browser window.
 
 *   `DOWNLOAD DATA DWIN` _%id%_ `SIZE` _%n%_ `DATA` _%str%_
 
-    The core asked Monkey to update the named download window with
+    The core asked Headless to update the named download window with
     the given byte size and data string.
 
 *   `DOWNLOAD ERROR DWIN` _%id%_ `ERROR` _%str%_
 
-    The core asked Monkey to update the named download window with
+    The core asked Headless to update the named download window with
     the given error message.
 
 *   `DOWNLOAD DONE DWIN` _%id%_
 
-    The core asked Monkey to destroy the named download window.
+    The core asked Headless to destroy the named download window.
 
 ### SSL Certificate messages
 
 *   `SSLCERT VERIFY CWIN` _%id%_ `URL` _%url%_
 
-    The core asked Monkey to say whether or not a given SSL
+    The core asked Headless to say whether or not a given SSL
     certificate is OK.
 
 *   `LOGIN DESTROY CWIN` _%id%_
@@ -417,7 +417,7 @@ Responses
 
 *   `LOGIN OPEN LWIN` _%id%_ `URL` _%url%_
 
-    The core asked Monkey to ask for identification for the given URL.
+    The core asked Headless to ask for identification for the given URL.
 
     This will be *immediately* followed by:
 
@@ -437,7 +437,7 @@ Responses
 
     The given login window has a realm of the given string
 
-    Subsequent to this message, the user of monkey is at liberty to issue
+    Subsequent to this message, the user of headless is at liberty to issue
     `LOGIN` commands to control the response of the `401LOGIN` process.
 
 *   `LOGIN DESTROY LWIN` _%id%_
@@ -447,31 +447,31 @@ Responses
 
 ### Plotter messages
 
-> **Note, Monkey won't clip coordinates, but sometimes the core does.**
+> **Note, Headless won't clip coordinates, but sometimes the core does.**
 
 *   `PLOT CLIP X0` _%n%_ `Y0` _%n%_ `X1` _%n%_ `Y1` _%n%_
 
-    The core asked Monkey to clip plotting to the given clipping
+    The core asked Headless to clip plotting to the given clipping
     rectangle (X0,Y0) (X1,Y1)
 
 *   `PLOT TEXT X` _%n%_ `Y` _%n%_ `STR` _%str%_
 
-    The core asked Monkey to plot the given string at the
+    The core asked Headless to plot the given string at the
     given coordinates.
 
 *   `PLOT LINE X0` _%n%_ `Y0` _%n%_ `X1` _%n%_ `Y1` _%n%_
 
-    The core asked Monkey to plot a line with the given start
+    The core asked Headless to plot a line with the given start
     and end coordinates.
 
 *   `PLOT RECT X0` _%n%_ `Y0` _%n%_ `X1` _%n%_ `Y1` _%n%_
 
-    The core asked Monkey to plot a rectangle with the given
+    The core asked Headless to plot a rectangle with the given
     coordinates as the corners.
 
 *   `PLOT BITMAP X` _%n%_ `Y` _%n%_ `WIDTH` _%n%_ `HEIGHT` _%n%_
 
-    The core asked Monkey to plot a bitmap at the given
+    The core asked Headless to plot a bitmap at the given
     coordinates, scaled to the given width/height.
 
 > TODO: Check if other things are implemented and add them to the docs

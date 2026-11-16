@@ -1418,8 +1418,7 @@ dom_exception _dom_element_get_attributes(dom_node_internal *node,
 /* Overload function of Node, please refer src/core/node.c for detail */
 dom_exception _dom_element_has_attributes(dom_node_internal *node, bool *result)
 {
-	UNUSED(node);
-	*result = true;
+	*result = ((struct dom_element *)node)->attributes != NULL;
 
 	return DOM_NO_ERR;
 }

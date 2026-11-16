@@ -42,10 +42,24 @@ static nserror process_query_section(const char *str, size_t len, char **term)
 	if (len < 3) {
 		return NSERROR_BAD_PARAMETER;
 	}
+	char *plain;
+	nserror res;
+
 	if (str[0] != 'q' || str[1] != '=') {
 		return NSERROR_BAD_PARAMETER;
 	}
-	return url_unescape(str + 2, len - 2, NULL, term);
+	plain = strndup(str + 2, len - 2);
+	if (plain == NULL) {
+		return NSERROR_NOMEM;
+	}
+	for (char *c = plain; *c != '\0'; c++) {
+		if (*c == '+') {
+			*c = ' ';
+		}
+	}
+	res = url_unescape(plain, len - 2, NULL, term);
+	free(plain);
+	return res;
 }
 
 static nserror searchterm_from_query(struct nsurl *url, char **term)

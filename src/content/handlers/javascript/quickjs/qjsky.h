@@ -72,6 +72,9 @@ struct html_content *qjsky_node_htmlc(struct dom_node *node);
 void qjsky_node_state_changed(struct dom_node *node);
 JSValue qjsky_content_document(JSContext *ctx, struct dom_node *element);
 JSValue qjsky_range_create(JSContext *ctx, struct dom_node *document);
+bool qjsky_dispatch_window_event(JSContext *ctx,
+				 struct dom_event *evt,
+				 JSValueConst event);
 JSValue qjsky_element_token_list(JSContext *ctx,
 				 JSValueConst this_val,
 				 struct dom_node *node,

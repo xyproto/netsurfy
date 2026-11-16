@@ -976,13 +976,11 @@ static nserror apply_user_button_customisation(struct nsgtk_toolbar *tb)
 	if (location == 0) {
 		/* completely failed to create any buttons so use defaults */
 		tb->items[BACK_BUTTON].location = location++;
-		tb->items[HISTORY_BUTTON].location = location++;
 		tb->items[FORWARD_BUTTON].location = location++;
 		tb->items[RELOADSTOP_BUTTON].location = location++;
+		tb->items[HOME_BUTTON].location = location++;
 		tb->items[URL_BAR_ITEM].location = location++;
-		tb->items[WEBSEARCH_ITEM].location = location++;
 		tb->items[OPENMENU_BUTTON].location = location++;
-		tb->items[THROBBER_ITEM].location = location++;
 	}
 
 
@@ -3018,6 +3016,8 @@ toolbar_connect_signal(struct nsgtk_toolbar *tb, nsgtk_toolbar_button itemid)
 	switch (itemid) {
 	case URL_BAR_ITEM:
 		entry = GTK_ENTRY(item->button);
+		gtk_entry_set_placeholder_text(
+			entry, messages_get("gtkUrlPlaceholder"));
 
 		g_signal_connect(GTK_WIDGET(entry),
 				 "activate",
@@ -3355,6 +3355,9 @@ nserror nsgtk_toolbar_set_url(struct nsgtk_toolbar *tb, nsurl *url)
 	}
 	if (url_text == NULL) {
 		url_text = nsurl_access(url);
+	}
+	if (strcmp(url_text, "about:start") == 0) {
+		url_text = "";
 	}
 
 	if (strcmp(url_text, gtk_editable_get_text(GTK_EDITABLE(url_entry))) !=

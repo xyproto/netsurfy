@@ -80,5 +80,9 @@ void nsgtk_tab_options_changed(GtkNotebook *notebook);
 nserror nsgtk_tab_close_current(GtkNotebook *notebook);
 nserror nsgtk_tab_prev(GtkNotebook *notebook);
 nserror nsgtk_tab_next(GtkNotebook *notebook);
+nserror nsgtk_tab_select(GtkNotebook *notebook, int index);
+void nsgtk_tab_remember_closed(struct nsurl *url);
+struct nsurl *nsgtk_tab_take_closed(void);
+void nsgtk_tab_forget_closed(void);
 
 #endif

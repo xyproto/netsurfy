@@ -61,6 +61,7 @@
 #include "query_timeout.h"
 #include "atestament.h"
 #include "websearch.h"
+#include "start.h"
 
 typedef bool (*fetch_about_handler)(struct fetch_about_context *);
 
@@ -381,7 +382,8 @@ struct about_handlers about_handler_list[] = {
 	 SLEN("websearch"),
 	 NULL,
 	 fetch_about_websearch_handler,
-	 true}};
+	 true},
+	{"start", SLEN("start"), NULL, fetch_about_start_handler, false}};
 
 #define about_handler_list_len                                                 \
 	(sizeof(about_handler_list) / sizeof(struct about_handlers))

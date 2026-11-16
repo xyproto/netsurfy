@@ -67,7 +67,7 @@ bool fetch_about_nscolours_handler(struct fetch_about_context *ctx)
 				     "}\n"
 				     "%s",
 				     colour_rb_swap(
-					     nscolours[NSCOLOUR_WIN_ODD_BG]),
+					     nscolours[NSCOLOUR_WIN_EVEN_BG]),
 				     stylesheet);
 	if (res != NSERROR_OK) {
 		goto aborted;

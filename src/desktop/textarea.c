@@ -121,6 +121,8 @@ struct textarea {
 
 	struct textarea_utf8 *show; /**< Points at .text or .password */
 
+	char *placeholder;
+
 	struct {
 		int line; /**< Line caret is on */
 		int byte_off; /**< Character index of caret on line */
@@ -1920,6 +1922,8 @@ struct textarea *textarea_create(const textarea_flags flags,
 		return NULL;
 	}
 
+	ret->placeholder = NULL;
+
 	ret->callback = callback;
 	ret->data = data;
 
@@ -2036,12 +2040,28 @@ void textarea_destroy(struct textarea *ta)
 	free(ta->undo.details);
 
 	free(ta->text.data);
+	free(ta->placeholder);
 	free(ta->lines);
 	free(ta);
 }
 
 
 /* exported interface, documented in textarea.h */
+bool textarea_set_placeholder(struct textarea *ta, const char *text)
+{
+	char *copy = NULL;
+
+	if (text != NULL && text[0] != '\0') {
+		copy = strdup(text);
+		if (copy == NULL) {
+			return false;
+		}
+	}
+	free(ta->placeholder);
+	ta->placeholder = copy;
+	return true;
+}
+
 bool textarea_set_text(struct textarea *ta, const char *text)
 {
 	unsigned int len = strlen(text) + 1;
@@ -2334,6 +2354,24 @@ void textarea_redraw(struct textarea *ta,
 
 		fsize *= scale;
 		line_height *= scale;
+	}
+
+	if (ta->placeholder != NULL && ta->show->len <= 1) {
+		colour behind = ta->fstyle.background != NS_TRANSPARENT
+					? ta->fstyle.background
+					: bg;
+		ctx->plot->clip(ctx, &r);
+		fstyle = ta->fstyle;
+		fstyle.size = fsize;
+		fstyle.foreground = mix_colour(ta->fstyle.foreground,
+					       behind,
+					       110);
+		ctx->plot->text(ctx,
+				&fstyle,
+				x + ta->border_width + ta->pad_left,
+				y + text_y_offset_baseline,
+				ta->placeholder,
+				strlen(ta->placeholder));
 	}
 
 	plot_style_fill_bg.fill_colour = ta->sel_fstyle.background;

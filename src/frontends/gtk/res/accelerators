@@ -8,6 +8,7 @@
 gtkNextTab:<Control>Page_Down
 gtkPrevTab:<Control>Page_Up
 gtkCloseTab:<Control>w
+gtkReopenTab:<Control><shift>t
 gtkNewTab:<Control>t
 gtkNewWindow:<Control>n
 gtkOpenFile:<Control>o

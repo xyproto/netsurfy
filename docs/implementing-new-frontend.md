@@ -19,7 +19,7 @@ to a new operating system platform.
 
 It is recommend, in the strongest terms, that if the prospective
 developer is porting to both a new platform and toolkit that they
-*start* by getting the [monkey](docs/using-monkey.md) frontend
+*start* by getting the [headless](docs/using-headless.md) frontend
 building and passing at least the basic integration tests on their
 platform.
 

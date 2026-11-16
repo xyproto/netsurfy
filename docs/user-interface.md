@@ -32,11 +32,11 @@ There is a basic user guide for the [framebuffer](docs/using-framebuffer.md)
 
 Frontend that uses the GTK toolkit
 
-## monkey
+## headless
 
 This is the internal unit test frontend.
 
-There is a basic user guide [monkey](docs/using-monkey.md)
+There is a basic user guide [headless](docs/using-headless.md)
 
 ## windows
 

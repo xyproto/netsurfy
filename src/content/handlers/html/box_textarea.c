@@ -259,6 +259,7 @@ bool box_textarea_create_textarea(html_content *html,
 {
 	bool autofocus = false;
 	dom_string *dom_text = NULL;
+	dom_string *placeholder = NULL;
 	dom_exception err;
 	textarea_setup ta_setup;
 	textarea_flags ta_flags;
@@ -381,6 +382,17 @@ bool box_textarea_create_textarea(html_content *html,
 
 	if (!textarea_set_text(gadget->data.text.ta, text))
 		return false;
+
+	if (dom_element_get_attribute(node,
+				      corestring_dom_placeholder,
+				      &placeholder) == DOM_NO_ERR &&
+	    placeholder != NULL) {
+		bool ok = textarea_set_placeholder(
+			gadget->data.text.ta, dom_string_data(placeholder));
+		dom_string_unref(placeholder);
+		if (!ok)
+			return false;
+	}
 
 	return true;
 }

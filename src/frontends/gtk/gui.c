@@ -64,6 +64,7 @@
 #include "gtk/throbber.h"
 #include "gtk/toolbar_items.h"
 #include "gtk/scaffolding.h"
+#include "gtk/tabs.h"
 #include "gtk/window.h"
 #include "gtk/corewindow.h"
 #include "gtk/schedule.h"
@@ -498,6 +499,62 @@ static bool nslog_stream_configure(FILE *fptr)
  * \param defaults The option table to update.
  * \return error status.
  */
+static bool nsgtk_name_is_dark(const char *name)
+{
+	gchar *lower;
+	bool dark;
+
+	if (name == NULL) {
+		return false;
+	}
+	lower = g_ascii_strdown(name, -1);
+	dark = strstr(lower, "dark") != NULL;
+	g_free(lower);
+	return dark;
+}
+
+static bool nsgtk_theme_is_dark(void)
+{
+	GtkSettings *settings = gtk_settings_get_default();
+	GSettingsSchemaSource *source = g_settings_schema_source_get_default();
+	const char *env = getenv("GTK_THEME");
+	gboolean prefer_dark = FALSE;
+	gchar *theme = NULL;
+	bool dark = false;
+
+	if (nsgtk_name_is_dark(env)) {
+		return true;
+	}
+	if (settings != NULL) {
+		g_object_get(settings,
+			     "gtk-application-prefer-dark-theme",
+			     &prefer_dark,
+			     "gtk-theme-name",
+			     &theme,
+			     NULL);
+		dark = prefer_dark || nsgtk_name_is_dark(theme);
+		g_free(theme);
+	}
+	if (!dark && source != NULL) {
+		GSettingsSchema *schema = g_settings_schema_source_lookup(
+			source, "org.gnome.desktop.interface", TRUE);
+		if (schema != NULL) {
+			if (g_settings_schema_has_key(schema, "color-scheme")) {
+				GSettings *gsettings = g_settings_new(
+					"org.gnome.desktop.interface");
+				gchar *scheme = g_settings_get_string(
+					gsettings, "color-scheme");
+				dark = scheme != NULL &&
+				       strcmp(scheme, "prefer-dark") == 0;
+				g_free(scheme);
+				g_object_unref(gsettings);
+			}
+			g_settings_schema_unref(schema);
+		}
+	}
+	return dark;
+}
+
 static nserror set_defaults(struct nsoption_s *defaults)
 {
 	char *fname;
@@ -564,13 +621,36 @@ static nserror set_defaults(struct nsoption_s *defaults)
 	nsoption_set_charp(font_cursive, strdup("Serif"));
 	nsoption_set_charp(font_fantasy, strdup("Serif"));
 
-	/* Default toolbar button type to large icons */
-	nsoption_set_int(button_type, 2);
+	if (nsgtk_theme_is_dark()) {
+		static const struct {
+			enum nsoption_e entry;
+			colour value;
+		} dark[] = {
+			{NSOPTION_sys_colour_Canvas, 0x00211d1b},
+			{NSOPTION_sys_colour_CanvasText, 0x00eae7e6},
+			{NSOPTION_sys_colour_Field, 0x002f2926},
+			{NSOPTION_sys_colour_FieldText, 0x00eae7e6},
+			{NSOPTION_sys_colour_ButtonFace, 0x0038312e},
+			{NSOPTION_sys_colour_ButtonText, 0x00eae7e6},
+			{NSOPTION_sys_colour_ButtonBorder, 0x00695f5a},
+			{NSOPTION_sys_colour_GrayText, 0x009a918b},
+			{NSOPTION_sys_colour_LinkText, 0x00f8b48a},
+			{NSOPTION_sys_colour_VisitedText, 0x00f98ac5},
+			{NSOPTION_sys_colour_ActiveText, 0x00807aff},
+		};
+		nsoption_set_bool(prefer_dark_mode, true);
+		for (size_t i = 0; i < sizeof(dark) / sizeof(dark[0]); i++) {
+			defaults[dark[i].entry].value.c = dark[i].value;
+		}
+	}
+
+	/* Default toolbar button type to small icons */
+	nsoption_set_int(button_type, 1);
 
 	/* set default items in toolbar */
 	nsoption_set_charp(
 		toolbar_items,
-		strdup("back/history/forward/reloadstop/url_bar/websearch/openmenu"));
+		strdup("back/forward/reloadstop/home/url_bar/openmenu"));
 
 	/* set default for menu and tool bar visibility */
 	nsoption_set_charp(bar_show, strdup("tool"));
@@ -761,6 +841,43 @@ static nserror create_cache_home(char **cache_home_out)
 /**
  * GTK specific initialisation
  */
+static void nsgtk_init_style(void)
+{
+	static const char css[] =
+		".nsgtk-status {"
+		" background-color: @theme_bg_color;"
+		" color: @theme_fg_color;"
+		" border: 1px solid alpha(currentColor, 0.18);"
+		" border-left: none;"
+		" border-bottom: none;"
+		" border-radius: 0 7px 0 0;"
+		" padding: 3px 10px;"
+		" font-size: 0.9em;"
+		"}"
+		".nsgtk-scrollbar { background: none; border: none; }"
+		".nsgtk-scrollbar slider {"
+		" min-width: 7px;"
+		" min-height: 7px;"
+		" border-radius: 4px;"
+		" margin: 2px;"
+		" background-color: alpha(@theme_fg_color, 0.35);"
+		"}"
+		".nsgtk-scrollbar slider:hover { background-color: alpha(@theme_fg_color, 0.55); }";
+	GdkDisplay *display = gdk_display_get_default();
+	GtkCssProvider *provider;
+
+	if (display == NULL) {
+		return;
+	}
+	provider = gtk_css_provider_new();
+	gtk_css_provider_load_from_string(provider, css);
+	gtk_style_context_add_provider_for_display(
+		display,
+		GTK_STYLE_PROVIDER(provider),
+		GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+	g_object_unref(provider);
+}
+
 static nserror nsgtk_init(int *pargc, char ***pargv, char **cache_home)
 {
 	nserror ret;
@@ -780,6 +897,7 @@ static nserror nsgtk_init(int *pargc, char ***pargv, char **cache_home)
 
 	/* Initialise gtk */
 	gtk_init();
+	nsgtk_init_style();
 
 	/* initialise logging. Not fatal if it fails but not much we
 	 * can do about it either.
@@ -1170,6 +1288,7 @@ static void nsgtk_finalise(void)
 
 	/* Ensure all scaffoldings are destroyed before we go into exit */
 	nsgtk_download_destroy();
+	nsgtk_tab_forget_closed();
 	urldb_save_cookies(nsoption_charp(cookie_jar));
 	urldb_save(nsoption_charp(url_file));
 

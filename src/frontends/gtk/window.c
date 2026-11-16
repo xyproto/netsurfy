@@ -131,8 +131,14 @@ struct gui_window {
 	/** statusbar */
 	GtkLabel *status_bar;
 
-	/** status pane */
-	GtkPaned *paned;
+	/** overlay scrollbars */
+	GtkWidget *hscrollbar, *vscrollbar;
+
+	/** a fetch is in progress */
+	bool loading;
+
+	/** status text shown when the page is idle */
+	char *idle_status;
 
 	/** The icon this window should have */
 	GdkPixbuf *icon;
@@ -235,6 +241,8 @@ static void nsgtk_window_update_adjustments(struct gui_window *g)
 				 height * 0.1,
 				 height * 0.9,
 				 height);
+	gtk_widget_set_visible(g->hscrollbar, g->extent_width > width);
+	gtk_widget_set_visible(g->vscrollbar, g->extent_height > height);
 }
 
 static void
@@ -625,9 +633,14 @@ static void nsgtk_window_input_method_commit(GtkIMContext *ctx,
 	struct gui_window *g = data;
 	size_t len = strlen(str), offset = 0;
 
-	if (strcmp(str, " ") == 0 && !browser_window_key_press(g->bw, ' ')) {
+	if (strcmp(str, " ") == 0) {
 		GdkModifierType state = 0;
-		double page = gtk_adjustment_get_page_increment(g->vadj);
+		double page;
+
+		if (browser_window_key_press(g->bw, ' ')) {
+			return;
+		}
+		page = gtk_adjustment_get_page_increment(g->vadj);
 
 		if (g->key_controller != NULL) {
 			state = gtk_event_controller_get_current_event_state(
@@ -665,47 +678,6 @@ static void nsgtk_window_resize(GtkDrawingArea *area,
 
 
 /**
- * when the pane position is changed update the user option
- *
- * The user position is a percentage of the pane total width not an
- * absolute value.
- */
-static void
-nsgtk_paned_notify__position(GObject *gobject, GParamSpec *pspec, gpointer data)
-{
-	struct gui_window *g = data;
-	int max_position;
-
-	g_object_get(g->paned, "max-position", &max_position, NULL);
-	if (max_position <= 0) {
-		return;
-	}
-
-	nsoption_set_int(toolbar_status_size,
-			 ((gtk_paned_get_position(g->paned) * 10000) /
-			  max_position));
-}
-
-
-/**
- * Set status bar / scroll bar proportion according to user option
- *   when pane is resized.
- */
-static void nsgtk_paned_notify__max_position(GObject *gobject,
-					     GParamSpec *pspec,
-					     gpointer data)
-{
-	struct gui_window *g = data;
-	int max_position;
-
-	g_object_get(g->paned, "max-position", &max_position, NULL);
-	gtk_paned_set_position(
-		g->paned,
-		(nsoption_int(toolbar_status_size) * max_position) / 10000);
-}
-
-
-/**
  * handler for gtk destroy signal on window container
  *
  * destroy the browsing context as there is will be nothing to display it now
@@ -714,6 +686,7 @@ static void window_destroy(GtkWidget *widget, gpointer data)
 {
 	struct gui_window *gw = data;
 
+	nsgtk_tab_remember_closed(browser_window_access_url(gw->bw));
 	browser_window_destroy(gw->bw);
 
 	g_object_unref(gw->input_method);
@@ -726,6 +699,7 @@ static void window_destroy(GtkWidget *widget, gpointer data)
 		gw->icon = NULL;
 	}
 
+	free(gw->idle_status);
 	free(gw);
 }
 
@@ -856,7 +830,10 @@ static struct gui_window *gui_window_create(struct browser_window *bw,
 		gtk_builder_get_object(tab_builder, "tabContents"));
 	g->status_bar = GTK_LABEL(
 		gtk_builder_get_object(tab_builder, "status_bar"));
-	g->paned = GTK_PANED(gtk_builder_get_object(tab_builder, "hpaned1"));
+	g->hscrollbar = GTK_WIDGET(
+		gtk_builder_get_object(tab_builder, "hscrollbar"));
+	g->vscrollbar = GTK_WIDGET(
+		gtk_builder_get_object(tab_builder, "vscrollbar"));
 	g->hadj = g_object_ref(GTK_ADJUSTMENT(
 		gtk_builder_get_object(tab_builder, "layouthadjustment")));
 	g->vadj = g_object_ref(GTK_ADJUSTMENT(
@@ -936,14 +913,6 @@ static struct gui_window *gui_window_create(struct browser_window *bw,
 	/* scrolling */
 	CONNECT(g->hadj, "value-changed", nsgtk_window_adjustment_changed, g);
 	CONNECT(g->vadj, "value-changed", nsgtk_window_adjustment_changed, g);
-
-	/* status pane signals */
-	CONNECT(g->paned,
-		"notify::max-position",
-		nsgtk_paned_notify__max_position,
-		g);
-
-	CONNECT(g->paned, "notify::position", nsgtk_paned_notify__position, g);
 
 	/* gtk container destructor */
 	CONNECT(g->container, "destroy", window_destroy, g);
@@ -1104,7 +1073,14 @@ static void gui_window_set_status(struct gui_window *g, const char *text)
 {
 	assert(g);
 	assert(g->status_bar);
+	if (text == NULL) {
+		text = "";
+	}
 	gtk_label_set_text(g->status_bar, text);
+	gtk_widget_set_visible(GTK_WIDGET(g->status_bar),
+			       text[0] != '\0' &&
+				       (g->loading || g->idle_status == NULL ||
+					strcmp(text, g->idle_status) != 0));
 }
 
 
@@ -1469,6 +1445,12 @@ static void gui_window_file_gadget_open(struct gui_window *g,
  */
 static nserror throbber(struct gui_window *gw, bool active)
 {
+	gw->loading = active;
+	if (!active) {
+		free(gw->idle_status);
+		gw->idle_status = strdup(gtk_label_get_text(gw->status_bar));
+		gtk_widget_set_visible(GTK_WIDGET(gw->status_bar), false);
+	}
 	nsgtk_toolbar_throbber(gw->toolbar, active);
 	nsgtk_scaffolding_throbber(gw, active);
 	if (active) {

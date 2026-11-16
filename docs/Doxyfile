@@ -799,7 +799,7 @@ INPUT                  = docs \
                          frontends/framebuffer \
                          frontends/framebuffer/fbtk \
                          frontends/gtk \
-                         frontends/monkey \
+                         frontends/headless \
                          frontends/windows \
                          include/netsurfy \
                          desktop \

@@ -4369,16 +4369,74 @@
         }
         return true;
     });
+    var voidElements = /^(area|base|basefont|bgsound|br|col|embed|frame|hr|img|input|keygen|link|meta|param|source|track|wbr)$/;
+    var rawTextElements = /^(style|script|xmp|iframe|noembed|noframes|plaintext|noscript)$/;
+    var htmlNamespace = "http://www.w3.org/1999/xhtml";
+
+    function escapeHtml(text, attribute) {
+        text = text.replace(/&/g, "&amp;").replace(/\u00a0/g, "&nbsp;");
+        return attribute ? text.replace(/"/g, "&quot;") : text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function serializeHtmlChildren(node) {
+        var out = "";
+        var parent = node.nodeType === 1 && node.localName === "template" && node.content ? node.content : node;
+        for (var c = parent.firstChild; c !== null; c = c.nextSibling) {
+            out += serializeHtmlNode(c, node);
+        }
+        return out;
+    }
+
+    function serializeHtmlNode(node, parent) {
+        switch (node.nodeType) {
+        case 1:
+            var html = node.namespaceURI === htmlNamespace || node.namespaceURI === null;
+            var name = html ? node.localName : node.tagName;
+            var s = "<" + name;
+            for (var i = 0; i < node.attributes.length; i++) {
+                var a = node.attributes[i];
+                s += " " + a.name + "=\"" + escapeHtml(a.value, true) + "\"";
+            }
+            s += ">";
+            if (html && voidElements.test(name)) {
+                return s;
+            }
+            return s + serializeHtmlChildren(node) + "</" + name + ">";
+        case 3:
+        case 4:
+            if (parent && parent.nodeType === 1 && rawTextElements.test(parent.localName) &&
+                (parent.namespaceURI === htmlNamespace || parent.namespaceURI === null)) {
+                return node.data;
+            }
+            return escapeHtml(node.data, false);
+        case 7:
+            return "<?" + node.target + " " + node.data + ">";
+        case 8:
+            return "<!--" + node.data + "-->";
+        case 10:
+            return "<!DOCTYPE " + node.name + ">";
+        case 9:
+        case 11:
+            return serializeHtmlChildren(node);
+        }
+        return "";
+    }
+
+    var innerHTMLDescriptor = Object.getOwnPropertyDescriptor(Element.prototype, "innerHTML");
+    defineGetter(Element.prototype, "innerHTML", function () {
+        return serializeHtmlChildren(this);
+    }, innerHTMLDescriptor ? innerHTMLDescriptor.set : undefined);
     defineGetter(Element.prototype, "outerHTML", function () {
-        var holder = document.createElement("div");
-        holder.appendChild(this.cloneNode(true));
-        return holder.innerHTML;
+        return serializeHtmlNode(this, this.parentNode);
     }, function (html) {
         var parent = this.parentNode;
         if (parent === null) {
             return;
         }
-        var holder = document.createElement("div");
+        if (parent.nodeType === 9) {
+            throw domException("Cannot set outerHTML on the document element", "NoModificationAllowedError");
+        }
+        var holder = this.ownerDocument.createElement(parent.nodeType === 1 ? parent.localName : "body");
         holder.innerHTML = String(html);
         while (holder.firstChild) {
             parent.insertBefore(holder.firstChild, this);
@@ -5162,11 +5220,15 @@
         return "";
     }
 
-    if (typeof global.XMLSerializer === "function") {
-        define(global.XMLSerializer.prototype, "serializeToString", function (node) {
-            return serializeNode(requireNode(node));
-        });
+    function XMLSerializer() {
+        if (new.target === undefined) {
+            throw new TypeError("Failed to construct 'XMLSerializer': Please use the 'new' operator.");
+        }
     }
+    define(XMLSerializer.prototype, "serializeToString", function (node) {
+        return serializeNode(requireNode(node));
+    });
+    define(global, "XMLSerializer", XMLSerializer);
 
     function defineEventInterface(name, base, fields) {
         var old = global[name];

@@ -4581,6 +4581,18 @@ fr.gtk.gtkCloseTab:_Fermer l’onglet
 it.gtk.gtkCloseTab:_Chiudi scheda
 nl.gtk.gtkCloseTab:Tabblad _sluiten
 zh_CN.gtk.gtkCloseTab:关闭标签页(_C)
+en.gtk.gtkReopenTab:_Reopen closed tab
+en.gtk.gtkUrlPlaceholder:Search the web or type an address
+de.gtk.gtkUrlPlaceholder:Im Web suchen oder Adresse eingeben
+fr.gtk.gtkUrlPlaceholder:Rechercher sur le Web ou saisir une adresse
+it.gtk.gtkUrlPlaceholder:Cerca nel web o digita un indirizzo
+nl.gtk.gtkUrlPlaceholder:Zoek op het web of typ een adres
+zh_CN.gtk.gtkUrlPlaceholder:搜索网络或输入网址
+de.gtk.gtkReopenTab:Geschlossenen Tab _wiederherstellen
+fr.gtk.gtkReopenTab:_Rouvrir l’onglet fermé
+it.gtk.gtkReopenTab:_Riapri scheda chiusa
+nl.gtk.gtkReopenTab:Gesloten tabblad _heropenen
+zh_CN.gtk.gtkReopenTab:重新打开关闭的标签页(_R)
 
 en.gtk.gtkContents:_Contents…
 de.gtk.gtkContents:_Inhalt

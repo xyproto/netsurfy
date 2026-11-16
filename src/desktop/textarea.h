@@ -188,6 +188,8 @@ void textarea_destroy(struct textarea *ta);
  */
 bool textarea_set_text(struct textarea *ta, const char *text);
 
+bool textarea_set_placeholder(struct textarea *ta, const char *text);
+
 
 /**
  * Insert the text in a text area at the caret, replacing any selection.

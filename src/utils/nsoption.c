@@ -76,8 +76,8 @@ static struct nsoption_s defaults[] = {
 #include "framebuffer/options.h"
 #elif defined(nsatari)
 #include "atari/options.h"
-#elif defined(nsmonkey)
-#include "monkey/options.h"
+#elif defined(nsheadless)
+#include "headless/options.h"
 #elif defined(nswin32)
 #include "windows/options.h"
 #elif defined(nsqt)

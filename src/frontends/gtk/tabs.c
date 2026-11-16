@@ -21,6 +21,7 @@
 
 #include "utils/nsoption.h"
 #include "utils/log.h"
+#include "utils/nsurl.h"
 #include "netsurfy/browser_window.h"
 #include "desktop/search.h"
 
@@ -31,9 +32,14 @@
 #include "gtk/search.h"
 #include "gtk/tabs.h"
 
-#define TAB_WIDTH_N_CHARS 15
+#define TAB_WIDTH_N_CHARS 22
 
 static gint srcpagenum;
+
+#define CLOSED_TAB_MAX 25
+
+static struct nsurl *closed_tabs[CLOSED_TAB_MAX];
+static int closed_tab_count;
 
 /**
  * Remove a page from the notebook it is in.
@@ -102,7 +108,6 @@ static GtkWidget *nsgtk_tab_label_setup(GtkWidget *page,
 	gtk_label_set_single_line_mode(GTK_LABEL(label), TRUE);
 	gtk_label_set_width_chars(GTK_LABEL(label), TAB_WIDTH_N_CHARS);
 	gtk_label_set_max_width_chars(GTK_LABEL(label), TAB_WIDTH_N_CHARS);
-	gtk_widget_set_hexpand(label, TRUE);
 	gtk_label_set_xalign(GTK_LABEL(label), 0.0);
 	nsgtk_widget_set_alignment(label, GTK_ALIGN_START, GTK_ALIGN_CENTER);
 	nsgtk_widget_set_margins(label, 0, 0);
@@ -554,4 +559,54 @@ nserror nsgtk_tab_next(GtkNotebook *notebook)
 	gtk_notebook_set_current_page(notebook, pagen + 1);
 
 	return NSERROR_OK;
+}
+
+nserror nsgtk_tab_select(GtkNotebook *notebook, int index)
+{
+	GtkWidget *addpage = g_object_get_data(G_OBJECT(notebook), "addtab");
+	int pages = gtk_notebook_get_n_pages(notebook);
+
+	if (addpage != NULL &&
+	    gtk_notebook_page_num(notebook, addpage) == pages - 1) {
+		pages--;
+	}
+	if (pages <= 0) {
+		return NSERROR_OK;
+	}
+	if (index < 0 || index >= pages) {
+		index = pages - 1;
+	}
+	gtk_notebook_set_current_page(notebook, index);
+
+	return NSERROR_OK;
+}
+
+void nsgtk_tab_remember_closed(struct nsurl *url)
+{
+	if (url == NULL) {
+		return;
+	}
+	if (closed_tab_count == CLOSED_TAB_MAX) {
+		nsurl_unref(closed_tabs[0]);
+		memmove(closed_tabs,
+			closed_tabs + 1,
+			sizeof(closed_tabs[0]) * (CLOSED_TAB_MAX - 1));
+		closed_tab_count--;
+	}
+	closed_tabs[closed_tab_count++] = nsurl_ref(url);
+}
+
+struct nsurl *nsgtk_tab_take_closed(void)
+{
+	if (closed_tab_count == 0) {
+		return NULL;
+	}
+	return closed_tabs[--closed_tab_count];
+}
+
+void nsgtk_tab_forget_closed(void)
+{
+	while (closed_tab_count > 0) {
+		nsurl_unref(closed_tabs[--closed_tab_count]);
+	}
 }

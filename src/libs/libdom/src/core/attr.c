@@ -591,7 +591,13 @@ dom_exception _dom_attr_set_value(struct dom_attr *attr, dom_string *value)
 	if (err != DOM_NO_ERR)
 		return err;
 
-	err = dom_element_parse_attribute(a->parent, name, value, &parsed);
+	if (a->parent != NULL) {
+		err = dom_element_parse_attribute(
+			a->parent, name, value, &parsed);
+	} else {
+		parsed = dom_string_ref(value);
+		err = DOM_NO_ERR;
+	}
 	dom_string_unref(name);
 	if (err != DOM_NO_ERR) {
 		return err;
