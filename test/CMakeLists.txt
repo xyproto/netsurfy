@@ -1,5 +1,14 @@
 set(SRC ${PROJECT_SOURCE_DIR}/src)
 set(TESTROOT ${CMAKE_CURRENT_BINARY_DIR})
+if(WIN32)
+  message(STATUS "Windows Check tests omit assertion death tests because fork is unavailable")
+  set(dictionary "")
+  foreach(index RANGE 0 16383)
+    string(SHA256 word "netsurfy-${index}")
+    string(APPEND dictionary "${word}\n")
+  endforeach()
+  file(WRITE ${TESTROOT}/words "${dictionary}")
+endif()
 
 set(NSURL_SOURCES
   ${SRC}/utils/nsurl/nsurl.c
@@ -19,7 +28,7 @@ set(hashtable_SRCS ${SRC}/utils/hashtable.c log.c hashtable.c)
 set(hashmap_SRCS ${NSURL_SOURCES} ${SRC}/utils/hashmap.c ${SRC}/utils/corestrings.c
   log.c hashmap.c)
 set(urlescape_SRCS ${SRC}/utils/url.c log.c urlescape.c)
-set(utils_SRCS ${NSURL_SOURCES} ${SRC}/utils/utils.c ${SRC}/utils/messages.c
+set(utils_SRCS ${NSURL_SOURCES} ${SRC}/utils/utils.c ${SRC}/utils/filepath.c ${SRC}/utils/messages.c
   ${SRC}/utils/hashtable.c ${SRC}/utils/corestrings.c log.c utils.c)
 set(time_SRCS ${SRC}/utils/time.c log.c time.c)
 set(mimesniff_SRCS ${NSURL_SOURCES} ${SRC}/utils/hashtable.c ${SRC}/utils/corestrings.c
@@ -28,7 +37,11 @@ set(mimesniff_SRCS ${NSURL_SOURCES} ${SRC}/utils/hashtable.c ${SRC}/utils/corest
   ${SRC}/utils/http/parameter.c ${SRC}/content/mimesniff.c
   log.c mimesniff.c)
 
-add_library(malloc_fig SHARED malloc_fig.c)
+if(WIN32)
+  add_library(malloc_fig STATIC malloc_fig.c)
+else()
+  add_library(malloc_fig SHARED malloc_fig.c)
+endif()
 target_include_directories(malloc_fig PRIVATE ${PROJECT_SOURCE_DIR})
 target_link_libraries(malloc_fig PRIVATE ${CMAKE_DL_LIBS})
 
@@ -58,7 +71,10 @@ foreach(test ${TESTS})
     -Wmissing-declarations -Wuninitialized -Wno-unused-parameter)
   target_link_libraries(test_${test} PRIVATE
     CURL::libcurl libparserutils libwapcaplet libdom libnsutils libutf8proc
-    ZLIB::ZLIB PkgConfig::CHECK)
+    ZLIB::ZLIB PkgConfig::CHECK $<$<PLATFORM_ID:Windows>:ws2_32>)
   add_test(NAME ${test} COMMAND test_${test} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 endforeach()
 target_link_libraries(test_hashmap PRIVATE malloc_fig)
+if(WIN32)
+  target_link_options(test_hashmap PRIVATE -Wl,--wrap=malloc)
+endif()

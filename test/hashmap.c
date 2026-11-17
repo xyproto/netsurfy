@@ -285,7 +285,11 @@ static TCase *basic_api_case_create(void)
 	TCase *tc;
 	tc = tcase_create("Basic API");
 
+#ifdef _WIN32
+	tcase_add_checked_fixture(tc,
+#else
 	tcase_add_unchecked_fixture(tc,
+#endif
 				    basic_fixture_create,
 				    basic_fixture_teardown);
 
@@ -530,7 +534,11 @@ static TCase *chain_case_create(void)
 	TCase *tc;
 	tc = tcase_create("Bucket Chain tests");
 
+#ifdef _WIN32
+	tcase_add_checked_fixture(tc,
+#else
 	tcase_add_unchecked_fixture(tc,
+#endif
 				    chain_fixture_create,
 				    chain_fixture_teardown);
 

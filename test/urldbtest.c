@@ -89,8 +89,12 @@ nserror nslog_set_filter_by_options()
 static char *testnam(char *out)
 {
 	static int count = 0;
-	static char name[64];
-	snprintf(name, 64, "/tmp/urldbtest%d-%d", getpid(), count);
+	static char name[sizeof(TESTROOT) + 64];
+#ifdef _WIN32
+	snprintf(name, sizeof(name), TESTROOT "/urldbtest%d-%d", getpid(), count);
+#else
+	snprintf(name, sizeof(name), "/tmp/urldbtest%d-%d", getpid(), count);
+#endif
 	count++;
 	return name;
 }
@@ -1237,7 +1241,9 @@ static TCase *urldb_api_case_create(void)
 	TCase *tc;
 	tc = tcase_create("API_checks");
 
+#ifndef _WIN32
 	tcase_add_test_raise_signal(tc, urldb_api_add_url_assert_test, 6);
+#endif
 
 	tcase_add_test(tc, urldb_api_url_find_test);
 

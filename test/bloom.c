@@ -32,6 +32,12 @@
 
 #include "utils/bloom.h"
 
+#ifdef _WIN32
+#define TEST_DICTIONARY TESTROOT "/words"
+#else
+#define TEST_DICTIONARY "/usr/share/dict/words"
+#endif
+
 #define BLOOM_SIZE 8192
 #define FALSE_POSITIVE_RATE 15 /* acceptable false positive percentage rate */
 
@@ -52,7 +58,7 @@ static void dict_bloom_create(void)
 	char buf[BUFSIZ];
 	int i;
 
-	dictf = fopen("/usr/share/dict/words", "r");
+	dictf = fopen(TEST_DICTIONARY, "r");
 	ck_assert(dictf != NULL);
 
 	dict_bloom = bloom_create(BLOOM_SIZE);
@@ -136,7 +142,7 @@ START_TEST(bloom_match_test)
 	char buf[BUFSIZ];
 	int i;
 
-	dictf = fopen("/usr/share/dict/words", "r");
+	dictf = fopen(TEST_DICTIONARY, "r");
 	ck_assert(dictf != NULL);
 
 	for (i = 0; i < BLOOM_SIZE; i++) {
@@ -172,7 +178,7 @@ START_TEST(bloom_falsepositive_test)
 	int i;
 	int false_positives = 0;
 
-	dictf = fopen("/usr/share/dict/words", "r");
+	dictf = fopen(TEST_DICTIONARY, "r");
 	ck_assert(dictf != NULL);
 
 	/* skip elements known presnent */

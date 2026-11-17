@@ -32,6 +32,8 @@
 
 #include "utils/string.h"
 #include "utils/corestrings.h"
+#include "utils/filepath.h"
+#include "utils/getline.h"
 
 #define NELEMS(x) (sizeof(x) / sizeof((x)[0]))
 #define SLEN(x) (sizeof((x)) - 1)
@@ -161,7 +163,9 @@ static TCase *squash_whitespace_case_create(void)
 	TCase *tc;
 	tc = tcase_create("Squash whitespace");
 
+#ifndef _WIN32
 	tcase_add_test_raise_signal(tc, squash_whitespace_api_test, 6);
+#endif
 
 	tcase_add_loop_test(tc,
 			    squash_whitespace_test,
@@ -411,11 +415,59 @@ static TCase *snstrjoin_case_create(void)
 /*
  * Utility test suite creation
  */
+START_TEST(getline_test)
+{
+	FILE *stream = tmpfile();
+	char *line = NULL;
+	size_t capacity = 0;
+	char expected[602];
+
+	ck_assert_ptr_nonnull(stream);
+	memset(expected, 'x', 600);
+	expected[600] = '\n';
+	expected[601] = '\0';
+	ck_assert_int_ge(fputs(expected, stream), 0);
+	ck_assert_int_ge(fputs("tail", stream), 0);
+	rewind(stream);
+	ck_assert_int_eq(getline(&line, &capacity, stream), 601);
+	ck_assert_str_eq(line, expected);
+	ck_assert_int_eq(getline(&line, &capacity, stream), 4);
+	ck_assert_str_eq(line, "tail");
+	ck_assert_int_eq(getline(&line, &capacity, stream), -1);
+	ck_assert(feof(stream));
+	free(line);
+	fclose(stream);
+}
+END_TEST
+
+START_TEST(filepath_search_path_test)
+{
+	char **paths;
+
+#ifdef _WIN32
+	paths = filepath_path_to_strvec("C:/Program Files/NetSurfy:D:\\cache:./resources");
+	ck_assert_str_eq(paths[0], "C:/Program Files/NetSurfy");
+	ck_assert_str_eq(paths[1], "D:\\cache");
+#else
+	paths = filepath_path_to_strvec("/usr/share:/opt/data:./resources");
+	ck_assert_str_eq(paths[0], "/usr/share");
+	ck_assert_str_eq(paths[1], "/opt/data");
+#endif
+	ck_assert_str_eq(paths[2], "./resources");
+	ck_assert_ptr_null(paths[3]);
+	filepath_free_strvec(paths);
+}
+END_TEST
+
 static Suite *utils_suite_create(void)
 {
 	Suite *s;
+	TCase *portability = tcase_create("Portability");
 	s = suite_create("Utility API");
 
+	tcase_add_test(portability, getline_test);
+	tcase_add_test(portability, filepath_search_path_test);
+	suite_add_tcase(s, portability);
 	suite_add_tcase(s, human_friendly_bytesize_case_create());
 	suite_add_tcase(s, squash_whitespace_case_create());
 	suite_add_tcase(s, corestrings_case_create());

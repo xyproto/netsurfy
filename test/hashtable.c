@@ -35,6 +35,12 @@
 #include "utils/hashtable.h"
 
 /* Limit for hash table tests which use /usr/share/dict/words */
+#ifdef _WIN32
+#define TEST_DICTIONARY TESTROOT "/words"
+#else
+#define TEST_DICTIONARY "/usr/share/dict/words"
+#endif
+
 #define DICT_TEST_WORD_COUNT 100000
 
 #define NELEMS(x) (sizeof(x) / sizeof((x)[0]))
@@ -98,7 +104,7 @@ static void dict_hashtable_create(int dict_hash_size)
 	char keybuf[BUFSIZ], valbuf[BUFSIZ];
 	uint32_t counter = 0;
 
-	dictf = fopen("/usr/share/dict/words", "r");
+	dictf = fopen(TEST_DICTIONARY, "r");
 	ck_assert(dictf != NULL);
 
 	dict_hash = hash_create(dict_hash_size);
@@ -237,7 +243,7 @@ START_TEST(hashtable_dict_test)
 	const char *res;
 	uint32_t counter = 0;
 
-	dictf = fopen("/usr/share/dict/words", "r");
+	dictf = fopen(TEST_DICTIONARY, "r");
 	ck_assert(dictf != NULL);
 
 	while (!feof(dictf)) {

@@ -1318,7 +1318,9 @@ static TCase *nsurl_utf8_case_create(void)
 static Suite *nsurl_suite(void)
 {
 	Suite *s;
+#ifndef _WIN32
 	TCase *tc_api_assert;
+#endif
 	TCase *tc_create;
 	TCase *tc_access;
 	TCase *tc_nice_nostrip;
@@ -1331,6 +1333,7 @@ static Suite *nsurl_suite(void)
 	s = suite_create("nsurl");
 
 	/* Basic API operation assert checks */
+#ifndef _WIN32
 	tc_api_assert = tcase_create("API asserts");
 
 	tcase_add_unchecked_fixture(tc_api_assert,
@@ -1411,6 +1414,7 @@ static Suite *nsurl_suite(void)
 				    6);
 
 	suite_add_tcase(s, tc_api_assert);
+#endif
 
 	/* url creation */
 	tc_create = tcase_create("Create");

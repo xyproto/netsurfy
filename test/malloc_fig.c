@@ -28,7 +28,9 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <limits.h>
+#ifndef _WIN32
 #include <dlfcn.h>
+#endif
 
 #include "test/malloc_fig.h"
 
@@ -40,14 +42,26 @@ void malloc_limit(unsigned int newcount)
 	// fprintf(stderr, "malloc_limit %d\n", count);
 }
 
+#ifdef _WIN32
+void *__real_malloc(size_t size);
+
+void *__wrap_malloc(size_t size)
+#else
 void *malloc(size_t size)
+#endif
 {
+#ifdef _WIN32
+	void *(*real_malloc)(size_t) = __real_malloc;
+#else
 	static void *(*real_malloc)(size_t) = NULL;
+#endif
 	void *p = NULL;
 
+#ifndef _WIN32
 	if (real_malloc == NULL) {
 		real_malloc = dlsym(RTLD_NEXT, "malloc");
 	}
+#endif
 
 	if (count > 0) {
 		p = real_malloc(size);
