@@ -122,7 +122,8 @@ const char *rfc1123_date(time_t t)
 	struct tm utc = {0};
 	struct tm *tm = &utc;
 
-	if (t < -epoch_offset || t > INT64_MAX / ticks_per_second - epoch_offset) {
+	if (t < -epoch_offset ||
+	    t > INT64_MAX / ticks_per_second - epoch_offset) {
 		errno = ERANGE;
 		return NULL;
 	}

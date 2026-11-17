@@ -290,8 +290,8 @@ static TCase *basic_api_case_create(void)
 #else
 	tcase_add_unchecked_fixture(tc,
 #endif
-				    basic_fixture_create,
-				    basic_fixture_teardown);
+				  basic_fixture_create,
+				  basic_fixture_teardown);
 
 	tcase_add_test(tc, empty_hashmap_create_destroy);
 	tcase_add_test(tc, check_not_present);
@@ -539,8 +539,8 @@ static TCase *chain_case_create(void)
 #else
 	tcase_add_unchecked_fixture(tc,
 #endif
-				    chain_fixture_create,
-				    chain_fixture_teardown);
+				  chain_fixture_create,
+				  chain_fixture_teardown);
 
 	tcase_add_test(tc, chain_add_remove_all);
 	tcase_add_test(tc, chain_add_all_remove_all);

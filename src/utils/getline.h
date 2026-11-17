@@ -16,8 +16,9 @@ static inline ssize_t getline(char **line, size_t *capacity, FILE *stream)
 
 	while ((ch = fgetc(stream)) != EOF) {
 		if (*line == NULL || length + 1 >= *capacity) {
-			size_t size = *line == NULL || *capacity < 128 ?
-				      128 : *capacity * 2;
+			size_t size = *line == NULL || *capacity < 128
+					      ? 128
+					      : *capacity * 2;
 			char *buffer;
 
 			if (size <= length + 1 || size > (size_t)PTRDIFF_MAX) {

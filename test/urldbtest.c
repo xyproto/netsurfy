@@ -91,7 +91,11 @@ static char *testnam(char *out)
 	static int count = 0;
 	static char name[sizeof(TESTROOT) + 64];
 #ifdef _WIN32
-	snprintf(name, sizeof(name), TESTROOT "/urldbtest%d-%d", getpid(), count);
+	snprintf(name,
+		 sizeof(name),
+		 TESTROOT "/urldbtest%d-%d",
+		 getpid(),
+		 count);
 #else
 	snprintf(name, sizeof(name), "/tmp/urldbtest%d-%d", getpid(), count);
 #endif

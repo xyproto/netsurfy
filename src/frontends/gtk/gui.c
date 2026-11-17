@@ -363,16 +363,19 @@ check_dirname(const char *path, const char *leaf, char **dirname_out)
  * @return NSERROR_OK on sucess and \a config_home_out updated else error code.
  */
 #ifdef _WIN32
-static nserror nsgtk_user_directory(const char *base, bool create,
-				  char **directory_out)
+static nserror
+nsgtk_user_directory(const char *base, bool create, char **directory_out)
 {
 	char *path = g_build_filename(base, "netsurfy", NULL);
 	nserror ret;
 
 	g_strdelimit(path, "\\", '/');
 	if (create && g_mkdir_with_parents(path, 0700) != 0) {
-		NSLOG(netsurfy, ERROR, "Unable to create %s: %s",
-		      path, strerror(errno));
+		NSLOG(netsurfy,
+		      ERROR,
+		      "Unable to create %s: %s",
+		      path,
+		      strerror(errno));
 		g_free(path);
 		return NSERROR_PERMISSION;
 	}
@@ -385,7 +388,9 @@ static nserror nsgtk_user_directory(const char *base, bool create,
 static nserror get_config_home(char **config_home_out)
 {
 #ifdef _WIN32
-	return nsgtk_user_directory(g_get_user_config_dir(), false, config_home_out);
+	return nsgtk_user_directory(g_get_user_config_dir(),
+				    false,
+				    config_home_out);
 #else
 	nserror ret;
 	char *home_dir;
@@ -451,7 +456,9 @@ static nserror get_config_home(char **config_home_out)
 static nserror create_config_home(char **config_home_out)
 {
 #ifdef _WIN32
-	return nsgtk_user_directory(g_get_user_config_dir(), true, config_home_out);
+	return nsgtk_user_directory(g_get_user_config_dir(),
+				    true,
+				    config_home_out);
 #else
 	char *config_home = NULL;
 	char *home_dir;
@@ -771,7 +778,9 @@ static nserror nsgtk_messages_init(char **respaths)
 static nserror get_cache_home(char **cache_home_out)
 {
 #ifdef _WIN32
-	return nsgtk_user_directory(g_get_user_cache_dir(), false, cache_home_out);
+	return nsgtk_user_directory(g_get_user_cache_dir(),
+				    false,
+				    cache_home_out);
 #else
 	nserror ret;
 	char *xdg_cache_dir;
@@ -821,7 +830,9 @@ static nserror get_cache_home(char **cache_home_out)
 static nserror create_cache_home(char **cache_home_out)
 {
 #ifdef _WIN32
-	return nsgtk_user_directory(g_get_user_cache_dir(), true, cache_home_out);
+	return nsgtk_user_directory(g_get_user_cache_dir(),
+				    true,
+				    cache_home_out);
 #else
 	char *cache_home = NULL;
 	char *home_dir;

@@ -476,7 +476,8 @@ char *realpath(const char *path, char *resolved_path)
 {
 	char *ret;
 #ifdef _WIN32
-	ret = _fullpath(resolved_path, path,
+	ret = _fullpath(resolved_path,
+			path,
 			resolved_path == NULL ? 0 : PATH_MAX);
 	if (ret == NULL) {
 		return NULL;

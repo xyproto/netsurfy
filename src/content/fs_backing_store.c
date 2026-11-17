@@ -803,7 +803,9 @@ static nserror write_blocks(struct store_state *state)
 		return ret;
 	}
 
-	fd = open(tname, O_RDWR | O_CREAT | O_TRUNC | O_BINARY, S_IRUSR | S_IWUSR);
+	fd = open(tname,
+		  O_RDWR | O_CREAT | O_TRUNC | O_BINARY,
+		  S_IRUSR | S_IWUSR);
 	if (fd == -1) {
 		free(tname);
 		return NSERROR_SAVE_FAILED;

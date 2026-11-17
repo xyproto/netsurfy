@@ -19,7 +19,7 @@
 #if defined(_WIN32)
 #include <windows.h>
 #elif (defined(_POSIX_TIMERS) && (_POSIX_TIMERS > 0) &&                        \
-     (defined _POSIX_MONOTONIC_CLOCK)) ||                                      \
+       (defined _POSIX_MONOTONIC_CLOCK)) ||                                    \
 	defined(__OpenBSD__)
 #include <time.h>
 #elif defined(__riscos)
@@ -48,7 +48,7 @@ nsuerror nsu_getmonotonic_ms(uint64_t *current_out)
 #if defined(_WIN32)
 	current = GetTickCount64();
 #elif (defined(_POSIX_TIMERS) && (_POSIX_TIMERS > 0) &&                        \
-     (defined _POSIX_MONOTONIC_CLOCK)) ||                                      \
+       (defined _POSIX_MONOTONIC_CLOCK)) ||                                    \
 	defined(__OpenBSD__)
 	struct timespec tp;
 

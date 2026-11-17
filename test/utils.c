@@ -445,7 +445,8 @@ START_TEST(filepath_search_path_test)
 	char **paths;
 
 #ifdef _WIN32
-	paths = filepath_path_to_strvec("C:/Program Files/NetSurfy:D:\\cache:./resources");
+	paths = filepath_path_to_strvec(
+		"C:/Program Files/NetSurfy:D:\\cache:./resources");
 	ck_assert_str_eq(paths[0], "C:/Program Files/NetSurfy");
 	ck_assert_str_eq(paths[1], "D:\\cache");
 #else
