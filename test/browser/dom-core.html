@@ -201,6 +201,24 @@ test("template content", function () {
     document.body.lastChild.remove();
     document.body.lastChild.remove();
 });
+test("innerHTML on raw text elements", function () {
+    var s = document.createElement("script");
+    s.type = "text/plain";
+    s.innerHTML = "for (i = 0; i<n; i++) a = b>c;";
+    assertEquals(s.textContent, "for (i = 0; i<n; i++) a = b>c;");
+    var st = document.createElement("style");
+    st.innerHTML = "a > b { color: red }";
+    assertEquals(st.textContent, "a > b { color: red }");
+});
+test("EventTarget is constructible and dispatches to itself", function () {
+    class Bus extends EventTarget {}
+    var b = new Bus();
+    var got = null;
+    b.addEventListener("x", function (e) { got = e.type; });
+    assert(b.dispatchEvent(new Event("x")));
+    assertEquals(got, "x");
+    assert(new EventTarget() instanceof EventTarget);
+});
 test("meta httpEquiv", function () {
     var m = document.createElement("meta");
     m.httpEquiv = "refresh";

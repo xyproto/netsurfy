@@ -1476,9 +1476,9 @@ static void qjsky_run_listeners(JSContext *ctx,
 
 bool qjsky_dispatch_window_event(JSContext *ctx,
 				 struct dom_event *evt,
+				 JSValueConst target,
 				 JSValueConst event)
 {
-	jsthread *thread = qjsky_thread(ctx);
 	dom_string *name = NULL;
 	bool prevented = false;
 	JSValue type, handler;
@@ -1487,7 +1487,7 @@ bool qjsky_dispatch_window_event(JSContext *ctx,
 		return true;
 	}
 	type = qjsky_string(ctx, name);
-	handler = qjsky_get_event_handler(ctx, thread->global, name, NULL);
+	handler = qjsky_get_event_handler(ctx, target, name, NULL);
 	dom_string_unref(name);
 	if (JS_IsException(type) || JS_IsException(handler)) {
 		JS_FreeValue(ctx, JS_GetException(ctx));
@@ -1496,15 +1496,14 @@ bool qjsky_dispatch_window_event(JSContext *ctx,
 		return true;
 	}
 	if (JS_IsFunction(ctx, handler)) {
-		JSValue ret = qjsky_call(
-			ctx, handler, thread->global, 1, &event, true);
+		JSValue ret = qjsky_call(ctx, handler, target, 1, &event, true);
 		if (JS_IsBool(ret) && !JS_ToBool(ctx, ret)) {
 			(void)dom_event_prevent_default(evt);
 		}
 		JS_FreeValue(ctx, ret);
 	}
 	JS_FreeValue(ctx, handler);
-	qjsky_run_listeners(ctx, thread->global, type, event, DOM_AT_TARGET);
+	qjsky_run_listeners(ctx, target, type, event, DOM_AT_TARGET);
 	JS_FreeValue(ctx, type);
 	(void)dom_event_is_default_prevented(evt, &prevented);
 	return !prevented;

@@ -119,6 +119,12 @@ init EventTarget()
 	priv->bubbling_registered = false;
 %}
 
+constructor EventTarget()
+%{
+	JSValue obj = qjsky_event_target___create(ctx);
+	return qjsky_constructed(ctx, obj, new_target);
+%}
+
 method EventTarget::addEventListener()
 %{
 	event_listener_flags flags;
@@ -188,7 +194,7 @@ method EventTarget::dispatchEvent()
 	bool success;
 	qjsky_event_bind(ctx, evt, argv[0]);
 	if (priv->is_node == false) {
-		return JS_NewBool(ctx, qjsky_dispatch_window_event(ctx, evt, argv[0]));
+		return JS_NewBool(ctx, qjsky_dispatch_window_event(ctx, evt, this_val, argv[0]));
 	}
 	exc = dom_event_target_dispatch_event(
 		((node_private_t *)priv)->node,

@@ -77,6 +77,19 @@ dialog.addEventListener("close", function () {
 });
 dialog.showModal();
 dialog.close("ok");
+test("performance marks and measures", function () {
+    var a = performance.mark("a");
+    performance.mark("b");
+    var m = performance.measure("ab", "a", "b");
+    assertEquals(a.entryType, "mark");
+    assertEquals(m.entryType, "measure");
+    assert(m.duration >= 0);
+    assertEquals(performance.getEntriesByName("ab").length, 1);
+    assertEquals(performance.getEntriesByType("mark").length, 2);
+    performance.clearMarks("a");
+    assertEquals(performance.getEntriesByType("mark").length, 1);
+    assert(PerformanceObserver.supportedEntryTypes.indexOf("mark") >= 0);
+});
 var blobUrl = URL.createObjectURL(new Blob(["blob text"], { type: "text/plain" }));
 fetch(blobUrl).then(function (r) {
     return r.text().then(function (t) {

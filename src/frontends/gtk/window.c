@@ -1270,10 +1270,17 @@ static void gui_window_place_caret(struct gui_window *g,
 	if (root != NULL) {
 		focus = gtk_root_get_focus(root);
 	}
-	if (focus == NULL || !GTK_IS_EDITABLE(focus) ||
-	    gtk_widget_is_ancestor(focus, g->layout)) {
-		gtk_widget_grab_focus(g->layout);
+	if (focus != NULL && GTK_IS_EDITABLE(focus) &&
+	    !gtk_widget_is_ancestor(focus, g->layout)) {
+		nsurl *url = browser_window_access_url(g->bw);
+		const char *text = gtk_editable_get_text(GTK_EDITABLE(focus));
+
+		if (url == NULL || text == NULL ||
+		    strcmp(text, nsurl_access(url)) != 0) {
+			return;
+		}
 	}
+	gtk_widget_grab_focus(g->layout);
 }
 
 

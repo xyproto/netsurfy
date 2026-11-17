@@ -4505,6 +4505,11 @@
     defineGetter(Element.prototype, "innerHTML", function () {
         return serializeHtmlChildren(this);
     }, nativeInnerHTMLSet === undefined ? undefined : function (html) {
+        if (this.nodeType === 1 && (this.namespaceURI === htmlNamespace || this.namespaceURI === null) &&
+            /^(script|style|xmp|iframe|noembed|noframes|plaintext)$/.test(this.localName)) {
+            this.textContent = html === null ? "" : String(html);
+            return;
+        }
         if (!isTemplate(this)) {
             nativeInnerHTMLSet.call(this, html);
             return;
@@ -5959,6 +5964,161 @@
     define(File.prototype, Symbol.toStringTag, "File");
     defineMissing(global, "Blob", Blob);
     defineMissing(global, "File", File);
+
+    var perfEntries = [];
+    var perfObservers = [];
+
+    function PerformanceEntry(name, type, start, duration, detail) {
+        define(this, "name", String(name));
+        define(this, "entryType", type);
+        define(this, "startTime", start);
+        define(this, "duration", duration);
+        define(this, "detail", detail === undefined ? null : detail);
+    }
+    define(PerformanceEntry.prototype, "toJSON", function () {
+        return { name: this.name, entryType: this.entryType, startTime: this.startTime, duration: this.duration };
+    });
+
+    function perfRecord(entry) {
+        perfEntries.push(entry);
+        perfObservers.forEach(function (o) {
+            if (o._types.indexOf(entry.entryType) >= 0) {
+                o._buffer.push(entry);
+                if (!o._queued) {
+                    o._queued = true;
+                    queueMicrotask(function () {
+                        o._queued = false;
+                        var list = o._buffer;
+                        o._buffer = [];
+                        if (list.length > 0) {
+                            o._callback({
+                                getEntries: function () { return list.slice(); },
+                                getEntriesByType: function (t) { return list.filter(function (e) { return e.entryType === t; }); },
+                                getEntriesByName: function (n, t) { return list.filter(function (e) { return e.name === n && (t === undefined || e.entryType === t); }); }
+                            }, o);
+                        }
+                    });
+                }
+            }
+        });
+        return entry;
+    }
+
+    function perfTime(value) {
+        if (typeof value === "number") {
+            return value;
+        }
+        if (typeof value === "string") {
+            for (var i = perfEntries.length - 1; i >= 0; i--) {
+                if (perfEntries[i].entryType === "mark" && perfEntries[i].name === value) {
+                    return perfEntries[i].startTime;
+                }
+            }
+            throw domException("The mark '" + value + "' does not exist.", "SyntaxError");
+        }
+        return undefined;
+    }
+
+    if (typeof performance === "object" && performance !== null) {
+        defineMissing(performance, "mark", function (name, options) {
+            var start = options && options.startTime !== undefined ? Number(options.startTime) : performance.now();
+            return perfRecord(new PerformanceEntry(name, "mark", start, 0, options && options.detail));
+        });
+        defineMissing(performance, "measure", function (name, startOrOptions, endMark) {
+            var start = 0, end = performance.now(), detail;
+            if (startOrOptions !== null && typeof startOrOptions === "object") {
+                detail = startOrOptions.detail;
+                if (startOrOptions.start !== undefined) {
+                    start = perfTime(startOrOptions.start);
+                }
+                if (startOrOptions.end !== undefined) {
+                    end = perfTime(startOrOptions.end);
+                } else if (startOrOptions.duration !== undefined) {
+                    end = start + Number(startOrOptions.duration);
+                }
+            } else {
+                if (startOrOptions !== undefined) {
+                    start = perfTime(startOrOptions);
+                }
+                if (endMark !== undefined) {
+                    end = perfTime(endMark);
+                }
+            }
+            return perfRecord(new PerformanceEntry(name, "measure", start, end - start, detail));
+        });
+        defineMissing(performance, "getEntries", function () {
+            return perfEntries.slice();
+        });
+        defineMissing(performance, "getEntriesByType", function (type) {
+            return perfEntries.filter(function (e) { return e.entryType === type; });
+        });
+        defineMissing(performance, "getEntriesByName", function (name, type) {
+            return perfEntries.filter(function (e) {
+                return e.name === name && (type === undefined || e.entryType === type);
+            });
+        });
+        ["Marks", "Measures"].forEach(function (kind) {
+            var type = kind === "Marks" ? "mark" : "measure";
+            defineMissing(performance, "clear" + kind, function (name) {
+                perfEntries = perfEntries.filter(function (e) {
+                    return e.entryType !== type || (name !== undefined && e.name !== name);
+                });
+            });
+        });
+        defineMissing(performance, "clearResourceTimings", function () {
+        });
+        defineMissing(performance, "setResourceTimingBufferSize", function () {
+        });
+        defineMissing(performance, "toJSON", function () {
+            return { timeOrigin: performance.timeOrigin };
+        });
+    }
+
+    function PerformanceObserver(callback) {
+        if (!new.target) {
+            throw new TypeError("Constructor PerformanceObserver requires 'new'");
+        }
+        if (typeof callback !== "function") {
+            throw new TypeError("Failed to construct 'PerformanceObserver': parameter 1 is not a function.");
+        }
+        define(this, "_callback", callback);
+        define(this, "_types", []);
+        define(this, "_buffer", []);
+        define(this, "_queued", false);
+    }
+    define(PerformanceObserver.prototype, "observe", function (options) {
+        var types = options && options.entryTypes ? options.entryTypes : options && options.type ? [options.type] : [];
+        var self = this;
+        types.forEach(function (t) {
+            if (self._types.indexOf(t) < 0) {
+                self._types.push(t);
+            }
+        });
+        if (perfObservers.indexOf(this) < 0) {
+            perfObservers.push(this);
+        }
+        if (options && options.buffered) {
+            perfEntries.forEach(function (e) {
+                if (self._types.indexOf(e.entryType) >= 0) {
+                    self._buffer.push(e);
+                }
+            });
+        }
+    });
+    define(PerformanceObserver.prototype, "disconnect", function () {
+        var i = perfObservers.indexOf(this);
+        if (i >= 0) {
+            perfObservers.splice(i, 1);
+        }
+    });
+    define(PerformanceObserver.prototype, "takeRecords", function () {
+        var list = this._buffer;
+        this._buffer = [];
+        return list;
+    });
+    define(PerformanceObserver, "supportedEntryTypes", Object.freeze(["mark", "measure"]));
+    defineMissing(global, "PerformanceObserver", PerformanceObserver);
+    defineMissing(global, "PerformanceEntry", PerformanceEntry);
 
     var importMap = { imports: {}, scopes: {} };
     var moduleTexts = new Map();

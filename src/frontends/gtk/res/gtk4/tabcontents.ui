@@ -79,7 +79,8 @@
             <property name="halign">end</property>
             <property name="valign">fill</property>
             <property name="visible">False</property>
-            <property name="css_classes">nsgtk-scrollbar</property>
+            <property name="css_classes">nsgtk-scrollbar
+nsgtk-vscrollbar</property>
           </object>
         </child>
         <child type="overlay">
@@ -89,7 +90,8 @@
             <property name="halign">fill</property>
             <property name="valign">end</property>
             <property name="visible">False</property>
-            <property name="css_classes">nsgtk-scrollbar</property>
+            <property name="css_classes">nsgtk-scrollbar
+nsgtk-hscrollbar</property>
           </object>
         </child>
         <child type="overlay">

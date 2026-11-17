@@ -909,12 +909,14 @@ static void nsgtk_init_style(void)
 		"}"
 		".nsgtk-scrollbar { background: none; border: none; }"
 		".nsgtk-scrollbar slider {"
-		" min-width: 7px;"
-		" min-height: 7px;"
-		" border-radius: 4px;"
+		" min-width: 10px;"
+		" min-height: 10px;"
+		" border-radius: 5px;"
 		" margin: 2px;"
 		" background-color: alpha(@theme_fg_color, 0.35);"
 		"}"
+		".nsgtk-vscrollbar slider { min-height: 48px; }"
+		".nsgtk-hscrollbar slider { min-width: 48px; }"
 		".nsgtk-scrollbar slider:hover { background-color: alpha(@theme_fg_color, 0.55); }";
 	GdkDisplay *display = gdk_display_get_default();
 	GtkCssProvider *provider;
