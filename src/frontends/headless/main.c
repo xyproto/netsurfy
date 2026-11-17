@@ -49,6 +49,8 @@
 #include "headless/schedule.h"
 #include "headless/bitmap.h"
 #include "headless/layout.h"
+#include "headless/duck.h"
+#include "desktop/version.h"
 
 /** maximum number of languages in language vector */
 #define LANGV_SIZE 32
@@ -59,6 +61,61 @@
 char **respaths;
 
 static bool headless_done = false;
+
+static const char headless_usage[] =
+	"Usage: netsurfy-headless [OPTION]... [--duck QUERY...]\n"
+	"\n"
+	"Without --duck, commands such as \"WINDOW NEW <url>\" are read from\n"
+	"standard input and events are written to standard output.\n"
+	"\n"
+	"  --duck QUERY...   search DuckDuckGo and print the results as JSON;\n"
+	"                    exits with 2 if DuckDuckGo blocks the search\n"
+	"  --NAME=VALUE      set a NetSurfy option, like --enable_javascript=0\n"
+	"  -v                write the log to standard error\n"
+	"  --help            show this help and exit\n"
+	"  --version         show the version and exit\n";
+
+static char *headless_args(int *argc, char **argv)
+{
+	char *query = NULL;
+	size_t len = 0;
+
+	for (int i = 1; i < *argc; i++) {
+		if (strcmp(argv[i], "--help") == 0) {
+			fputs(headless_usage, stdout);
+			exit(EXIT_SUCCESS);
+		}
+		if (strcmp(argv[i], "--version") == 0) {
+			printf("NetSurfy %s\n", netsurfy_version);
+			exit(EXIT_SUCCESS);
+		}
+		if (strcmp(argv[i], "--duck") != 0) {
+			continue;
+		}
+		for (int j = i + 1; j < *argc; j++) {
+			len += strlen(argv[j]) + 1;
+		}
+		query = calloc(1, len + 1);
+		if (query == NULL) {
+			exit(EXIT_FAILURE);
+		}
+		for (int j = i + 1; j < *argc; j++) {
+			if (j > i + 1) {
+				strcat(query, " ");
+			}
+			strcat(query, argv[j]);
+		}
+		*argc = i;
+		argv[i] = NULL;
+		if (query[0] == '\0') {
+			fputs("netsurfy-headless: --duck needs a search query\n",
+			      stderr);
+			exit(EXIT_FAILURE);
+		}
+		break;
+	}
+	return query;
+}
 
 /**
  * Cause an abnormal program termination.
@@ -283,7 +340,7 @@ static void headless_run(void)
 	struct timeval tv;
 	struct timeval *timeout;
 
-	while (!headless_done) {
+	while (!headless_done && !headless_duck_done()) {
 
 		/* discover the next scheduled event time */
 		schedtm = headless_schedule_run();
@@ -295,8 +352,10 @@ static void headless_run(void)
 		if (max_fd < 0) {
 			max_fd = 0;
 		}
-		FD_SET(0, &read_fd_set);
-		FD_SET(0, &exc_fd_set);
+		if (!headless_duck_active()) {
+			FD_SET(0, &read_fd_set);
+			FD_SET(0, &exc_fd_set);
+		}
 
 		/* setup timeout */
 		switch (schedtm) {
@@ -402,6 +461,7 @@ int main(int argc, char **argv)
 	char *messages;
 	char *options;
 	char buf[PATH_MAX];
+	char *query;
 	nserror ret;
 	struct netsurfy_table headless_table = {
 		.misc = &headless_misc_table,
@@ -421,6 +481,9 @@ int main(int argc, char **argv)
 	/* It's unlikely, but SIGBUS could happen on some platforms */
 	signal(SIGBUS, signal_handler);
 #endif
+
+	query = headless_args(&argc, argv);
+	headless_quiet = query != NULL;
 
 	ret = netsurfy_register(&headless_table);
 	if (ret != NSERROR_OK) {
@@ -501,6 +564,13 @@ int main(int argc, char **argv)
 
 
 	moutf(MOUT_GENERIC, "STARTED");
+	if (query != NULL) {
+		ret = headless_duck_start(query);
+		free(query);
+		if (ret != NSERROR_OK) {
+			die("DuckDuckGo search failed to start");
+		}
+	}
 	headless_run();
 
 	moutf(MOUT_GENERIC, "CLOSING_DOWN");
@@ -518,5 +588,5 @@ int main(int argc, char **argv)
 	/* And free any headless-specific bits */
 	headless_free_handlers();
 
-	return 0;
+	return headless_duck_status();
 }

@@ -19,6 +19,8 @@
 #ifndef NS_HEADLESS_OUTPUT_H
 #define NS_HEADLESS_OUTPUT_H
 
+#include <stdbool.h>
+
 enum headless_output_type {
 	MOUT_DIE,
 	MOUT_ERROR,
@@ -29,6 +31,8 @@ enum headless_output_type {
 	MOUT_DOWNLOAD,
 	MOUT_PLOT,
 };
+
+extern bool headless_quiet;
 
 int moutf(enum headless_output_type mout_type, const char *fmt, ...);
 

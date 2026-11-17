@@ -35,6 +35,7 @@
 #include "headless/output.h"
 #include "headless/browser.h"
 #include "headless/plot.h"
+#include "headless/duck.h"
 
 static uint32_t win_ctr = 0;
 
@@ -151,11 +152,13 @@ gui_window_set_icon(struct gui_window *g, struct hlcache_handle *icon)
 static void gui_window_start_throbber(struct gui_window *g)
 {
 	moutf(MOUT_WINDOW, "START_THROBBER WIN %u", g->win_num);
+	headless_duck_loading();
 }
 
 static void gui_window_stop_throbber(struct gui_window *g)
 {
 	moutf(MOUT_WINDOW, "STOP_THROBBER WIN %u", g->win_num);
+	headless_duck_loaded(g);
 }
 
 
@@ -378,6 +381,10 @@ static void gui_window_console_log(struct gui_window *g,
 	bool foldable = !!(flags & BW_CS_FLAG_FOLDABLE);
 	const char *src_text;
 	const char *level_text;
+
+	if (headless_duck_console(msg, msglen)) {
+		return;
+	}
 
 	switch (src) {
 	case BW_CS_INPUT:

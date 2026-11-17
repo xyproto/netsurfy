@@ -16,6 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdarg.h>
 
@@ -36,18 +37,28 @@ static const char *type_text[] = {
 };
 
 /* exported interface documented in headless/output.h */
+bool headless_quiet = false;
+
 int moutf(enum headless_output_type mout_type, const char *fmt, ...)
 {
+	FILE *out = stdout;
 	va_list ap;
 	int res;
 
-	res = fprintf(stdout, "%s ", type_text[mout_type]);
+	if (headless_quiet) {
+		if (mout_type != MOUT_DIE) {
+			return 0;
+		}
+		out = stderr;
+	}
+
+	res = fprintf(out, "%s ", type_text[mout_type]);
 
 	va_start(ap, fmt);
-	res += vfprintf(stdout, fmt, ap);
+	res += vfprintf(out, fmt, ap);
 	va_end(ap);
 
-	fputc('\n', stdout);
+	fputc('\n', out);
 
 	return res + 1;
 }
