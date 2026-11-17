@@ -21,6 +21,7 @@
  */
 
 #include <assert.h>
+#include <limits.h>
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
@@ -474,6 +475,24 @@ int uname(struct utsname *buf)
 char *realpath(const char *path, char *resolved_path)
 {
 	char *ret;
+#ifdef _WIN32
+	ret = _fullpath(resolved_path, path,
+			resolved_path == NULL ? 0 : PATH_MAX);
+	if (ret == NULL) {
+		return NULL;
+	}
+	if (access(ret, F_OK) != 0) {
+		if (resolved_path == NULL) {
+			free(ret);
+		}
+		return NULL;
+	}
+	for (char *p = ret; *p != '\0'; p++) {
+		if (*p == '\\') {
+			*p = '/';
+		}
+	}
+#else
 	if (resolved_path == NULL) {
 		ret = strdup(path);
 	} else {
@@ -481,6 +500,7 @@ char *realpath(const char *path, char *resolved_path)
 		strncpy(resolved_path, path, PATH_MAX - 1);
 		resolved_path[PATH_MAX - 1] = '\0';
 	}
+#endif
 	return ret;
 }
 

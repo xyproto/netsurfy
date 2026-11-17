@@ -43,6 +43,10 @@
 #include <stdlib.h>
 #include <nsutils/unistd.h>
 
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
 #include "netsurfy/inttypes.h"
 #include "utils/filepath.h"
 #include "utils/file.h"
@@ -728,7 +732,7 @@ static nserror write_entries(struct store_state *state)
 	}
 
 	weistate.fd = open(tname,
-			   O_RDWR | O_CREAT | O_TRUNC,
+			   O_RDWR | O_CREAT | O_TRUNC | O_BINARY,
 			   S_IRUSR | S_IWUSR);
 	if (weistate.fd == -1) {
 		free(tname);
@@ -799,7 +803,7 @@ static nserror write_blocks(struct store_state *state)
 		return ret;
 	}
 
-	fd = open(tname, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+	fd = open(tname, O_RDWR | O_CREAT | O_TRUNC | O_BINARY, S_IRUSR | S_IWUSR);
 	if (fd == -1) {
 		free(tname);
 		return NSERROR_SAVE_FAILED;
@@ -1119,7 +1123,7 @@ static int store_open(struct store_state *state,
 	}
 
 	NSLOG(netsurfy, DEBUG, "opening %s", fname);
-	fd = open(fname, openflags, S_IRUSR | S_IWUSR);
+	fd = open(fname, openflags | O_BINARY, S_IRUSR | S_IWUSR);
 
 	free(fname);
 
@@ -1176,7 +1180,7 @@ static nserror read_entries(struct store_state *state)
 		return NSERROR_NOMEM;
 	}
 
-	fd = open(fname, O_RDWR);
+	fd = open(fname, O_RDWR | O_BINARY);
 	if (fd != -1) {
 		uint32_t urllen;
 		while (read(fd, &urllen, sizeof(urllen)) == sizeof(urllen)) {
@@ -1269,7 +1273,7 @@ static nserror read_blocks(struct store_state *state)
 
 	NSLOG(netsurfy, INFO, "Initialising block use map from %s", fname);
 
-	fd = open(fname, O_RDWR);
+	fd = open(fname, O_RDWR | O_BINARY);
 	free(fname);
 	if (fd != -1) {
 		/* initialise block file use array */

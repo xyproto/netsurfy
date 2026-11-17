@@ -325,6 +325,12 @@ char **filepath_path_to_strvec(const char *path)
 	estart = eend = path;
 
 	while (strc < (MAX_RESPATH - 2)) {
+#ifdef _WIN32
+		if (eend[0] != '\0' && eend[1] == ':' &&
+		    (eend[2] == '/' || eend[2] == '\\')) {
+			eend += 2;
+		}
+#endif
 		while ((*eend != 0) && (*eend != ':'))
 			eend++;
 		elen = eend - estart;

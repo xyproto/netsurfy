@@ -71,6 +71,8 @@ void gtk_fetch_filetype_init(const char *mimefile)
 	 */
 
 	hash_add(mime_hash, "css", "text/css");
+	hash_add(mime_hash, "js", "application/javascript");
+	hash_add(mime_hash, "mjs", "application/javascript");
 	hash_add(mime_hash, "htm", "text/html");
 	hash_add(mime_hash, "html", "text/html");
 	hash_add(mime_hash, "jpg", "image/jpeg");
@@ -83,6 +85,8 @@ void gtk_fetch_filetype_init(const char *mimefile)
 	hash_add(mime_hash, "webp", "image/webp");
 	hash_add(mime_hash, "spr", "image/x-riscos-sprite");
 	hash_add(mime_hash, "bmp", "image/bmp");
+	hash_add(mime_hash, "ico", "image/x-icon");
+	hash_add(mime_hash, "svg", "image/svg+xml");
 
 	/* first, check to see if /etc/mime.types in preference */
 	if ((stat("/etc/mime.types", &statbuf) == 0) &&

@@ -35,7 +35,8 @@ static char *genb_fpath_tmp(const char *fname)
 	char *fpath;
 	int fpathl;
 
-	fpathl = strlen(options->outdirname) + strlen(fname) + 3;
+	fpathl = snprintf(NULL, 0, "%s/%s.%d",
+			 options->outdirname, fname, getpid()) + 1;
 	fpath = malloc(fpathl);
 	snprintf(fpath,
 		 fpathl,

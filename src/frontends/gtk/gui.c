@@ -24,6 +24,7 @@
  */
 
 #include <assert.h>
+#include <errno.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -361,8 +362,31 @@ check_dirname(const char *path, const char *leaf, char **dirname_out)
  * @param config_home_out Path to configuration directory.
  * @return NSERROR_OK on sucess and \a config_home_out updated else error code.
  */
+#ifdef _WIN32
+static nserror nsgtk_user_directory(const char *base, bool create,
+				  char **directory_out)
+{
+	char *path = g_build_filename(base, "netsurfy", NULL);
+	nserror ret;
+
+	g_strdelimit(path, "\\", '/');
+	if (create && g_mkdir_with_parents(path, 0700) != 0) {
+		NSLOG(netsurfy, ERROR, "Unable to create %s: %s",
+		      path, strerror(errno));
+		g_free(path);
+		return NSERROR_PERMISSION;
+	}
+	ret = check_dirname(path, "", directory_out);
+	g_free(path);
+	return ret;
+}
+#endif
+
 static nserror get_config_home(char **config_home_out)
 {
+#ifdef _WIN32
+	return nsgtk_user_directory(g_get_user_config_dir(), false, config_home_out);
+#else
 	nserror ret;
 	char *home_dir;
 	char *xdg_config_dir;
@@ -420,11 +444,15 @@ static nserror get_config_home(char **config_home_out)
 
 	*config_home_out = config_home;
 	return NSERROR_OK;
+#endif
 }
 
 
 static nserror create_config_home(char **config_home_out)
 {
+#ifdef _WIN32
+	return nsgtk_user_directory(g_get_user_config_dir(), true, config_home_out);
+#else
 	char *config_home = NULL;
 	char *home_dir;
 	char *xdg_config_dir;
@@ -478,6 +506,7 @@ static nserror create_config_home(char **config_home_out)
 	*config_home_out = config_home;
 
 	return NSERROR_OK;
+#endif
 }
 
 
@@ -593,8 +622,13 @@ static nserror set_defaults(struct nsoption_s *defaults)
 	if (g_get_user_special_dir(G_USER_DIRECTORY_DOWNLOAD) != NULL) {
 		fname = strdup(
 			g_get_user_special_dir(G_USER_DIRECTORY_DOWNLOAD));
+#ifdef _WIN32
+	} else {
+		fname = g_build_filename(g_get_home_dir(), "Downloads", NULL);
+#else
 	} else if (getenv("HOME") != NULL) {
 		netsurfy_mkpath(&fname, NULL, 2, getenv("HOME"), "downloads");
+#endif
 	}
 	if (fname != NULL) {
 		if (nsoption_charp(downloads_directory) == NULL) {
@@ -736,6 +770,9 @@ static nserror nsgtk_messages_init(char **respaths)
  */
 static nserror get_cache_home(char **cache_home_out)
 {
+#ifdef _WIN32
+	return nsgtk_user_directory(g_get_user_cache_dir(), false, cache_home_out);
+#else
 	nserror ret;
 	char *xdg_cache_dir;
 	char *cache_home;
@@ -774,6 +811,7 @@ static nserror get_cache_home(char **cache_home_out)
 
 	*cache_home_out = cache_home;
 	return NSERROR_OK;
+#endif
 }
 
 
@@ -782,6 +820,9 @@ static nserror get_cache_home(char **cache_home_out)
  */
 static nserror create_cache_home(char **cache_home_out)
 {
+#ifdef _WIN32
+	return nsgtk_user_directory(g_get_user_cache_dir(), true, cache_home_out);
+#else
 	char *cache_home = NULL;
 	char *home_dir;
 	char *xdg_cache_dir;
@@ -835,6 +876,7 @@ static nserror create_cache_home(char **cache_home_out)
 	*cache_home_out = cache_home;
 
 	return NSERROR_OK;
+#endif
 }
 
 
@@ -1142,16 +1184,20 @@ static nserror nsgtk_setup(int argc, char **argv, char **respath)
 	if (argc > 1) {
 		struct stat fs;
 		if (stat(argv[1], &fs) == 0) {
-			size_t addrlen;
 			char *rp = realpath(argv[1], NULL);
-			assert(rp != NULL);
-
-			/* calculate file url length including terminator */
-			addrlen = SLEN("file://") + strlen(rp) + 1;
-			addr = malloc(addrlen);
-			assert(addr != NULL);
-			snprintf(addr, addrlen, "file://%s", rp);
+			if (rp == NULL) {
+				return NSERROR_NOT_FOUND;
+			}
+			res = netsurfy_path_to_nsurl(rp, &url);
 			free(rp);
+			if (res != NSERROR_OK) {
+				return res;
+			}
+			addr = strdup(nsurl_access(url));
+			nsurl_unref(url);
+			if (addr == NULL) {
+				return NSERROR_NOMEM;
+			}
 		} else {
 			addr = strdup(argv[1]);
 		}
@@ -1187,6 +1233,7 @@ static nserror nsgtk_setup(int argc, char **argv, char **respath)
  * The same as the standard gtk_main loop except this ensures active
  * FD are added to the gtk poll event set.
  */
+#ifndef _WIN32
 #define NSGTK_MAX_POLLS 1024
 
 struct nsgtk_poll_set {
@@ -1219,25 +1266,31 @@ static bool nsgtk_poll_set_equal(const struct nsgtk_poll_set *a,
 	}
 	return true;
 }
+#endif
 
 static void nsgtk_main(void)
 {
+#ifndef _WIN32
 	static struct nsgtk_poll_set active;
 	static struct nsgtk_poll_set wanted;
 	fd_set read_fd_set, write_fd_set, exc_fd_set;
 	int max_fd;
+#endif
 
 	while (!nsgtk_complete) {
+#ifndef _WIN32
 		max_fd = -1;
 		FD_ZERO(&read_fd_set);
 		FD_ZERO(&write_fd_set);
 		FD_ZERO(&exc_fd_set);
+#endif
 
 		while (g_main_context_pending(NULL))
 			g_main_context_iteration(NULL, TRUE);
 
 		schedule_run();
 
+#ifndef _WIN32
 		fetch_fdset(&read_fd_set, &write_fd_set, &exc_fd_set, &max_fd);
 		wanted.count = 0;
 		for (int i = 0; i <= max_fd; i++) {
@@ -1269,14 +1322,17 @@ static void nsgtk_main(void)
 							0);
 			}
 		}
+#endif
 
 		g_main_context_iteration(NULL, TRUE);
 	}
 
+#ifndef _WIN32
 	for (unsigned int i = 0; i != active.count; i++) {
 		g_main_context_remove_poll(NULL, &active.fds[i]);
 	}
 	active.count = 0;
+#endif
 }
 
 

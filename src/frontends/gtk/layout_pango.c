@@ -255,14 +255,14 @@ static nserror nsfont_split(const plot_font_style_t *fstyle,
 	}
 
 	/* deal with being unable to split */
-	if ((split_len < 1) || (split_len >= length)) {
+	if (split_len >= length) {
 		*string_idx = length;
 		*actual_x = split_x;
 		goto split_done;
 	}
 
 	/* if string broke on boundary do not attempt to adjust */
-	if (string[split_len] == ' ') {
+	if (split_len > 0 && string[split_len] == ' ') {
 		*string_idx = split_len;
 		*actual_x = split_x;
 		goto split_done;

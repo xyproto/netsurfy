@@ -28,6 +28,10 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#ifdef _WIN32
+#include <errno.h>
+#include <windows.h>
+#endif
 
 #ifdef WITH_CURL
 #include <curl/curl.h>
@@ -109,7 +113,36 @@ const char *rfc1123_date(time_t t)
 {
 	static char ret[31];
 
+#ifdef _WIN32
+	const int64_t epoch_offset = 11644473600LL;
+	const int64_t ticks_per_second = 10000000;
+	uint64_t ticks;
+	FILETIME filetime;
+	SYSTEMTIME systemtime;
+	struct tm utc = {0};
+	struct tm *tm = &utc;
+
+	if (t < -epoch_offset || t > INT64_MAX / ticks_per_second - epoch_offset) {
+		errno = ERANGE;
+		return NULL;
+	}
+	ticks = ((int64_t)t + epoch_offset) * ticks_per_second;
+	filetime.dwLowDateTime = (DWORD)ticks;
+	filetime.dwHighDateTime = (DWORD)(ticks >> 32);
+	if (!FileTimeToSystemTime(&filetime, &systemtime)) {
+		errno = ERANGE;
+		return NULL;
+	}
+	utc.tm_year = systemtime.wYear - 1900;
+	utc.tm_mon = systemtime.wMonth - 1;
+	utc.tm_mday = systemtime.wDay;
+	utc.tm_wday = systemtime.wDayOfWeek;
+	utc.tm_hour = systemtime.wHour;
+	utc.tm_min = systemtime.wMinute;
+	utc.tm_sec = systemtime.wSecond;
+#else
 	struct tm *tm = gmtime(&t);
+#endif
 
 	snprintf(ret,
 		 sizeof ret,

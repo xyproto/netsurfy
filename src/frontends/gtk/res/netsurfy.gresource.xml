@@ -2,8 +2,8 @@
 <gresources>
   <gresource prefix="/org/netsurfy">
     <file preprocess="to-pixdata">favicon.png</file>
-    <file preprocess="to-pixdata">netsurfy.xpm</file>
-    <file preprocess="to-pixdata">menu_cursor.png</file>
+    <file alias="netsurfy.xpm" preprocess="to-pixdata">img/gtk/netsurfy.xpm</file>
+    <file alias="menu_cursor.png" preprocess="to-pixdata">img/gtk/menu_cursor.png</file>
     <file preprocess="to-pixdata">throbber/throbber0.png</file>
     <file preprocess="to-pixdata">throbber/throbber1.png</file>
     <file preprocess="to-pixdata">throbber/throbber2.png</file>
@@ -28,7 +28,8 @@
     <file>internal.css</file>
     <file>quirks.css</file>
     <file>netsurfy.png</file>
-    <file>default.ico</file>
+    <file alias="default.ico">img/gtk/default.ico</file>
+    <file alias="icons/256x256/apps/netsurfy.png">img/icons/256x256/apps/netsurfy.png</file>
     <file>icons/show-cookie.png</file>
     <file>icons/local-history.png</file>
     <file>icons/arrow-l.png</file>

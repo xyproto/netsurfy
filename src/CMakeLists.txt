@@ -29,9 +29,12 @@ file(GLOB_RECURSE host_tool_sources CONFIGURE_DEPENDS
   ${CMAKE_CURRENT_SOURCE_DIR}/libs/nsgenbind/src/*
   ${CMAKE_CURRENT_SOURCE_DIR}/libs/libcss/src/parse/properties/css_property_parser_gen.c)
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${host_tool_sources})
-set(NETSURFY_NSGENBIND ${HOST_TOOLS_DIR}/nsgenbind)
-set(NETSURFY_SPLIT_MESSAGES ${HOST_TOOLS_DIR}/split-messages)
-set(NETSURFY_CSS_GEN_PARSER ${HOST_TOOLS_DIR}/css_gen_parser)
+if(CMAKE_HOST_WIN32)
+  set(host_executable_suffix .exe)
+endif()
+set(NETSURFY_NSGENBIND ${HOST_TOOLS_DIR}/nsgenbind${host_executable_suffix})
+set(NETSURFY_SPLIT_MESSAGES ${HOST_TOOLS_DIR}/split-messages${host_executable_suffix})
+set(NETSURFY_CSS_GEN_PARSER ${HOST_TOOLS_DIR}/css_gen_parser${host_executable_suffix})
 
 add_subdirectory(libs)
 
@@ -268,6 +271,35 @@ else()
 endif()
 
 set(GTK_RES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/frontends/gtk/res)
+if(WIN32)
+  function(netsurfy_copy_resource source destination)
+    if(NOT IS_DIRECTORY "${source}")
+      file(SIZE "${source}" size)
+      if(size LESS 512)
+        file(READ "${source}" link)
+        if(link MATCHES "^[a-zA-Z0-9_.-]+/[^ \t\r\n]+$")
+          get_filename_component(directory "${source}" DIRECTORY)
+          if(EXISTS "${directory}/${link}")
+            set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${source}")
+            netsurfy_copy_resource("${directory}/${link}" "${destination}")
+            return()
+          endif()
+        endif()
+      endif()
+    endif()
+    if(IS_DIRECTORY "${source}")
+      file(GLOB children CONFIGURE_DEPENDS "${source}/*")
+      foreach(child IN LISTS children)
+        get_filename_component(name "${child}" NAME)
+        netsurfy_copy_resource("${child}" "${destination}/${name}")
+      endforeach()
+    else()
+      configure_file("${source}" "${destination}" COPYONLY)
+    endif()
+  endfunction()
+  netsurfy_copy_resource("${GTK_RES_DIR}" "${NETSURFY_GEN}/resources")
+  set(GTK_RES_DIR ${NETSURFY_GEN}/resources)
+endif()
 set(MESSAGES_DIR ${NETSURFY_GEN}/messages)
 set(NETSURFY_MESSAGES)
 foreach(language ${NETSURFY_MESSAGES_LANGUAGES})
@@ -291,17 +323,18 @@ function(netsurfy_gresource name sourcedir)
   set(dependencies ${ARGN})
   if(NOT dependencies)
     execute_process(
-      COMMAND ${GLIB_COMPILE_RESOURCES} --sourcedir ${sourcedir}
+      COMMAND ${GLIB_COMPILE_RESOURCES} --sourcedir ${sourcedir} --sourcedir ${PROJECT_SOURCE_DIR}
         --generate-dependencies ${GTK_RES_DIR}/${name}.gresource.xml
       OUTPUT_VARIABLE dependencies
       OUTPUT_STRIP_TRAILING_WHITESPACE)
+    string(REPLACE "\r" "" dependencies "${dependencies}")
     string(REPLACE "\n" ";" dependencies "${dependencies}")
   endif()
   set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
     ${GTK_RES_DIR}/${name}.gresource.xml)
   add_custom_command(
     OUTPUT ${NETSURFY_GEN}/${name}_gresource.c
-    COMMAND ${GLIB_COMPILE_RESOURCES} --generate-source --sourcedir ${sourcedir}
+    COMMAND ${GLIB_COMPILE_RESOURCES} --generate-source --sourcedir ${sourcedir} --sourcedir ${PROJECT_SOURCE_DIR}
       --target=${NETSURFY_GEN}/${name}_gresource.c ${GTK_RES_DIR}/${name}.gresource.xml
     DEPENDS ${GTK_RES_DIR}/${name}.gresource.xml ${dependencies}
     VERBATIM)
@@ -319,6 +352,12 @@ add_executable(netsurfy
   ${NETSURFY_GEN}/messages_gresource.c)
 add_dependencies(netsurfy testament)
 set_target_properties(netsurfy PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+if(WIN32)
+  set_target_properties(netsurfy PROPERTIES WIN32_EXECUTABLE TRUE)
+  target_sources(netsurfy PRIVATE frontends/gtk/netsurfy.rc)
+  target_include_directories(netsurfy PRIVATE ${PROJECT_SOURCE_DIR}/img)
+endif()
 
 target_include_directories(netsurfy PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}
@@ -343,7 +382,8 @@ target_compile_definitions(netsurfy PRIVATE
   "GTK_RESPATH=\"${NETSURFY_GTK_RES_PATH}\""
   WITH_GRESOURCE)
 
-target_compile_options(netsurfy PRIVATE ${NETSURFY_WARNING_FLAGS} -include ${NETSURFY_CONFIG_HEADER})
+target_compile_options(netsurfy PRIVATE
+  "$<$<COMPILE_LANGUAGE:C>:${NETSURFY_WARNING_FLAGS};-include;${NETSURFY_CONFIG_HEADER}>")
 
 target_link_libraries(netsurfy PRIVATE
   ${NETSURFY_CORE_LIBRARIES}
@@ -402,9 +442,12 @@ endfunction()
 
 set(GTK_RESOURCES
   languages SearchEngines ca-bundle.txt default.css adblock.css quirks.css
-  internal.css credits.html licence.html default.ico favicon.png netsurfy.png
-  netsurfy.xpm netsurfy-16x16.xpm)
+  internal.css credits.html licence.html favicon.png netsurfy.png)
 list(TRANSFORM GTK_RESOURCES PREPEND ${GTK_RES_DIR}/)
+list(APPEND GTK_RESOURCES
+  ${PROJECT_SOURCE_DIR}/img/gtk/default.ico
+  ${PROJECT_SOURCE_DIR}/img/gtk/netsurfy.xpm
+  ${PROJECT_SOURCE_DIR}/img/gtk/netsurfy-16x16.xpm)
 file(GLOB GTK_UI_FILES ${GTK_RES_DIR}/gtk4/*.ui)
 netsurfy_install_resolved(${NETSURFY_DATADIR} ${GTK_RESOURCES} ${GTK_UI_FILES})
 install(FILES ${MESSAGES_DIR}/Messages DESTINATION ${NETSURFY_DATADIR})
@@ -413,6 +456,8 @@ file(GLOB GTK_ICONS ${GTK_RES_DIR}/icons/*.png)
 netsurfy_install_resolved(${NETSURFY_DATADIR}/icons ${GTK_ICONS})
 file(GLOB GTK_THROBBER ${GTK_RES_DIR}/throbber/*.png)
 netsurfy_install_resolved(${NETSURFY_DATADIR}/throbber ${GTK_THROBBER})
+install(FILES ${PROJECT_SOURCE_DIR}/img/icons/256x256/apps/netsurfy.png
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/256x256/apps)
 
 foreach(language ${NETSURFY_MESSAGES_LANGUAGES})
   file(GLOB language_files ${GTK_RES_DIR}/${language}/*)

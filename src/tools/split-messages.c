@@ -12,6 +12,7 @@
 #include <zlib.h>
 
 #include "utils/errors.h"
+#include "utils/getline.h"
 
 enum out_fmt {
 	OUTPUTFMT_NONE = 0,
@@ -471,6 +472,13 @@ fatmessages_read(struct param *param, struct trnsltn_entry **tlist)
 		}
 	}
 
+	if (ferror(infile) || !feof(infile)) {
+		perror("Unable to read input file");
+		free(line);
+		fclose(infile);
+		return NSERROR_INVALID;
+	}
+	free(line);
 	fclose(infile);
 
 	res = translation_list_reverse(tlist);

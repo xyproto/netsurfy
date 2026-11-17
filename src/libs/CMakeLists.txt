@@ -55,6 +55,9 @@ nslib(libparserutils
   ${NSLIBS_GEN}/libparserutils/aliases.inc
   DEFINES ${BSD_DEFINES}
   PRIVATE_INCLUDES ${NSLIBS_GEN}/libparserutils)
+if(WIN32)
+  target_link_libraries(libparserutils PUBLIC Iconv::Iconv)
+endif()
 
 add_custom_command(
   OUTPUT ${NSLIBS_GEN}/libhubbub/entities.inc

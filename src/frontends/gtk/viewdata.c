@@ -34,6 +34,7 @@
 #include <gtk/gtk.h>
 
 #include "utils/log.h"
+#include "utils/getline.h"
 #include "utils/nsoption.h"
 #include "utils/utf8.h"
 #include "utils/messages.h"

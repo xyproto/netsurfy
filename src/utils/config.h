@@ -100,9 +100,6 @@ char *strchrnul(const char *s, int c);
 #endif
 
 #define HAVE_INETPTON
-#if (defined(_WIN32))
-#undef HAVE_INETPTON
-#endif
 
 #define HAVE_UTSNAME
 #if (defined(_WIN32))

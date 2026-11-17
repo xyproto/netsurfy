@@ -2,8 +2,16 @@ cmake_minimum_required(VERSION 3.20)
 
 project(NetSurfy VERSION 1.1.5 LANGUAGES C)
 
-if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  message(FATAL_ERROR "NetSurfy only supports Linux")
+if(NOT CMAKE_SYSTEM_NAME MATCHES "^(Linux|Windows)$")
+  message(FATAL_ERROR "NetSurfy supports Linux and Windows")
+endif()
+
+if(WIN32)
+  if(NOT MINGW)
+    message(FATAL_ERROR "The Windows build requires a MinGW-w64 toolchain")
+  endif()
+  enable_language(RC)
+  add_compile_definitions(__USE_MINGW_ANSI_STDIO=1 WIN32_LEAN_AND_MEAN NOMINMAX)
 endif()
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -13,10 +21,23 @@ endif()
 foreach(config RELEASE RELWITHDEBINFO MINSIZEREL)
   string(REPLACE "-DNDEBUG" "" CMAKE_C_FLAGS_${config} "${CMAKE_C_FLAGS_${config}}")
 endforeach()
+string(REPLACE "-O2" "-O3" CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO}")
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
+
+include(CheckIPOSupported)
+check_ipo_supported(RESULT netsurfy_ipo_supported OUTPUT netsurfy_ipo_error LANGUAGES C)
+if(NOT netsurfy_ipo_supported)
+  message(WARNING "LTO is unavailable: ${netsurfy_ipo_error}")
+endif()
+foreach(config RELEASE RELWITHDEBINFO)
+  if(NOT DEFINED CMAKE_INTERPROCEDURAL_OPTIMIZATION_${config}
+      AND NOT DEFINED CMAKE_INTERPROCEDURAL_OPTIMIZATION)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_${config} ${netsurfy_ipo_supported})
+  endif()
+endforeach()
 
 include(GNUInstallDirs)
 
@@ -36,9 +57,16 @@ option(BUILD_TESTING "Build the unit tests (requires check)" ON)
 set(NETSURFY_LOG_LEVEL "VERBOSE" CACHE STRING "Compiled-in log level")
 set(NETSURFY_BUILTIN_LOG_FILTER "(level:WARNING || cat:jserrors)" CACHE STRING "Default log filter")
 set(NETSURFY_BUILTIN_VERBOSE_FILTER "(level:VERBOSE || cat:jserrors)" CACHE STRING "Verbose log filter")
-set(NETSURFY_UA_FORMAT_STRING "Mozilla/5.0 (Arch Linux; %s) NetSurfy/%d.%d" CACHE STRING "User agent format")
+if(WIN32)
+  set(netsurfy_ua_format "Mozilla/5.0 (%s) NetSurfy/%d.%d")
+  set(netsurfy_res_path "${CMAKE_BINARY_DIR}/src/gen/resources/:${CMAKE_INSTALL_FULL_DATADIR}/netsurfy/")
+else()
+  set(netsurfy_ua_format "Mozilla/5.0 (Arch Linux; %s) NetSurfy/%d.%d")
+  set(netsurfy_res_path "${CMAKE_INSTALL_FULL_DATADIR}/netsurfy/:./src/frontends/gtk/res/")
+endif()
+set(NETSURFY_UA_FORMAT_STRING "${netsurfy_ua_format}" CACHE STRING "User agent format")
 set(NETSURFY_HOMEPAGE "https://html.duckduckgo.com/" CACHE STRING "Default homepage")
-set(NETSURFY_GTK_RES_PATH "${CMAKE_INSTALL_FULL_DATADIR}/netsurfy/:./src/frontends/gtk/res/" CACHE STRING "Resource search path")
+set(NETSURFY_GTK_RES_PATH "${netsurfy_res_path}" CACHE STRING "Resource search path")
 set(NETSURFY_HOST_C_COMPILER "" CACHE FILEPATH "C compiler for build-time tools when cross compiling")
 set(NETSURFY_MESSAGES_LANGUAGES de en fr it nl zh_CN)
 
@@ -52,6 +80,10 @@ find_package(OpenSSL REQUIRED)
 find_package(JPEG REQUIRED)
 find_package(PNG REQUIRED)
 find_package(EXPAT REQUIRED)
+if(WIN32)
+  find_package(Iconv REQUIRED)
+  find_library(REGEX_LIBRARY NAMES regex REQUIRED)
+endif()
 find_program(GLIB_COMPILE_RESOURCES glib-compile-resources REQUIRED)
 if(NETSURFY_USE_QUICKJS)
   find_package(qjs CONFIG QUIET)
@@ -164,6 +196,8 @@ set(NETSURFY_CORE_LIBRARIES
   $<$<BOOL:${NETSURFY_USE_WEBP}>:PkgConfig::WEBP>
   $<$<BOOL:${NETSURFY_USE_JPEGXL}>:PkgConfig::JPEGXL>
   $<$<BOOL:${NETSURFY_USE_HARU_PDF}>:${HPDF_LIBRARY}>
+  $<$<PLATFORM_ID:Windows>:ws2_32>
+  $<$<PLATFORM_ID:Windows>:${REGEX_LIBRARY}>
   m)
 
 add_subdirectory(src)

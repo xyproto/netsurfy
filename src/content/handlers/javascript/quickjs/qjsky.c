@@ -27,7 +27,11 @@
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
+#ifdef _WIN32
+#include <openssl/rand.h>
+#else
 #include <sys/random.h>
+#endif
 #include <sys/stat.h>
 #include <nsutils/time.h>
 
@@ -4399,7 +4403,9 @@ static JSValue qjsky_native_random(JSContext *ctx,
 {
 	uint8_t buf[65536];
 	int32_t n;
+#ifndef _WIN32
 	size_t got = 0;
+#endif
 
 	if (JS_ToInt32(ctx, &n, argv[0]) < 0) {
 		return JS_EXCEPTION;
@@ -4407,6 +4413,11 @@ static JSValue qjsky_native_random(JSContext *ctx,
 	if (n < 0 || n > (int32_t)sizeof(buf)) {
 		return JS_ThrowRangeError(ctx, "invalid length");
 	}
+#ifdef _WIN32
+	if (RAND_bytes(buf, n) != 1) {
+		return JS_ThrowInternalError(ctx, "no random data");
+	}
+#else
 	while (got < (size_t)n) {
 		ssize_t r = getrandom(buf + got, (size_t)n - got, 0);
 		if (r < 0) {
@@ -4417,6 +4428,7 @@ static JSValue qjsky_native_random(JSContext *ctx,
 		}
 		got += (size_t)r;
 	}
+#endif
 	return JS_NewArrayBufferCopy(ctx, buf, (size_t)n);
 }
 
@@ -4441,7 +4453,7 @@ static char *qjsky_storage_path(JSContext *ctx, JSValueConst key, bool mkdirs)
 	if (path != NULL) {
 		size_t o = (size_t)snprintf(
 			path, len, "%.*s/Storage", (int)dirlen, cookies);
-		if (mkdirs && mkdir(path, 0700) != 0 && errno != EEXIST) {
+		if (mkdirs && nsmkdir(path, 0700) != 0 && errno != EEXIST) {
 			free(path);
 			JS_FreeCString(ctx, k);
 			return NULL;

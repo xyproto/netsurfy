@@ -16,7 +16,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#if (defined(_POSIX_TIMERS) && (_POSIX_TIMERS > 0) &&                          \
+#if defined(_WIN32)
+#include <windows.h>
+#elif (defined(_POSIX_TIMERS) && (_POSIX_TIMERS > 0) &&                        \
      (defined _POSIX_MONOTONIC_CLOCK)) ||                                      \
 	defined(__OpenBSD__)
 #include <time.h>
@@ -43,7 +45,9 @@ nsuerror nsu_getmonotonic_ms(uint64_t *current_out)
 	uint64_t current;
 	static uint64_t prev = 0; /* previous time so we never go backwards */
 
-#if (defined(_POSIX_TIMERS) && (_POSIX_TIMERS > 0) &&                          \
+#if defined(_WIN32)
+	current = GetTickCount64();
+#elif (defined(_POSIX_TIMERS) && (_POSIX_TIMERS > 0) &&                        \
      (defined _POSIX_MONOTONIC_CLOCK)) ||                                      \
 	defined(__OpenBSD__)
 	struct timespec tp;

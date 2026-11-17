@@ -28,6 +28,7 @@
 #include <gtk/gtk.h>
 
 #include "utils/log.h"
+#include "utils/dirent.h"
 #include "utils/messages.h"
 #include "utils/nsoption.h"
 #include "utils/file.h"

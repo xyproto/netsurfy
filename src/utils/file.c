@@ -60,7 +60,17 @@
  */
 static nserror posix_vmkpath(char **str, size_t *size, size_t nelm, va_list ap)
 {
-	return vsnstrjoin(str, size, '/', nelm, ap);
+	nserror ret = vsnstrjoin(str, size, '/', nelm, ap);
+#ifdef _WIN32
+	if (ret == NSERROR_OK) {
+		for (char *p = *str; *p != '\0'; p++) {
+			if (*p == '\\') {
+				*p = '/';
+			}
+		}
+	}
+#endif
+	return ret;
 }
 
 /**
@@ -87,6 +97,12 @@ static nserror posix_basename(const char *path, char **str, size_t *size)
 	}
 
 	leafname = strrchr(path, '/');
+#ifdef _WIN32
+	const char *backslash = strrchr(path, '\\');
+	if (backslash != NULL && (leafname == NULL || backslash > leafname)) {
+		leafname = backslash;
+	}
+#endif
 	if (!leafname) {
 		leafname = path;
 	} else {
@@ -151,6 +167,11 @@ static nserror posix_nsurl_to_path(struct nsurl *url, char **path_out)
 		return res;
 	}
 
+#ifdef _WIN32
+	if (path[0] == '/' && path[1] != '\0' && path[2] == ':') {
+		memmove(path, path + 1, strlen(path));
+	}
+#endif
 	*path_out = path;
 
 	return NSERROR_OK;
@@ -180,7 +201,16 @@ static nserror posix_path_to_nsurl(const char *path, struct nsurl **url_out)
 	}
 
 	/* escape the path so it can be placed in a url */
+#ifdef _WIN32
+	char *fullpath = realpath(path, NULL);
+	if (fullpath == NULL) {
+		return NSERROR_NOT_FOUND;
+	}
+	ret = url_escape(fullpath, false, "/:", &escpath);
+	free(fullpath);
+#else
 	ret = url_escape(path, false, "/", &escpath);
+#endif
 	if (ret != NSERROR_OK) {
 		return ret;
 	}
@@ -220,6 +250,18 @@ static nserror posix_mkdir_all(const char *fname)
 	struct stat sb;
 
 	dname = strdup(fname);
+#ifdef _WIN32
+	if (dname != NULL) {
+		for (char *p = dname; *p != '\0'; p++) {
+			if (*p == '\\') {
+				*p = '/';
+			}
+		}
+	}
+#endif
+	if (dname == NULL) {
+		return NSERROR_NOMEM;
+	}
 
 	sep = strrchr(dname, '/');
 	if (sep == NULL) {
@@ -241,6 +283,11 @@ static nserror posix_mkdir_all(const char *fname)
 	*sep = '/'; /* restore separator */
 
 	sep = dname;
+#ifdef _WIN32
+	if (sep[0] != '\0' && sep[1] == ':' && sep[2] == '/') {
+		sep += 3;
+	}
+#endif
 	while (*sep == '/') {
 		sep++;
 	}
