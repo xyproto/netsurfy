@@ -48,6 +48,7 @@
 #include "html/form_internal.h"
 #include "netsurfy/browser_window.h"
 #include "netsurfy/window.h"
+#include "netsurfy/misc.h"
 #include "desktop/browser_private.h"
 #include "desktop/gui_internal.h"
 
@@ -119,6 +120,10 @@ struct jsthread {
 	struct qjsky_fetch *fetches;
 	uint32_t next_fetch_id;
 	int ready_state;
+	bool reactions_pending;
+	void (*module_loaded)(void *pw);
+	void *module_loaded_pw;
+	unsigned int modules_loaded;
 	struct qjsky_observer *observers;
 };
 
@@ -334,7 +339,7 @@ void qjsky_dump_error(JSContext *ctx)
 	JSValue causeval = JS_UNDEFINED;
 	const char *cause = NULL;
 
-	if (JS_IsError(exc)) {
+	if (JS_IsObject(exc)) {
 		stackval = JS_GetPropertyStr(ctx, exc, "stack");
 		if (JS_IsString(stackval)) {
 			stack = JS_ToCString(ctx, stackval);
@@ -976,8 +981,16 @@ static int qjsky_node_iface(struct dom_node *node)
 		return qjsky_node_iface_html(type);
 	case DOM_TEXT_NODE:
 		return QJSKY_IFACE_TEXT;
+	case DOM_CDATA_SECTION_NODE:
+		return QJSKY_IFACE_TEXT;
 	case DOM_COMMENT_NODE:
 		return QJSKY_IFACE_COMMENT;
+	case DOM_PROCESSING_INSTRUCTION_NODE:
+		return QJSKY_IFACE_PROCESSINGINSTRUCTION;
+	case DOM_DOCUMENT_FRAGMENT_NODE:
+		return QJSKY_IFACE_DOCUMENTFRAGMENT;
+	case DOM_DOCUMENT_TYPE_NODE:
+		return QJSKY_IFACE_DOCUMENTTYPE;
 	case DOM_DOCUMENT_NODE:
 		return QJSKY_IFACE_DOCUMENT;
 	case DOM_ATTRIBUTE_NODE:
@@ -1373,6 +1386,9 @@ static void qjsky_run_listeners(JSContext *ctx,
 		ctx, target, type, false, NULL);
 	JSValue *entries = NULL;
 	int64_t len = 0;
+	jsthread *thread = qjsky_thread(ctx);
+	bool mutation = false;
+	const char *name;
 
 	if (!JS_IsObject(listeners)) {
 		if (JS_IsException(listeners)) {
@@ -1391,6 +1407,17 @@ static void qjsky_run_listeners(JSContext *ctx,
 	}
 	for (int64_t idx = 0; idx < len; idx++) {
 		entries[idx] = JS_GetPropertyInt64(ctx, listeners, idx);
+	}
+	name = JS_ToCString(ctx, type);
+	if (name != NULL) {
+		mutation = strncmp(name, "DOMNode", 7) == 0 ||
+			   strncmp(name, "DOMAttr", 7) == 0 ||
+			   strncmp(name, "DOMCharacterData", 16) == 0 ||
+			   strcmp(name, "DOMSubtreeModified") == 0;
+		JS_FreeCString(ctx, name);
+	}
+	if (mutation) {
+		thread->call_depth++;
 	}
 
 	for (int64_t idx = 0; idx < len; idx++) {
@@ -1431,6 +1458,9 @@ static void qjsky_run_listeners(JSContext *ctx,
 		JS_FreeValue(ctx, thisv);
 		JS_FreeValue(ctx, fn);
 		JS_FreeValue(ctx, cb);
+	}
+	if (mutation) {
+		thread->call_depth--;
 	}
 
 	for (int64_t idx = 0; idx < len; idx++) {
@@ -1733,6 +1763,8 @@ static const char *qjsky_css_display(uint8_t v)
 		return "grid";
 	case CSS_DISPLAY_INLINE_GRID:
 		return "inline-grid";
+	case CSS_DISPLAY_CONTENTS:
+		return "contents";
 	default:
 		return "none";
 	}
@@ -3340,6 +3372,199 @@ void js_finalise(void)
 {
 }
 
+static char *qjsky_module_normalize(JSContext *ctx,
+				    const char *base,
+				    const char *name,
+				    void *opaque)
+{
+	JSValue fn = qjsky_generic(ctx, "resolveModule");
+	JSValue args[2], ret;
+	const char *url;
+	char *result = NULL;
+
+	args[0] = JS_NewString(ctx, name);
+	args[1] = JS_NewString(ctx, base != NULL ? base : "");
+	ret = JS_Call(ctx, fn, JS_UNDEFINED, 2, args);
+	JS_FreeValue(ctx, args[0]);
+	JS_FreeValue(ctx, args[1]);
+	JS_FreeValue(ctx, fn);
+	if (JS_IsException(ret)) {
+		return NULL;
+	}
+	url = JS_ToCString(ctx, ret);
+	if (url != NULL) {
+		result = js_strdup(ctx, url);
+		JS_FreeCString(ctx, url);
+	}
+	JS_FreeValue(ctx, ret);
+	return result;
+}
+
+static JSModuleDef *qjsky_module_loader(JSContext *ctx,
+					const char *name,
+					void *opaque,
+					JSValueConst attributes)
+{
+	JSValue fn = qjsky_generic(ctx, "moduleText");
+	JSValue arg = JS_NewString(ctx, name);
+	JSValue text = JS_Call(ctx, fn, JS_UNDEFINED, 1, &arg);
+	JSValue func, meta;
+	const char *src;
+	size_t len;
+	JSModuleDef *m;
+
+	JS_FreeValue(ctx, fn);
+	JS_FreeValue(ctx, arg);
+	if (JS_IsException(text)) {
+		return NULL;
+	}
+	if (!JS_IsString(text)) {
+		JS_FreeValue(ctx, text);
+		JS_ThrowTypeError(ctx,
+				  "Failed to load module script: %s",
+				  name);
+		return NULL;
+	}
+	src = JS_ToCStringLen(ctx, &len, text);
+	JS_FreeValue(ctx, text);
+	if (src == NULL) {
+		return NULL;
+	}
+	func = JS_Eval(ctx,
+		       src,
+		       len,
+		       name,
+		       JS_EVAL_TYPE_MODULE | JS_EVAL_FLAG_COMPILE_ONLY);
+	JS_FreeCString(ctx, src);
+	if (JS_IsException(func)) {
+		return NULL;
+	}
+	m = JS_VALUE_GET_PTR(func);
+	meta = JS_GetImportMeta(ctx, m);
+	if (!JS_IsException(meta)) {
+		JS_SetPropertyStr(ctx, meta, "url", JS_NewString(ctx, name));
+	}
+	JS_FreeValue(ctx, meta);
+	JS_FreeValue(ctx, func);
+	return m;
+}
+
+static JSValue qjsky_import_settled(JSContext *ctx,
+				    JSValueConst this_val,
+				    int argc,
+				    JSValueConst *argv,
+				    int magic,
+				    JSValueConst *data)
+{
+	const char *url;
+
+	if (magic != 0) {
+		JS_FinishDynamicImport(
+			ctx,
+			JS_DupValue(ctx, data[0]),
+			JS_EXCEPTION,
+			JS_DupValue(ctx, argc > 0 ? argv[0] : JS_UNDEFINED));
+		return JS_UNDEFINED;
+	}
+	url = JS_ToCString(ctx, data[1]);
+	if (url == NULL) {
+		JS_FinishDynamicImport(ctx,
+				       JS_DupValue(ctx, data[0]),
+				       JS_EXCEPTION,
+				       JS_GetException(ctx));
+		return JS_UNDEFINED;
+	}
+	JS_FinishDynamicImport(ctx,
+			       JS_DupValue(ctx, data[0]),
+			       JS_LoadModule(ctx, "", url, JS_UNDEFINED),
+			       JS_UNDEFINED);
+	JS_FreeCString(ctx, url);
+	return JS_UNDEFINED;
+}
+
+static void qjsky_dynamic_import(JSContext *ctx,
+				 const char *basename,
+				 const char *filename,
+				 JSValue token,
+				 JSValueConst attributes,
+				 void *opaque)
+{
+	char *url = qjsky_module_normalize(ctx, basename, filename, NULL);
+	JSValue fn, arg, promise, data[2], handlers[2], ret;
+
+	if (url == NULL) {
+		JS_FinishDynamicImport(
+			ctx, token, JS_EXCEPTION, JS_GetException(ctx));
+		return;
+	}
+	fn = qjsky_generic(ctx, "loadModuleGraph");
+	arg = JS_NewString(ctx, url);
+	js_free(ctx, url);
+	promise = JS_Call(ctx, fn, JS_UNDEFINED, 1, &arg);
+	JS_FreeValue(ctx, fn);
+	if (JS_IsException(promise)) {
+		JS_FreeValue(ctx, arg);
+		JS_FinishDynamicImport(
+			ctx, token, JS_EXCEPTION, JS_GetException(ctx));
+		return;
+	}
+	data[0] = token;
+	data[1] = arg;
+	handlers[0] = JS_NewCFunctionData(
+		ctx, qjsky_import_settled, 1, 0, 2, (JSValueConst *)data);
+	handlers[1] = JS_NewCFunctionData(
+		ctx, qjsky_import_settled, 1, 1, 2, (JSValueConst *)data);
+	JS_FreeValue(ctx, token);
+	JS_FreeValue(ctx, arg);
+	fn = JS_GetPropertyStr(ctx, promise, "then");
+	ret = JS_Call(ctx, fn, promise, 2, (JSValueConst *)handlers);
+	JS_FreeValue(ctx, ret);
+	JS_FreeValue(ctx, fn);
+	JS_FreeValue(ctx, promise);
+	JS_FreeValue(ctx, handlers[0]);
+	JS_FreeValue(ctx, handlers[1]);
+}
+
+static void qjsky_module_loaded_cb(void *p)
+{
+	jsthread *thread = p;
+
+	while (thread->modules_loaded > 0) {
+		thread->modules_loaded--;
+		if (thread->module_loaded != NULL) {
+			thread->module_loaded(thread->module_loaded_pw);
+		}
+	}
+}
+
+static JSValue qjsky_native_module_loaded(JSContext *ctx,
+					  JSValueConst this_val,
+					  int argc,
+					  JSValueConst *argv)
+{
+	jsthread *thread = qjsky_thread(ctx);
+
+	thread->modules_loaded++;
+	guit->misc->schedule(0, qjsky_module_loaded_cb, thread);
+	return JS_UNDEFINED;
+}
+
+static JSValue qjsky_native_run_module(JSContext *ctx,
+				       JSValueConst this_val,
+				       int argc,
+				       JSValueConst *argv)
+{
+	const char *url = JS_ToCString(ctx, argv[0]);
+	JSValue ret;
+
+	if (url == NULL) {
+		return JS_EXCEPTION;
+	}
+	ret = JS_LoadModule(ctx, "", url, JS_UNDEFINED);
+	JS_FreeCString(ctx, url);
+	return ret;
+}
+
 nserror js_newheap(int timeout, jsheap **heap)
 {
 	jsheap *ret = calloc(1, sizeof(*ret));
@@ -3358,6 +3583,12 @@ nserror js_newheap(int timeout, jsheap **heap)
 	JS_SetRuntimeOpaque(ret->rt, ret);
 	JS_SetMemoryLimit(ret->rt, QJSKY_MEMORY_LIMIT);
 	JS_SetInterruptHandler(ret->rt, qjsky_interrupt, ret);
+	JS_SetModuleLoaderFunc2(ret->rt,
+				qjsky_module_normalize,
+				qjsky_module_loader,
+				NULL,
+				NULL);
+	JS_SetDynamicImportFunc(ret->rt, qjsky_dynamic_import, NULL);
 	JS_NewClassID(ret->rt, &qjsky_class_id);
 	if (JS_NewClass(ret->rt, qjsky_class_id, &qjsky_class) < 0) {
 		JS_FreeRuntime(ret->rt);
@@ -3409,6 +3640,67 @@ void js_set_current_script(jsthread *thread, struct dom_node *node)
 		dom_node_unref(thread->current_script);
 	}
 	thread->current_script = node != NULL ? dom_node_ref(node) : NULL;
+}
+
+bool js_module_script(jsthread *thread,
+		      struct dom_node *node,
+		      const char *url,
+		      const char *text,
+		      size_t len,
+		      void (*loaded)(void *pw),
+		      void *pw)
+{
+	JSContext *ctx;
+	JSValue fn, args[3], ret;
+
+	if (thread == NULL || thread->ctx == NULL || thread->pending_destroy) {
+		return false;
+	}
+	ctx = thread->ctx;
+	thread->module_loaded = loaded;
+	thread->module_loaded_pw = pw;
+	fn = qjsky_generic(ctx, "loadModuleScript");
+	args[0] = qjsky_node(ctx, node);
+	args[1] = url != NULL ? JS_NewString(ctx, url) : JS_NULL;
+	args[2] = text != NULL ? JS_NewStringLen(ctx, text, len) : JS_NULL;
+	ret = qjsky_call(ctx, fn, JS_UNDEFINED, 3, args, true);
+	JS_FreeValue(ctx, args[0]);
+	JS_FreeValue(ctx, args[1]);
+	JS_FreeValue(ctx, args[2]);
+	JS_FreeValue(ctx, fn);
+	if (JS_IsException(ret)) {
+		return false;
+	}
+	JS_FreeValue(ctx, ret);
+	return true;
+}
+
+void js_run_modules(jsthread *thread)
+{
+	JSValue fn, ret;
+
+	if (thread == NULL || thread->ctx == NULL || thread->pending_destroy) {
+		return;
+	}
+	fn = qjsky_generic(thread->ctx, "runModules");
+	ret = qjsky_call(thread->ctx, fn, JS_UNDEFINED, 0, NULL, true);
+	JS_FreeValue(thread->ctx, ret);
+	JS_FreeValue(thread->ctx, fn);
+}
+
+void js_import_map(jsthread *thread, const char *text, size_t len)
+{
+	JSValue fn, arg, ret;
+
+	if (thread == NULL || thread->ctx == NULL || thread->pending_destroy) {
+		return;
+	}
+	fn = qjsky_generic(thread->ctx, "addImportMap");
+	arg = JS_NewStringLen(thread->ctx, text, len);
+	ret = qjsky_call(thread->ctx, fn, JS_UNDEFINED, 1, &arg, true);
+	JS_FreeValue(thread->ctx, ret);
+	JS_FreeValue(thread->ctx, arg);
+	JS_FreeValue(thread->ctx, fn);
 }
 
 static void qjsky_fetch_free(JSContext *ctx, struct qjsky_fetch *f)
@@ -4074,6 +4366,32 @@ static JSValue qjsky_native_ready_state(JSContext *ctx,
 	return JS_NewInt32(ctx, qjsky_thread(ctx)->ready_state);
 }
 
+static JSValue qjsky_native_css_supports(JSContext *ctx,
+					 JSValueConst this_val,
+					 int argc,
+					 JSValueConst *argv)
+{
+	size_t len;
+	const char *text = JS_ToCStringLen(ctx, &len, argv[0]);
+	bool result = false;
+
+	if (text == NULL) {
+		return JS_EXCEPTION;
+	}
+	css_stylesheet_supports(text, len, &result);
+	JS_FreeCString(ctx, text);
+	return JS_NewBool(ctx, result);
+}
+
+static JSValue qjsky_native_queue_reactions(JSContext *ctx,
+					    JSValueConst this_val,
+					    int argc,
+					    JSValueConst *argv)
+{
+	qjsky_thread(ctx)->reactions_pending = true;
+	return JS_UNDEFINED;
+}
+
 static JSValue qjsky_native_random(JSContext *ctx,
 				   JSValueConst this_val,
 				   int argc,
@@ -4350,6 +4668,10 @@ static JSValue qjsky_native_object(JSContext *ctx)
 		{"utf8Decode", qjsky_native_utf8_decode, 1},
 		{"origin", qjsky_native_origin, 1},
 		{"readyState", qjsky_native_ready_state, 0},
+		{"queueReactions", qjsky_native_queue_reactions, 0},
+		{"cssSupports", qjsky_native_css_supports, 1},
+		{"moduleLoaded", qjsky_native_module_loaded, 0},
+		{"runModule", qjsky_native_run_module, 1},
 		{"candidates", qjsky_native_candidates, 4},
 		{"comparePoints", qjsky_native_compare_points, 4},
 		{"language", qjsky_native_language, 0},
@@ -4425,6 +4747,7 @@ static void qjsky_destroythread(jsthread *thread)
 void js_destroythread(jsthread *thread)
 {
 	thread->pending_destroy = true;
+	guit->misc->schedule(-1, qjsky_module_loaded_cb, thread);
 	if (thread->in_use == 0) {
 		qjsky_destroythread(thread);
 	}
@@ -4713,6 +5036,26 @@ void js_event_cleanup(jsthread *thread, struct dom_event *evt)
 	}
 	obj = qjsky_map_take(&thread->events, evt);
 	JS_FreeValue(thread->ctx, obj);
+	if (thread->reactions_pending && !thread->pending_destroy) {
+		JSValue flush;
+		thread->reactions_pending = false;
+		flush = JS_GetPropertyStr(thread->ctx,
+					  thread->generics,
+					  "flushReactions");
+		if (JS_IsFunction(thread->ctx, flush)) {
+			JS_FreeValue(thread->ctx,
+				     qjsky_call(thread->ctx,
+						flush,
+						JS_UNDEFINED,
+						0,
+						NULL,
+						false));
+		}
+		JS_FreeValue(thread->ctx, flush);
+	}
+	if (!thread->pending_destroy) {
+		qjsky_run_jobs(thread);
+	}
 }
 
 static void qjsky_fire_window_event(jsthread *thread,

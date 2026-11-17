@@ -3134,6 +3134,26 @@
     var nativeHTMLElement = HTMLElement;
     var nativeCreateElement = Document.prototype.createElement;
     var listening = false;
+    var reactionQueue = [];
+
+    function queueReaction(fn) {
+        reactionQueue.push(fn);
+        native.queueReactions();
+    }
+
+    function flushReactions() {
+        while (reactionQueue.length > 0) {
+            var queue = reactionQueue;
+            reactionQueue = [];
+            queue.forEach(function (fn) {
+                try {
+                    fn();
+                } catch (e) {
+                    reportError(e);
+                }
+            });
+        }
+    }
 
     function validCustomName(name) {
         return /^[a-z][a-z0-9._·À-￿-]*-[a-z0-9._·À-￿-]*$/.test(name) &&
@@ -3252,8 +3272,12 @@
         listening = true;
         document.addEventListener("DOMNodeInserted", function (e) {
             var target = e.target;
-            if (target !== null && (target.nodeType === 1 || target.nodeType === 11) && isConnected(target)) {
-                upgradeTree(target, true);
+            if (target !== null && (target.nodeType === 1 || target.nodeType === 11)) {
+                queueReaction(function () {
+                    if (isConnected(target)) {
+                        upgradeTree(target, true);
+                    }
+                });
             }
         });
         document.addEventListener("DOMNodeRemoved", function (e) {
@@ -3273,12 +3297,15 @@
                 return;
             }
             var change = e.attrChange;
-            callback(el, "attributeChangedCallback", [
+            var args = [
                 name,
                 change === 2 ? null : e.prevValue,
                 change === 3 ? null : e.newValue,
                 null
-            ]);
+            ];
+            queueReaction(function () {
+                callback(el, "attributeChangedCallback", args);
+            });
         });
     }
 
@@ -4026,6 +4053,21 @@
             function start() {
                 var scheme = schemeOf(url);
                 var isData = scheme === "data";
+                if (scheme === "blob") {
+                    var blob = blobRegistry.get(url);
+                    if (blob === undefined || method !== "GET") {
+                        fail(new TypeError("Failed to fetch"));
+                        return;
+                    }
+                    var blobResponse = new Response(blob._bytes, { headers: blob._type ? { "content-type": blob._type } : {} });
+                    blobResponse._url = url;
+                    finished = true;
+                    if (signal) {
+                        signal.removeEventListener("abort", onAbort);
+                    }
+                    resolve(blobResponse);
+                    return;
+                }
                 var sameOrigin = isData || (docOrigin !== "null" && native.origin(url) === docOrigin);
                 if (!sameOrigin) {
                     tainted = true;
@@ -4422,10 +4464,72 @@
         return "";
     }
 
+    var templateContents = new WeakMap();
+    var inertDocument = null;
+
+    function isTemplate(node) {
+        return node.nodeType === 1 && node.localName === "template" &&
+            (node.namespaceURI === htmlNamespace || node.namespaceURI === null);
+    }
+
+    function templateContent(el) {
+        var frag = templateContents.get(el);
+        if (frag === undefined) {
+            if (inertDocument === null) {
+                inertDocument = document.implementation.createHTMLDocument("");
+            }
+            frag = inertDocument.createDocumentFragment();
+            templateContents.set(el, frag);
+            while (el.firstChild) {
+                frag.appendChild(el.firstChild);
+            }
+        }
+        return frag;
+    }
+
+    if (typeof HTMLTemplateElement === "function") {
+        defineGetter(HTMLTemplateElement.prototype, "content", function () {
+            return templateContent(this);
+        });
+    }
+    document.addEventListener("DOMContentLoaded", function () {
+        Array.prototype.slice.call(document.getElementsByTagName("template")).forEach(function (el) {
+            if (isTemplate(el)) {
+                templateContent(el);
+            }
+        });
+    });
+
     var innerHTMLDescriptor = Object.getOwnPropertyDescriptor(Element.prototype, "innerHTML");
+    var nativeInnerHTMLSet = innerHTMLDescriptor ? innerHTMLDescriptor.set : undefined;
     defineGetter(Element.prototype, "innerHTML", function () {
         return serializeHtmlChildren(this);
-    }, innerHTMLDescriptor ? innerHTMLDescriptor.set : undefined);
+    }, nativeInnerHTMLSet === undefined ? undefined : function (html) {
+        if (!isTemplate(this)) {
+            nativeInnerHTMLSet.call(this, html);
+            return;
+        }
+        var frag = templateContent(this);
+        while (frag.firstChild) {
+            frag.removeChild(frag.firstChild);
+        }
+        nativeInnerHTMLSet.call(this, html);
+        while (this.firstChild) {
+            frag.appendChild(this.firstChild);
+        }
+    });
+
+    var nativeCloneNode = Node.prototype.cloneNode;
+    define(Node.prototype, "cloneNode", function (deep) {
+        var copy = nativeCloneNode.apply(this, arguments);
+        if (deep && isTemplate(this) && templateContents.has(this)) {
+            var target = templateContent(copy);
+            for (var c = templateContents.get(this).firstChild; c !== null; c = c.nextSibling) {
+                target.appendChild(c.cloneNode(true));
+            }
+        }
+        return copy;
+    });
     defineGetter(Element.prototype, "outerHTML", function () {
         return serializeHtmlNode(this, this.parentNode);
     }, function (html) {
@@ -4450,6 +4554,31 @@
         return [];
     });
     defineMissing(Element.prototype, "scrollIntoView", function () {
+    });
+    function elementScroll(el, args, relative) {
+        var left, top;
+        if (args.length === 1 && args[0] !== null && typeof args[0] === "object") {
+            left = args[0].left;
+            top = args[0].top;
+        } else {
+            left = args[0];
+            top = args[1];
+        }
+        if (left !== undefined && isFinite(left)) {
+            el.scrollLeft = (relative ? el.scrollLeft : 0) + Number(left);
+        }
+        if (top !== undefined && isFinite(top)) {
+            el.scrollTop = (relative ? el.scrollTop : 0) + Number(top);
+        }
+    }
+    defineMissing(Element.prototype, "scroll", function () {
+        elementScroll(this, arguments, false);
+    });
+    defineMissing(Element.prototype, "scrollTo", function () {
+        elementScroll(this, arguments, false);
+    });
+    defineMissing(Element.prototype, "scrollBy", function () {
+        elementScroll(this, arguments, true);
     });
     defineGetter(Node.prototype, "isConnected", function () {
         var n = this;
@@ -4560,6 +4689,12 @@
         });
     });
 
+    function ShadowRoot() {
+        throw new TypeError("Illegal constructor");
+    }
+    Object.setPrototypeOf(ShadowRoot.prototype, DocumentFragment.prototype);
+    define(ShadowRoot.prototype, Symbol.toStringTag, "ShadowRoot");
+    defineMissing(global, "ShadowRoot", ShadowRoot);
     define(DocumentFragment.prototype, "getElementById", function (id) {
         id = String(id);
         for (var n = this.firstChild; n !== null; n = followingIn(n, this, false)) {
@@ -5825,6 +5960,268 @@
     defineMissing(global, "Blob", Blob);
     defineMissing(global, "File", File);
 
+    var importMap = { imports: {}, scopes: {} };
+    var moduleTexts = new Map();
+    var moduleLoads = new Map();
+    var moduleQueue = [];
+    var modulesReady = false;
+    var inlineModules = 0;
+
+    function absoluteURL(text, base) {
+        try {
+            return new URL(text, base).href;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function mapSpecifier(map, spec) {
+        if (Object.prototype.hasOwnProperty.call(map, spec)) {
+            return map[spec];
+        }
+        var best = null;
+        Object.keys(map).forEach(function (key) {
+            if (key.charAt(key.length - 1) === "/" && spec.indexOf(key) === 0 &&
+                (best === null || key.length > best.length)) {
+                best = key;
+            }
+        });
+        return best === null ? null : map[best] + spec.slice(best.length);
+    }
+
+    function resolveModule(spec, base) {
+        if (!/^[a-z][a-z0-9+.-]*:/i.test(base)) {
+            base = location.href;
+        }
+        var relative = /^(\/|\.\/|\.\.\/)/.test(spec);
+        var key = relative ? absoluteURL(spec, base) : (absoluteURL(spec) || spec);
+        var scopes = Object.keys(importMap.scopes).sort(function (a, b) {
+            return b.length - a.length;
+        });
+        for (var i = 0; i < scopes.length; i++) {
+            if (base.indexOf(scopes[i]) === 0) {
+                var scoped = mapSpecifier(importMap.scopes[scopes[i]], key);
+                if (scoped !== null) {
+                    return scoped;
+                }
+            }
+        }
+        var mapped = mapSpecifier(importMap.imports, key);
+        if (mapped !== null) {
+            return mapped;
+        }
+        if (relative || absoluteURL(spec) !== null) {
+            return key;
+        }
+        throw new TypeError("Failed to resolve module specifier \"" + spec + "\"");
+    }
+
+    function addImportMap(text) {
+        var map;
+        try {
+            map = JSON.parse(text);
+        } catch (e) {
+            reportError(e);
+            return;
+        }
+        var base = location.href;
+        function normalise(entries) {
+            var out = {};
+            Object.keys(entries || {}).forEach(function (key) {
+                var target = absoluteURL(String(entries[key]), base);
+                var name = /^(\/|\.\/|\.\.\/)/.test(key) ? absoluteURL(key, base) : key;
+                if (target !== null && name !== null) {
+                    out[name] = target;
+                }
+            });
+            return out;
+        }
+        Object.assign(importMap.imports, normalise(map.imports));
+        Object.keys(map.scopes || {}).forEach(function (scope) {
+            var url = absoluteURL(scope, base);
+            if (url !== null) {
+                importMap.scopes[url] = Object.assign(importMap.scopes[url] || {}, normalise(map.scopes[scope]));
+            }
+        });
+    }
+
+    function scanImports(text) {
+        var specs = [];
+        var patterns = [
+            /(?:^|[^.\w$])(?:import|export)\s*(?:[\w$*{}\s,]+?\s*from\s*)(["'])([^"'\n]+)\1/g,
+            /(?:^|[^.\w$])import\s*(["'])([^"'\n]+)\1/g
+        ];
+        patterns.forEach(function (re) {
+            var m;
+            while ((m = re.exec(text)) !== null) {
+                specs.push(m[2]);
+            }
+        });
+        return specs;
+    }
+
+    function moduleSource(url, inlineText) {
+        if (moduleLoads.has(url)) {
+            return moduleLoads.get(url);
+        }
+        var source = inlineText !== undefined ? Promise.resolve(inlineText) :
+            fetch(url, { credentials: "same-origin" }).then(function (r) {
+                if (!r.ok) {
+                    throw new TypeError("Failed to fetch module " + url);
+                }
+                return r.text();
+            });
+        source = source.then(function (text) {
+            moduleTexts.set(url, text);
+            return text;
+        });
+        moduleLoads.set(url, source);
+        return source;
+    }
+
+    function loadModuleGraph(url, inlineText) {
+        return new Promise(function (resolve, reject) {
+            var visited = new Set();
+            var pending = 0;
+            var entryError = null;
+            function visit(target, text) {
+                if (visited.has(target)) {
+                    return;
+                }
+                visited.add(target);
+                pending++;
+                moduleSource(target, text).then(function (source) {
+                    scanImports(source).forEach(function (spec) {
+                        try {
+                            visit(resolveModule(spec, target));
+                        } catch (e) {
+                        }
+                    });
+                }, function (e) {
+                    if (target === url) {
+                        entryError = e;
+                    }
+                }).then(function () {
+                    if (--pending === 0) {
+                        if (entryError !== null) {
+                            reject(entryError);
+                        } else {
+                            resolve();
+                        }
+                    }
+                });
+            }
+            visit(url, inlineText);
+        });
+    }
+
+    function fireScriptEvent(node, type) {
+        try {
+            node.dispatchEvent(new Event(type));
+        } catch (e) {
+        }
+    }
+
+    function runModuleEntry(entry) {
+        if (entry.state === "failed") {
+            reportError(entry.error);
+            fireScriptEvent(entry.node, "error");
+            return;
+        }
+        native.runModule(entry.url).then(function () {
+            fireScriptEvent(entry.node, "load");
+        }, function (e) {
+            reportError(e);
+        });
+    }
+
+    function runModules() {
+        modulesReady = true;
+        while (moduleQueue.length > 0 && moduleQueue[0].state !== "loading") {
+            runModuleEntry(moduleQueue.shift());
+        }
+    }
+
+    function loadModuleScript(node, src, text) {
+        var url = src !== null ? src : location.href.replace(/#.*$/, "") + "#module-" + (++inlineModules);
+        var entry = { node: node, url: url, state: "loading", error: null };
+        var isAsync = src !== null && node !== null && node.hasAttribute("async");
+        if (!isAsync) {
+            moduleQueue.push(entry);
+        }
+        loadModuleGraph(url, src === null ? (text === null ? "" : text) : undefined).then(function () {
+            entry.state = "ready";
+        }, function (e) {
+            entry.state = "failed";
+            entry.error = e;
+        }).then(function () {
+            native.moduleLoaded();
+            if (isAsync) {
+                runModuleEntry(entry);
+            } else if (modulesReady) {
+                runModules();
+            }
+        });
+    }
+
+    var cssNamespace = global.CSS !== undefined && global.CSS !== null ? global.CSS : {};
+    defineMissing(cssNamespace, "supports", function (property, value) {
+        if (arguments.length >= 2) {
+            return native.cssSupports("(" + String(property) + ": " + String(value) + ")");
+        }
+        var text = String(property);
+        return native.cssSupports(text) || native.cssSupports("(" + text + ")");
+    });
+    defineMissing(cssNamespace, "escape", function (value) {
+        var string = String(value);
+        var first = string.charCodeAt(0);
+        var result = "";
+        if (string.length === 1 && first === 0x2d) {
+            return "\\" + string;
+        }
+        for (var i = 0; i < string.length; i++) {
+            var code = string.charCodeAt(i);
+            if (code === 0) {
+                result += "\ufffd";
+            } else if ((code >= 1 && code <= 0x1f) || code === 0x7f ||
+                (i === 0 && code >= 0x30 && code <= 0x39) ||
+                (i === 1 && code >= 0x30 && code <= 0x39 && first === 0x2d)) {
+                result += "\\" + code.toString(16) + " ";
+            } else if (code >= 0x80 || code === 0x2d || code === 0x5f ||
+                (code >= 0x30 && code <= 0x39) || (code >= 0x41 && code <= 0x5a) ||
+                (code >= 0x61 && code <= 0x7a)) {
+                result += string.charAt(i);
+            } else {
+                result += "\\" + string.charAt(i);
+            }
+        }
+        return result;
+    });
+    defineMissing(global, "CSS", cssNamespace);
+
+    var blobRegistry = new Map();
+    var blobCounter = 0;
+    defineMissing(URL, "createObjectURL", function (blob) {
+        if (!(blob instanceof Blob)) {
+            throw new TypeError("Failed to execute 'createObjectURL' on 'URL': parameter 1 is not of type 'Blob'.");
+        }
+        var origin = native.origin(location.href);
+        blobCounter++;
+        var id = [8, 4, 4, 4, 12].map(function (n) {
+            var out = "";
+            for (var i = 0; i < n; i++) {
+                out += Math.floor(Math.random() * 16).toString(16);
+            }
+            return out;
+        }).join("-");
+        var url = "blob:" + (origin === "null" ? "null" : origin) + "/" + id;
+        blobRegistry.set(url, blob);
+        return url;
+    });
+    defineMissing(URL, "revokeObjectURL", function (url) {
+        blobRegistry.delete(String(url));
+    });
+
     function SimpleEventTarget() {
     }
     define(SimpleEventTarget.prototype, "addEventListener", function (type, fn) {
@@ -6207,7 +6604,13 @@
             this[n] = null;
         }, this);
     }
-    Object.setPrototypeOf(XMLHttpRequest.prototype, SimpleEventTarget.prototype);
+    function XMLHttpRequestEventTarget() {
+        throw new TypeError("Illegal constructor");
+    }
+    Object.setPrototypeOf(XMLHttpRequestEventTarget.prototype, SimpleEventTarget.prototype);
+    define(XMLHttpRequestEventTarget.prototype, Symbol.toStringTag, "XMLHttpRequestEventTarget");
+    defineMissing(global, "XMLHttpRequestEventTarget", XMLHttpRequestEventTarget);
+    Object.setPrototypeOf(XMLHttpRequest.prototype, XMLHttpRequestEventTarget.prototype);
     [["UNSENT", XHR_UNSENT], ["OPENED", XHR_OPENED], ["HEADERS_RECEIVED", XHR_HEADERS], ["LOADING", XHR_LOADING], ["DONE", XHR_DONE]].forEach(function (c) {
         Object.defineProperty(XMLHttpRequest, c[0], { value: c[1], enumerable: true });
         Object.defineProperty(XMLHttpRequest.prototype, c[0], { value: c[1], enumerable: true });
@@ -6387,6 +6790,17 @@
     }
 
     return {
+        flushReactions: flushReactions,
+        resolveModule: resolveModule,
+        moduleText: function (url) {
+            return moduleTexts.get(url);
+        },
+        loadModuleGraph: function (url) {
+            return loadModuleGraph(url);
+        },
+        loadModuleScript: loadModuleScript,
+        runModules: runModules,
+        addImportMap: addImportMap,
         makeComputedStyle: function (values) {
             var names = Object.keys(computedDefaults).concat(Object.keys(values)).filter(function (n, i, a) {
                 return a.indexOf(n) === i;

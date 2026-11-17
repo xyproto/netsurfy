@@ -345,23 +345,26 @@ css_error css__cascade_length_normal(
 	return CSS_OK;
 }
 
-css_error css__cascade_gap(
-	uint32_t opv,
-	css_style *style,
-	css_select_state *state,
-	css_error (*fun)(css_computed_style *, uint8_t, css_fixed, css_unit))
+css_error css__cascade_gap(uint32_t opv,
+			   css_style *style,
+			   css_select_state *state,
+			   css_error (*fun)(css_computed_style *,
+					    uint8_t,
+					    css_fixed_or_calc,
+					    css_unit))
 {
 	uint16_t value = CSS_COLUMN_GAP_INHERIT;
-	css_fixed length = 0;
+	css_fixed_or_calc length = (css_fixed_or_calc)0;
+	uint32_t snum = 0;
 	uint32_t unit = UNIT_PX;
 
 	if (hasFlagValue(opv) == false) {
 		switch (getValue(opv)) {
 		case COLUMN_GAP_SET:
 			value = CSS_COLUMN_GAP_SET;
-			length = *((css_fixed *)style->bytecode);
-			advance_bytecode(style, sizeof(length));
-			unit = *((uint32_t *)style->bytecode);
+			length.value = *((css_fixed *)style->bytecode);
+			advance_bytecode(style, sizeof(length.value));
+			unit = css__to_css_unit(*((uint32_t *)style->bytecode));
 			advance_bytecode(style, sizeof(unit));
 			break;
 		case COLUMN_GAP_NORMAL:
@@ -377,16 +380,21 @@ css_error css__cascade_gap(
 			value = CSS_COLUMN_GAP_THICK;
 			break;
 		case COLUMN_GAP_CALC:
+			value = CSS_COLUMN_GAP_SET;
 			advance_bytecode(style, sizeof(unit));
-			advance_bytecode(style, sizeof(unit)); // TODO
-			return CSS_OK;
+			snum = *((uint32_t *)style->bytecode);
+			advance_bytecode(style, sizeof(snum));
+			unit = CSS_UNIT_CALC;
+			css__stylesheet_string_get(style->sheet,
+						   snum,
+						   &length.calc);
+			break;
 		default:
 			assert(0 && "Invalid value");
 			break;
 		}
 	}
 
-	unit = css__to_css_unit(unit);
 
 	if (css__outranks_existing(getOpcode(opv),
 				   isImportant(opv),
@@ -398,39 +406,47 @@ css_error css__cascade_gap(
 	return CSS_OK;
 }
 
-css_error css__cascade_length_none(
-	uint32_t opv,
-	css_style *style,
-	css_select_state *state,
-	css_error (*fun)(css_computed_style *, uint8_t, css_fixed, css_unit))
+css_error css__cascade_length_none(uint32_t opv,
+				   css_style *style,
+				   css_select_state *state,
+				   css_error (*fun)(css_computed_style *,
+						    uint8_t,
+						    css_fixed_or_calc,
+						    css_unit))
 {
 	uint16_t value = CSS_MAX_HEIGHT_INHERIT;
-	css_fixed length = 0;
+	css_fixed_or_calc length = (css_fixed_or_calc)0;
+	uint32_t snum = 0;
 	uint32_t unit = UNIT_PX;
 
 	if (hasFlagValue(opv) == false) {
 		switch (getValue(opv)) {
 		case MAX_HEIGHT_SET:
 			value = CSS_MAX_HEIGHT_SET;
-			length = *((css_fixed *)style->bytecode);
-			advance_bytecode(style, sizeof(length));
-			unit = *((uint32_t *)style->bytecode);
+			length.value = *((css_fixed *)style->bytecode);
+			advance_bytecode(style, sizeof(length.value));
+			unit = css__to_css_unit(*((uint32_t *)style->bytecode));
 			advance_bytecode(style, sizeof(unit));
 			break;
 		case MAX_HEIGHT_NONE:
 			value = CSS_MAX_HEIGHT_NONE;
 			break;
 		case MAX_HEIGHT_CALC:
+			value = CSS_MAX_HEIGHT_SET;
 			advance_bytecode(style, sizeof(unit));
-			advance_bytecode(style, sizeof(unit)); // TODO
-			return CSS_OK;
+			snum = *((uint32_t *)style->bytecode);
+			advance_bytecode(style, sizeof(snum));
+			unit = CSS_UNIT_CALC;
+			css__stylesheet_string_get(style->sheet,
+						   snum,
+						   &length.calc);
+			break;
 		default:
 			assert(0 && "Invalid value");
 			break;
 		}
 	}
 
-	unit = css__to_css_unit(unit);
 
 	if (css__outranks_existing(getOpcode(opv),
 				   isImportant(opv),
@@ -472,6 +488,56 @@ css_error css__cascade_length(
 	}
 
 	unit = css__to_css_unit(unit);
+
+	/** \todo lose fun != NULL once all properties have set routines */
+	if (fun != NULL && css__outranks_existing(getOpcode(opv),
+						  isImportant(opv),
+						  state,
+						  getFlagValue(opv))) {
+		return fun(state->computed, value, length, unit);
+	}
+
+	return CSS_OK;
+}
+
+css_error css__cascade_length_calc(uint32_t opv,
+				   css_style *style,
+				   css_select_state *state,
+				   css_error (*fun)(css_computed_style *,
+						    uint8_t,
+						    css_fixed_or_calc,
+						    css_unit))
+{
+	uint16_t value = CSS_MIN_HEIGHT_INHERIT;
+	css_fixed_or_calc length = (css_fixed_or_calc)0;
+	uint32_t snum = 0;
+	uint32_t unit = UNIT_PX;
+
+	if (hasFlagValue(opv) == false) {
+		switch (getValue(opv)) {
+		case MIN_HEIGHT_SET:
+			value = CSS_MIN_HEIGHT_SET;
+			length.value = *((css_fixed *)style->bytecode);
+			advance_bytecode(style, sizeof(length.value));
+			unit = css__to_css_unit(*((uint32_t *)style->bytecode));
+			advance_bytecode(style, sizeof(unit));
+			break;
+		case MIN_HEIGHT_CALC:
+			value = CSS_MIN_HEIGHT_SET;
+			advance_bytecode(style, sizeof(unit));
+			snum = *((uint32_t *)style->bytecode);
+			advance_bytecode(style, sizeof(snum));
+			unit = CSS_UNIT_CALC;
+			css__stylesheet_string_get(style->sheet,
+						   snum,
+						   &length.calc);
+			break;
+		default:
+			assert(0 && "Invalid value");
+			break;
+		}
+	}
+
 
 	/** \todo lose fun != NULL once all properties have set routines */
 	if (fun != NULL && css__outranks_existing(getOpcode(opv),

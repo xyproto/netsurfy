@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>DOM core</title><script src="harness.js"></script></head>
-<body><div id="d" class="a b" data-x="1"><span>x</span>text</div><script>
+<body><div id="d" class="a b" data-x="1"><span>x</span>text</div><template id="tpl"><p class="item">x<b>y</b></p><script>window.templateScriptRan = true;</script></template>
+<script>
 var d = document.getElementById("d");
 test("detached text nodes are writable", function () {
     var t = document.createTextNode("a");
@@ -114,6 +115,91 @@ test("XHTML documents from createDocument", function () {
     assertEquals(doc.title, "Sparrow");
     doc.body.appendChild(doc.createElementNS(ns, "form"));
     assertEquals(doc.forms.length, 1);
+});
+test("custom element reactions can modify the DOM", function () {
+    var log = [];
+    customElements.define("x-reaction", class extends HTMLElement {
+        static get observedAttributes() { return ["data-v"]; }
+        connectedCallback() {
+            this.textContent = "connected";
+            this.appendChild(document.createElement("span"));
+            log.push("connected");
+        }
+        attributeChangedCallback(name, oldValue, newValue) {
+            this.title = newValue;
+            log.push("changed");
+        }
+    });
+    var el = document.createElement("x-reaction");
+    document.body.appendChild(el);
+    assertEquals(el.textContent, "connected");
+    assertEquals(el.lastChild.nodeName, "SPAN");
+    el.setAttribute("data-v", "7");
+    assertEquals(el.title, "7");
+    assertEquals(log.join(), "connected,changed");
+    el.remove();
+});
+test("nodes from other documents are adopted on insertion", function () {
+    var other = document.implementation.createHTMLDocument("x");
+    var span = other.createElement("span");
+    span.setAttribute("data-a", "1");
+    span.appendChild(other.createTextNode("t"));
+    other.body.appendChild(span);
+    document.body.appendChild(span);
+    assertEquals(span.ownerDocument, document);
+    assertEquals(span.firstChild.ownerDocument, document);
+    assertEquals(span.getAttributeNode("data-a").ownerDocument, document);
+    assertEquals(span.parentNode, document.body);
+    assertEquals(other.body.childNodes.length, 0);
+    var text = other.createTextNode("x");
+    assertEquals(document.adoptNode(text), text);
+    assertEquals(text.ownerDocument, document);
+    var div = document.createElement("div");
+    document.body.appendChild(div);
+    div.replaceChild(text, div.appendChild(document.createElement("b")));
+    assertEquals(div.firstChild, text);
+    span.remove();
+    div.remove();
+});
+test("ShadowRoot and XMLHttpRequestEventTarget interfaces", function () {
+    assert(Object.getPrototypeOf(ShadowRoot.prototype) === DocumentFragment.prototype);
+    assert(!(document.createDocumentFragment() instanceof ShadowRoot));
+    assert(new XMLHttpRequest() instanceof XMLHttpRequestEventTarget);
+});
+test("element scrolling methods", function () {
+    var d = document.createElement("div");
+    assert(typeof d.scrollTo === "function" && typeof d.scrollBy === "function" && typeof d.scroll === "function");
+    d.scrollTo({ top: 0, left: 0 });
+});
+test("template content", function () {
+    var tpl = document.getElementById("tpl");
+    assert(!window.templateScriptRan);
+    var content = tpl.content;
+    assertEquals(tpl.childNodes.length, 0, "parsed children move into content");
+    assertEquals(content.nodeType, 11);
+    assert(content instanceof DocumentFragment);
+    assertEquals(content.cloneNode(true).firstElementChild.className, "item");
+    assert(document.createDocumentFragment().querySelector("p") === null);
+    assert(content === tpl.content);
+    assertEquals(content.firstChild.className, "item");
+    assert(content.ownerDocument !== document);
+    assertEquals(document.querySelectorAll(".item").length, 0);
+    var copy = document.importNode(content, true);
+    document.body.appendChild(copy);
+    assertEquals(document.querySelectorAll(".item").length, 1);
+    document.querySelector(".item").remove();
+    var made = document.createElement("template");
+    made.innerHTML = "<span>a</span><span>b</span>";
+    assertEquals(made.childNodes.length, 0);
+    assertEquals(made.content.childNodes.length, 2);
+    assertEquals(made.innerHTML, "<span>a</span><span>b</span>");
+    var clone = made.cloneNode(true);
+    assertEquals(clone.content.childNodes.length, 2);
+    assert(clone.content.firstChild !== made.content.firstChild);
+    document.body.appendChild(made.content.cloneNode(true));
+    assertEquals(document.body.lastChild.textContent, "b");
+    document.body.lastChild.remove();
+    document.body.lastChild.remove();
 });
 test("meta httpEquiv", function () {
     var m = document.createElement("meta");

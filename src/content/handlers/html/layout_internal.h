@@ -91,6 +91,8 @@ extern const css_len_func margin_funcs[4];
 
 /** Array of per-side access functions for computed style paddings. */
 extern const css_len_func padding_funcs[4];
+extern const enum css_properties_e margin_props[4];
+extern const enum css_properties_e padding_props[4];
 
 /** Array of per-side access functions for computed style border_widths. */
 extern const css_len_func border_width_funcs[4];
@@ -194,6 +196,16 @@ static inline bool lh__flex_direction_reversed(const struct box *flex)
 	}
 }
 
+static inline bool lh__calc_px(const css_unit_ctx *unit_len_ctx,
+			       const css_computed_style *style,
+			       enum css_properties_e property,
+			       int available,
+			       int *px)
+{
+	return css_computed_calc_px(
+		       style, property, unit_len_ctx, available, px) == CSS_OK;
+}
+
 static inline int lh__flex_gap(const css_unit_ctx *unit_len_ctx,
 			       const struct box *flex,
 			       bool main)
@@ -203,8 +215,24 @@ static inline int lh__flex_gap(const css_unit_ctx *unit_len_ctx,
 	uint8_t type;
 
 	if (lh__flex_main_is_horizontal(flex) == main) {
+		int px;
+		if (lh__calc_px(unit_len_ctx,
+				flex->style,
+				CSS_PROP_COLUMN_GAP,
+				-1,
+				&px)) {
+			return px;
+		}
 		type = css_computed_column_gap(flex->style, &length, &unit);
 	} else {
+		int px;
+		if (lh__calc_px(unit_len_ctx,
+				flex->style,
+				CSS_PROP_ROW_GAP,
+				-1,
+				&px)) {
+			return px;
+		}
 		type = css_computed_row_gap(flex->style, &length, &unit);
 	}
 
@@ -331,8 +359,13 @@ static inline void calculate_mbp_width(const css_unit_ctx *unit_len_ctx,
 	if (margin) {
 		enum css_margin_e type;
 
+		int px;
+
 		type = margin_funcs[side](style, &value, &unit);
-		if (type == CSS_MARGIN_SET) {
+		if (lh__calc_px(
+			    unit_len_ctx, style, margin_props[side], -1, &px)) {
+			*fixed += px;
+		} else if (type == CSS_MARGIN_SET) {
 			if (unit == CSS_UNIT_PCT) {
 				*frac += FIXTOFLT(FDIV(value, F_100));
 			} else {
@@ -354,8 +387,16 @@ static inline void calculate_mbp_width(const css_unit_ctx *unit_len_ctx,
 
 	/* padding */
 	if (padding) {
+		int px;
+
 		padding_funcs[side](style, &value, &unit);
-		if (unit == CSS_UNIT_PCT) {
+		if (lh__calc_px(unit_len_ctx,
+				style,
+				padding_props[side],
+				-1,
+				&px)) {
+			*fixed += px;
+		} else if (unit == CSS_UNIT_PCT) {
 			*frac += FIXTOFLT(FDIV(value, F_100));
 		} else {
 			*fixed += FIXTOINT(css_unit_len2device_px(
@@ -528,7 +569,13 @@ static inline void layout_find_dimensions(const css_unit_ctx *unit_len_ctx,
 
 		htype = css_computed_height(style, &value, &unit);
 
-		if (htype == CSS_HEIGHT_SET) {
+		if (lh__calc_px(unit_len_ctx,
+				style,
+				CSS_PROP_HEIGHT,
+				layout_percentage_height_base(box,
+							      viewport_height),
+				height)) {
+		} else if (htype == CSS_HEIGHT_SET) {
 			if (unit == CSS_UNIT_PCT) {
 				int base = layout_percentage_height_base(
 					box, viewport_height);
@@ -565,7 +612,12 @@ static inline void layout_find_dimensions(const css_unit_ctx *unit_len_ctx,
 
 		type = css_computed_max_width(style, &value, &unit);
 
-		if (type == CSS_MAX_WIDTH_SET) {
+		if (lh__calc_px(unit_len_ctx,
+				style,
+				CSS_PROP_MAX_WIDTH,
+				available_width,
+				max_width)) {
+		} else if (type == CSS_MAX_WIDTH_SET) {
 			if (unit == CSS_UNIT_PCT) {
 				*max_width = layout_percent_of(value,
 							       available_width);
@@ -594,7 +646,12 @@ static inline void layout_find_dimensions(const css_unit_ctx *unit_len_ctx,
 
 		type = ns_computed_min_width(style, &value, &unit);
 
-		if (type == CSS_MIN_WIDTH_SET) {
+		if (lh__calc_px(unit_len_ctx,
+				style,
+				CSS_PROP_MIN_WIDTH,
+				available_width,
+				min_width)) {
+		} else if (type == CSS_MIN_WIDTH_SET) {
 			if (unit == CSS_UNIT_PCT) {
 				*min_width = layout_percent_of(value,
 							       available_width);
@@ -623,7 +680,13 @@ static inline void layout_find_dimensions(const css_unit_ctx *unit_len_ctx,
 
 		type = css_computed_max_height(style, &value, &unit);
 
-		if (type == CSS_MAX_HEIGHT_SET) {
+		if (lh__calc_px(unit_len_ctx,
+				style,
+				CSS_PROP_MAX_HEIGHT,
+				layout_percentage_height_base(box,
+							      viewport_height),
+				max_height)) {
+		} else if (type == CSS_MAX_HEIGHT_SET) {
 			if (unit == CSS_UNIT_PCT) {
 				int base = layout_percentage_height_base(
 					box, viewport_height);
@@ -649,7 +712,13 @@ static inline void layout_find_dimensions(const css_unit_ctx *unit_len_ctx,
 
 		type = ns_computed_min_height(style, &value, &unit);
 
-		if (type == CSS_MIN_HEIGHT_SET) {
+		if (lh__calc_px(unit_len_ctx,
+				style,
+				CSS_PROP_MIN_HEIGHT,
+				layout_percentage_height_base(box,
+							      viewport_height),
+				min_height)) {
+		} else if (type == CSS_MIN_HEIGHT_SET) {
 			if (unit == CSS_UNIT_PCT) {
 				int base = layout_percentage_height_base(
 					box, viewport_height);
@@ -676,7 +745,12 @@ static inline void layout_find_dimensions(const css_unit_ctx *unit_len_ctx,
 
 			type = margin_funcs[i](style, &value, &unit);
 
-			if (type == CSS_MARGIN_SET) {
+			if (lh__calc_px(unit_len_ctx,
+					style,
+					margin_props[i],
+					available_width,
+					&margin[i])) {
+			} else if (type == CSS_MARGIN_SET) {
 				if (unit == CSS_UNIT_PCT) {
 					margin[i] = layout_percent_of(
 						value, available_width);
@@ -699,7 +773,12 @@ static inline void layout_find_dimensions(const css_unit_ctx *unit_len_ctx,
 
 			padding_funcs[i](style, &value, &unit);
 
-			if (unit == CSS_UNIT_PCT) {
+			if (lh__calc_px(unit_len_ctx,
+					style,
+					padding_props[i],
+					available_width,
+					&padding[i])) {
+			} else if (unit == CSS_UNIT_PCT) {
 				padding[i] = layout_percent_of(value,
 							       available_width);
 			} else {

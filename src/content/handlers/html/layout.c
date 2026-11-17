@@ -79,6 +79,20 @@ const css_len_func margin_funcs[4] = {
 };
 
 /** Array of per-side access functions for computed style paddings. */
+const enum css_properties_e margin_props[4] = {
+	[TOP] = CSS_PROP_MARGIN_TOP,
+	[RIGHT] = CSS_PROP_MARGIN_RIGHT,
+	[BOTTOM] = CSS_PROP_MARGIN_BOTTOM,
+	[LEFT] = CSS_PROP_MARGIN_LEFT,
+};
+
+const enum css_properties_e padding_props[4] = {
+	[TOP] = CSS_PROP_PADDING_TOP,
+	[RIGHT] = CSS_PROP_PADDING_RIGHT,
+	[BOTTOM] = CSS_PROP_PADDING_BOTTOM,
+	[LEFT] = CSS_PROP_PADDING_LEFT,
+};
+
 const css_len_func padding_funcs[4] = {
 	[TOP] = css_computed_padding_top,
 	[RIGHT] = css_computed_padding_right,
@@ -235,6 +249,13 @@ static int layout_text_indent(const css_unit_ctx *unit_len_ctx,
 {
 	css_fixed value = 0;
 	css_unit unit = CSS_UNIT_PX;
+
+	int px;
+
+	if (lh__calc_px(
+		    unit_len_ctx, style, CSS_PROP_TEXT_INDENT, width, &px)) {
+		return px;
+	}
 
 	css_computed_text_indent(style, &value, &unit);
 
@@ -2473,9 +2494,23 @@ static bool layout_apply_minmax_height(const css_unit_ctx *unit_len_ctx,
 						    &unit);
 		}
 
+		int base = containing_block != NULL &&
+					   containing_block->height != AUTO
+				   ? containing_block->height
+				   : -1;
+
 		/* max-height */
-		if (css_computed_max_height(box->style, &value, &unit) ==
-		    CSS_MAX_HEIGHT_SET) {
+		if (lh__calc_px(unit_len_ctx,
+				box->style,
+				CSS_PROP_MAX_HEIGHT,
+				base,
+				&h)) {
+			if (h < box->height) {
+				box->height = h;
+				updated = true;
+			}
+		} else if (css_computed_max_height(box->style, &value, &unit) ==
+			   CSS_MAX_HEIGHT_SET) {
 			if (unit == CSS_UNIT_PCT) {
 				if (containing_block &&
 				    containing_block->height != AUTO &&
@@ -2505,8 +2540,17 @@ static bool layout_apply_minmax_height(const css_unit_ctx *unit_len_ctx,
 		}
 
 		/* min-height */
-		if (ns_computed_min_height(box->style, &value, &unit) ==
-		    CSS_MIN_HEIGHT_SET) {
+		if (lh__calc_px(unit_len_ctx,
+				box->style,
+				CSS_PROP_MIN_HEIGHT,
+				base,
+				&h)) {
+			if (h > box->height) {
+				box->height = h;
+				updated = true;
+			}
+		} else if (ns_computed_min_height(box->style, &value, &unit) ==
+			   CSS_MIN_HEIGHT_SET) {
 			if (unit == CSS_UNIT_PCT) {
 				if (containing_block &&
 				    containing_block->height != AUTO &&
@@ -4249,6 +4293,14 @@ bool layout_block_context(struct box *block,
 			layout_block_add_scrollbar(box, BOTTOM);
 		}
 
+		if (box->type == BOX_BLOCK && box->style != NULL &&
+		    css_computed_position(box->style) !=
+			    CSS_POSITION_ABSOLUTE) {
+			layout_apply_minmax_height(&content->unit_len_ctx,
+						   box,
+						   NULL);
+		}
+
 		cy += box->height + box->padding[BOTTOM] +
 		      box->border[BOTTOM].width;
 		cx -= box->x;
@@ -4861,7 +4913,12 @@ static void layout_compute_offsets(const css_unit_ctx *unit_len_ctx,
 
 	/* left */
 	type = css_computed_left(box->style, &value, &unit);
-	if (type == CSS_LEFT_SET) {
+	if (lh__calc_px(unit_len_ctx,
+			box->style,
+			CSS_PROP_LEFT,
+			containing_block->width,
+			left)) {
+	} else if (type == CSS_LEFT_SET) {
 		if (unit == CSS_UNIT_PCT) {
 			*left = layout_percent_of(value,
 						  containing_block->width);
@@ -4875,7 +4932,12 @@ static void layout_compute_offsets(const css_unit_ctx *unit_len_ctx,
 
 	/* right */
 	type = css_computed_right(box->style, &value, &unit);
-	if (type == CSS_RIGHT_SET) {
+	if (lh__calc_px(unit_len_ctx,
+			box->style,
+			CSS_PROP_RIGHT,
+			containing_block->width,
+			right)) {
+	} else if (type == CSS_RIGHT_SET) {
 		if (unit == CSS_UNIT_PCT) {
 			*right = layout_percent_of(value,
 						   containing_block->width);
@@ -4889,7 +4951,12 @@ static void layout_compute_offsets(const css_unit_ctx *unit_len_ctx,
 
 	/* top */
 	type = css_computed_top(box->style, &value, &unit);
-	if (type == CSS_TOP_SET) {
+	if (lh__calc_px(unit_len_ctx,
+			box->style,
+			CSS_PROP_TOP,
+			containing_block->height,
+			top)) {
+	} else if (type == CSS_TOP_SET) {
 		if (unit == CSS_UNIT_PCT) {
 			*top = layout_percent_of(value,
 						 containing_block->height);
@@ -4903,7 +4970,12 @@ static void layout_compute_offsets(const css_unit_ctx *unit_len_ctx,
 
 	/* bottom */
 	type = css_computed_bottom(box->style, &value, &unit);
-	if (type == CSS_BOTTOM_SET) {
+	if (lh__calc_px(unit_len_ctx,
+			box->style,
+			CSS_PROP_BOTTOM,
+			containing_block->height,
+			bottom)) {
+	} else if (type == CSS_BOTTOM_SET) {
 		if (unit == CSS_UNIT_PCT) {
 			*bottom = layout_percent_of(value,
 						    containing_block->height);

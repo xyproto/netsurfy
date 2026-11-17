@@ -355,7 +355,7 @@ void output_calc(FILE *outputf,
 
 	fprintf(outputf,
 		"if ((token->type == CSS_TOKEN_FUNCTION) && "
-		"(lwc_string_caseless_isequal(token->idata, c->strings[CALC], &match) == lwc_error_ok && match))"
+		"css__is_calc_function(token))"
 		" {\n"
 		"\t\terror = css__parse_calc(c, vector, ctx, result, buildOPV(%s, 0, %s), %s);\n"
 		"\t} else ",

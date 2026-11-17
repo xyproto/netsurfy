@@ -493,16 +493,30 @@ static inline css_error set_border_top_width(css_computed_style *style,
 
 static inline css_error set_bottom(css_computed_style *style,
 				   uint8_t type,
-				   css_fixed length,
+				   css_fixed_or_calc length,
 				   css_unit unit)
 {
+	uint32_t orig_bits = (style->i.bits[BOTTOM_INDEX] & BOTTOM_MASK) >>
+			     BOTTOM_SHIFT;
+
+	/* 7bits: uuuuutt : unit | type */
+	if ((orig_bits & 0x3) == CSS_BOTTOM_SET) {
+		if ((orig_bits & 0x7c) >> 2 == CSS_UNIT_CALC) {
+			lwc_string_unref(style->i.bottom.calc);
+		}
+	}
+
 	uint32_t *bits = &style->i.bits[BOTTOM_INDEX];
 
 	/* 7bits: uuuuutt : unit | type */
 	*bits = (*bits & ~BOTTOM_MASK) |
 		((((uint32_t)type & 0x3) | (unit << 2)) << BOTTOM_SHIFT);
 
-	style->i.bottom = length;
+	if (unit == CSS_UNIT_CALC) {
+		style->i.bottom.calc = lwc_string_ref(length.calc);
+	} else {
+		style->i.bottom.value = length.value;
+	}
 
 	return CSS_OK;
 }
@@ -727,16 +741,31 @@ static inline css_error set_column_fill(css_computed_style *style, uint8_t type)
 
 static inline css_error set_column_gap(css_computed_style *style,
 				       uint8_t type,
-				       css_fixed length,
+				       css_fixed_or_calc length,
 				       css_unit unit)
 {
+	uint32_t orig_bits = (style->i.bits[COLUMN_GAP_INDEX] &
+			      COLUMN_GAP_MASK) >>
+			     COLUMN_GAP_SHIFT;
+
+	/* 8bits: uuuuuttt : unit | type */
+	if ((orig_bits & 0x7) == CSS_COLUMN_GAP_SET) {
+		if ((orig_bits & 0xf8) >> 3 == CSS_UNIT_CALC) {
+			lwc_string_unref(style->i.column_gap.calc);
+		}
+	}
+
 	uint32_t *bits = &style->i.bits[COLUMN_GAP_INDEX];
 
 	/* 8bits: uuuuuttt : unit | type */
 	*bits = (*bits & ~COLUMN_GAP_MASK) |
 		((((uint32_t)type & 0x7) | (unit << 3)) << COLUMN_GAP_SHIFT);
 
-	style->i.column_gap = length;
+	if (unit == CSS_UNIT_CALC) {
+		style->i.column_gap.calc = lwc_string_ref(length.calc);
+	} else {
+		style->i.column_gap.value = length.value;
+	}
 
 	return CSS_OK;
 }
@@ -1122,16 +1151,31 @@ set_fill_opacity(css_computed_style *style, uint8_t type, css_fixed fixed)
 
 static inline css_error set_flex_basis(css_computed_style *style,
 				       uint8_t type,
-				       css_fixed length,
+				       css_fixed_or_calc length,
 				       css_unit unit)
 {
+	uint32_t orig_bits = (style->i.bits[FLEX_BASIS_INDEX] &
+			      FLEX_BASIS_MASK) >>
+			     FLEX_BASIS_SHIFT;
+
+	/* 7bits: uuuuutt : unit | type */
+	if ((orig_bits & 0x3) == CSS_FLEX_BASIS_SET) {
+		if ((orig_bits & 0x7c) >> 2 == CSS_UNIT_CALC) {
+			lwc_string_unref(style->i.flex_basis.calc);
+		}
+	}
+
 	uint32_t *bits = &style->i.bits[FLEX_BASIS_INDEX];
 
 	/* 7bits: uuuuutt : unit | type */
 	*bits = (*bits & ~FLEX_BASIS_MASK) |
 		((((uint32_t)type & 0x3) | (unit << 2)) << FLEX_BASIS_SHIFT);
 
-	style->i.flex_basis = length;
+	if (unit == CSS_UNIT_CALC) {
+		style->i.flex_basis.calc = lwc_string_ref(length.calc);
+	} else {
+		style->i.flex_basis.value = length.value;
+	}
 
 	return CSS_OK;
 }
@@ -1356,16 +1400,30 @@ static inline css_error set_font_weight(css_computed_style *style, uint8_t type)
 
 static inline css_error set_height(css_computed_style *style,
 				   uint8_t type,
-				   css_fixed length,
+				   css_fixed_or_calc length,
 				   css_unit unit)
 {
+	uint32_t orig_bits = (style->i.bits[HEIGHT_INDEX] & HEIGHT_MASK) >>
+			     HEIGHT_SHIFT;
+
+	/* 7bits: uuuuutt : unit | type */
+	if ((orig_bits & 0x3) == CSS_HEIGHT_SET) {
+		if ((orig_bits & 0x7c) >> 2 == CSS_UNIT_CALC) {
+			lwc_string_unref(style->i.height.calc);
+		}
+	}
+
 	uint32_t *bits = &style->i.bits[HEIGHT_INDEX];
 
 	/* 7bits: uuuuutt : unit | type */
 	*bits = (*bits & ~HEIGHT_MASK) |
 		((((uint32_t)type & 0x3) | (unit << 2)) << HEIGHT_SHIFT);
 
-	style->i.height = length;
+	if (unit == CSS_UNIT_CALC) {
+		style->i.height.calc = lwc_string_ref(length.calc);
+	} else {
+		style->i.height.value = length.value;
+	}
 
 	return CSS_OK;
 }
@@ -1398,16 +1456,30 @@ set_justify_content(css_computed_style *style, uint8_t type)
 
 static inline css_error set_left(css_computed_style *style,
 				 uint8_t type,
-				 css_fixed length,
+				 css_fixed_or_calc length,
 				 css_unit unit)
 {
+	uint32_t orig_bits = (style->i.bits[LEFT_INDEX] & LEFT_MASK) >>
+			     LEFT_SHIFT;
+
+	/* 7bits: uuuuutt : unit | type */
+	if ((orig_bits & 0x3) == CSS_LEFT_SET) {
+		if ((orig_bits & 0x7c) >> 2 == CSS_UNIT_CALC) {
+			lwc_string_unref(style->i.left.calc);
+		}
+	}
+
 	uint32_t *bits = &style->i.bits[LEFT_INDEX];
 
 	/* 7bits: uuuuutt : unit | type */
 	*bits = (*bits & ~LEFT_MASK) |
 		((((uint32_t)type & 0x3) | (unit << 2)) << LEFT_SHIFT);
 
-	style->i.left = length;
+	if (unit == CSS_UNIT_CALC) {
+		style->i.left.calc = lwc_string_ref(length.calc);
+	} else {
+		style->i.left.value = length.value;
+	}
 
 	return CSS_OK;
 }
@@ -1536,16 +1608,31 @@ set_list_style_type(css_computed_style *style, uint8_t type)
 
 static inline css_error set_margin_bottom(css_computed_style *style,
 					  uint8_t type,
-					  css_fixed length,
+					  css_fixed_or_calc length,
 					  css_unit unit)
 {
+	uint32_t orig_bits = (style->i.bits[MARGIN_BOTTOM_INDEX] &
+			      MARGIN_BOTTOM_MASK) >>
+			     MARGIN_BOTTOM_SHIFT;
+
+	/* 7bits: uuuuutt : unit | type */
+	if ((orig_bits & 0x3) == CSS_MARGIN_SET) {
+		if ((orig_bits & 0x7c) >> 2 == CSS_UNIT_CALC) {
+			lwc_string_unref(style->i.margin_bottom.calc);
+		}
+	}
+
 	uint32_t *bits = &style->i.bits[MARGIN_BOTTOM_INDEX];
 
 	/* 7bits: uuuuutt : unit | type */
 	*bits = (*bits & ~MARGIN_BOTTOM_MASK) |
 		((((uint32_t)type & 0x3) | (unit << 2)) << MARGIN_BOTTOM_SHIFT);
 
-	style->i.margin_bottom = length;
+	if (unit == CSS_UNIT_CALC) {
+		style->i.margin_bottom.calc = lwc_string_ref(length.calc);
+	} else {
+		style->i.margin_bottom.value = length.value;
+	}
 
 	return CSS_OK;
 }
@@ -1559,16 +1646,31 @@ static inline css_error set_margin_bottom(css_computed_style *style,
 
 static inline css_error set_margin_left(css_computed_style *style,
 					uint8_t type,
-					css_fixed length,
+					css_fixed_or_calc length,
 					css_unit unit)
 {
+	uint32_t orig_bits = (style->i.bits[MARGIN_LEFT_INDEX] &
+			      MARGIN_LEFT_MASK) >>
+			     MARGIN_LEFT_SHIFT;
+
+	/* 7bits: uuuuutt : unit | type */
+	if ((orig_bits & 0x3) == CSS_MARGIN_SET) {
+		if ((orig_bits & 0x7c) >> 2 == CSS_UNIT_CALC) {
+			lwc_string_unref(style->i.margin_left.calc);
+		}
+	}
+
 	uint32_t *bits = &style->i.bits[MARGIN_LEFT_INDEX];
 
 	/* 7bits: uuuuutt : unit | type */
 	*bits = (*bits & ~MARGIN_LEFT_MASK) |
 		((((uint32_t)type & 0x3) | (unit << 2)) << MARGIN_LEFT_SHIFT);
 
-	style->i.margin_left = length;
+	if (unit == CSS_UNIT_CALC) {
+		style->i.margin_left.calc = lwc_string_ref(length.calc);
+	} else {
+		style->i.margin_left.value = length.value;
+	}
 
 	return CSS_OK;
 }
@@ -1582,16 +1684,31 @@ static inline css_error set_margin_left(css_computed_style *style,
 
 static inline css_error set_margin_right(css_computed_style *style,
 					 uint8_t type,
-					 css_fixed length,
+					 css_fixed_or_calc length,
 					 css_unit unit)
 {
+	uint32_t orig_bits = (style->i.bits[MARGIN_RIGHT_INDEX] &
+			      MARGIN_RIGHT_MASK) >>
+			     MARGIN_RIGHT_SHIFT;
+
+	/* 7bits: uuuuutt : unit | type */
+	if ((orig_bits & 0x3) == CSS_MARGIN_SET) {
+		if ((orig_bits & 0x7c) >> 2 == CSS_UNIT_CALC) {
+			lwc_string_unref(style->i.margin_right.calc);
+		}
+	}
+
 	uint32_t *bits = &style->i.bits[MARGIN_RIGHT_INDEX];
 
 	/* 7bits: uuuuutt : unit | type */
 	*bits = (*bits & ~MARGIN_RIGHT_MASK) |
 		((((uint32_t)type & 0x3) | (unit << 2)) << MARGIN_RIGHT_SHIFT);
 
-	style->i.margin_right = length;
+	if (unit == CSS_UNIT_CALC) {
+		style->i.margin_right.calc = lwc_string_ref(length.calc);
+	} else {
+		style->i.margin_right.value = length.value;
+	}
 
 	return CSS_OK;
 }
@@ -1605,16 +1722,31 @@ static inline css_error set_margin_right(css_computed_style *style,
 
 static inline css_error set_margin_top(css_computed_style *style,
 				       uint8_t type,
-				       css_fixed length,
+				       css_fixed_or_calc length,
 				       css_unit unit)
 {
+	uint32_t orig_bits = (style->i.bits[MARGIN_TOP_INDEX] &
+			      MARGIN_TOP_MASK) >>
+			     MARGIN_TOP_SHIFT;
+
+	/* 7bits: uuuuutt : unit | type */
+	if ((orig_bits & 0x3) == CSS_MARGIN_SET) {
+		if ((orig_bits & 0x7c) >> 2 == CSS_UNIT_CALC) {
+			lwc_string_unref(style->i.margin_top.calc);
+		}
+	}
+
 	uint32_t *bits = &style->i.bits[MARGIN_TOP_INDEX];
 
 	/* 7bits: uuuuutt : unit | type */
 	*bits = (*bits & ~MARGIN_TOP_MASK) |
 		((((uint32_t)type & 0x3) | (unit << 2)) << MARGIN_TOP_SHIFT);
 
-	style->i.margin_top = length;
+	if (unit == CSS_UNIT_CALC) {
+		style->i.margin_top.calc = lwc_string_ref(length.calc);
+	} else {
+		style->i.margin_top.value = length.value;
+	}
 
 	return CSS_OK;
 }
@@ -1628,16 +1760,31 @@ static inline css_error set_margin_top(css_computed_style *style,
 
 static inline css_error set_max_height(css_computed_style *style,
 				       uint8_t type,
-				       css_fixed length,
+				       css_fixed_or_calc length,
 				       css_unit unit)
 {
+	uint32_t orig_bits = (style->i.bits[MAX_HEIGHT_INDEX] &
+			      MAX_HEIGHT_MASK) >>
+			     MAX_HEIGHT_SHIFT;
+
+	/* 7bits: uuuuutt : unit | type */
+	if ((orig_bits & 0x3) == CSS_MAX_HEIGHT_SET) {
+		if ((orig_bits & 0x7c) >> 2 == CSS_UNIT_CALC) {
+			lwc_string_unref(style->i.max_height.calc);
+		}
+	}
+
 	uint32_t *bits = &style->i.bits[MAX_HEIGHT_INDEX];
 
 	/* 7bits: uuuuutt : unit | type */
 	*bits = (*bits & ~MAX_HEIGHT_MASK) |
 		((((uint32_t)type & 0x3) | (unit << 2)) << MAX_HEIGHT_SHIFT);
 
-	style->i.max_height = length;
+	if (unit == CSS_UNIT_CALC) {
+		style->i.max_height.calc = lwc_string_ref(length.calc);
+	} else {
+		style->i.max_height.value = length.value;
+	}
 
 	return CSS_OK;
 }
@@ -1651,16 +1798,31 @@ static inline css_error set_max_height(css_computed_style *style,
 
 static inline css_error set_max_width(css_computed_style *style,
 				      uint8_t type,
-				      css_fixed length,
+				      css_fixed_or_calc length,
 				      css_unit unit)
 {
+	uint32_t orig_bits = (style->i.bits[MAX_WIDTH_INDEX] &
+			      MAX_WIDTH_MASK) >>
+			     MAX_WIDTH_SHIFT;
+
+	/* 7bits: uuuuutt : unit | type */
+	if ((orig_bits & 0x3) == CSS_MAX_WIDTH_SET) {
+		if ((orig_bits & 0x7c) >> 2 == CSS_UNIT_CALC) {
+			lwc_string_unref(style->i.max_width.calc);
+		}
+	}
+
 	uint32_t *bits = &style->i.bits[MAX_WIDTH_INDEX];
 
 	/* 7bits: uuuuutt : unit | type */
 	*bits = (*bits & ~MAX_WIDTH_MASK) |
 		((((uint32_t)type & 0x3) | (unit << 2)) << MAX_WIDTH_SHIFT);
 
-	style->i.max_width = length;
+	if (unit == CSS_UNIT_CALC) {
+		style->i.max_width.calc = lwc_string_ref(length.calc);
+	} else {
+		style->i.max_width.value = length.value;
+	}
 
 	return CSS_OK;
 }
@@ -1674,16 +1836,31 @@ static inline css_error set_max_width(css_computed_style *style,
 
 static inline css_error set_min_height(css_computed_style *style,
 				       uint8_t type,
-				       css_fixed length,
+				       css_fixed_or_calc length,
 				       css_unit unit)
 {
+	uint32_t orig_bits = (style->i.bits[MIN_HEIGHT_INDEX] &
+			      MIN_HEIGHT_MASK) >>
+			     MIN_HEIGHT_SHIFT;
+
+	/* 7bits: uuuuutt : unit | type */
+	if ((orig_bits & 0x3) == CSS_MIN_HEIGHT_SET) {
+		if ((orig_bits & 0x7c) >> 2 == CSS_UNIT_CALC) {
+			lwc_string_unref(style->i.min_height.calc);
+		}
+	}
+
 	uint32_t *bits = &style->i.bits[MIN_HEIGHT_INDEX];
 
 	/* 7bits: uuuuutt : unit | type */
 	*bits = (*bits & ~MIN_HEIGHT_MASK) |
 		((((uint32_t)type & 0x3) | (unit << 2)) << MIN_HEIGHT_SHIFT);
 
-	style->i.min_height = length;
+	if (unit == CSS_UNIT_CALC) {
+		style->i.min_height.calc = lwc_string_ref(length.calc);
+	} else {
+		style->i.min_height.value = length.value;
+	}
 
 	return CSS_OK;
 }
@@ -1697,16 +1874,31 @@ static inline css_error set_min_height(css_computed_style *style,
 
 static inline css_error set_min_width(css_computed_style *style,
 				      uint8_t type,
-				      css_fixed length,
+				      css_fixed_or_calc length,
 				      css_unit unit)
 {
+	uint32_t orig_bits = (style->i.bits[MIN_WIDTH_INDEX] &
+			      MIN_WIDTH_MASK) >>
+			     MIN_WIDTH_SHIFT;
+
+	/* 7bits: uuuuutt : unit | type */
+	if ((orig_bits & 0x3) == CSS_MIN_WIDTH_SET) {
+		if ((orig_bits & 0x7c) >> 2 == CSS_UNIT_CALC) {
+			lwc_string_unref(style->i.min_width.calc);
+		}
+	}
+
 	uint32_t *bits = &style->i.bits[MIN_WIDTH_INDEX];
 
 	/* 7bits: uuuuutt : unit | type */
 	*bits = (*bits & ~MIN_WIDTH_MASK) |
 		((((uint32_t)type & 0x3) | (unit << 2)) << MIN_WIDTH_SHIFT);
 
-	style->i.min_width = length;
+	if (unit == CSS_UNIT_CALC) {
+		style->i.min_width.calc = lwc_string_ref(length.calc);
+	} else {
+		style->i.min_width.value = length.value;
+	}
 
 	return CSS_OK;
 }
@@ -1881,9 +2073,20 @@ static inline css_error set_overflow_y(css_computed_style *style, uint8_t type)
 
 static inline css_error set_padding_bottom(css_computed_style *style,
 					   uint8_t type,
-					   css_fixed length,
+					   css_fixed_or_calc length,
 					   css_unit unit)
 {
+	uint32_t orig_bits = (style->i.bits[PADDING_BOTTOM_INDEX] &
+			      PADDING_BOTTOM_MASK) >>
+			     PADDING_BOTTOM_SHIFT;
+
+	/* 6bits: uuuuut : unit | type */
+	if ((orig_bits & 0x1) == CSS_PADDING_SET) {
+		if ((orig_bits & 0x3e) >> 1 == CSS_UNIT_CALC) {
+			lwc_string_unref(style->i.padding_bottom.calc);
+		}
+	}
+
 	uint32_t *bits = &style->i.bits[PADDING_BOTTOM_INDEX];
 
 	/* 6bits: uuuuut : unit | type */
@@ -1891,7 +2094,11 @@ static inline css_error set_padding_bottom(css_computed_style *style,
 		((((uint32_t)type & 0x1) | (unit << 1))
 		 << PADDING_BOTTOM_SHIFT);
 
-	style->i.padding_bottom = length;
+	if (unit == CSS_UNIT_CALC) {
+		style->i.padding_bottom.calc = lwc_string_ref(length.calc);
+	} else {
+		style->i.padding_bottom.value = length.value;
+	}
 
 	return CSS_OK;
 }
@@ -1905,16 +2112,31 @@ static inline css_error set_padding_bottom(css_computed_style *style,
 
 static inline css_error set_padding_left(css_computed_style *style,
 					 uint8_t type,
-					 css_fixed length,
+					 css_fixed_or_calc length,
 					 css_unit unit)
 {
+	uint32_t orig_bits = (style->i.bits[PADDING_LEFT_INDEX] &
+			      PADDING_LEFT_MASK) >>
+			     PADDING_LEFT_SHIFT;
+
+	/* 6bits: uuuuut : unit | type */
+	if ((orig_bits & 0x1) == CSS_PADDING_SET) {
+		if ((orig_bits & 0x3e) >> 1 == CSS_UNIT_CALC) {
+			lwc_string_unref(style->i.padding_left.calc);
+		}
+	}
+
 	uint32_t *bits = &style->i.bits[PADDING_LEFT_INDEX];
 
 	/* 6bits: uuuuut : unit | type */
 	*bits = (*bits & ~PADDING_LEFT_MASK) |
 		((((uint32_t)type & 0x1) | (unit << 1)) << PADDING_LEFT_SHIFT);
 
-	style->i.padding_left = length;
+	if (unit == CSS_UNIT_CALC) {
+		style->i.padding_left.calc = lwc_string_ref(length.calc);
+	} else {
+		style->i.padding_left.value = length.value;
+	}
 
 	return CSS_OK;
 }
@@ -1928,16 +2150,31 @@ static inline css_error set_padding_left(css_computed_style *style,
 
 static inline css_error set_padding_right(css_computed_style *style,
 					  uint8_t type,
-					  css_fixed length,
+					  css_fixed_or_calc length,
 					  css_unit unit)
 {
+	uint32_t orig_bits = (style->i.bits[PADDING_RIGHT_INDEX] &
+			      PADDING_RIGHT_MASK) >>
+			     PADDING_RIGHT_SHIFT;
+
+	/* 6bits: uuuuut : unit | type */
+	if ((orig_bits & 0x1) == CSS_PADDING_SET) {
+		if ((orig_bits & 0x3e) >> 1 == CSS_UNIT_CALC) {
+			lwc_string_unref(style->i.padding_right.calc);
+		}
+	}
+
 	uint32_t *bits = &style->i.bits[PADDING_RIGHT_INDEX];
 
 	/* 6bits: uuuuut : unit | type */
 	*bits = (*bits & ~PADDING_RIGHT_MASK) |
 		((((uint32_t)type & 0x1) | (unit << 1)) << PADDING_RIGHT_SHIFT);
 
-	style->i.padding_right = length;
+	if (unit == CSS_UNIT_CALC) {
+		style->i.padding_right.calc = lwc_string_ref(length.calc);
+	} else {
+		style->i.padding_right.value = length.value;
+	}
 
 	return CSS_OK;
 }
@@ -1951,16 +2188,31 @@ static inline css_error set_padding_right(css_computed_style *style,
 
 static inline css_error set_padding_top(css_computed_style *style,
 					uint8_t type,
-					css_fixed length,
+					css_fixed_or_calc length,
 					css_unit unit)
 {
+	uint32_t orig_bits = (style->i.bits[PADDING_TOP_INDEX] &
+			      PADDING_TOP_MASK) >>
+			     PADDING_TOP_SHIFT;
+
+	/* 6bits: uuuuut : unit | type */
+	if ((orig_bits & 0x1) == CSS_PADDING_SET) {
+		if ((orig_bits & 0x3e) >> 1 == CSS_UNIT_CALC) {
+			lwc_string_unref(style->i.padding_top.calc);
+		}
+	}
+
 	uint32_t *bits = &style->i.bits[PADDING_TOP_INDEX];
 
 	/* 6bits: uuuuut : unit | type */
 	*bits = (*bits & ~PADDING_TOP_MASK) |
 		((((uint32_t)type & 0x1) | (unit << 1)) << PADDING_TOP_SHIFT);
 
-	style->i.padding_top = length;
+	if (unit == CSS_UNIT_CALC) {
+		style->i.padding_top.calc = lwc_string_ref(length.calc);
+	} else {
+		style->i.padding_top.value = length.value;
+	}
 
 	return CSS_OK;
 }
@@ -2085,16 +2337,30 @@ set_quotes(css_computed_style *style, uint8_t type, lwc_string **string_arr)
 
 static inline css_error set_right(css_computed_style *style,
 				  uint8_t type,
-				  css_fixed length,
+				  css_fixed_or_calc length,
 				  css_unit unit)
 {
+	uint32_t orig_bits = (style->i.bits[RIGHT_INDEX] & RIGHT_MASK) >>
+			     RIGHT_SHIFT;
+
+	/* 7bits: uuuuutt : unit | type */
+	if ((orig_bits & 0x3) == CSS_RIGHT_SET) {
+		if ((orig_bits & 0x7c) >> 2 == CSS_UNIT_CALC) {
+			lwc_string_unref(style->i.right.calc);
+		}
+	}
+
 	uint32_t *bits = &style->i.bits[RIGHT_INDEX];
 
 	/* 7bits: uuuuutt : unit | type */
 	*bits = (*bits & ~RIGHT_MASK) |
 		((((uint32_t)type & 0x3) | (unit << 2)) << RIGHT_SHIFT);
 
-	style->i.right = length;
+	if (unit == CSS_UNIT_CALC) {
+		style->i.right.calc = lwc_string_ref(length.calc);
+	} else {
+		style->i.right.value = length.value;
+	}
 
 	return CSS_OK;
 }
@@ -2108,16 +2374,30 @@ static inline css_error set_right(css_computed_style *style,
 
 static inline css_error set_row_gap(css_computed_style *style,
 				    uint8_t type,
-				    css_fixed length,
+				    css_fixed_or_calc length,
 				    css_unit unit)
 {
+	uint32_t orig_bits = (style->i.bits[ROW_GAP_INDEX] & ROW_GAP_MASK) >>
+			     ROW_GAP_SHIFT;
+
+	/* 8bits: uuuuuttt : unit | type */
+	if ((orig_bits & 0x7) == CSS_ROW_GAP_SET) {
+		if ((orig_bits & 0xf8) >> 3 == CSS_UNIT_CALC) {
+			lwc_string_unref(style->i.row_gap.calc);
+		}
+	}
+
 	uint32_t *bits = &style->i.bits[ROW_GAP_INDEX];
 
 	/* 8bits: uuuuuttt : unit | type */
 	*bits = (*bits & ~ROW_GAP_MASK) |
 		((((uint32_t)type & 0x7) | (unit << 3)) << ROW_GAP_SHIFT);
 
-	style->i.row_gap = length;
+	if (unit == CSS_UNIT_CALC) {
+		style->i.row_gap.calc = lwc_string_ref(length.calc);
+	} else {
+		style->i.row_gap.value = length.value;
+	}
 
 	return CSS_OK;
 }
@@ -2208,16 +2488,31 @@ set_text_decoration(css_computed_style *style, uint8_t type)
 
 static inline css_error set_text_indent(css_computed_style *style,
 					uint8_t type,
-					css_fixed length,
+					css_fixed_or_calc length,
 					css_unit unit)
 {
+	uint32_t orig_bits = (style->i.bits[TEXT_INDENT_INDEX] &
+			      TEXT_INDENT_MASK) >>
+			     TEXT_INDENT_SHIFT;
+
+	/* 6bits: uuuuut : unit | type */
+	if ((orig_bits & 0x1) == CSS_TEXT_INDENT_SET) {
+		if ((orig_bits & 0x3e) >> 1 == CSS_UNIT_CALC) {
+			lwc_string_unref(style->i.text_indent.calc);
+		}
+	}
+
 	uint32_t *bits = &style->i.bits[TEXT_INDENT_INDEX];
 
 	/* 6bits: uuuuut : unit | type */
 	*bits = (*bits & ~TEXT_INDENT_MASK) |
 		((((uint32_t)type & 0x1) | (unit << 1)) << TEXT_INDENT_SHIFT);
 
-	style->i.text_indent = length;
+	if (unit == CSS_UNIT_CALC) {
+		style->i.text_indent.calc = lwc_string_ref(length.calc);
+	} else {
+		style->i.text_indent.value = length.value;
+	}
 
 	return CSS_OK;
 }
@@ -2250,16 +2545,29 @@ set_text_transform(css_computed_style *style, uint8_t type)
 
 static inline css_error set_top(css_computed_style *style,
 				uint8_t type,
-				css_fixed length,
+				css_fixed_or_calc length,
 				css_unit unit)
 {
+	uint32_t orig_bits = (style->i.bits[TOP_INDEX] & TOP_MASK) >> TOP_SHIFT;
+
+	/* 7bits: uuuuutt : unit | type */
+	if ((orig_bits & 0x3) == CSS_TOP_SET) {
+		if ((orig_bits & 0x7c) >> 2 == CSS_UNIT_CALC) {
+			lwc_string_unref(style->i.top.calc);
+		}
+	}
+
 	uint32_t *bits = &style->i.bits[TOP_INDEX];
 
 	/* 7bits: uuuuutt : unit | type */
 	*bits = (*bits & ~TOP_MASK) |
 		((((uint32_t)type & 0x3) | (unit << 2)) << TOP_SHIFT);
 
-	style->i.top = length;
+	if (unit == CSS_UNIT_CALC) {
+		style->i.top.calc = lwc_string_ref(length.calc);
+	} else {
+		style->i.top.value = length.value;
+	}
 
 	return CSS_OK;
 }

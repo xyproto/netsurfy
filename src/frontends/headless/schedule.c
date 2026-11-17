@@ -131,6 +131,30 @@ nserror headless_schedule(int tival, void (*callback)(void *p), void *p)
 	return NSERROR_OK;
 }
 
+int headless_schedule_next(void)
+{
+	struct nscallback *cb;
+	struct timeval now, next, delta;
+	int ms;
+
+	if (schedule_list == NULL) {
+		return -1;
+	}
+	next = schedule_list->tv;
+	for (cb = schedule_list->next; cb != NULL; cb = cb->next) {
+		if (timercmp(&next, &cb->tv, >)) {
+			next = cb->tv;
+		}
+	}
+	gettimeofday(&now, NULL);
+	if (!timercmp(&next, &now, >)) {
+		return 0;
+	}
+	timersub(&next, &now, &delta);
+	ms = (delta.tv_sec * 1000) + (delta.tv_usec / 1000);
+	return ms;
+}
+
 /* exported function documented in headless/schedule.h */
 int headless_schedule_run(void)
 {

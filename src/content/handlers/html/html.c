@@ -1035,6 +1035,7 @@ bool html_begin_conversion(html_content *htmlc)
 
 	/* complete script execution, including deferred scripts */
 	html_script_exec(htmlc, true);
+	js_run_modules(htmlc->jsthread);
 
 	/* fire a simple event that bubbles named DOMContentLoaded at
 	 * the Document.

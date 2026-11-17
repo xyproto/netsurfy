@@ -89,3 +89,22 @@ void js_event_cleanup(jsthread *thread, struct dom_event *evt)
 void js_set_current_script(jsthread *thread, struct dom_node *node)
 {
 }
+
+bool js_module_script(jsthread *thread,
+		      struct dom_node *node,
+		      const char *url,
+		      const char *text,
+		      size_t len,
+		      void (*loaded)(void *pw),
+		      void *pw)
+{
+	return false;
+}
+
+void js_run_modules(jsthread *thread)
+{
+}
+
+void js_import_map(jsthread *thread, const char *text, size_t len)
+{
+}

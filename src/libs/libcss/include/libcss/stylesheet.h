@@ -165,6 +165,9 @@ css_error css_stylesheet_set_disabled(css_stylesheet *sheet, bool disabled);
 
 css_error css_stylesheet_size(css_stylesheet *sheet, size_t *size);
 
+css_error
+css_stylesheet_supports(const char *condition, size_t len, bool *result);
+
 #ifdef __cplusplus
 }
 #endif

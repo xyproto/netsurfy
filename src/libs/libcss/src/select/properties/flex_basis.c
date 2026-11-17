@@ -18,7 +18,8 @@ css_error
 css__cascade_flex_basis(uint32_t opv, css_style *style, css_select_state *state)
 {
 	uint16_t value = CSS_FLEX_BASIS_INHERIT;
-	css_fixed length = 0;
+	css_fixed_or_calc length = (css_fixed_or_calc)0;
+	uint32_t snum = 0;
 	uint32_t unit = UNIT_PX;
 
 	if (hasFlagValue(opv) == false) {
@@ -31,22 +32,27 @@ css__cascade_flex_basis(uint32_t opv, css_style *style, css_select_state *state)
 			break;
 		case FLEX_BASIS_SET:
 			value = CSS_FLEX_BASIS_SET;
-			length = *((css_fixed *)style->bytecode);
-			advance_bytecode(style, sizeof(length));
-			unit = *((uint32_t *)style->bytecode);
+			length.value = *((css_fixed *)style->bytecode);
+			advance_bytecode(style, sizeof(length.value));
+			unit = css__to_css_unit(*((uint32_t *)style->bytecode));
 			advance_bytecode(style, sizeof(unit));
 			break;
 		case FLEX_BASIS_CALC:
+			value = CSS_FLEX_BASIS_SET;
 			advance_bytecode(style, sizeof(unit));
-			advance_bytecode(style, sizeof(unit)); // TODO
-			return CSS_OK;
+			snum = *((uint32_t *)style->bytecode);
+			advance_bytecode(style, sizeof(snum));
+			unit = CSS_UNIT_CALC;
+			css__stylesheet_string_get(style->sheet,
+						   snum,
+						   &length.calc);
+			break;
 		default:
 			assert(0 && "Invalid value");
 			break;
 		}
 	}
 
-	unit = css__to_css_unit(unit);
 
 	if (css__outranks_existing(getOpcode(opv),
 				   isImportant(opv),
@@ -63,20 +69,22 @@ css__set_flex_basis_from_hint(const css_hint *hint, css_computed_style *style)
 {
 	return set_flex_basis(style,
 			      hint->status,
-			      hint->data.length.value,
+			      (css_fixed_or_calc)(hint->data.length.value),
 			      hint->data.length.unit);
 }
 
 css_error css__initial_flex_basis(css_select_state *state)
 {
-	return set_flex_basis(
-		state->computed, CSS_FLEX_BASIS_AUTO, 0, CSS_UNIT_PX);
+	return set_flex_basis(state->computed,
+			      CSS_FLEX_BASIS_AUTO,
+			      (css_fixed_or_calc)0,
+			      CSS_UNIT_PX);
 }
 
 css_error
 css__copy_flex_basis(const css_computed_style *from, css_computed_style *to)
 {
-	css_fixed length = 0;
+	css_fixed_or_calc length = (css_fixed_or_calc)0;
 	css_unit unit = CSS_UNIT_PX;
 	uint8_t type = get_flex_basis(from, &length, &unit);
 
@@ -91,7 +99,7 @@ css_error css__compose_flex_basis(const css_computed_style *parent,
 				  const css_computed_style *child,
 				  css_computed_style *result)
 {
-	css_fixed length = 0;
+	css_fixed_or_calc length = (css_fixed_or_calc)0;
 	css_unit unit = CSS_UNIT_PX;
 	uint8_t type = get_flex_basis(child, &length, &unit);
 

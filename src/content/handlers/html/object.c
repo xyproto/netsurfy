@@ -69,6 +69,22 @@ struct content_html_object *html_get_objects(hlcache_handle *h, unsigned int *n)
 	return c->object_list;
 }
 
+static void html_object_set_active(struct content_html_object *o, bool active)
+{
+	html_content *c = (html_content *)o->parent;
+
+	if (o->active == active) {
+		return;
+	}
+	o->active = active;
+	if (active) {
+		c->base.active++;
+	} else {
+		c->base.active--;
+	}
+	NSLOG(netsurfy, INFO, "%d fetches active", c->base.active);
+}
+
 /**
  * Handle object fetching or loading failure.
  *
@@ -193,8 +209,7 @@ static nserror html_object_callback(hlcache_handle *object,
 		break;
 
 	case CONTENT_MSG_DONE:
-		c->base.active--;
-		NSLOG(netsurfy, INFO, "%d fetches active", c->base.active);
+		html_object_set_active(o, false);
 
 		html_object_done(box, object, o->background);
 
@@ -225,8 +240,7 @@ static nserror html_object_callback(hlcache_handle *object,
 
 		o->content = NULL;
 
-		c->base.active--;
-		NSLOG(netsurfy, INFO, "%d fetches active", c->base.active);
+		html_object_set_active(o, false);
 
 		html_object_failed(box, c, o->background);
 
@@ -546,14 +560,7 @@ static bool html_replace_object(struct content_html_object *object, nsurl *url)
 
 	if (object->content != NULL) {
 		/* remove existing object */
-		if (content_get_status(object->content) !=
-		    CONTENT_STATUS_DONE) {
-			c->base.active--;
-			NSLOG(netsurfy,
-			      INFO,
-			      "%d fetches active",
-			      c->base.active);
-		}
+		html_object_set_active(object, false);
 
 		hlcache_handle_release(object->content);
 		object->content = NULL;
@@ -562,6 +569,7 @@ static bool html_replace_object(struct content_html_object *object, nsurl *url)
 	}
 
 	/* initialise fetch */
+	html_object_set_active(object, true);
 	error = hlcache_handle_retrieve(url,
 					HLCACHE_RETRIEVE_SNIFF_TYPE,
 					content_get_url(&c->base),
@@ -572,10 +580,13 @@ static bool html_replace_object(struct content_html_object *object, nsurl *url)
 					object->permitted_types,
 					&object->content);
 
-	if (error != NSERROR_OK)
+	if (error != NSERROR_OK) {
+		html_object_set_active(object, false);
 		return false;
+	}
 
-	for (page = c; page != NULL; page = page->page) {
+	c->base.status = CONTENT_STATUS_READY;
+	for (page = c->page; page != NULL; page = page->page) {
 		page->base.active++;
 		NSLOG(netsurfy, INFO, "%d fetches active", c->base.active);
 
@@ -660,13 +671,7 @@ nserror html_object_abort_objects(html_content *htmlc)
 			hlcache_handle_abort(object->content);
 			hlcache_handle_release(object->content);
 			object->content = NULL;
-			if (object->box != NULL) {
-				htmlc->base.active--;
-				NSLOG(netsurfy,
-				      INFO,
-				      "%d fetches active",
-				      htmlc->base.active);
-			}
+			html_object_set_active(object, false);
 			break;
 		}
 	}
@@ -709,16 +714,7 @@ nserror html_object_release_for_rebuild(html_content *html)
 	}
 	for (object = html->object_list; object != NULL;
 	     object = object->next) {
-		content_status status;
-
-		if (object->content == NULL || object->box == NULL) {
-			continue;
-		}
-		status = content_get_status(object->content);
-		if (status != CONTENT_STATUS_DONE &&
-		    status != CONTENT_STATUS_ERROR && html->base.active > 0) {
-			html->base.active--;
-		}
+		html_object_set_active(object, false);
 	}
 	html->num_objects = 0;
 	return html_object_free_objects(html);
@@ -786,6 +782,10 @@ bool html_fetch_object(html_content *c,
 	object->permitted_types = permitted_types;
 	object->background = background;
 
+	if (box != NULL) {
+		html_object_set_active(object, true);
+	}
+
 	error = hlcache_handle_retrieve(url,
 					HLCACHE_RETRIEVE_SNIFF_TYPE,
 					content_get_url(&c->base),
@@ -796,6 +796,7 @@ bool html_fetch_object(html_content *c,
 					object->permitted_types,
 					&object->content);
 	if (error != NSERROR_OK) {
+		html_object_set_active(object, false);
 		free(object);
 		return error != NSERROR_NOMEM;
 	}
@@ -805,10 +806,6 @@ bool html_fetch_object(html_content *c,
 	c->object_list = object;
 
 	c->num_objects++;
-	if (box != NULL) {
-		c->base.active++;
-		NSLOG(netsurfy, INFO, "%d fetches active", c->base.active);
-	}
 
 	return true;
 }

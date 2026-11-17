@@ -26,20 +26,22 @@ css__set_max_width_from_hint(const css_hint *hint, css_computed_style *style)
 {
 	return set_max_width(style,
 			     hint->status,
-			     hint->data.length.value,
+			     (css_fixed_or_calc)(hint->data.length.value),
 			     hint->data.length.unit);
 }
 
 css_error css__initial_max_width(css_select_state *state)
 {
-	return set_max_width(
-		state->computed, CSS_MAX_WIDTH_NONE, 0, CSS_UNIT_PX);
+	return set_max_width(state->computed,
+			     CSS_MAX_WIDTH_NONE,
+			     (css_fixed_or_calc)0,
+			     CSS_UNIT_PX);
 }
 
 css_error
 css__copy_max_width(const css_computed_style *from, css_computed_style *to)
 {
-	css_fixed length = 0;
+	css_fixed_or_calc length = (css_fixed_or_calc)0;
 	css_unit unit = CSS_UNIT_PX;
 	uint8_t type = get_max_width(from, &length, &unit);
 
@@ -54,7 +56,7 @@ css_error css__compose_max_width(const css_computed_style *parent,
 				 const css_computed_style *child,
 				 css_computed_style *result)
 {
-	css_fixed length = 0;
+	css_fixed_or_calc length = (css_fixed_or_calc)0;
 	css_unit unit = CSS_UNIT_PX;
 	uint8_t type = get_max_width(child, &length, &unit);
 

@@ -588,6 +588,59 @@ css_error css_stylesheet_set_disabled(css_stylesheet *sheet, bool disabled)
 	return CSS_OK;
 }
 
+static css_error
+supports_resolve(void *pw, const char *base, lwc_string *rel, lwc_string **abs)
+{
+	*abs = lwc_string_ref(rel);
+	return CSS_OK;
+}
+
+css_error
+css_stylesheet_supports(const char *condition, size_t len, bool *result)
+{
+	static const char prefix[] = "@supports ";
+	css_stylesheet_params params;
+	css_stylesheet *sheet = NULL;
+	css_error error;
+	char *text;
+
+	*result = false;
+	text = malloc(sizeof(prefix) + len + 2);
+	if (text == NULL) {
+		return CSS_NOMEM;
+	}
+	memcpy(text, prefix, sizeof(prefix) - 1);
+	memcpy(text + sizeof(prefix) - 1, condition, len);
+	memcpy(text + sizeof(prefix) - 1 + len, "{}", 2);
+
+	memset(&params, 0, sizeof(params));
+	params.params_version = CSS_STYLESHEET_PARAMS_VERSION_1;
+	params.level = CSS_LEVEL_DEFAULT;
+	params.charset = "UTF-8";
+	params.url = "";
+	params.resolve = supports_resolve;
+	error = css_stylesheet_create(&params, &sheet);
+	if (error == CSS_OK) {
+		error = css_stylesheet_append_data(sheet,
+						   (const uint8_t *)text,
+						   sizeof(prefix) + len + 1);
+		if (error == CSS_OK || error == CSS_NEEDDATA) {
+			error = css_stylesheet_data_done(sheet);
+		}
+	}
+	if (error == CSS_OK && sheet->rule_list != NULL &&
+	    sheet->rule_list->type == CSS_RULE_MEDIA) {
+		css_mq_query *media =
+			((css_rule_media *)sheet->rule_list)->media;
+		*result = media != NULL && media->negate_type == 0;
+	}
+	if (sheet != NULL) {
+		css_stylesheet_destroy(sheet);
+	}
+	free(text);
+	return error;
+}
+
 /**
  * Determine the memory-resident size of a stylesheet
  *

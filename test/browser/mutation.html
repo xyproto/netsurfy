@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Mutation</title><script src="harness.js"></script>
+<script>
+var removed = 0;
+var failure = null;
+customElements.define("x-watched", class extends HTMLElement {});
+new MutationObserver(function () {
+    var victim = document.getElementById("victim");
+    if (victim !== null) {
+        try {
+            victim.remove();
+            removed++;
+        } catch (e) {
+            failure = e;
+        }
+    }
+}).observe(document.documentElement, { childList: true, subtree: true });
+var resolved = false;
+Promise.resolve().then(function () {
+    document.documentElement.setAttribute("data-promise", "1");
+    resolved = true;
+});
+</script></head>
+<body><div id="victim"></div><p>after</p>
+<script>
+window.addEventListener("load", function () {
+    test("observers and microtasks may modify the DOM during parsing", function () {
+        assertEquals(failure, null);
+        assertEquals(removed, 1);
+        assert(resolved);
+        assertEquals(document.getElementById("victim"), null);
+    });
+    done();
+});
+</script></body></html>

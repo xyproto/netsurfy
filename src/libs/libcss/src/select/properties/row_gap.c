@@ -25,19 +25,22 @@ css__set_row_gap_from_hint(const css_hint *hint, css_computed_style *style)
 {
 	return set_row_gap(style,
 			   hint->status,
-			   hint->data.length.value,
+			   (css_fixed_or_calc)(hint->data.length.value),
 			   hint->data.length.unit);
 }
 
 css_error css__initial_row_gap(css_select_state *state)
 {
-	return set_row_gap(state->computed, CSS_ROW_GAP_NORMAL, 0, CSS_UNIT_PX);
+	return set_row_gap(state->computed,
+			   CSS_ROW_GAP_NORMAL,
+			   (css_fixed_or_calc)0,
+			   CSS_UNIT_PX);
 }
 
 css_error
 css__copy_row_gap(const css_computed_style *from, css_computed_style *to)
 {
-	css_fixed length = 0;
+	css_fixed_or_calc length = (css_fixed_or_calc)0;
 	css_unit unit = CSS_UNIT_PX;
 	uint8_t type = get_row_gap(from, &length, &unit);
 
@@ -52,7 +55,7 @@ css_error css__compose_row_gap(const css_computed_style *parent,
 			       const css_computed_style *child,
 			       css_computed_style *result)
 {
-	css_fixed length = 0;
+	css_fixed_or_calc length = (css_fixed_or_calc)0;
 	css_unit unit = CSS_UNIT_PX;
 	uint8_t type = get_row_gap(child, &length, &unit);
 

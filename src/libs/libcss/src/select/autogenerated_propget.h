@@ -486,8 +486,9 @@ static inline uint8_t get_border_top_width(const css_computed_style *style,
 #define BOTTOM_INDEX 6
 #define BOTTOM_SHIFT 4
 #define BOTTOM_MASK 0x7f0
-static inline uint8_t
-get_bottom(const css_computed_style *style, css_fixed *length, css_unit *unit)
+static inline uint8_t get_bottom(const css_computed_style *style,
+				 css_fixed_or_calc *length,
+				 css_unit *unit)
 {
 	uint8_t type;
 	uint32_t bits = style->i.bits[BOTTOM_INDEX];
@@ -727,7 +728,7 @@ static inline uint8_t get_column_fill(const css_computed_style *style)
 #define COLUMN_GAP_SHIFT 16
 #define COLUMN_GAP_MASK 0xff0000
 static inline uint8_t get_column_gap(const css_computed_style *style,
-				     css_fixed *length,
+				     css_fixed_or_calc *length,
 				     css_unit *unit)
 {
 	uint8_t type;
@@ -1030,7 +1031,7 @@ get_fill_opacity(const css_computed_style *style, css_fixed *fixed)
 #define FLEX_BASIS_SHIFT 18
 #define FLEX_BASIS_MASK 0x1fc0000
 static inline uint8_t get_flex_basis(const css_computed_style *style,
-				     css_fixed *length,
+				     css_fixed_or_calc *length,
 				     css_unit *unit)
 {
 	uint8_t type;
@@ -1260,8 +1261,9 @@ static inline uint8_t get_font_weight(const css_computed_style *style)
 #define HEIGHT_INDEX 6
 #define HEIGHT_SHIFT 25
 #define HEIGHT_MASK 0xfe000000
-static inline uint8_t
-get_height(const css_computed_style *style, css_fixed *length, css_unit *unit)
+static inline uint8_t get_height(const css_computed_style *style,
+				 css_fixed_or_calc *length,
+				 css_unit *unit)
 {
 	uint8_t type;
 	uint32_t bits = style->i.bits[HEIGHT_INDEX];
@@ -1303,8 +1305,9 @@ static inline uint8_t get_justify_content(const css_computed_style *style)
 #define LEFT_INDEX 5
 #define LEFT_SHIFT 4
 #define LEFT_MASK 0x7f0
-static inline uint8_t
-get_left(const css_computed_style *style, css_fixed *length, css_unit *unit)
+static inline uint8_t get_left(const css_computed_style *style,
+			       css_fixed_or_calc *length,
+			       css_unit *unit)
 {
 	uint8_t type;
 	uint32_t bits = style->i.bits[LEFT_INDEX];
@@ -1439,7 +1442,7 @@ static inline uint8_t get_list_style_type(const css_computed_style *style)
 #define MARGIN_BOTTOM_SHIFT 25
 #define MARGIN_BOTTOM_MASK 0xfe000000
 static inline uint8_t get_margin_bottom(const css_computed_style *style,
-					css_fixed *length,
+					css_fixed_or_calc *length,
 					css_unit *unit)
 {
 	uint8_t type;
@@ -1464,7 +1467,7 @@ static inline uint8_t get_margin_bottom(const css_computed_style *style,
 #define MARGIN_LEFT_SHIFT 4
 #define MARGIN_LEFT_MASK 0x7f0
 static inline uint8_t get_margin_left(const css_computed_style *style,
-				      css_fixed *length,
+				      css_fixed_or_calc *length,
 				      css_unit *unit)
 {
 	uint8_t type;
@@ -1489,7 +1492,7 @@ static inline uint8_t get_margin_left(const css_computed_style *style,
 #define MARGIN_RIGHT_SHIFT 11
 #define MARGIN_RIGHT_MASK 0x3f800
 static inline uint8_t get_margin_right(const css_computed_style *style,
-				       css_fixed *length,
+				       css_fixed_or_calc *length,
 				       css_unit *unit)
 {
 	uint8_t type;
@@ -1514,7 +1517,7 @@ static inline uint8_t get_margin_right(const css_computed_style *style,
 #define MARGIN_TOP_SHIFT 18
 #define MARGIN_TOP_MASK 0x1fc0000
 static inline uint8_t get_margin_top(const css_computed_style *style,
-				     css_fixed *length,
+				     css_fixed_or_calc *length,
 				     css_unit *unit)
 {
 	uint8_t type;
@@ -1539,7 +1542,7 @@ static inline uint8_t get_margin_top(const css_computed_style *style,
 #define MAX_HEIGHT_SHIFT 25
 #define MAX_HEIGHT_MASK 0xfe000000
 static inline uint8_t get_max_height(const css_computed_style *style,
-				     css_fixed *length,
+				     css_fixed_or_calc *length,
 				     css_unit *unit)
 {
 	uint8_t type;
@@ -1564,7 +1567,7 @@ static inline uint8_t get_max_height(const css_computed_style *style,
 #define MAX_WIDTH_SHIFT 4
 #define MAX_WIDTH_MASK 0x7f0
 static inline uint8_t get_max_width(const css_computed_style *style,
-				    css_fixed *length,
+				    css_fixed_or_calc *length,
 				    css_unit *unit)
 {
 	uint8_t type;
@@ -1589,7 +1592,7 @@ static inline uint8_t get_max_width(const css_computed_style *style,
 #define MIN_HEIGHT_SHIFT 11
 #define MIN_HEIGHT_MASK 0x3f800
 static inline uint8_t get_min_height(const css_computed_style *style,
-				     css_fixed *length,
+				     css_fixed_or_calc *length,
 				     css_unit *unit)
 {
 	uint8_t type;
@@ -1614,7 +1617,7 @@ static inline uint8_t get_min_height(const css_computed_style *style,
 #define MIN_WIDTH_SHIFT 18
 #define MIN_WIDTH_MASK 0x1fc0000
 static inline uint8_t get_min_width(const css_computed_style *style,
-				    css_fixed *length,
+				    css_fixed_or_calc *length,
 				    css_unit *unit)
 {
 	uint8_t type;
@@ -1811,7 +1814,7 @@ static inline uint8_t get_overflow_y(const css_computed_style *style)
 #define PADDING_BOTTOM_SHIFT 8
 #define PADDING_BOTTOM_MASK 0x3f00
 static inline uint8_t get_padding_bottom(const css_computed_style *style,
-					 css_fixed *length,
+					 css_fixed_or_calc *length,
 					 css_unit *unit)
 {
 	uint8_t type;
@@ -1836,7 +1839,7 @@ static inline uint8_t get_padding_bottom(const css_computed_style *style,
 #define PADDING_LEFT_SHIFT 14
 #define PADDING_LEFT_MASK 0xfc000
 static inline uint8_t get_padding_left(const css_computed_style *style,
-				       css_fixed *length,
+				       css_fixed_or_calc *length,
 				       css_unit *unit)
 {
 	uint8_t type;
@@ -1861,7 +1864,7 @@ static inline uint8_t get_padding_left(const css_computed_style *style,
 #define PADDING_RIGHT_SHIFT 20
 #define PADDING_RIGHT_MASK 0x3f00000
 static inline uint8_t get_padding_right(const css_computed_style *style,
-					css_fixed *length,
+					css_fixed_or_calc *length,
 					css_unit *unit)
 {
 	uint8_t type;
@@ -1886,7 +1889,7 @@ static inline uint8_t get_padding_right(const css_computed_style *style,
 #define PADDING_TOP_SHIFT 26
 #define PADDING_TOP_MASK 0xfc000000
 static inline uint8_t get_padding_top(const css_computed_style *style,
-				      css_fixed *length,
+				      css_fixed_or_calc *length,
 				      css_unit *unit)
 {
 	uint8_t type;
@@ -2007,8 +2010,9 @@ get_quotes(const css_computed_style *style, lwc_string ***string_arr)
 #define RIGHT_INDEX 3
 #define RIGHT_SHIFT 25
 #define RIGHT_MASK 0xfe000000
-static inline uint8_t
-get_right(const css_computed_style *style, css_fixed *length, css_unit *unit)
+static inline uint8_t get_right(const css_computed_style *style,
+				css_fixed_or_calc *length,
+				css_unit *unit)
 {
 	uint8_t type;
 	uint32_t bits = style->i.bits[RIGHT_INDEX];
@@ -2031,8 +2035,9 @@ get_right(const css_computed_style *style, css_fixed *length, css_unit *unit)
 #define ROW_GAP_INDEX 1
 #define ROW_GAP_SHIFT 15
 #define ROW_GAP_MASK 0x7f8000
-static inline uint8_t
-get_row_gap(const css_computed_style *style, css_fixed *length, css_unit *unit)
+static inline uint8_t get_row_gap(const css_computed_style *style,
+				  css_fixed_or_calc *length,
+				  css_unit *unit)
 {
 	uint8_t type;
 	uint32_t bits = style->i.bits[ROW_GAP_INDEX];
@@ -2136,7 +2141,7 @@ static inline uint8_t get_text_decoration(const css_computed_style *style)
 #define TEXT_INDENT_SHIFT 0
 #define TEXT_INDENT_MASK 0x3f
 static inline uint8_t get_text_indent(const css_computed_style *style,
-				      css_fixed *length,
+				      css_fixed_or_calc *length,
 				      css_unit *unit)
 {
 	uint8_t type;
@@ -2179,8 +2184,9 @@ static inline uint8_t get_text_transform(const css_computed_style *style)
 #define TOP_INDEX 7
 #define TOP_SHIFT 2
 #define TOP_MASK 0x1fc
-static inline uint8_t
-get_top(const css_computed_style *style, css_fixed *length, css_unit *unit)
+static inline uint8_t get_top(const css_computed_style *style,
+			      css_fixed_or_calc *length,
+			      css_unit *unit)
 {
 	uint8_t type;
 	uint32_t bits = style->i.bits[TOP_INDEX];

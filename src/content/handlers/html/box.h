@@ -88,7 +88,8 @@ typedef enum {
 	REPLACE_DIM = 1 << 9, /* replaced element has given dimensions */
 	IFRAME = 1 << 10, /* box contains an iframe */
 	CONVERT_CHILDREN = 1 << 11, /* wanted children converting */
-	IS_REPLACED = 1 << 12 /* box is a replaced element */
+	IS_REPLACED = 1 << 12, /* box is a replaced element */
+	DISPLAY_CONTENTS = 1 << 13
 } box_flags;
 
 

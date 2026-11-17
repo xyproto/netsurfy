@@ -1113,45 +1113,38 @@ _dom_document_adopt_node(dom_document *doc, dom_node *node, dom_node **result)
 {
 	dom_node_internal *n = (dom_node_internal *)node;
 	dom_exception err;
-	dom_node_internal *parent;
-	dom_node_internal *tmp;
 
 	*result = NULL;
 
-	if (n->type == DOM_DOCUMENT_NODE || n->type == DOM_DOCUMENT_TYPE_NODE) {
+	if (n->type == DOM_DOCUMENT_NODE || n->type == DOM_DOCUMENT_TYPE_NODE ||
+	    n->type == DOM_ENTITY_REFERENCE_NODE) {
 		return DOM_NOT_SUPPORTED_ERR;
 	}
 
-	if (n->type == DOM_ENTITY_NODE || n->type == DOM_NOTATION_NODE ||
-	    n->type == DOM_PROCESSING_INSTRUCTION_NODE ||
-	    n->type == DOM_TEXT_NODE || n->type == DOM_CDATA_SECTION_NODE ||
-	    n->type == DOM_COMMENT_NODE) {
-		*result = NULL;
-		return DOM_NO_ERR;
+	if (n->type == DOM_ATTRIBUTE_NODE) {
+		dom_element *owner = NULL;
+		err = dom_attr_get_owner_element((dom_attr *)n, &owner);
+		if (err != DOM_NO_ERR) {
+			return err;
+		}
+		if (owner != NULL) {
+			dom_attr *removed = NULL;
+			err = dom_element_remove_attribute_node(owner,
+								(dom_attr *)n,
+								&removed);
+			dom_node_unref(owner);
+			if (err != DOM_NO_ERR) {
+				return err;
+			}
+			dom_node_unref(removed);
+		}
 	}
-
-	/* Support XML when necessary */
-	if (n->type == DOM_ENTITY_REFERENCE_NODE) {
-		return DOM_NOT_SUPPORTED_ERR;
-	}
-
-	err = dom_document_dup_node(doc, node, true, result, DOM_NODE_ADOPTED);
+	err = _dom_node_adopt(doc, n);
 	if (err != DOM_NO_ERR) {
-		*result = NULL;
 		return err;
 	}
 
-	parent = n->parent;
-	if (parent != NULL) {
-		err = dom_node_remove_child(parent, node, (void *)&tmp);
-		if (err != DOM_NO_ERR) {
-			dom_node_unref(*result);
-			*result = NULL;
-			return err;
-		}
-		dom_node_unref(tmp);
-	}
-
+	*result = (dom_node *)dom_node_ref(n);
 	return DOM_NO_ERR;
 }
 

@@ -92,6 +92,18 @@ static const content_type image_types = CONTENT_IMAGE;
 
 /* mapping from CSS display to box type
  * this table must be in sync with libcss' css_display enum */
+static struct box *node_box(dom_node *n)
+{
+	struct box *box = NULL;
+
+	if (dom_node_get_user_data(n,
+				   corestring_dom___ns_key_box_node_data,
+				   (void *)&box) != DOM_NO_ERR) {
+		return NULL;
+	}
+	return box;
+}
+
 static const box_type box_map[] = {
 	BOX_BLOCK, /* CSS_DISPLAY_INHERIT */
 	BOX_INLINE, /* CSS_DISPLAY_INLINE */
@@ -114,6 +126,7 @@ static const box_type box_map[] = {
 	BOX_INLINE_FLEX, /* CSS_DISPLAY_INLINE_FLEX */
 	BOX_BLOCK, /* CSS_DISPLAY_GRID */
 	BOX_INLINE_BLOCK, /* CSS_DISPLAY_INLINE_GRID */
+	BOX_NONE, /* CSS_DISPLAY_CONTENTS */
 };
 
 
@@ -175,7 +188,7 @@ box_extract_properties(dom_node *n, struct box_construct_props *props)
 			if (err != DOM_NO_ERR || parent_node == NULL)
 				break;
 
-			parent_box = box_for_node(parent_node);
+			parent_box = node_box(parent_node);
 
 			if (parent_box != NULL) {
 				props->parent_style = parent_box->style;
@@ -208,7 +221,7 @@ box_extract_properties(dom_node *n, struct box_construct_props *props)
 			if (current_node != n)
 				dom_node_unref(current_node);
 
-			b = box_for_node(parent_node);
+			b = node_box(parent_node);
 
 			/* Children of nodes that created an inline box
 			 * will generate boxes which are attached as
@@ -217,7 +230,8 @@ box_extract_properties(dom_node *n, struct box_construct_props *props)
 			 * use the parent node's styling as the parent
 			 * style, above. */
 			if (b != NULL && b->type != BOX_INLINE &&
-			    b->type != BOX_BR) {
+			    b->type != BOX_BR &&
+			    !(b->flags & DISPLAY_CONTENTS)) {
 				props->containing_block = b;
 
 				dom_node_unref(parent_node);
@@ -681,6 +695,7 @@ box_construct_element(struct box_construct_ctx *ctx, bool *convert_children)
 			case BOX_INLINE_FLEX:
 				box->type = BOX_FLEX;
 				break;
+			case BOX_INLINE:
 			case BOX_INLINE_BLOCK:
 				box->type = BOX_BLOCK;
 				break;
@@ -693,6 +708,23 @@ box_construct_element(struct box_construct_ctx *ctx, bool *convert_children)
 	if (convert_special_elements(
 		    ctx->n, ctx->content, box, convert_children) == false) {
 		return false;
+	}
+
+	if (box->type == BOX_NONE && props.node_is_root == false &&
+	    css_computed_display(box->style, false) == CSS_DISPLAY_CONTENTS &&
+	    !(box->flags & IS_REPLACED) && box->gadget == NULL &&
+	    *convert_children) {
+		box->flags |= DISPLAY_CONTENTS;
+		err = dom_node_set_user_data(
+			ctx->n,
+			corestring_dom___ns_key_box_node_data,
+			box,
+			NULL,
+			(void *)&old_box);
+		if (err != DOM_NO_ERR)
+			return false;
+		box->node = dom_node_ref(ctx->n);
+		return true;
 	}
 
 	/* Handle the :before pseudo element */
@@ -857,9 +889,13 @@ box_construct_element(struct box_construct_ctx *ctx, bool *convert_children)
 static void box_construct_element_after(dom_node *n, html_content *content)
 {
 	struct box_construct_props props;
-	struct box *box = box_for_node(n);
+	struct box *box = node_box(n);
 
 	assert(box != NULL);
+
+	if (box->flags & DISPLAY_CONTENTS) {
+		return;
+	}
 
 	box_extract_properties(n, &props);
 
@@ -968,11 +1004,11 @@ next_node(dom_node *n, html_content *content, bool convert_children)
 		}
 
 		if (next != NULL) {
-			if (box_for_node(n) != NULL)
+			if (node_box(n) != NULL)
 				box_construct_element_after(n, content);
 			dom_node_unref(n);
 		} else {
-			if (box_for_node(n) != NULL)
+			if (node_box(n) != NULL)
 				box_construct_element_after(n, content);
 
 			while (box_is_root(n) == false) {
@@ -1005,7 +1041,7 @@ next_node(dom_node *n, html_content *content, bool convert_children)
 				n = parent;
 				parent = NULL;
 
-				if (box_for_node(n) != NULL) {
+				if (node_box(n) != NULL) {
 					box_construct_element_after(n, content);
 				}
 			}
@@ -1028,7 +1064,7 @@ next_node(dom_node *n, html_content *content, bool convert_children)
 					return NULL;
 				}
 
-				if (box_for_node(parent) != NULL) {
+				if (node_box(parent) != NULL) {
 					box_construct_element_after(parent,
 								    content);
 				}
@@ -1564,15 +1600,11 @@ nserror cancel_dom_to_box(void *box_conversion_context)
 /* exported function documented in html/box_construct.h */
 struct box *box_for_node(dom_node *n)
 {
-	struct box *box = NULL;
-	dom_exception err;
+	struct box *box = node_box(n);
 
-	err = dom_node_get_user_data(n,
-				     corestring_dom___ns_key_box_node_data,
-				     (void *)&box);
-	if (err != DOM_NO_ERR)
+	if (box != NULL && (box->flags & DISPLAY_CONTENTS)) {
 		return NULL;
-
+	}
 	return box;
 }
 

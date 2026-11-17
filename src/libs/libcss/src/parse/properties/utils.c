@@ -1671,8 +1671,9 @@ css_error css__ident_list_to_string(css_language *c,
 	while (token != NULL &&
 	       (token->type == CSS_TOKEN_IDENT || token->type == CSS_TOKEN_S)) {
 		if (token->type == CSS_TOKEN_IDENT) {
-			/* IDENT -- if reserved, reject style */
-			if (reserved != NULL && reserved(c, token)) {
+			/* IDENT -- if reserved and alone, reject style */
+			if (reserved != NULL && buffer->length == 0 &&
+			    reserved(c, token)) {
 				error = CSS_INVALID;
 				goto cleanup;
 			}
@@ -1902,6 +1903,83 @@ static css_error css__parse_calc_sum(css_language *c,
 				     int *ctx,
 				     parserutils_buffer *result);
 
+static int calc_function_kind(const css_token *token)
+{
+	static const char *const names[] = {"calc", "min", "max", "clamp"};
+	const char *data;
+	size_t len;
+
+	if (token == NULL || token->type != CSS_TOKEN_FUNCTION ||
+	    token->idata == NULL) {
+		return -1;
+	}
+	data = lwc_string_data(token->idata);
+	len = lwc_string_length(token->idata);
+	for (int i = 0; i < 4; i++) {
+		if (strlen(names[i]) == len &&
+		    strncasecmp(names[i], data, len) == 0) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+bool css__is_calc_function(const css_token *token)
+{
+	return calc_function_kind(token) >= 0;
+}
+
+static css_error css__parse_calc_function(css_language *c,
+					  enum css_properties_e property,
+					  int kind,
+					  const parserutils_vector *vector,
+					  int *ctx,
+					  parserutils_buffer *result)
+{
+	const css_token *token;
+	css_code_t op = kind == 2 ? CALC_MAX : CALC_MIN;
+	int args = 0;
+	css_error error;
+
+	if (kind < 0) {
+		return CSS_INVALID;
+	}
+	do {
+		if (args > 0) {
+			parserutils_vector_iterate(vector, ctx);
+		}
+		consumeWhitespace(vector, ctx);
+		error = css__parse_calc_sum(c, property, vector, ctx, result);
+		if (error != CSS_OK) {
+			return error;
+		}
+		args++;
+		if (args > 1 && (kind == 1 || kind == 2)) {
+			error = css_error_from_parserutils_error(
+				parserutils_buffer_append(result,
+							  (const uint8_t *)&op,
+							  sizeof(op)));
+			if (error != CSS_OK) {
+				return error;
+			}
+		}
+		token = parserutils_vector_peek(vector, *ctx);
+	} while (kind != 0 && tokenIsChar(token, ','));
+
+	if (!tokenIsChar(token, ')') || (kind == 3 && args != 3)) {
+		return CSS_INVALID;
+	}
+	parserutils_vector_iterate(vector, ctx);
+
+	if (kind == 3) {
+		css_code_t ops[2] = {CALC_MIN, CALC_MAX};
+		error = css_error_from_parserutils_error(
+			parserutils_buffer_append(
+				result, (const uint8_t *)ops, sizeof(ops)));
+	}
+	return error;
+}
+
 static css_error css__parse_calc_number(const parserutils_vector *vector,
 					int *ctx,
 					parserutils_buffer *result)
@@ -1962,6 +2040,14 @@ static css_error css__parse_calc_value(css_language *c,
 		}
 		/* Consume the close-paren to complete this value */
 		parserutils_vector_iterate(vector, ctx);
+	} else if (calc_function_kind(token) >= 0) {
+		int kind = calc_function_kind(token);
+		parserutils_vector_iterate(vector, ctx);
+		error = css__parse_calc_function(
+			c, property, kind, vector, ctx, result);
+		if (error != CSS_OK) {
+			return error;
+		}
 	} else
 		switch (token->type) {
 		case CSS_TOKEN_NUMBER:
@@ -2042,7 +2128,7 @@ static css_error css__parse_calc_product(css_language *c,
 			error = CSS_INVALID;
 			break;
 		} else if (tokenIsChar(token, ')') || tokenIsChar(token, '+') ||
-			   tokenIsChar(token, '-'))
+			   tokenIsChar(token, '-') || tokenIsChar(token, ','))
 			break;
 		else if (tokenIsChar(token, '*'))
 			operator= CALC_MULTIPLY;
@@ -2100,7 +2186,7 @@ css_error css__parse_calc_sum(css_language *c,
 		if (token == NULL) {
 			error = CSS_INVALID;
 			break;
-		} else if (tokenIsChar(token, ')'))
+		} else if (tokenIsChar(token, ')') || tokenIsChar(token, ','))
 			break;
 		else if (tokenIsChar(token, '+'))
 			operator= CALC_ADD;
@@ -2174,26 +2260,22 @@ css_error css__parse_calc(css_language *c,
 	if (error != CSS_OK)
 		goto cleanup;
 
-	error = css__parse_calc_sum(c, property, vector, ctx, calc_buffer);
+	error = css__parse_calc_function(
+		c,
+		property,
+		calc_function_kind(
+			parserutils_vector_peek(vector, orig_ctx - 1)),
+		vector,
+		ctx,
+		calc_buffer);
 	if (error != CSS_OK)
 		goto cleanup;
-
-	consumeWhitespace(vector, ctx);
-	token = parserutils_vector_peek(vector, *ctx);
-	if (!tokenIsChar(token, ')')) {
-		/* If we don't get a close-paren, give up now */
-		error = CSS_INVALID;
-		goto cleanup;
-	}
 
 	/* Append the indicator that the calc is finished */
 	error = css_error_from_parserutils_error(parserutils_buffer_append(
 		calc_buffer, (const uint8_t *)&finish, sizeof(finish)));
 	if (error != CSS_OK)
 		goto cleanup;
-
-	/* Swallow that close paren */
-	parserutils_vector_iterate(vector, ctx);
 
 	/* Create the lwc string representing the calculation and store it in */
 	error = css_error_from_lwc_error(

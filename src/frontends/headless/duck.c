@@ -184,7 +184,8 @@ void headless_duck_loaded(struct gui_window *g)
 		duck_json = strdup("[]");
 	}
 	if (duck_json == NULL) {
-		duck_finish(EXIT_FAILURE, "could not read the DuckDuckGo results");
+		duck_finish(EXIT_FAILURE,
+			    "could not read the DuckDuckGo results");
 	} else if (strcmp(duck_json, "[]") != 0) {
 		duck_finish(EXIT_SUCCESS, NULL);
 	} else if (duck_attempt + 1 ==

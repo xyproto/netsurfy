@@ -32,12 +32,7 @@ css_error css__parse_padding(css_language *c,
 			     int32_t *ctx,
 			     css_style *result)
 {
-	int32_t orig_ctx = *ctx;
-	int prev_ctx;
 	const css_token *token;
-	css_fixed side_length[4];
-	uint32_t side_unit[4];
-	uint32_t side_count = 0;
 	enum flag_value flag_value;
 	css_error error;
 
@@ -75,88 +70,12 @@ css_error css__parse_padding(css_language *c,
 		return error;
 	}
 
-	/* Attempt to parse up to 4 widths */
-	do {
-		prev_ctx = *ctx;
+	static const css_prop_handler handlers[] = {
+		css__parse_padding_top,
+		css__parse_padding_right,
+		css__parse_padding_bottom,
+		css__parse_padding_left,
+	};
 
-		if ((token != NULL) && is_css_inherit(c, token)) {
-			*ctx = orig_ctx;
-			return CSS_INVALID;
-		}
-
-		error = css__parse_unit_specifier(c,
-						  vector,
-						  ctx,
-						  UNIT_PX,
-						  &side_length[side_count],
-						  &side_unit[side_count]);
-		if (error == CSS_OK) {
-			if (side_unit[side_count] & UNIT_ANGLE ||
-			    side_unit[side_count] & UNIT_TIME ||
-			    side_unit[side_count] & UNIT_FREQ) {
-				*ctx = orig_ctx;
-				return CSS_INVALID;
-			}
-
-			if (side_length[side_count] < 0) {
-				*ctx = orig_ctx;
-				return CSS_INVALID;
-			}
-
-			side_count++;
-
-			consumeWhitespace(vector, ctx);
-
-			token = parserutils_vector_peek(vector, *ctx);
-		} else {
-			/* Forcibly cause loop to exit */
-			token = NULL;
-		}
-	} while ((*ctx != prev_ctx) && (token != NULL) && (side_count < 4));
-
-#define SIDE_APPEND(OP, NUM)                                                   \
-	error = css__stylesheet_style_appendOPV(result, (OP), 0, PADDING_SET); \
-	if (error != CSS_OK)                                                   \
-		break;                                                         \
-	error = css__stylesheet_style_append(result, side_length[(NUM)]);      \
-	if (error != CSS_OK)                                                   \
-		break;                                                         \
-	error = css__stylesheet_style_append(result, side_unit[(NUM)]);        \
-	if (error != CSS_OK)                                                   \
-		break;
-
-	switch (side_count) {
-	case 1:
-		SIDE_APPEND(CSS_PROP_PADDING_TOP, 0);
-		SIDE_APPEND(CSS_PROP_PADDING_RIGHT, 0);
-		SIDE_APPEND(CSS_PROP_PADDING_BOTTOM, 0);
-		SIDE_APPEND(CSS_PROP_PADDING_LEFT, 0);
-		break;
-	case 2:
-		SIDE_APPEND(CSS_PROP_PADDING_TOP, 0);
-		SIDE_APPEND(CSS_PROP_PADDING_RIGHT, 1);
-		SIDE_APPEND(CSS_PROP_PADDING_BOTTOM, 0);
-		SIDE_APPEND(CSS_PROP_PADDING_LEFT, 1);
-		break;
-	case 3:
-		SIDE_APPEND(CSS_PROP_PADDING_TOP, 0);
-		SIDE_APPEND(CSS_PROP_PADDING_RIGHT, 1);
-		SIDE_APPEND(CSS_PROP_PADDING_BOTTOM, 2);
-		SIDE_APPEND(CSS_PROP_PADDING_LEFT, 1);
-		break;
-	case 4:
-		SIDE_APPEND(CSS_PROP_PADDING_TOP, 0);
-		SIDE_APPEND(CSS_PROP_PADDING_RIGHT, 1);
-		SIDE_APPEND(CSS_PROP_PADDING_BOTTOM, 2);
-		SIDE_APPEND(CSS_PROP_PADDING_LEFT, 3);
-		break;
-	default:
-		error = CSS_INVALID;
-		break;
-	}
-
-	if (error != CSS_OK)
-		*ctx = orig_ctx;
-
-	return error;
+	return css__parse_sides(c, vector, ctx, result, handlers, 4);
 }

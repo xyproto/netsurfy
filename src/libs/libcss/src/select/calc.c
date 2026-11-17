@@ -176,8 +176,7 @@ static css_error css__normalise_unit(const css_unit_ctx *unit_ctx,
 		*u = UNIT_DPI;
 		return CSS_OK;
 	} else if (*u == UNIT_PCT) {
-		css_fixed pct100 = css_unit_device2css_px(INTTOFIX(available),
-							  unit_ctx->device_dpi);
+		css_fixed pct100 = INTTOFIX(available);
 		if (available < 0) {
 			return CSS_INVALID;
 		}
@@ -270,6 +269,21 @@ css_error css_calculator_calculate(css_calculator *calc,
 				v_left = css_divide_fixed(v_left, v_right);
 			}
 
+			CALC_PUSH(u_left, v_left);
+			break;
+		}
+		case CALC_MIN: /* fallthrough */
+		case CALC_MAX: {
+			unit u_left, u_right;
+			css_fixed v_left, v_right;
+			CALC_POP(u_right, v_right);
+			CALC_POP(u_left, v_left);
+			if (u_left != u_right) {
+				return CSS_INVALID;
+			}
+			if ((op == CALC_MIN) == (v_right < v_left)) {
+				v_left = v_right;
+			}
 			CALC_PUSH(u_left, v_left);
 			break;
 		}

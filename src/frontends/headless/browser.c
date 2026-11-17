@@ -634,6 +634,30 @@ static void headless_window_handle_reload(int argc, char **argv)
 	}
 }
 
+static void headless_window_handle_resize(int argc, char **argv)
+{
+	struct gui_window *gw;
+	if (argc != 5) {
+		moutf(MOUT_ERROR, "WINDOW RESIZE ARGS BAD");
+		return;
+	}
+
+	gw = headless_find_window_by_num(atoi(argv[2]));
+
+	if (gw == NULL) {
+		moutf(MOUT_ERROR, "WINDOW NUM BAD");
+	} else {
+		gw->width = atoi(argv[3]);
+		gw->height = atoi(argv[4]);
+		moutf(MOUT_WINDOW,
+		      "SIZE WIN %u WIDTH %d HEIGHT %d",
+		      gw->win_num,
+		      gw->width,
+		      gw->height);
+		browser_window_schedule_reformat(gw->bw);
+	}
+}
+
 static void headless_window_handle_exec(int argc, char **argv)
 {
 	struct gui_window *gw;
@@ -744,6 +768,8 @@ void headless_window_handle_command(int argc, char **argv)
 		headless_window_handle_redraw(argc, argv);
 	} else if (strcmp(argv[1], "RELOAD") == 0) {
 		headless_window_handle_reload(argc, argv);
+	} else if (strcmp(argv[1], "RESIZE") == 0) {
+		headless_window_handle_resize(argc, argv);
 	} else if (strcmp(argv[1], "EXEC") == 0) {
 		headless_window_handle_exec(argc, argv);
 	} else if (strcmp(argv[1], "CLICK") == 0) {

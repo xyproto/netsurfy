@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Layout</title><script src="harness.js"></script>
+<style>
+body { margin: 0; width: 600px; }
+#calc-width { width: min(50%, 1000px); height: calc(10px + 5px); }
+#calc-margin { margin: 0 0 0 calc(10% + 4px); width: 10px; height: 1px; }
+#calc-padding { padding: 0 0 0 max(5%, 2px); width: 10px; height: 1px; }
+#calc-clamp { width: clamp(100px, 90%, 200px); min-height: max(20px, 1px); height: 1px; }
+#calc-max { width: 500px; max-width: calc(100% - 550px); height: 1px; }
+#calc-pos { position: relative; height: 40px; }
+#calc-abs { position: absolute; left: calc(25% + 1px); top: calc(5px * 2); width: 1px; height: 1px; }
+.flex { display: flex; gap: calc(4px + 6px); }
+.item { width: 50px; height: 5px; flex-shrink: 0; }
+#contents { display: contents; }
+#empty-min { min-height: 20px; }
+#empty-max { height: 30px; max-height: 5px; }
+</style></head>
+<body>
+<textarea id="ta" style="width: 20px; height: 208px; padding: 0 0 0 10px; border: none">
+// You can edit this code!
+package main
+func main() {
+  fmt.Println("Hello")
+}</textarea>
+<div id="calc-width"></div>
+<div id="calc-margin"></div>
+<div id="calc-padding"></div>
+<div id="calc-clamp"></div>
+<div id="calc-max"></div>
+<div id="calc-pos"><div id="calc-abs"></div></div>
+<div id="empty-min"></div>
+<div id="empty-max"></div>
+<div class="flex"><div id="f1" class="item"></div><div id="contents"><div id="f2" class="item"></div><span id="f3" class="item"></span></div></div>
+<script>
+function $(id) {
+    return document.getElementById(id);
+}
+window.addEventListener("load", function () {
+    test("narrow textarea with a scrollbar", function () {
+        assert($("ta").value.length > 0);
+    });
+    test("min(), max(), clamp() and calc() in sizes", function () {
+        assertEquals($("calc-width").offsetWidth, 300);
+        assertEquals($("calc-width").offsetHeight, 15);
+        assertEquals($("calc-clamp").offsetWidth, 200);
+        assertEquals($("calc-clamp").offsetHeight, 20);
+        assertEquals($("calc-max").offsetWidth, 50);
+    });
+    test("calc() in margins, padding and offsets", function () {
+        assertEquals($("calc-margin").offsetLeft, 64);
+        assertEquals($("calc-padding").offsetWidth, 40);
+        assertEquals($("calc-abs").offsetLeft, 151);
+        assertEquals($("calc-abs").offsetTop - $("calc-pos").offsetTop, 10);
+    });
+    test("min-height and max-height on empty blocks", function () {
+        assertEquals($("empty-min").offsetHeight, 20);
+        assertEquals($("empty-max").offsetHeight, 5);
+    });
+    test("flex gap and display: contents children as flex items", function () {
+        assertEquals($("f2").offsetLeft - $("f1").offsetLeft, 60);
+        assertEquals($("f3").offsetLeft - $("f2").offsetLeft, 60);
+        assertEquals($("f3").offsetWidth, 50);
+        assertEquals($("contents").offsetWidth, 0);
+    });
+    done();
+});
+</script>
+</body></html>

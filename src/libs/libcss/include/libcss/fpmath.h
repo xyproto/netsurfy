@@ -23,16 +23,10 @@ typedef int32_t css_fixed;
 
 static inline css_fixed css_add_fixed(const css_fixed x, const css_fixed y)
 {
-	int32_t ux = x;
-	int32_t uy = y;
-	int32_t res = ux + uy;
+	int32_t res = (int32_t)((uint32_t)x + (uint32_t)y);
 
-	/* Calculate overflowed result. (Don't change the sign bit of ux) */
-	ux = (ux >> 31) + INT_MAX;
-
-	/* Force compiler to use cmovns instruction */
-	if ((int32_t)((ux ^ uy) | ~(uy ^ res)) >= 0) {
-		res = ux;
+	if (((x ^ res) & (y ^ res)) < 0) {
+		res = x < 0 ? INT_MIN : INT_MAX;
 	}
 
 	return res;
@@ -40,15 +34,10 @@ static inline css_fixed css_add_fixed(const css_fixed x, const css_fixed y)
 
 static inline css_fixed css_subtract_fixed(const css_fixed x, const css_fixed y)
 {
-	int32_t ux = x;
-	int32_t uy = y;
-	int32_t res = ux - uy;
+	int32_t res = (int32_t)((uint32_t)x - (uint32_t)y);
 
-	ux = (ux >> 31) + INT_MAX;
-
-	/* Force compiler to use cmovns instruction */
-	if ((int32_t)((ux ^ uy) & (ux ^ res)) < 0) {
-		res = ux;
+	if (((x ^ y) & (x ^ res)) < 0) {
+		res = x < 0 ? INT_MIN : INT_MAX;
 	}
 
 	return res;

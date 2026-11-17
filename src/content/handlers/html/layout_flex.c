@@ -387,6 +387,18 @@ static void layout_flex_ctx__populate_item_data(const struct flex_ctx *ctx,
 		item->basis = css_computed_flex_basis(b->style,
 						      &item->basis_length,
 						      &item->basis_unit);
+		{
+			int px;
+			if (lh__calc_px(ctx->unit_len_ctx,
+					b->style,
+					CSS_PROP_FLEX_BASIS,
+					available_width,
+					&px)) {
+				item->basis = CSS_FLEX_BASIS_SET;
+				item->basis_length = INTTOFIX(px);
+				item->basis_unit = CSS_UNIT_PX;
+			}
+		}
 
 		css_computed_flex_shrink(b->style, &item->shrink);
 		css_computed_flex_grow(b->style, &item->grow);

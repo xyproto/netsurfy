@@ -276,6 +276,12 @@ uint8_t css_computed_width_px(const css_computed_style *style,
 			      int available_px,
 			      int *px_out);
 
+css_error css_computed_calc_px(const css_computed_style *style,
+			       enum css_properties_e property,
+			       const css_unit_ctx *unit_ctx,
+			       int available_px,
+			       int *px_out);
+
 uint8_t css_computed_width(const css_computed_style *style,
 			   css_fixed *length,
 			   css_unit *unit);

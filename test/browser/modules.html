@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Modules</title><script src="harness.js"></script>
+<script type="importmap">{"imports": {"lib": "data:text/javascript,export const answer = 42; export default 'lib';"}}</script>
+<script>window.log = [];</script>
+<script type="module">
+import name, { answer } from "lib";
+log.push("first " + name + " " + answer + " " + (document.getElementById("late") !== null));
+window.metaUrl = import.meta.url;
+</script>
+<script>log.push("classic");</script>
+<script type="module">
+log.push("second");
+const m = await import("data:text/javascript,export const x = 7;");
+log.push("dynamic " + m.x);
+</script>
+<script nomodule>window.nomoduleRan = true;</script>
+</head>
+<body><div id="late"></div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    log.push("DOMContentLoaded");
+});
+window.addEventListener("load", function () {
+    var tries = 0;
+    function check() {
+        if (log.indexOf("dynamic 7") < 0 && tries++ < 50) {
+            setTimeout(check, 20);
+            return;
+        }
+        test("module scripts run after parsing, in order, before DOMContentLoaded", function () {
+            assertEquals(log.slice(0, 4).join("|"), "classic|first lib 42 true|second|DOMContentLoaded");
+        });
+        test("top-level await and dynamic import()", function () {
+            assert(log.indexOf("dynamic 7") > 0);
+        });
+        test("import.meta.url and nomodule", function () {
+            assertEquals(metaUrl.split("#")[0], location.href.split("#")[0]);
+            assert(!window.nomoduleRan);
+        });
+        var s = document.createElement("script");
+        s.type = "module";
+        s.textContent = "import { answer } from 'lib'; window.lateAnswer = answer;";
+        document.body.appendChild(s);
+        setTimeout(function () {
+            test("dynamically inserted module scripts", function () {
+                assertEquals(window.lateAnswer, 42);
+            });
+            done();
+        }, 100);
+    }
+    check();
+});
+</script>
+</body></html>

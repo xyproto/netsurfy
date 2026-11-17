@@ -734,10 +734,8 @@ dom_exception _dom_node_insert_before(dom_node_internal *node,
 	assert(node != NULL);
 
 	/* Ensure that new_child and node are owned by the same document */
-	if ((new_child->type == DOM_DOCUMENT_TYPE_NODE &&
-	     new_child->owner != NULL && new_child->owner != node->owner) ||
-	    (new_child->type != DOM_DOCUMENT_TYPE_NODE &&
-	     new_child->owner != node->owner))
+	if (new_child->type == DOM_DOCUMENT_TYPE_NODE &&
+	    new_child->owner != NULL && new_child->owner != node->owner)
 		return DOM_WRONG_DOCUMENT_ERR;
 
 	/* Ensure node isn't read only */
@@ -765,6 +763,13 @@ dom_exception _dom_node_insert_before(dom_node_internal *node,
 		*result = new_child;
 
 		return DOM_NO_ERR;
+	}
+
+	if (new_child->type != DOM_DOCUMENT_TYPE_NODE &&
+	    new_child->owner != node->owner) {
+		err = _dom_node_adopt(node->owner, new_child);
+		if (err != DOM_NO_ERR)
+			return err;
 	}
 
 	/* If new_child is already in the tree and
@@ -878,10 +883,6 @@ dom_exception _dom_node_replace_child(dom_node_internal *node,
 	     new_child->type == DOM_ELEMENT_NODE))
 		return DOM_NOT_SUPPORTED_ERR;
 
-	/* Ensure that new_child and node are owned by the same document */
-	if (new_child->owner != node->owner)
-		return DOM_WRONG_DOCUMENT_ERR;
-
 	/* Ensure node isn't read only */
 	if (_dom_node_readonly(node))
 		return DOM_NO_MODIFICATION_ALLOWED_ERR;
@@ -919,6 +920,12 @@ dom_exception _dom_node_replace_child(dom_node_internal *node,
 		*result = old_child;
 
 		return DOM_NO_ERR;
+	}
+
+	if (new_child->owner != node->owner) {
+		err = _dom_node_adopt(node->owner, new_child);
+		if (err != DOM_NO_ERR)
+			return err;
 	}
 
 	/* If new_child is already in the tree and
@@ -2151,6 +2158,58 @@ bool _dom_node_readonly_owner(const dom_node_internal *node)
 		return true;
 
 	return false;
+}
+
+static void
+_dom_node_set_owner(dom_node_internal *node, struct dom_document *doc)
+{
+	dom_node_internal *child;
+
+	node->owner = doc;
+	if (node->type == DOM_ELEMENT_NODE) {
+		_dom_element_set_owner((struct dom_element *)node, doc);
+	}
+	for (child = node->first_child; child != NULL; child = child->next) {
+		_dom_node_set_owner(child, doc);
+	}
+}
+
+dom_exception _dom_node_adopt(struct dom_document *doc, dom_node_internal *node)
+{
+	struct dom_document *old = node->owner;
+	dom_node_internal *removed = NULL;
+	bool pending;
+
+	if (old == doc) {
+		return DOM_NO_ERR;
+	}
+	if (node->type == DOM_DOCUMENT_NODE ||
+	    node->type == DOM_DOCUMENT_TYPE_NODE) {
+		return DOM_NOT_SUPPORTED_ERR;
+	}
+	if (node->parent != NULL) {
+		dom_exception err = dom_node_remove_child(node->parent,
+							  node,
+							  (void *)&removed);
+		if (err != DOM_NO_ERR) {
+			return err;
+		}
+	}
+	pending = node->pending_list.prev != &node->pending_list;
+	if (pending) {
+		list_del(&node->pending_list);
+	}
+	_dom_node_set_owner(node, doc);
+	if (pending) {
+		list_append(&doc->pending_nodes, &node->pending_list);
+	}
+	if (old != NULL) {
+		_dom_document_try_destroy(old);
+	}
+	if (removed != NULL) {
+		dom_node_unref(removed);
+	}
+	return DOM_NO_ERR;
 }
 
 /**

@@ -83,6 +83,9 @@ css__cascade_display(uint32_t opv, css_style *style, css_select_state *state)
 		case DISPLAY_INLINE_GRID:
 			value = CSS_DISPLAY_INLINE_GRID;
 			break;
+		case DISPLAY_CONTENTS:
+			value = CSS_DISPLAY_CONTENTS;
+			break;
 		}
 	}
 

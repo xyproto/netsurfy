@@ -18,7 +18,7 @@ css_error css__cascade_padding_right(uint32_t opv,
 				     css_style *style,
 				     css_select_state *state)
 {
-	return css__cascade_length(opv, style, state, set_padding_right);
+	return css__cascade_length_calc(opv, style, state, set_padding_right);
 }
 
 css_error css__set_padding_right_from_hint(const css_hint *hint,
@@ -26,20 +26,22 @@ css_error css__set_padding_right_from_hint(const css_hint *hint,
 {
 	return set_padding_right(style,
 				 hint->status,
-				 hint->data.length.value,
+				 (css_fixed_or_calc)(hint->data.length.value),
 				 hint->data.length.unit);
 }
 
 css_error css__initial_padding_right(css_select_state *state)
 {
-	return set_padding_right(
-		state->computed, CSS_PADDING_SET, 0, CSS_UNIT_PX);
+	return set_padding_right(state->computed,
+				 CSS_PADDING_SET,
+				 (css_fixed_or_calc)0,
+				 CSS_UNIT_PX);
 }
 
 css_error
 css__copy_padding_right(const css_computed_style *from, css_computed_style *to)
 {
-	css_fixed length = 0;
+	css_fixed_or_calc length = (css_fixed_or_calc)0;
 	css_unit unit = CSS_UNIT_PX;
 	uint8_t type = get_padding_right(from, &length, &unit);
 
@@ -54,7 +56,7 @@ css_error css__compose_padding_right(const css_computed_style *parent,
 				     const css_computed_style *child,
 				     css_computed_style *result)
 {
-	css_fixed length = 0;
+	css_fixed_or_calc length = (css_fixed_or_calc)0;
 	css_unit unit = CSS_UNIT_PX;
 	uint8_t type = get_padding_right(child, &length, &unit);
 

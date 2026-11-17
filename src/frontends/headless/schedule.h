@@ -40,6 +40,8 @@ nserror headless_schedule(int tival, void (*callback)(void *p), void *p);
  */
 int headless_schedule_run(void);
 
+int headless_schedule_next(void);
+
 /**
  * Log a list of all scheduled callbacks.
  */

@@ -44,11 +44,11 @@ static css_error
 compute_absolute_gap(css_computed_style *style,
 		     const css_hint_length *ex_size,
 		     uint8_t (*get)(const css_computed_style *style,
-				    css_fixed *len,
+				    css_fixed_or_calc *len,
 				    css_unit *unit),
 		     css_error (*set)(css_computed_style *style,
 				      uint8_t type,
-				      css_fixed len,
+				      css_fixed_or_calc len,
 				      css_unit unit));
 static css_error compute_absolute_clip(css_computed_style *style,
 				       const css_hint_length *ex_size);
@@ -96,6 +96,32 @@ compute_absolute_length_pair(css_computed_style *style,
 					      css_fixed len2,
 					      css_unit unit2));
 
+
+static uint8_t calc_get(uint8_t (*get)(const css_computed_style *style,
+				       css_fixed_or_calc *len,
+				       css_unit *unit),
+			const css_computed_style *style,
+			css_fixed *length,
+			css_unit *unit,
+			uint8_t calc_type)
+{
+	css_fixed_or_calc value;
+	uint8_t type;
+
+	value.calc = NULL;
+	value.value = *length;
+	type = get(style, &value, unit);
+	if (*unit == CSS_UNIT_CALC) {
+		*length = 0;
+		*unit = CSS_UNIT_PX;
+		if (calc_type != 0) {
+			type = calc_type;
+		}
+	} else {
+		*length = value.value;
+	}
+	return type;
+}
 
 /**
  * Create a computed style
@@ -522,7 +548,7 @@ uint8_t css_computed_top(const css_computed_style *style,
 			 css_unit *unit)
 {
 	uint8_t position = css_computed_position(style);
-	uint8_t top = get_top(style, length, unit);
+	uint8_t top = calc_get(get_top, style, length, unit, CSS_TOP_AUTO);
 
 	/* Fix up, based on computed position */
 	if (position == CSS_POSITION_STATIC) {
@@ -536,9 +562,11 @@ uint8_t css_computed_top(const css_computed_style *style,
 			css_fixed bottom_length;
 			css_unit bottom_unit;
 
-			uint8_t bottom = get_bottom(style,
-						    &bottom_length,
-						    &bottom_unit);
+			uint8_t bottom = calc_get(get_bottom,
+						  style,
+						  &bottom_length,
+						  &bottom_unit,
+						  CSS_BOTTOM_AUTO);
 
 			if (bottom == CSS_BOTTOM_SET) {
 				/* Top is auto, bottom is set, use `-bottom`. */
@@ -562,7 +590,8 @@ uint8_t css_computed_right(const css_computed_style *style,
 			   css_unit *unit)
 {
 	uint8_t position = css_computed_position(style);
-	uint8_t right = get_right(style, length, unit);
+	uint8_t right = calc_get(
+		get_right, style, length, unit, CSS_RIGHT_AUTO);
 
 	/* Fix up, based on computed position */
 	if (position == CSS_POSITION_STATIC) {
@@ -574,7 +603,11 @@ uint8_t css_computed_right(const css_computed_style *style,
 		css_fixed left_length;
 		css_unit left_unit;
 
-		uint8_t left = get_left(style, &left_length, &left_unit);
+		uint8_t left = calc_get(get_left,
+					style,
+					&left_length,
+					&left_unit,
+					CSS_LEFT_AUTO);
 
 		if (right == CSS_RIGHT_SET) {
 			if (left == CSS_LEFT_SET) {
@@ -610,7 +643,8 @@ uint8_t css_computed_bottom(const css_computed_style *style,
 			    css_unit *unit)
 {
 	uint8_t position = css_computed_position(style);
-	uint8_t bottom = get_bottom(style, length, unit);
+	uint8_t bottom = calc_get(
+		get_bottom, style, length, unit, CSS_BOTTOM_AUTO);
 
 	/* Fix up, based on computed position */
 	if (position == CSS_POSITION_STATIC) {
@@ -623,7 +657,8 @@ uint8_t css_computed_bottom(const css_computed_style *style,
 		css_unit top_unit;
 
 		/* Have to get top; if set at all, it overrides bottom */
-		uint8_t top = get_top(style, &top_length, &top_unit);
+		uint8_t top = calc_get(
+			get_top, style, &top_length, &top_unit, CSS_TOP_AUTO);
 
 		if (top == CSS_TOP_SET) {
 			/* Top is set; bottom doesn't matter => -top */
@@ -647,7 +682,7 @@ uint8_t css_computed_left(const css_computed_style *style,
 			  css_unit *unit)
 {
 	uint8_t position = css_computed_position(style);
-	uint8_t left = get_left(style, length, unit);
+	uint8_t left = calc_get(get_left, style, length, unit, CSS_LEFT_AUTO);
 
 	/* Fix up, based on computed position */
 	if (position == CSS_POSITION_STATIC) {
@@ -659,7 +694,11 @@ uint8_t css_computed_left(const css_computed_style *style,
 		css_fixed right_length;
 		css_unit right_unit;
 
-		uint8_t right = get_right(style, &right_length, &right_unit);
+		uint8_t right = calc_get(get_right,
+					 style,
+					 &right_length,
+					 &right_unit,
+					 CSS_RIGHT_AUTO);
 
 		if (left == CSS_LEFT_SET) {
 			if (right == CSS_RIGHT_SET) {
@@ -723,7 +762,7 @@ uint8_t css_computed_height(const css_computed_style *style,
 			    css_fixed *length,
 			    css_unit *unit)
 {
-	return get_height(style, length, unit);
+	return calc_get(get_height, style, length, unit, CSS_HEIGHT_AUTO);
 }
 
 uint8_t css_computed_line_height(const css_computed_style *style,
@@ -748,28 +787,28 @@ uint8_t css_computed_margin_top(const css_computed_style *style,
 				css_fixed *length,
 				css_unit *unit)
 {
-	return get_margin_top(style, length, unit);
+	return calc_get(get_margin_top, style, length, unit, 0);
 }
 
 uint8_t css_computed_margin_right(const css_computed_style *style,
 				  css_fixed *length,
 				  css_unit *unit)
 {
-	return get_margin_right(style, length, unit);
+	return calc_get(get_margin_right, style, length, unit, 0);
 }
 
 uint8_t css_computed_margin_bottom(const css_computed_style *style,
 				   css_fixed *length,
 				   css_unit *unit)
 {
-	return get_margin_bottom(style, length, unit);
+	return calc_get(get_margin_bottom, style, length, unit, 0);
 }
 
 uint8_t css_computed_margin_left(const css_computed_style *style,
 				 css_fixed *length,
 				 css_unit *unit)
 {
-	return get_margin_left(style, length, unit);
+	return calc_get(get_margin_left, style, length, unit, 0);
 }
 
 uint8_t css_computed_background_attachment(const css_computed_style *style)
@@ -796,14 +835,128 @@ uint8_t css_computed_max_height(const css_computed_style *style,
 				css_fixed *length,
 				css_unit *unit)
 {
-	return get_max_height(style, length, unit);
+	return calc_get(
+		get_max_height, style, length, unit, CSS_MAX_HEIGHT_NONE);
 }
 
 uint8_t css_computed_max_width(const css_computed_style *style,
 			       css_fixed *length,
 			       css_unit *unit)
 {
-	return get_max_width(style, length, unit);
+	return calc_get(get_max_width, style, length, unit, CSS_MAX_WIDTH_NONE);
+}
+
+css_error css_computed_calc_px(const css_computed_style *style,
+			       enum css_properties_e property,
+			       const css_unit_ctx *unit_ctx,
+			       int available_px,
+			       int *px_out)
+{
+	css_fixed_or_calc value = {.calc = NULL};
+	css_unit unit = CSS_UNIT_PX;
+	css_error error;
+
+	switch (property) {
+	case CSS_PROP_TOP:
+		get_top(style, &value, &unit);
+		break;
+	case CSS_PROP_RIGHT:
+		get_right(style, &value, &unit);
+		break;
+	case CSS_PROP_BOTTOM:
+		get_bottom(style, &value, &unit);
+		break;
+	case CSS_PROP_LEFT:
+		get_left(style, &value, &unit);
+		break;
+	case CSS_PROP_FLEX_BASIS:
+		get_flex_basis(style, &value, &unit);
+		break;
+	case CSS_PROP_HEIGHT:
+		get_height(style, &value, &unit);
+		break;
+	case CSS_PROP_WIDTH:
+		get_width(style, &value, &unit);
+		break;
+	case CSS_PROP_MARGIN_TOP:
+		get_margin_top(style, &value, &unit);
+		break;
+	case CSS_PROP_MARGIN_RIGHT:
+		get_margin_right(style, &value, &unit);
+		break;
+	case CSS_PROP_MARGIN_BOTTOM:
+		get_margin_bottom(style, &value, &unit);
+		break;
+	case CSS_PROP_MARGIN_LEFT:
+		get_margin_left(style, &value, &unit);
+		break;
+	case CSS_PROP_MAX_HEIGHT:
+		get_max_height(style, &value, &unit);
+		break;
+	case CSS_PROP_MAX_WIDTH:
+		get_max_width(style, &value, &unit);
+		break;
+	case CSS_PROP_MIN_HEIGHT:
+		get_min_height(style, &value, &unit);
+		break;
+	case CSS_PROP_MIN_WIDTH:
+		get_min_width(style, &value, &unit);
+		break;
+	case CSS_PROP_PADDING_TOP:
+		get_padding_top(style, &value, &unit);
+		break;
+	case CSS_PROP_PADDING_RIGHT:
+		get_padding_right(style, &value, &unit);
+		break;
+	case CSS_PROP_PADDING_LEFT:
+		get_padding_left(style, &value, &unit);
+		break;
+	case CSS_PROP_PADDING_BOTTOM:
+		get_padding_bottom(style, &value, &unit);
+		break;
+	case CSS_PROP_TEXT_INDENT:
+		get_text_indent(style, &value, &unit);
+		break;
+	case CSS_PROP_COLUMN_GAP:
+		get_column_gap(style, &value, &unit);
+		break;
+	case CSS_PROP_ROW_GAP:
+		get_row_gap(style, &value, &unit);
+		break;
+	default:
+		return CSS_BADPARM;
+	}
+	if (unit != CSS_UNIT_CALC) {
+		return CSS_INVALID;
+	}
+	error = css_calculator_calculate(style->calc,
+					 unit_ctx,
+					 available_px,
+					 value.calc,
+					 style,
+					 &unit,
+					 &value.value);
+	if (error == CSS_OK) {
+		*px_out = FIXTOINT(value.value);
+		switch (property) {
+		case CSS_PROP_TOP:
+		case CSS_PROP_RIGHT:
+		case CSS_PROP_BOTTOM:
+		case CSS_PROP_LEFT:
+		case CSS_PROP_MARGIN_TOP:
+		case CSS_PROP_MARGIN_RIGHT:
+		case CSS_PROP_MARGIN_BOTTOM:
+		case CSS_PROP_MARGIN_LEFT:
+		case CSS_PROP_TEXT_INDENT:
+			break;
+		default:
+			if (*px_out < 0) {
+				*px_out = 0;
+			}
+			break;
+		}
+	}
+	return error;
 }
 
 uint8_t css_computed_width_px(const css_computed_style *style,
@@ -833,6 +986,9 @@ uint8_t css_computed_width_px(const css_computed_style *style,
 						     &value.value) == CSS_OK) {
 				type = CSS_WIDTH_SET;
 				*px_out = FIXTOINT(value.value);
+				if (*px_out < 0) {
+					*px_out = 0;
+				}
 			} else {
 				type = CSS_WIDTH_AUTO;
 			}
@@ -897,7 +1053,8 @@ uint8_t css_computed_min_height(const css_computed_style *style,
 				css_fixed *length,
 				css_unit *unit)
 {
-	uint8_t min_height = get_min_height(style, length, unit);
+	uint8_t min_height = calc_get(
+		get_min_height, style, length, unit, CSS_MIN_HEIGHT_AUTO);
 
 	if (min_height == CSS_MIN_HEIGHT_AUTO) {
 		uint8_t display = get_display(style);
@@ -917,7 +1074,8 @@ uint8_t css_computed_min_width(const css_computed_style *style,
 			       css_fixed *length,
 			       css_unit *unit)
 {
-	uint8_t min_width = get_min_width(style, length, unit);
+	uint8_t min_width = calc_get(
+		get_min_width, style, length, unit, CSS_MIN_WIDTH_AUTO);
 
 	if (min_width == CSS_MIN_WIDTH_AUTO) {
 		uint8_t display = get_display(style);
@@ -947,28 +1105,28 @@ uint8_t css_computed_padding_top(const css_computed_style *style,
 				 css_fixed *length,
 				 css_unit *unit)
 {
-	return get_padding_top(style, length, unit);
+	return calc_get(get_padding_top, style, length, unit, 0);
 }
 
 uint8_t css_computed_padding_right(const css_computed_style *style,
 				   css_fixed *length,
 				   css_unit *unit)
 {
-	return get_padding_right(style, length, unit);
+	return calc_get(get_padding_right, style, length, unit, 0);
 }
 
 uint8_t css_computed_padding_bottom(const css_computed_style *style,
 				    css_fixed *length,
 				    css_unit *unit)
 {
-	return get_padding_bottom(style, length, unit);
+	return calc_get(get_padding_bottom, style, length, unit, 0);
 }
 
 uint8_t css_computed_padding_left(const css_computed_style *style,
 				  css_fixed *length,
 				  css_unit *unit)
 {
-	return get_padding_left(style, length, unit);
+	return calc_get(get_padding_left, style, length, unit, 0);
 }
 
 uint8_t css_computed_overflow_x(const css_computed_style *style)
@@ -1013,7 +1171,7 @@ uint8_t css_computed_text_indent(const css_computed_style *style,
 				 css_fixed *length,
 				 css_unit *unit)
 {
-	return get_text_indent(style, length, unit);
+	return calc_get(get_text_indent, style, length, unit, 0);
 }
 
 uint8_t css_computed_white_space(const css_computed_style *style)
@@ -1060,14 +1218,15 @@ uint8_t css_computed_column_gap(const css_computed_style *style,
 				css_fixed *length,
 				css_unit *unit)
 {
-	return get_column_gap(style, length, unit);
+	return calc_get(
+		get_column_gap, style, length, unit, CSS_COLUMN_GAP_NORMAL);
 }
 
 uint8_t css_computed_row_gap(const css_computed_style *style,
 			     css_fixed *length,
 			     css_unit *unit)
 {
-	return get_row_gap(style, length, unit);
+	return calc_get(get_row_gap, style, length, unit, CSS_ROW_GAP_NORMAL);
 }
 
 uint8_t css_computed_column_rule_color(const css_computed_style *style,
@@ -1123,6 +1282,9 @@ uint8_t css_computed_display(const css_computed_style *style, bool root)
 
 	if (display == CSS_DISPLAY_NONE)
 		return display; /* 1. */
+
+	if (display == CSS_DISPLAY_CONTENTS)
+		return root ? CSS_DISPLAY_BLOCK : display;
 
 	if ((position == CSS_POSITION_ABSOLUTE ||
 	     position == CSS_POSITION_FIXED) /* 2. */
@@ -1278,7 +1440,8 @@ uint8_t css_computed_flex_basis(const css_computed_style *style,
 				css_fixed *length,
 				css_unit *unit)
 {
-	return get_flex_basis(style, length, unit);
+	return calc_get(
+		get_flex_basis, style, length, unit, CSS_FLEX_BASIS_AUTO);
 }
 
 uint8_t css_computed_flex_direction(const css_computed_style *style)
@@ -1413,7 +1576,7 @@ css_error css__compute_absolute_values(const css_computed_style *parent,
 		return error;
 
 	/* Fix up height */
-	error = compute_absolute_length(
+	error = compute_absolute_length_calc(
 		style, &ex_size.data.length, get_height, set_height);
 	if (error != CSS_OK)
 		return error;
@@ -1429,25 +1592,25 @@ css_error css__compute_absolute_values(const css_computed_style *parent,
 		return error;
 
 	/* Fix up max-height */
-	error = compute_absolute_length(
+	error = compute_absolute_length_calc(
 		style, &ex_size.data.length, get_max_height, set_max_height);
 	if (error != CSS_OK)
 		return error;
 
 	/* Fix up max-width */
-	error = compute_absolute_length(
+	error = compute_absolute_length_calc(
 		style, &ex_size.data.length, get_max_width, set_max_width);
 	if (error != CSS_OK)
 		return error;
 
 	/* Fix up min-height */
-	error = compute_absolute_length(
+	error = compute_absolute_length_calc(
 		style, &ex_size.data.length, get_min_height, set_min_height);
 	if (error != CSS_OK)
 		return error;
 
 	/* Fix up min-width */
-	error = compute_absolute_length(
+	error = compute_absolute_length_calc(
 		style, &ex_size.data.length, get_min_width, set_min_width);
 	if (error != CSS_OK)
 		return error;
@@ -1458,7 +1621,7 @@ css_error css__compute_absolute_values(const css_computed_style *parent,
 		return error;
 
 	/* Fix up text-indent */
-	error = compute_absolute_length(
+	error = compute_absolute_length_calc(
 		style, &ex_size.data.length, get_text_indent, set_text_indent);
 	if (error != CSS_OK)
 		return error;
@@ -1475,7 +1638,7 @@ css_error css__compute_absolute_values(const css_computed_style *parent,
 		return error;
 
 	/* Fix up flex-basis */
-	error = compute_absolute_length(
+	error = compute_absolute_length_calc(
 		style, &ex_size.data.length, get_flex_basis, set_flex_basis);
 	if (error != CSS_OK)
 		return error;
@@ -1740,35 +1903,35 @@ css_error compute_absolute_border_side_width(
 css_error compute_absolute_gap(css_computed_style *style,
 			       const css_hint_length *ex_size,
 			       uint8_t (*get)(const css_computed_style *style,
-					      css_fixed *len,
+					      css_fixed_or_calc *len,
 					      css_unit *unit),
 			       css_error (*set)(css_computed_style *style,
 						uint8_t type,
-						css_fixed len,
+						css_fixed_or_calc len,
 						css_unit unit))
 {
-	css_fixed length = 0;
+	css_fixed_or_calc length = {.value = 0};
 	css_unit unit = CSS_UNIT_PX;
 
 	switch (get(style, &length, &unit)) {
 	case CSS_COLUMN_GAP_NORMAL:
 		return CSS_OK;
 	case CSS_COLUMN_GAP_THIN:
-		length = INTTOFIX(1);
+		length.value = INTTOFIX(1);
 		unit = CSS_UNIT_PX;
 		break;
 	case CSS_COLUMN_GAP_MEDIUM:
-		length = INTTOFIX(2);
+		length.value = INTTOFIX(2);
 		unit = CSS_UNIT_PX;
 		break;
 	case CSS_COLUMN_GAP_THICK:
-		length = INTTOFIX(4);
+		length.value = INTTOFIX(4);
 		unit = CSS_UNIT_PX;
 		break;
 	case CSS_COLUMN_GAP_SET:
 		if (unit != CSS_UNIT_EX)
 			return CSS_OK;
-		length = FMUL(length, ex_size->value);
+		length.value = FMUL(length.value, ex_size->value);
 		unit = ex_size->unit;
 		break;
 	default:
@@ -1883,19 +2046,22 @@ css_error compute_absolute_sides(css_computed_style *style,
 	css_error error;
 
 	/* Calculate absolute lengths for sides */
-	error = compute_absolute_length(style, ex_size, get_top, set_top);
+	error = compute_absolute_length_calc(style, ex_size, get_top, set_top);
 	if (error != CSS_OK)
 		return error;
 
-	error = compute_absolute_length(style, ex_size, get_right, set_right);
+	error = compute_absolute_length_calc(
+		style, ex_size, get_right, set_right);
 	if (error != CSS_OK)
 		return error;
 
-	error = compute_absolute_length(style, ex_size, get_bottom, set_bottom);
+	error = compute_absolute_length_calc(
+		style, ex_size, get_bottom, set_bottom);
 	if (error != CSS_OK)
 		return error;
 
-	error = compute_absolute_length(style, ex_size, get_left, set_left);
+	error = compute_absolute_length_calc(
+		style, ex_size, get_left, set_left);
 	if (error != CSS_OK)
 		return error;
 
@@ -1914,22 +2080,22 @@ css_error compute_absolute_margins(css_computed_style *style,
 {
 	css_error error;
 
-	error = compute_absolute_length(
+	error = compute_absolute_length_calc(
 		style, ex_size, get_margin_top, set_margin_top);
 	if (error != CSS_OK)
 		return error;
 
-	error = compute_absolute_length(
+	error = compute_absolute_length_calc(
 		style, ex_size, get_margin_right, set_margin_right);
 	if (error != CSS_OK)
 		return error;
 
-	error = compute_absolute_length(
+	error = compute_absolute_length_calc(
 		style, ex_size, get_margin_bottom, set_margin_bottom);
 	if (error != CSS_OK)
 		return error;
 
-	error = compute_absolute_length(
+	error = compute_absolute_length_calc(
 		style, ex_size, get_margin_left, set_margin_left);
 	if (error != CSS_OK)
 		return error;
@@ -1949,22 +2115,22 @@ css_error compute_absolute_padding(css_computed_style *style,
 {
 	css_error error;
 
-	error = compute_absolute_length(
+	error = compute_absolute_length_calc(
 		style, ex_size, get_padding_top, set_padding_top);
 	if (error != CSS_OK)
 		return error;
 
-	error = compute_absolute_length(
+	error = compute_absolute_length_calc(
 		style, ex_size, get_padding_right, set_padding_right);
 	if (error != CSS_OK)
 		return error;
 
-	error = compute_absolute_length(
+	error = compute_absolute_length_calc(
 		style, ex_size, get_padding_bottom, set_padding_bottom);
 	if (error != CSS_OK)
 		return error;
 
-	error = compute_absolute_length(
+	error = compute_absolute_length_calc(
 		style, ex_size, get_padding_left, set_padding_left);
 	if (error != CSS_OK)
 		return error;

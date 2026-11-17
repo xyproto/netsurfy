@@ -92,6 +92,8 @@ void _dom_node_finalise(dom_node_internal *node);
 
 bool _dom_node_readonly_owner(const dom_node_internal *node);
 bool _dom_node_readonly(const dom_node_internal *node);
+dom_exception
+_dom_node_adopt(struct dom_document *doc, dom_node_internal *node);
 
 /* Event Target implementation */
 dom_exception _dom_node_add_event_listener(dom_event_target *et,

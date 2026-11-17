@@ -1025,6 +1025,9 @@ static bool textarea_reflow_multiline(struct textarea *ta,
 					    &b_off,
 					    &x);
 			/* b_off now marks space, or end of paragraph */
+			if (b_off == 0 && para_end > text) {
+				b_off = utf8_next(text, para_end - text, 0);
+			}
 
 			if (x > h_extent) {
 				h_extent = x;

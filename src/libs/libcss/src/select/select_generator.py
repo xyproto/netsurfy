@@ -502,6 +502,7 @@ class CSSGroup:
         t.append('struct css_computed_style_i i;')
         t.append()
         t.append(self.make_value_declaration(for_commented=True))
+        t.append('struct css_computed_vars *vars;')
         t.append()
 
         t.append('struct css_computed_style *next;')

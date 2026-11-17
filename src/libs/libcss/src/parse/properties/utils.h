@@ -277,6 +277,8 @@ css__comma_list_to_style(css_language *c,
  * Post condition: \a *ctx is updated with the next token to process
  *                 If the input is invalid, then \a *ctx remains unchanged.
  */
+bool css__is_calc_function(const css_token *token);
+
 css_error css__parse_calc(css_language *c,
 			  const parserutils_vector *vector,
 			  int *ctx,

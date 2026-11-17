@@ -7,6 +7,7 @@
 
 #include <assert.h>
 #include <ctype.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
@@ -117,6 +118,9 @@ static css_error parseSelector(css_language *c,
 static css_error parseSelectorList(css_language *c,
 				   const parserutils_vector *vector,
 				   css_rule *rule);
+
+static void
+reportInvalid(const char *what, const parserutils_vector *vector, int32_t ctx);
 
 /* Declaration parsing */
 static bool vectorHasVar(const parserutils_vector *vector, int32_t ctx);
@@ -606,6 +610,9 @@ css_error handleStartRuleset(css_language *c, const parserutils_vector *vector)
 		/* Parse selectors, if there are any */
 		error = parseSelectorList(c, vector, rule);
 		if (error != CSS_OK) {
+			if (error == CSS_INVALID) {
+				reportInvalid("SELECTOR", vector, 0);
+			}
 			css__stylesheet_rule_destroy(c->sheet, rule);
 			return error;
 		}
@@ -1182,6 +1189,54 @@ handleEndBlockContent(css_language *c, const parserutils_vector *vector)
 	return ret;
 }
 
+static void
+reportInvalid(const char *what, const parserutils_vector *vector, int32_t ctx)
+{
+	static int enabled = -1;
+	const css_token *token;
+
+	if (enabled < 0) {
+		enabled = getenv("NETSURFY_CSS_REPORT") != NULL;
+	}
+	if (!enabled || vector == NULL ||
+	    parserutils_vector_peek(vector, ctx) == NULL) {
+		return;
+	}
+	fprintf(stderr, "CSS_REJECT %s ", what);
+	while ((token = parserutils_vector_iterate(vector, &ctx)) != NULL) {
+		const uint8_t *data = token->data.data;
+		int len = (int)token->data.len;
+		if (token->idata != NULL) {
+			data = (const uint8_t *)lwc_string_data(token->idata);
+			len = (int)lwc_string_length(token->idata);
+		}
+		switch (token->type) {
+		case CSS_TOKEN_S:
+			fputc(' ', stderr);
+			break;
+		case CSS_TOKEN_FUNCTION:
+			fprintf(stderr, "%.*s(", len, data);
+			break;
+		case CSS_TOKEN_STRING:
+			fprintf(stderr, "\"%.*s\"", len, data);
+			break;
+		case CSS_TOKEN_HASH:
+			fprintf(stderr, "#%.*s", len, data);
+			break;
+		case CSS_TOKEN_ATKEYWORD:
+			fprintf(stderr, "@%.*s", len, data);
+			break;
+		case CSS_TOKEN_PERCENTAGE:
+			fprintf(stderr, "%.*s%%", len, data);
+			break;
+		default:
+			fprintf(stderr, "%.*s", len, data);
+			break;
+		}
+	}
+	fputc('\n', stderr);
+}
+
 css_error handleDeclaration(css_language *c, const parserutils_vector *vector)
 {
 	css_error error;
@@ -1231,6 +1286,9 @@ css_error handleDeclaration(css_language *c, const parserutils_vector *vector)
 			c, ident, vector, &ctx, ff_rule);
 	} else {
 		error = parseProperty(c, ident, vector, &ctx, rule);
+	}
+	if (error == CSS_INVALID) {
+		reportInvalid("DECL", vector, 0);
 	}
 	if (error != CSS_OK)
 		return error;

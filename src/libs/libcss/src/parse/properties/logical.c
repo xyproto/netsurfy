@@ -7,12 +7,12 @@
 #include "parse/properties/properties.h"
 #include "parse/properties/utils.h"
 
-static css_error parse_sides(css_language *c,
-			     const parserutils_vector *vector,
-			     int32_t *ctx,
-			     css_style *result,
-			     const css_prop_handler *handlers,
-			     int sides)
+css_error css__parse_sides(css_language *c,
+			   const parserutils_vector *vector,
+			   int32_t *ctx,
+			   css_style *result,
+			   const css_prop_handler *handlers,
+			   int sides)
 {
 	static const int map2[2][2] = {{0, 0}, {0, 1}};
 	static const int map4[4][4] = {
@@ -68,7 +68,7 @@ css_error css__parse_border_block(css_language *c,
 	static const css_prop_handler handlers[] = {css__parse_border_top,
 						    css__parse_border_bottom};
 
-	return parse_sides(c, vector, ctx, result, handlers, 2);
+	return css__parse_sides(c, vector, ctx, result, handlers, 2);
 }
 
 css_error css__parse_border_block_color(css_language *c,
@@ -79,7 +79,7 @@ css_error css__parse_border_block_color(css_language *c,
 	static const css_prop_handler handlers[] = {
 		css__parse_border_top_color, css__parse_border_bottom_color};
 
-	return parse_sides(c, vector, ctx, result, handlers, 2);
+	return css__parse_sides(c, vector, ctx, result, handlers, 2);
 }
 
 css_error css__parse_border_block_style(css_language *c,
@@ -90,7 +90,7 @@ css_error css__parse_border_block_style(css_language *c,
 	static const css_prop_handler handlers[] = {
 		css__parse_border_top_style, css__parse_border_bottom_style};
 
-	return parse_sides(c, vector, ctx, result, handlers, 2);
+	return css__parse_sides(c, vector, ctx, result, handlers, 2);
 }
 
 css_error css__parse_border_block_width(css_language *c,
@@ -101,7 +101,7 @@ css_error css__parse_border_block_width(css_language *c,
 	static const css_prop_handler handlers[] = {
 		css__parse_border_top_width, css__parse_border_bottom_width};
 
-	return parse_sides(c, vector, ctx, result, handlers, 2);
+	return css__parse_sides(c, vector, ctx, result, handlers, 2);
 }
 
 css_error css__parse_border_inline(css_language *c,
@@ -112,7 +112,7 @@ css_error css__parse_border_inline(css_language *c,
 	static const css_prop_handler handlers[] = {css__parse_border_left,
 						    css__parse_border_right};
 
-	return parse_sides(c, vector, ctx, result, handlers, 2);
+	return css__parse_sides(c, vector, ctx, result, handlers, 2);
 }
 
 css_error css__parse_border_inline_color(css_language *c,
@@ -123,7 +123,7 @@ css_error css__parse_border_inline_color(css_language *c,
 	static const css_prop_handler handlers[] = {
 		css__parse_border_left_color, css__parse_border_right_color};
 
-	return parse_sides(c, vector, ctx, result, handlers, 2);
+	return css__parse_sides(c, vector, ctx, result, handlers, 2);
 }
 
 css_error css__parse_border_inline_style(css_language *c,
@@ -134,7 +134,7 @@ css_error css__parse_border_inline_style(css_language *c,
 	static const css_prop_handler handlers[] = {
 		css__parse_border_left_style, css__parse_border_right_style};
 
-	return parse_sides(c, vector, ctx, result, handlers, 2);
+	return css__parse_sides(c, vector, ctx, result, handlers, 2);
 }
 
 css_error css__parse_border_inline_width(css_language *c,
@@ -145,7 +145,7 @@ css_error css__parse_border_inline_width(css_language *c,
 	static const css_prop_handler handlers[] = {
 		css__parse_border_left_width, css__parse_border_right_width};
 
-	return parse_sides(c, vector, ctx, result, handlers, 2);
+	return css__parse_sides(c, vector, ctx, result, handlers, 2);
 }
 
 css_error css__parse_inset(css_language *c,
@@ -158,7 +158,7 @@ css_error css__parse_inset(css_language *c,
 						    css__parse_bottom,
 						    css__parse_left};
 
-	return parse_sides(c, vector, ctx, result, handlers, 4);
+	return css__parse_sides(c, vector, ctx, result, handlers, 4);
 }
 
 css_error css__parse_inset_block(css_language *c,
@@ -169,7 +169,7 @@ css_error css__parse_inset_block(css_language *c,
 	static const css_prop_handler handlers[] = {css__parse_top,
 						    css__parse_bottom};
 
-	return parse_sides(c, vector, ctx, result, handlers, 2);
+	return css__parse_sides(c, vector, ctx, result, handlers, 2);
 }
 
 css_error css__parse_inset_inline(css_language *c,
@@ -180,7 +180,7 @@ css_error css__parse_inset_inline(css_language *c,
 	static const css_prop_handler handlers[] = {css__parse_left,
 						    css__parse_right};
 
-	return parse_sides(c, vector, ctx, result, handlers, 2);
+	return css__parse_sides(c, vector, ctx, result, handlers, 2);
 }
 
 css_error css__parse_margin_block(css_language *c,
@@ -191,7 +191,7 @@ css_error css__parse_margin_block(css_language *c,
 	static const css_prop_handler handlers[] = {css__parse_margin_top,
 						    css__parse_margin_bottom};
 
-	return parse_sides(c, vector, ctx, result, handlers, 2);
+	return css__parse_sides(c, vector, ctx, result, handlers, 2);
 }
 
 css_error css__parse_margin_inline(css_language *c,
@@ -202,7 +202,7 @@ css_error css__parse_margin_inline(css_language *c,
 	static const css_prop_handler handlers[] = {css__parse_margin_left,
 						    css__parse_margin_right};
 
-	return parse_sides(c, vector, ctx, result, handlers, 2);
+	return css__parse_sides(c, vector, ctx, result, handlers, 2);
 }
 
 css_error css__parse_padding_block(css_language *c,
@@ -213,7 +213,7 @@ css_error css__parse_padding_block(css_language *c,
 	static const css_prop_handler handlers[] = {css__parse_padding_top,
 						    css__parse_padding_bottom};
 
-	return parse_sides(c, vector, ctx, result, handlers, 2);
+	return css__parse_sides(c, vector, ctx, result, handlers, 2);
 }
 
 css_error css__parse_padding_inline(css_language *c,
@@ -224,5 +224,5 @@ css_error css__parse_padding_inline(css_language *c,
 	static const css_prop_handler handlers[] = {css__parse_padding_left,
 						    css__parse_padding_right};
 
-	return parse_sides(c, vector, ctx, result, handlers, 2);
+	return css__parse_sides(c, vector, ctx, result, handlers, 2);
 }

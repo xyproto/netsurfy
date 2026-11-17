@@ -348,6 +348,13 @@ static void headless_run(void)
 		/* clears fdset */
 		fetch_fdset(&read_fd_set, &write_fd_set, &exc_fd_set, &max_fd);
 
+		{
+			int next = headless_schedule_next();
+			if (next >= 0 && (schedtm < 0 || next < schedtm)) {
+				schedtm = next;
+			}
+		}
+
 		/* add stdin to the set */
 		if (max_fd < 0) {
 			max_fd = 0;

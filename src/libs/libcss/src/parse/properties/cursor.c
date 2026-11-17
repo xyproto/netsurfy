@@ -6,6 +6,7 @@
  */
 
 #include <string.h>
+#include <strings.h>
 
 #include "bytecode/bytecode.h"
 #include "bytecode/opcodes.h"
@@ -26,6 +27,53 @@
  * Post condition: \a *ctx is updated with the next token to process
  *                 If the input is invalid, then \a *ctx remains unchanged.
  */
+static css_error cursor_fallback(css_language *c,
+				 const css_token *token,
+				 bool first,
+				 css_style *result)
+{
+	static const struct {
+		const char *name;
+		uint16_t value;
+	} map[] = {
+		{"none", CURSOR_DEFAULT},
+		{"context-menu", CURSOR_DEFAULT},
+		{"not-allowed", CURSOR_DEFAULT},
+		{"no-drop", CURSOR_DEFAULT},
+		{"alias", CURSOR_POINTER},
+		{"copy", CURSOR_POINTER},
+		{"zoom-in", CURSOR_POINTER},
+		{"zoom-out", CURSOR_POINTER},
+		{"cell", CURSOR_CROSSHAIR},
+		{"vertical-text", CURSOR_TEXT},
+		{"grab", CURSOR_MOVE},
+		{"grabbing", CURSOR_MOVE},
+		{"all-scroll", CURSOR_MOVE},
+		{"col-resize", CURSOR_E_RESIZE},
+		{"ew-resize", CURSOR_E_RESIZE},
+		{"row-resize", CURSOR_N_RESIZE},
+		{"ns-resize", CURSOR_N_RESIZE},
+		{"nesw-resize", CURSOR_NE_RESIZE},
+		{"nwse-resize", CURSOR_NW_RESIZE},
+	};
+	const char *name = lwc_string_data(token->idata);
+	size_t len = lwc_string_length(token->idata);
+
+	UNUSED(c);
+	for (size_t i = 0; i < sizeof(map) / sizeof(map[0]); i++) {
+		if (strlen(map[i].name) == len &&
+		    strncasecmp(map[i].name, name, len) == 0) {
+			return css__stylesheet_style_append(
+				result,
+				first ? buildOPV(CSS_PROP_CURSOR,
+						 0,
+						 map[i].value)
+				      : map[i].value);
+		}
+	}
+	return CSS_INVALID;
+}
+
 css_error css__parse_cursor(css_language *c,
 			    const parserutils_vector *vector,
 			    int32_t *ctx,
@@ -227,7 +275,8 @@ css_error css__parse_cursor(css_language *c,
 				    match)) {
 				error = CSS_APPEND(CURSOR_PROGRESS);
 			} else {
-				error = CSS_INVALID;
+				error = cursor_fallback(
+					c, token, first, result);
 			}
 		}
 	}

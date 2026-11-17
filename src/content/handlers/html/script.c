@@ -622,6 +622,103 @@ exec_inline_script(html_content *c, dom_node *node, dom_string *mimetype)
  *
  *
  */
+static void html_module_loaded(void *pw)
+{
+	html_content *c = pw;
+
+	c->base.active--;
+	NSLOG(netsurfy, INFO, "%d fetches active", c->base.active);
+	if (c->conversion_begun == false && html_can_begin_conversion(c)) {
+		html_begin_conversion(c);
+	}
+}
+
+static dom_hubbub_error
+html_process_module(html_content *c, dom_node *node, bool import_map)
+{
+	dom_exception exc;
+	dom_string *src = NULL, *text = NULL;
+	nsurl *url = NULL;
+
+	exc = dom_element_get_attribute(node, corestring_dom_src, &src);
+	if (exc != DOM_NO_ERR) {
+		src = NULL;
+	}
+	if (src == NULL || import_map) {
+		exc = dom_node_get_text_content(node, &text);
+		if (exc != DOM_NO_ERR) {
+			text = NULL;
+		}
+	}
+	if (import_map) {
+		if (text != NULL) {
+			js_import_map(c->jsthread,
+				      dom_string_data(text),
+				      dom_string_byte_length(text));
+		}
+	} else if (src == NULL ||
+		   nsurl_join(c->base_url, dom_string_data(src), &url) ==
+			   NSERROR_OK) {
+		if (js_module_script(c->jsthread,
+				     node,
+				     url != NULL ? nsurl_access(url) : NULL,
+				     text != NULL ? dom_string_data(text) : "",
+				     text != NULL ? dom_string_byte_length(text)
+						  : 0,
+				     html_module_loaded,
+				     c)) {
+			c->base.active++;
+			NSLOG(netsurfy,
+			      INFO,
+			      "%d fetches active",
+			      c->base.active);
+		}
+	}
+	if (url != NULL) {
+		nsurl_unref(url);
+	}
+	if (src != NULL) {
+		dom_string_unref(src);
+	}
+	if (text != NULL) {
+		dom_string_unref(text);
+	}
+	return DOM_HUBBUB_OK;
+}
+
+static bool script_in_template(dom_node *node)
+{
+	dom_node *parent = NULL;
+	bool found = false;
+
+	if (dom_node_get_parent_node(node, &parent) != DOM_NO_ERR) {
+		return false;
+	}
+	while (parent != NULL && !found) {
+		dom_node *next = NULL;
+		dom_string *name = NULL;
+
+		if (dom_node_get_node_name(parent, &name) == DOM_NO_ERR &&
+		    name != NULL) {
+			found = dom_string_byte_length(name) ==
+					SLEN("template") &&
+				strncasecmp(dom_string_data(name),
+					    "template",
+					    SLEN("template")) == 0;
+			dom_string_unref(name);
+		}
+		if (dom_node_get_parent_node(parent, &next) != DOM_NO_ERR) {
+			next = NULL;
+		}
+		dom_node_unref(parent);
+		parent = next;
+	}
+	if (parent != NULL) {
+		dom_node_unref(parent);
+	}
+	return found;
+}
+
 dom_hubbub_error html_process_script(void *ctx, dom_node *node)
 {
 	html_content *c = (html_content *)ctx;
@@ -652,6 +749,27 @@ dom_hubbub_error html_process_script(void *ctx, dom_node *node)
 	      c->parser,
 	      node);
 
+	if (script_in_template(node)) {
+		return DOM_HUBBUB_OK;
+	}
+
+	{
+		bool nomodule = false;
+		dom_string *attr = NULL;
+		if (dom_string_create((const uint8_t *)"nomodule",
+				      SLEN("nomodule"),
+				      &attr) == DOM_NO_ERR) {
+			if (dom_element_has_attribute(node, attr, &nomodule) !=
+			    DOM_NO_ERR) {
+				nomodule = false;
+			}
+			dom_string_unref(attr);
+		}
+		if (nomodule) {
+			return DOM_HUBBUB_OK;
+		}
+	}
+
 	exc = dom_element_get_attribute(node, corestring_dom_type, &mimetype);
 	if (exc != DOM_NO_ERR || mimetype == NULL) {
 		mimetype = dom_string_ref(corestring_dom_text_javascript);
@@ -661,7 +779,14 @@ dom_hubbub_error html_process_script(void *ctx, dom_node *node)
 	    strncasecmp(dom_string_data(mimetype), "module", SLEN("module")) ==
 		    0) {
 		dom_string_unref(mimetype);
-		return DOM_HUBBUB_OK;
+		return html_process_module(c, node, false);
+	}
+	if (dom_string_byte_length(mimetype) == SLEN("importmap") &&
+	    strncasecmp(dom_string_data(mimetype),
+			"importmap",
+			SLEN("importmap")) == 0) {
+		dom_string_unref(mimetype);
+		return html_process_module(c, node, true);
 	}
 
 	exc = dom_element_get_attribute(node, corestring_dom_src, &src);

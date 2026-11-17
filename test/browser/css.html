@@ -155,5 +155,54 @@ test("selector list specificity", function () {
     st.textContent = "* { position: absolute; } #r { z-index: 1 } :is(div, #r) { z-index: 7 } :where(#r) { z-index: 9 }";
     assertEquals(getComputedStyle(document.getElementById("r")).zIndex, "7");
 });
+test("CSS.supports", function () {
+    assert(CSS.supports("display", "flex"));
+    assert(!CSS.supports("display", "banana"));
+    assert(CSS.supports("(display: flex) and (not (display: banana))"));
+    assert(CSS.supports("display: flex"));
+    assert(!CSS.supports("selector(:banana)"));
+    assert(CSS.supports("selector(:is(a, b))"));
+});
+test("min(), max() and clamp()", function () {
+    assert(CSS.supports("width", "min(10px, 5%)"));
+    assert(CSS.supports("max-width", "min(calc(100% - 32px), 1008px)"));
+    assert(CSS.supports("height", "max(10px, 2em, 1vh)"));
+    assert(CSS.supports("width", "clamp(1px, 50%, 300px)"));
+    assert(CSS.supports("width", "calc(min(1px, 2px) * 3)"));
+    assert(!CSS.supports("width", "clamp(1px, 2px)"));
+    assert(!CSS.supports("width", "min()"));
+});
+test("alignment and cursor keywords", function () {
+    assert(CSS.supports("justify-content", "end"));
+    assert(CSS.supports("justify-content", "left"));
+    assert(CSS.supports("align-items", "start"));
+    assert(CSS.supports("align-self", "self-end"));
+    assert(CSS.supports("cursor", "not-allowed"));
+    assert(CSS.supports("cursor", "url(a.png), grab"));
+    assert(!CSS.supports("cursor", "banana"));
+});
+test("family names containing generic keywords", function () {
+    assert(CSS.supports("font-family", "BBC Reith Serif, serif"));
+    assert(!CSS.supports("font-family", "serif serif"));
+});
+test("CSS.escape", function () {
+    assertEquals(CSS.escape("a b"), "a\\ b");
+    assertEquals(CSS.escape("1x"), "\\31 x");
+    assertEquals(CSS.escape("-"), "\\-");
+    assertEquals(CSS.escape("a-b_c"), "a-b_c");
+});
+test("display: contents", function () {
+    assert(CSS.supports("display", "contents"));
+    var outer = document.createElement("div");
+    var inner = document.createElement("span");
+    outer.style.display = "contents";
+    outer.style.color = "rgb(1, 2, 3)";
+    outer.appendChild(inner);
+    document.body.appendChild(outer);
+    assertEquals(getComputedStyle(outer).display, "contents");
+    assertEquals(getComputedStyle(inner).color, "rgb(1, 2, 3)");
+    outer.remove();
+    assertEquals(getComputedStyle(document.documentElement).display, "block");
+});
 done();
 </script></body></html>

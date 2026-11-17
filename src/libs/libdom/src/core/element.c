@@ -152,6 +152,21 @@ error:
  * \param n  The attribute list node
  * \return The next attribute node
  */
+static dom_attr_list *_dom_element_attr_list_next(const dom_attr_list *n);
+
+void _dom_element_set_owner(struct dom_element *ele, struct dom_document *doc)
+{
+	dom_attr_list *attr = ele->attributes;
+
+	if (attr == NULL) {
+		return;
+	}
+	do {
+		((dom_node_internal *)attr->attr)->owner = doc;
+		attr = _dom_element_attr_list_next(attr);
+	} while (attr != ele->attributes);
+}
+
 static dom_attr_list *_dom_element_attr_list_next(const dom_attr_list *n)
 {
 	return (dom_attr_list *)(n->list.next);

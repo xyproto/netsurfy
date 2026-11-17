@@ -40,7 +40,7 @@ test("media elements reject play()", function () {
     assert(v.play() instanceof Promise);
     assertEquals(v.canPlayType("video/mp4"), "");
 });
-var pending = 2;
+var pending = 3;
 function finish() {
     if (--pending === 0) {
         test("global EventTarget methods with undefined this", function () {
@@ -77,4 +77,23 @@ dialog.addEventListener("close", function () {
 });
 dialog.showModal();
 dialog.close("ok");
+var blobUrl = URL.createObjectURL(new Blob(["blob text"], { type: "text/plain" }));
+fetch(blobUrl).then(function (r) {
+    return r.text().then(function (t) {
+        test("fetch from object URLs", function () {
+            assertEquals(blobUrl.slice(0, 5), "blob:");
+            assertEquals(r.headers.get("content-type"), "text/plain");
+            assertEquals(t, "blob text");
+        });
+        URL.revokeObjectURL(blobUrl);
+        return fetch(blobUrl).then(function () {
+            test("revoked object URLs fail", function () { assert(false); });
+        }, function (e) {
+            test("revoked object URLs fail", function () { assert(e instanceof TypeError); });
+        });
+    });
+}).then(finish, function (e) {
+    test("fetch from object URLs", function () { throw e; });
+    finish();
+});
 </script></body></html>

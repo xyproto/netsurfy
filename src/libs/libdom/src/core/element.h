@@ -54,6 +54,7 @@ dom_exception _dom_element_initialise(struct dom_document *doc,
 				      dom_string *prefix);
 
 void _dom_element_finalise(struct dom_element *ele);
+void _dom_element_set_owner(struct dom_element *ele, struct dom_document *doc);
 void _dom_element_attr_value_changed(struct dom_element *ele,
 				     struct dom_attr *attr,
 				     bool removed);
