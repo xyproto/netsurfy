@@ -326,9 +326,19 @@ function(netsurfy_gresource name sourcedir)
       COMMAND ${GLIB_COMPILE_RESOURCES} --sourcedir ${sourcedir} --sourcedir ${PROJECT_SOURCE_DIR}
         --generate-dependencies ${GTK_RES_DIR}/${name}.gresource.xml
       OUTPUT_VARIABLE dependencies
+      RESULT_VARIABLE dependency_result
+      ERROR_VARIABLE dependency_error
       OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(NOT dependency_result EQUAL 0)
+      message(FATAL_ERROR "Cannot discover ${name} resources: ${dependency_error}")
+    endif()
     string(REPLACE "\r" "" dependencies "${dependencies}")
     string(REPLACE "\n" ";" dependencies "${dependencies}")
+    foreach(dependency IN LISTS dependencies)
+      if(NOT IS_ABSOLUTE "${dependency}" OR NOT EXISTS "${dependency}")
+        message(FATAL_ERROR "Missing ${name} resource: ${dependency}")
+      endif()
+    endforeach()
   endif()
   set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
     ${GTK_RES_DIR}/${name}.gresource.xml)

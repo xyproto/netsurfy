@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/org/netsurfy">
-    <file preprocess="to-pixdata">favicon.png</file>
+    <file alias="favicon.png" preprocess="to-pixdata">img/favicon.png</file>
     <file alias="netsurfy.xpm" preprocess="to-pixdata">img/gtk/netsurfy.xpm</file>
     <file alias="menu_cursor.png" preprocess="to-pixdata">img/gtk/menu_cursor.png</file>
-    <file preprocess="to-pixdata">throbber/throbber0.png</file>
-    <file preprocess="to-pixdata">throbber/throbber1.png</file>
-    <file preprocess="to-pixdata">throbber/throbber2.png</file>
-    <file preprocess="to-pixdata">throbber/throbber3.png</file>
-    <file preprocess="to-pixdata">throbber/throbber4.png</file>
-    <file preprocess="to-pixdata">throbber/throbber5.png</file>
-    <file preprocess="to-pixdata">throbber/throbber6.png</file>
-    <file preprocess="to-pixdata">throbber/throbber7.png</file>
-    <file preprocess="to-pixdata">throbber/throbber8.png</file>
+    <file alias="throbber/throbber0.png" preprocess="to-pixdata">img/throbber/throbber0.png</file>
+    <file alias="throbber/throbber1.png" preprocess="to-pixdata">img/throbber/throbber1.png</file>
+    <file alias="throbber/throbber2.png" preprocess="to-pixdata">img/throbber/throbber2.png</file>
+    <file alias="throbber/throbber3.png" preprocess="to-pixdata">img/throbber/throbber3.png</file>
+    <file alias="throbber/throbber4.png" preprocess="to-pixdata">img/throbber/throbber4.png</file>
+    <file alias="throbber/throbber5.png" preprocess="to-pixdata">img/throbber/throbber5.png</file>
+    <file alias="throbber/throbber6.png" preprocess="to-pixdata">img/throbber/throbber6.png</file>
+    <file alias="throbber/throbber7.png" preprocess="to-pixdata">img/throbber/throbber7.png</file>
+    <file alias="throbber/throbber8.png" preprocess="to-pixdata">img/throbber/throbber8.png</file>
     <file>credits.html</file>
     <file>fr/credits.html</file>
     <file>it/credits.html</file>
@@ -27,37 +27,37 @@
     <file>default.css</file>
     <file>internal.css</file>
     <file>quirks.css</file>
-    <file>netsurfy.png</file>
+    <file alias="netsurfy.png">img/netsurfy-wordmark.png</file>
     <file alias="default.ico">img/gtk/default.ico</file>
     <file alias="icons/256x256/apps/netsurfy.png">img/icons/256x256/apps/netsurfy.png</file>
-    <file>icons/show-cookie.png</file>
-    <file>icons/local-history.png</file>
-    <file>icons/arrow-l.png</file>
-    <file>icons/content.png</file>
-    <file>icons/directory2.png</file>
-    <file>icons/directory.png</file>
-    <file>icons/hotlist-add.png</file>
-    <file>icons/hotlist-rmv.png</file>
-    <file>icons/search.png</file>
-    <file>icons/scalable/actions/go-previous-symbolic.svg</file>
-    <file>icons/scalable/actions/go-next-symbolic.svg</file>
-    <file>icons/scalable/actions/go-down-symbolic.svg</file>
-    <file>icons/scalable/actions/view-refresh-symbolic.svg</file>
-    <file>icons/scalable/actions/process-stop-symbolic.svg</file>
-    <file>icons/scalable/actions/go-home-symbolic.svg</file>
-    <file>icons/scalable/actions/open-menu-symbolic.svg</file>
-    <file>icons/scalable/actions/list-add-symbolic.svg</file>
-    <file>icons/scalable/actions/window-close-symbolic.svg</file>
-    <file>icons/24x24/actions/page-info-insecure.png</file>
-    <file>icons/24x24/actions/page-info-internal.png</file>
-    <file>icons/24x24/actions/page-info-local.png</file>
-    <file>icons/24x24/actions/page-info-secure.png</file>
-    <file>icons/24x24/actions/page-info-warning.png</file>
-    <file>icons/48x48/actions/page-info-insecure.png</file>
-    <file>icons/48x48/actions/page-info-internal.png</file>
-    <file>icons/48x48/actions/page-info-local.png</file>
-    <file>icons/48x48/actions/page-info-secure.png</file>
-    <file>icons/48x48/actions/page-info-warning.png</file>
+    <file alias="icons/show-cookie.png">img/icons/show-cookie.png</file>
+    <file alias="icons/local-history.png">img/icons/local-history.png</file>
+    <file alias="icons/arrow-l.png">img/icons/arrow-l.png</file>
+    <file alias="icons/content.png">img/icons/content.png</file>
+    <file alias="icons/directory2.png">img/icons/directory2.png</file>
+    <file alias="icons/directory.png">img/icons/directory.png</file>
+    <file alias="icons/hotlist-add.png">img/icons/hotlist-add.png</file>
+    <file alias="icons/hotlist-rmv.png">img/icons/hotlist-rmv.png</file>
+    <file alias="icons/search.png">img/icons/search.png</file>
+    <file alias="icons/scalable/actions/go-previous-symbolic.svg">img/icons/scalable/actions/go-previous-symbolic.svg</file>
+    <file alias="icons/scalable/actions/go-next-symbolic.svg">img/icons/scalable/actions/go-next-symbolic.svg</file>
+    <file alias="icons/scalable/actions/go-down-symbolic.svg">img/icons/scalable/actions/go-down-symbolic.svg</file>
+    <file alias="icons/scalable/actions/view-refresh-symbolic.svg">img/icons/scalable/actions/view-refresh-symbolic.svg</file>
+    <file alias="icons/scalable/actions/process-stop-symbolic.svg">img/icons/scalable/actions/process-stop-symbolic.svg</file>
+    <file alias="icons/scalable/actions/go-home-symbolic.svg">img/icons/scalable/actions/go-home-symbolic.svg</file>
+    <file alias="icons/scalable/actions/open-menu-symbolic.svg">img/icons/scalable/actions/open-menu-symbolic.svg</file>
+    <file alias="icons/scalable/actions/list-add-symbolic.svg">img/icons/scalable/actions/list-add-symbolic.svg</file>
+    <file alias="icons/scalable/actions/window-close-symbolic.svg">img/icons/scalable/actions/window-close-symbolic.svg</file>
+    <file alias="icons/24x24/actions/page-info-insecure.png">img/icons/24x24/actions/page-info-insecure.png</file>
+    <file alias="icons/24x24/actions/page-info-internal.png">img/icons/24x24/actions/page-info-internal.png</file>
+    <file alias="icons/24x24/actions/page-info-local.png">img/icons/24x24/actions/page-info-local.png</file>
+    <file alias="icons/24x24/actions/page-info-secure.png">img/icons/24x24/actions/page-info-secure.png</file>
+    <file alias="icons/24x24/actions/page-info-warning.png">img/icons/24x24/actions/page-info-warning.png</file>
+    <file alias="icons/48x48/actions/page-info-insecure.png">img/icons/48x48/actions/page-info-insecure.png</file>
+    <file alias="icons/48x48/actions/page-info-internal.png">img/icons/48x48/actions/page-info-internal.png</file>
+    <file alias="icons/48x48/actions/page-info-local.png">img/icons/48x48/actions/page-info-local.png</file>
+    <file alias="icons/48x48/actions/page-info-secure.png">img/icons/48x48/actions/page-info-secure.png</file>
+    <file alias="icons/48x48/actions/page-info-warning.png">img/icons/48x48/actions/page-info-warning.png</file>
     <file>languages</file>
     <file>accelerators</file>
   </gresource>
