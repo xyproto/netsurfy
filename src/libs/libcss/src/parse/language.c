@@ -288,7 +288,8 @@ static css_error collectParens(const parserutils_vector *vector,
 	}
 
 	while ((token = parserutils_vector_iterate(vector, ctx)) != NULL) {
-		if (token->type == CSS_TOKEN_FUNCTION || tokenIsChar(token, '(')) {
+		if (token->type == CSS_TOKEN_FUNCTION ||
+		    tokenIsChar(token, '(')) {
 			depth++;
 		} else if (tokenIsChar(token, ')')) {
 			if (depth == 0) {
@@ -313,8 +314,8 @@ static bool supportsCondition(css_language *c,
 			      int32_t *ctx,
 			      bool *valid);
 
-static bool supportsDeclaration(css_language *c,
-				const parserutils_vector *vector)
+static bool
+supportsDeclaration(css_language *c, const parserutils_vector *vector)
 {
 	const css_token *ident, *token;
 	css_style *style = NULL;
@@ -438,7 +439,8 @@ static bool supportsInParens(css_language *c,
 		{
 			bool sub_valid = true;
 
-			result = supportsCondition(c, sub, &sub_ctx, &sub_valid);
+			result = supportsCondition(
+				c, sub, &sub_ctx, &sub_valid);
 			if (!sub_valid ||
 			    parserutils_vector_peek(sub, sub_ctx) != NULL) {
 				result = false;
@@ -463,9 +465,8 @@ static bool supportsCondition(css_language *c,
 	consumeWhitespace(vector, ctx);
 	token = parserutils_vector_peek(vector, *ctx);
 	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-	    lwc_string_caseless_isequal(token->idata,
-					c->strings[NOT],
-					&match) == lwc_error_ok &&
+	    lwc_string_caseless_isequal(
+		    token->idata, c->strings[NOT], &match) == lwc_error_ok &&
 	    match) {
 		parserutils_vector_iterate(vector, ctx);
 		consumeWhitespace(vector, ctx);
@@ -489,9 +490,9 @@ static bool supportsCondition(css_language *c,
 						&match) == lwc_error_ok &&
 		    match) {
 			this_op = 1;
-		} else if (lwc_string_caseless_isequal(token->idata,
-						       c->strings[OR],
-						       &match) == lwc_error_ok &&
+		} else if (lwc_string_caseless_isequal(
+				   token->idata, c->strings[OR], &match) ==
+				   lwc_error_ok &&
 			   match) {
 			this_op = 2;
 		}
@@ -509,9 +510,8 @@ static bool supportsCondition(css_language *c,
 	return result;
 }
 
-static css_error createConditionalRule(css_language *c,
-				       bool applies,
-				       css_rule **result)
+static css_error
+createConditionalRule(css_language *c, bool applies, css_rule **result)
 {
 	css_mq_query *media;
 	css_rule *rule;
@@ -1703,7 +1703,8 @@ static void skipToComma(const parserutils_vector *vector, int32_t *ctx)
 		if (depth == 0 && tokenIsChar(token, ',')) {
 			return;
 		}
-		if (token->type == CSS_TOKEN_FUNCTION || tokenIsChar(token, '(')) {
+		if (token->type == CSS_TOKEN_FUNCTION ||
+		    tokenIsChar(token, '(')) {
 			depth++;
 		} else if (tokenIsChar(token, ')') && depth > 0) {
 			depth--;

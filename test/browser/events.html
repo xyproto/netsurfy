@@ -43,7 +43,20 @@ test("media elements reject play()", function () {
 var pending = 2;
 function finish() {
     if (--pending === 0) {
-        done();
+        test("global EventTarget methods with undefined this", function () {
+    "use strict";
+    var fired = 0;
+    var add = window.addEventListener;
+    function h() { fired++; }
+    add("bare-test", h);
+    addEventListener("bare-test", h, true);
+    dispatchEvent(new Event("bare-test"));
+    removeEventListener("bare-test", h);
+    removeEventListener("bare-test", h, true);
+    dispatchEvent(new Event("bare-test"));
+    assertEquals(fired, 2);
+});
+done();
     }
 }
 window.addEventListener("message", function (e) {

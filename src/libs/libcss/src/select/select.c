@@ -258,6 +258,8 @@ css_error css_libcss_node_data_handler(css_select_handler *handler,
  * \param result  Pointer to location to receive created context
  * \return CSS_OK on success, appropriate error otherwise.
  */
+static uint32_t select_ctx_count;
+
 css_error css_select_ctx_create(css_select_ctx **result)
 {
 	css_select_ctx *c;
@@ -284,6 +286,7 @@ css_error css_select_ctx_create(css_select_ctx **result)
 	}
 
 	*result = c;
+	select_ctx_count++;
 
 	return CSS_OK;
 }
@@ -314,6 +317,10 @@ css_error css_select_ctx_destroy(css_select_ctx *ctx)
 	css_calculator_unref(ctx->calc);
 
 	free(ctx);
+
+	if (--select_ctx_count == 0) {
+		css__vars_flush();
+	}
 
 	return CSS_OK;
 }
@@ -2631,7 +2638,8 @@ static css_error match_sub_selector(css_select_ctx *ctx,
 			return error;
 	}
 
-	error = match_details(ctx, node, &selector->data, state, match, &pseudo);
+	error = match_details(
+		ctx, node, &selector->data, state, match, &pseudo);
 	if (error != CSS_OK || *match == false)
 		return error;
 	if (pseudo != CSS_PSEUDO_ELEMENT_NONE) {
@@ -2714,8 +2722,9 @@ static css_error match_has(css_select_ctx *ctx,
 			}
 			if (item->comb == CSS_COMBINATOR_SIBLING && simple)
 				break;
-			error = state->handler->next_sibling_node(
-				state->pw, sibling, &sibling);
+			error = state->handler->next_sibling_node(state->pw,
+								  sibling,
+								  &sibling);
 		}
 		return error;
 	default:

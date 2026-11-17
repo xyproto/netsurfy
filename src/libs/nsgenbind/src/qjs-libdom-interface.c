@@ -84,10 +84,12 @@ output_get_method_private(struct opctx *outc, struct ir_entry *interfacee)
 		"\t%s_private_t *priv = %s_private(ctx, this_val, %s);\n"
 		"\tif (priv == NULL) {\n"
 		"\t\treturn JS_ThrowTypeError(ctx, \"Illegal invocation\");\n"
-		"\t}\n\n",
+		"\t}\n"
+		"\tthis_val = %s_this(ctx, this_val);\n\n",
 		interfacee->class_name,
 		DLPFX,
-		ename);
+		ename,
+		DLPFX);
 	free(ename);
 
 	return 0;

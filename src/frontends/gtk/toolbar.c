@@ -3368,7 +3368,9 @@ nserror nsgtk_toolbar_set_url(struct nsgtk_toolbar *tb, nsurl *url)
 		gtk_editable_get_selection_bounds(GTK_EDITABLE(url_entry),
 						  &startpos,
 						  &endpos);
-		was_selected = gtk_widget_is_focus(GTK_WIDGET(url_entry)) &&
+		was_selected = (gtk_widget_get_state_flags(
+					GTK_WIDGET(url_entry)) &
+				GTK_STATE_FLAG_FOCUS_WITHIN) != 0 &&
 			       startpos == 0 &&
 			       endpos == gtk_entry_get_text_length(url_entry);
 		gtk_editable_set_text(GTK_EDITABLE(url_entry), url_text);
@@ -3377,6 +3379,10 @@ nserror nsgtk_toolbar_set_url(struct nsgtk_toolbar *tb, nsurl *url)
 			if (tb->loc_focus == LFS_LAST) {
 				tb->loc_focus = LFS_IDLE;
 			}
+		} else if (was_selected) {
+			gtk_editable_select_region(GTK_EDITABLE(url_entry),
+						   0,
+						   -1);
 		}
 	}
 

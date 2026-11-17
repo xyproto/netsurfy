@@ -431,6 +431,14 @@ void *qjsky_global_private(JSContext *ctx)
 	return qjsky_thread(ctx)->window_priv;
 }
 
+JSValueConst qjsky_this(JSContext *ctx, JSValueConst val)
+{
+	if (JS_IsUndefined(val) || JS_IsNull(val)) {
+		return qjsky_thread(ctx)->global;
+	}
+	return val;
+}
+
 void *qjsky_private(JSContext *ctx, JSValueConst val, int iface)
 {
 	jsthread *thread = qjsky_thread(ctx);

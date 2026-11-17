@@ -116,6 +116,7 @@ JSValue qjsky_current_script(JSContext *ctx);
 JSValue qjsky_generic(JSContext *ctx, const char *name);
 JSValue qjsky_list_proxy(JSContext *ctx, const char *generic, JSValue inner);
 
+JSValueConst qjsky_this(JSContext *ctx, JSValueConst val);
 JSValue qjsky_hidden_get(JSContext *ctx,
 			 JSValueConst obj,
 			 qjsky_hidden key,

@@ -1244,6 +1244,9 @@ static void gui_window_place_caret(struct gui_window *g,
 				   int height,
 				   const struct rect *clip)
 {
+	GtkRoot *root = gtk_widget_get_root(g->layout);
+	GtkWidget *focus = NULL;
+
 	nsgtk_redraw_caret(g);
 
 	y += 1;
@@ -1264,7 +1267,13 @@ static void gui_window_place_caret(struct gui_window *g,
 
 	nsgtk_redraw_caret(g);
 
-	gtk_widget_grab_focus(g->layout);
+	if (root != NULL) {
+		focus = gtk_root_get_focus(root);
+	}
+	if (focus == NULL || !GTK_IS_EDITABLE(focus) ||
+	    gtk_widget_is_ancestor(focus, g->layout)) {
+		gtk_widget_grab_focus(g->layout);
+	}
 }
 
 

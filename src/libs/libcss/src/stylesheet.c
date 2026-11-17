@@ -917,7 +917,8 @@ void css__stylesheet_selector_list_destroy(css_stylesheet *sheet,
 		return;
 
 	for (uint32_t i = 0; i < list->count; i++) {
-		css__stylesheet_selector_destroy(sheet, list->items[i].selector);
+		css__stylesheet_selector_destroy(sheet,
+						 list->items[i].selector);
 	}
 	free(list);
 }

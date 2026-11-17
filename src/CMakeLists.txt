@@ -361,6 +361,7 @@ if(NETSURFY_BUILD_HEADLESS)
     frontends/headless/browser.c
     frontends/headless/dispatch.c
     frontends/headless/download.c
+    frontends/headless/duck.c
     frontends/headless/fetch.c
     frontends/headless/filetype.c
     frontends/headless/layout.c

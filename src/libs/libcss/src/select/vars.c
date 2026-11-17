@@ -359,6 +359,27 @@ static const css_style *vars_parse_cached(uint16_t prop,
 	return vars_sheet_style(e->sheet);
 }
 
+void css__vars_flush(void)
+{
+	for (size_t i = 0; i < VARS_CACHE_SIZE; i++) {
+		vars_cache_entry *e = &vars_cache[i];
+		if (e->text != NULL) {
+			lwc_string_unref(e->text);
+		}
+		if (e->url != NULL) {
+			lwc_string_unref(e->url);
+		}
+		if (e->sheet != NULL) {
+			css_stylesheet_destroy(e->sheet);
+		}
+		memset(e, 0, sizeof(*e));
+	}
+	if (propstrings != NULL) {
+		css__propstrings_unref();
+		propstrings = NULL;
+	}
+}
+
 static css_error vars_probe_resolve(void *pw,
 				    const char *base,
 				    lwc_string *rel,

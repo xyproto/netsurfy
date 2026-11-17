@@ -91,6 +91,7 @@ css_error css__vars_cascade_pending(struct css_select_state *state,
 				    const css_stylesheet *sheet);
 css_error css__vars_finish_select(struct css_select_state *state);
 void css__vars_select_cleanup(struct css_select_state *state);
+void css__vars_flush(void);
 
 css_error css__vars_resolve(const css_computed_style *parent,
 			    const css_computed_vars *own,
