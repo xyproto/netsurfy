@@ -203,6 +203,7 @@ nserror netsurfy_init(const char *store_path)
 		return ret;
 
 	setlocale(LC_ALL, "");
+	setlocale(LC_NUMERIC, "C");
 
 	/* initialise the fetchers */
 	ret = fetcher_init();

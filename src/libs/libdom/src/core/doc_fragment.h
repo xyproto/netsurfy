@@ -18,6 +18,11 @@ dom_exception _dom_document_fragment_create(dom_document *doc,
 
 void _dom_document_fragment_destroy(dom_document_fragment *frag);
 
+void _dom_document_fragment_set_host(dom_document_fragment *frag,
+				     struct dom_element *host);
+struct dom_element *_dom_document_fragment_host(const dom_node_internal *node);
+dom_node_internal *_dom_node_composed_parent(const dom_node_internal *node);
+
 #define _dom_document_fragment_initialise _dom_node_initialise
 #define _dom_document_fragment_finalise _dom_node_finalise
 

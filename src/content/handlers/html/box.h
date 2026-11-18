@@ -435,6 +435,8 @@ struct box {
 	 */
 	struct hlcache_handle *background;
 
+	struct hlcache_handle *mask;
+
 
 	/**
 	 * Object in this box (usually an image), or NULL if none.

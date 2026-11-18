@@ -204,5 +204,15 @@ test("display: contents", function () {
     outer.remove();
     assertEquals(getComputedStyle(document.documentElement).display, "block");
 });
+test("overflow clip and two-value overflow", function () {
+    assert(CSS.supports("overflow", "clip"));
+    assert(CSS.supports("overflow", "auto hidden"));
+    assert(CSS.supports("overflow-x", "clip"));
+    assert(!CSS.supports("overflow", "auto hidden scroll"));
+});
+test("mask-image", function () {
+    assert(CSS.supports("mask-image", "url(a.svg)"));
+    assert(CSS.supports("-webkit-mask-image", "none"));
+});
 done();
 </script></body></html>

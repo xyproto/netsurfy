@@ -85,6 +85,7 @@ typedef struct css_select_state {
 	const css_stylesheet *sheet; /* Current sheet being processed */
 
 	css_origin current_origin; /* Origin of current sheet */
+	bool host_only; /* Only :host subjects match in current sheet */
 	uint32_t current_specificity; /* Specificity of current rule */
 
 	css_qname element; /* Element we're selecting for */

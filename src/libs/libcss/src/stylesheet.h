@@ -66,7 +66,8 @@ typedef enum css_selector_list_kind {
 	CSS_SELECTOR_LIST_IS,
 	CSS_SELECTOR_LIST_WHERE,
 	CSS_SELECTOR_LIST_NOT,
-	CSS_SELECTOR_LIST_HAS
+	CSS_SELECTOR_LIST_HAS,
+	CSS_SELECTOR_LIST_HOST
 } css_selector_list_kind;
 
 typedef struct css_selector_list_item {

@@ -62,6 +62,7 @@
 
 #include "html/html.h"
 #include "html/private.h"
+#include "html/shadow.h"
 #include "html/dom_event.h"
 #include "html/css.h"
 #include "css/select.h"
@@ -1239,7 +1240,8 @@ static void html_reformat(struct content *c, int width, int height)
 	 * autofocus can be given the input focus.  Placing the caret at
 	 * the start makes the control report its caret through the html
 	 * focus machinery, which also routes keyboard input to it. */
-	if (htmlc->autofocus_box != NULL && htmlc->autofocus_done == false) {
+	if (htmlc->autofocus_box != NULL && htmlc->autofocus_done == false &&
+	    htmlc->bw != NULL) {
 		struct form_control *gadget = htmlc->autofocus_box->gadget;
 
 		htmlc->autofocus_done = true;
@@ -1506,6 +1508,7 @@ static void html_rebuild_layout(html_content *htmlc)
 	html_css_refresh_detached(htmlc);
 	nscss_clear_node_data(html);
 	err = dom_to_box_sync(html, htmlc);
+	html_object_release_unused(htmlc);
 	dom_node_unref(html);
 	if (err != NSERROR_OK || htmlc->layout == NULL) {
 		NSLOG(netsurfy, ERROR, "rebuilding the layout failed");
@@ -1680,6 +1683,7 @@ static void html_destroy(struct content *c)
 	}
 
 	/* Destroy selection context */
+	html_shadow_flush(html);
 	if (html->select_ctx != NULL) {
 		css_select_ctx_destroy(html->select_ctx);
 		html->select_ctx = NULL;

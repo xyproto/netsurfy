@@ -502,6 +502,41 @@ static inline bool box_has_percentage_max_width(struct box *b)
 	return ((type == CSS_MAX_WIDTH_SET) && (unit == CSS_UNIT_PCT));
 }
 
+static void replaced_max_size(const css_unit_ctx *unit_ctx,
+			      const struct box *b,
+			      int *max_width,
+			      int *max_height)
+{
+	css_fixed v = 0;
+	css_unit u = CSS_UNIT_PX;
+
+	*max_width = -1;
+	*max_height = -1;
+	if (b->style == NULL) {
+		return;
+	}
+	if (css_computed_max_width(b->style, &v, &u) == CSS_MAX_WIDTH_SET &&
+	    u != CSS_UNIT_PCT) {
+		*max_width = FIXTOINT(
+			css_unit_len2device_px(b->style, unit_ctx, v, u));
+	}
+	if (css_computed_max_height(b->style, &v, &u) == CSS_MAX_HEIGHT_SET &&
+	    u != CSS_UNIT_PCT) {
+		*max_height = FIXTOINT(
+			css_unit_len2device_px(b->style, unit_ctx, v, u));
+	}
+}
+
+static bool box_has_percentage_width(const struct box *b)
+{
+	css_fixed value = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	return b->style != NULL &&
+	       css_computed_width(b->style, &value, &unit) == CSS_WIDTH_SET &&
+	       unit == CSS_UNIT_PCT;
+}
+
 /**
  * Calculate minimum and maximum width of a line.
  *
@@ -787,13 +822,16 @@ static struct box *layout_minmax_line(struct box *first,
 		if (b->object || (b->flags & REPLACE_DIM)) {
 			if (b->object) {
 				int temp_height = height;
+				int mxw, mxh;
+				replaced_max_size(
+					&content->unit_len_ctx, b, &mxw, &mxh);
 				layout_get_object_dimensions(b,
 							     &width,
 							     &temp_height,
 							     INT_MIN,
-							     INT_MAX,
+							     mxw,
 							     INT_MIN,
-							     INT_MAX);
+							     mxh);
 			}
 
 			fixed = frac = 0;
@@ -889,7 +927,8 @@ static struct box *layout_minmax_line(struct box *first,
 					CSS_UNIT_EM));
 		}
 
-		if (min < width && !box_has_percentage_max_width(b))
+		if (min < width && !box_has_percentage_max_width(b) &&
+		    !(b->object != NULL && box_has_percentage_width(b)))
 			min = width;
 		if (width > 0)
 			max += width;
@@ -1074,7 +1113,17 @@ static void layout_minmax_block(struct box *block,
 			min = html_get_box_tree(block->object)->min_width;
 			max = html_get_box_tree(block->object)->max_width;
 		} else {
-			min = max = content_get_width(block->object);
+			int w = AUTO, h = AUTO, mxw, mxh;
+
+			replaced_max_size(
+				&content->unit_len_ctx, block, &mxw, &mxh);
+			layout_get_object_dimensions(
+				block, &w, &h, 0, mxw, 0, mxh);
+			min = max = w;
+			if (box_has_percentage_width(block) ||
+			    box_has_percentage_max_width(block)) {
+				min = 0;
+			}
 		}
 
 		block->flags |= HAS_HEIGHT;
@@ -1157,6 +1206,10 @@ static void layout_minmax_block(struct box *block,
 			if (child_has_height)
 				block->flags |= HAS_HEIGHT;
 		}
+	}
+
+	if (layout_grid_is_grid(block) && block->object == NULL) {
+		layout_grid_minmax(block, content, &min, &max);
 	}
 
 	if (max < min) {
@@ -5782,6 +5835,8 @@ static void layout_calculate_descendant_bboxes(const css_unit_ctx *unit_len_ctx,
 					       struct box *box)
 {
 	struct box *child;
+	bool clip_x, clip_y;
+	int x0, x1, y0, y1;
 
 	assert(box->width != UNKNOWN_WIDTH);
 	assert(box->height != AUTO);
@@ -5838,18 +5893,21 @@ static void layout_calculate_descendant_bboxes(const css_unit_ctx *unit_len_ctx,
 		/* Box's children aren't displayed if the box is replaced */
 		return;
 
+	clip_x = box->style != NULL &&
+		 css_computed_overflow_x(box->style) != CSS_OVERFLOW_VISIBLE;
+	clip_y = box->style != NULL &&
+		 css_computed_overflow_y(box->style) != CSS_OVERFLOW_VISIBLE;
+	x0 = box->descendant_x0;
+	x1 = box->descendant_x1;
+	y0 = box->descendant_y0;
+	y1 = box->descendant_y1;
+
 	for (child = box->children; child; child = child->next) {
 		if (child->type == BOX_FLOAT_LEFT ||
 		    child->type == BOX_FLOAT_RIGHT)
 			continue;
 
 		layout_calculate_descendant_bboxes(unit_len_ctx, child);
-
-		if (box->style &&
-		    css_computed_overflow_x(box->style) ==
-			    CSS_OVERFLOW_HIDDEN &&
-		    css_computed_overflow_y(box->style) == CSS_OVERFLOW_HIDDEN)
-			continue;
 
 		layout_update_descendant_bbox(unit_len_ctx, box, child, 0, 0);
 	}
@@ -5868,6 +5926,15 @@ static void layout_calculate_descendant_bboxes(const css_unit_ctx *unit_len_ctx,
 		layout_calculate_descendant_bboxes(unit_len_ctx, child);
 
 		layout_update_descendant_bbox(unit_len_ctx, box, child, 0, 0);
+	}
+
+	if (clip_x) {
+		box->descendant_x0 = x0;
+		box->descendant_x1 = x1;
+	}
+	if (clip_y) {
+		box->descendant_y0 = y0;
+		box->descendant_y1 = y1;
 	}
 }
 

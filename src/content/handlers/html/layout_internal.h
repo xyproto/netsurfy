@@ -79,6 +79,13 @@ bool layout_table(struct box *table,
  */
 bool layout_flex(struct box *flex, int available_width, html_content *content);
 
+bool layout_grid(struct box *grid, int available_width, html_content *content);
+bool layout_grid_is_grid(const struct box *box);
+void layout_grid_minmax(struct box *grid,
+			const html_content *content,
+			int *min,
+			int *max);
+
 typedef uint8_t (*css_len_func)(const css_computed_style *style,
 				css_fixed *length,
 				css_unit *unit);
@@ -194,6 +201,18 @@ static inline bool lh__flex_direction_reversed(const struct box *flex)
 	case CSS_FLEX_DIRECTION_COLUMN:
 		return false;
 	}
+}
+
+static inline int lh__automatic_min_width(const struct box *b)
+{
+	if (b->style == NULL) {
+		return b->min_width;
+	}
+	if (!css_computed_min_width_is_auto(b->style) ||
+	    css_computed_overflow_x(b->style) != CSS_OVERFLOW_VISIBLE) {
+		return 0;
+	}
+	return b->min_width;
 }
 
 static inline bool lh__calc_px(const css_unit_ctx *unit_len_ctx,

@@ -47,6 +47,20 @@ nserror html_css_new_selection_context(struct html_content *c,
 				       css_select_ctx **select_ctx);
 
 /**
+ * create a css selection context for a tree scope of an html content.
+ *
+ * \param c The html content.
+ * \param scope Shadow root of the scope, or NULL for the document.
+ * \param host_scope Shadow root whose :host rules apply, or NULL.
+ * \param select_ctx A pointer to receive the new context.
+ * \return NSERROR_OK on success and \a select_ctx updated else error code
+ */
+nserror html_css_new_scope_context(struct html_content *c,
+				   struct dom_node *scope,
+				   struct dom_node *host_scope,
+				   css_select_ctx **select_ctx);
+
+/**
  * Initialise core stylesheets for a content
  *
  * \param c content structure to update

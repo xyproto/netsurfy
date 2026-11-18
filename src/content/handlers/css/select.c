@@ -91,6 +91,7 @@ static css_error node_has_attribute_substring(void *pw,
 					      lwc_string *value,
 					      bool *match);
 static css_error node_is_root(void *pw, void *node, bool *match);
+static css_error node_is_shadow_host(void *pw, void *node, bool *match);
 static css_error node_count_siblings(void *pw,
 				     void *node,
 				     bool same_name,
@@ -158,6 +159,7 @@ static css_select_handler selection_handler = {
 	get_libcss_node_data,
 	first_child_node,
 	next_sibling_node,
+	node_is_shadow_host,
 };
 
 /**
@@ -1420,6 +1422,14 @@ css_error node_has_attribute_substring(void *pw,
  *
  * \post \a match will contain true if the node matches and false otherwise.
  */
+static css_error node_is_shadow_host(void *pw, void *node, bool *match)
+{
+	nscss_select_ctx *ctx = pw;
+
+	*match = ctx->shadow_host != NULL && ctx->shadow_host == node;
+	return CSS_OK;
+}
+
 css_error node_is_root(void *pw, void *node, bool *match)
 {
 	dom_node *n = node;

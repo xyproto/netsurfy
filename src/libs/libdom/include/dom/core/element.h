@@ -17,6 +17,7 @@
 struct dom_attr;
 struct dom_nodelist;
 struct dom_type_info;
+struct dom_document_fragment;
 
 typedef struct dom_element dom_element;
 
@@ -392,6 +393,11 @@ static inline dom_exception dom_element_has_class(struct dom_element *element,
 dom_exception dom_element_named_ancestor_node(dom_element *element,
 					      lwc_string *name,
 					      dom_element **ancestor);
+dom_exception dom_element_attach_shadow(dom_element *element,
+					struct dom_document_fragment **root);
+dom_exception dom_element_get_shadow_root(dom_element *element,
+					  struct dom_document_fragment **root);
+
 dom_exception dom_element_named_parent_node(dom_element *element,
 					    lwc_string *name,
 					    dom_element **parent);

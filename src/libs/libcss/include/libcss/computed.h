@@ -169,6 +169,36 @@ uint8_t css_computed_border_left_width(const css_computed_style *style,
 				       css_fixed *length,
 				       css_unit *unit);
 
+uint8_t css_computed_grid_template_columns(const css_computed_style *style,
+					   lwc_string **value);
+uint8_t css_computed_grid_template_rows(const css_computed_style *style,
+					lwc_string **value);
+uint8_t css_computed_grid_template_areas(const css_computed_style *style,
+					 lwc_string **value);
+uint8_t css_computed_grid_auto_columns(const css_computed_style *style,
+				       lwc_string **value);
+uint8_t css_computed_grid_auto_rows(const css_computed_style *style,
+				    lwc_string **value);
+uint8_t css_computed_grid_auto_flow(const css_computed_style *style,
+				    lwc_string **value);
+uint8_t
+css_computed_grid_column(const css_computed_style *style, lwc_string **value);
+uint8_t
+css_computed_grid_row(const css_computed_style *style, lwc_string **value);
+uint8_t
+css_computed_grid_area(const css_computed_style *style, lwc_string **value);
+uint8_t css_computed_grid_column_start(const css_computed_style *style,
+				       lwc_string **value);
+uint8_t css_computed_grid_column_end(const css_computed_style *style,
+				     lwc_string **value);
+uint8_t css_computed_grid_row_start(const css_computed_style *style,
+				    lwc_string **value);
+uint8_t
+css_computed_grid_row_end(const css_computed_style *style, lwc_string **value);
+
+uint8_t
+css_computed_mask_image(const css_computed_style *style, lwc_string **url);
+
 uint8_t css_computed_background_image(const css_computed_style *style,
 				      lwc_string **url);
 
@@ -297,6 +327,8 @@ uint8_t css_computed_font_style(const css_computed_style *style);
 uint8_t css_computed_min_height(const css_computed_style *style,
 				css_fixed *length,
 				css_unit *unit);
+
+bool css_computed_min_width_is_auto(const css_computed_style *style);
 
 uint8_t css_computed_min_width(const css_computed_style *style,
 			       css_fixed *length,

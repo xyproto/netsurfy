@@ -3168,7 +3168,7 @@
     }
 
     function isConnected(node) {
-        for (var n = node; n !== null; n = n.parentNode) {
+        for (var n = node; n !== null; n = n.parentNode || (n.nodeType === 11 ? native.shadowHost(n) : null)) {
             if (n.nodeType === 9) {
                 return true;
             }
@@ -4492,7 +4492,35 @@
             return templateContent(this);
         });
     }
+    var pendingTemplates = [];
+
+    function moveTemplateChildren(el) {
+        var frag = templateContent(el);
+        while (el.firstChild) {
+            frag.appendChild(el.firstChild);
+        }
+    }
+
+    function noteTemplate(el) {
+        if (isTemplate(el) && el.ownerDocument === document) {
+            moveTemplateChildren(el);
+            if (document.readyState === "loading") {
+                pendingTemplates.push(el);
+            }
+        }
+        return pendingTemplates.length > 0;
+    }
+
+    function moveTemplates() {
+        pendingTemplates.forEach(moveTemplateChildren);
+        if (document.readyState !== "loading") {
+            pendingTemplates = [];
+        }
+        return pendingTemplates.length > 0;
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
+        moveTemplates();
         Array.prototype.slice.call(document.getElementsByTagName("template")).forEach(function (el) {
             if (isTemplate(el)) {
                 templateContent(el);
@@ -4586,18 +4614,24 @@
         elementScroll(this, arguments, true);
     });
     defineGetter(Node.prototype, "isConnected", function () {
-        var n = this;
-        while (n.parentNode) {
-            n = n.parentNode;
-        }
-        return n.nodeType === 9;
+        return isConnected(this);
     });
-    defineMissing(Node.prototype, "getRootNode", function () {
+    define(Node.prototype, "getRootNode", function (options) {
+        var composed = options !== undefined && options !== null && !!options.composed;
         var n = this;
-        while (n.parentNode) {
-            n = n.parentNode;
+        for (;;) {
+            while (n.parentNode) {
+                n = n.parentNode;
+            }
+            var host = n.nodeType === 11 ? native.shadowHost(n) : null;
+            if (host === null) {
+                return n;
+            }
+            if (!composed) {
+                return asShadowRoot(n);
+            }
+            n = host;
         }
-        return n;
     });
 
     function convertNodes(doc, nodes) {
@@ -4700,6 +4734,198 @@
     Object.setPrototypeOf(ShadowRoot.prototype, DocumentFragment.prototype);
     define(ShadowRoot.prototype, Symbol.toStringTag, "ShadowRoot");
     defineMissing(global, "ShadowRoot", ShadowRoot);
+
+    var shadowModes = new WeakMap();
+    var shadowHostNames = /^(article|aside|blockquote|body|div|footer|h[1-6]|header|main|nav|p|section|span)$/;
+
+    function asShadowRoot(frag) {
+        if (frag !== null && Object.getPrototypeOf(frag) !== ShadowRoot.prototype) {
+            Object.setPrototypeOf(frag, ShadowRoot.prototype);
+        }
+        return frag;
+    }
+
+    function shadowState(root) {
+        var state = shadowModes.get(root);
+        if (state === undefined) {
+            state = { mode: "open", declarative: true, delegatesFocus: false };
+            shadowModes.set(root, state);
+        }
+        return state;
+    }
+
+    define(Element.prototype, "attachShadow", function (init) {
+        var mode = init === undefined || init === null ? undefined : init.mode;
+        if (mode !== "open" && mode !== "closed") {
+            throw new TypeError("Failed to execute 'attachShadow': mode must be 'open' or 'closed'");
+        }
+        if (this.namespaceURI !== htmlNamespace ||
+            (!shadowHostNames.test(this.localName) && this.localName.indexOf("-") < 0)) {
+            throw new DOMException("This element does not support attachShadow", "NotSupportedError");
+        }
+        var existing = native.shadowRoot(this);
+        if (existing !== null) {
+            var state = shadowState(existing);
+            if (!state.declarative || state.mode !== mode) {
+                throw new DOMException("Shadow root cannot be created on a host which already hosts a shadow tree.", "NotSupportedError");
+            }
+            while (existing.firstChild) {
+                existing.removeChild(existing.firstChild);
+            }
+            state.declarative = false;
+            return asShadowRoot(existing);
+        }
+        var root = native.shadowAttach(this);
+        if (root === null) {
+            throw new DOMException("Shadow root cannot be created", "NotSupportedError");
+        }
+        shadowModes.set(root, { mode: mode, declarative: false, delegatesFocus: !!init.delegatesFocus });
+        return asShadowRoot(root);
+    });
+    defineGetter(Element.prototype, "shadowRoot", function () {
+        var root = native.shadowRoot(this);
+        if (root === null || shadowState(root).mode !== "open") {
+            return null;
+        }
+        return asShadowRoot(root);
+    });
+    defineGetter(ShadowRoot.prototype, "host", function () {
+        return native.shadowHost(this);
+    });
+    defineGetter(ShadowRoot.prototype, "mode", function () {
+        return shadowState(this).mode;
+    });
+    defineGetter(ShadowRoot.prototype, "delegatesFocus", function () {
+        return shadowState(this).delegatesFocus;
+    });
+    defineGetter(ShadowRoot.prototype, "slotAssignment", function () {
+        return "named";
+    });
+    defineGetter(ShadowRoot.prototype, "clonable", function () {
+        return false;
+    });
+    defineGetter(ShadowRoot.prototype, "activeElement", function () {
+        var el = document.activeElement;
+        while (el !== null) {
+            var root = el.getRootNode();
+            if (root === this) {
+                return el;
+            }
+            el = root.nodeType === 11 ? native.shadowHost(root) : null;
+        }
+        return null;
+    });
+    defineGetter(ShadowRoot.prototype, "innerHTML", function () {
+        return serializeHtmlChildren(this);
+    }, function (html) {
+        var t = document.createElement("template");
+        t.innerHTML = html === null ? "" : String(html);
+        while (this.firstChild) {
+            this.removeChild(this.firstChild);
+        }
+        this.appendChild(t.content);
+    });
+    define(ShadowRoot.prototype, "setHTMLUnsafe", function (html) {
+        this.innerHTML = html;
+    });
+
+    function slotName(node) {
+        if (node.nodeType === 1) {
+            return node.getAttribute("slot") || "";
+        }
+        return node.nodeType === 3 ? "" : null;
+    }
+
+    function findSlot(root, name) {
+        for (var n = root.firstChild; n !== null; n = followingIn(n, root, false)) {
+            if (n.nodeType === 1 && n.localName === "slot" && n.namespaceURI === htmlNamespace &&
+                (n.getAttribute("name") || "") === name) {
+                return n;
+            }
+        }
+        return null;
+    }
+
+    function slotAssigned(slot) {
+        var root = slot.getRootNode();
+        var host = root.nodeType === 11 ? native.shadowHost(root) : null;
+        var list = [];
+        if (host === null) {
+            return list;
+        }
+        var name = slot.getAttribute("name") || "";
+        if (findSlot(root, name) !== slot) {
+            return list;
+        }
+        for (var c = host.firstChild; c !== null; c = c.nextSibling) {
+            if (slotName(c) === name) {
+                list.push(c);
+            }
+        }
+        return list;
+    }
+
+    function slotFlattened(slot, out) {
+        var assigned = slotAssigned(slot);
+        if (assigned.length === 0) {
+            assigned = Array.prototype.slice.call(slot.childNodes).filter(function (n) {
+                return n.nodeType === 1 || n.nodeType === 3;
+            });
+        }
+        assigned.forEach(function (n) {
+            if (n.nodeType === 1 && n.localName === "slot" && n.namespaceURI === htmlNamespace &&
+                n.getRootNode().nodeType === 11 && native.shadowHost(n.getRootNode()) !== null) {
+                slotFlattened(n, out);
+            } else {
+                out.push(n);
+            }
+        });
+        return out;
+    }
+
+    function HTMLSlotElement() {
+        throw new TypeError("Illegal constructor");
+    }
+    HTMLSlotElement.prototype = Object.create(HTMLElement.prototype, {
+        constructor: { value: HTMLSlotElement, writable: true, configurable: true }
+    });
+    define(HTMLSlotElement.prototype, Symbol.toStringTag, "HTMLSlotElement");
+    defineGetter(HTMLSlotElement.prototype, "name", function () {
+        return this.getAttribute("name") || "";
+    }, function (value) {
+        this.setAttribute("name", value);
+    });
+    define(HTMLSlotElement.prototype, "assignedNodes", function (options) {
+        if (options && options.flatten) {
+            return slotFlattened(this, []);
+        }
+        return slotAssigned(this);
+    });
+    define(HTMLSlotElement.prototype, "assignedElements", function (options) {
+        return this.assignedNodes(options).filter(function (n) {
+            return n.nodeType === 1;
+        });
+    });
+    define(HTMLSlotElement.prototype, "assign", function () {
+    });
+    defineMissing(global, "HTMLSlotElement", HTMLSlotElement);
+
+    defineGetter(Element.prototype, "slot", function () {
+        return this.getAttribute("slot") || "";
+    }, function (value) {
+        this.setAttribute("slot", value);
+    });
+    [Element, Text].forEach(function (iface) {
+        defineGetter(iface.prototype, "assignedSlot", function () {
+            var host = this.parentNode;
+            var root = host !== null && host.nodeType === 1 ? native.shadowRoot(host) : null;
+            if (root === null || shadowState(root).mode !== "open") {
+                return null;
+            }
+            var name = slotName(this);
+            return name === null ? null : findSlot(root, name);
+        });
+    });
     define(DocumentFragment.prototype, "getElementById", function (id) {
         id = String(id);
         for (var n = this.firstChild; n !== null; n = followingIn(n, this, false)) {
@@ -6009,6 +6235,9 @@
             return value;
         }
         if (typeof value === "string") {
+            if (/^(navigationStart|unloadEvent(Start|End)|redirect(Start|End)|fetchStart|domainLookup(Start|End)|connect(Start|End)|secureConnectionStart|request(Start)|response(Start|End)|domLoading|domInteractive|domContentLoadedEvent(Start|End)|domComplete|loadEvent(Start|End))$/.test(value)) {
+                return 0;
+            }
             for (var i = perfEntries.length - 1; i >= 0; i--) {
                 if (perfEntries[i].entryType === "mark" && perfEntries[i].name === value) {
                     return perfEntries[i].startTime;
@@ -6951,6 +7180,15 @@
 
     return {
         flushReactions: flushReactions,
+        noteTemplate: noteTemplate,
+        makeSlot: function (el) {
+            var proto = Object.getPrototypeOf(el);
+            if (proto === HTMLElement.prototype ||
+                (global.HTMLUnknownElement && proto === global.HTMLUnknownElement.prototype)) {
+                Object.setPrototypeOf(el, HTMLSlotElement.prototype);
+            }
+        },
+        moveTemplates: moveTemplates,
         resolveModule: resolveModule,
         moduleText: function (url) {
             return moduleTexts.get(url);

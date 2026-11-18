@@ -592,6 +592,20 @@ static void html_texty_element_update(html_content *htmlc, dom_node *node)
 	html__redraw_a_box(htmlc, box);
 }
 
+static void dom_style_showed_up(html_content *htmlc, dom_node *node)
+{
+	bool has_children = false;
+
+	if (!nsoption_bool(author_level_css)) {
+		return;
+	}
+	if (!html_css_process_style(htmlc, node) &&
+	    dom_node_has_child_nodes(node, &has_children) == DOM_NO_ERR &&
+	    has_children) {
+		html_css_update_style(htmlc, node);
+	}
+}
+
 static enum dom_walk_cmd subtree_walk_cb(enum dom_walk_stage stage,
 					 dom_node_type type,
 					 dom_node *node,
@@ -612,6 +626,9 @@ static enum dom_walk_cmd subtree_walk_cb(enum dom_walk_stage stage,
 		case DOM_HTML_ELEMENT_TYPE_SCRIPT:
 			dom_SCRIPT_showed_up(htmlc,
 					     (dom_html_script_element *)node);
+			break;
+		case DOM_HTML_ELEMENT_TYPE_STYLE:
+			dom_style_showed_up(htmlc, node);
 			break;
 		default:
 			break;
@@ -666,9 +683,7 @@ dom_default_action_DOMNodeInserted_cb(struct dom_event *evt, void *pw)
 			break;
 
 		case DOM_HTML_ELEMENT_TYPE_STYLE:
-			if (nsoption_bool(author_level_css)) {
-				html_css_process_style(htmlc, (dom_node *)node);
-			}
+			dom_style_showed_up(htmlc, (dom_node *)node);
 			break;
 
 		case DOM_HTML_ELEMENT_TYPE_SCRIPT:

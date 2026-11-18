@@ -26,6 +26,10 @@ css_error css_select_strings_intern(css_select_strings *str)
 	if (error != lwc_error_ok)
 		return css_error_from_lwc_error(error);
 
+	error = lwc_intern_string("host", SLEN("host"), &str->host);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
 	error = lwc_intern_string("link", SLEN("link"), &str->link);
 	if (error != lwc_error_ok)
 		return css_error_from_lwc_error(error);
@@ -170,6 +174,7 @@ void css_select_strings_unref(css_select_strings *str)
 {
 	lwc_string_unref(str->universal);
 	lwc_string_unref(str->first_child);
+	lwc_string_unref(str->host);
 	lwc_string_unref(str->link);
 	lwc_string_unref(str->visited);
 	lwc_string_unref(str->hover);

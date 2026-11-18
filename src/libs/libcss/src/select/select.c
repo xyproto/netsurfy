@@ -42,6 +42,7 @@ typedef struct css_select_sheet {
 	const css_stylesheet *sheet; /**< Stylesheet */
 	css_origin origin; /**< Stylesheet origin */
 	css_mq_query *media; /**< Applicable media */
+	bool host_only; /**< Only rules for a shadow host apply */
 } css_select_sheet;
 
 /**
@@ -347,6 +348,33 @@ css_error css_select_ctx_append_sheet(css_select_ctx *ctx,
 }
 
 /**
+ * Append a shadow tree stylesheet whose :host rules style the shadow host
+ *
+ * Only selectors whose subject is :host match, and they rank below the
+ * author sheets of the host's own tree.
+ *
+ * \param ctx    The context to append to
+ * \param sheet  Sheet to append
+ * \param media  Media string for the stylesheet
+ * \return CSS_OK on success, appropriate error otherwise
+ */
+css_error css_select_ctx_append_host_sheet(css_select_ctx *ctx,
+					   const css_stylesheet *sheet,
+					   const char *media)
+{
+	css_error error;
+
+	if (ctx == NULL || sheet == NULL)
+		return CSS_BADPARM;
+
+	error = css_select_ctx_insert_sheet(
+		ctx, sheet, ctx->n_sheets, CSS_ORIGIN_USER, media);
+	if (error == CSS_OK)
+		ctx->sheets[ctx->n_sheets - 1].host_only = true;
+	return error;
+}
+
+/**
  * Insert a stylesheet into a selection context
  *
  * \param ctx    The context to insert into
@@ -409,6 +437,7 @@ css_error css_select_ctx_insert_sheet(css_select_ctx *ctx,
 	ctx->sheets[index].sheet = sheet;
 	ctx->sheets[index].origin = origin;
 	ctx->sheets[index].media = mq;
+	ctx->sheets[index].host_only = false;
 
 	ctx->uses_revert |= sheet->uses_revert;
 
@@ -1419,8 +1448,10 @@ css_error css_select_style(css_select_ctx *ctx,
 
 		if (mq__list_match(s.media, unit_ctx, media, &ctx->str) &&
 		    s.sheet->disabled == false) {
+			state.host_only = s.host_only;
 			error = select_from_sheet(
 				ctx, s.sheet, s.origin, &state);
+			state.host_only = false;
 			if (error != CSS_OK)
 				goto cleanup;
 		}
@@ -2080,6 +2111,21 @@ static const css_selector *_selector_next(const css_selector **node,
 	return ret;
 }
 
+static bool
+selector_targets_host(css_select_ctx *ctx, const css_selector *selector)
+{
+	const css_selector_detail *detail = &selector->data;
+
+	for (;;) {
+		if (detail->type == CSS_SELECTOR_PSEUDO_CLASS &&
+		    detail->qname.name == ctx->str.host)
+			return true;
+		if (detail->next == 0)
+			return false;
+		detail++;
+	}
+}
+
 css_error match_selectors_in_sheet(css_select_ctx *ctx,
 				   const css_stylesheet *sheet,
 				   css_select_state *state)
@@ -2172,9 +2218,11 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 		assert(selector != NULL);
 
 		/* Match and handle the selector chain */
-		error = match_selector_chain(ctx, selector, state);
-		if (error != CSS_OK)
-			goto cleanup;
+		if (!state->host_only || selector_targets_host(ctx, selector)) {
+			error = match_selector_chain(ctx, selector, state);
+			if (error != CSS_OK)
+				goto cleanup;
+		}
 
 		/* Advance to next selector in whichever chain we extracted
 		 * the processed selector from. */
@@ -2791,6 +2839,28 @@ css_error match_detail(css_select_ctx *ctx,
 			state->pw, node, detail->qname.name, match);
 		break;
 	case CSS_SELECTOR_PSEUDO_CLASS:
+		if (detail->qname.name == ctx->str.host) {
+			bool is_host = false;
+
+			if (state->host_only) {
+				is_host = node == state->node;
+			} else if (state->handler->node_is_shadow_host !=
+				   NULL) {
+				error = state->handler->node_is_shadow_host(
+					state->pw, node, &is_host);
+				if (error != CSS_OK)
+					return error;
+			}
+			add_node_flags(node,
+				       state,
+				       CSS_NODE_FLAGS_TAINT_PSEUDO_CLASS);
+			if (!is_host ||
+			    detail->value_type !=
+				    CSS_SELECTOR_DETAIL_VALUE_LIST) {
+				*match = is_host;
+				break;
+			}
+		}
 		if (detail->value_type == CSS_SELECTOR_DETAIL_VALUE_LIST) {
 			error = match_selector_list(
 				ctx, detail->value.list, node, state, match);

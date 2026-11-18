@@ -43,6 +43,10 @@ struct nsurl;
  * \param background this is a background image
  * \return true on success, false on memory exhaustion
  */
+bool html_fetch_mask(struct html_content *c,
+		     struct nsurl *url,
+		     struct box *box);
+
 bool html_fetch_object(struct html_content *c,
 		       struct nsurl *url,
 		       struct box *box,
@@ -61,6 +65,8 @@ bool html_fetch_object(struct html_content *c,
 nserror html_object_free_objects(struct html_content *html);
 
 nserror html_object_release_for_rebuild(struct html_content *html);
+
+void html_object_release_unused(struct html_content *html);
 
 /**
  * close content of content objects associated with a HTML content

@@ -265,7 +265,6 @@ static inline bool layout_flex__base_and_main_sizes(const struct flex_ctx *ctx,
 						    int available_width)
 {
 	struct box *b = item->box;
-	int content_min_width = b->min_width;
 	int content_max_width = b->max_width;
 	int delta_outer_main = lh__delta_outer_main(ctx->flex, b);
 
@@ -295,8 +294,15 @@ static inline bool layout_flex__base_and_main_sizes(const struct flex_ctx *ctx,
 
 	if (ctx->horizontal == false) {
 		if (b->width == AUTO) {
-			b->width = min(max(content_min_width, available_width),
-				       content_max_width);
+			if (lh__box_align_self(ctx->flex, b) ==
+			    CSS_ALIGN_SELF_STRETCH) {
+				b->width = min(available_width,
+					       content_max_width);
+			} else {
+				b->width = min(max(b->min_width,
+						   available_width),
+					       content_max_width);
+			}
 			b->width -= lh__delta_outer_width(b);
 		}
 
@@ -317,7 +323,6 @@ static inline bool layout_flex__base_and_main_sizes(const struct flex_ctx *ctx,
 
 	if (ctx->horizontal) {
 		item->base_size = min(item->base_size, available_width);
-		item->base_size = max(item->base_size, content_min_width);
 	}
 
 	item->target_main_size = item->base_size;
@@ -633,8 +638,9 @@ layout_flex__get_min_max_violations(struct flex_ctx *ctx,
 			      item->min_main);
 		}
 
-		if (target_main_size < item->box->min_width) {
-			target_main_size = item->box->min_width;
+		if (ctx->horizontal &&
+		    target_main_size < lh__automatic_min_width(item->box)) {
+			target_main_size = lh__automatic_min_width(item->box);
 			item->min_violation = true;
 			NSLOG(flex,
 			      DEEPDEBUG,
@@ -1176,6 +1182,10 @@ bool layout_flex(struct box *flex, int available_width, html_content *content)
 	int max_height, min_height;
 	struct flex_ctx *ctx;
 	bool success = false;
+
+	if (layout_grid_is_grid(flex)) {
+		return layout_grid(flex, available_width, content);
+	}
 
 	ctx = layout_flex_ctx__create(content, flex);
 	if (ctx == NULL) {

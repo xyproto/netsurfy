@@ -2,6 +2,8 @@
 <html><head><meta charset="utf-8"><title>DOM core</title><script src="harness.js"></script></head>
 <body><div id="d" class="a b" data-x="1"><span>x</span>text</div><template id="tpl"><p class="item">x<b>y</b></p><script>window.templateScriptRan = true;</script></template>
 <script>
+var templateChildrenAtParse = document.getElementById("tpl").childNodes.length;
+var templateQueryAtParse = document.querySelector(".item");
 var d = document.getElementById("d");
 test("detached text nodes are writable", function () {
     var t = document.createTextNode("a");
@@ -223,6 +225,20 @@ test("meta httpEquiv", function () {
     var m = document.createElement("meta");
     m.httpEquiv = "refresh";
     assertEquals(m.getAttribute("http-equiv"), "refresh");
+});
+test("textContent of empty elements and documents", function () {
+    assertEquals(document.createElement("div").textContent, "");
+    assertEquals(document.createDocumentFragment().textContent, "");
+    assertEquals(document.textContent, null);
+});
+test("number parsing is locale independent", function () {
+    assertEquals(JSON.stringify(JSON.parse("[990734,878642]")), "[990734,878642]");
+    assertEquals(parseFloat("1,5"), 1);
+    assertEquals(Number("2.5"), 2.5);
+});
+test("template contents are inert before scripts run", function () {
+    assertEquals(templateChildrenAtParse, 0);
+    assertEquals(templateQueryAtParse, null);
 });
 done();
 </script></body></html>

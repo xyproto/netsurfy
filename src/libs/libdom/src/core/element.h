@@ -39,6 +39,8 @@ struct dom_element {
 
 	lwc_string **classes;
 	uint32_t n_classes;
+
+	struct dom_document_fragment *shadow_root;
 };
 
 dom_exception _dom_element_create(struct dom_document *doc,

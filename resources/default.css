@@ -165,6 +165,8 @@ details:not([open]) > :not(summary) {
 }
 
 [hidden], area, base, basefont, datalist, link, meta, param, rp, source,
+slot { display: contents; }
+
 track, template, dialog:not([open]), input[type=hidden] {
 	display: none;
 }

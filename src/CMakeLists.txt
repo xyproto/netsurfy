@@ -85,7 +85,9 @@ set(NETSURFY_CORE_SOURCES
   content/handlers/html/interaction.c
   content/handlers/html/layout.c
   content/handlers/html/layout_flex.c
+  content/handlers/html/layout_grid.c
   content/handlers/html/object.c
+  content/handlers/html/shadow.c
   content/handlers/html/redraw_border.c
   content/handlers/html/redraw.c
   content/handlers/html/script.c

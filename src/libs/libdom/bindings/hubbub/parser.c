@@ -8,7 +8,9 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
 #include <hubbub/errors.h>
 #include <hubbub/hubbub.h>
@@ -52,6 +54,10 @@ struct dom_hubbub_parser {
 	dom_script script; /**< Script callback function */
 
 	void *mctx; /**< Pointer to client data */
+
+	struct dom_node **shadow_templates; /**< Declarative shadow roots */
+	struct dom_node **shadow_roots;
+	size_t n_shadow;
 };
 
 /* Forward declaration to break reference loop */
@@ -354,11 +360,129 @@ static hubbub_error unref_node(void *parser, void *node)
 	return HUBBUB_OK;
 }
 
+static bool
+merge_text(struct dom_node *prev, struct dom_node *child, void **result)
+{
+	dom_node_type type;
+	dom_string *data = NULL;
+	dom_exception err;
+
+	if (prev == NULL || dom_node_get_node_type(prev, &type) != DOM_NO_ERR ||
+	    type != DOM_TEXT_NODE ||
+	    dom_node_get_node_type(child, &type) != DOM_NO_ERR ||
+	    type != DOM_TEXT_NODE) {
+		return false;
+	}
+	if (dom_characterdata_get_data(child, &data) != DOM_NO_ERR ||
+	    data == NULL) {
+		return false;
+	}
+	err = dom_characterdata_append_data(prev, data);
+	dom_string_unref(data);
+	if (err != DOM_NO_ERR) {
+		return false;
+	}
+	*result = dom_node_ref(prev);
+	return true;
+}
+
+static struct dom_node *
+shadow_target(dom_hubbub_parser *parser, struct dom_node *node)
+{
+	for (size_t i = 0; i < parser->n_shadow; i++) {
+		if (parser->shadow_templates[i] == node) {
+			return parser->shadow_roots[i];
+		}
+	}
+	return node;
+}
+
+static bool is_shadow_template(struct dom_node *node)
+{
+	dom_string *name = NULL, *attr = NULL, *mode = NULL;
+	dom_node_type type;
+	bool result = false;
+
+	if (dom_node_get_node_type(node, &type) != DOM_NO_ERR ||
+	    type != DOM_ELEMENT_NODE ||
+	    dom_node_get_node_name(node, &name) != DOM_NO_ERR || name == NULL) {
+		return false;
+	}
+	if (strcasecmp(dom_string_data(name), "template") == 0 &&
+	    dom_string_create((const uint8_t *)"shadowrootmode",
+			      SLEN("shadowrootmode"),
+			      &attr) == DOM_NO_ERR) {
+		(void)dom_element_get_attribute(node, attr, &mode);
+		result = mode != NULL &&
+			 (strcasecmp(dom_string_data(mode), "open") == 0 ||
+			  strcasecmp(dom_string_data(mode), "closed") == 0);
+		if (mode != NULL) {
+			dom_string_unref(mode);
+		}
+		dom_string_unref(attr);
+	}
+	dom_string_unref(name);
+	return result;
+}
+
+static bool attach_declarative_shadow(dom_hubbub_parser *parser,
+				      struct dom_node *host,
+				      struct dom_node *template)
+{
+	struct dom_document_fragment *root = NULL;
+	struct dom_node **templates, **roots;
+	dom_node_type type;
+
+	if (dom_node_get_node_type(host, &type) != DOM_NO_ERR ||
+	    type != DOM_ELEMENT_NODE || !is_shadow_template(template)) {
+		return false;
+	}
+	templates = realloc(parser->shadow_templates,
+			    (parser->n_shadow + 1) * sizeof(*templates));
+	if (templates == NULL) {
+		return false;
+	}
+	parser->shadow_templates = templates;
+	roots = realloc(parser->shadow_roots,
+			(parser->n_shadow + 1) * sizeof(*roots));
+	if (roots == NULL) {
+		return false;
+	}
+	parser->shadow_roots = roots;
+	if (dom_element_attach_shadow((struct dom_element *)host, &root) !=
+	    DOM_NO_ERR) {
+		return false;
+	}
+	templates[parser->n_shadow] = dom_node_ref(template);
+	roots[parser->n_shadow] = (struct dom_node *)root;
+	parser->n_shadow++;
+	return true;
+}
+
 static hubbub_error
 append_child(void *parser, void *parent, void *child, void **result)
 {
 	dom_hubbub_parser *dom_parser = (dom_hubbub_parser *)parser;
 	dom_exception err;
+	struct dom_node *last = NULL;
+
+	if (attach_declarative_shadow(dom_parser, parent, child)) {
+		*result = dom_node_ref(child);
+		return HUBBUB_OK;
+	}
+	parent = shadow_target(dom_parser, parent);
+
+	if (dom_node_get_last_child((struct dom_node *)parent, &last) ==
+		    DOM_NO_ERR &&
+	    last != NULL) {
+		bool merged = merge_text(last,
+					 (struct dom_node *)child,
+					 result);
+		dom_node_unref(last);
+		if (merged) {
+			return HUBBUB_OK;
+		}
+	}
 
 	err = dom_node_append_child((struct dom_node *)parent,
 				    (struct dom_node *)child,
@@ -383,6 +507,26 @@ static hubbub_error insert_before(void *parser,
 {
 	dom_hubbub_parser *dom_parser = (dom_hubbub_parser *)parser;
 	dom_exception err;
+	struct dom_node *prev = NULL;
+
+	if (attach_declarative_shadow(dom_parser, parent, child)) {
+		*result = dom_node_ref(child);
+		return HUBBUB_OK;
+	}
+	parent = shadow_target(dom_parser, parent);
+
+	if (ref_child != NULL &&
+	    dom_node_get_previous_sibling((struct dom_node *)ref_child,
+					  &prev) == DOM_NO_ERR &&
+	    prev != NULL) {
+		bool merged = merge_text(prev,
+					 (struct dom_node *)child,
+					 result);
+		dom_node_unref(prev);
+		if (merged) {
+			return HUBBUB_OK;
+		}
+	}
 
 	err = dom_node_insert_before((struct dom_node *)parent,
 				     (struct dom_node *)child,
@@ -817,7 +961,7 @@ dom_hubbub_error dom_hubbub_parser_create(dom_hubbub_parser_params *params,
 	}
 
 	/* setup binding parser context */
-	binding = malloc(sizeof(dom_hubbub_parser));
+	binding = calloc(1, sizeof(dom_hubbub_parser));
 	if (binding == NULL) {
 		return DOM_HUBBUB_NOMEM;
 	}
@@ -950,7 +1094,7 @@ dom_hubbub_fragment_parser_create(dom_hubbub_parser_params *params,
 	}
 
 	/* setup binding parser context */
-	binding = malloc(sizeof(dom_hubbub_parser));
+	binding = calloc(1, sizeof(dom_hubbub_parser));
 	if (binding == NULL) {
 		return DOM_HUBBUB_NOMEM;
 	}
@@ -1048,6 +1192,13 @@ void dom_hubbub_parser_destroy(dom_hubbub_parser *parser)
 {
 	hubbub_parser_destroy(parser->parser);
 	parser->parser = NULL;
+
+	for (size_t i = 0; i < parser->n_shadow; i++) {
+		dom_node_unref(parser->shadow_templates[i]);
+		dom_node_unref(parser->shadow_roots[i]);
+	}
+	free(parser->shadow_templates);
+	free(parser->shadow_roots);
 
 	if (parser->doc != NULL) {
 		dom_node_unref((struct dom_node *)parser->doc);

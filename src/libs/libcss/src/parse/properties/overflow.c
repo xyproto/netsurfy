@@ -36,7 +36,6 @@ css_error css__parse_overflow(css_language *c,
 	css_error error1, error2 = CSS_OK;
 	const css_token *token;
 	enum flag_value flag_value;
-	bool match;
 
 	token = parserutils_vector_iterate(vector, ctx);
 	if ((token == NULL) || ((token->type != CSS_TOKEN_IDENT))) {
@@ -54,44 +53,14 @@ css_error css__parse_overflow(css_language *c,
 							 flag_value,
 							 CSS_PROP_OVERFLOW_Y);
 
-	} else if ((lwc_string_caseless_isequal(token->idata,
-						c->strings[VISIBLE],
-						&match) == lwc_error_ok &&
-		    match)) {
-		error1 = css__stylesheet_style_appendOPV(
-			result, CSS_PROP_OVERFLOW_X, 0, OVERFLOW_VISIBLE);
-		error2 = css__stylesheet_style_appendOPV(
-			result, CSS_PROP_OVERFLOW_Y, 0, OVERFLOW_VISIBLE);
-
-	} else if ((lwc_string_caseless_isequal(token->idata,
-						c->strings[HIDDEN],
-						&match) == lwc_error_ok &&
-		    match)) {
-		error1 = css__stylesheet_style_appendOPV(
-			result, CSS_PROP_OVERFLOW_X, 0, OVERFLOW_HIDDEN);
-		error2 = css__stylesheet_style_appendOPV(
-			result, CSS_PROP_OVERFLOW_Y, 0, OVERFLOW_HIDDEN);
-
-	} else if ((lwc_string_caseless_isequal(token->idata,
-						c->strings[SCROLL],
-						&match) == lwc_error_ok &&
-		    match)) {
-		error1 = css__stylesheet_style_appendOPV(
-			result, CSS_PROP_OVERFLOW_X, 0, OVERFLOW_SCROLL);
-		error2 = css__stylesheet_style_appendOPV(
-			result, CSS_PROP_OVERFLOW_Y, 0, OVERFLOW_SCROLL);
-
-	} else if ((lwc_string_caseless_isequal(token->idata,
-						c->strings[AUTO],
-						&match) == lwc_error_ok &&
-		    match)) {
-		error1 = css__stylesheet_style_appendOPV(
-			result, CSS_PROP_OVERFLOW_X, 0, OVERFLOW_AUTO);
-		error2 = css__stylesheet_style_appendOPV(
-			result, CSS_PROP_OVERFLOW_Y, 0, OVERFLOW_AUTO);
-
 	} else {
-		error1 = CSS_INVALID;
+		static const css_prop_handler handlers[] = {
+			css__parse_overflow_x,
+			css__parse_overflow_y,
+		};
+
+		*ctx = orig_ctx;
+		return css__parse_sides(c, vector, ctx, result, handlers, 2);
 	}
 
 	if (error2 != CSS_OK)

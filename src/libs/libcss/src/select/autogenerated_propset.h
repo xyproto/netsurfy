@@ -106,9 +106,9 @@ set_background_color(css_computed_style *style, uint8_t type, css_color color)
 #undef BACKGROUND_COLOR_SHIFT
 #undef BACKGROUND_COLOR_MASK
 
-#define BACKGROUND_IMAGE_INDEX 14
-#define BACKGROUND_IMAGE_SHIFT 7
-#define BACKGROUND_IMAGE_MASK 0x80
+#define BACKGROUND_IMAGE_INDEX 15
+#define BACKGROUND_IMAGE_SHIFT 25
+#define BACKGROUND_IMAGE_MASK 0x2000000
 
 static inline css_error set_background_image(css_computed_style *style,
 					     uint8_t type,
@@ -676,9 +676,9 @@ set_clip(css_computed_style *style, uint8_t type, css_computed_clip_rect *rect)
 #undef CLIP_SHIFT
 #undef CLIP_MASK
 
-#define COLOR_INDEX 14
-#define COLOR_SHIFT 8
-#define COLOR_MASK 0x100
+#define COLOR_INDEX 15
+#define COLOR_SHIFT 26
+#define COLOR_MASK 0x4000000
 
 static inline css_error
 set_color(css_computed_style *style, uint8_t type, css_color color)
@@ -960,9 +960,9 @@ static inline css_error set_content(css_computed_style *style,
 #undef CONTENT_SHIFT
 #undef CONTENT_MASK
 
-#define COUNTER_INCREMENT_INDEX 14
-#define COUNTER_INCREMENT_SHIFT 9
-#define COUNTER_INCREMENT_MASK 0x200
+#define COUNTER_INCREMENT_INDEX 15
+#define COUNTER_INCREMENT_SHIFT 27
+#define COUNTER_INCREMENT_MASK 0x8000000
 
 static inline css_error set_counter_increment(css_computed_style *style,
 					      uint8_t type,
@@ -997,9 +997,9 @@ static inline css_error set_counter_increment(css_computed_style *style,
 #undef COUNTER_INCREMENT_SHIFT
 #undef COUNTER_INCREMENT_MASK
 
-#define COUNTER_RESET_INDEX 14
-#define COUNTER_RESET_SHIFT 10
-#define COUNTER_RESET_MASK 0x400
+#define COUNTER_RESET_INDEX 15
+#define COUNTER_RESET_SHIFT 28
+#define COUNTER_RESET_MASK 0x10000000
 
 static inline css_error set_counter_reset(css_computed_style *style,
 					  uint8_t type,
@@ -1124,9 +1124,9 @@ static inline css_error set_empty_cells(css_computed_style *style, uint8_t type)
 #undef EMPTY_CELLS_SHIFT
 #undef EMPTY_CELLS_MASK
 
-#define FILL_OPACITY_INDEX 14
-#define FILL_OPACITY_SHIFT 11
-#define FILL_OPACITY_MASK 0x800
+#define FILL_OPACITY_INDEX 15
+#define FILL_OPACITY_SHIFT 29
+#define FILL_OPACITY_MASK 0x20000000
 
 static inline css_error
 set_fill_opacity(css_computed_style *style, uint8_t type, css_fixed fixed)
@@ -1202,9 +1202,9 @@ set_flex_direction(css_computed_style *style, uint8_t type)
 #undef FLEX_DIRECTION_SHIFT
 #undef FLEX_DIRECTION_MASK
 
-#define FLEX_GROW_INDEX 14
-#define FLEX_GROW_SHIFT 12
-#define FLEX_GROW_MASK 0x1000
+#define FLEX_GROW_INDEX 15
+#define FLEX_GROW_SHIFT 30
+#define FLEX_GROW_MASK 0x40000000
 
 static inline css_error
 set_flex_grow(css_computed_style *style, uint8_t type, css_fixed fixed)
@@ -1223,9 +1223,9 @@ set_flex_grow(css_computed_style *style, uint8_t type, css_fixed fixed)
 #undef FLEX_GROW_SHIFT
 #undef FLEX_GROW_MASK
 
-#define FLEX_SHRINK_INDEX 14
-#define FLEX_SHRINK_SHIFT 13
-#define FLEX_SHRINK_MASK 0x2000
+#define FLEX_SHRINK_INDEX 15
+#define FLEX_SHRINK_SHIFT 31
+#define FLEX_SHRINK_MASK 0x80000000
 
 static inline css_error
 set_flex_shrink(css_computed_style *style, uint8_t type, css_fixed fixed)
@@ -1394,6 +1394,388 @@ static inline css_error set_font_weight(css_computed_style *style, uint8_t type)
 #undef FONT_WEIGHT_SHIFT
 #undef FONT_WEIGHT_MASK
 
+#define GRID_AREA_INDEX 14
+#define GRID_AREA_SHIFT 0
+#define GRID_AREA_MASK 0x1
+
+static inline css_error
+set_grid_area(css_computed_style *style, uint8_t type, lwc_string *string)
+{
+	uint32_t *bits = &style->i.bits[GRID_AREA_INDEX];
+
+	/* 1bit: t : type */
+	*bits = (*bits & ~GRID_AREA_MASK) |
+		(((uint32_t)type & 0x1) << GRID_AREA_SHIFT);
+
+	lwc_string *old_string = style->i.grid_area;
+
+	if (string != NULL) {
+		style->i.grid_area = lwc_string_ref(string);
+	} else {
+		style->i.grid_area = NULL;
+	}
+
+	lwc_string_unref(old_string);
+
+	return CSS_OK;
+}
+#undef GRID_AREA_INDEX
+#undef GRID_AREA_SHIFT
+#undef GRID_AREA_MASK
+
+#define GRID_AUTO_COLUMNS_INDEX 14
+#define GRID_AUTO_COLUMNS_SHIFT 1
+#define GRID_AUTO_COLUMNS_MASK 0x2
+
+static inline css_error set_grid_auto_columns(css_computed_style *style,
+					      uint8_t type,
+					      lwc_string *string)
+{
+	uint32_t *bits = &style->i.bits[GRID_AUTO_COLUMNS_INDEX];
+
+	/* 1bit: t : type */
+	*bits = (*bits & ~GRID_AUTO_COLUMNS_MASK) |
+		(((uint32_t)type & 0x1) << GRID_AUTO_COLUMNS_SHIFT);
+
+	lwc_string *old_string = style->i.grid_auto_columns;
+
+	if (string != NULL) {
+		style->i.grid_auto_columns = lwc_string_ref(string);
+	} else {
+		style->i.grid_auto_columns = NULL;
+	}
+
+	lwc_string_unref(old_string);
+
+	return CSS_OK;
+}
+#undef GRID_AUTO_COLUMNS_INDEX
+#undef GRID_AUTO_COLUMNS_SHIFT
+#undef GRID_AUTO_COLUMNS_MASK
+
+#define GRID_AUTO_FLOW_INDEX 14
+#define GRID_AUTO_FLOW_SHIFT 2
+#define GRID_AUTO_FLOW_MASK 0x4
+
+static inline css_error
+set_grid_auto_flow(css_computed_style *style, uint8_t type, lwc_string *string)
+{
+	uint32_t *bits = &style->i.bits[GRID_AUTO_FLOW_INDEX];
+
+	/* 1bit: t : type */
+	*bits = (*bits & ~GRID_AUTO_FLOW_MASK) |
+		(((uint32_t)type & 0x1) << GRID_AUTO_FLOW_SHIFT);
+
+	lwc_string *old_string = style->i.grid_auto_flow;
+
+	if (string != NULL) {
+		style->i.grid_auto_flow = lwc_string_ref(string);
+	} else {
+		style->i.grid_auto_flow = NULL;
+	}
+
+	lwc_string_unref(old_string);
+
+	return CSS_OK;
+}
+#undef GRID_AUTO_FLOW_INDEX
+#undef GRID_AUTO_FLOW_SHIFT
+#undef GRID_AUTO_FLOW_MASK
+
+#define GRID_AUTO_ROWS_INDEX 14
+#define GRID_AUTO_ROWS_SHIFT 3
+#define GRID_AUTO_ROWS_MASK 0x8
+
+static inline css_error
+set_grid_auto_rows(css_computed_style *style, uint8_t type, lwc_string *string)
+{
+	uint32_t *bits = &style->i.bits[GRID_AUTO_ROWS_INDEX];
+
+	/* 1bit: t : type */
+	*bits = (*bits & ~GRID_AUTO_ROWS_MASK) |
+		(((uint32_t)type & 0x1) << GRID_AUTO_ROWS_SHIFT);
+
+	lwc_string *old_string = style->i.grid_auto_rows;
+
+	if (string != NULL) {
+		style->i.grid_auto_rows = lwc_string_ref(string);
+	} else {
+		style->i.grid_auto_rows = NULL;
+	}
+
+	lwc_string_unref(old_string);
+
+	return CSS_OK;
+}
+#undef GRID_AUTO_ROWS_INDEX
+#undef GRID_AUTO_ROWS_SHIFT
+#undef GRID_AUTO_ROWS_MASK
+
+#define GRID_COLUMN_INDEX 14
+#define GRID_COLUMN_SHIFT 4
+#define GRID_COLUMN_MASK 0x10
+
+static inline css_error
+set_grid_column(css_computed_style *style, uint8_t type, lwc_string *string)
+{
+	uint32_t *bits = &style->i.bits[GRID_COLUMN_INDEX];
+
+	/* 1bit: t : type */
+	*bits = (*bits & ~GRID_COLUMN_MASK) |
+		(((uint32_t)type & 0x1) << GRID_COLUMN_SHIFT);
+
+	lwc_string *old_string = style->i.grid_column;
+
+	if (string != NULL) {
+		style->i.grid_column = lwc_string_ref(string);
+	} else {
+		style->i.grid_column = NULL;
+	}
+
+	lwc_string_unref(old_string);
+
+	return CSS_OK;
+}
+#undef GRID_COLUMN_INDEX
+#undef GRID_COLUMN_SHIFT
+#undef GRID_COLUMN_MASK
+
+#define GRID_COLUMN_END_INDEX 14
+#define GRID_COLUMN_END_SHIFT 5
+#define GRID_COLUMN_END_MASK 0x20
+
+static inline css_error
+set_grid_column_end(css_computed_style *style, uint8_t type, lwc_string *string)
+{
+	uint32_t *bits = &style->i.bits[GRID_COLUMN_END_INDEX];
+
+	/* 1bit: t : type */
+	*bits = (*bits & ~GRID_COLUMN_END_MASK) |
+		(((uint32_t)type & 0x1) << GRID_COLUMN_END_SHIFT);
+
+	lwc_string *old_string = style->i.grid_column_end;
+
+	if (string != NULL) {
+		style->i.grid_column_end = lwc_string_ref(string);
+	} else {
+		style->i.grid_column_end = NULL;
+	}
+
+	lwc_string_unref(old_string);
+
+	return CSS_OK;
+}
+#undef GRID_COLUMN_END_INDEX
+#undef GRID_COLUMN_END_SHIFT
+#undef GRID_COLUMN_END_MASK
+
+#define GRID_COLUMN_START_INDEX 14
+#define GRID_COLUMN_START_SHIFT 6
+#define GRID_COLUMN_START_MASK 0x40
+
+static inline css_error set_grid_column_start(css_computed_style *style,
+					      uint8_t type,
+					      lwc_string *string)
+{
+	uint32_t *bits = &style->i.bits[GRID_COLUMN_START_INDEX];
+
+	/* 1bit: t : type */
+	*bits = (*bits & ~GRID_COLUMN_START_MASK) |
+		(((uint32_t)type & 0x1) << GRID_COLUMN_START_SHIFT);
+
+	lwc_string *old_string = style->i.grid_column_start;
+
+	if (string != NULL) {
+		style->i.grid_column_start = lwc_string_ref(string);
+	} else {
+		style->i.grid_column_start = NULL;
+	}
+
+	lwc_string_unref(old_string);
+
+	return CSS_OK;
+}
+#undef GRID_COLUMN_START_INDEX
+#undef GRID_COLUMN_START_SHIFT
+#undef GRID_COLUMN_START_MASK
+
+#define GRID_ROW_INDEX 14
+#define GRID_ROW_SHIFT 7
+#define GRID_ROW_MASK 0x80
+
+static inline css_error
+set_grid_row(css_computed_style *style, uint8_t type, lwc_string *string)
+{
+	uint32_t *bits = &style->i.bits[GRID_ROW_INDEX];
+
+	/* 1bit: t : type */
+	*bits = (*bits & ~GRID_ROW_MASK) |
+		(((uint32_t)type & 0x1) << GRID_ROW_SHIFT);
+
+	lwc_string *old_string = style->i.grid_row;
+
+	if (string != NULL) {
+		style->i.grid_row = lwc_string_ref(string);
+	} else {
+		style->i.grid_row = NULL;
+	}
+
+	lwc_string_unref(old_string);
+
+	return CSS_OK;
+}
+#undef GRID_ROW_INDEX
+#undef GRID_ROW_SHIFT
+#undef GRID_ROW_MASK
+
+#define GRID_ROW_END_INDEX 14
+#define GRID_ROW_END_SHIFT 8
+#define GRID_ROW_END_MASK 0x100
+
+static inline css_error
+set_grid_row_end(css_computed_style *style, uint8_t type, lwc_string *string)
+{
+	uint32_t *bits = &style->i.bits[GRID_ROW_END_INDEX];
+
+	/* 1bit: t : type */
+	*bits = (*bits & ~GRID_ROW_END_MASK) |
+		(((uint32_t)type & 0x1) << GRID_ROW_END_SHIFT);
+
+	lwc_string *old_string = style->i.grid_row_end;
+
+	if (string != NULL) {
+		style->i.grid_row_end = lwc_string_ref(string);
+	} else {
+		style->i.grid_row_end = NULL;
+	}
+
+	lwc_string_unref(old_string);
+
+	return CSS_OK;
+}
+#undef GRID_ROW_END_INDEX
+#undef GRID_ROW_END_SHIFT
+#undef GRID_ROW_END_MASK
+
+#define GRID_ROW_START_INDEX 14
+#define GRID_ROW_START_SHIFT 9
+#define GRID_ROW_START_MASK 0x200
+
+static inline css_error
+set_grid_row_start(css_computed_style *style, uint8_t type, lwc_string *string)
+{
+	uint32_t *bits = &style->i.bits[GRID_ROW_START_INDEX];
+
+	/* 1bit: t : type */
+	*bits = (*bits & ~GRID_ROW_START_MASK) |
+		(((uint32_t)type & 0x1) << GRID_ROW_START_SHIFT);
+
+	lwc_string *old_string = style->i.grid_row_start;
+
+	if (string != NULL) {
+		style->i.grid_row_start = lwc_string_ref(string);
+	} else {
+		style->i.grid_row_start = NULL;
+	}
+
+	lwc_string_unref(old_string);
+
+	return CSS_OK;
+}
+#undef GRID_ROW_START_INDEX
+#undef GRID_ROW_START_SHIFT
+#undef GRID_ROW_START_MASK
+
+#define GRID_TEMPLATE_AREAS_INDEX 14
+#define GRID_TEMPLATE_AREAS_SHIFT 10
+#define GRID_TEMPLATE_AREAS_MASK 0x400
+
+static inline css_error set_grid_template_areas(css_computed_style *style,
+						uint8_t type,
+						lwc_string *string)
+{
+	uint32_t *bits = &style->i.bits[GRID_TEMPLATE_AREAS_INDEX];
+
+	/* 1bit: t : type */
+	*bits = (*bits & ~GRID_TEMPLATE_AREAS_MASK) |
+		(((uint32_t)type & 0x1) << GRID_TEMPLATE_AREAS_SHIFT);
+
+	lwc_string *old_string = style->i.grid_template_areas;
+
+	if (string != NULL) {
+		style->i.grid_template_areas = lwc_string_ref(string);
+	} else {
+		style->i.grid_template_areas = NULL;
+	}
+
+	lwc_string_unref(old_string);
+
+	return CSS_OK;
+}
+#undef GRID_TEMPLATE_AREAS_INDEX
+#undef GRID_TEMPLATE_AREAS_SHIFT
+#undef GRID_TEMPLATE_AREAS_MASK
+
+#define GRID_TEMPLATE_COLUMNS_INDEX 14
+#define GRID_TEMPLATE_COLUMNS_SHIFT 11
+#define GRID_TEMPLATE_COLUMNS_MASK 0x800
+
+static inline css_error set_grid_template_columns(css_computed_style *style,
+						  uint8_t type,
+						  lwc_string *string)
+{
+	uint32_t *bits = &style->i.bits[GRID_TEMPLATE_COLUMNS_INDEX];
+
+	/* 1bit: t : type */
+	*bits = (*bits & ~GRID_TEMPLATE_COLUMNS_MASK) |
+		(((uint32_t)type & 0x1) << GRID_TEMPLATE_COLUMNS_SHIFT);
+
+	lwc_string *old_string = style->i.grid_template_columns;
+
+	if (string != NULL) {
+		style->i.grid_template_columns = lwc_string_ref(string);
+	} else {
+		style->i.grid_template_columns = NULL;
+	}
+
+	lwc_string_unref(old_string);
+
+	return CSS_OK;
+}
+#undef GRID_TEMPLATE_COLUMNS_INDEX
+#undef GRID_TEMPLATE_COLUMNS_SHIFT
+#undef GRID_TEMPLATE_COLUMNS_MASK
+
+#define GRID_TEMPLATE_ROWS_INDEX 14
+#define GRID_TEMPLATE_ROWS_SHIFT 12
+#define GRID_TEMPLATE_ROWS_MASK 0x1000
+
+static inline css_error set_grid_template_rows(css_computed_style *style,
+					       uint8_t type,
+					       lwc_string *string)
+{
+	uint32_t *bits = &style->i.bits[GRID_TEMPLATE_ROWS_INDEX];
+
+	/* 1bit: t : type */
+	*bits = (*bits & ~GRID_TEMPLATE_ROWS_MASK) |
+		(((uint32_t)type & 0x1) << GRID_TEMPLATE_ROWS_SHIFT);
+
+	lwc_string *old_string = style->i.grid_template_rows;
+
+	if (string != NULL) {
+		style->i.grid_template_rows = lwc_string_ref(string);
+	} else {
+		style->i.grid_template_rows = NULL;
+	}
+
+	lwc_string_unref(old_string);
+
+	return CSS_OK;
+}
+#undef GRID_TEMPLATE_ROWS_INDEX
+#undef GRID_TEMPLATE_ROWS_SHIFT
+#undef GRID_TEMPLATE_ROWS_MASK
+
 #define HEIGHT_INDEX 6
 #define HEIGHT_SHIFT 25
 #define HEIGHT_MASK 0xfe000000
@@ -1535,8 +1917,8 @@ static inline css_error set_line_height(css_computed_style *style,
 #undef LINE_HEIGHT_MASK
 
 #define LIST_STYLE_IMAGE_INDEX 14
-#define LIST_STYLE_IMAGE_SHIFT 14
-#define LIST_STYLE_IMAGE_MASK 0x4000
+#define LIST_STYLE_IMAGE_SHIFT 13
+#define LIST_STYLE_IMAGE_MASK 0x2000
 
 static inline css_error set_list_style_image(css_computed_style *style,
 					     uint8_t type,
@@ -1753,6 +2135,35 @@ static inline css_error set_margin_top(css_computed_style *style,
 #undef MARGIN_TOP_INDEX
 #undef MARGIN_TOP_SHIFT
 #undef MARGIN_TOP_MASK
+
+#define MASK_IMAGE_INDEX 14
+#define MASK_IMAGE_SHIFT 14
+#define MASK_IMAGE_MASK 0x4000
+
+static inline css_error
+set_mask_image(css_computed_style *style, uint8_t type, lwc_string *string)
+{
+	uint32_t *bits = &style->i.bits[MASK_IMAGE_INDEX];
+
+	/* 1bit: t : type */
+	*bits = (*bits & ~MASK_IMAGE_MASK) |
+		(((uint32_t)type & 0x1) << MASK_IMAGE_SHIFT);
+
+	lwc_string *old_string = style->i.mask_image;
+
+	if (string != NULL) {
+		style->i.mask_image = lwc_string_ref(string);
+	} else {
+		style->i.mask_image = NULL;
+	}
+
+	lwc_string_unref(old_string);
+
+	return CSS_OK;
+}
+#undef MASK_IMAGE_INDEX
+#undef MASK_IMAGE_SHIFT
+#undef MASK_IMAGE_MASK
 
 #define MAX_HEIGHT_INDEX 4
 #define MAX_HEIGHT_SHIFT 25

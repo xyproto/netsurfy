@@ -104,10 +104,17 @@ html_object_failed(struct box *box, html_content *content, bool background)
  * Update a box whose content has completed rendering.
  */
 
-static void
-html_object_done(struct box *box, hlcache_handle *object, bool background)
+static void html_object_done(struct box *box,
+			     hlcache_handle *object,
+			     bool background,
+			     bool mask)
 {
 	struct box *b;
+
+	if (mask) {
+		box->mask = object;
+		return;
+	}
 
 	if (background) {
 		box->background = object;
@@ -177,6 +184,13 @@ static nserror html_object_callback(hlcache_handle *object,
 	struct box *box;
 
 	box = o->box;
+	if (box == NULL) {
+		if (event->type == CONTENT_MSG_ERROR) {
+			hlcache_handle_release(object);
+			o->content = NULL;
+		}
+		return NSERROR_OK;
+	}
 
 	switch (event->type) {
 	case CONTENT_MSG_LOADING:
@@ -198,7 +212,7 @@ static nserror html_object_callback(hlcache_handle *object,
 						 : 0);
 
 			/* Adjust parent content for new object size */
-			html_object_done(box, object, o->background);
+			html_object_done(box, object, o->background, o->mask);
 			if (c->base.status == CONTENT_STATUS_READY ||
 			    c->base.status == CONTENT_STATUS_DONE)
 				content__reformat(&c->base,
@@ -211,7 +225,7 @@ static nserror html_object_callback(hlcache_handle *object,
 	case CONTENT_MSG_DONE:
 		html_object_set_active(o, false);
 
-		html_object_done(box, object, o->background);
+		html_object_done(box, object, o->background, o->mask);
 
 		if (c->base.status != CONTENT_STATUS_LOADING &&
 		    box->flags & REPLACE_DIM) {
@@ -707,17 +721,85 @@ nserror html_object_close_objects(html_content *html)
 /* exported interface documented in html/object.h */
 nserror html_object_release_for_rebuild(html_content *html)
 {
-	struct content_html_object *object;
+	struct content_html_object *object, *next, *release = NULL;
 
 	if (html->bw != NULL) {
 		html_object_close_objects(html);
 	}
-	for (object = html->object_list; object != NULL;
-	     object = object->next) {
+	for (object = html->object_list; object != NULL; object = next) {
+		next = object->next;
 		html_object_set_active(object, false);
+		if (object->box != NULL && object->content != NULL &&
+		    content_get_type(object->content) != CONTENT_HTML) {
+			object->box = NULL;
+			object->next = html->rebuild_objects;
+			html->rebuild_objects = object;
+		} else {
+			object->next = release;
+			release = object;
+		}
 	}
+	html->object_list = release;
 	html->num_objects = 0;
 	return html_object_free_objects(html);
+}
+
+
+/* exported interface documented in html/object.h */
+void html_object_release_unused(html_content *html)
+{
+	struct content_html_object *object = html->rebuild_objects;
+
+	html->rebuild_objects = NULL;
+	while (object != NULL) {
+		struct content_html_object *next = object->next;
+
+		hlcache_handle_release(object->content);
+		free(object);
+		object = next;
+	}
+}
+
+
+static bool html_object_reuse(html_content *c,
+			      nsurl *url,
+			      struct box *box,
+			      content_type permitted_types,
+			      bool background,
+			      bool mask)
+{
+	struct content_html_object **link = &c->rebuild_objects;
+	struct content_html_object *object;
+	content_status status;
+
+	for (object = *link; object != NULL; object = *link) {
+		if (object->content != NULL &&
+		    object->permitted_types == permitted_types &&
+		    object->background == background && object->mask == mask &&
+		    nsurl_compare(hlcache_handle_get_url(object->content),
+				  url,
+				  NSURL_COMPLETE)) {
+			break;
+		}
+		link = &object->next;
+	}
+	if (object == NULL) {
+		return false;
+	}
+	*link = object->next;
+	object->box = box;
+	object->next = c->object_list;
+	c->object_list = object;
+	c->num_objects++;
+
+	status = content_get_status(object->content);
+	if (status == CONTENT_STATUS_READY || status == CONTENT_STATUS_DONE) {
+		html_object_done(box, object->content, background, mask);
+	}
+	if (status != CONTENT_STATUS_DONE) {
+		html_object_set_active(object, true);
+	}
+	return true;
 }
 
 
@@ -745,12 +827,12 @@ nserror html_object_free_objects(html_content *html)
 }
 
 
-/* exported interface documented in html/object.h */
-bool html_fetch_object(html_content *c,
+static bool html_fetch(html_content *c,
 		       nsurl *url,
 		       struct box *box,
 		       content_type permitted_types,
-		       bool background)
+		       bool background,
+		       bool mask)
 {
 	struct content_html_object *object;
 	hlcache_handle_callback object_callback;
@@ -760,6 +842,11 @@ bool html_fetch_object(html_content *c,
 	/* If we've already been aborted, don't bother attempting the fetch */
 	if (c->aborted)
 		return true;
+
+	if (box != NULL &&
+	    html_object_reuse(c, url, box, permitted_types, background, mask)) {
+		return true;
+	}
 
 	child.charset = c->encoding;
 	child.quirks = c->base.quirks;
@@ -781,6 +868,7 @@ bool html_fetch_object(html_content *c,
 	object->box = box;
 	object->permitted_types = permitted_types;
 	object->background = background;
+	object->mask = mask;
 
 	if (box != NULL) {
 		html_object_set_active(object, true);
@@ -808,4 +896,22 @@ bool html_fetch_object(html_content *c,
 	c->num_objects++;
 
 	return true;
+}
+
+
+/* exported interface documented in html/object.h */
+bool html_fetch_object(html_content *c,
+		       nsurl *url,
+		       struct box *box,
+		       content_type permitted_types,
+		       bool background)
+{
+	return html_fetch(c, url, box, permitted_types, background, false);
+}
+
+
+/* exported interface documented in html/object.h */
+bool html_fetch_mask(html_content *c, nsurl *url, struct box *box)
+{
+	return html_fetch(c, url, box, CONTENT_IMAGE, true, true);
 }

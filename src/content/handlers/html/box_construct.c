@@ -41,6 +41,7 @@
 #include "desktop/gui_internal.h"
 
 #include "html/private.h"
+#include "html/shadow.h"
 #include "html/css.h"
 #include "html/object.h"
 #include "html/box.h"
@@ -124,8 +125,8 @@ static const box_type box_map[] = {
 	BOX_NONE, /* CSS_DISPLAY_NONE */
 	BOX_FLEX, /* CSS_DISPLAY_FLEX */
 	BOX_INLINE_FLEX, /* CSS_DISPLAY_INLINE_FLEX */
-	BOX_BLOCK, /* CSS_DISPLAY_GRID */
-	BOX_INLINE_BLOCK, /* CSS_DISPLAY_INLINE_GRID */
+	BOX_FLEX, /* CSS_DISPLAY_GRID */
+	BOX_INLINE_FLEX, /* CSS_DISPLAY_INLINE_GRID */
 	BOX_NONE, /* CSS_DISPLAY_CONTENTS */
 };
 
@@ -179,13 +180,11 @@ box_extract_properties(dom_node *n, struct box_construct_props *props)
 		dom_node *current_node = n;
 		dom_node *parent_node = NULL;
 		struct box *parent_box;
-		dom_exception err;
 
 		/* Find ancestor node containing parent box */
 		while (true) {
-			err = dom_node_get_parent_node(current_node,
-						       &parent_node);
-			if (err != DOM_NO_ERR || parent_node == NULL)
+			parent_node = html_flat_parent(current_node);
+			if (parent_node == NULL)
 				break;
 
 			parent_box = node_box(parent_node);
@@ -210,9 +209,8 @@ box_extract_properties(dom_node *n, struct box_construct_props *props)
 		while (true) {
 			struct box *b;
 
-			err = dom_node_get_parent_node(current_node,
-						       &parent_node);
-			if (err != DOM_NO_ERR || parent_node == NULL) {
+			parent_node = html_flat_parent(current_node);
+			if (parent_node == NULL) {
 				if (current_node != n)
 					dom_node_unref(current_node);
 				break;
@@ -294,7 +292,7 @@ static css_select_results *box_get_style(html_content *c,
 	}
 
 	/* Populate selection context */
-	ctx.ctx = c->select_ctx;
+	ctx.ctx = html_shadow_select_ctx(c, n, &ctx.shadow_host);
 	ctx.quirks = (c->quirks == DOM_DOCUMENT_QUIRKS_MODE_FULL);
 	ctx.base_url = c->base_url;
 	ctx.universal = c->universal;
@@ -336,9 +334,8 @@ css_select_results *box_select_style(html_content *c, dom_node *n)
 		dom_node *parent = NULL;
 		dom_node_type type;
 
-		if (dom_node_get_parent_node(chain[depth - 1], &parent) !=
-			    DOM_NO_ERR ||
-		    parent == NULL) {
+		parent = html_flat_parent(chain[depth - 1]);
+		if (parent == NULL) {
 			break;
 		}
 		if (dom_node_get_node_type(parent, &type) != DOM_NO_ERR ||
@@ -820,6 +817,21 @@ box_construct_element(struct box_construct_ctx *ctx, bool *convert_children)
 		}
 	}
 
+	if (css_computed_mask_image(box->style, &bgimage_uri) ==
+		    CSS_MASK_IMAGE_IMAGE &&
+	    bgimage_uri != NULL && nsoption_bool(background_images) == true) {
+		nsurl *url;
+
+		if (nsurl_create(lwc_string_data(bgimage_uri), &url) ==
+		    NSERROR_OK) {
+			bool ok = html_fetch_mask(ctx->content, url, box);
+			nsurl_unref(url);
+			if (!ok) {
+				return false;
+			}
+		}
+	}
+
 	if (*convert_children)
 		box->flags |= CONVERT_CHILDREN;
 
@@ -980,102 +992,37 @@ static dom_node *
 next_node(dom_node *n, html_content *content, bool convert_children)
 {
 	dom_node *next = NULL;
-	bool has_children;
-	dom_exception err;
 
-	err = dom_node_has_child_nodes(n, &has_children);
-	if (err != DOM_NO_ERR) {
-		dom_node_unref(n);
-		return NULL;
-	}
-
-	if (convert_children && has_children) {
-		err = dom_node_get_first_child(n, &next);
-		if (err != DOM_NO_ERR) {
-			dom_node_unref(n);
-			return NULL;
-		}
-		dom_node_unref(n);
-	} else {
-		err = dom_node_get_next_sibling(n, &next);
-		if (err != DOM_NO_ERR) {
-			dom_node_unref(n);
-			return NULL;
-		}
-
+	if (convert_children) {
+		next = html_flat_first_child(n);
 		if (next != NULL) {
-			if (node_box(n) != NULL)
-				box_construct_element_after(n, content);
 			dom_node_unref(n);
-		} else {
-			if (node_box(n) != NULL)
-				box_construct_element_after(n, content);
-
-			while (box_is_root(n) == false) {
-				dom_node *parent = NULL;
-				dom_node *parent_next = NULL;
-
-				err = dom_node_get_parent_node(n, &parent);
-				if (err != DOM_NO_ERR) {
-					dom_node_unref(n);
-					return NULL;
-				}
-
-				assert(parent != NULL);
-
-				err = dom_node_get_next_sibling(parent,
-								&parent_next);
-				if (err != DOM_NO_ERR) {
-					dom_node_unref(parent);
-					dom_node_unref(n);
-					return NULL;
-				}
-
-				if (parent_next != NULL) {
-					dom_node_unref(parent_next);
-					dom_node_unref(parent);
-					break;
-				}
-
-				dom_node_unref(n);
-				n = parent;
-				parent = NULL;
-
-				if (node_box(n) != NULL) {
-					box_construct_element_after(n, content);
-				}
-			}
-
-			if (box_is_root(n) == false) {
-				dom_node *parent = NULL;
-
-				err = dom_node_get_parent_node(n, &parent);
-				if (err != DOM_NO_ERR) {
-					dom_node_unref(n);
-					return NULL;
-				}
-
-				assert(parent != NULL);
-
-				err = dom_node_get_next_sibling(parent, &next);
-				if (err != DOM_NO_ERR) {
-					dom_node_unref(parent);
-					dom_node_unref(n);
-					return NULL;
-				}
-
-				if (node_box(parent) != NULL) {
-					box_construct_element_after(parent,
-								    content);
-				}
-
-				dom_node_unref(parent);
-			}
-
-			dom_node_unref(n);
+			return next;
 		}
 	}
 
+	for (;;) {
+		dom_node *parent;
+
+		if (node_box(n) != NULL) {
+			box_construct_element_after(n, content);
+		}
+		if (box_is_root(n)) {
+			break;
+		}
+		next = html_flat_next_sibling(n);
+		if (next != NULL) {
+			break;
+		}
+		parent = html_flat_parent(n);
+		if (parent == NULL) {
+			break;
+		}
+		dom_node_unref(n);
+		n = parent;
+	}
+
+	dom_node_unref(n);
 	return next;
 }
 
@@ -1514,6 +1461,8 @@ nserror dom_to_box(dom_node *n,
 	struct box_construct_ctx *ctx;
 
 	assert(box_conversion_context != NULL);
+
+	html_shadow_flush(c);
 
 	if (c->bctx == NULL) {
 		/* create a context allocation for this box tree */

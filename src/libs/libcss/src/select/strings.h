@@ -14,6 +14,7 @@
 typedef struct {
 	lwc_string *universal;
 	lwc_string *first_child;
+	lwc_string *host;
 	lwc_string *link;
 	lwc_string *visited;
 	lwc_string *hover;

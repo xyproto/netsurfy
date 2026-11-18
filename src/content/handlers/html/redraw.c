@@ -638,6 +638,49 @@ static bool html_redraw_background(int x,
 	if (ctx->background_images == false)
 		return true;
 
+	if (box->style != NULL) {
+		lwc_string *mask_url = NULL;
+
+		if (css_computed_mask_image(box->style, &mask_url) ==
+			    CSS_MASK_IMAGE_IMAGE &&
+		    mask_url != NULL) {
+			int pw = box->padding[LEFT] + box->width +
+				 box->padding[RIGHT];
+			int ph = box->padding[TOP] + box->height +
+				 box->padding[BOTTOM];
+			int mw, mh;
+			float fit;
+			struct content_redraw_data data;
+
+			if (box->mask == NULL || pw <= 0 || ph <= 0) {
+				return true;
+			}
+			mw = content_get_width(box->mask);
+			mh = content_get_height(box->mask);
+			if (mw <= 0 || mh <= 0) {
+				mw = pw;
+				mh = ph;
+			}
+			fit = (float)pw / mw;
+			if ((float)ph / mh < fit) {
+				fit = (float)ph / mh;
+			}
+			data.width = ceilf(mw * fit * scale);
+			data.height = ceilf(mh * fit * scale);
+			data.x = x + (pw * scale - data.width) / 2;
+			data.y = y + (ph * scale - data.height) / 2;
+			data.background_colour = *background_colour;
+			data.scale = scale;
+			data.repeat_x = false;
+			data.repeat_y = false;
+			if (ctx->plot->clip(ctx, clip) != NSERROR_OK) {
+				return false;
+			}
+			content_redraw(box->mask, &data, clip, ctx);
+			return true;
+		}
+	}
+
 	plot_content = (background->background != NULL);
 
 	if (plot_content) {

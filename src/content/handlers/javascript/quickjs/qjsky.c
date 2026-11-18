@@ -125,6 +125,7 @@ struct jsthread {
 	uint32_t next_fetch_id;
 	int ready_state;
 	bool reactions_pending;
+	bool templates_pending;
 	void (*module_loaded)(void *pw);
 	void *module_loaded_pw;
 	unsigned int modules_loaded;
@@ -631,6 +632,21 @@ JSValue qjsky_generic(JSContext *ctx, const char *name)
 	return JS_GetPropertyStr(ctx, qjsky_thread(ctx)->generics, name);
 }
 
+static bool qjsky_call_generic(JSContext *ctx, const char *name, JSValue arg)
+{
+	JSValue fn = qjsky_generic(ctx, name);
+	JSValue res = JS_UNDEFINED;
+	bool ret = false;
+
+	if (JS_IsFunction(ctx, fn)) {
+		res = qjsky_call(ctx, fn, JS_UNDEFINED, 1, &arg, false);
+		ret = JS_ToBool(ctx, res) > 0;
+	}
+	JS_FreeValue(ctx, res);
+	JS_FreeValue(ctx, fn);
+	return ret;
+}
+
 JSValue qjsky_list_proxy(JSContext *ctx, const char *generic, JSValue inner)
 {
 	JSValue fn, ret;
@@ -1034,6 +1050,18 @@ JSValue qjsky_node(JSContext *ctx, struct dom_node *node)
 		} else {
 			JS_FreeValue(ctx, obj);
 			obj = proxy;
+		}
+	}
+	if (iface != QJSKY_IFACE_NODE && iface != QJSKY_IFACE_ELEMENT) {
+		dom_string *name = NULL;
+
+		if (dom_node_get_node_name(node, &name) == DOM_NO_ERR &&
+		    name != NULL) {
+			if (dom_string_caseless_isequal(name,
+							corestring_dom_slot)) {
+				(void)qjsky_call_generic(ctx, "makeSlot", obj);
+			}
+			dom_string_unref(name);
 		}
 	}
 	if (!qjsky_map_put(&thread->nodes, node, JS_DupValue(ctx, obj))) {
@@ -1722,6 +1750,48 @@ bool qjsky_node_boxes(struct dom_node *node,
 	content[1] = y + box->padding[TOP];
 	content[2] = box->width;
 	content[3] = box->height;
+	if (box->type == BOX_INLINE && box->inline_end != NULL) {
+		double x0 = border[0], y0 = border[1];
+		double x1 = border[0] + border[2], y1 = border[1] + border[3];
+		struct box *b;
+
+		for (b = box->next; b != NULL; b = b->next) {
+			int bx, by;
+
+			box_coords(b, &bx, &by);
+			x0 = bx - b->border[LEFT].width < x0
+				     ? bx - b->border[LEFT].width
+				     : x0;
+			y0 = by - b->border[TOP].width < y0
+				     ? by - b->border[TOP].width
+				     : y0;
+			if (bx + b->width + b->padding[RIGHT] +
+				    b->border[RIGHT].width >
+			    x1) {
+				x1 = bx + b->width + b->padding[RIGHT] +
+				     b->border[RIGHT].width;
+			}
+			if (by + b->height + b->padding[BOTTOM] +
+				    b->border[BOTTOM].width >
+			    y1) {
+				y1 = by + b->height + b->padding[BOTTOM] +
+				     b->border[BOTTOM].width;
+			}
+			if (b == box->inline_end) {
+				break;
+			}
+		}
+		border[0] = x0;
+		border[1] = y0;
+		border[2] = x1 - x0;
+		border[3] = y1 - y0;
+		content[0] = x0 + box->border[LEFT].width + box->padding[LEFT];
+		content[1] = y + box->padding[TOP];
+		content[2] = border[2] - box->border[LEFT].width -
+			     box->padding[LEFT] - box->padding[RIGHT] -
+			     box->border[RIGHT].width;
+		content[3] = box->height;
+	}
 	return true;
 }
 
@@ -4214,6 +4284,76 @@ static bool qjsky_candidate_matches(dom_node *node,
 	return match;
 }
 
+static JSValue qjsky_native_node_result(JSContext *ctx, struct dom_node *node)
+{
+	JSValue ret;
+
+	if (node == NULL) {
+		return JS_NULL;
+	}
+	ret = qjsky_node(ctx, node);
+	dom_node_unref(node);
+	return ret;
+}
+
+static JSValue qjsky_native_shadow_attach(JSContext *ctx,
+					  JSValueConst this_val,
+					  int argc,
+					  JSValueConst *argv)
+{
+	node_private_t *el = qjsky_private(ctx, argv[0], QJSKY_IFACE_NODE);
+	dom_document_fragment *root = NULL;
+
+	if (el == NULL) {
+		return JS_ThrowTypeError(ctx, "not a node");
+	}
+	if (dom_element_attach_shadow((dom_element *)el->node, &root) !=
+	    DOM_NO_ERR) {
+		return JS_NULL;
+	}
+	if (qjsky_node_htmlc(el->node) != NULL) {
+		html_schedule_rebuild(qjsky_node_htmlc(el->node));
+	}
+	return qjsky_native_node_result(ctx, (struct dom_node *)root);
+}
+
+static JSValue qjsky_native_shadow_root(JSContext *ctx,
+					JSValueConst this_val,
+					int argc,
+					JSValueConst *argv)
+{
+	node_private_t *el = qjsky_private(ctx, argv[0], QJSKY_IFACE_NODE);
+	dom_document_fragment *root = NULL;
+	dom_node_type type;
+
+	if (el == NULL ||
+	    dom_node_get_node_type(el->node, &type) != DOM_NO_ERR ||
+	    type != DOM_ELEMENT_NODE) {
+		return JS_NULL;
+	}
+	(void)dom_element_get_shadow_root((dom_element *)el->node, &root);
+	return qjsky_native_node_result(ctx, (struct dom_node *)root);
+}
+
+static JSValue qjsky_native_shadow_host(JSContext *ctx,
+					JSValueConst this_val,
+					int argc,
+					JSValueConst *argv)
+{
+	node_private_t *frag = qjsky_private(ctx, argv[0], QJSKY_IFACE_NODE);
+	dom_element *host = NULL;
+	dom_node_type type;
+
+	if (frag == NULL ||
+	    dom_node_get_node_type(frag->node, &type) != DOM_NO_ERR ||
+	    type != DOM_DOCUMENT_FRAGMENT_NODE) {
+		return JS_NULL;
+	}
+	(void)dom_document_fragment_get_host(
+		(dom_document_fragment *)frag->node, &host);
+	return qjsky_native_node_result(ctx, (struct dom_node *)host);
+}
+
 static JSValue qjsky_native_compare_points(JSContext *ctx,
 					   JSValueConst this_val,
 					   int argc,
@@ -4685,6 +4825,9 @@ static JSValue qjsky_native_object(JSContext *ctx)
 		{"runModule", qjsky_native_run_module, 1},
 		{"candidates", qjsky_native_candidates, 4},
 		{"comparePoints", qjsky_native_compare_points, 4},
+		{"shadowAttach", qjsky_native_shadow_attach, 1},
+		{"shadowRoot", qjsky_native_shadow_root, 1},
+		{"shadowHost", qjsky_native_shadow_host, 1},
 		{"language", qjsky_native_language, 0},
 		{"random", qjsky_native_random, 1},
 		{"storageRead", qjsky_native_storage_read, 1},
@@ -4933,6 +5076,11 @@ bool js_exec(jsthread *thread,
 	      name);
 
 	qjsky_reset_timeout(thread->ctx);
+	if (thread->templates_pending) {
+		thread->templates_pending = qjsky_call_generic(thread->ctx,
+							       "moveTemplates",
+							       JS_UNDEFINED);
+	}
 	thread->call_depth++;
 	res = qjsky_eval(thread->ctx,
 			 (const char *)txt,
@@ -4972,6 +5120,17 @@ void js_handle_new_element(jsthread *thread, struct dom_element *node)
 	}
 	if (nodename == corestring_dom_BODY) {
 		is_body = true;
+	} else if (dom_string_caseless_isequal(nodename,
+					       corestring_dom_template)) {
+		JSValue el;
+
+		qjsky_enter_thread(thread);
+		el = qjsky_node(thread->ctx, (struct dom_node *)node);
+		thread->templates_pending = qjsky_call_generic(thread->ctx,
+							       "noteTemplate",
+							       el);
+		JS_FreeValue(thread->ctx, el);
+		qjsky_leave_thread(thread);
 	}
 	dom_string_unref(nodename);
 

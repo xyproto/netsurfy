@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Shadow DOM</title><script src="harness.js"></script>
+<style>
+body { margin: 0; width: 600px; }
+.box { width: 50px; height: 10px; }
+.light { width: 70px; display: block; height: 5px; }
+#dsd { width: 999px; }
+</style></head>
+<body>
+<div id="dsd"><template shadowrootmode="open"><style>:host { display: block; width: 300px; } .box { width: 120px; } slot[name=hidden] { display: none; }</style><div class="box" id="inner"></div><slot name="first"></slot><slot></slot><slot name="hidden"></slot></template><span class="light" id="second">b</span><span class="light" id="first" slot="first">a</span><span class="light" id="hidden" slot="hidden">h</span></div>
+<div class="box" id="outside"></div>
+<div id="cond"><template shadowrootmode="open"><style>:host(:not([loaded])) slot { display: none; } :host(.wide) { display: block; width: 200px; }</style><slot></slot></template><span class="light" id="condchild">c</span></div>
+<div id="fallback"><template shadowrootmode="open"><slot><span class="light" id="fb">fallback</span></slot></template></div>
+<div id="imperative"><span class="light" id="ichild" slot="x">i</span></div>
+<x-widget id="widget"><span class="light" id="wchild">w</span></x-widget>
+<div id="outer"><template shadowrootmode="open"><div id="nesthost"><template shadowrootmode="open"><div class="box" id="deep"></div></template></div></template></div>
+<script>
+function $(id) {
+    return document.getElementById(id);
+}
+customElements.define("x-widget", class extends HTMLElement {
+    constructor() {
+        super();
+        var root = this.attachShadow({ mode: "open" });
+        root.innerHTML = "<style>:host { display: block; width: 150px; } p { margin: 0; width: 40px; height: 3px; }</style><p id='wp'></p><slot></slot>";
+    }
+});
+window.addEventListener("load", function () {
+    var dsd = $("dsd");
+    var root = dsd.shadowRoot;
+    test("declarative shadow roots attach and replace the template", function () {
+        assert(root instanceof ShadowRoot);
+        assert(root instanceof DocumentFragment);
+        assertEquals(root.mode, "open");
+        assert(root.host === dsd);
+        assertEquals(dsd.querySelectorAll("template").length, 0);
+        assertEquals(dsd.children.length, 3);
+        assert(root.getElementById("inner") !== null);
+        assertEquals($("inner"), null);
+    });
+    test("shadow styles are scoped in both directions", function () {
+        assertEquals(root.getElementById("inner").offsetWidth, 120);
+        assertEquals($("outside").offsetWidth, 50);
+    });
+    test(":host rules lose to outer document rules", function () {
+        assertEquals(dsd.offsetWidth, 999);
+        assertEquals($("cond").offsetWidth, 600);
+    });
+    test("slots place light children in the flat tree", function () {
+        var first = $("first"), second = $("second");
+        assertEquals(first.offsetWidth, 70);
+        assert(first.offsetTop < second.offsetTop, "named slot comes before the default slot");
+        assert(root.getElementById("inner").offsetTop < first.offsetTop);
+        assertEquals($("hidden").offsetWidth, 0);
+    });
+    test("slot API", function () {
+        var slots = root.querySelectorAll("slot");
+        assert(slots[0] instanceof HTMLSlotElement);
+        assertEquals(slots[0].name, "first");
+        assertEquals(slots[0].assignedNodes().length, 1);
+        assert(slots[0].assignedElements()[0] === $("first"));
+        assert($("first").assignedSlot === slots[0]);
+        assertEquals($("first").slot, "first");
+        assert($("second").assignedSlot === slots[1]);
+        var fb = $("fallback").shadowRoot.querySelector("slot");
+        assertEquals(fb.assignedNodes().length, 0);
+        assertEquals(fb.assignedNodes({ flatten: true }).length, 1);
+    });
+    test(":host() with a selector argument", function () {
+        var cond = $("cond");
+        assertEquals($("condchild").offsetWidth, 0);
+        cond.setAttribute("loaded", "");
+        assertEquals($("condchild").offsetWidth, 70);
+        cond.className = "wide";
+        assertEquals(cond.offsetWidth, 200);
+    });
+    test("fallback content renders when nothing is assigned", function () {
+        var fb = $("fallback").shadowRoot.getElementById("fb");
+        assert(fb.offsetWidth > 0);
+        assert(fb.offsetWidth !== 70, "document rules do not style fallback content");
+    });
+    test("attachShadow, innerHTML and rendering", function () {
+        var host = $("imperative");
+        var r = host.attachShadow({ mode: "open" });
+        assert(host.shadowRoot === r);
+        assertEquals($("ichild").offsetWidth, 0, "unassigned light children are not rendered");
+        r.innerHTML = "<div class='box' id='made'></div><slot name='x'></slot>";
+        assertEquals(r.getElementById("made").offsetWidth, 600, "document rules do not reach into the shadow tree");
+        assertEquals($("ichild").offsetWidth, 70);
+        var threw = false;
+        try {
+            host.attachShadow({ mode: "open" });
+        } catch (e) {
+            threw = e.name === "NotSupportedError";
+        }
+        assert(threw, "second attachShadow throws");
+        var closedHost = document.createElement("span");
+        var closed = closedHost.attachShadow({ mode: "closed" });
+        assertEquals(closedHost.shadowRoot, null);
+        assertEquals(closed.mode, "closed");
+        threw = false;
+        try {
+            document.createElement("img").attachShadow({ mode: "open" });
+        } catch (e) {
+            threw = true;
+        }
+        assert(threw, "img cannot host a shadow root");
+    });
+    test("getRootNode, isConnected and composed events", function () {
+        var inner = root.getElementById("inner");
+        assert(inner.getRootNode() === root);
+        assert(inner.getRootNode({ composed: true }) === document);
+        assert(inner.isConnected);
+        var seen = [];
+        dsd.addEventListener("ping", function () { seen.push("host"); });
+        document.addEventListener("ping", function () { seen.push("document"); });
+        inner.dispatchEvent(new Event("ping", { bubbles: true, composed: true }));
+        assertEquals(seen.join(","), "host,document");
+    });
+    test("custom elements with shadow roots", function () {
+        var w = $("widget");
+        assertEquals(w.offsetWidth, 150);
+        assertEquals(w.shadowRoot.getElementById("wp").offsetWidth, 40);
+        assertEquals($("wchild").offsetWidth, 70);
+    });
+    test("nested shadow roots", function () {
+        var nesthost = $("outer").shadowRoot.getElementById("nesthost");
+        var deep = nesthost.shadowRoot.getElementById("deep");
+        assertEquals(deep.offsetWidth, 600);
+    });
+    done();
+});
+</script>
+</body></html>

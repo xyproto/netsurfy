@@ -1065,6 +1065,66 @@ static svgtiny_code initialise_parse_state(struct svgtiny_parse_state *state,
 	state->viewport_width = viewport_width;
 	state->viewport_height = viewport_height;
 	svgtiny_parse_position_attributes(svg, *state, &x, &y, &width, &height);
+	{
+		dom_string *view_box = NULL, *w_attr = NULL, *h_attr = NULL;
+		float vx, vy, vw, vh;
+
+		if (dom_element_get_attribute(svg,
+					      state->interned_viewBox,
+					      &view_box) != DOM_NO_ERR) {
+			view_box = NULL;
+		}
+		if (dom_element_get_attribute(svg,
+					      state->interned_width,
+					      &w_attr) != DOM_NO_ERR) {
+			w_attr = NULL;
+		}
+		if (dom_element_get_attribute(svg,
+					      state->interned_height,
+					      &h_attr) != DOM_NO_ERR) {
+			h_attr = NULL;
+		}
+		if (w_attr != NULL &&
+		    memchr(dom_string_data(w_attr),
+			   '%',
+			   dom_string_byte_length(w_attr)) != NULL) {
+			dom_string_unref(w_attr);
+			w_attr = NULL;
+		}
+		if (h_attr != NULL &&
+		    memchr(dom_string_data(h_attr),
+			   '%',
+			   dom_string_byte_length(h_attr)) != NULL) {
+			dom_string_unref(h_attr);
+			h_attr = NULL;
+		}
+		if (view_box != NULL &&
+		    sscanf(dom_string_data(view_box),
+			   "%f%*[ ,]%f%*[ ,]%f%*[ ,]%f",
+			   &vx,
+			   &vy,
+			   &vw,
+			   &vh) == 4 &&
+		    vw > 0 && vh > 0) {
+			if (w_attr == NULL && h_attr == NULL) {
+				width = vw;
+				height = vh;
+			} else if (w_attr == NULL) {
+				width = height * vw / vh;
+			} else if (h_attr == NULL) {
+				height = width * vh / vw;
+			}
+		}
+		if (view_box != NULL) {
+			dom_string_unref(view_box);
+		}
+		if (w_attr != NULL) {
+			dom_string_unref(w_attr);
+		}
+		if (h_attr != NULL) {
+			dom_string_unref(h_attr);
+		}
+	}
 	diagram->width = width;
 	diagram->height = height;
 

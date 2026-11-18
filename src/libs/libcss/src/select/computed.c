@@ -526,6 +526,90 @@ css_computed_background_image(const css_computed_style *style, lwc_string **url)
 	return get_background_image(style, url);
 }
 
+uint8_t css_computed_grid_template_columns(const css_computed_style *style,
+					   lwc_string **value)
+{
+	return get_grid_template_columns(style, value);
+}
+
+uint8_t css_computed_grid_template_rows(const css_computed_style *style,
+					lwc_string **value)
+{
+	return get_grid_template_rows(style, value);
+}
+
+uint8_t css_computed_grid_template_areas(const css_computed_style *style,
+					 lwc_string **value)
+{
+	return get_grid_template_areas(style, value);
+}
+
+uint8_t css_computed_grid_auto_columns(const css_computed_style *style,
+				       lwc_string **value)
+{
+	return get_grid_auto_columns(style, value);
+}
+
+uint8_t
+css_computed_grid_auto_rows(const css_computed_style *style, lwc_string **value)
+{
+	return get_grid_auto_rows(style, value);
+}
+
+uint8_t
+css_computed_grid_auto_flow(const css_computed_style *style, lwc_string **value)
+{
+	return get_grid_auto_flow(style, value);
+}
+
+uint8_t
+css_computed_grid_column(const css_computed_style *style, lwc_string **value)
+{
+	return get_grid_column(style, value);
+}
+
+uint8_t
+css_computed_grid_row(const css_computed_style *style, lwc_string **value)
+{
+	return get_grid_row(style, value);
+}
+
+uint8_t
+css_computed_grid_area(const css_computed_style *style, lwc_string **value)
+{
+	return get_grid_area(style, value);
+}
+
+uint8_t css_computed_grid_column_start(const css_computed_style *style,
+				       lwc_string **value)
+{
+	return get_grid_column_start(style, value);
+}
+
+uint8_t css_computed_grid_column_end(const css_computed_style *style,
+				     lwc_string **value)
+{
+	return get_grid_column_end(style, value);
+}
+
+uint8_t
+css_computed_grid_row_start(const css_computed_style *style, lwc_string **value)
+{
+	return get_grid_row_start(style, value);
+}
+
+uint8_t
+css_computed_grid_row_end(const css_computed_style *style, lwc_string **value)
+{
+	return get_grid_row_end(style, value);
+}
+
+uint8_t
+css_computed_mask_image(const css_computed_style *style, lwc_string **url)
+{
+	return get_mask_image(style, url);
+}
+
 uint8_t css_computed_color(const css_computed_style *style, css_color *color)
 {
 	return get_color(style, color);
@@ -1068,6 +1152,14 @@ uint8_t css_computed_min_height(const css_computed_style *style,
 	}
 
 	return min_height;
+}
+
+bool css_computed_min_width_is_auto(const css_computed_style *style)
+{
+	css_fixed_or_calc value = {.value = 0};
+	css_unit unit = CSS_UNIT_PX;
+
+	return get_min_width(style, &value, &unit) == CSS_MIN_WIDTH_AUTO;
 }
 
 uint8_t css_computed_min_width(const css_computed_style *style,

@@ -38,6 +38,7 @@ typedef struct nscss_select_ctx {
 	lwc_string *universal;
 	const css_computed_style *root_style;
 	const css_computed_style *parent_style;
+	struct dom_node *shadow_host;
 } nscss_select_ctx;
 
 css_stylesheet *nscss_create_inline_style(const uint8_t *data,

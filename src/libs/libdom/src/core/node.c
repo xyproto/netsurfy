@@ -2607,7 +2607,8 @@ dom_exception _dom_node_dispatch_event(dom_event_target *et,
 				       bool *success)
 {
 	dom_exception err, ret = DOM_NO_ERR;
-	dom_node_internal *target = ((dom_node_internal *)et)->parent;
+	dom_node_internal *target = _dom_node_composed_parent(
+		(dom_node_internal *)et);
 	dom_document *doc;
 	dom_document_event_internal *dei = NULL;
 	dom_event_target **targets;
@@ -2650,7 +2651,7 @@ dom_exception _dom_node_dispatch_event(dom_event_target *et,
 	ntargets = 0;
 
 	/* Add interested event listeners to array */
-	for (; target != NULL; target = target->parent) {
+	for (; target != NULL; target = _dom_node_composed_parent(target)) {
 		struct listener_entry *le = target->eti.listeners;
 		bool target_has_listener = false;
 

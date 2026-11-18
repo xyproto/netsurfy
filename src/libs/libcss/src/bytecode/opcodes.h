@@ -680,6 +680,61 @@ enum op_richness { RICHNESS_CALC = VALUE_IS_CALC, RICHNESS_SET = 0x0080 };
 
 enum op_right { RIGHT_SET = BOTTOM_SET, RIGHT_AUTO = BOTTOM_AUTO };
 
+enum op_grid_template_columns {
+	GRID_TEMPLATE_COLUMNS_SET = 0x0080,
+	GRID_TEMPLATE_COLUMNS_NONE = 0x0000
+};
+
+enum op_grid_template_rows {
+	GRID_TEMPLATE_ROWS_SET = 0x0080,
+	GRID_TEMPLATE_ROWS_NONE = 0x0000
+};
+
+enum op_grid_template_areas {
+	GRID_TEMPLATE_AREAS_SET = 0x0080,
+	GRID_TEMPLATE_AREAS_NONE = 0x0000
+};
+
+enum op_grid_auto_columns {
+	GRID_AUTO_COLUMNS_SET = 0x0080,
+	GRID_AUTO_COLUMNS_NONE = 0x0000
+};
+
+enum op_grid_auto_rows {
+	GRID_AUTO_ROWS_SET = 0x0080,
+	GRID_AUTO_ROWS_NONE = 0x0000
+};
+
+enum op_grid_auto_flow {
+	GRID_AUTO_FLOW_SET = 0x0080,
+	GRID_AUTO_FLOW_NONE = 0x0000
+};
+
+enum op_grid_column { GRID_COLUMN_SET = 0x0080, GRID_COLUMN_NONE = 0x0000 };
+
+enum op_grid_row { GRID_ROW_SET = 0x0080, GRID_ROW_NONE = 0x0000 };
+
+enum op_grid_area { GRID_AREA_SET = 0x0080, GRID_AREA_NONE = 0x0000 };
+
+enum op_grid_column_start {
+	GRID_COLUMN_START_SET = 0x0080,
+	GRID_COLUMN_START_NONE = 0x0000
+};
+
+enum op_grid_column_end {
+	GRID_COLUMN_END_SET = 0x0080,
+	GRID_COLUMN_END_NONE = 0x0000
+};
+
+enum op_grid_row_start {
+	GRID_ROW_START_SET = 0x0080,
+	GRID_ROW_START_NONE = 0x0000
+};
+
+enum op_grid_row_end { GRID_ROW_END_SET = 0x0080, GRID_ROW_END_NONE = 0x0000 };
+
+enum op_mask_image { MASK_IMAGE_URI = 0x0080, MASK_IMAGE_NONE = 0x0000 };
+
 enum op_row_gap {
 	ROW_GAP_NORMAL = COLUMN_GAP_NORMAL,
 	ROW_GAP_THIN = COLUMN_GAP_THIN,

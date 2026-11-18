@@ -45,6 +45,7 @@
 
 #include "html/html.h"
 #include "html/private.h"
+#include "html/shadow.h"
 #include "html/css.h"
 
 static nsurl *html_default_stylesheet_url;
@@ -386,6 +387,7 @@ static bool html_css_refresh_selection(html_content *c)
 	}
 	css_select_ctx_destroy(c->select_ctx);
 	c->select_ctx = ctx;
+	html_shadow_flush(c);
 	return true;
 }
 
@@ -840,12 +842,46 @@ nserror html_css_new_stylesheets(html_content *c)
 }
 
 
-/* exported function documented in html/css.h */
-nserror
-html_css_new_selection_context(html_content *c, css_select_ctx **ret_select_ctx)
+static dom_node *html_css_tree_root(dom_node *node)
+{
+	dom_node *n = dom_node_ref(node);
+
+	for (;;) {
+		dom_node *parent = NULL;
+
+		(void)dom_node_get_parent_node(n, &parent);
+		if (parent == NULL) {
+			return n;
+		}
+		dom_node_unref(n);
+		n = parent;
+	}
+}
+
+static css_stylesheet *html_css_usable_sheet(struct html_stylesheet *hsheet)
+{
+	if (hsheet->unused) {
+		return NULL;
+	}
+	if (hsheet->inline_sheet != NULL) {
+		return hsheet->inline_sheet;
+	}
+	if (hsheet->sheet != NULL &&
+	    hlcache_handle_get_content(hsheet->sheet) != NULL &&
+	    content_get_status(hsheet->sheet) == CONTENT_STATUS_DONE) {
+		return nscss_get_stylesheet(hsheet->sheet);
+	}
+	return NULL;
+}
+
+/* exported interface documented in html/css.h */
+nserror html_css_new_scope_context(html_content *c,
+				   dom_node *scope,
+				   dom_node *host_scope,
+				   css_select_ctx **ret_select_ctx)
 {
 	uint32_t i;
-	css_error css_ret;
+	css_error css_ret = CSS_OK;
 	css_select_ctx *select_ctx;
 
 	/* check that the base stylesheet loaded; layout fails without it */
@@ -862,36 +898,28 @@ html_css_new_selection_context(html_content *c, css_select_ctx **ret_select_ctx)
 	/* Add sheets to it */
 	for (i = STYLESHEET_BASE; i != c->stylesheet_count; i++) {
 		struct html_stylesheet *hsheet = &c->stylesheets[i];
-		css_stylesheet *sheet = NULL;
+		css_stylesheet *sheet = html_css_usable_sheet(hsheet);
 		css_origin origin = CSS_ORIGIN_AUTHOR;
 
-		/* Filter out stylesheets for non-screen media. */
-		/* TODO: We should probably pass the sheet in anyway, and let
-		 *       libcss handle the filtering.
-		 */
-		if (hsheet->unused) {
-			continue;
-		}
-		hsheet->detached = i >= STYLESHEET_START &&
-				   hsheet->node != NULL &&
-				   html_css_node_detached(c, hsheet->node);
-		if (hsheet->detached) {
-			continue;
+		if (i >= STYLESHEET_START && hsheet->node != NULL) {
+			dom_node *root = html_css_tree_root(hsheet->node);
+			bool in_scope =
+				scope != NULL ? root == scope
+					      : root == (dom_node *)c->document;
+
+			if (scope == NULL) {
+				hsheet->detached = !in_scope;
+			}
+			dom_node_unref(root);
+			if (!in_scope) {
+				continue;
+			}
 		}
 
 		if (i < STYLESHEET_USER) {
 			origin = CSS_ORIGIN_UA;
 		} else if (i < STYLESHEET_START) {
 			origin = CSS_ORIGIN_USER;
-		}
-
-		if (hsheet->inline_sheet != NULL) {
-			sheet = hsheet->inline_sheet;
-		} else if (hsheet->sheet != NULL &&
-			   hlcache_handle_get_content(hsheet->sheet) != NULL &&
-			   content_get_status(hsheet->sheet) ==
-				   CONTENT_STATUS_DONE) {
-			sheet = nscss_get_stylesheet(hsheet->sheet);
 		}
 
 		if (sheet != NULL) {
@@ -901,15 +929,45 @@ html_css_new_selection_context(html_content *c, css_select_ctx **ret_select_ctx)
 			css_ret = css_select_ctx_append_sheet(
 				select_ctx, sheet, origin, "screen");
 			if (css_ret != CSS_OK) {
-				css_select_ctx_destroy(select_ctx);
-				return css_error_to_nserror(css_ret);
+				break;
 			}
 		}
+	}
+
+	for (i = STYLESHEET_START;
+	     host_scope != NULL && css_ret == CSS_OK && i < c->stylesheet_count;
+	     i++) {
+		struct html_stylesheet *hsheet = &c->stylesheets[i];
+		css_stylesheet *sheet = html_css_usable_sheet(hsheet);
+		dom_node *root;
+
+		if (sheet == NULL || hsheet->node == NULL) {
+			continue;
+		}
+		root = html_css_tree_root(hsheet->node);
+		if (root == host_scope) {
+			css_ret = css_select_ctx_append_host_sheet(select_ctx,
+								   sheet,
+								   "screen");
+		}
+		dom_node_unref(root);
+	}
+
+	if (css_ret != CSS_OK) {
+		css_select_ctx_destroy(select_ctx);
+		return css_error_to_nserror(css_ret);
 	}
 
 	/* return new selection context to caller */
 	*ret_select_ctx = select_ctx;
 	return NSERROR_OK;
+}
+
+/* exported interface documented in html/css.h */
+nserror
+html_css_new_selection_context(html_content *c, css_select_ctx **ret_select_ctx)
+{
+	return html_css_new_scope_context(c, NULL, NULL, ret_select_ctx);
 }
 
 

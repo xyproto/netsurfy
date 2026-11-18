@@ -169,6 +169,12 @@ typedef struct html_content {
 	unsigned int num_objects;
 	/** List of objects. */
 	struct content_html_object *object_list;
+	/** Objects kept across a rebuild, for reuse by new boxes. */
+	struct content_html_object *rebuild_objects;
+	/** Selection contexts for shadow tree scopes. */
+	struct html_shadow_scope *shadow_scopes;
+	/** Whether a shadow host has been styled. */
+	bool shadow_seen;
 	/** Forms, in reverse order to document. */
 	struct form *forms;
 	/** Hash table of imagemaps. */

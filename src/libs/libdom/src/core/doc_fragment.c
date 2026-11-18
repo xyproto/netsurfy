@@ -20,6 +20,7 @@
  */
 struct dom_document_fragment {
 	dom_node_internal base; /**< Base node */
+	struct dom_element *host; /**< Shadow host, if a shadow root */
 };
 
 static const struct dom_node_vtable df_vtable = {{DOM_NODE_EVENT_TARGET_VTABLE},
@@ -56,6 +57,7 @@ dom_exception _dom_document_fragment_create(dom_document *doc,
 
 	f->base.base.vtable = &df_vtable;
 	f->base.vtable = &df_protect_vtable;
+	f->host = NULL;
 
 	/* And initialise the node */
 	err = _dom_document_fragment_initialise(&f->base,
@@ -91,6 +93,42 @@ void _dom_document_fragment_destroy(dom_document_fragment *frag)
 	free(frag);
 }
 
+void _dom_document_fragment_set_host(dom_document_fragment *frag,
+				     struct dom_element *host)
+{
+	frag->host = host;
+}
+
+struct dom_element *_dom_document_fragment_host(const dom_node_internal *node)
+{
+	if (node == NULL || node->type != DOM_DOCUMENT_FRAGMENT_NODE)
+		return NULL;
+	return ((const dom_document_fragment *)node)->host;
+}
+
+dom_node_internal *_dom_node_composed_parent(const dom_node_internal *node)
+{
+	if (node->parent != NULL)
+		return node->parent;
+	return (dom_node_internal *)_dom_document_fragment_host(node);
+}
+
+/**
+ * Get the shadow host of a shadow root
+ *
+ * \param frag  The document fragment
+ * \param host  Pointer to location to receive the host, or NULL
+ * \return DOM_NO_ERR.
+ */
+dom_exception dom_document_fragment_get_host(dom_document_fragment *frag,
+					     struct dom_element **host)
+{
+	*host = NULL;
+	if (frag != NULL && frag->host != NULL)
+		*host = (struct dom_element *)dom_node_ref(frag->host);
+	return DOM_NO_ERR;
+}
+
 /*-----------------------------------------------------------------------*/
 
 /* Overload protected functions */
@@ -116,6 +154,7 @@ dom_exception _dom_df_copy(dom_node_internal *old, dom_node_internal **copy)
 		free(new_f);
 		return err;
 	}
+	new_f->host = NULL;
 
 	*copy = (dom_node_internal *)new_f;
 

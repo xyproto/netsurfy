@@ -1666,8 +1666,19 @@ css_error node_presentational_hint(void *pw,
 	case DOM_HTML_ELEMENT_TYPE_OL:
 		css_hint_list(pw, node);
 		break;
-	default:
+	default: {
+		dom_string *name = NULL;
+		if (dom_node_get_node_name(node, &name) == DOM_NO_ERR &&
+		    name != NULL) {
+			if (dom_string_byte_length(name) == 3 &&
+			    strncasecmp(dom_string_data(name), "svg", 3) == 0) {
+				css_hint_height(pw, node);
+				css_hint_width(pw, node);
+			}
+			dom_string_unref(name);
+		}
 		break;
+	}
 	}
 
 	if (tag_type != DOM_HTML_ELEMENT_TYPE__UNKNOWN) {

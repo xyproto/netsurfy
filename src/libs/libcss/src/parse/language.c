@@ -1904,6 +1904,7 @@ css_error parsePseudo(css_language *c,
 			  {IS, CSS_SELECTOR_PSEUDO_CLASS},
 			  {WHERE, CSS_SELECTOR_PSEUDO_CLASS},
 			  {HAS, CSS_SELECTOR_PSEUDO_CLASS},
+			  {HOST, CSS_SELECTOR_PSEUDO_CLASS},
 
 			  {FIRST_LINE, CSS_SELECTOR_PSEUDO_ELEMENT},
 			  {FIRST_LETTER, CSS_SELECTOR_PSEUDO_ELEMENT},
@@ -1997,7 +1998,8 @@ css_error parsePseudo(css_language *c,
 
 			value_type = CSS_SELECTOR_DETAIL_VALUE_NTH;
 		} else if (fun_type == NOT || fun_type == IS ||
-			   fun_type == WHERE || fun_type == HAS) {
+			   fun_type == WHERE || fun_type == HAS ||
+			   fun_type == HOST) {
 			css_selector_list *list = NULL;
 
 			error = parseSelectorListArgument(
@@ -2007,7 +2009,8 @@ css_error parsePseudo(css_language *c,
 				fun_type == NOT	    ? CSS_SELECTOR_LIST_NOT
 				: fun_type == IS    ? CSS_SELECTOR_LIST_IS
 				: fun_type == WHERE ? CSS_SELECTOR_LIST_WHERE
-						    : CSS_SELECTOR_LIST_HAS,
+				: fun_type == HAS   ? CSS_SELECTOR_LIST_HAS
+						    : CSS_SELECTOR_LIST_HOST,
 				&list);
 			if (error != CSS_OK)
 				return error;

@@ -23,6 +23,7 @@
 
 #include "core/attr.h"
 #include "core/document.h"
+#include "core/doc_fragment.h"
 #include "core/element.h"
 #include "core/node.h"
 #include "core/namednodemap.h"
@@ -662,6 +663,7 @@ dom_exception _dom_element_initialise(struct dom_document *doc,
 
 	el->n_classes = 0;
 	el->classes = NULL;
+	el->shadow_root = NULL;
 
 	return DOM_NO_ERR;
 }
@@ -685,6 +687,12 @@ void _dom_element_finalise(struct dom_element *ele)
 
 	/* Destroy the pre-separated class names */
 	_dom_element_destroy_classes(ele);
+
+	if (ele->shadow_root != NULL) {
+		_dom_document_fragment_set_host(ele->shadow_root, NULL);
+		dom_node_unref(ele->shadow_root);
+		ele->shadow_root = NULL;
+	}
 
 	/* Finalise base class */
 	_dom_node_finalise(&ele->base);
@@ -1325,6 +1333,53 @@ dom_exception _dom_element_has_class(struct dom_element *element,
  * \param ancestor  Pointer to location to receive node.
  * \return DOM_NO_ERR.
  */
+/**
+ * Attach a shadow root to an element
+ *
+ * \param element  Element to become the shadow host
+ * \param root     Pointer to location to receive the referenced root
+ * \return DOM_NO_ERR on success, DOM_NOT_SUPPORTED_ERR if the element
+ *         already hosts a shadow root.
+ */
+dom_exception dom_element_attach_shadow(dom_element *element,
+					struct dom_document_fragment **root)
+{
+	dom_exception err;
+
+	*root = NULL;
+	if (element->shadow_root != NULL)
+		return DOM_NOT_SUPPORTED_ERR;
+
+	err = dom_document_create_document_fragment(element->base.owner,
+						    &element->shadow_root);
+	if (err != DOM_NO_ERR) {
+		element->shadow_root = NULL;
+		return err;
+	}
+	_dom_document_fragment_set_host(element->shadow_root, element);
+	*root = (struct dom_document_fragment *)dom_node_ref(
+		element->shadow_root);
+	return DOM_NO_ERR;
+}
+
+/**
+ * Get the shadow root of an element
+ *
+ * \param element  Element to consider
+ * \param root     Pointer to location to receive the referenced root,
+ *                 or NULL
+ * \return DOM_NO_ERR.
+ */
+dom_exception dom_element_get_shadow_root(dom_element *element,
+					  struct dom_document_fragment **root)
+{
+	*root = NULL;
+	if (element->shadow_root != NULL)
+		*root = (struct dom_document_fragment *)dom_node_ref(
+			element->shadow_root);
+	return DOM_NO_ERR;
+}
+
 dom_exception dom_element_named_ancestor_node(dom_element *element,
 					      lwc_string *name,
 					      dom_element **ancestor)
@@ -1333,7 +1388,8 @@ dom_exception dom_element_named_ancestor_node(dom_element *element,
 
 	*ancestor = NULL;
 
-	for (node = node->parent; node != NULL; node = node->parent) {
+	for (node = _dom_node_composed_parent(node); node != NULL;
+	     node = _dom_node_composed_parent(node)) {
 		if (node->type != DOM_ELEMENT_NODE)
 			continue;
 
@@ -1366,7 +1422,8 @@ dom_exception dom_element_named_parent_node(dom_element *element,
 
 	*parent = NULL;
 
-	for (node = node->parent; node != NULL; node = node->parent) {
+	for (node = _dom_node_composed_parent(node); node != NULL;
+	     node = _dom_node_composed_parent(node)) {
 		if (node->type != DOM_ELEMENT_NODE)
 			continue;
 
@@ -1398,7 +1455,8 @@ dom_element_parent_node(dom_element *element, dom_element **parent)
 
 	*parent = NULL;
 
-	for (node = node->parent; node != NULL; node = node->parent) {
+	for (node = _dom_node_composed_parent(node); node != NULL;
+	     node = _dom_node_composed_parent(node)) {
 		if (node->type != DOM_ELEMENT_NODE)
 			continue;
 
@@ -1646,6 +1704,8 @@ dom_exception _dom_element_copy_internal(dom_element *old, dom_element *new)
 {
 	dom_exception err;
 	uint32_t classnr;
+
+	new->shadow_root = NULL;
 
 	if (old->attributes != NULL) {
 		/* Copy the attribute list */

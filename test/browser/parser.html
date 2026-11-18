@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>Parser</title><script src="harness.js"></script></head>
-<body><p id="ent">&amp;&lt;&gt;&notit;&AMP&zscr;&#x41;&bogus;</p>
+<body><div id="merge">a&nbsp;b&amp;c<!-- x -->d</div><noscript id="ns"><img src="x.png"><p>hi</p></noscript>
+<p id="ent">&amp;&lt;&gt;&notit;&AMP&zscr;&#x41;&bogus;</p>
 <script>document.write('<map name="m"><area id="area" shape="rect" coords="2,2,4,4" href="#"></map><img usemap="#m" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">');</script>
 <table id="t1"><tr><td><p></tbody> </table>
 <table id="t2"> <tr><td>x</td></tr> </table>
@@ -32,6 +33,14 @@ test("XMLSerializer", function () {
     var d = document.createElement("div");
     d.appendChild(document.createElement("br"));
     assertEquals(new XMLSerializer().serializeToString(d), "<div xmlns=\"http://www.w3.org/1999/xhtml\"><br/></div>");
+});
+test("parser text runs become single text nodes", function () {
+    var d = document.getElementById("merge");
+    assertEquals(d.childNodes.length, 3);
+    assertEquals(d.firstChild.nodeValue, "a\u00a0b&c");
+    var ns = document.getElementById("ns");
+    assertEquals(ns.childNodes.length, 1);
+    assertEquals(ns.firstChild.nodeValue, "<img src=\"x.png\"><p>hi</p>");
 });
 done();
 </script></body></html>

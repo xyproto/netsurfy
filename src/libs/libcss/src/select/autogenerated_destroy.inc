@@ -64,6 +64,19 @@ set_flex_basis(style, 0, (css_fixed_or_calc)0, CSS_UNIT_PX);
 /* set_font_style(style, 0, 0, CSS_UNIT_PX); */
 /* set_font_variant(style, 0, 0, CSS_UNIT_PX); */
 /* set_font_weight(style, 0, 0, CSS_UNIT_PX); */
+/* set_grid_area(style, 0, 0, CSS_UNIT_PX); */
+/* set_grid_auto_columns(style, 0, 0, CSS_UNIT_PX); */
+/* set_grid_auto_flow(style, 0, 0, CSS_UNIT_PX); */
+/* set_grid_auto_rows(style, 0, 0, CSS_UNIT_PX); */
+/* set_grid_column(style, 0, 0, CSS_UNIT_PX); */
+/* set_grid_column_end(style, 0, 0, CSS_UNIT_PX); */
+/* set_grid_column_start(style, 0, 0, CSS_UNIT_PX); */
+/* set_grid_row(style, 0, 0, CSS_UNIT_PX); */
+/* set_grid_row_end(style, 0, 0, CSS_UNIT_PX); */
+/* set_grid_row_start(style, 0, 0, CSS_UNIT_PX); */
+/* set_grid_template_areas(style, 0, 0, CSS_UNIT_PX); */
+/* set_grid_template_columns(style, 0, 0, CSS_UNIT_PX); */
+/* set_grid_template_rows(style, 0, 0, CSS_UNIT_PX); */
 set_height(style, 0, (css_fixed_or_calc)0, CSS_UNIT_PX);
 /* set_justify_content(style, 0, 0, CSS_UNIT_PX); */
 set_left(style, 0, (css_fixed_or_calc)0, CSS_UNIT_PX);
@@ -76,6 +89,7 @@ set_margin_bottom(style, 0, (css_fixed_or_calc)0, CSS_UNIT_PX);
 set_margin_left(style, 0, (css_fixed_or_calc)0, CSS_UNIT_PX);
 set_margin_right(style, 0, (css_fixed_or_calc)0, CSS_UNIT_PX);
 set_margin_top(style, 0, (css_fixed_or_calc)0, CSS_UNIT_PX);
+/* set_mask_image(style, 0, 0, CSS_UNIT_PX); */
 set_max_height(style, 0, (css_fixed_or_calc)0, CSS_UNIT_PX);
 set_max_width(style, 0, (css_fixed_or_calc)0, CSS_UNIT_PX);
 set_min_height(style, 0, (css_fixed_or_calc)0, CSS_UNIT_PX);

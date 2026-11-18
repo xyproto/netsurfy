@@ -272,6 +272,7 @@ nslib(libcss
   libcss/src/parse/properties/list_style_type.c
   libcss/src/parse/properties/margin.c
   libcss/src/parse/properties/logical.c
+  libcss/src/parse/properties/grid.c
   libcss/src/parse/properties/opacity.c
   libcss/src/parse/properties/outline.c
   libcss/src/parse/properties/overflow.c
@@ -399,6 +400,20 @@ nslib(libcss
   libcss/src/select/properties/richness.c
   libcss/src/select/properties/right.c
   libcss/src/select/properties/row_gap.c
+  libcss/src/select/properties/mask_image.c
+  libcss/src/select/properties/grid_template_columns.c
+  libcss/src/select/properties/grid_template_rows.c
+  libcss/src/select/properties/grid_template_areas.c
+  libcss/src/select/properties/grid_auto_columns.c
+  libcss/src/select/properties/grid_auto_rows.c
+  libcss/src/select/properties/grid_auto_flow.c
+  libcss/src/select/properties/grid_column.c
+  libcss/src/select/properties/grid_row.c
+  libcss/src/select/properties/grid_area.c
+  libcss/src/select/properties/grid_column_start.c
+  libcss/src/select/properties/grid_column_end.c
+  libcss/src/select/properties/grid_row_start.c
+  libcss/src/select/properties/grid_row_end.c
   libcss/src/select/properties/speech_rate.c
   libcss/src/select/properties/speak.c
   libcss/src/select/properties/speak_header.c

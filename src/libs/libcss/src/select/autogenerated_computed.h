@@ -73,6 +73,19 @@ struct css_computed_style_i {
 	 * font_style                       2
 	 * font_variant                     2
 	 * font_weight                      4
+	 * grid_area                        1             sizeof(ptr)
+	 * grid_auto_columns                1             sizeof(ptr)
+	 * grid_auto_flow                   1             sizeof(ptr)
+	 * grid_auto_rows                   1             sizeof(ptr)
+	 * grid_column                      1             sizeof(ptr)
+	 * grid_column_end                  1             sizeof(ptr)
+	 * grid_column_start                1             sizeof(ptr)
+	 * grid_row                         1             sizeof(ptr)
+	 * grid_row_end                     1             sizeof(ptr)
+	 * grid_row_start                   1             sizeof(ptr)
+	 * grid_template_areas              1             sizeof(ptr)
+	 * grid_template_columns            1             sizeof(ptr)
+	 * grid_template_rows               1             sizeof(ptr)
 	 * height                           2 + 5           4
 	 * justify_content                  3
 	 * left                             2 + 5           4
@@ -85,6 +98,7 @@ struct css_computed_style_i {
 	 * margin_left                      2 + 5           4
 	 * margin_right                     2 + 5           4
 	 * margin_top                       2 + 5           4
+	 * mask_image                       1             sizeof(ptr)
 	 * max_height                       2 + 5           4
 	 * max_width                        2 + 5           4
 	 * min_height                       2 + 5           4
@@ -155,10 +169,10 @@ struct css_computed_style_i {
 	 * quotes                           1             sizeof(ptr)
 	 *
 	 * ---                            ---             ---
-	 *                                473 bits        240 + 8sizeof(ptr)
+	 *                                487 bits        240 + 22sizeof(ptr)
 	 * bytes
 	 *                                ===================
-	 *                                300 + 8sizeof(ptr) bytes
+	 *                                301 + 22sizeof(ptr) bytes
 	 *
 	 * Bit allocations:
 	 *
@@ -213,14 +227,20 @@ struct css_computed_style_i {
 	 * background_repeat; align_self; align_items; align_content;
 	 * unicode_bidi; table_layout; quotes
 	 *
-	 * 14 bboorrddeeaaccpOilfxtunCk.......
+	 * 14 bboorrddeeaaccpOimlgtswnGuRIDfAE
 	 * border_top_color; border_right_color; border_left_color;
 	 * border_collapse; border_bottom_color; background_color;
-	 * background_attachment; orphans; order; opacity; list_style_image;
+	 * background_attachment; orphans; order; opacity; mask_image;
+	 * list_style_image; grid_template_rows; grid_template_columns;
+	 * grid_template_areas; grid_row_start; grid_row_end; grid_row;
+	 * grid_column_start; grid_column_end; grid_column; grid_auto_rows;
+	 * grid_auto_flow; grid_auto_columns; grid_area
+	 *
+	 * 15 flicorb.........................
 	 * flex_shrink; flex_grow; fill_opacity; counter_reset;
 	 * counter_increment; color; background_image
 	 */
-	uint32_t bits[15];
+	uint32_t bits[16];
 
 	css_color background_color;
 	lwc_string *background_image;
@@ -252,6 +272,19 @@ struct css_computed_style_i {
 	css_fixed flex_grow;
 	css_fixed flex_shrink;
 	css_fixed font_size;
+	lwc_string *grid_area;
+	lwc_string *grid_auto_columns;
+	lwc_string *grid_auto_flow;
+	lwc_string *grid_auto_rows;
+	lwc_string *grid_column;
+	lwc_string *grid_column_end;
+	lwc_string *grid_column_start;
+	lwc_string *grid_row;
+	lwc_string *grid_row_end;
+	lwc_string *grid_row_start;
+	lwc_string *grid_template_areas;
+	lwc_string *grid_template_columns;
+	lwc_string *grid_template_rows;
 	css_fixed_or_calc height;
 	css_fixed_or_calc left;
 	css_fixed letter_spacing;
@@ -261,6 +294,7 @@ struct css_computed_style_i {
 	css_fixed_or_calc margin_left;
 	css_fixed_or_calc margin_right;
 	css_fixed_or_calc margin_top;
+	lwc_string *mask_image;
 	css_fixed_or_calc max_height;
 	css_fixed_or_calc max_width;
 	css_fixed_or_calc min_height;

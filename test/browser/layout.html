@@ -12,6 +12,14 @@ body { margin: 0; width: 600px; }
 .flex { display: flex; gap: calc(4px + 6px); }
 .item { width: 50px; height: 5px; flex-shrink: 0; }
 #contents { display: contents; }
+#g1 { display: grid; grid-template-columns: 100px 1fr 2fr; gap: 10px 20px; width: 400px; }
+#g1 > div { height: 10px; }
+#g2 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); width: 400px; }
+#g3 { display: grid; grid-template-areas: "head head" "side main"; grid-template-columns: 50px 1fr; width: 300px; }
+#g3 .h { grid-area: head; height: 20px; }
+#g3 .s { grid-area: side; height: 30px; }
+#g3 .m { grid-area: main; height: 40px; }
+#g4 { display: grid; grid-template-columns: repeat(24, 1fr); column-gap: 16px; width: 1248px; }
 #empty-min { min-height: 20px; }
 #empty-max { height: 30px; max-height: 5px; }
 </style></head>
@@ -28,6 +36,13 @@ func main() {
 <div id="calc-clamp"></div>
 <div id="calc-max"></div>
 <div id="calc-pos"><div id="calc-abs"></div></div>
+<div id="g1"><div id="a1"></div><div id="a2"></div><div id="a3"></div><div id="a4"></div></div>
+<div id="g2"><div id="b1" style="grid-column: 2 / span 2">x</div><div id="b2" style="grid-column: -2">y</div><div id="b3">z</div></div>
+<div id="g3"><div class="m" id="c3"></div><div class="s" id="c2"></div><div class="h" id="c1"></div></div>
+<div style="display: flex; flex-direction: column; width: 300px"><div id="colitem"><span style="white-space: nowrap">a very long line of text that does not fit into three hundred pixels</span></div></div>
+<div style="display: inline-block" id="shrink"><img id="bigsvg" style="max-width: 100px" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='2000' height='100'%3E%3C/svg%3E"></div>
+<div style="display: flex; width: 200px"><div id="minzero" style="min-width: 0; flex: 1"><span style="white-space: nowrap">a very long line of text that does not fit</span></div><div style="flex: 1">x</div></div>
+<div id="g4"><div id="d1" style="grid-column: 1 / span 24">a</div><div id="d2" style="grid-column: 17">c</div></div>
 <div id="empty-min"></div>
 <div id="empty-max"></div>
 <div class="flex"><div id="f1" class="item"></div><div id="contents"><div id="f2" class="item"></div><span id="f3" class="item"></span></div></div>
@@ -51,6 +66,47 @@ window.addEventListener("load", function () {
         assertEquals($("calc-padding").offsetWidth, 40);
         assertEquals($("calc-abs").offsetLeft, 151);
         assertEquals($("calc-abs").offsetTop - $("calc-pos").offsetTop, 10);
+    });
+    test("grid tracks: fixed, fr, gaps and implicit rows", function () {
+        var g = $("g1").offsetLeft;
+        assertEquals($("a1").offsetWidth, 100);
+        assertEquals($("a2").offsetLeft - g, 120);
+        assertEquals($("a2").offsetWidth, 87);
+        assertEquals($("a3").offsetWidth, 173);
+        assertEquals($("a4").offsetTop - $("a1").offsetTop, 20);
+        assertEquals($("a4").offsetLeft - g, 0);
+        assertEquals($("g1").offsetHeight, 30);
+    });
+    test("grid repeat(), minmax(), spans and negative lines", function () {
+        var g = $("g2").offsetLeft;
+        assertEquals($("b1").offsetLeft - g, 100);
+        assertEquals($("b1").offsetWidth, 200);
+        assertEquals($("b2").offsetLeft - g, 300);
+        assertEquals($("b3").offsetLeft - g, 0);
+        assert($("b3").offsetTop > $("b1").offsetTop);
+    });
+    test("grid with many repeated fr tracks", function () {
+        assertEquals($("d1").offsetWidth, 1248);
+        assert(Math.abs($("d2").offsetWidth - 36.67) < 1);
+    });
+    test("grid template areas", function () {
+        var g = $("g3");
+        assertEquals($("c1").offsetTop, g.offsetTop);
+        assertEquals($("c1").offsetWidth, 300);
+        assertEquals($("c2").offsetTop - g.offsetTop, 20);
+        assertEquals($("c3").offsetLeft - g.offsetLeft, 50);
+        assertEquals($("c3").offsetWidth, 250);
+        assertEquals(g.offsetHeight, 60);
+    });
+    test("column flex items stretch instead of growing to min-content", function () {
+        assertEquals($("colitem").offsetWidth, 300);
+    });
+    test("max-width limits replaced element intrinsic contributions", function () {
+        assertEquals($("bigsvg").offsetWidth, 100);
+        assertEquals($("shrink").offsetWidth, 100);
+    });
+    test("min-width: 0 flex items may shrink below their content", function () {
+        assertEquals($("minzero").offsetWidth, 100);
     });
     test("min-height and max-height on empty blocks", function () {
         assertEquals($("empty-min").offsetHeight, 20);

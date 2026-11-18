@@ -1069,6 +1069,9 @@ css__stylesheet_selector_append_specific(css_stylesheet *sheet,
 
 	if (detail->value_type == CSS_SELECTOR_DETAIL_VALUE_LIST) {
 		(*parent)->specificity += detail->value.list->specificity;
+		if (detail->value.list->kind == CSS_SELECTOR_LIST_HOST) {
+			(*parent)->specificity += CSS_SPECIFICITY_C;
+		}
 		return CSS_OK;
 	}
 

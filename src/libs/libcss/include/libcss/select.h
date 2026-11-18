@@ -187,6 +187,7 @@ typedef struct css_select_handler {
 
 	css_error (*first_child_node)(void *pw, void *node, void **child);
 	css_error (*next_sibling_node)(void *pw, void *node, void **sibling);
+	css_error (*node_is_shadow_host)(void *pw, void *node, bool *match);
 } css_select_handler;
 
 /**
@@ -244,6 +245,9 @@ css_error css_libcss_node_data_handler(css_select_handler *handler,
 css_error css_select_ctx_create(css_select_ctx **result);
 css_error css_select_ctx_destroy(css_select_ctx *ctx);
 
+css_error css_select_ctx_append_host_sheet(css_select_ctx *ctx,
+					   const css_stylesheet *sheet,
+					   const char *media);
 css_error css_select_ctx_append_sheet(css_select_ctx *ctx,
 				      const css_stylesheet *sheet,
 				      css_origin origin,

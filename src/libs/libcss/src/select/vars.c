@@ -55,6 +55,9 @@ static bool vars_scope_lookup(vars_scope *scope,
 
 static bool buf_append(vars_buf *b, const char *data, size_t n)
 {
+	if (n > SIZE_MAX / 2) {
+		return false;
+	}
 	if (b->len + n + 1 > b->alloc) {
 		size_t want = b->alloc == 0 ? 128 : b->alloc * 2;
 		char *grown;

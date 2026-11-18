@@ -175,8 +175,13 @@ getter Node::textContent()
 %{
 	dom_string *content = NULL;
 	JSValue ret;
+	dom_node_type type = DOM_ELEMENT_NODE;
 	if (dom_node_get_text_content(priv->node, &content) != DOM_NO_ERR) return JS_UNDEFINED;
-	if (content == NULL) return JS_NULL;
+	if (content == NULL) {
+		(void)dom_node_get_node_type(priv->node, &type);
+		if (type == DOM_ELEMENT_NODE || type == DOM_DOCUMENT_FRAGMENT_NODE) return JS_NewString(ctx, "");
+		return JS_NULL;
+	}
 	ret = qjsky_string(ctx, content);
 	dom_string_unref(content);
 	return ret;

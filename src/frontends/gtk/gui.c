@@ -691,7 +691,7 @@ static nserror set_defaults(struct nsoption_s *defaults)
 	/* set default items in toolbar */
 	nsoption_set_charp(
 		toolbar_items,
-		strdup("back/forward/reloadstop/home/url_bar/openmenu"));
+		strdup("back/forward/reloadstop/history/url_bar/openmenu"));
 
 	/* set default for menu and tool bar visibility */
 	nsoption_set_charp(bar_show, strdup("tool"));
