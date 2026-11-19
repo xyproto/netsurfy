@@ -95,7 +95,7 @@ if(hostname STREQUAL "")
 endif()
 c_escape(hostname "${hostname}")
 
-set(root "${ROOT}")
+get_filename_component(root "${ROOT}" NAME)
 if(NOT root MATCHES "/$")
   string(APPEND root "/")
 endif()

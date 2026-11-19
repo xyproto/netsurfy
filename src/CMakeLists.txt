@@ -436,7 +436,7 @@ if(NETSURFY_BUILD_HEADLESS)
     _POSIX_C_SOURCE=200809L
     _BSD_SOURCE
     _DEFAULT_SOURCE
-    "HEADLESS_RESPATH=\"${MESSAGES_DIR}:${GTK_RES_DIR}\"")
+    "HEADLESS_RESPATH=\"${NETSURFY_GTK_RES_PATH}\"")
   target_compile_options(netsurfy-headless PRIVATE ${NETSURFY_WARNING_FLAGS} -include ${NETSURFY_CONFIG_HEADER})
   target_link_libraries(netsurfy-headless PRIVATE
     ${NETSURFY_CORE_LIBRARIES}
