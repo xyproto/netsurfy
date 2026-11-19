@@ -10,5 +10,5 @@ cmake -B build && cmake --build build
 
 ### General info
 
-* Version: 1.1.6
+* Version: 1.1.7
 * License: MIT and GPL2, see the `LICENSE` file for more information.
