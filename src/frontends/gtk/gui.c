@@ -1227,11 +1227,9 @@ static nserror nsgtk_setup(int argc, char **argv, char **respath)
 	res = nsurl_create(addr, &url);
 	if (res == NSERROR_OK) {
 		res = browser_window_create(
-			BW_CREATE_HISTORY, url, NULL, NULL, NULL);
+			BW_CREATE_HISTORY | BW_CREATE_FOCUS_LOCATION,
+			url, NULL, NULL, NULL);
 		nsurl_unref(url);
-	}
-	if (res == NSERROR_OK && window_list != NULL) {
-		nsgtk_window_item_activate(window_list, OPENLOCATION_BUTTON);
 	}
 
 	free(addr);

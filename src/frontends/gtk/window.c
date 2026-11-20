@@ -550,6 +550,12 @@ static gboolean nsgtk_window_key_pressed(GtkEventControllerKey *controller,
 	if (state & GDK_ALT_MASK)
 		return FALSE;
 
+	if ((state & GDK_CONTROL_MASK) &&
+	    (keyval == GDK_KEY(l) || keyval == GDK_KEY(L))) {
+		nsgtk_window_item_activate(g, OPENLOCATION_BUTTON);
+		return TRUE;
+	}
+
 	nskey = gtk_gui_gdkkey_to_nskey(keyval, state);
 
 	if (browser_window_key_press(g->bw, nskey))
@@ -1272,13 +1278,7 @@ static void gui_window_place_caret(struct gui_window *g,
 	}
 	if (focus != NULL && GTK_IS_EDITABLE(focus) &&
 	    !gtk_widget_is_ancestor(focus, g->layout)) {
-		nsurl *url = browser_window_access_url(g->bw);
-		const char *text = gtk_editable_get_text(GTK_EDITABLE(focus));
-
-		if (url == NULL || text == NULL ||
-		    strcmp(text, nsurl_access(url)) != 0) {
-			return;
-		}
+		return;
 	}
 	gtk_widget_grab_focus(g->layout);
 }
