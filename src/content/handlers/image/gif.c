@@ -3,13 +3,13 @@
  * Copyright 2004 Richard Wilson <not_ginger_matt@users.sourceforge.net>
  * Copyright 2008 Sean Fox <dyntryx@gmail.com>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -25,7 +25,7 @@
  *
  * All GIFs are dynamically decompressed using the routines that gifread.c
  * provides. Whilst this allows support for progressive decoding, it is
- * not implemented here as NetSurfy currently does not provide such support.
+ * not implemented here as TinySurf currently does not provide such support.
  *
  * [rjw] - Sun 4th April 2004
  */
@@ -43,9 +43,9 @@
 #include "utils/utils.h"
 #include "utils/messages.h"
 #include "utils/nsoption.h"
-#include "netsurfy/misc.h"
-#include "netsurfy/bitmap.h"
-#include "netsurfy/content.h"
+#include "tinysurf/misc.h"
+#include "tinysurf/bitmap.h"
+#include "tinysurf/content.h"
 #include "content/llcache.h"
 #include "content/content.h"
 #include "content/content_protected.h"
@@ -247,7 +247,7 @@ static bool gif_convert(struct content *c)
 	/* Initialise the GIF */
 	gif_err = nsgif_data_scan(gif->gif, size, data);
 	if (gif_err != NSGIF_OK) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "nsgif scan: %s",
 		      nsgif_strerror(gif_err));

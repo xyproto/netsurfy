@@ -1,13 +1,13 @@
 /*
  * Copyright 2008 Adam Blokus <adamblokus@gmail.com>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -30,8 +30,8 @@
 #include "utils/nsoption.h"
 #include "utils/log.h"
 #include "utils/talloc.h"
-#include "netsurfy/content.h"
-#include "netsurfy/plotters.h"
+#include "tinysurf/content.h"
+#include "tinysurf/plotters.h"
 #include "content/hlcache.h"
 #include "css/utils.h"
 #include "html/box.h"
@@ -129,7 +129,7 @@ print_apply_settings(hlcache_handle *content, struct print_settings *settings)
 
 	content_reformat(content, false, page_content_width, 0);
 
-	NSLOG(netsurfy,
+	NSLOG(tinysurf,
 	      INFO,
 	      "New layout applied.New height = %d ; New width = %d ",
 	      content_get_height(content),

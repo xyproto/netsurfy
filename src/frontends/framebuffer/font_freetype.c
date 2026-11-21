@@ -2,13 +2,13 @@
  * Copyright 2005 James Bursa <bursa@users.sourceforge.net>
  *           2008 Vincent Sanders <vince@simtec.co.uk>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -22,15 +22,15 @@
 #include <ft2build.h>
 #include FT_CACHE_H
 
-#include "netsurfy/inttypes.h"
+#include "tinysurf/inttypes.h"
 #include "utils/filepath.h"
 #include "utils/utf8.h"
 #include "utils/log.h"
 #include "utils/nsoption.h"
-#include "netsurfy/utf8.h"
-#include "netsurfy/layout.h"
-#include "netsurfy/browser.h"
-#include "netsurfy/plot_style.h"
+#include "tinysurf/utf8.h"
+#include "tinysurf/layout.h"
+#include "tinysurf/browser.h"
+#include "tinysurf/plot_style.h"
 
 #include "framebuffer/gui.h"
 #include "framebuffer/font.h"
@@ -89,12 +89,12 @@ static FT_Error ft_face_requester(FTC_FaceID face_id,
 
 	error = FT_New_Face(library, fb_face->fontfile, fb_face->index, face);
 	if (error) {
-		NSLOG(netsurfy, INFO, "Could not find font (code %d)", error);
+		NSLOG(tinysurf, INFO, "Could not find font (code %d)", error);
 	} else {
 
 		error = FT_Select_Charmap(*face, FT_ENCODING_UNICODE);
 		if (error) {
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      INFO,
 			      "Could not select charmap (code %d)",
 			      error);
@@ -108,7 +108,7 @@ static FT_Error ft_face_requester(FTC_FaceID face_id,
 			}
 		}
 	}
-	NSLOG(netsurfy, INFO, "Loaded face from %s", fb_face->fontfile);
+	NSLOG(tinysurf, INFO, "Loaded face from %s", fb_face->fontfile);
 
 	return error;
 }
@@ -135,7 +135,7 @@ fb_new_face(const char *option, const char *resname, const char *fontname)
 
 	error = FTC_Manager_LookupFace(ft_cmanager, (FTC_FaceID)newf, &aface);
 	if (error) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Could not find font face %s (code %d)",
 		      fontname,
@@ -159,7 +159,7 @@ bool fb_font_init(void)
 	/* freetype library initialise */
 	error = FT_Init_FreeType(&library);
 	if (error) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Freetype could not initialised (code %d)",
 		      error);
@@ -182,7 +182,7 @@ bool fb_font_init(void)
 				NULL,
 				&ft_cmanager);
 	if (error) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Freetype could not initialise cache manager (code %d)",
 		      error);
@@ -202,7 +202,7 @@ bool fb_font_init(void)
 			      NETSURFY_FB_FONT_SANS_SERIF);
 	if (fb_face == NULL) {
 		/* The sans serif font is the default and must be found. */
-		NSLOG(netsurfy, INFO, "Could not find the default font");
+		NSLOG(tinysurf, INFO, "Could not find the default font");
 		FTC_Manager_Done(ft_cmanager);
 		FT_Done_FreeType(library);
 		return false;

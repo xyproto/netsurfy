@@ -7,13 +7,13 @@
  * Copyright 2008 Michael Drake <tlsa@netsurf-browser.org>
  * Copyright 2009 Paul Blokus <paul_pl@users.sourceforge.net>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -41,11 +41,11 @@
 #include "utils/utils.h"
 #include "utils/nsoption.h"
 #include "utils/corestrings.h"
-#include "netsurfy/content.h"
-#include "netsurfy/browser_window.h"
-#include "netsurfy/plotters.h"
-#include "netsurfy/bitmap.h"
-#include "netsurfy/layout.h"
+#include "tinysurf/content.h"
+#include "tinysurf/browser_window.h"
+#include "tinysurf/plotters.h"
+#include "tinysurf/bitmap.h"
+#include "tinysurf/layout.h"
 #include "content/content.h"
 #include "content/content_protected.h"
 #include "content/textsearch.h"
@@ -2153,7 +2153,7 @@ bool html_redraw_box(const html_content *html,
 					    has_x_scroll,
 					    has_y_scroll);
 		if (res != NSERROR_OK) {
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      INFO,
 			      "%s",
 			      messages_get_errorcode(res));

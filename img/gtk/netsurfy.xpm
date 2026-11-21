@@ -1,5 +1,5 @@
 /* XPM */
-static char * netsurfy_xpm[] = {
+static char * tinysurf_xpm[] = {
 "132 135 7 1",
 " 	c None",
 ".	c #000000",

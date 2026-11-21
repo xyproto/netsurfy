@@ -1,4 +1,4 @@
-NetSurfy Integration Testing
+TinySurf Integration Testing
 ===========================
 
 [TOC]
@@ -12,7 +12,7 @@ websites and rendering the contents etc.)
 A test is written as a set of operations in a yaml file. These files
 are parsed and executed by the headless driver script.
 
-There are very few tests within the NetSurfy repository. The large
+There are very few tests within the TinySurf repository. The large
 majority of integration tests are instead held within the
  [netsurf-test](http://source.netsurf-browser.org/netsurf-test.git/)
 repository.
@@ -30,7 +30,7 @@ extend test capabilities.
 # Running a test
 
 An individual test can be run using the headless_driver.py python script
-from within the NetSurfy repository
+from within the TinySurf repository
 
     $ make TARGET=headless
     $ ./test/headless_driver.py -m ./nsheadless -t test/headless-tests/start-stop.yaml
@@ -50,7 +50,7 @@ run together. Groups are listed within division index files. A group
 of tests may occur within more than one division.
 
 To run the integration tests the headless-integration python script is
-used. It downloads the test plan for a division from the NetSurfy test
+used. It downloads the test plan for a division from the TinySurf test
 infrastructure and executes it.
 
     $ ./test/headless-integration
@@ -138,7 +138,7 @@ with the `accept_language` user option.
 
 The following launch action would start a browser:
  * Passing `--verbose` on the commandline
- * The `NETSURFYRES` environment variable set to `/home/netsurfy/resources`
+ * The `NETSURFYRES` environment variable set to `/home/tinysurf/resources`
  * The user options `enable_javascript` and `send_referer` set to false.
  * The `LANGUAGE` environment variable set to `en`
 
@@ -147,7 +147,7 @@ The following launch action would start a browser:
   launch-options:
   - verbose
   environment:
-    NETSURFYRES: /home/netsurfy/resources
+    NETSURFYRES: /home/tinysurf/resources
   options:
   - enable_javascript=0
   - send_referer=0
@@ -423,7 +423,7 @@ The checks available are:
       window: win1
 	  area: extent
       checks:
-      - text-contains: NetSurfy
+      - text-contains: TinySurf
       - text-contains: Browser
 	  - text-not-contains: Chrome
       - bitmap-count: 1

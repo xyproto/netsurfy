@@ -1,13 +1,13 @@
 /*
  * Copyright 2014 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -26,28 +26,28 @@
 #include "utils/errors.h"
 #include "utils/file.h"
 #include "utils/inet.h"
-#include "netsurfy/bitmap.h"
+#include "tinysurf/bitmap.h"
 #include "content/hlcache.h"
 #include "content/backing_store.h"
 
 #include "desktop/save_pdf.h"
 #include "desktop/download.h"
 #include "desktop/searchweb.h"
-#include "netsurfy/download.h"
-#include "netsurfy/fetch.h"
-#include "netsurfy/misc.h"
-#include "netsurfy/window.h"
-#include "netsurfy/core_window.h"
-#include "netsurfy/search.h"
-#include "netsurfy/clipboard.h"
-#include "netsurfy/utf8.h"
-#include "netsurfy/layout.h"
-#include "netsurfy/netsurfy.h"
+#include "tinysurf/download.h"
+#include "tinysurf/fetch.h"
+#include "tinysurf/misc.h"
+#include "tinysurf/window.h"
+#include "tinysurf/core_window.h"
+#include "tinysurf/search.h"
+#include "tinysurf/clipboard.h"
+#include "tinysurf/utf8.h"
+#include "tinysurf/layout.h"
+#include "tinysurf/tinysurf.h"
 
 /**
  * The global interface table.
  */
-struct netsurfy_table *guit = NULL;
+struct tinysurf_table *guit = NULL;
 
 
 static void
@@ -791,8 +791,8 @@ static nserror verify_misc_register(struct gui_misc_table *gmt)
 }
 
 
-/* exported interface documented in netsurfy/netsurfy.h */
-nserror netsurfy_register(struct netsurfy_table *gt)
+/* exported interface documented in tinysurf/tinysurf.h */
+nserror tinysurf_register(struct tinysurf_table *gt)
 {
 	nserror err;
 

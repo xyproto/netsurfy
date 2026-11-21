@@ -1,13 +1,13 @@
 /*
  * Copyright 2009 John-Mark Bell <jmb@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -25,12 +25,12 @@
 #define _NETSURFY_CSS_H_
 
 /**
- * Convert a CSS color to a NetSurfy colour primitive
+ * Convert a CSS color to a TinySurf colour primitive
  *
  * ARGB -> (1-A)BGR
  *
  * \param c The CSS color to convert
- * \return Corresponding NetSurfy colour primitive
+ * \return Corresponding TinySurf colour primitive
  */
 #define nscss_color_to_ns(c)                                                   \
 	(((~c) & 0xff000000) | (((c) & 0xff0000) >> 16) | ((c) & 0xff00) |     \
@@ -38,11 +38,11 @@
 
 
 /**
- * Convert a NetSurfy color to a CSS colour primitive
+ * Convert a TinySurf color to a CSS colour primitive
  *
  * (1-A)BGR -> ARGB
  *
- * \param c The NetSurfy color to convert
+ * \param c The TinySurf color to convert
  * \return Corresponding CSS colour primitive
  */
 #define ns_color_to_nscss(c)                                                   \

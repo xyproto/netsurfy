@@ -2,7 +2,7 @@
  * Copyright 2006 Richard Wilson <richard.wilson@netsurf-browser.org>
  * Copyright 2008 Sean Fox <dyntryx@gmail.com>
  *
- * This file is part of NetSurf's libnsbmp, https://github.com/xyproto/netsurfy
+ * This file is part of NetSurf's libnsbmp, https://github.com/xyproto/tinysurf
  * Licenced under the MIT License,
  *                http://www.opensource.org/licenses/mit-license.php
  */

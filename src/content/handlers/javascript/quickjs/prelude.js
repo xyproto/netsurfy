@@ -6788,7 +6788,7 @@
     defineMissing(global, "FormData", FormData);
 
     function encodeMultipart(formData) {
-        var boundary = "----NetSurfyFormBoundary" + Array.from(new Uint8Array(native.random(8)), function (x) { return (x + 256).toString(16).slice(1); }).join("");
+        var boundary = "----TinySurfFormBoundary" + Array.from(new Uint8Array(native.random(8)), function (x) { return (x + 256).toString(16).slice(1); }).join("");
         var parts = [];
         formData._entries.forEach(function (e) {
             var head = "--" + boundary + "\r\nContent-Disposition: form-data; name=\"" + e[0].replace(/"/g, "%22") + "\"";

@@ -68,8 +68,8 @@ def run_page(headless, page, timeout):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run NetSurfy browser test pages")
-    parser.add_argument("--headless", required=True, help="path to netsurfy-headless")
+    parser = argparse.ArgumentParser(description="Run TinySurf browser test pages")
+    parser.add_argument("--headless", required=True, help="path to tinysurf-headless")
     parser.add_argument("--timeout", type=int, default=30)
     parser.add_argument("-v", "--verbose", action="store_true", help="also print passing tests")
     parser.add_argument("pages", nargs="+")

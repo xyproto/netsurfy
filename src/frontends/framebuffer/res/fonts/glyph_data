@@ -6,13 +6,13 @@
 *
 * This font is based on the "Default" font with Zap 1.47 [TEST], which
 * was created for Zap by Tim Tyler.  It was converted to a plain text
-* format and many glyphs added for use in the NetSurfy project.
+* format and many glyphs added for use in the TinySurf project.
 *
 * Plain text font data:
-*     http://git.netsurf-browser.org/art.git/plain/fonts/netsurfy/glyph_data
+*     http://git.netsurf-browser.org/art.git/plain/fonts/tinysurf/glyph_data
 *
 *     Zap: http://zap.tartarus.org/
-* NetSurfy: https://github.com/xyproto/netsurfy
+* TinySurf: https://github.com/xyproto/tinysurf
 *
 * Thanks to Tim Tyler for the original font and his permission to use it.
 * Thanks to James Aylett for helping track down Tim.

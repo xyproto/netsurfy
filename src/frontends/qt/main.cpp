@@ -1,13 +1,13 @@
 /*
  * Copyright 2023 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -21,7 +21,7 @@ extern "C" {
 #include "utils/log.h"
 #include "utils/messages.h"
 
-#include "netsurfy/netsurfy.h"
+#include "tinysurf/tinysurf.h"
 }
 
 #include "qt/application.cls.h"
@@ -41,7 +41,7 @@ extern "C" {
 int main(int argc, char **argv)
 {
 	int ret = 0;
-	struct netsurfy_table nsqt_table = {
+	struct tinysurf_table nsqt_table = {
 		.misc = nsqt_misc_table,
 		.window = nsqt_window_table,
 		.corewindow = nsqt_core_window_table,
@@ -63,7 +63,7 @@ int main(int argc, char **argv)
 		nsapp = new NS_Application(argc, argv, &nsqt_table);
 	} catch (NS_Exception &exp) {
 		fprintf(stderr,
-			"NetSurfy qt application initialisation failed. %s (%s)\n",
+			"TinySurf qt application initialisation failed. %s (%s)\n",
 			exp.m_str.c_str(),
 			messages_get_errorcode(exp.m_err));
 		return 2;

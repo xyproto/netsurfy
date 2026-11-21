@@ -3,13 +3,13 @@
  * Copyright 2010 Daniel Silverstone <dsilvers@digital-scurf.org>
  * Copyright 2010-2020 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -36,13 +36,13 @@
 #include "utils/corestrings.h"
 #include "utils/messages.h"
 #include "utils/nsoption.h"
-#include "netsurfy/types.h"
-#include "netsurfy/browser_window.h"
-#include "netsurfy/window.h"
-#include "netsurfy/misc.h"
-#include "netsurfy/content.h"
-#include "netsurfy/search.h"
-#include "netsurfy/plotters.h"
+#include "tinysurf/types.h"
+#include "tinysurf/browser_window.h"
+#include "tinysurf/window.h"
+#include "tinysurf/misc.h"
+#include "tinysurf/content.h"
+#include "tinysurf/search.h"
+#include "tinysurf/plotters.h"
 #include "content/content.h"
 #include "content/hlcache.h"
 #include "content/urldb.h"
@@ -343,11 +343,11 @@ static nserror browser_window_download(struct browser_window *bw,
 		/* no internal handler for this type, call out to frontend */
 		error = guit->misc->launch_url(url);
 	} else if (error != NSERROR_OK) {
-		NSLOG(netsurfy, INFO, "Failed to fetch download: %d", error);
+		NSLOG(tinysurf, INFO, "Failed to fetch download: %d", error);
 	} else {
 		error = download_context_create(l, root->window);
 		if (error != NSERROR_OK) {
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      INFO,
 			      "Failed creating download context: %d",
 			      error);
@@ -479,7 +479,7 @@ static nserror browser_window_favicon_callback(hlcache_handle *c,
 
 			error = nsurl_create("resource:favicon.ico", &nsurl);
 			if (error != NSERROR_OK) {
-				NSLOG(netsurfy,
+				NSLOG(tinysurf,
 				      INFO,
 				      "Unable to create default location url");
 			} else {
@@ -579,7 +579,7 @@ static nserror browser_window_update_favicon(hlcache_handle *c,
 			res = nsurl_create("resource:favicon.ico", &nsurl);
 		}
 		if (res != NSERROR_OK) {
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      INFO,
 			      "Unable to create default location url");
 			return res;
@@ -589,12 +589,12 @@ static nserror browser_window_update_favicon(hlcache_handle *c,
 	}
 
 	if (link == NULL) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "fetching general favicon from '%s'",
 		      nsurl_access(nsurl));
 	} else {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "fetching favicon rel:%s '%s'",
 		      lwc_string_data(link->rel),
@@ -1000,7 +1000,7 @@ static nserror browser_window_content_done(struct browser_window *bw)
 		rect.x0 = rect.x1 = scrollx;
 		rect.y0 = rect.y1 = scrolly;
 		if (browser_window_set_scroll(bw, &rect) != NSERROR_OK) {
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      WARNING,
 			      "Unable to set browser scroll offsets to %d by %d",
 			      scrollx,
@@ -1902,7 +1902,7 @@ nserror browser_window_destroy_internal(struct browser_window *bw)
 
 	/* clear any pending callbacks */
 	guit->misc->schedule(-1, browser_window_refresh, bw);
-	NSLOG(netsurfy,
+	NSLOG(tinysurf,
 	      INFO,
 	      "Clearing reformat schedule for browser window %p",
 	      bw);
@@ -1976,7 +1976,7 @@ nserror browser_window_destroy_internal(struct browser_window *bw)
 	bw->status.text = NULL;
 	browser_window__free_fetch_parameters(&bw->current_parameters);
 	browser_window__free_fetch_parameters(&bw->loading_parameters);
-	NSLOG(netsurfy,
+	NSLOG(tinysurf,
 	      INFO,
 	      "Status text cache match:miss %d:%d",
 	      bw->status.match,
@@ -2589,7 +2589,7 @@ static bool is_internal_navigate_url(nsurl *url)
 }
 
 
-/* exported interface, documented in netsurfy/browser_window.h */
+/* exported interface, documented in tinysurf/browser_window.h */
 nserror
 browser_window_get_name(struct browser_window *bw, const char **out_name)
 {
@@ -2601,7 +2601,7 @@ browser_window_get_name(struct browser_window *bw, const char **out_name)
 }
 
 
-/* exported interface, documented in netsurfy/browser_window.h */
+/* exported interface, documented in tinysurf/browser_window.h */
 nserror browser_window_set_name(struct browser_window *bw, const char *name)
 {
 	char *nname = NULL;
@@ -2625,7 +2625,7 @@ nserror browser_window_set_name(struct browser_window *bw, const char *name)
 }
 
 
-/* exported interface, documented in netsurfy/browser_window.h */
+/* exported interface, documented in tinysurf/browser_window.h */
 bool browser_window_redraw(struct browser_window *bw,
 			   int x,
 			   int y,
@@ -2642,7 +2642,7 @@ bool browser_window_redraw(struct browser_window *bw,
 	nserror res;
 
 	if (bw == NULL) {
-		NSLOG(netsurfy, INFO, "NULL browser window");
+		NSLOG(tinysurf, INFO, "NULL browser window");
 		return false;
 	}
 
@@ -2820,11 +2820,11 @@ bool browser_window_redraw(struct browser_window *bw,
 }
 
 
-/* exported interface, documented in netsurfy/browser_window.h */
+/* exported interface, documented in tinysurf/browser_window.h */
 bool browser_window_redraw_ready(struct browser_window *bw)
 {
 	if (bw == NULL) {
-		NSLOG(netsurfy, INFO, "NULL browser window");
+		NSLOG(tinysurf, INFO, "NULL browser window");
 		return false;
 	} else if (bw->current_content != NULL) {
 		/* Can't render locked contents */
@@ -2848,7 +2848,7 @@ void browser_window_update_extent(struct browser_window *bw)
 }
 
 
-/* exported interface, documented in netsurfy/browser_window.h */
+/* exported interface, documented in tinysurf/browser_window.h */
 void browser_window_get_position(struct browser_window *bw,
 				 bool root,
 				 int *pos_x,
@@ -2893,7 +2893,7 @@ void browser_window_get_position(struct browser_window *bw,
 }
 
 
-/* exported interface, documented in netsurfy/browser_window.h */
+/* exported interface, documented in tinysurf/browser_window.h */
 void browser_window_set_position(struct browser_window *bw, int x, int y)
 {
 	assert(bw != NULL);
@@ -2903,7 +2903,7 @@ void browser_window_set_position(struct browser_window *bw, int x, int y)
 		bw->x = x;
 		bw->y = y;
 	} else {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Asked to set position of front end window.");
 		assert(0);
@@ -2911,7 +2911,7 @@ void browser_window_set_position(struct browser_window *bw, int x, int y)
 }
 
 
-/* exported interface, documented in netsurfy/browser_window.h */
+/* exported interface, documented in tinysurf/browser_window.h */
 void browser_window_set_drag_type(struct browser_window *bw,
 				  browser_drag_type type,
 				  const struct rect *rect)
@@ -2945,14 +2945,14 @@ void browser_window_set_drag_type(struct browser_window *bw,
 }
 
 
-/* exported interface, documented in netsurfy/browser_window.h */
+/* exported interface, documented in tinysurf/browser_window.h */
 browser_drag_type browser_window_get_drag_type(struct browser_window *bw)
 {
 	return bw->drag.type;
 }
 
 
-/* exported interface, documented in netsurfy/browser_window.h */
+/* exported interface, documented in tinysurf/browser_window.h */
 struct browser_window *browser_window_get_root(struct browser_window *bw)
 {
 	while (bw && bw->parent) {
@@ -2962,7 +2962,7 @@ struct browser_window *browser_window_get_root(struct browser_window *bw)
 }
 
 
-/* exported interface, documented in netsurfy/browser_window.h */
+/* exported interface, documented in tinysurf/browser_window.h */
 browser_editor_flags browser_window_get_editor_flags(struct browser_window *bw)
 {
 	browser_editor_flags ed_flags = BW_EDITOR_NONE;
@@ -2983,7 +2983,7 @@ browser_editor_flags browser_window_get_editor_flags(struct browser_window *bw)
 }
 
 
-/* exported interface, documented in netsurfy/browser_window.h */
+/* exported interface, documented in tinysurf/browser_window.h */
 bool browser_window_can_select(struct browser_window *bw)
 {
 	if (bw == NULL || bw->current_content == NULL)
@@ -2999,7 +2999,7 @@ bool browser_window_can_select(struct browser_window *bw)
 }
 
 
-/* exported interface, documented in netsurfy/browser_window.h */
+/* exported interface, documented in tinysurf/browser_window.h */
 char *browser_window_get_selection(struct browser_window *bw)
 {
 	assert(bw->window);
@@ -3013,7 +3013,7 @@ char *browser_window_get_selection(struct browser_window *bw)
 }
 
 
-/* exported interface, documented in netsurfy/browser_window.h */
+/* exported interface, documented in tinysurf/browser_window.h */
 bool browser_window_can_search(struct browser_window *bw)
 {
 	if (bw == NULL || bw->current_content == NULL)
@@ -3031,14 +3031,14 @@ bool browser_window_can_search(struct browser_window *bw)
 }
 
 
-/* exported interface, documented in netsurfy/browser_window.h */
+/* exported interface, documented in tinysurf/browser_window.h */
 bool browser_window_is_frameset(struct browser_window *bw)
 {
 	return (bw->children != NULL);
 }
 
 
-/* exported interface, documented in netsurfy/browser_window.h */
+/* exported interface, documented in tinysurf/browser_window.h */
 nserror browser_window_get_scrollbar_type(struct browser_window *bw,
 					  browser_scrolling *h,
 					  browser_scrolling *v)
@@ -3050,7 +3050,7 @@ nserror browser_window_get_scrollbar_type(struct browser_window *bw,
 }
 
 
-/* exported interface, documented in netsurfy/browser_window.h */
+/* exported interface, documented in tinysurf/browser_window.h */
 nserror browser_window_get_features(struct browser_window *bw,
 				    int x,
 				    int y,
@@ -3069,7 +3069,7 @@ nserror browser_window_get_features(struct browser_window *bw,
 }
 
 
-/* exported interface, documented in netsurfy/browser_window.h */
+/* exported interface, documented in tinysurf/browser_window.h */
 bool browser_window_scroll_at_point(struct browser_window *bw,
 				    int x,
 				    int y,
@@ -3081,7 +3081,7 @@ bool browser_window_scroll_at_point(struct browser_window *bw,
 }
 
 
-/* exported interface, documented in netsurfy/browser_window.h */
+/* exported interface, documented in tinysurf/browser_window.h */
 bool browser_window_drop_file_at_point(struct browser_window *bw,
 				       int x,
 				       int y,
@@ -3092,7 +3092,7 @@ bool browser_window_drop_file_at_point(struct browser_window *bw,
 }
 
 
-/* exported interface, documented in netsurfy/browser_window.h */
+/* exported interface, documented in tinysurf/browser_window.h */
 void browser_window_set_gadget_filename(struct browser_window *bw,
 					struct form_control *gadget,
 					const char *fn)
@@ -3101,7 +3101,7 @@ void browser_window_set_gadget_filename(struct browser_window *bw,
 }
 
 
-/* exported interface, documented in netsurfy/browser_window.h */
+/* exported interface, documented in tinysurf/browser_window.h */
 nserror browser_window_debug_dump(struct browser_window *bw,
 				  FILE *f,
 				  enum content_debug op)
@@ -3113,7 +3113,7 @@ nserror browser_window_debug_dump(struct browser_window *bw,
 }
 
 
-/* exported interface, documented in netsurfy/browser_window.h */
+/* exported interface, documented in tinysurf/browser_window.h */
 nserror browser_window_debug(struct browser_window *bw, enum content_debug op)
 {
 	if (bw->current_content != NULL) {
@@ -3123,7 +3123,7 @@ nserror browser_window_debug(struct browser_window *bw, enum content_debug op)
 }
 
 
-/* exported interface, documented in netsurfy/browser_window.h */
+/* exported interface, documented in tinysurf/browser_window.h */
 nserror browser_window_create(enum browser_window_create_flags flags,
 			      nsurl *url,
 			      nsurl *referrer,
@@ -3266,7 +3266,7 @@ nserror browser_window_initialise_common(enum browser_window_create_flags flags,
 }
 
 
-/* exported interface, documented in netsurfy/browser_window.h */
+/* exported interface, documented in tinysurf/browser_window.h */
 void browser_window_destroy(struct browser_window *bw)
 {
 	/* can't destoy child windows on their own */
@@ -3278,7 +3278,7 @@ void browser_window_destroy(struct browser_window *bw)
 }
 
 
-/* exported interface, documented in netsurfy/browser_window.h */
+/* exported interface, documented in tinysurf/browser_window.h */
 nserror browser_window_refresh_url_bar(struct browser_window *bw)
 {
 	nserror ret;
@@ -3325,7 +3325,7 @@ nserror browser_window_refresh_url_bar(struct browser_window *bw)
 }
 
 
-/* exported interface documented in netsurfy/browser_window.h */
+/* exported interface documented in tinysurf/browser_window.h */
 nserror browser_window_navigate(struct browser_window *bw,
 				nsurl *url,
 				nsurl *referrer,
@@ -3347,7 +3347,7 @@ nserror browser_window_navigate(struct browser_window *bw,
 	assert(bw);
 	assert(url);
 
-	NSLOG(netsurfy, INFO, "bw %p, url %s", bw, nsurl_access(url));
+	NSLOG(tinysurf, INFO, "bw %p, url %s", bw, nsurl_access(url));
 
 	/*
 	 * determine if navigation is internal url, if so, we do not
@@ -3388,7 +3388,7 @@ nserror browser_window_navigate(struct browser_window *bw,
 		depth++;
 	}
 	if (depth > FRAME_DEPTH) {
-		NSLOG(netsurfy, INFO, "frame depth too high.");
+		NSLOG(tinysurf, INFO, "frame depth too high.");
 		return NSERROR_FRAME_DEPTH;
 	}
 
@@ -3544,7 +3544,7 @@ static nserror navigate_internal_real(struct browser_window *bw,
 	nserror res;
 	hlcache_handle *c;
 
-	NSLOG(netsurfy, INFO, "Loading '%s'", nsurl_access(params->url));
+	NSLOG(tinysurf, INFO, "Loading '%s'", nsurl_access(params->url));
 
 	fetch_is_post = (params->post_urlenc != NULL ||
 			 params->post_multipart != NULL);
@@ -3735,7 +3735,7 @@ navigate_internal_query_ssl(struct browser_window *bw,
 	}
 
 	if (nsurl_create(siteurl, &siteurl_ns) != NSERROR_OK) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      ERROR,
 		      "Unable to reset ssl loading parameters");
 	} else {
@@ -3761,7 +3761,7 @@ navigate_internal_query_timeout(struct browser_window *bw,
 {
 	bool is_retry = false, is_back = false;
 
-	NSLOG(netsurfy, INFO, "bw:%p params:%p", bw, params);
+	NSLOG(tinysurf, INFO, "bw:%p params:%p", bw, params);
 
 	assert(params->post_multipart != NULL);
 
@@ -3799,7 +3799,7 @@ navigate_internal_query_fetcherror(struct browser_window *bw,
 {
 	bool is_retry = false, is_back = false;
 
-	NSLOG(netsurfy, INFO, "bw:%p params:%p", bw, params);
+	NSLOG(tinysurf, INFO, "bw:%p params:%p", bw, params);
 
 	assert(params->post_multipart != NULL);
 
@@ -3876,7 +3876,7 @@ normal_fetch:
 }
 
 
-/* Exported interface, documented in netsurfy/browser_window.h */
+/* Exported interface, documented in tinysurf/browser_window.h */
 bool browser_window_up_available(struct browser_window *bw)
 {
 	bool result = false;
@@ -3899,7 +3899,7 @@ bool browser_window_up_available(struct browser_window *bw)
 }
 
 
-/* Exported interface, documented in netsurfy/browser_window.h */
+/* Exported interface, documented in tinysurf/browser_window.h */
 nserror browser_window_navigate_up(struct browser_window *bw, bool new_window)
 {
 	nsurl *current, *parent;
@@ -3939,7 +3939,7 @@ nserror browser_window_navigate_up(struct browser_window *bw, bool new_window)
 }
 
 
-/* Exported interface, documented in include/netsurfy/browser_window.h */
+/* Exported interface, documented in include/tinysurf/browser_window.h */
 nsurl *browser_window_access_url(const struct browser_window *bw)
 {
 	assert(bw != NULL);
@@ -3956,7 +3956,7 @@ nsurl *browser_window_access_url(const struct browser_window *bw)
 }
 
 
-/* Exported interface, documented in include/netsurfy/browser_window.h */
+/* Exported interface, documented in include/tinysurf/browser_window.h */
 nserror browser_window_get_url(struct browser_window *bw,
 			       bool fragment,
 			       nsurl **url_out)
@@ -3987,7 +3987,7 @@ nserror browser_window_get_url(struct browser_window *bw,
 }
 
 
-/* Exported interface, documented in netsurfy/browser_window.h */
+/* Exported interface, documented in tinysurf/browser_window.h */
 const char *browser_window_get_title(struct browser_window *bw)
 {
 	assert(bw != NULL);
@@ -4001,7 +4001,7 @@ const char *browser_window_get_title(struct browser_window *bw)
 }
 
 
-/* Exported interface, documented in netsurfy/browser_window.h */
+/* Exported interface, documented in tinysurf/browser_window.h */
 struct history *browser_window_get_history(struct browser_window *bw)
 {
 	assert(bw != NULL);
@@ -4010,7 +4010,7 @@ struct history *browser_window_get_history(struct browser_window *bw)
 }
 
 
-/* Exported interface, documented in netsurfy/browser_window.h */
+/* Exported interface, documented in tinysurf/browser_window.h */
 bool browser_window_has_content(struct browser_window *bw)
 {
 	assert(bw != NULL);
@@ -4023,14 +4023,14 @@ bool browser_window_has_content(struct browser_window *bw)
 }
 
 
-/* Exported interface, documented in netsurfy/browser_window.h */
+/* Exported interface, documented in tinysurf/browser_window.h */
 struct hlcache_handle *browser_window_get_content(struct browser_window *bw)
 {
 	return bw->current_content;
 }
 
 
-/* Exported interface, documented in netsurfy/browser_window.h */
+/* Exported interface, documented in tinysurf/browser_window.h */
 nserror browser_window_get_extents(struct browser_window *bw,
 				   bool scaled,
 				   int *width,
@@ -4077,7 +4077,7 @@ nserror browser_window_get_dimensions(struct browser_window *bw,
 }
 
 
-/* Exported interface, documented in netsurfy/browser_window.h */
+/* Exported interface, documented in tinysurf/browser_window.h */
 void browser_window_set_dimensions(struct browser_window *bw,
 				   int width,
 				   int height)
@@ -4089,7 +4089,7 @@ void browser_window_set_dimensions(struct browser_window *bw,
 		bw->width = width;
 		bw->height = height;
 	} else {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Asked to set dimensions of front end window.");
 		assert(0);
@@ -4128,7 +4128,7 @@ browser_window_invalidate_rect(struct browser_window *bw, struct rect *rect)
 }
 
 
-/* Exported interface, documented in netsurfy/browser_window.h */
+/* Exported interface, documented in tinysurf/browser_window.h */
 void browser_window_stop(struct browser_window *bw)
 {
 	int children, index;
@@ -4169,7 +4169,7 @@ void browser_window_stop(struct browser_window *bw)
 }
 
 
-/* Exported interface, documented in netsurfy/browser_window.h */
+/* Exported interface, documented in tinysurf/browser_window.h */
 nserror browser_window_reload(struct browser_window *bw, bool all)
 {
 	hlcache_handle *c;
@@ -4214,7 +4214,7 @@ nserror browser_window_reload(struct browser_window *bw, bool all)
 }
 
 
-/* Exported interface, documented in netsurfy/browser_window.h */
+/* Exported interface, documented in tinysurf/browser_window.h */
 void browser_window_set_status(struct browser_window *bw, const char *text)
 {
 	int text_len;
@@ -4247,7 +4247,7 @@ void browser_window_set_status(struct browser_window *bw, const char *text)
 }
 
 
-/* Exported interface, documented in netsurfy/browser_window.h */
+/* Exported interface, documented in tinysurf/browser_window.h */
 void browser_window_set_pointer(struct browser_window *bw,
 				browser_pointer_shape shape)
 {
@@ -4288,7 +4288,7 @@ void browser_window_set_pointer(struct browser_window *bw,
 }
 
 
-/* exported function documented in netsurfy/browser_window.h */
+/* exported function documented in tinysurf/browser_window.h */
 nserror browser_window_schedule_reformat(struct browser_window *bw)
 {
 	if (bw->window == NULL) {
@@ -4299,7 +4299,7 @@ nserror browser_window_schedule_reformat(struct browser_window *bw)
 }
 
 
-/* exported function documented in netsurfy/browser_window.h */
+/* exported function documented in tinysurf/browser_window.h */
 void browser_window_reformat(struct browser_window *bw,
 			     bool background,
 			     int width,
@@ -4329,7 +4329,7 @@ void browser_window_reformat(struct browser_window *bw,
 }
 
 
-/* exported interface documented in netsurfy/browser_window.h */
+/* exported interface documented in tinysurf/browser_window.h */
 nserror
 browser_window_set_scale(struct browser_window *bw, float scale, bool absolute)
 {
@@ -4366,7 +4366,7 @@ browser_window_set_scale(struct browser_window *bw, float scale, bool absolute)
 }
 
 
-/* exported interface documented in netsurfy/browser_window.h */
+/* exported interface documented in tinysurf/browser_window.h */
 float browser_window_get_scale(struct browser_window *bw)
 {
 	if (bw == NULL) {
@@ -4377,7 +4377,7 @@ float browser_window_get_scale(struct browser_window *bw)
 }
 
 
-/* exported interface documented in netsurfy/browser_window.h */
+/* exported interface documented in tinysurf/browser_window.h */
 struct browser_window *browser_window_find_target(struct browser_window *bw,
 						  const char *target,
 						  browser_mouse_state mouse)
@@ -4509,7 +4509,7 @@ struct browser_window *browser_window_find_target(struct browser_window *bw,
 }
 
 
-/* exported interface documented in netsurfy/browser_window.h */
+/* exported interface documented in tinysurf/browser_window.h */
 void browser_window_mouse_track(struct browser_window *bw,
 				browser_mouse_state mouse,
 				int x,
@@ -4519,7 +4519,7 @@ void browser_window_mouse_track(struct browser_window *bw,
 		bw, mouse, x / bw->scale, y / bw->scale);
 }
 
-/* exported interface documented in netsurfy/browser_window.h */
+/* exported interface documented in tinysurf/browser_window.h */
 void browser_window_mouse_click(struct browser_window *bw,
 				browser_mouse_state mouse,
 				int x,
@@ -4530,7 +4530,7 @@ void browser_window_mouse_click(struct browser_window *bw,
 }
 
 
-/* exported interface documented in netsurfy/browser_window.h */
+/* exported interface documented in tinysurf/browser_window.h */
 void browser_window_page_drag_start(struct browser_window *bw, int x, int y)
 {
 	assert(bw != NULL);
@@ -4555,7 +4555,7 @@ void browser_window_page_drag_start(struct browser_window *bw, int x, int y)
 }
 
 
-/* exported interface documented in netsurfy/browser_window.h */
+/* exported interface documented in tinysurf/browser_window.h */
 bool browser_window_back_available(struct browser_window *bw)
 {
 	if (bw != NULL && bw->internal_nav) {
@@ -4566,21 +4566,21 @@ bool browser_window_back_available(struct browser_window *bw)
 }
 
 
-/* exported interface documented in netsurfy/browser_window.h */
+/* exported interface documented in tinysurf/browser_window.h */
 bool browser_window_forward_available(struct browser_window *bw)
 {
 	return (bw && bw->history &&
 		browser_window_history_forward_available(bw));
 }
 
-/* exported interface documented in netsurfy/browser_window.h */
+/* exported interface documented in tinysurf/browser_window.h */
 bool browser_window_reload_available(struct browser_window *bw)
 {
 	return (bw && bw->current_content && !bw->loading_content);
 }
 
 
-/* exported interface documented in netsurfy/browser_window.h */
+/* exported interface documented in tinysurf/browser_window.h */
 bool browser_window_stop_available(struct browser_window *bw)
 {
 	return (bw && (bw->loading_content ||
@@ -4589,7 +4589,7 @@ bool browser_window_stop_available(struct browser_window *bw)
 			 CONTENT_STATUS_DONE))));
 }
 
-/* exported interface documented in netsurfy/browser_window.h */
+/* exported interface documented in tinysurf/browser_window.h */
 bool browser_window_exec(struct browser_window *bw,
 			 const char *src,
 			 size_t srclen)
@@ -4597,12 +4597,12 @@ bool browser_window_exec(struct browser_window *bw,
 	assert(bw != NULL);
 
 	if (!bw->current_content) {
-		NSLOG(netsurfy, DEEPDEBUG, "Unable to exec, no content");
+		NSLOG(tinysurf, DEEPDEBUG, "Unable to exec, no content");
 		return false;
 	}
 
 	if (content_get_status(bw->current_content) != CONTENT_STATUS_DONE) {
-		NSLOG(netsurfy, DEEPDEBUG, "Unable to exec, content not done");
+		NSLOG(tinysurf, DEEPDEBUG, "Unable to exec, content not done");
 		return false;
 	}
 
@@ -4631,12 +4631,12 @@ nserror browser_window_console_log(struct browser_window *bw,
 
 	/* bw is the target of the log, but root is where we log it */
 
-	NSLOG(netsurfy,
+	NSLOG(tinysurf,
 	      DEEPDEBUG,
 	      "Logging message in %p targetted at %p",
 	      root,
 	      bw);
-	NSLOG(netsurfy,
+	NSLOG(tinysurf,
 	      DEEPDEBUG,
 	      "Log came from %s",
 	      ((src == BW_CS_INPUT)	       ? "user input"
@@ -4646,19 +4646,19 @@ nserror browser_window_console_log(struct browser_window *bw,
 
 	switch (log_level) {
 	case BW_CS_FLAG_LEVEL_DEBUG:
-		NSLOG(netsurfy, DEBUG, "%.*s", (int)msglen, msg);
+		NSLOG(tinysurf, DEBUG, "%.*s", (int)msglen, msg);
 		break;
 	case BW_CS_FLAG_LEVEL_LOG:
-		NSLOG(netsurfy, VERBOSE, "%.*s", (int)msglen, msg);
+		NSLOG(tinysurf, VERBOSE, "%.*s", (int)msglen, msg);
 		break;
 	case BW_CS_FLAG_LEVEL_INFO:
-		NSLOG(netsurfy, INFO, "%.*s", (int)msglen, msg);
+		NSLOG(tinysurf, INFO, "%.*s", (int)msglen, msg);
 		break;
 	case BW_CS_FLAG_LEVEL_WARN:
-		NSLOG(netsurfy, WARNING, "%.*s", (int)msglen, msg);
+		NSLOG(tinysurf, WARNING, "%.*s", (int)msglen, msg);
 		break;
 	case BW_CS_FLAG_LEVEL_ERROR:
-		NSLOG(netsurfy, ERROR, "%.*s", (int)msglen, msg);
+		NSLOG(tinysurf, ERROR, "%.*s", (int)msglen, msg);
 		break;
 	default:
 		/* Unreachable */

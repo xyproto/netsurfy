@@ -1,13 +1,13 @@
 /*
  * Copyright 2016 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -446,8 +446,8 @@ START_TEST(filepath_search_path_test)
 
 #ifdef _WIN32
 	paths = filepath_path_to_strvec(
-		"C:/Program Files/NetSurfy:D:\\cache:./resources");
-	ck_assert_str_eq(paths[0], "C:/Program Files/NetSurfy");
+		"C:/Program Files/TinySurf:D:\\cache:./resources");
+	ck_assert_str_eq(paths[0], "C:/Program Files/TinySurf");
 	ck_assert_str_eq(paths[1], "D:\\cache");
 #else
 	paths = filepath_path_to_strvec("/usr/share:/opt/data:./resources");

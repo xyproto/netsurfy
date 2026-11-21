@@ -1,13 +1,13 @@
 /*
  * Copyright 2023 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -18,7 +18,7 @@
 
 /**
  * \file
- * Implementations of netsurfy qt actions.
+ * Implementations of tinysurf qt actions.
  */
 
 #include <cfloat>
@@ -36,7 +36,7 @@ extern "C" {
 #include "utils/nsurl.h"
 #include "utils/log.h"
 
-#include "netsurfy/content.h"
+#include "tinysurf/content.h"
 
 #include "desktop/browser_history.h"
 #include "desktop/hotlist.h"
@@ -85,7 +85,7 @@ NS_Actions::NS_Actions(QWidget *parent, struct browser_window *bw)
 	  m_debug_render(new QAction(messages_get("DebugRender"), parent)),
 	  m_debug_box_tree(new QAction(messages_get("DebugBoxTree"), parent)),
 	  m_debug_dom_tree(new QAction(messages_get("DebugDomTree"), parent)),
-	  m_about_netsurfy(new QAction(messages_get("About"), parent)),
+	  m_about_tinysurf(new QAction(messages_get("About"), parent)),
 	  m_link_new_tab(new QAction(messages_get("LinkNewTab"), parent)),
 	  m_link_new_window(new QAction(messages_get("LinkNewWin"), parent)),
 	  m_link_bookmark(new QAction(messages_get("LinkBookmark"), parent)),
@@ -223,10 +223,10 @@ NS_Actions::NS_Actions(QWidget *parent, struct browser_window *bw)
 		this,
 		&NS_Actions::debug_dom_tree_slot);
 
-	connect(m_about_netsurfy,
+	connect(m_about_tinysurf,
 		&QAction::triggered,
 		this,
-		&NS_Actions::about_netsurfy_slot);
+		&NS_Actions::about_tinysurf_slot);
 
 	connect(m_link_new_tab,
 		&QAction::triggered,
@@ -320,7 +320,7 @@ QToolButton *NS_Actions::QToolButtonFromQAction(QAction *action)
 #else
 		const char *clsname =
 			widget_list.at(idx)->metaObject()->className();
-		// NSLOG(netsurfy, WARN, "%s",clsname);
+		// NSLOG(tinysurf, WARN, "%s",clsname);
 		if ((strcmp(clsname, "QToolButton") == 0) ||
 		    (strcmp(clsname, "QLineEditIconButton") == 0)) {
 			return (QToolButton *)(widget_list.at(idx));
@@ -747,7 +747,7 @@ void NS_Actions::debug_dom_tree_slot(bool checked)
 }
 
 
-void NS_Actions::about_netsurfy_slot(bool checked)
+void NS_Actions::about_tinysurf_slot(bool checked)
 {
 }
 
@@ -835,7 +835,7 @@ void NS_Actions::sel_search_slot(bool checked)
 		nsurl_unref(url);
 	}
 	if (res != NSERROR_OK) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      WARNING,
 		      "web search for %s failed with %s",
 		      m_selection,

@@ -1,13 +1,13 @@
 /*
  * Copyright 2011-2017 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -52,12 +52,12 @@ struct nsurl_components {
 
 
 /**
- * NetSurfy URL object
+ * TinySurf URL object
  */
 struct nsurl {
 	struct nsurl_components components;
 
-	int count; /* Number of references to NetSurfy URL object */
+	int count; /* Number of references to TinySurf URL object */
 	uint32_t hash; /* Hash value for nsurl identification */
 
 	size_t length; /* Length of string */
@@ -122,7 +122,7 @@ nserror nsurl__components_to_string(const struct nsurl_components *components,
 /**
  * Calculate hash value
  *
- * \param url		NetSurfy URL object to set hash value for
+ * \param url		TinySurf URL object to set hash value for
  */
 void nsurl__calc_hash(nsurl *url);
 

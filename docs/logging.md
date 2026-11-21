@@ -1,7 +1,7 @@
-NetSurfy logging
+TinySurf logging
 ===============
 
-NetSurfy has a large number of internal diagnostic messages which can
+TinySurf has a large number of internal diagnostic messages which can
 be viewed by the developer (or user if they wish)
 
 Each message has a category and a level which can be used to control
@@ -27,7 +27,7 @@ At compilation time the logging behaviour can be controlled by using
 configuration overrides in a Makefile.config The parameters are:
 
   - NETSURFY_USE_NSLOG  
-  This controls if the NetSurfy logging library (nslog) is used to
+  This controls if the TinySurf logging library (nslog) is used to
   allow comprehensive filtering of messages. The value defaults to
   AUTO which will use pkg-config to locate the library and enable if
   present. If set to NO or the library cannot be located the browsers
@@ -35,7 +35,7 @@ configuration overrides in a Makefile.config The parameters are:
   controlled by the -v command line switch.
   
   - NETSURFY_LOG_LEVEL  
-  This controls what level of message is compiled into the NetSurfy
+  This controls what level of message is compiled into the TinySurf
   binary. The default value is VERBOSE and when not using nslog this
   value is also used to select what level of logging is shown with the
   -v command line switch.
@@ -70,9 +70,9 @@ The main command line switches that control logging are:
 
 Examples:
 
-    ./netsurfy --log_filter="level:INFO"
-    ./netsurfy -v --verbose_filter="(cat:layout && level:DEBUG)"
-    ./netsurfy -v --verbose_filter="((cat:layout && level:DEBUG) || level:INFO)"
+    ./tinysurf --log_filter="level:INFO"
+    ./tinysurf -v --verbose_filter="(cat:layout && level:DEBUG)"
+    ./tinysurf -v --verbose_filter="((cat:layout && level:DEBUG) || level:INFO)"
 
 Options
 -------
@@ -86,7 +86,7 @@ Adding messages
 Messages can be easily added by including the utils/log.h header and
 he NSLOG() macro. for example
 
-    NSLOG(netsurfy, INFO, "An example message %d", example_func());
+    NSLOG(tinysurf, INFO, "An example message %d", example_func());
 
 nslog
 -----

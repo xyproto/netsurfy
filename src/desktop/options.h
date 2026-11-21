@@ -1,13 +1,13 @@
 /*
  * Copyright 2012 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -31,7 +31,7 @@
 #ifndef NETSURFY_DESKTOP_OPTIONS_H_
 #define NETSURFY_DESKTOP_OPTIONS_H_
 
-#include "netsurfy/types.h"
+#include "tinysurf/types.h"
 
 /* defines for system colour table */
 #define NSOPTION_SYS_COLOUR_START NSOPTION_sys_colour_AccentColor
@@ -208,7 +208,7 @@ NSOPTION_INTEGER(max_fetchers, 24)
 NSOPTION_INTEGER(max_fetchers_per_host, 5)
 
 /** Maximum number of inactive fetchers cached.  The total number of
- * handles netsurfy will therefore have open is this plus
+ * handles tinysurf will therefore have open is this plus
  * option_max_fetchers.
  */
 NSOPTION_INTEGER(max_cached_fetch_handles, 6)

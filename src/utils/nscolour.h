@@ -1,13 +1,13 @@
 /*
  * Copyright 2020 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -17,18 +17,18 @@
  */
 
 /** \file
- * NetSurfy UI colours (interface).
+ * TinySurf UI colours (interface).
  *
- * Interface to acquire common colours used throughout NetSurfy's interface.
+ * Interface to acquire common colours used throughout TinySurf's interface.
  */
 
 #ifndef _NETSURFY_UTILS_NSCOLOUR_H_
 #define _NETSURFY_UTILS_NSCOLOUR_H_
 
-#include "netsurfy/types.h"
+#include "tinysurf/types.h"
 
 /**
- * NetSurfy UI colour key.
+ * TinySurf UI colour key.
  */
 enum nscolour {
 	NSCOLOUR_WIN_ODD_BG,
@@ -60,7 +60,7 @@ enum nscolour {
 };
 
 /**
- * NetSurfy UI colour table.
+ * TinySurf UI colour table.
  */
 extern colour nscolours[];
 

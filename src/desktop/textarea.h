@@ -2,13 +2,13 @@
  * Copyright 2006 John-Mark Bell <jmb@netsurf-browser.org>
  * Copyright 2009 Paul Blokus <paul_pl@users.sourceforge.net>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -28,8 +28,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "netsurfy/plot_style.h"
-#include "netsurfy/mouse.h"
+#include "tinysurf/plot_style.h"
+#include "tinysurf/mouse.h"
 
 struct textarea;
 struct redraw_context;

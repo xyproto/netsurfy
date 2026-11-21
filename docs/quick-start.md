@@ -1,7 +1,7 @@
-Quick Build Steps for NetSurfy
+Quick Build Steps for TinySurf
 ==============================
 
-NetSurfy builds on Linux (x86_64, i686, x32 and aarch64) with CMake. All
+TinySurf builds on Linux (x86_64, i686, x32 and aarch64) with CMake. All
   NetSurf project libraries are included in `src/libs`.
 
 
@@ -15,12 +15,12 @@ On Arch Linux:
 Install `check` as well to build the unit tests.
 
 
-Build and run NetSurfy
+Build and run TinySurf
 ----------------------
 
       $ cmake -B build
       $ cmake --build build
-      $ ./build/netsurfy
+      $ ./build/tinysurf
 
 Run the unit tests with:
 

@@ -1,9 +1,9 @@
-Usage Instructions for Headless NetSurfy
+Usage Instructions for Headless TinySurf
 =====================================
 
-This document provides usage instructions for the Headless version of NetSurfy.
+This document provides usage instructions for the Headless version of TinySurf.
 
-Headless NetSurfy has been tested on Ubuntu and Debian.
+Headless TinySurf has been tested on Ubuntu and Debian.
 
 Automated testing
 -----------------
@@ -17,15 +17,15 @@ Overview
 
 ### What it is
 
-The NetSurfy Headless front end is a developer debug tool used to test how the
+The TinySurf Headless front end is a developer debug tool used to test how the
 core interacts with the user interface.  It allows the developers to profile
-NetSurfy and to interact with the core directly as though the developer were a
+TinySurf and to interact with the core directly as though the developer were a
 front end.
  
 ### What it is not
 
 Headless is not a tool for building web-crawling robots or indeed anything other
-than a debug tool for the NetSurfy developers.
+than a debug tool for the TinySurf developers.
 
 ### How to interact with `nsheadless`
 
@@ -74,7 +74,7 @@ In the below, _%something%_ indicates a substitution made by Headless.
 
 ### Warnings, errors etc
 
-*  Warnings (tagged `WARN`) come from the NetSurfy core.
+*  Warnings (tagged `WARN`) come from the TinySurf core.
 *  Errors (tagged `ERROR`) tend to come from Headless's parsers
 *  Death (tagged `DIE`) comes from the core and kills Headless dead.
 

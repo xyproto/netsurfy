@@ -1,13 +1,13 @@
 /*
  * Copyright 2011 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy.
+ * This file is part of TinySurf.
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -33,7 +33,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "netsurfy/inttypes.h"
+#include "tinysurf/inttypes.h"
 
 #include "utils/errors.h"
 #include "utils/nsurl.h"
@@ -305,7 +305,7 @@ static bool fetch_about_licence_handler(struct fetch_about_context *ctx)
  */
 static bool fetch_about_logo_handler(struct fetch_about_context *ctx)
 {
-	return fetch_about_redirect(ctx, "resource:netsurfy.png");
+	return fetch_about_redirect(ctx, "resource:tinysurf.png");
 }
 
 
@@ -410,12 +410,12 @@ static bool fetch_about_about_handler(struct fetch_about_context *ctx)
 	res = fetch_about_ssenddataf(
 		ctx,
 		"<html>\n<head>\n"
-		"<title>List of NetSurfy pages</title>\n"
+		"<title>List of TinySurf pages</title>\n"
 		"<link rel=\"stylesheet\" type=\"text/css\" "
 		"href=\"resource:internal.css\">\n"
 		"</head>\n"
 		"<body class=\"ns-even-bg ns-even-fg ns-border\">\n"
-		"<h1 class =\"ns-border\">List of NetSurfy pages</h1>\n"
+		"<h1 class =\"ns-border\">List of TinySurf pages</h1>\n"
 		"<ul>\n");
 	if (res != NSERROR_OK) {
 		goto fetch_about_config_handler_aborted;

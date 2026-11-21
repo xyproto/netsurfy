@@ -2,13 +2,13 @@
  * Copyright 2006 Rob Kendrick <rjek@rjek.com>
  * Copyright 2006 Richard Wilson <info@tinct.net>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -125,7 +125,7 @@ static nserror process_line(struct hash_table *hash, uint8_t *ln, int lnlen)
 
 	res = hash_add(hash, (char *)key, (char *)value);
 	if (res != NSERROR_OK) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Unable to add %s:%s to hash table",
 		      ln,
@@ -158,7 +158,7 @@ hash_add_inline_plain(struct hash_table *ht, const uint8_t *data, size_t size)
 		} else {
 			slen++;
 			if (slen > sizeof s) {
-				NSLOG(netsurfy, INFO, "Overlength line\n");
+				NSLOG(tinysurf, INFO, "Overlength line\n");
 				slen = 0;
 			}
 		}
@@ -196,7 +196,7 @@ hash_add_inline_gzip(struct hash_table *ht, const uint8_t *data, size_t size)
 
 	ret = inflateInit2(&strm, 32 + MAX_WBITS);
 	if (ret != Z_OK) {
-		NSLOG(netsurfy, INFO, "inflateInit returned %d", ret);
+		NSLOG(tinysurf, INFO, "inflateInit returned %d", ret);
 		return NSERROR_INVALID;
 	}
 
@@ -235,7 +235,7 @@ hash_add_inline_gzip(struct hash_table *ht, const uint8_t *data, size_t size)
 		}
 		if (used == sizeof(s)) {
 			/* entire buffer used and no newline */
-			NSLOG(netsurfy, INFO, "Overlength line");
+			NSLOG(tinysurf, INFO, "Overlength line");
 			used = 0;
 		}
 	} while (ret != Z_STREAM_END);
@@ -243,7 +243,7 @@ hash_add_inline_gzip(struct hash_table *ht, const uint8_t *data, size_t size)
 	inflateEnd(&strm);
 
 	if (ret != Z_STREAM_END) {
-		NSLOG(netsurfy, INFO, "inflate returned %d", ret);
+		NSLOG(tinysurf, INFO, "inflate returned %d", ret);
 		return NSERROR_INVALID;
 	}
 	return NSERROR_OK;
@@ -256,7 +256,7 @@ struct hash_table *hash_create(unsigned int chains)
 	struct hash_table *r = malloc(sizeof(struct hash_table));
 
 	if (r == NULL) {
-		NSLOG(netsurfy, INFO, "Not enough memory for hash table.");
+		NSLOG(tinysurf, INFO, "Not enough memory for hash table.");
 		return NULL;
 	}
 
@@ -264,7 +264,7 @@ struct hash_table *hash_create(unsigned int chains)
 	r->chain = calloc(chains, sizeof(struct hash_entry *));
 
 	if (r->chain == NULL) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Not enough memory for %d hash table chains.",
 		      chains);
@@ -312,7 +312,7 @@ nserror hash_add(struct hash_table *ht, const char *key, const char *value)
 
 	e = malloc(sizeof(struct hash_entry));
 	if (e == NULL) {
-		NSLOG(netsurfy, INFO, "Not enough memory for hash entry.");
+		NSLOG(tinysurf, INFO, "Not enough memory for hash entry.");
 		return NSERROR_NOMEM;
 	}
 
@@ -322,7 +322,7 @@ nserror hash_add(struct hash_table *ht, const char *key, const char *value)
 	v = strlen(value);
 	e->pairing = malloc(v + e->key_length + 2);
 	if (e->pairing == NULL) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Not enough memory for string duplication.");
 		free(e);
@@ -374,7 +374,7 @@ nserror hash_add_file(struct hash_table *ht, const char *path)
 
 	fp = gzopen(path, "r");
 	if (!fp) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Unable to open file \"%.100s\": %s",
 		      path,

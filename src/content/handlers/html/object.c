@@ -1,13 +1,13 @@
 /*
  * Copyright 2013 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -33,8 +33,8 @@
 #include "utils/config.h"
 #include "utils/log.h"
 #include "utils/nsoption.h"
-#include "netsurfy/content.h"
-#include "netsurfy/misc.h"
+#include "tinysurf/content.h"
+#include "tinysurf/misc.h"
 #include "content/hlcache.h"
 #include "css/utils.h"
 #include "desktop/scrollbar.h"
@@ -82,7 +82,7 @@ static void html_object_set_active(struct content_html_object *o, bool active)
 	} else {
 		c->base.active--;
 	}
-	NSLOG(netsurfy, INFO, "%d fetches active", c->base.active);
+	NSLOG(tinysurf, INFO, "%d fetches active", c->base.active);
 }
 
 /**
@@ -602,7 +602,7 @@ static bool html_replace_object(struct content_html_object *object, nsurl *url)
 	c->base.status = CONTENT_STATUS_READY;
 	for (page = c->page; page != NULL; page = page->page) {
 		page->base.active++;
-		NSLOG(netsurfy, INFO, "%d fetches active", c->base.active);
+		NSLOG(tinysurf, INFO, "%d fetches active", c->base.active);
 
 		page->base.status = CONTENT_STATUS_READY;
 	}
@@ -810,7 +810,7 @@ nserror html_object_free_objects(html_content *html)
 		struct content_html_object *victim = html->object_list;
 
 		if (victim->content != NULL) {
-			NSLOG(netsurfy, INFO, "object %p", victim->content);
+			NSLOG(tinysurf, INFO, "object %p", victim->content);
 
 			if (content_get_type(victim->content) == CONTENT_HTML) {
 				guit->misc->schedule(-1,

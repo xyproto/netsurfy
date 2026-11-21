@@ -1,13 +1,13 @@
 /*
  * Copyright 2010 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -20,7 +20,7 @@
  * Browser window creation and manipulation (implementation).
  */
 
-#include "netsurfy/browser_window.h"
+#include "tinysurf/browser_window.h"
 #include "utils/log.h"
 
 /**
@@ -30,7 +30,7 @@
  */
 void browser_mouse_state_dump(browser_mouse_state mouse)
 {
-	NSLOG(netsurfy,
+	NSLOG(tinysurf,
 	      INFO,
 	      "mouse state: %s %s %s %s %s %s %s %s %s %s %s %s %s %s",
 	      mouse & BROWSER_MOUSE_PRESS_1 ? "P1" : "  ",

@@ -2,13 +2,13 @@
  * Copyright 2020 Daniel Silverstone <dsilvers@netsurf-browser.org>
  * Copyright 2016 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -52,7 +52,7 @@ static void corestring_create(void)
 /**
  * iterator for any remaining strings in teardown fixture
  */
-static void netsurfy_lwc_iterator(lwc_string *str, void *pw)
+static void tinysurf_lwc_iterator(lwc_string *str, void *pw)
 {
 	fprintf(stderr,
 		"[%3u] %.*s",
@@ -65,7 +65,7 @@ static void corestring_teardown(void)
 {
 	corestrings_fini();
 
-	lwc_iterate_strings(netsurfy_lwc_iterator, NULL);
+	lwc_iterate_strings(tinysurf_lwc_iterator, NULL);
 }
 
 /* Infra */
@@ -325,7 +325,7 @@ static case_pair chain_pairs[] = {{"https://www.google.com/", NULL},
 				  {"https://www.netsurf-browser.org/", NULL},
 				  {"http://www.google.com/", NULL},
 				  {"http://www.google.co.uk/", NULL},
-				  {"https://github.com/xyproto/netsurfy", NULL},
+				  {"https://github.com/xyproto/tinysurf", NULL},
 				  {"file:///tmp/test.html", NULL},
 				  {"file:///tmp/inner.html", NULL},
 				  {"about:blank", NULL},

@@ -2,13 +2,13 @@
  * Copyright 2005 James Bursa <bursa@users.sourceforge.net>
  *           2008 Vincent Sanders <vince@simtec.co.uk>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -25,9 +25,9 @@
 #include "utils/nsoption.h"
 #include "utils/utils.h"
 #include "utils/utf8.h"
-#include "netsurfy/utf8.h"
-#include "netsurfy/layout.h"
-#include "netsurfy/plot_style.h"
+#include "tinysurf/utf8.h"
+#include "tinysurf/layout.h"
+#include "tinysurf/plot_style.h"
 
 #include "framebuffer/gui.h"
 #include "framebuffer/font.h"

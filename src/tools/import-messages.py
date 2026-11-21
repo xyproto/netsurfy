@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Take a single-language messages file and merge it back in to the
-# NetSurfy master messages (i10n) file.
+# TinySurf master messages (i10n) file.
 
 import argparse
 import re

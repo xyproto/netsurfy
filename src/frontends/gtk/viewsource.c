@@ -1,13 +1,13 @@
 /*
  * Copyright 2009 Mark Benjamin <MarkBenjamin@dfgh.net>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -24,8 +24,8 @@
 #include "utils/utf8.h"
 #include "utils/nsurl.h"
 #include "utils/messages.h"
-#include "netsurfy/browser_window.h"
-#include "netsurfy/content.h"
+#include "tinysurf/browser_window.h"
+#include "tinysurf/content.h"
 
 #include "gtk/viewdata.h"
 #include "gtk/viewsource.h"
@@ -62,7 +62,7 @@ nserror nsgtk_viewsource(GtkWindow *parent, struct browser_window *bw)
 	}
 
 	titlesize = strlen(nsurl_access(browser_window_access_url(bw))) +
-		    SLEN("Source of  - NetSurfy") + 1;
+		    SLEN("Source of  - TinySurf") + 1;
 	title = malloc(titlesize);
 	if (title == NULL) {
 		free(filename);
@@ -70,7 +70,7 @@ nserror nsgtk_viewsource(GtkWindow *parent, struct browser_window *bw)
 	}
 	snprintf(title,
 		 titlesize,
-		 "Source of %s - NetSurfy",
+		 "Source of %s - TinySurf",
 		 nsurl_access(browser_window_access_url(bw)));
 
 	ret = utf8_from_enc((const char *)source_data,

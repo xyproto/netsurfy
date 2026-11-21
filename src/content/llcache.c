@@ -1,13 +1,13 @@
 /*
  * Copyright 2009 John-Mark Bell <jmb@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
@@ -38,7 +38,7 @@
 #include <nsutils/time.h>
 #include <nsutils/base64.h>
 
-#include "netsurfy/inttypes.h"
+#include "tinysurf/inttypes.h"
 #include "utils/config.h"
 #include "utils/corestrings.h"
 #include "utils/log.h"
@@ -48,7 +48,7 @@
 #include "utils/time.h"
 #include "utils/http.h"
 #include "utils/nsoption.h"
-#include "netsurfy/misc.h"
+#include "tinysurf/misc.h"
 #include "desktop/gui_internal.h"
 
 #include "content/fetch.h"

@@ -2,13 +2,13 @@
  * Copyright 2003 James Bursa <bursa@users.sourceforge.net>
  * Copyright 2004 John Tytgat <joty@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -77,7 +77,7 @@ extern nserror nslog_set_filter_by_options(void);
 
 #include <nslog/nslog.h>
 
-NSLOG_DECLARE_CATEGORY(netsurfy);
+NSLOG_DECLARE_CATEGORY(tinysurf);
 NSLOG_DECLARE_CATEGORY(llcache);
 NSLOG_DECLARE_CATEGORY(fetch);
 NSLOG_DECLARE_CATEGORY(plot);

@@ -1,19 +1,19 @@
 --------------------------------------------------------------------------------
-  Build Instructions for Windows NetSurfy                      13 February 2010
+  Build Instructions for Windows TinySurf                      13 February 2010
 --------------------------------------------------------------------------------
 
   This document provides instructions for building the Windows version
-  of NetSurfy and provides guidance on obtaining NetSurfy's build
+  of TinySurf and provides guidance on obtaining TinySurf's build
   dependencies.
 
-  Windows NetSurfy has been tested on Wine and Vista.
+  Windows TinySurf has been tested on Wine and Vista.
 
 
-  Building and executing NetSurfy
+  Building and executing TinySurf
 ================================
 
-  The windows netsurfy port uses the MinGW (Minimal GNU on Windows)
-  system as its build infrastructure. This allows the normal netsurfy
+  The windows tinysurf port uses the MinGW (Minimal GNU on Windows)
+  system as its build infrastructure. This allows the normal tinysurf
   build process to be used.
 
   The method outlined here to create executables cross compiles
@@ -26,18 +26,18 @@
   Others cannot be automatically detected from the Makefile, so you
   will either need to install the dependencies, or set them to NO.
   
-  You should then obtain NetSurfy's dependencies, keeping in mind which
+  You should then obtain TinySurf's dependencies, keeping in mind which
   options you have enabled in the configuration file.  See the next
   section for specifics.
   
-  Once done, to build windows NetSurfy on a UNIX-like platform, simply run:
+  Once done, to build windows TinySurf on a UNIX-like platform, simply run:
 
       $ export MINGW_PREFIX=i586-mingw32msvc-
       $ export MINGW_INSTALL_ENV=/usr/i586-mingw32msvc/
       $ make TARGET=windows
 
-  If that produces errors, you probably don't have some of NetSurfy's
-  build dependencies installed. See "Obtaining NetSurfy's dependencies"
+  If that produces errors, you probably don't have some of TinySurf's
+  build dependencies installed. See "Obtaining TinySurf's dependencies"
   below. Or turn off the complaining features in a Makefile.config
   file. You may need to "make clean" before attempting to build after
   installing the dependencies.
@@ -46,17 +46,17 @@
   copied next to the exe and the windows/res directory available, also
   next to the executable.
 
-  Run NetSurfy by executing it:
+  Run TinySurf by executing it:
 
-      $ wine NetSurfy.exe
+      $ wine TinySurf.exe
 
   The staticaly linked binary which is generated may be several
   megabytes in size, this can be reduced by stripping the binary.
 
-      $ i586-mingw32msvc-strip NetSurfy.exe 
+      $ i586-mingw32msvc-strip TinySurf.exe 
 
 
-  Obtaining NetSurfy's build dependencies
+  Obtaining TinySurf's build dependencies
 ========================================
 
   Package installation
@@ -164,10 +164,10 @@ EOF
       $ make
       $ sudo make install
 
-  The NetSurfy project's libraries
+  The TinySurf project's libraries
 ---------------------------------
 
-  The NetSurfy project has developed several libraries which are required by
+  The TinySurf project has developed several libraries which are required by
   the browser. These are:
 
   LibParserUtils  --  Parser building utility functions
@@ -196,7 +196,7 @@ EOF
 -----------
 
   The windows resources may be rebuilt. Currently there is 1 object
-  file included in the Git distribution of NetSurfy that could be
+  file included in the Git distribution of TinySurf that could be
   manually compiled
 
       $ cd windows/res

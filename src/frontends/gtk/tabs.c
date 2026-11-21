@@ -1,13 +1,13 @@
 /*
  * Copyright 2008 Michael Lester <element3260@gmail.com>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -22,7 +22,7 @@
 #include "utils/nsoption.h"
 #include "utils/log.h"
 #include "utils/nsurl.h"
-#include "netsurfy/browser_window.h"
+#include "tinysurf/browser_window.h"
 #include "desktop/search.h"
 
 #include "gtk/compat.h"
@@ -190,7 +190,7 @@ static void nsgtk_tab_switch_page_after(GtkNotebook *notebook,
 
 	/* check if trying to select the "add page" tab */
 	if (selpage != addpage) {
-		NSLOG(netsurfy, INFO, "sel %d", selpagenum);
+		NSLOG(tinysurf, INFO, "sel %d", selpagenum);
 		menubar = nsgtk_scaffolding_menu_bar(
 			nsgtk_scaffolding_from_notebook(notebook));
 		gw = g_object_get_data(G_OBJECT(selpage), "gui_window");
@@ -207,7 +207,7 @@ static void nsgtk_tab_switch_page_after(GtkNotebook *notebook,
 		return;
 	}
 
-	NSLOG(netsurfy, INFO, "src %d sel %d", srcpagenum, selpagenum);
+	NSLOG(tinysurf, INFO, "src %d sel %d", srcpagenum, selpagenum);
 
 	/* ensure the add tab is not already selected */
 	if ((srcpagenum == -1) || (srcpagenum == (gint)selpagenum)) {
@@ -222,7 +222,7 @@ static void nsgtk_tab_switch_page_after(GtkNotebook *notebook,
 		res = nsgtk_window_item_activate(gw, NEWTAB_BUTTON);
 	}
 	if (res != NSERROR_OK) {
-		NSLOG(netsurfy, INFO, "Failed to open new tab.");
+		NSLOG(tinysurf, INFO, "Failed to open new tab.");
 	}
 }
 

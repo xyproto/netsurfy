@@ -1,13 +1,13 @@
 /*
  * Copyright 2023 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -29,9 +29,9 @@ extern "C" {
 #include "utils/log.h"
 #include "utils/nsoption.h"
 
-#include "netsurfy/plotters.h"
-#include "netsurfy/keypress.h"
-#include "netsurfy/content.h"
+#include "tinysurf/plotters.h"
+#include "tinysurf/keypress.h"
+#include "tinysurf/content.h"
 }
 
 #include "qt/application.cls.h"
@@ -46,7 +46,7 @@ extern "C" {
 #define CARET_FRAME_COUNT (2)
 
 /**
- * netsurfy widget class constructor
+ * tinysurf widget class constructor
  */
 NS_Widget::NS_Widget(QWidget *parent,
 		     NS_Actions *actions,
@@ -147,7 +147,7 @@ void NS_Widget::resizeEvent(QResizeEvent *event)
 
 
 /**
- * redraw the netsurfy browsing widget
+ * redraw the tinysurf browsing widget
  */
 void NS_Widget::paintEvent(QPaintEvent *event)
 {
@@ -158,7 +158,7 @@ void NS_Widget::paintEvent(QPaintEvent *event)
 		.plot = &nsqt_plotters,
 		.priv = painter,
 	};
-	/* netsurfy render clip region coordinates */
+	/* tinysurf render clip region coordinates */
 	struct rect clip = {
 		.x0 = event->rect().left(),
 		.y0 = event->rect().top(),

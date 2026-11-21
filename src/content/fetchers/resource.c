@@ -1,13 +1,13 @@
 /*
  * Copyright 2011 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy.
+ * This file is part of TinySurf.
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -29,7 +29,7 @@
 #include <stdarg.h>
 #include <libwapcaplet/libwapcaplet.h>
 
-#include "netsurfy/inttypes.h"
+#include "tinysurf/inttypes.h"
 #include "utils/nsurl.h"
 #include "utils/corestrings.h"
 #include "utils/log.h"
@@ -37,7 +37,7 @@
 #include "utils/messages.h"
 #include "utils/utils.h"
 #include "utils/ring.h"
-#include "netsurfy/fetch.h"
+#include "tinysurf/fetch.h"
 #include "desktop/gui_internal.h"
 
 #include "content/fetch.h"
@@ -56,7 +56,7 @@ static const char *fetch_resource_paths[] = {"adblock.css",
 					     "licence.html",
 					     "favicon.ico",
 					     "default.ico",
-					     "netsurfy.png",
+					     "tinysurf.png",
 					     "icons/arrow-l.png",
 					     "icons/content.png",
 					     "icons/directory.png",
@@ -298,7 +298,7 @@ static bool fetch_resource_initialise(lwc_string *scheme)
 						     &e->data,
 						     &e->data_len);
 		if (res == NSERROR_OK) {
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      INFO,
 			      "direct data for %s",
 			      fetch_resource_paths[i]);
@@ -309,7 +309,7 @@ static bool fetch_resource_initialise(lwc_string *scheme)
 			if (e->redirect_url == NULL) {
 				lwc_string_unref(e->path);
 			} else {
-				NSLOG(netsurfy,
+				NSLOG(tinysurf,
 				      INFO,
 				      "redirect url for %s",
 				      fetch_resource_paths[i]);

@@ -2,7 +2,7 @@
  * Copyright 2003 James Bursa <bursa@users.sourceforge.net>
  * Copyright 2004 John Tytgat <John.Tytgat@aaug.net>
  *
- * This file is part of NetSurf, https://github.com/xyproto/netsurfy
+ * This file is part of NetSurf, https://github.com/xyproto/tinysurf
  * Licenced under the MIT License,
  *                http://www.opensource.org/licenses/mit-license.php
  */

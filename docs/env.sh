@@ -2,12 +2,12 @@
 # may work in other shells it is not meant to, and any misbehaviour is not
 # considered a bug in that case.
 #
-# NetSurfy Library, tool and browser development support script
+# TinySurf Library, tool and browser development support script
 #
 # Copyright 2013-2024 Vincent Sanders <vince@netsurf-browser.org>
 # Released under the MIT Licence
 #
-# This script allows NetSurfy and its libraries to be built without
+# This script allows TinySurf and its libraries to be built without
 #   requiring installation into a system.
 #
 # Usage: source env.sh
@@ -252,7 +252,7 @@ if [ "x${HOST}" = "x" ]; then
     fi
 else
     # attempt to find host tools with the specificed ABI
-    HOST_CC_LIST="/opt/netsurfy/${HOST}/cross/bin/${HOST}-cc /opt/netsurfy/${HOST}/cross/bin/${HOST}-gcc ${HOST}-cc ${HOST}-gcc"
+    HOST_CC_LIST="/opt/tinysurf/${HOST}/cross/bin/${HOST}-cc /opt/tinysurf/${HOST}/cross/bin/${HOST}-gcc ${HOST}-cc ${HOST}-gcc"
     for HOST_CC_V in $(echo ${HOST_CC_LIST});do
         HOST_CC=$(command -v ${HOST_CC_V})
         if [ $? -eq 0 ];then
@@ -279,7 +279,7 @@ fi
 
 # set up a default target workspace
 if [ "x${TARGET_WORKSPACE}" = "x" ]; then
-    TARGET_WORKSPACE=${HOME}/dev-netsurfy/workspace
+    TARGET_WORKSPACE=${HOME}/dev-tinysurf/workspace
 fi
 
 # set up default parallelism
@@ -321,7 +321,7 @@ export NETSURFY_GTK_MAJOR
 # make tool
 MAKE=make
 
-# NetSurfy GIT repositories
+# TinySurf GIT repositories
 NS_GIT="${REPO_BASE_URI:-git://git.netsurf-browser.org}"
 
 # Buildsystem: everything depends on this
@@ -330,7 +330,7 @@ NS_BUILDSYSTEM="buildsystem"
 NS_TOOLS=""
 NS_FRONTEND_LIBS=""
 
-BUILD_TARGET="${TARGET:-netsurfy}"
+BUILD_TARGET="${TARGET:-tinysurf}"
 
 case "$BUILD_TARGET" in
     libhubbub)
@@ -349,7 +349,7 @@ case "$BUILD_TARGET" in
         NS_INTERNAL_LIBS="libwapcaplet libparserutils libhubbub libdom"
         ;;
 
-    netsurfy)
+    tinysurf)
         # internal libraries all frontends require (order is important)
         NS_INTERNAL_LIBS="libwapcaplet libparserutils libhubbub libdom libcss libnsgif libnsbmp libnsutils libnspsl libnslog"
 

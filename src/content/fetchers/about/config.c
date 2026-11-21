@@ -1,13 +1,13 @@
 /*
  * Copyright 2020 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy.
+ * This file is part of TinySurf.
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "netsurfy/types.h"
+#include "tinysurf/types.h"
 #include "utils/errors.h"
 #include "utils/nsoption.h"
 
@@ -58,7 +58,7 @@ bool fetch_about_config_handler(struct fetch_about_context *ctx)
 	res = fetch_about_ssenddataf(
 		ctx,
 		"<html>\n<head>\n"
-		"<title>NetSurfy Browser Config</title>\n"
+		"<title>TinySurf Browser Config</title>\n"
 		"<link rel=\"stylesheet\" type=\"text/css\" "
 		"href=\"resource:internal.css\">\n"
 		"</head>\n"
@@ -66,7 +66,7 @@ bool fetch_about_config_handler(struct fetch_about_context *ctx)
 		"id =\"configlist\" "
 		"class=\"ns-even-bg ns-even-fg ns-border\" "
 		"style=\"overflow: hidden;\">\n"
-		"<h1 class=\"ns-border\">NetSurfy Browser Config</h1>\n"
+		"<h1 class=\"ns-border\">TinySurf Browser Config</h1>\n"
 		"<table class=\"config\">\n"
 		"<tr><th>Option</th>"
 		"<th>Type</th>"

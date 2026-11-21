@@ -3,13 +3,13 @@
  * Copyright 2005 Adrian Lees <adrianl@users.sourceforge.net>
  * Copyright 2009 Mark Benjamin <netsurf-browser.org.MarkBenjamin@dfgh.net>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -27,8 +27,8 @@
 
 #include "utils/errors.h"
 #include "content/textsearch.h"
-#include "netsurfy/types.h"
-#include "netsurfy/browser_window.h"
+#include "tinysurf/types.h"
+#include "tinysurf/browser_window.h"
 
 #include "desktop/browser_private.h"
 #include "desktop/search.h"

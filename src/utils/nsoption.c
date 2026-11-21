@@ -1,13 +1,13 @@
 /*
  * Copyright 2012 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -32,8 +32,8 @@
 #include <string.h>
 #include <strings.h>
 
-#include "netsurfy/inttypes.h"
-#include "netsurfy/plot_style.h"
+#include "tinysurf/inttypes.h"
+#include "tinysurf/plot_style.h"
 #include "utils/errors.h"
 #include "utils/log.h"
 #include "utils/utils.h"
@@ -713,11 +713,11 @@ nserror nsoption_read(const char *path, struct nsoption_s *opts)
 
 	fp = fopen(path, "r");
 	if (!fp) {
-		NSLOG(netsurfy, INFO, "Failed to open file '%s'", path);
+		NSLOG(tinysurf, INFO, "Failed to open file '%s'", path);
 		return NSERROR_NOT_FOUND;
 	}
 
-	NSLOG(netsurfy,
+	NSLOG(tinysurf,
 	      INFO,
 	      "Successfully opened '%s' for Options file",
 	      path);
@@ -805,7 +805,7 @@ nserror nsoption_write(const char *path,
 
 	fp = fopen(path, "w");
 	if (!fp) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "failed to open file '%s' for writing",
 		      path);
@@ -895,7 +895,7 @@ nserror nsoption_commandline(int *pargc, char **argv, struct nsoption_s *opts)
 
 		/* arg+arglen is the option to set, val is the value */
 
-		NSLOG(netsurfy, INFO, "%.*s = %s", arglen, arg, val);
+		NSLOG(tinysurf, INFO, "%.*s = %s", arglen, arg, val);
 
 		for (entry_loop = 0; entry_loop < NSOPTION_LISTEND;
 		     entry_loop++) {

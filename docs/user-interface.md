@@ -45,7 +45,7 @@ Frontend which uses the Microsodt win32 GDI toolkit.
 # User configuration
 
 The behaviour of the browser can be changed from the defaults with a
-configuration file. The [core user options](docs/netsurfy-options.md)
+configuration file. The [core user options](docs/tinysurf-options.md)
 of the browser are common to all versions and are augmented by each
 frontend in a specific manner.
 

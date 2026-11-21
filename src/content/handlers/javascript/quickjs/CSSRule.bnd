@@ -1,8 +1,8 @@
-/* CSS Rule binding for NetSurfy using QuickJS and libcss/libdom
+/* CSS Rule binding for TinySurf using QuickJS and libcss/libdom
  *
  * Copyright 2022 Daniel Silverstone <dsilvers@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
  * Released under the terms of the MIT License,
  *         http://www.opensource.org/licenses/mit-license

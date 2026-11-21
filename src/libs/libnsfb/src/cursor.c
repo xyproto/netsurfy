@@ -1,7 +1,7 @@
 /*
  * Copyright 2010 Vincent Sanders <vince@kyllikki.org>
  *
- * This file is part of libnsfb, https://github.com/xyproto/netsurfy
+ * This file is part of libnsfb, https://github.com/xyproto/tinysurf
  * Licenced under the MIT License,
  *                http://www.opensource.org/licenses/mit-license.php
  */

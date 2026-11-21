@@ -1,5 +1,5 @@
 /*
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
  * Released under the terms of the MIT License,
  *         http://www.opensource.org/licenses/mit-license
@@ -13,7 +13,7 @@
 
 #include "utils/errors.h"
 #include "utils/nsurl.h"
-#include "netsurfy/browser_window.h"
+#include "tinysurf/browser_window.h"
 
 #include "headless/browser.h"
 #include "headless/schedule.h"
@@ -21,7 +21,7 @@
 
 #define DUCK_TIMEOUT 60000
 #define DUCK_BLOCKED 2
-#define DUCK_MARK "\x01netsurfy-duck\x01"
+#define DUCK_MARK "\x01tinysurf-duck\x01"
 
 static const char *const duck_bases[] = {
 	"https://html.duckduckgo.com/html/",
@@ -87,7 +87,7 @@ static void duck_finish(int status, const char *error)
 	duck_finished = true;
 	duck_status = status;
 	if (error != NULL) {
-		fprintf(stderr, "netsurfy-headless: %s\n", error);
+		fprintf(stderr, "tinysurf-headless: %s\n", error);
 	}
 }
 

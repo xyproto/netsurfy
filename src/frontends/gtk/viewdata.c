@@ -1,13 +1,13 @@
 /*
  * Copyright 2014 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -42,7 +42,7 @@
 #include "utils/file.h"
 #include "utils/filepath.h"
 #include "utils/nsurl.h"
-#include "netsurfy/browser_window.h"
+#include "tinysurf/browser_window.h"
 
 #include "gtk/warn.h"
 #include "gtk/about.h"
@@ -366,7 +366,7 @@ static nserror window_init(const char *title,
 
 	res = nsgtk_builder_new_from_resname("viewdata", &newctx->builder);
 	if (res != NSERROR_OK) {
-		NSLOG(netsurfy, INFO, "Viewdata UI builder init failed");
+		NSLOG(tinysurf, INFO, "Viewdata UI builder init failed");
 		free(newctx);
 		return res;
 	}
@@ -375,7 +375,7 @@ static nserror window_init(const char *title,
 	window = GTK_WINDOW(
 		gtk_builder_get_object(newctx->builder, "ViewDataWindow"));
 	if (window == NULL) {
-		NSLOG(netsurfy, INFO, "Unable to find window in builder ");
+		NSLOG(tinysurf, INFO, "Unable to find window in builder ");
 
 		/* free the builder */
 		g_object_unref(G_OBJECT(newctx->builder));
@@ -488,7 +488,7 @@ tab_init_fname(const char *title, const char *leafname, const char *fname)
 	nserror ret;
 
 	/* Open tab on temporary file */
-	ret = netsurfy_path_to_nsurl(fname, &url);
+	ret = tinysurf_path_to_nsurl(fname, &url);
 	if (ret != NSERROR_OK) {
 		return ret;
 	}
@@ -599,7 +599,7 @@ static char **xdg_data_strvec(void)
 			 xdg_data_dirs);
 	}
 
-	NSLOG(netsurfy, INFO, "%s", xdg_data_path);
+	NSLOG(tinysurf, INFO, "%s", xdg_data_path);
 
 	svec = filepath_path_to_strvec(xdg_data_path);
 	free(xdg_data_path);
@@ -634,7 +634,7 @@ static char *xdg_get_default_app(const char *path, const char *mimetype)
 	fname = malloc(fname_len);
 	snprintf(fname, fname_len, "%s/applications/defaults.list", path);
 
-	NSLOG(netsurfy, INFO, "Checking %s", fname);
+	NSLOG(tinysurf, INFO, "Checking %s", fname);
 
 	fp = fopen(fname, "r");
 	free(fname);
@@ -656,12 +656,12 @@ static char *xdg_get_default_app(const char *path, const char *mimetype)
 
 			ret = strdup(line + mimetype_len + 1);
 
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      INFO,
 			      "Found line match for %s length %zu\n",
 			      mimetype,
 			      rd);
-			NSLOG(netsurfy, INFO, "Result %s", ret);
+			NSLOG(tinysurf, INFO, "Result %s", ret);
 
 			break;
 		}
@@ -701,7 +701,7 @@ static char *xdg_get_exec_cmd(const char *path, const char *desktop)
 	fname = malloc(fname_len);
 	snprintf(fname, fname_len, "%s/applications/%s", path, desktop);
 
-	NSLOG(netsurfy, INFO, "Checking %s", fname);
+	NSLOG(tinysurf, INFO, "Checking %s", fname);
 
 	fp = fopen(fname, "r");
 	free(fname);
@@ -722,8 +722,8 @@ static char *xdg_get_exec_cmd(const char *path, const char *desktop)
 
 			ret = strdup(line + SLEN("Exec="));
 
-			NSLOG(netsurfy, INFO, "Found Exec length %zu", rd);
-			NSLOG(netsurfy, INFO, "Result %s", ret);
+			NSLOG(tinysurf, INFO, "Found Exec length %zu", rd);
+			NSLOG(tinysurf, INFO, "Result %s", ret);
 
 			break;
 		}
@@ -788,7 +788,7 @@ static char **build_exec_argv(const char *fname, const char *exec_cmd)
 
 		argv[aidx] = exec_arg(start, cur - start, fname);
 		if (argv[aidx] != NULL) {
-			NSLOG(netsurfy, INFO, "adding \"%s\"", argv[aidx]);
+			NSLOG(tinysurf, INFO, "adding \"%s\"", argv[aidx]);
 			aidx++;
 		}
 	}

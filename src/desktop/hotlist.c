@@ -2,13 +2,13 @@
  * Copyright 2012 John-Mark Bell <jmb@netsurf-browser.org>
  * Copyright 2013 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -34,11 +34,11 @@
 #include "utils/nsurl.h"
 #include "content/urldb.h"
 
-#include "netsurfy/misc.h"
+#include "tinysurf/misc.h"
 #include "desktop/gui_internal.h"
 #include "desktop/hotlist.h"
 #include "desktop/treeview.h"
-#include "netsurfy/browser_window.h"
+#include "tinysurf/browser_window.h"
 
 #define N_DAYS 28
 #define N_SEC_PER_DAY (60 * 60 * 24)
@@ -138,7 +138,7 @@ static nserror hotlist_save(const char *path)
 	/* Replace any old hotlist file with the one we just saved */
 	if (rename(temp_path, path) != 0) {
 		res = NSERROR_SAVE_FAILED;
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Error renaming hotlist: %s.",
 		      strerror(errno));
@@ -672,20 +672,20 @@ static nserror hotlist_load_entry(dom_node *li, hotlist_load_ctx *ctx)
 	/* The li must contain an "a" element */
 	a = libdom_find_first_element(li, corestring_lwc_a);
 	if (a == NULL) {
-		NSLOG(netsurfy, INFO, "Missing <a> in <li>");
+		NSLOG(tinysurf, INFO, "Missing <a> in <li>");
 		return NSERROR_INVALID;
 	}
 
 	derror = dom_node_get_text_content(a, &title1);
 	if (derror != DOM_NO_ERR) {
-		NSLOG(netsurfy, INFO, "No title");
+		NSLOG(tinysurf, INFO, "No title");
 		dom_node_unref(a);
 		return NSERROR_INVALID;
 	}
 
 	derror = dom_element_get_attribute(a, corestring_dom_href, &url1);
 	if (derror != DOM_NO_ERR || url1 == NULL) {
-		NSLOG(netsurfy, INFO, "No URL");
+		NSLOG(tinysurf, INFO, "No URL");
 		dom_string_unref(title1);
 		dom_node_unref(a);
 		return NSERROR_INVALID;
@@ -703,7 +703,7 @@ static nserror hotlist_load_entry(dom_node *li, hotlist_load_ctx *ctx)
 	dom_string_unref(url1);
 
 	if (err != NSERROR_OK) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Failed normalising '%s'",
 		      dom_string_data(url1));
@@ -734,7 +734,7 @@ static nserror hotlist_load_entry(dom_node *li, hotlist_load_ctx *ctx)
 
 /*
  * Callback for libdom_iterate_child_elements, which despite the namespace is
- * a NetSurfy function.
+ * a TinySurf function.
  *
  * \param node		Node that is a child of the directory UL node
  * \param ctx		Our hotlist loading context.
@@ -787,7 +787,7 @@ nserror hotlist_load_directory_cb(dom_node *node, void *ctx)
 
 		error = dom_node_get_text_content(node, &title);
 		if (error != DOM_NO_ERR || title == NULL) {
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      INFO,
 			      "Empty <h4> or memory exhausted.");
 			dom_string_unref(name);
@@ -889,7 +889,7 @@ static nserror hotlist_load(const char *path, bool *loaded)
 
 	/* Handle no path */
 	if (path == NULL) {
-		NSLOG(netsurfy, INFO, "No hotlist file path provided.");
+		NSLOG(tinysurf, INFO, "No hotlist file path provided.");
 		return NSERROR_OK;
 	}
 
@@ -915,7 +915,7 @@ static nserror hotlist_load(const char *path, bool *loaded)
 					 corestring_lwc_html);
 	if (html == NULL) {
 		dom_node_unref(document);
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      WARNING,
 		      "%s (<html> not found)",
 		      messages_get("TreeLoadError"));
@@ -927,7 +927,7 @@ static nserror hotlist_load(const char *path, bool *loaded)
 	if (body == NULL) {
 		dom_node_unref(html);
 		dom_node_unref(document);
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      WARNING,
 		      "%s (<html>...<body> not found)",
 		      messages_get("TreeLoadError"));
@@ -940,7 +940,7 @@ static nserror hotlist_load(const char *path, bool *loaded)
 		dom_node_unref(body);
 		dom_node_unref(html);
 		dom_node_unref(document);
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      WARNING,
 		      "%s (<html>...<body>...<ul> not found.)",
 		      messages_get("TreeLoadError"));
@@ -967,7 +967,7 @@ static nserror hotlist_load(const char *path, bool *loaded)
 	dom_node_unref(document);
 
 	if (err != NSERROR_OK) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      WARNING,
 		      "%s (Failed building tree.)",
 		      messages_get("TreeLoadError"));
@@ -997,16 +997,16 @@ static nserror hotlist_generate(void)
 		const char *url;
 		const char *msg_key;
 	} default_entries[] = {
-		{"https://github.com/xyproto/netsurfy", "HotlistHomepage"},
-		{"https://github.com/xyproto/netsurfy/releases",
+		{"https://github.com/xyproto/tinysurf", "HotlistHomepage"},
+		{"https://github.com/xyproto/tinysurf/releases",
 		 "HotlistDownloads"},
-		{"https://github.com/xyproto/netsurfy", "HotlistDocumentation"},
-		{"https://github.com/xyproto/netsurfy", "HotlistContact"}};
+		{"https://github.com/xyproto/tinysurf", "HotlistDocumentation"},
+		{"https://github.com/xyproto/tinysurf", "HotlistContact"}};
 	const int n_entries = sizeof(default_entries) /
 			      sizeof(default_entries[0]);
 
-	/* First make "NetSurfy" folder for defualt entries */
-	title = "NetSurfy";
+	/* First make "TinySurf" folder for defualt entries */
+	title = "TinySurf";
 	err = hotlist_add_folder_internal(
 		title, NULL, TREE_REL_FIRST_CHILD, &f, false);
 	if (err != NSERROR_OK) {
@@ -1129,7 +1129,7 @@ nserror hotlist_export(const char *path, const char *title)
 		return NSERROR_SAVE_FAILED;
 
 	if (title == NULL)
-		title = "NetSurfy hotlist";
+		title = "TinySurf hotlist";
 
 	/* The Acorn Browse Hotlist format, which we mimic[*], is invalid HTML
 	 * claming to be valid.
@@ -1339,7 +1339,7 @@ nserror hotlist_init(const char *load_path, const char *save_path)
 		return err;
 	}
 
-	NSLOG(netsurfy, INFO, "Loading hotlist");
+	NSLOG(tinysurf, INFO, "Loading hotlist");
 
 	hl_ctx.tree = NULL;
 	hl_ctx.built = false;
@@ -1388,7 +1388,7 @@ nserror hotlist_init(const char *load_path, const char *save_path)
 	 * the treeview is built. */
 	hl_ctx.built = true;
 
-	NSLOG(netsurfy, INFO, "Loaded hotlist");
+	NSLOG(tinysurf, INFO, "Loaded hotlist");
 
 	return NSERROR_OK;
 }
@@ -1433,7 +1433,7 @@ nserror hotlist_fini(void)
 	int i;
 	nserror err;
 
-	NSLOG(netsurfy, INFO, "Finalising hotlist");
+	NSLOG(tinysurf, INFO, "Finalising hotlist");
 
 	/* Remove any existing scheduled save callback */
 	guit->misc->schedule(-1, hotlist_schedule_save_cb, NULL);
@@ -1442,7 +1442,7 @@ nserror hotlist_fini(void)
 	/* Save the hotlist */
 	err = hotlist_save(hl_ctx.save_path);
 	if (err != NSERROR_OK) {
-		NSLOG(netsurfy, INFO, "Problem saving the hotlist.");
+		NSLOG(tinysurf, INFO, "Problem saving the hotlist.");
 	}
 
 	free(hl_ctx.save_path);
@@ -1450,7 +1450,7 @@ nserror hotlist_fini(void)
 	/* Destroy the hotlist treeview */
 	err = treeview_destroy(hl_ctx.tree);
 	if (err != NSERROR_OK) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Problem destroying the hotlist treeview.");
 	}
@@ -1465,7 +1465,7 @@ nserror hotlist_fini(void)
 		return err;
 	}
 
-	NSLOG(netsurfy, INFO, "Finalised hotlist");
+	NSLOG(tinysurf, INFO, "Finalised hotlist");
 
 	return err;
 }

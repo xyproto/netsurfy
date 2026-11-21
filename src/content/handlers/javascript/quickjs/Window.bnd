@@ -2,7 +2,7 @@
  *
  * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
  * Released under the terms of the MIT License,
  *         http://www.opensource.org/licenses/mit-license
@@ -18,16 +18,16 @@ class Window {
 
 #include "utils/corestrings.h"
 #include "utils/nsurl.h"
-#include "netsurfy/browser_window.h"
+#include "tinysurf/browser_window.h"
 #include "content/hlcache.h"
 #include "html/html.h"
 #include "html/private.h"
 #include "desktop/gui_internal.h"
-#include "netsurfy/misc.h"
+#include "tinysurf/misc.h"
 #include "utils/ring.h"
 #include "desktop/browser_private.h"
-#include "netsurfy/window.h"
-#include "netsurfy/inttypes.h"
+#include "tinysurf/window.h"
+#include "tinysurf/inttypes.h"
 
 static size_t next_handle = 1;
 
@@ -381,9 +381,9 @@ init Window(struct browser_window *win, struct html_content *htmlc)
 	priv->htmlc = htmlc;
 	priv->schedule_ring = NULL;
 	priv->closed_down = false;
-	NSLOG(netsurfy, DEEPDEBUG, "win=%p htmlc=%p", priv->win, priv->htmlc);
+	NSLOG(tinysurf, DEEPDEBUG, "win=%p htmlc=%p", priv->win, priv->htmlc);
 
-	NSLOG(netsurfy, DEEPDEBUG,
+	NSLOG(tinysurf, DEEPDEBUG,
 	      "URL is %s", nsurl_access(browser_window_access_url(priv->win)));
 %}
 
@@ -470,12 +470,12 @@ setter Window::name()
 method Window::alert()
 %{
 	if (argc == 0) {
-		NSLOG(netsurfy, INFO, "JS ALERT");
+		NSLOG(tinysurf, INFO, "JS ALERT");
 	} else {
 		size_t msg_len;
 		const char *msg = JS_ToCStringLen(ctx, &msg_len, argv[0]);
 		if (msg == NULL) return JS_EXCEPTION;
-		NSLOG(netsurfy, INFO, "JS ALERT: %*s", (int)msg_len, msg);
+		NSLOG(tinysurf, INFO, "JS ALERT: %*s", (int)msg_len, msg);
 		JS_FreeCString(ctx, msg);
 	}
 	return JS_UNDEFINED;

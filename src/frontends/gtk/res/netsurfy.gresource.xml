@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
-  <gresource prefix="/org/netsurfy">
+  <gresource prefix="/org/tinysurf">
     <file alias="favicon.png" preprocess="to-pixdata">img/favicon.png</file>
-    <file alias="netsurfy.xpm" preprocess="to-pixdata">img/gtk/netsurfy.xpm</file>
+    <file alias="tinysurf.xpm" preprocess="to-pixdata">img/gtk/tinysurf.xpm</file>
     <file alias="menu_cursor.png" preprocess="to-pixdata">img/gtk/menu_cursor.png</file>
     <file alias="throbber/throbber0.png" preprocess="to-pixdata">img/throbber/throbber0.png</file>
     <file alias="throbber/throbber1.png" preprocess="to-pixdata">img/throbber/throbber1.png</file>
@@ -27,9 +27,9 @@
     <file>default.css</file>
     <file>internal.css</file>
     <file>quirks.css</file>
-    <file alias="netsurfy.png">img/netsurfy-wordmark.png</file>
+    <file alias="tinysurf.png">img/tinysurf-wordmark.png</file>
     <file alias="default.ico">img/gtk/default.ico</file>
-    <file alias="icons/256x256/apps/netsurfy.png">img/icons/256x256/apps/netsurfy.png</file>
+    <file alias="icons/256x256/apps/tinysurf.png">img/icons/256x256/apps/tinysurf.png</file>
     <file alias="icons/show-cookie.png">img/icons/show-cookie.png</file>
     <file alias="icons/local-history.png">img/icons/local-history.png</file>
     <file alias="icons/arrow-l.png">img/icons/arrow-l.png</file>

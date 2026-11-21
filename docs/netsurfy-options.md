@@ -1,8 +1,8 @@
-Common NetSurfy user options
+Common TinySurf user options
 ---------------------------
 
 This document outlines the common configuration options supported by
-  the NetSurfy core.
+  the TinySurf core.
 
 Overview
 ========
@@ -82,7 +82,7 @@ Fetcher options
  ------------------------ | -----| ------- | ----------------------------------- 
  max_fetchers             | int  | 24      | Maximum simultaneous active fetchers 
  max_fetchers_per_host    | int  | 5       | Maximum simultaneous active fetchers per host. (<=option_max_fetchers else it makes no sense) [2]       
- max_cached_fetch_handles | int  |  6      | Maximum number of inactive fetchers cached. The total number of handles netsurfy will therefore have open is this plus option_max_fetchers. 
+ max_cached_fetch_handles | int  |  6      | Maximum number of inactive fetchers cached. The total number of handles tinysurf will therefore have open is this plus option_max_fetchers. 
  suppress_curl_debug      | bool | true    | Suppress debug output from cURL.    
  target_blank             | bool | true    | Whether to allow target="_blank"    
  button_2_tab             | bool | true    | Whether second mouse button opens in new tab. 

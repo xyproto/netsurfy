@@ -2,13 +2,13 @@
  * Copyright 2008 Rob Kendrick <rjek@netsurf-browser.org>
  * Copyright 2013 John-Mark Bell <jmb@netsurf-browser.org>
  *
- * This file is part of NetSurfy.
+ * This file is part of TinySurf.
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -29,7 +29,7 @@
 #include <dom/dom.h>
 #include <libwapcaplet/libwapcaplet.h>
 
-#include "netsurfy/inttypes.h"
+#include "tinysurf/inttypes.h"
 #include "utils/config.h"
 #include "utils/corestrings.h"
 #include "utils/log.h"
@@ -67,7 +67,7 @@ static html_css_fetcher_context *ring = NULL;
 
 static bool html_css_fetcher_initialise(lwc_string *scheme)
 {
-	NSLOG(netsurfy,
+	NSLOG(tinysurf,
 	      INFO,
 	      "html_css_fetcher_initialise called for %s",
 	      lwc_string_data(scheme));
@@ -76,7 +76,7 @@ static bool html_css_fetcher_initialise(lwc_string *scheme)
 
 static void html_css_fetcher_finalise(lwc_string *scheme)
 {
-	NSLOG(netsurfy,
+	NSLOG(tinysurf,
 	      INFO,
 	      "html_css_fetcher_finalise called for %s",
 	      lwc_string_data(scheme));
@@ -270,7 +270,7 @@ static void html_css_fetcher_poll(lwc_string *scheme)
 				html_css_fetcher_send_callback(&msg, c);
 			}
 		} else {
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      INFO,
 			      "Processing of %s failed!",
 			      nsurl_access(c->url));

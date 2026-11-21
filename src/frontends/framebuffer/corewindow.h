@@ -1,13 +1,13 @@
 /*
  * Copyright 2017 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -19,7 +19,7 @@
 #ifndef FB_COREWINDOW_H
 #define FB_COREWINDOW_H
 
-#include "netsurfy/core_window.h"
+#include "tinysurf/core_window.h"
 
 extern struct core_window_table *framebuffer_core_window_table;
 
@@ -64,7 +64,7 @@ struct fb_corewindow {
 	 * callback for keypress on fb core window
 	 *
 	 * \param fb_cw The fb core window structure.
-	 * \param nskey The netsurfy key code.
+	 * \param nskey The tinysurf key code.
 	 * \return NSERROR_OK if key processed,
 	 *         NSERROR_NOT_IMPLEMENTED if key not processed
 	 *         otherwise apropriate error code

@@ -1,13 +1,13 @@
 /*
  * Copyright 2011 Daniel Silverstone <dsilvers@digital-scurf.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -39,7 +39,7 @@ nserror headless_register_handler(const char *cmd, handle_command_fn fn)
 {
 	headless_cmdhandler_t *ret = calloc(1, sizeof(*ret));
 	if (ret == NULL) {
-		NSLOG(netsurfy, INFO, "Unable to allocate handler");
+		NSLOG(tinysurf, INFO, "Unable to allocate handler");
 		return NSERROR_NOMEM;
 	}
 	ret->cmd = strdup(cmd);

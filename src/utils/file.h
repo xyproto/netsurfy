@@ -1,13 +1,13 @@
 /*
  * Copyright 2014 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -138,7 +138,7 @@ extern struct gui_file_table *default_file_table;
  * @return NSERROR_OK and the complete path is written to str
  *         or error code on faliure.
  */
-nserror netsurfy_mkpath(char **str, size_t *size, size_t nelm, ...);
+nserror tinysurf_mkpath(char **str, size_t *size, size_t nelm, ...);
 
 /**
  * Create a path from a nsurl.
@@ -149,7 +149,7 @@ nserror netsurfy_mkpath(char **str, size_t *size, size_t nelm, ...);
  * @return NSERROR_OK and the path is written to \a path_out or error code on
  *         faliure.
  */
-nserror netsurfy_nsurl_to_path(struct nsurl *url, char **path_out);
+nserror tinysurf_nsurl_to_path(struct nsurl *url, char **path_out);
 
 /**
  * Create a nsurl from a path.
@@ -162,7 +162,7 @@ nserror netsurfy_nsurl_to_path(struct nsurl *url, char **path_out);
  * @return NSERROR_OK and the url is placed in \a url or error
  *         code on faliure.
  */
-nserror netsurfy_path_to_nsurl(const char *path, struct nsurl **url);
+nserror tinysurf_path_to_nsurl(const char *path, struct nsurl **url);
 
 /**
  * Ensure that all directory elements needed to store a filename exist.
@@ -170,7 +170,7 @@ nserror netsurfy_path_to_nsurl(const char *path, struct nsurl **url);
  * @param fname The filename to ensure the path to exists.
  * @return NSERROR_OK on success or error code on failure.
  */
-nserror netsurfy_mkdir_all(const char *fname);
+nserror tinysurf_mkdir_all(const char *fname);
 
 /**
  * Recursively remove a directory
@@ -181,6 +181,6 @@ nserror netsurfy_mkdir_all(const char *fname);
  * @param path The path to recursively remove
  * @return NSERROR_OK on success, or an error code on failure.
  */
-nserror netsurfy_recursive_rm(const char *path);
+nserror tinysurf_recursive_rm(const char *path);
 
 #endif

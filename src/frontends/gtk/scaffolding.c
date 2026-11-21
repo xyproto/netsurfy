@@ -1,13 +1,13 @@
 /*
  * Copyright 2019 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -26,7 +26,7 @@
 #include "utils/messages.h"
 #include "utils/nsurl.h"
 #include "utils/nsoption.h"
-#include "netsurfy/browser_window.h"
+#include "tinysurf/browser_window.h"
 #include "desktop/browser_history.h"
 #include "desktop/hotlist.h"
 
@@ -118,7 +118,7 @@ static void scaffolding_window_destroy(GtkWidget *widget, gpointer data)
 {
 	struct nsgtk_scaffolding *gs = data;
 
-	NSLOG(netsurfy, INFO, "scaffold:%p", gs);
+	NSLOG(tinysurf, INFO, "scaffold:%p", gs);
 
 	nsgtk_local_history_hide();
 
@@ -144,7 +144,7 @@ static void scaffolding_window_destroy(GtkWidget *widget, gpointer data)
 		gs->next->prev = gs->prev;
 	}
 
-	NSLOG(netsurfy, INFO, "scaffold list head: %p", scaf_list);
+	NSLOG(tinysurf, INFO, "scaffold list head: %p", scaf_list);
 
 	g_signal_handler_disconnect(gs->notebook, gs->tabs_remove_handler_id);
 	g_object_unref(gs->notebook);
@@ -871,17 +871,17 @@ void nsgtk_scaffolding_set_title(struct gui_window *gw, const char *title)
 	}
 
 	if (title == NULL || title[0] == '\0') {
-		gtk_window_set_title(gs->window, "NetSurfy");
+		gtk_window_set_title(gs->window, "TinySurf");
 		return;
 	}
 
-	title_len = strlen(title) + SLEN(" - NetSurfy") + 1;
+	title_len = strlen(title) + SLEN(" - TinySurf") + 1;
 	newtitle = malloc(title_len);
 	if (newtitle == NULL) {
 		return;
 	}
 
-	snprintf(newtitle, title_len, "%s - NetSurfy", title);
+	snprintf(newtitle, title_len, "%s - TinySurf", title);
 
 	gtk_window_set_title(gs->window, newtitle);
 
@@ -1093,7 +1093,7 @@ struct nsgtk_scaffolding *nsgtk_new_scaffolding(struct gui_window *toplevel)
 		return NULL;
 	}
 
-	NSLOG(netsurfy,
+	NSLOG(tinysurf,
 	      INFO,
 	      "Constructing a scaffold of %p for gui_window %p",
 	      gs,
@@ -1102,7 +1102,7 @@ struct nsgtk_scaffolding *nsgtk_new_scaffolding(struct gui_window *toplevel)
 	gs->top_level = toplevel;
 
 	/* Construct UI widgets */
-	if (nsgtk_builder_new_from_resname("netsurfy", &gs->builder) !=
+	if (nsgtk_builder_new_from_resname("tinysurf", &gs->builder) !=
 	    NSERROR_OK) {
 		free(gs);
 		return NULL;
@@ -1178,7 +1178,7 @@ struct nsgtk_scaffolding *nsgtk_new_scaffolding(struct gui_window *toplevel)
 	/* finally, show the window. */
 	gtk_window_present(gs->window);
 
-	NSLOG(netsurfy, INFO, "creation complete");
+	NSLOG(tinysurf, INFO, "creation complete");
 
 	return gs;
 }

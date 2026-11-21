@@ -2,7 +2,7 @@
  *
  * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
  * Released under the terms of the MIT License,
  *         http://www.opensource.org/licenses/mit-license
@@ -34,11 +34,11 @@ static JSValue document_write(JSContext *ctx, dom_node *node, int argc, JSValueC
 	struct html_content *htmlc = document_htmlc(node);
 
 	if (htmlc == NULL) {
-		NSLOG(netsurfy, INFO, "error getting htmlc. parent node:%p", node);
+		NSLOG(tinysurf, INFO, "error getting htmlc. parent node:%p", node);
 		return JS_UNDEFINED;
 	}
 	if (htmlc->parser == NULL) {
-		NSLOG(netsurfy, INFO, "error; no parser for htmlc: %p", htmlc);
+		NSLOG(tinysurf, INFO, "error; no parser for htmlc: %p", htmlc);
 		return JS_UNDEFINED;
 	}
 	for (int i = 0; i < argc; i++) {
@@ -533,7 +533,7 @@ getter Document::cookie()
 	struct html_content *htmlc = document_htmlc(priv->parent.node);
 
 	if (htmlc == NULL) {
-		NSLOG(netsurfy, INFO, "error getting htmlc. parent node:%p", priv->parent.node);
+		NSLOG(tinysurf, INFO, "error getting htmlc. parent node:%p", priv->parent.node);
 		return JS_UNDEFINED;
 	}
 	cookie_str = urldb_get_cookie(llcache_handle_get_url(htmlc->base.llcache), false);
@@ -551,7 +551,7 @@ setter Document::cookie()
 	const char *cookie_str;
 
 	if (htmlc == NULL) {
-		NSLOG(netsurfy, INFO, "error getting htmlc. parent node:%p", priv->parent.node);
+		NSLOG(tinysurf, INFO, "error getting htmlc. parent node:%p", priv->parent.node);
 		return JS_UNDEFINED;
 	}
 	cookie_str = JS_ToCString(ctx, argv[0]);
@@ -559,7 +559,7 @@ setter Document::cookie()
 	if (!urldb_set_cookie(cookie_str,
 			      llcache_handle_get_url(htmlc->base.llcache),
 			      NULL)) {
-		NSLOG(netsurfy, DEEPDEBUG, "unable to set cookie: %s", cookie_str);
+		NSLOG(tinysurf, DEEPDEBUG, "unable to set cookie: %s", cookie_str);
 	}
 	JS_FreeCString(ctx, cookie_str);
 	return JS_UNDEFINED;

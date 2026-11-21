@@ -1,13 +1,13 @@
 /*
  * Copyright 2024 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -18,7 +18,7 @@
 
 /**
  * \file
- * Implementation of netsurfy application for qt frontend.
+ * Implementation of tinysurf application for qt frontend.
  */
 
 #include <QSettings>
@@ -38,12 +38,12 @@ extern "C" {
 #include "utils/messages.h"
 #include "utils/filepath.h"
 
-#include "netsurfy/bitmap.h"
-#include "netsurfy/netsurfy.h"
-#include "netsurfy/content.h"
-#include "netsurfy/browser_window.h"
-#include "netsurfy/cookie_db.h"
-#include "netsurfy/url_db.h"
+#include "tinysurf/bitmap.h"
+#include "tinysurf/tinysurf.h"
+#include "tinysurf/content.h"
+#include "tinysurf/browser_window.h"
+#include "tinysurf/cookie_db.h"
+#include "tinysurf/url_db.h"
 
 #include "desktop/hotlist.h"
 #include "desktop/searchweb.h"
@@ -249,7 +249,7 @@ nserror NS_Application::set_option_defaults(struct nsoption_s *defaults)
 		strdup(config_dir.absoluteFilePath("Hotlist").toUtf8()));
 
 	if (nsoption_charp(hotlist_path) == NULL) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      ERROR,
 		      "Failed initialising bookmarks resource path");
 		return NSERROR_BAD_PARAMETER;
@@ -267,7 +267,7 @@ nserror NS_Application::set_option_defaults(struct nsoption_s *defaults)
 	char *alang;
 	alang = accept_language_from_qlocale(loc);
 	if (alang != NULL) {
-		NSLOG(netsurfy, DEBUG, "accept_language \"%s\"", alang);
+		NSLOG(tinysurf, DEBUG, "accept_language \"%s\"", alang);
 		nsoption_set_charp(accept_language, alang);
 	}
 
@@ -393,7 +393,7 @@ void NS_Application::nsOptionUpdate()
 
 NS_Application::NS_Application(int &argc,
 			       char **argv,
-			       struct netsurfy_table *nsqt_table)
+			       struct tinysurf_table *nsqt_table)
 	: QApplication(argc, argv), m_settings_window(nullptr),
 	  m_bookmarks_window(nullptr), m_local_history_window(nullptr),
 	  m_global_history_window(nullptr), m_cookies_window(nullptr)
@@ -403,16 +403,16 @@ NS_Application::NS_Application(int &argc,
 	nsqtapp = this;
 
 	/* register operation tables */
-	res = netsurfy_register(nsqt_table);
+	res = tinysurf_register(nsqt_table);
 	if (res != NSERROR_OK) {
 		throw NS_Exception(
-			"NetSurfy operation table failed registration", res);
+			"TinySurf operation table failed registration", res);
 	}
 
 	/* organization setup for settings */
-	setOrganizationName("NetSurfy");
+	setOrganizationName("TinySurf");
 	setOrganizationDomain("netsurf-browser.org");
-	setApplicationName("NetSurfy");
+	setApplicationName("TinySurf");
 
 	// set up scheduler timer
 	m_schedule_timer = new QTimer(this);
@@ -424,7 +424,7 @@ NS_Application::NS_Application(int &argc,
 
 	/* Prep the resource search paths */
 	res = nsqt_init_resource_path(
-		"${HOME}/.netsurfy/:${NETSURFYRES}:" QT_RESPATH);
+		"${HOME}/.tinysurf/:${NETSURFYRES}:" QT_RESPATH);
 	if (res != NSERROR_OK) {
 		throw NS_Exception("Resources failed to initialise", res);
 	}
@@ -465,8 +465,8 @@ NS_Application::NS_Application(int &argc,
 	char *addr = NULL;
 	nsurl *url = NULL;
 
-	/* netsurfy initialisation */
-	res = netsurfy_init(NULL);
+	/* tinysurf initialisation */
+	res = tinysurf_init(NULL);
 	if (res != NSERROR_OK) {
 		throw NS_Exception("Netsurfy core initialisation failed", res);
 	}
@@ -475,7 +475,7 @@ NS_Application::NS_Application(int &argc,
 	char *resource_filename = filepath_find(respaths, "SearchEngines");
 	search_web_init(resource_filename);
 	if (resource_filename != NULL) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Using '%s' as Search Engines file",
 		      resource_filename);
@@ -549,14 +549,14 @@ NS_Application::~NS_Application()
 
 	res = hotlist_fini();
 	if (res != NSERROR_OK) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Error finalising hotlist: %s",
 		      messages_get_errorcode(res));
 	}
 
 	/* common finalisation */
-	netsurfy_exit();
+	tinysurf_exit();
 
 	/* finalise options */
 	nsoption_finalise(nsoptions, nsoptions_default);

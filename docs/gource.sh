@@ -63,7 +63,7 @@ FILENAME=${TITLE}-gource-${TYPE}-${OUTPUT_SIZE}-${CMODE}.mp4
 FILEFILTER="gtk/res/|framebuffer/res/|beos/res/|windows/res/|atari/res"
 
 # generate
-gource --title "NetSurfy Development" -${OUTPUT_SIZE} ${QPARAM} --max-files 10000 --bloom-multiplier 0.10 --bloom-intensity 0.5 --title ${TITLE} --highlight-all-users --output-framerate 25 --hide filenames --stop-at-end --date-format "%d %B %Y" --bloom-intensity 0.2 --file-filter "${FILEFILTER}" --key --camera-mode ${CMODE} --output-ppm-stream - > ${TMP_PPM}
+gource --title "TinySurf Development" -${OUTPUT_SIZE} ${QPARAM} --max-files 10000 --bloom-multiplier 0.10 --bloom-intensity 0.5 --title ${TITLE} --highlight-all-users --output-framerate 25 --hide filenames --stop-at-end --date-format "%d %B %Y" --bloom-intensity 0.2 --file-filter "${FILEFILTER}" --key --camera-mode ${CMODE} --output-ppm-stream - > ${TMP_PPM}
 
 #convert the ppm to movie
 ffmpeg -y -r 25 -f image2pipe -vcodec ppm -i ${TMP_PPM} -vcodec libx264 -b:v 2000k ${FILENAME}

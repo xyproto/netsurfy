@@ -1,13 +1,13 @@
 /*
  * Copyright 2017 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -31,8 +31,8 @@
 #include <libnsfb_event.h>
 
 #include "utils/log.h"
-#include "netsurfy/keypress.h"
-#include "netsurfy/plotters.h"
+#include "tinysurf/keypress.h"
+#include "tinysurf/plotters.h"
 #include "desktop/local_history.h"
 
 #include "framebuffer/gui.h"
@@ -54,7 +54,7 @@ static struct fb_local_history_window *local_history_window = NULL;
  * callback for mouse action on local history window
  *
  * \param fb_cw The fb core window structure.
- * \param mouse_state netsurfy mouse state on event
+ * \param mouse_state tinysurf mouse state on event
  * \param x location of event
  * \param y location of event
  * \return NSERROR_OK on success otherwise apropriate error code
@@ -82,7 +82,7 @@ static nserror fb_local_history_mouse(struct fb_corewindow *fb_cw,
  * callback for keypress on local history window
  *
  * \param fb_cw The fb core window structure.
- * \param nskey The netsurfy key code
+ * \param nskey The tinysurf key code
  * \return NSERROR_OK on success otherwise apropriate error code
  */
 static nserror fb_local_history_key(struct fb_corewindow *fb_cw, uint32_t nskey)

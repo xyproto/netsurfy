@@ -3,7 +3,7 @@
  * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
  * Copyright 2015 Daniel Silverstone <dsilvers@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
  * Released under the terms of the MIT License,
  *         http://www.opensource.org/licenses/mit-license
@@ -15,7 +15,7 @@ class Location {
 
 prologue Location()
 %{
-#include "netsurfy/browser_window.h"
+#include "tinysurf/browser_window.h"
 #include "javascript/quickjs/urlutils.h"
 
 static JSValue location_navigate(JSContext *ctx, nsurl *base, JSValueConst target, enum browser_window_nav_flags flags)
@@ -25,7 +25,7 @@ static JSValue location_navigate(JSContext *ctx, nsurl *base, JSValueConst targe
 	nsurl *joined;
 
 	if (priv_win == NULL || priv_win->win == NULL) {
-		NSLOG(netsurfy, INFO, "failed to get browser context");
+		NSLOG(tinysurf, INFO, "failed to get browser context");
 		return JS_UNDEFINED;
 	}
 	url = JS_ToCString(ctx, target);
@@ -65,7 +65,7 @@ method Location::reload()
 	if (priv_win != NULL && priv_win->win != NULL) {
 		browser_window_reload(priv_win->win, false);
 	} else {
-		NSLOG(netsurfy, INFO, "failed to get browser context");
+		NSLOG(tinysurf, INFO, "failed to get browser context");
 	}
 	return JS_UNDEFINED;
 %}

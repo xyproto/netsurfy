@@ -1,11 +1,11 @@
 --------------------------------------------------------------------------------
-  Usage Instructions for Framebuffer NetSurfy                  2nd October 2010
+  Usage Instructions for Framebuffer TinySurf                  2nd October 2010
 --------------------------------------------------------------------------------
 
   This document provides usage instructions for the Framebuffer version of 
-  NetSurfy.
+  TinySurf.
 
-  Framebuffer NetSurfy has been tested on Ubuntu and Debian.
+  Framebuffer TinySurf has been tested on Ubuntu and Debian.
 
 Overview
 ========
@@ -13,7 +13,7 @@ Overview
   What it is
   ----------
 
-  The NetSurfy framebuffer front end is primarily intended for kiosk
+  The TinySurf framebuffer front end is primarily intended for kiosk
    and embedded applications where there is insufficient Operating
    System support for a full graphical windowing environment.
 
@@ -54,7 +54,7 @@ Overview
    especially) and is not intended to replace native surface
    handlers.
 
-  If a high level windowing system is available then a native NetSurfy
+  If a high level windowing system is available then a native TinySurf
    frontend is almost certainly a better choice than attempting to use
    the framebuffer frontend.
 
@@ -121,11 +121,11 @@ Configuring
    default surface to use. Refer to the BUILDING-Framebuffer document
    for details.
 
-  As with any NetSurfy frontend run-time configuration is read from a
+  As with any TinySurf frontend run-time configuration is read from a
    "Choices" file. This file is a simple key:value list and by default
-   is located in "${HOME}/.netsurfy/Choices".
+   is located in "${HOME}/.tinysurf/Choices".
 
-  The standard [core user options](docs/netsurfy-options.md) are
+  The standard [core user options](docs/tinysurf-options.md) are
    available. In addition to the core options there are a number of
    values to control specific aspects of the framebuffer version.
 

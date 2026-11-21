@@ -124,7 +124,7 @@ set(NETSURFY_CORE_SOURCES
   desktop/knockout.c
   desktop/local_history.c
   desktop/mouse.c
-  desktop/netsurfy.c
+  desktop/tinysurf.c
   desktop/page-info.c
   desktop/plot_style.c
   desktop/print.c
@@ -236,7 +236,7 @@ if(NETSURFY_USE_QUICKJS)
   file(MAKE_DIRECTORY ${QUICKJS_GEN})
   execute_process(
     COMMAND ${NETSURFY_NSGENBIND} -I ${JAVASCRIPT_DIR}/WebIDL
-      ${JAVASCRIPT_DIR}/quickjs/netsurfy.bnd ${QUICKJS_GEN}
+      ${JAVASCRIPT_DIR}/quickjs/tinysurf.bnd ${QUICKJS_GEN}
     RESULT_VARIABLE nsgenbind_result
     OUTPUT_QUIET)
   if(NOT nsgenbind_result EQUAL 0)
@@ -274,7 +274,7 @@ endif()
 
 set(GTK_RES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/frontends/gtk/res)
 if(WIN32)
-  function(netsurfy_copy_resource source destination)
+  function(tinysurf_copy_resource source destination)
     if(NOT IS_DIRECTORY "${source}")
       file(SIZE "${source}" size)
       if(size LESS 512)
@@ -283,7 +283,7 @@ if(WIN32)
           get_filename_component(directory "${source}" DIRECTORY)
           if(EXISTS "${directory}/${link}")
             set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${source}")
-            netsurfy_copy_resource("${directory}/${link}" "${destination}")
+            tinysurf_copy_resource("${directory}/${link}" "${destination}")
             return()
           endif()
         endif()
@@ -293,13 +293,13 @@ if(WIN32)
       file(GLOB children CONFIGURE_DEPENDS "${source}/*")
       foreach(child IN LISTS children)
         get_filename_component(name "${child}" NAME)
-        netsurfy_copy_resource("${child}" "${destination}/${name}")
+        tinysurf_copy_resource("${child}" "${destination}/${name}")
       endforeach()
     else()
       configure_file("${source}" "${destination}" COPYONLY)
     endif()
   endfunction()
-  netsurfy_copy_resource("${GTK_RES_DIR}" "${NETSURFY_GEN}/resources")
+  tinysurf_copy_resource("${GTK_RES_DIR}" "${NETSURFY_GEN}/resources")
   set(GTK_RES_DIR ${NETSURFY_GEN}/resources)
 endif()
 set(MESSAGES_DIR ${NETSURFY_GEN}/messages)
@@ -321,7 +321,7 @@ add_custom_command(
   VERBATIM)
 list(APPEND NETSURFY_MESSAGES ${MESSAGES_DIR}/Messages)
 
-function(netsurfy_gresource name sourcedir)
+function(tinysurf_gresource name sourcedir)
   set(dependencies ${ARGN})
   if(NOT dependencies)
     execute_process(
@@ -351,34 +351,34 @@ function(netsurfy_gresource name sourcedir)
     DEPENDS ${GTK_RES_DIR}/${name}.gresource.xml ${dependencies}
     VERBATIM)
 endfunction()
-netsurfy_gresource(netsurfy ${GTK_RES_DIR})
-netsurfy_gresource(ui ${GTK_RES_DIR}/gtk4)
-netsurfy_gresource(messages ${MESSAGES_DIR} ${NETSURFY_MESSAGES})
+tinysurf_gresource(tinysurf ${GTK_RES_DIR})
+tinysurf_gresource(ui ${GTK_RES_DIR}/gtk4)
+tinysurf_gresource(messages ${MESSAGES_DIR} ${NETSURFY_MESSAGES})
 
-add_executable(netsurfy
+add_executable(tinysurf
   ${NETSURFY_CORE_SOURCES}
   ${NETSURFY_JAVASCRIPT_SOURCES}
   ${NETSURFY_GTK_SOURCES}
-  ${NETSURFY_GEN}/netsurfy_gresource.c
+  ${NETSURFY_GEN}/tinysurf_gresource.c
   ${NETSURFY_GEN}/ui_gresource.c
   ${NETSURFY_GEN}/messages_gresource.c)
-add_dependencies(netsurfy testament)
-set_target_properties(netsurfy PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+add_dependencies(tinysurf testament)
+set_target_properties(tinysurf PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 if(WIN32)
-  set_target_properties(netsurfy PROPERTIES WIN32_EXECUTABLE TRUE)
-  target_sources(netsurfy PRIVATE frontends/gtk/netsurfy.rc)
-  target_include_directories(netsurfy PRIVATE ${PROJECT_SOURCE_DIR}/img)
+  set_target_properties(tinysurf PROPERTIES WIN32_EXECUTABLE TRUE)
+  target_sources(tinysurf PRIVATE frontends/gtk/tinysurf.rc)
+  target_include_directories(tinysurf PRIVATE ${PROJECT_SOURCE_DIR}/img)
 endif()
 
-target_include_directories(netsurfy PRIVATE
+target_include_directories(tinysurf PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}/frontends
   ${CMAKE_CURRENT_SOURCE_DIR}/content/handlers
   ${NETSURFY_GEN})
 
-target_compile_definitions(netsurfy PRIVATE
+target_compile_definitions(tinysurf PRIVATE
   ${NETSURFY_CORE_DEFINES}
   gtk
   nsgtk
@@ -394,18 +394,18 @@ target_compile_definitions(netsurfy PRIVATE
   "GTK_RESPATH=\"${NETSURFY_GTK_RES_PATH}\""
   WITH_GRESOURCE)
 
-target_compile_options(netsurfy PRIVATE
+target_compile_options(tinysurf PRIVATE
   "$<$<COMPILE_LANGUAGE:C>:${NETSURFY_WARNING_FLAGS};-include;${NETSURFY_CONFIG_HEADER}>")
 
-target_link_libraries(netsurfy PRIVATE
+target_link_libraries(tinysurf PRIVATE
   ${NETSURFY_CORE_LIBRARIES}
   $<$<BOOL:${NETSURFY_USE_QUICKJS}>:qjs>
   PkgConfig::GTK)
 
-install(TARGETS netsurfy RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS tinysurf RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 if(NETSURFY_BUILD_HEADLESS)
-  add_executable(netsurfy-headless
+  add_executable(tinysurf-headless
     ${NETSURFY_CORE_SOURCES}
     ${NETSURFY_JAVASCRIPT_SOURCES}
     frontends/headless/401login.c
@@ -421,15 +421,15 @@ if(NETSURFY_BUILD_HEADLESS)
     frontends/headless/output.c
     frontends/headless/plot.c
     frontends/headless/schedule.c)
-  add_dependencies(netsurfy-headless testament)
-  set_target_properties(netsurfy-headless PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-  target_include_directories(netsurfy-headless PRIVATE
+  add_dependencies(tinysurf-headless testament)
+  set_target_properties(tinysurf-headless PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+  target_include_directories(tinysurf-headless PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/frontends
     ${CMAKE_CURRENT_SOURCE_DIR}/content/handlers
     ${NETSURFY_GEN})
-  target_compile_definitions(netsurfy-headless PRIVATE
+  target_compile_definitions(tinysurf-headless PRIVATE
     ${NETSURFY_CORE_DEFINES}
     nsheadless
     _XOPEN_SOURCE=700
@@ -437,14 +437,14 @@ if(NETSURFY_BUILD_HEADLESS)
     _BSD_SOURCE
     _DEFAULT_SOURCE
     "HEADLESS_RESPATH=\"${NETSURFY_GTK_RES_PATH}\"")
-  target_compile_options(netsurfy-headless PRIVATE ${NETSURFY_WARNING_FLAGS} -include ${NETSURFY_CONFIG_HEADER})
-  target_link_libraries(netsurfy-headless PRIVATE
+  target_compile_options(tinysurf-headless PRIVATE ${NETSURFY_WARNING_FLAGS} -include ${NETSURFY_CONFIG_HEADER})
+  target_link_libraries(tinysurf-headless PRIVATE
     ${NETSURFY_CORE_LIBRARIES}
     $<$<BOOL:${NETSURFY_USE_QUICKJS}>:qjs>)
 endif()
 
-set(NETSURFY_DATADIR ${CMAKE_INSTALL_DATADIR}/netsurfy)
-function(netsurfy_install_resolved destination)
+set(NETSURFY_DATADIR ${CMAKE_INSTALL_DATADIR}/tinysurf)
+function(tinysurf_install_resolved destination)
   foreach(path ${ARGN})
     get_filename_component(name ${path} NAME)
     get_filename_component(real_path ${path} REALPATH)
@@ -454,25 +454,25 @@ endfunction()
 
 set(GTK_RESOURCES
   languages SearchEngines ca-bundle.txt default.css adblock.css quirks.css
-  internal.css credits.html licence.html favicon.png netsurfy.png)
+  internal.css credits.html licence.html favicon.png tinysurf.png)
 list(TRANSFORM GTK_RESOURCES PREPEND ${GTK_RES_DIR}/)
 list(APPEND GTK_RESOURCES
   ${PROJECT_SOURCE_DIR}/img/gtk/default.ico
-  ${PROJECT_SOURCE_DIR}/img/gtk/netsurfy.xpm
-  ${PROJECT_SOURCE_DIR}/img/gtk/netsurfy-16x16.xpm)
+  ${PROJECT_SOURCE_DIR}/img/gtk/tinysurf.xpm
+  ${PROJECT_SOURCE_DIR}/img/gtk/tinysurf-16x16.xpm)
 file(GLOB GTK_UI_FILES ${GTK_RES_DIR}/gtk4/*.ui)
-netsurfy_install_resolved(${NETSURFY_DATADIR} ${GTK_RESOURCES} ${GTK_UI_FILES})
+tinysurf_install_resolved(${NETSURFY_DATADIR} ${GTK_RESOURCES} ${GTK_UI_FILES})
 install(FILES ${MESSAGES_DIR}/Messages DESTINATION ${NETSURFY_DATADIR})
 
 file(GLOB GTK_ICONS ${GTK_RES_DIR}/icons/*.png)
-netsurfy_install_resolved(${NETSURFY_DATADIR}/icons ${GTK_ICONS})
+tinysurf_install_resolved(${NETSURFY_DATADIR}/icons ${GTK_ICONS})
 file(GLOB GTK_THROBBER ${GTK_RES_DIR}/throbber/*.png)
-netsurfy_install_resolved(${NETSURFY_DATADIR}/throbber ${GTK_THROBBER})
-install(FILES ${PROJECT_SOURCE_DIR}/img/icons/256x256/apps/netsurfy.png
+tinysurf_install_resolved(${NETSURFY_DATADIR}/throbber ${GTK_THROBBER})
+install(FILES ${PROJECT_SOURCE_DIR}/img/icons/256x256/apps/tinysurf.png
   DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/256x256/apps)
 
 foreach(language ${NETSURFY_MESSAGES_LANGUAGES})
   file(GLOB language_files ${GTK_RES_DIR}/${language}/*)
-  netsurfy_install_resolved(${NETSURFY_DATADIR}/${language} ${language_files})
+  tinysurf_install_resolved(${NETSURFY_DATADIR}/${language} ${language_files})
   install(FILES ${MESSAGES_DIR}/${language}/Messages DESTINATION ${NETSURFY_DATADIR}/${language})
 endforeach()

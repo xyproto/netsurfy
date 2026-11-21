@@ -1,13 +1,13 @@
 /*
  * Copyright 2008 Vincent Sanders <vince@simtec.co.uk>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -202,7 +202,7 @@ void list_schedule(void)
 
 	gettimeofday(&tv, NULL);
 
-	NSLOG(netsurfy,
+	NSLOG(tinysurf,
 	      INFO,
 	      "schedule list at %ld:%ld",
 	      tv.tv_sec,
@@ -211,7 +211,7 @@ void list_schedule(void)
 	cur_nscb = schedule_list;
 
 	while (cur_nscb != NULL) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Schedule %p at %ld:%ld",
 		      cur_nscb,

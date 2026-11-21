@@ -1,5 +1,5 @@
 /*
- * This file is part of NetSurf's LibNSGIF, https://github.com/xyproto/netsurfy
+ * This file is part of NetSurf's LibNSGIF, https://github.com/xyproto/tinysurf
  * Licensed under the MIT License,
  *                http://www.opensource.org/licenses/mit-license.php
  *

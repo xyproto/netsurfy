@@ -1,5 +1,5 @@
 /*
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
  * Released under the terms of the MIT License,
  *         http://www.opensource.org/licenses/mit-license
@@ -10,8 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "netsurfy/types.h"
-#include "netsurfy/url_db.h"
+#include "tinysurf/types.h"
+#include "tinysurf/url_db.h"
 #include "utils/errors.h"
 #include "utils/nsurl.h"
 #include "content/fetch.h"
@@ -64,7 +64,7 @@ static const char start_page_head[] =
 	"</style>\n"
 	"</head>\n"
 	"<body><div class=\"page\">\n"
-	"<div class=\"brand\"><img src=\"resource:netsurfy.png\" alt=\"NetSurfy\"></div>\n"
+	"<div class=\"brand\"><img src=\"resource:tinysurf.png\" alt=\"TinySurf\"></div>\n"
 	"<form action=\"about:websearch\" method=\"get\">"
 	"<input name=\"q\" type=\"search\" autofocus "
 	"placeholder=\"Search the web or type an address\"></form>\n";

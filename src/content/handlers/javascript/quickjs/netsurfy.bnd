@@ -2,7 +2,7 @@
  *
  * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
  * Released under the terms of the MIT License,
  *         http://www.opensource.org/licenses/mit-license
@@ -21,10 +21,10 @@ binding qjs_libdom {
 	webidl "svg.idl";
 
 	preface	%{
-/* QuickJS JavaScript bindings for NetSurfy browser
+/* QuickJS JavaScript bindings for TinySurf browser
  *
  * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  * Released under the terms of the MIT License,
  *        http://www.opensource.org/licenses/mit-license
  */
@@ -60,11 +60,11 @@ struct dom_html_br_element;
 	prologue %{
 #include <string.h>
 #include "javascript/quickjs/qjsky.h"
-#include "netsurfy/types.h"
+#include "tinysurf/types.h"
 #include "html/box.h"
 #include "html/box_construct.h"
-#include "netsurfy/browser_window.h"
-#include "netsurfy/window.h"
+#include "tinysurf/browser_window.h"
+#include "tinysurf/window.h"
 #include "desktop/browser_private.h"
 #include "desktop/gui_internal.h"
 %};

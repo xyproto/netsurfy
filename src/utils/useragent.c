@@ -2,13 +2,13 @@
  * Copyright 2007 Daniel Silverstone <dsilvers@digital-scurf.org>
  * Copyright 2007 Rob Kendrick <rjek@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -30,7 +30,7 @@
 static const char *core_user_agent_string = NULL;
 
 #ifndef NETSURFY_UA_FORMAT_STRING
-#define NETSURFY_UA_FORMAT_STRING "Mozilla/5.0 (%s) NetSurfy/%d.%d"
+#define NETSURFY_UA_FORMAT_STRING "Mozilla/5.0 (%s) TinySurf/%d.%d"
 #endif
 
 /**
@@ -56,8 +56,8 @@ static void user_agent_build_string(void)
 		       0,
 		       NETSURFY_UA_FORMAT_STRING,
 		       sysname,
-		       netsurfy_version_major,
-		       netsurfy_version_minor);
+		       tinysurf_version_major,
+		       tinysurf_version_minor);
 	ua_string = malloc(len + 1);
 	if (!ua_string) {
 		/** \todo this needs handling better */
@@ -67,12 +67,12 @@ static void user_agent_build_string(void)
 		 len + 1,
 		 NETSURFY_UA_FORMAT_STRING,
 		 sysname,
-		 netsurfy_version_major,
-		 netsurfy_version_minor);
+		 tinysurf_version_major,
+		 tinysurf_version_minor);
 
 	core_user_agent_string = ua_string;
 
-	NSLOG(netsurfy,
+	NSLOG(tinysurf,
 	      INFO,
 	      "Built user agent \"%s\"",
 	      core_user_agent_string);

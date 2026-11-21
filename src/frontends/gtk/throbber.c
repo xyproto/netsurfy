@@ -2,13 +2,13 @@
  * Copyright 2008 Rob Kendrick <rjek@netsurf-browser.org>
  * Copyright 2008 Sean Fox <dyntryx@gmail.com>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -67,12 +67,12 @@ nserror nsgtk_throbber_init(void)
 		if (res != NSERROR_OK) {
 			break;
 		}
-		NSLOG(netsurfy, INFO, "%s", resname);
+		NSLOG(tinysurf, INFO, "%s", resname);
 	}
 
 	if (frame < 1) {
 		/* we need at least two frames - one for idle, one for active */
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Insufficent number of frames (%d) in throbber animation.",
 		      frame);

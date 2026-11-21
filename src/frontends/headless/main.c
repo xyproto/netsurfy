@@ -1,13 +1,13 @@
 /*
  * Copyright 2011 Daniel Silverstone <dsilvers@digital-scurf.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -33,10 +33,10 @@
 #include "utils/filepath.h"
 #include "utils/nsoption.h"
 #include "utils/nsurl.h"
-#include "netsurfy/misc.h"
-#include "netsurfy/netsurfy.h"
-#include "netsurfy/url_db.h"
-#include "netsurfy/cookie_db.h"
+#include "tinysurf/misc.h"
+#include "tinysurf/tinysurf.h"
+#include "tinysurf/url_db.h"
+#include "tinysurf/cookie_db.h"
 #include "content/fetch.h"
 #include "content/backing_store.h"
 
@@ -63,14 +63,14 @@ char **respaths;
 static bool headless_done = false;
 
 static const char headless_usage[] =
-	"Usage: netsurfy-headless [OPTION]... [--duck QUERY...]\n"
+	"Usage: tinysurf-headless [OPTION]... [--duck QUERY...]\n"
 	"\n"
 	"Without --duck, commands such as \"WINDOW NEW <url>\" are read from\n"
 	"standard input and events are written to standard output.\n"
 	"\n"
 	"  --duck QUERY...   search DuckDuckGo and print the results as JSON;\n"
 	"                    exits with 2 if DuckDuckGo blocks the search\n"
-	"  --NAME=VALUE      set a NetSurfy option, like --enable_javascript=0\n"
+	"  --NAME=VALUE      set a TinySurf option, like --enable_javascript=0\n"
 	"  -v                write the log to standard error\n"
 	"  --help            show this help and exit\n"
 	"  --version         show the version and exit\n";
@@ -86,7 +86,7 @@ static char *headless_args(int *argc, char **argv)
 			exit(EXIT_SUCCESS);
 		}
 		if (strcmp(argv[i], "--version") == 0) {
-			printf("NetSurfy %s\n", netsurfy_version);
+			printf("TinySurf %s\n", tinysurf_version);
 			exit(EXIT_SUCCESS);
 		}
 		if (strcmp(argv[i], "--duck") != 0) {
@@ -108,7 +108,7 @@ static char *headless_args(int *argc, char **argv)
 		*argc = i;
 		argv[i] = NULL;
 		if (query[0] == '\0') {
-			fputs("netsurfy-headless: --duck needs a search query\n",
+			fputs("tinysurf-headless: --duck needs a search query\n",
 			      stderr);
 			exit(EXIT_FAILURE);
 		}
@@ -303,9 +303,9 @@ static void headless_options_handle_command(int argc, char **argv)
 static nserror set_defaults(struct nsoption_s *defaults)
 {
 	/* Set defaults for absent option strings */
-	nsoption_setnull_charp(cookie_file, strdup("~/.netsurfy/Cookies"));
-	nsoption_setnull_charp(cookie_jar, strdup("~/.netsurfy/Cookies"));
-	nsoption_setnull_charp(url_file, strdup("~/.netsurfy/URLs"));
+	nsoption_setnull_charp(cookie_file, strdup("~/.tinysurf/Cookies"));
+	nsoption_setnull_charp(cookie_jar, strdup("~/.tinysurf/Cookies"));
+	nsoption_setnull_charp(url_file, strdup("~/.tinysurf/URLs"));
 
 	return NSERROR_OK;
 }
@@ -367,20 +367,20 @@ static void headless_run(void)
 		/* setup timeout */
 		switch (schedtm) {
 		case -1:
-			NSLOG(netsurfy, INFO, "Iterate blocking");
+			NSLOG(tinysurf, INFO, "Iterate blocking");
 			moutf(MOUT_GENERIC, "POLL BLOCKING");
 			timeout = NULL;
 			break;
 
 		case 0:
-			NSLOG(netsurfy, INFO, "Iterate immediate");
+			NSLOG(tinysurf, INFO, "Iterate immediate");
 			tv.tv_sec = 0;
 			tv.tv_usec = 0;
 			timeout = &tv;
 			break;
 
 		default:
-			NSLOG(netsurfy, INFO, "Iterate non-blocking");
+			NSLOG(tinysurf, INFO, "Iterate non-blocking");
 			moutf(MOUT_GENERIC, "POLL TIMED %d", schedtm);
 			tv.tv_sec = schedtm / 1000; /* miliseconds to seconds */
 			tv.tv_usec = (schedtm % 1000) *
@@ -395,7 +395,7 @@ static void headless_run(void)
 				&exc_fd_set,
 				timeout);
 		if (rdy_fd < 0) {
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      CRITICAL,
 			      "Unable to select: %s",
 			      strerror(errno));
@@ -470,7 +470,7 @@ int main(int argc, char **argv)
 	char buf[PATH_MAX];
 	char *query;
 	nserror ret;
-	struct netsurfy_table headless_table = {
+	struct tinysurf_table headless_table = {
 		.misc = &headless_misc_table,
 		.window = headless_window_table,
 		.download = headless_download_table,
@@ -492,9 +492,9 @@ int main(int argc, char **argv)
 	query = headless_args(&argc, argv);
 	headless_quiet = query != NULL;
 
-	ret = netsurfy_register(&headless_table);
+	ret = tinysurf_register(&headless_table);
 	if (ret != NSERROR_OK) {
-		die("NetSurfy operation table failed registration");
+		die("TinySurf operation table failed registration");
 	}
 
 	/* Unbuffer stdin/out/err */
@@ -504,7 +504,7 @@ int main(int argc, char **argv)
 
 	/* Prep the search paths */
 	respaths = nsheadless_init_resource(
-		"${HOME}/.netsurfy/:${NETSURFYRES}:" HEADLESS_RESPATH
+		"${HOME}/.tinysurf/:${NETSURFYRES}:" HEADLESS_RESPATH
 		":./frontends/headless/res");
 
 	/* initialise logging. Not fatal if it fails but not much we can do
@@ -525,14 +525,14 @@ int main(int argc, char **argv)
 	messages = filepath_find(respaths, "Messages");
 	ret = messages_add_from_file(messages);
 	if (ret != NSERROR_OK) {
-		NSLOG(netsurfy, INFO, "Messages failed to load");
+		NSLOG(tinysurf, INFO, "Messages failed to load");
 	}
 
 	/* common initialisation */
-	ret = netsurfy_init(NULL);
+	ret = tinysurf_init(NULL);
 	free(messages);
 	if (ret != NSERROR_OK) {
-		die("NetSurfy failed to initialise");
+		die("TinySurf failed to initialise");
 	}
 
 	filepath_sfinddef(respaths, buf, "mime.types", "/etc/");
@@ -583,7 +583,7 @@ int main(int argc, char **argv)
 	moutf(MOUT_GENERIC, "CLOSING_DOWN");
 	headless_kill_browser_windows();
 
-	netsurfy_exit();
+	tinysurf_exit();
 	moutf(MOUT_GENERIC, "FINISHED");
 
 	/* finalise options */

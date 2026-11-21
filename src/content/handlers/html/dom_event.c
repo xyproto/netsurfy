@@ -2,13 +2,13 @@
  * Copyright 2010 Michael Drake <tlsa@netsurf-browser.org>
  * Copyright 2020 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -38,7 +38,7 @@
 #include "content/content.h"
 #include "javascript/js.h"
 
-#include "netsurfy/bitmap.h"
+#include "tinysurf/bitmap.h"
 
 #include "html/private.h"
 #include "html/object.h"
@@ -265,40 +265,40 @@ dom_SCRIPT_showed_up(html_content *htmlc, dom_html_script_element *script)
 	bool within;
 
 	if (!htmlc->enable_scripting) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Encountered a script, but scripting is off, ignoring");
 		return;
 	}
 
-	NSLOG(netsurfy,
+	NSLOG(tinysurf,
 	      DEEPDEBUG,
 	      "Encountered a script, node %p showed up",
 	      script);
 
 	exc = dom_html_script_element_get_flags(script, &flags);
 	if (exc != DOM_NO_ERR) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      DEEPDEBUG,
 		      "Unable to retrieve flags, giving up");
 		return;
 	}
 
 	if (flags & DOM_HTML_SCRIPT_ELEMENT_FLAG_PARSER_INSERTED) {
-		NSLOG(netsurfy, DEBUG, "Script was parser inserted, skipping");
+		NSLOG(tinysurf, DEBUG, "Script was parser inserted, skipping");
 		return;
 	}
 
 	exc = dom_node_contains(htmlc->document, script, &within);
 	if (exc != DOM_NO_ERR) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      DEBUG,
 		      "Unable to determine if script was within document, ignoring");
 		return;
 	}
 
 	if (!within) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      DEBUG,
 		      "Script was not within the document, ignoring for now");
 		return;
@@ -306,16 +306,16 @@ dom_SCRIPT_showed_up(html_content *htmlc, dom_html_script_element *script)
 
 	res = html_process_script(htmlc, (dom_node *)script);
 	if (res == DOM_HUBBUB_OK) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      DEEPDEBUG,
 		      "Inserted script has finished running");
 	} else {
 		if (res == (DOM_HUBBUB_HUBBUB_ERR | HUBBUB_PAUSED)) {
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      DEEPDEBUG,
 			      "Inserted script has launced asynchronously");
 		} else {
-			NSLOG(netsurfy, DEEPDEBUG, "Failure starting script");
+			NSLOG(tinysurf, DEEPDEBUG, "Failure starting script");
 		}
 	}
 }
@@ -705,7 +705,7 @@ dom_default_action_DOMNodeInserted_cb(struct dom_event *evt, void *pw)
 				      (dom_node *)node,
 				      htmlc);
 		if (exc != DOM_NO_ERR) {
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      DEBUG,
 			      "libdom_treewalk failed: %d",
 			      exc);
@@ -720,7 +720,7 @@ dom_default_action_DOMNodeInserted_cb(struct dom_event *evt, void *pw)
 				content_broadcast(&htmlc->base,
 						  CONTENT_MSG_GETTHREAD,
 						  &msg_data);
-				NSLOG(netsurfy,
+				NSLOG(tinysurf,
 				      INFO,
 				      "javascript context: %p (htmlc: %p)",
 				      htmlc->jsthread,
@@ -814,7 +814,7 @@ html_dom_event_fetcher(dom_string *type,
 		       dom_default_action_phase phase,
 		       void **pw)
 {
-	NSLOG(netsurfy,
+	NSLOG(tinysurf,
 	      DEEPDEBUG,
 	      "phase:%d type:%s",
 	      phase,

@@ -1,13 +1,13 @@
 /*
  * Copyright 2014 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -21,7 +21,7 @@
  * top level interface table.
  *
  * \note This should probably not be included directly but rather
- * through netsurfy.h or gui_internal.h
+ * through tinysurf.h or gui_internal.h
  */
 
 #ifndef _NETSURFY_DESKTOP_GUI_TABLE_H_
@@ -41,11 +41,11 @@ struct gui_bitmap_table;
 struct gui_layout_table;
 
 /**
- * NetSurfy operation function table
+ * TinySurf operation function table
  *
  * Function table implementing interface operations for the browser core.
  */
-struct netsurfy_table {
+struct tinysurf_table {
 
 	/**
 	 * Browser table.

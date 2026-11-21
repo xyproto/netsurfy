@@ -1,13 +1,13 @@
 /*
  * Copyright 2022 Michael Drake <tlsa@nesturf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -25,8 +25,8 @@
 
 #include <nsutils/endian.h>
 
-#include "netsurfy/types.h"
-#include "netsurfy/bitmap.h"
+#include "tinysurf/types.h"
+#include "tinysurf/bitmap.h"
 
 /** Pixel format: colour component order. */
 struct bitmap_colour_layout {
@@ -43,12 +43,12 @@ extern bitmap_fmt_t bitmap_fmt;
 extern struct bitmap_colour_layout bitmap_layout;
 
 /**
- * Convert a bitmap pixel to a NetSurfy colour (0xAARRGGBB).
+ * Convert a bitmap pixel to a TinySurf colour (0xAARRGGBB).
  *
  * The bitmap must be in the client format.
  *
  * \param[in]  Pointer to a pixel in the bitmap's pixel data.
- * \return The corresponding NetSurfy colour.
+ * \return The corresponding TinySurf colour.
  */
 static inline colour bitmap_pixel_to_colour(const uint8_t *pixel)
 {

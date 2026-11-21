@@ -1,13 +1,13 @@
 /*
  * Copyright 2009 John-Mark Bell <jmb@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -26,8 +26,8 @@
 #include "utils/corestrings.h"
 #include "utils/log.h"
 #include "utils/nsurl.h"
-#include "netsurfy/plot_style.h"
-#include "netsurfy/url_db.h"
+#include "tinysurf/plot_style.h"
+#include "tinysurf/url_db.h"
 #include "desktop/system_colour.h"
 
 #include "css/internal.h"
@@ -200,20 +200,20 @@ css_stylesheet *nscss_create_inline_style(const uint8_t *data,
 
 	error = css_stylesheet_create(&params, &sheet);
 	if (error != CSS_OK) {
-		NSLOG(netsurfy, INFO, "Failed creating sheet: %d", error);
+		NSLOG(tinysurf, INFO, "Failed creating sheet: %d", error);
 		return NULL;
 	}
 
 	error = css_stylesheet_append_data(sheet, data, len);
 	if (error != CSS_OK && error != CSS_NEEDDATA) {
-		NSLOG(netsurfy, INFO, "failed appending data: %d", error);
+		NSLOG(tinysurf, INFO, "failed appending data: %d", error);
 		css_stylesheet_destroy(sheet);
 		return NULL;
 	}
 
 	error = css_stylesheet_data_done(sheet);
 	if (error != CSS_OK) {
-		NSLOG(netsurfy, INFO, "failed completing parse: %d", error);
+		NSLOG(tinysurf, INFO, "failed completing parse: %d", error);
 		css_stylesheet_destroy(sheet);
 		return NULL;
 	}
@@ -245,7 +245,7 @@ static void nscss_dom_user_data_handler(dom_node_operation operation,
 						     dst,
 						     data);
 		if (error != CSS_OK)
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      INFO,
 			      "Failed to clone libcss_node_data.");
 		break;
@@ -258,7 +258,7 @@ static void nscss_dom_user_data_handler(dom_node_operation operation,
 						     NULL,
 						     data);
 		if (error != CSS_OK)
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      INFO,
 			      "Failed to update libcss_node_data.");
 		break;
@@ -273,13 +273,13 @@ static void nscss_dom_user_data_handler(dom_node_operation operation,
 						     NULL,
 						     data);
 		if (error != CSS_OK)
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      INFO,
 			      "Failed to delete libcss_node_data.");
 		break;
 
 	default:
-		NSLOG(netsurfy, INFO, "User data operation not handled.");
+		NSLOG(tinysurf, INFO, "User data operation not handled.");
 		assert(0);
 	}
 }

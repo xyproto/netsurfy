@@ -1,13 +1,13 @@
 /*
  * Copyright 2011 John-Mark Bell <jmb@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -19,11 +19,11 @@
 /** \file
  * The image content handler intermediate image cache.
  *
- * This cache allows netsurfy to use a generic intermediate bitmap
+ * This cache allows tinysurf to use a generic intermediate bitmap
  * format without keeping the
  * intermediate representation in memory.
  *
- * The bitmap structure is opaque to the rest of netsurfy and is
+ * The bitmap structure is opaque to the rest of tinysurf and is
  * controlled by the platform-specific code (see image/bitmap.h for
  * detials). All image content handlers convert into this format and
  * pass it to the plot functions for display,
@@ -38,7 +38,7 @@
 #define NETSURFY_IMAGE_IMAGE_CACHE_H_
 
 #include "utils/errors.h"
-#include "netsurfy/content_type.h"
+#include "tinysurf/content_type.h"
 
 struct content;
 struct content_redraw_data;
@@ -74,7 +74,7 @@ nserror image_cache_fini(void);
  * @param bitmap A bitmap representing the already converted content or NULL.
  * @param convert A function pointer to convert the content into a bitmap or
  * NULL.
- * @return A netsurfy error code.
+ * @return A tinysurf error code.
  */
 nserror image_cache_add(struct content *content,
 			struct bitmap *bitmap,

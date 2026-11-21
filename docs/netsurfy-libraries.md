@@ -1,12 +1,12 @@
 --------------------------------------------------------------------------------
-  NetSurfy project libraries required                               1 July 2012
+  TinySurf project libraries required                               1 July 2012
 --------------------------------------------------------------------------------
 
-  To build NetSurfy, you need the libraries required by the core, and any extra
+  To build TinySurf, you need the libraries required by the core, and any extra
   libraries required by the specific front end you are building.
 
 
-  NetSurfy Core
+  TinySurf Core
 ==============
 
   Required:

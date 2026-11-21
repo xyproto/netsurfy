@@ -1,7 +1,7 @@
 Core Window Interface
 =====================
 
-The NetSurfy core provides an optional API to frontend implementations
+The TinySurf core provides an optional API to frontend implementations
 which allows a number of "standard" window content interfaces to be
 provided.
 
@@ -27,7 +27,7 @@ core window API
 The API is fairly simple and simply involves passing a callback table
 and context pointer to the interface element being constructed.
 
-The header that defines the callback interface is netsurfy/core_window.h 
+The header that defines the callback interface is tinysurf/core_window.h 
 
 The callback table contains five function pointer interfaces which the
 frontend must implement for the core.
@@ -121,13 +121,13 @@ frontends/example/corewindow.h
     /*
      * Copyright 2016 Vincent Sanders <vince@netsurf-browser.org>
      *
-     * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+     * This file is part of TinySurf, https://github.com/xyproto/tinysurf
      *
-     * NetSurfy is free software; you can redistribute it and/or modify
+     * TinySurf is free software; you can redistribute it and/or modify
      * it under the terms of the GNU General Public License as published by
      * the Free Software Foundation; version 2 of the License.
      *
-     * NetSurfy is distributed in the hope that it will be useful,
+     * TinySurf is distributed in the hope that it will be useful,
      * but WITHOUT ANY WARRANTY; without even the implied warranty of
      * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
      * GNU General Public License for more details.
@@ -139,7 +139,7 @@ frontends/example/corewindow.h
     #ifndef EXAMPLE_COREWINDOW_H
     #define EXAMPLE_COREWINDOW_H
     
-    #include "netsurfy/core_window.h"
+    #include "tinysurf/core_window.h"
     
     /**
      * example core window state
@@ -174,7 +174,7 @@ frontends/example/corewindow.h
              * callback for keypress on example core window
              *
              * \param example_cw The example core window structure.
-             * \param nskey The netsurfy key code.
+             * \param nskey The tinysurf key code.
              * \return NSERROR_OK if key processed,
              *         NSERROR_NOT_IMPLEMENTED if key not processed
              *         otherwise apropriate error code
@@ -219,13 +219,13 @@ frontends/example/corewindow.c
     /*
      * Copyright 2016 Vincent Sanders <vince@netsurf-browser.org>
      *
-     * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+     * This file is part of TinySurf, https://github.com/xyproto/tinysurf
      *
-     * NetSurfy is free software; you can redistribute it and/or modify
+     * TinySurf is free software; you can redistribute it and/or modify
      * it under the terms of the GNU General Public License as published by
      * the Free Software Foundation; version 2 of the License.
      *
-     * NetSurfy is distributed in the hope that it will be useful,
+     * TinySurf is distributed in the hope that it will be useful,
      * but WITHOUT ANY WARRANTY; without even the implied warranty of
      * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
      * GNU General Public License for more details.
@@ -257,9 +257,9 @@ frontends/example/corewindow.c
     #include "utils/utils.h"
     #include "utils/messages.h"
     #include "utils/utf8.h"
-    #include "netsurfy/keypress.h"
-    #include "netsurfy/mouse.h"
-    #include "netsurfy/plot_style.h"
+    #include "tinysurf/keypress.h"
+    #include "tinysurf/mouse.h"
+    #include "tinysurf/plot_style.h"
     
     /* extremely likely there will be additional headers required in a real frontend */
     #include "example/corewindow.h"
@@ -422,13 +422,13 @@ frontends/example/ssl_cert.h
     /*
      * Copyright 2016 Vincent Sanders <vince@netsurf-browser.org>
      *
-     * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+     * This file is part of TinySurf, https://github.com/xyproto/tinysurf
      *
-     * NetSurfy is free software; you can redistribute it and/or modify
+     * TinySurf is free software; you can redistribute it and/or modify
      * it under the terms of the GNU General Public License as published by
      * the Free Software Foundation; version 2 of the License.
      *
-     * NetSurfy is distributed in the hope that it will be useful,
+     * TinySurf is distributed in the hope that it will be useful,
      * but WITHOUT ANY WARRANTY; without even the implied warranty of
      * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
      * GNU General Public License for more details.
@@ -463,13 +463,13 @@ frontends/example/ssl_cert.c
     /*
      * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
      *
-     * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+     * This file is part of TinySurf, https://github.com/xyproto/tinysurf
      *
-     * NetSurfy is free software; you can redistribute it and/or modify
+     * TinySurf is free software; you can redistribute it and/or modify
      * it under the terms of the GNU General Public License as published by
      * the Free Software Foundation; version 2 of the License.
      *
-     * NetSurfy is distributed in the hope that it will be useful,
+     * TinySurf is distributed in the hope that it will be useful,
      * but WITHOUT ANY WARRANTY; without even the implied warranty of
      * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
      * GNU General Public License for more details.
@@ -487,8 +487,8 @@ frontends/example/ssl_cert.c
     #include <stdlib.h>
     
     #include "utils/log.h"
-    #include "netsurfy/keypress.h"
-    #include "netsurfy/plotters.h"
+    #include "tinysurf/keypress.h"
+    #include "tinysurf/plotters.h"
     #include "desktop/sslcert_viewer.h"
     
     #include "example/corewindow.h"
@@ -548,7 +548,7 @@ frontends/example/ssl_cert.c
      * callback for mouse action for certificate verify on core window
      *
      * \param example_cw The example core window structure.
-     * \param mouse_state netsurfy mouse state on event
+     * \param mouse_state tinysurf mouse state on event
      * \param x location of event
      * \param y location of event
      * \return NSERROR_OK on success otherwise apropriate error code
@@ -571,7 +571,7 @@ frontends/example/ssl_cert.c
      * callback for keypress for certificate verify on core window
      *
      * \param example_cw The example core window structure.
-     * \param nskey The netsurfy key code
+     * \param nskey The tinysurf key code
      * \return NSERROR_OK on success otherwise apropriate error code
      */
     static nserror

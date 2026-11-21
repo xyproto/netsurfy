@@ -3,7 +3,7 @@
  * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
  * Copyright 2015 Daniel Silverstone <dsilvers@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
  * Released under the terms of the MIT License,
  *         http://www.opensource.org/licenses/mit-license
@@ -15,7 +15,7 @@ class Console {
 #include <stdlib.h>
 #include <string.h>
 #include <nsutils/time.h>
-#include "netsurfy/browser_window.h"
+#include "tinysurf/browser_window.h"
 
 static void
 write_log_message(JSContext *ctx, const char *msg, size_t msglen, browser_window_console_flags flags)
@@ -26,7 +26,7 @@ write_log_message(JSContext *ctx, const char *msg, size_t msglen, browser_window
 	    browser_window_console_log(priv_win->win, BW_CS_SCRIPT_CONSOLE,
 				       msg, msglen,
 				       flags) != NSERROR_OK) {
-		NSLOG(netsurfy, DEBUG, "Unable to log: %.*s", (int)msglen, msg);
+		NSLOG(tinysurf, DEBUG, "Unable to log: %.*s", (int)msglen, msg);
 	}
 }
 

@@ -1,13 +1,13 @@
 /*
  * Copyright 2011 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -18,7 +18,7 @@
 
 /**
  * \file
- * NetSurfy URL handling implementation.
+ * TinySurf URL handling implementation.
  *
  * This is the common implementation of all URL handling within the
  * browser. This implementation is based upon RFC3986 although this has
@@ -64,7 +64,7 @@
 
 
 /******************************************************************************
- * NetSurfy URL Public API                                                     *
+ * TinySurf URL Public API                                                     *
  ******************************************************************************/
 
 /* exported interface, documented in nsurl.h */
@@ -90,7 +90,7 @@ void nsurl_unref(nsurl *url)
 	/* Release lwc strings */
 	nsurl__components_destroy(&url->components);
 
-	/* Free the NetSurfy URL */
+	/* Free the TinySurf URL */
 	free(url);
 }
 
@@ -241,7 +241,7 @@ lwc_string *nsurl_get_component(const nsurl *url, nsurl_component part)
 			       : NULL;
 
 	default:
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Unsupported value passed to part param.");
 		assert(0);
@@ -318,7 +318,7 @@ bool nsurl_has_component(const nsurl *url, nsurl_component part)
 			return false;
 
 	default:
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Unsupported value passed to part param.");
 		assert(0);
@@ -505,7 +505,7 @@ nserror nsurl_defragment(const nsurl *url, nsurl **no_frag)
 		length -= 1 + lwc_string_length(url->components.fragment);
 	}
 
-	/* Create NetSurfy URL object */
+	/* Create TinySurf URL object */
 	*no_frag = malloc(sizeof(nsurl) + length + 1); /* Add 1 for \0 */
 	if (*no_frag == NULL) {
 		return NSERROR_NOMEM;
@@ -569,7 +569,7 @@ nserror nsurl_refragment(const nsurl *url, lwc_string *frag, nsurl **new_url)
 	/* Set new_url's length */
 	len = base_len + 1 /* # */ + frag_len;
 
-	/* Create NetSurfy URL object */
+	/* Create TinySurf URL object */
 	*new_url = malloc(sizeof(nsurl) + len + 1); /* Add 1 for \0 */
 	if (*new_url == NULL) {
 		return NSERROR_NOMEM;
@@ -654,7 +654,7 @@ nsurl_replace_query(const nsurl *url, const char *query, nsurl **new_url)
 	/* compute new url string length */
 	length += base_len;
 
-	/* Create NetSurfy URL object */
+	/* Create TinySurf URL object */
 	*new_url = malloc(sizeof(nsurl) + length + 1); /* Add 1 for \0 */
 	if (*new_url == NULL) {
 		lwc_string_unref(lwc_query);
@@ -734,7 +734,7 @@ nsurl_replace_scheme(const nsurl *url, lwc_string *scheme, nsurl **new_url)
 	/* Set new_url's length */
 	len = base_len + scheme_len;
 
-	/* Create NetSurfy URL object */
+	/* Create TinySurf URL object */
 	*new_url = malloc(sizeof(nsurl) + len + 1); /* Add 1 for \0 */
 	if (*new_url == NULL) {
 		return NSERROR_NOMEM;
@@ -957,7 +957,7 @@ nserror nsurl_parent(const nsurl *url, nsurl **new_url)
 	}
 	len -= old_path_len - new_path_len;
 
-	/* Create NetSurfy URL object */
+	/* Create TinySurf URL object */
 	*new_url = malloc(sizeof(nsurl) + len + 1); /* Add 1 for \0 */
 	if (*new_url == NULL) {
 		return NSERROR_NOMEM;

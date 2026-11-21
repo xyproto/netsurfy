@@ -3,13 +3,13 @@
  * Copyright 2005 James Bursa <bursa@users.sourceforge.net>
  * Copyright 2008 Adam Blokus <adamblokus@gmail.com>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -36,7 +36,7 @@
 #include "utils/log.h"
 #include "utils/utils.h"
 #include "utils/nsoption.h"
-#include "netsurfy/plotters.h"
+#include "tinysurf/plotters.h"
 #include "desktop/print.h"
 #include "desktop/printer.h"
 
@@ -158,7 +158,7 @@ static inline void nsgtk_set_line_width(plot_style_fixed width)
 static nserror
 nsgtk_print_plot_clip(const struct redraw_context *ctx, const struct rect *clip)
 {
-	NSLOG(netsurfy,
+	NSLOG(tinysurf,
 	      INFO,
 	      "Clipping. x0: %i ;\t y0: %i ;\t x1: %i ;\t y1: %i",
 	      clip->x0,
@@ -344,7 +344,7 @@ static nserror nsgtk_print_plot_rectangle(const struct redraw_context *ctx,
 					  const plot_style_t *style,
 					  const struct rect *rect)
 {
-	NSLOG(netsurfy,
+	NSLOG(tinysurf,
 	      INFO,
 	      "x0: %i ;\t y0: %i ;\t x1: %i ;\t y1: %i",
 	      rect->x0,
@@ -412,7 +412,7 @@ static nserror nsgtk_print_plot_polygon(const struct redraw_context *ctx,
 {
 	unsigned int i;
 
-	NSLOG(netsurfy, INFO, "Plotting polygon.");
+	NSLOG(tinysurf, INFO, "Plotting polygon.");
 
 	nsgtk_print_set_colour(style->fill_colour);
 	nsgtk_print_set_solid();
@@ -420,11 +420,11 @@ static nserror nsgtk_print_plot_polygon(const struct redraw_context *ctx,
 	cairo_set_line_width(gtk_print_current_cr, 0);
 	cairo_move_to(gtk_print_current_cr, p[0], p[1]);
 
-	NSLOG(netsurfy, INFO, "Starting line at: %i\t%i", p[0], p[1]);
+	NSLOG(tinysurf, INFO, "Starting line at: %i\t%i", p[0], p[1]);
 
 	for (i = 1; i != n; i++) {
 		cairo_line_to(gtk_print_current_cr, p[i * 2], p[i * 2 + 1]);
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Drawing line to: %i\t%i",
 		      p[i * 2],
@@ -464,7 +464,7 @@ static nserror nsgtk_print_plot_path(const struct redraw_context *ctx,
 		return NSERROR_OK;
 
 	if (p[0] != PLOTTER_PATH_MOVE) {
-		NSLOG(netsurfy, INFO, "Path does not start with move");
+		NSLOG(tinysurf, INFO, "Path does not start with move");
 		return NSERROR_INVALID;
 	}
 
@@ -502,7 +502,7 @@ static nserror nsgtk_print_plot_path(const struct redraw_context *ctx,
 				       p[i + 6]);
 			i += 7;
 		} else {
-			NSLOG(netsurfy, INFO, "bad path command %f", p[i]);
+			NSLOG(tinysurf, INFO, "bad path command %f", p[i]);
 			cairo_new_path(gtk_print_current_cr);
 			cairo_set_matrix(gtk_print_current_cr, &old_ctm);
 			return NSERROR_INVALID;
@@ -802,7 +802,7 @@ void gtk_print_signal_begin_print(GtkPrintOperation *operation,
 	int page_number;
 	double height_on_page, height_to_print;
 
-	NSLOG(netsurfy, INFO, "Begin print");
+	NSLOG(tinysurf, INFO, "Begin print");
 
 	settings = user_data;
 
@@ -823,7 +823,7 @@ void gtk_print_signal_begin_print(GtkPrintOperation *operation,
 
 	} else {
 
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "page_width: %f ;page_height: %f; content height: %lf",
 		      settings->page_width,
@@ -855,7 +855,7 @@ void gtk_print_signal_draw_page(GtkPrintOperation *operation,
 				gint page_nr,
 				gpointer user_data)
 {
-	NSLOG(netsurfy, INFO, "Draw Page");
+	NSLOG(tinysurf, INFO, "Draw Page");
 	gtk_print_current_cr = gtk_print_context_get_cairo_context(context);
 	print_draw_next_page(&gtk_printer, settings);
 }
@@ -868,6 +868,6 @@ void gtk_print_signal_end_print(GtkPrintOperation *operation,
 				GtkPrintContext *context,
 				gpointer user_data)
 {
-	NSLOG(netsurfy, INFO, "End print");
+	NSLOG(tinysurf, INFO, "End print");
 	print_cleanup(content_to_print, &gtk_printer, user_data);
 }

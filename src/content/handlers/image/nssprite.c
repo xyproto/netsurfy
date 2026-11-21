@@ -1,13 +1,13 @@
 /*
  * Copyright 2008 James Shaw <js102@zepler.net>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -30,9 +30,9 @@
 #include "utils/utils.h"
 #include "utils/log.h"
 #include "utils/messages.h"
-#include "netsurfy/plotters.h"
-#include "netsurfy/bitmap.h"
-#include "netsurfy/content.h"
+#include "tinysurf/plotters.h"
+#include "tinysurf/bitmap.h"
+#include "tinysurf/content.h"
 #include "content/llcache.h"
 #include "content/content_protected.h"
 #include "content/content_factory.h"
@@ -43,7 +43,7 @@
 
 typedef struct nssprite_content {
 	struct content base;
-	struct bitmap *bitmap; /**< Created NetSurfy bitmap */
+	struct bitmap *bitmap; /**< Created TinySurf bitmap */
 
 	struct rosprite_area *sprite_area;
 } nssprite_content;
@@ -53,12 +53,12 @@ typedef struct nssprite_content {
 	do {                                                                    \
 		rosprite_error err = x;                                         \
 		if (err == ROSPRITE_EOF) {                                      \
-			NSLOG(netsurfy,                                         \
+			NSLOG(tinysurf,                                         \
 			      INFO,                                             \
 			      "Got ROSPRITE_EOF when loading sprite file");     \
 			goto ro_sprite_error;                                   \
 		} else if (err == ROSPRITE_BADMODE) {                           \
-			NSLOG(netsurfy,                                         \
+			NSLOG(tinysurf,                                         \
 			      INFO,                                             \
 			      "Got ROSPRITE_BADMODE when loading sprite file"); \
 			goto ro_sprite_error;                                   \

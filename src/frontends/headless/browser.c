@@ -1,13 +1,13 @@
 /*
  * Copyright 2011 Daniel Silverstone <dsilvers@digital-scurf.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -27,10 +27,10 @@
 #include "utils/log.h"
 #include "utils/messages.h"
 #include "utils/nsurl.h"
-#include "netsurfy/mouse.h"
-#include "netsurfy/window.h"
-#include "netsurfy/browser_window.h"
-#include "netsurfy/plotters.h"
+#include "tinysurf/mouse.h"
+#include "tinysurf/window.h"
+#include "tinysurf/browser_window.h"
+#include "tinysurf/plotters.h"
 
 #include "headless/output.h"
 #include "headless/browser.h"
@@ -611,7 +611,7 @@ static void headless_window_handle_redraw(int argc, char **argv)
 		clip.y1 = atoi(argv[6]);
 	}
 
-	NSLOG(netsurfy, INFO, "Issue redraw");
+	NSLOG(tinysurf, INFO, "Issue redraw");
 	moutf(MOUT_WINDOW, "REDRAW WIN %d START", atoi(argv[2]));
 	browser_window_redraw(gw->bw, gw->scrollx, gw->scrolly, &clip, &ctx);
 	moutf(MOUT_WINDOW, "REDRAW WIN %d STOP", atoi(argv[2]));

@@ -2,7 +2,7 @@
 set -eu
 cd "$(dirname "$0")"
 
-current=$(sed -n 's/^project(NetSurfy VERSION \([0-9][0-9.]*\) .*/\1/p' CMakeLists.txt)
+current=$(sed -n 's/^project(TinySurf VERSION \([0-9][0-9.]*\) .*/\1/p' CMakeLists.txt)
 [ -n "$current" ] || { echo "version.sh: no version in CMakeLists.txt" >&2; exit 1; }
 
 lines() {
@@ -10,11 +10,11 @@ lines() {
   rest=${1#*.}
   minor=${rest%%.*}
   printf '%s\t%s\n' \
-    CMakeLists.txt "project(NetSurfy VERSION $1 LANGUAGES C)" \
+    CMakeLists.txt "project(TinySurf VERSION $1 LANGUAGES C)" \
     README.md "* Version: $1" \
-    src/desktop/version.c "const char *const netsurfy_version = \"$1\"" \
-    src/desktop/version.c "const int netsurfy_version_major = $major;" \
-    src/desktop/version.c "const int netsurfy_version_minor = $minor;"
+    src/desktop/version.c "const char *const tinysurf_version = \"$1\"" \
+    src/desktop/version.c "const int tinysurf_version_major = $major;" \
+    src/desktop/version.c "const int tinysurf_version_minor = $minor;"
 }
 
 check() {
@@ -43,7 +43,7 @@ edit() {
 }
 
 if [ $# -eq 0 ]; then
-  echo "NetSurfy $current"
+  echo "TinySurf $current"
   check "$current" || { echo "Not every file has version $current, run: $0 $current" >&2; exit 1; }
   echo "Pass a new version, like $0 X.Y.Z, to change it."
   exit 0
@@ -63,11 +63,11 @@ fi
 major=${new%%.*}
 rest=${new#*.}
 minor=${rest%%.*}
-edit CMakeLists.txt "s/^project(NetSurfy VERSION [0-9][0-9.]* /project(NetSurfy VERSION $new /"
+edit CMakeLists.txt "s/^project(TinySurf VERSION [0-9][0-9.]* /project(TinySurf VERSION $new /"
 edit README.md "s/^\\* Version: .*/* Version: $new/"
-edit src/desktop/version.c "s/^\\(const char \\*const netsurfy_version = \"\\)[^\"]*\"/\\1$new\"/
-s/^\\(const int netsurfy_version_major = \\)[0-9]*;/\\1$major;/
-s/^\\(const int netsurfy_version_minor = \\)[0-9]*;/\\1$minor;/"
+edit src/desktop/version.c "s/^\\(const char \\*const tinysurf_version = \"\\)[^\"]*\"/\\1$new\"/
+s/^\\(const int tinysurf_version_major = \\)[0-9]*;/\\1$major;/
+s/^\\(const int tinysurf_version_minor = \\)[0-9]*;/\\1$minor;/"
 
 check "$new" || { echo "version.sh: some files were not updated, see above" >&2; exit 1; }
 git diff --stat 2>/dev/null || true

@@ -1,13 +1,13 @@
 /*
  * Copyright 2024 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -18,7 +18,7 @@
 
 /**
  * \file
- * Interface of netsurfy qt actions.
+ * Interface of tinysurf qt actions.
  *
  * this wraps all the interface actions in one place to be used in toolbars or
  * menus as needed.
@@ -32,9 +32,9 @@
 
 extern "C" {
 
-#include "netsurfy/types.h"
-#include "netsurfy/content_type.h"
-#include "netsurfy/browser_window.h"
+#include "tinysurf/types.h"
+#include "tinysurf/content_type.h"
+#include "tinysurf/browser_window.h"
 }
 
 class NS_Actions : public QObject
@@ -96,7 +96,7 @@ class NS_Actions : public QObject
 	QAction *m_debug_render; /**< toggle debug rendering */
 	QAction *m_debug_box_tree; /**< debug the box tree */
 	QAction *m_debug_dom_tree; /**< debug the DOM tree */
-	QAction *m_about_netsurfy; /**< show info about the browser */
+	QAction *m_about_tinysurf; /**< show info about the browser */
 	QAction *m_link_new_tab; /**< open link in new tab */
 	QAction *m_link_new_window; /**< open link in new window */
 	QAction *m_link_bookmark; /**<  bookmark link */
@@ -132,7 +132,7 @@ class NS_Actions : public QObject
 	void debug_render_slot(bool checked);
 	void debug_box_tree_slot(bool checked);
 	void debug_dom_tree_slot(bool checked);
-	void about_netsurfy_slot(bool checked);
+	void about_tinysurf_slot(bool checked);
 	void link_new_tab_slot(bool checked);
 	void link_new_window_slot(bool checked);
 	void link_bookmark_slot(bool checked);

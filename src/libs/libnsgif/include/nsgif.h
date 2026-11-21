@@ -3,7 +3,7 @@
  * Copyright 2008 Sean Fox <dyntryx@gmail.com>
  * Copyright 2013-2022 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of NetSurf's libnsgif, https://github.com/xyproto/netsurfy
+ * This file is part of NetSurf's libnsgif, https://github.com/xyproto/tinysurf
  * Licenced under the MIT License,
  *                http://www.opensource.org/licenses/mit-license.php
  */

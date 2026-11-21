@@ -1,13 +1,13 @@
 /*
  * Copyright 2021 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -18,7 +18,7 @@
 
 /**
  * \file
- * Implementation of netsurfy fetch for qt.
+ * Implementation of tinysurf fetch for qt.
  */
 
 #include <stddef.h>
@@ -34,7 +34,7 @@ extern "C" {
 #include "utils/log.h"
 #include "utils/filepath.h"
 #include "utils/file.h"
-#include "netsurfy/fetch.h"
+#include "tinysurf/fetch.h"
 }
 
 #include "qt/fetch.h"
@@ -54,7 +54,7 @@ static const char *nsqt_fetch_filetype(const char *unix_path)
 	int l;
 	char *res = (char *)"text/html";
 	l = strlen(unix_path);
-	NSLOG(netsurfy, INFO, "unix path: %s", unix_path);
+	NSLOG(tinysurf, INFO, "unix path: %s", unix_path);
 
 
 	if (2 < l && strcasecmp(unix_path + l - 3, "f79") == 0)
@@ -76,7 +76,7 @@ static const char *nsqt_fetch_filetype(const char *unix_path)
 	else if (2 < l && strcasecmp(unix_path + l - 3, "txt") == 0)
 		res = (char *)"text/plain";
 
-	NSLOG(netsurfy, INFO, "mime type: %s", res);
+	NSLOG(tinysurf, INFO, "mime type: %s", res);
 	return res;
 }
 
@@ -90,7 +90,7 @@ static const char *nsqt_fetch_filetype(const char *unix_path)
  * the returned nsurl including unrefing it when finished with it.
  *
  * \param path The path of the resource to locate.
- * \return A netsurfy url object containing the full URL of the resource path
+ * \return A tinysurf url object containing the full URL of the resource path
  *           or NULL if a suitable resource URL can not be generated.
  */
 static nsurl *nsqt_get_resource_url(const char *path)
@@ -98,7 +98,7 @@ static nsurl *nsqt_get_resource_url(const char *path)
 	char buf[PATH_MAX];
 	nsurl *url = NULL;
 
-	netsurfy_path_to_nsurl(filepath_sfind(respaths, buf, path), &url);
+	tinysurf_path_to_nsurl(filepath_sfind(respaths, buf, path), &url);
 
 	return url;
 }
@@ -126,7 +126,7 @@ static nserror nsqt_get_resource_data(const char *resname,
 	*data_out = data;
 	*data_size_out = size;
 
-	NSLOG(netsurfy, DEBUG, "returning resource data for: %s", resname);
+	NSLOG(tinysurf, DEBUG, "returning resource data for: %s", resname);
 	return NSERROR_OK;
 }
 

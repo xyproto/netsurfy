@@ -1,13 +1,13 @@
 /*
  * Copyright 2017 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -95,7 +95,7 @@ static const char *nslog_gettime(void)
 
 #ifdef WITH_NSLOG
 
-NSLOG_DEFINE_CATEGORY(netsurfy, "NetSurfy default logging");
+NSLOG_DEFINE_CATEGORY(tinysurf, "TinySurf default logging");
 NSLOG_DEFINE_CATEGORY(llcache, "Low level cache");
 NSLOG_DEFINE_CATEGORY(fetch, "Object fetching");
 NSLOG_DEFINE_CATEGORY(plot, "Rendering system");
@@ -106,7 +106,7 @@ NSLOG_DEFINE_CATEGORY(flex, "Flex");
 NSLOG_DEFINE_CATEGORY(qjsky, "QuickJS JavaScript Binding");
 NSLOG_DEFINE_CATEGORY(jserrors, "JavaScript error messages");
 
-static void netsurfy_render_log(void *_ctx,
+static void tinysurf_render_log(void *_ctx,
 				nslog_entry_context_t *ctx,
 				const char *fmt,
 				va_list args)
@@ -252,7 +252,7 @@ nserror nslog_init(nslog_ensure_t *ensure, int *pargc, char **argv)
 	    NSERROR_OK) {
 		ret = NSERROR_INIT_FAILED;
 		verbose_log = false;
-	} else if (nslog_set_render_callback(netsurfy_render_log, NULL) !=
+	} else if (nslog_set_render_callback(tinysurf_render_log, NULL) !=
 		   NSLOG_NO_ERROR) {
 		ret = NSERROR_INIT_FAILED;
 		verbose_log = false;
@@ -265,18 +265,18 @@ nserror nslog_init(nslog_ensure_t *ensure, int *pargc, char **argv)
 
 	/* sucessfull logging initialisation so log system info */
 	if (ret == NSERROR_OK) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
-		      "NetSurfy version '%s'",
-		      netsurfy_version);
+		      "TinySurf version '%s'",
+		      tinysurf_version);
 		if (uname(&utsname) < 0) {
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      INFO,
 			      "Failed to extract machine information");
 		} else {
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      INFO,
-			      "NetSurfy on <%s>, node <%s>, release <%s>, version <%s>, machine <%s>",
+			      "TinySurf on <%s>, node <%s>, release <%s>, version <%s>, machine <%s>",
 			      utsname.sysname,
 			      utsname.nodename,
 			      utsname.release,
@@ -300,7 +300,7 @@ nserror nslog_set_filter_by_options(void)
 /* exported interface documented in utils/log.h */
 void nslog_finalise(void)
 {
-	NSLOG(netsurfy,
+	NSLOG(tinysurf,
 	      INFO,
 	      "Finalising logging, please report any further messages");
 	verbose_log = true;

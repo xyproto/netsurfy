@@ -32,7 +32,7 @@ DOXYFILE_ENCODING      = UTF-8
 # title of most generated pages and in a few other places.
 # The default value is: My Project.
 
-PROJECT_NAME           = "NetSurfy"
+PROJECT_NAME           = "TinySurf"
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. This
 # could be handy for archiving the generated documentation or if some version
@@ -801,7 +801,7 @@ INPUT                  = docs \
                          frontends/gtk \
                          frontends/headless \
                          frontends/windows \
-                         include/netsurfy \
+                         include/tinysurf \
                          desktop \
                          content \
                          content/fetchers \

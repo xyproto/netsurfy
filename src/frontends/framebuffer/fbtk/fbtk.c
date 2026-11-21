@@ -3,13 +3,13 @@
  *
  * Framebuffer windowing toolkit core.
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -34,8 +34,8 @@
 
 #include "utils/utils.h"
 #include "utils/log.h"
-#include "netsurfy/browser_window.h"
-#include "netsurfy/plotters.h"
+#include "tinysurf/browser_window.h"
+#include "tinysurf/plotters.h"
 
 #include "framebuffer/gui.h"
 #include "framebuffer/fbtk.h"
@@ -123,7 +123,7 @@ void fbtk_request_redraw(fbtk_widget_t *widget)
 /* exported function documented in fbtk.h */
 int fbtk_set_mapping(fbtk_widget_t *widget, bool map)
 {
-	NSLOG(netsurfy, INFO, "setting mapping on %p to %d", widget, map);
+	NSLOG(tinysurf, INFO, "setting mapping on %p to %d", widget, map);
 	widget->mapped = map;
 	if (map) {
 		fbtk_request_redraw(widget);
@@ -147,7 +147,7 @@ static void swap_siblings(fbtk_widget_t *lw)
 
 	assert(rw != NULL);
 
-	NSLOG(netsurfy, INFO, "Swapping %p with %p", lw, rw);
+	NSLOG(tinysurf, INFO, "Swapping %p with %p", lw, rw);
 	before = lw->prev;
 	after = rw->next;
 
@@ -421,7 +421,7 @@ fbtk_widget_t *fbtk_get_root_widget(fbtk_widget_t *widget)
 
 	/* check root widget was found */
 	if (widget->type != FB_WIDGET_TYPE_ROOT) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Widget with null parent that is not the root widget!");
 		return NULL;

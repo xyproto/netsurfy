@@ -1,13 +1,13 @@
 /*
  * Copyright 2020 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy.
+ * This file is part of TinySurf.
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -29,8 +29,8 @@
 #include "utils/errors.h"
 #include "utils/log.h"
 #include "utils/messages.h"
-#include "netsurfy/inttypes.h"
-#include "netsurfy/ssl_certs.h"
+#include "tinysurf/inttypes.h"
+#include "tinysurf/ssl_certs.h"
 
 #include "private.h"
 #include "certificate.h"
@@ -385,13 +385,13 @@ static nserror xname_to_info(const X509_NAME *xname, struct ns_cert_name *iname)
 		}
 		if (field != NULL) {
 			*field = strdup((const char *)value_str);
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      DEEPDEBUG,
 			      "NID:%d value: %s",
 			      name_nid,
 			      *field);
 		} else {
-			NSLOG(netsurfy, DEEPDEBUG, "NID:%d", name_nid);
+			NSLOG(tinysurf, DEEPDEBUG, "NID:%d", name_nid);
 		}
 	}
 
@@ -411,7 +411,7 @@ static nserror xname_to_info(const X509_NAME *xname, struct ns_cert_name *iname)
 /**
  * duplicate a hex formatted string inserting the colons
  *
- * \todo only uses html entity as separator because netsurfys line breaking
+ * \todo only uses html entity as separator because tinysurfs line breaking
  *       fails otherwise.
  */
 static char *hexdup(const char *hex)
@@ -447,7 +447,7 @@ static char *hexdup(const char *hex)
 /**
  * create a hex formatted string inserting the colons from binary data
  *
- * \todo only uses html entity as separator because netsurfys line breaking
+ * \todo only uses html entity as separator because tinysurfs line breaking
  *       fails otherwise.
  */
 static char *bindup(unsigned char *bin, unsigned int binlen)
@@ -1250,7 +1250,7 @@ bool fetch_about_certificate_handler(struct fetch_about_context *ctx)
 	res = fetch_about_ssenddataf(
 		ctx,
 		"<html>\n<head>\n"
-		"<title>NetSurfy Browser Certificate Viewer</title>\n"
+		"<title>TinySurf Browser Certificate Viewer</title>\n"
 		"<link rel=\"stylesheet\" type=\"text/css\" "
 		"href=\"resource:internal.css\">\n"
 		"</head>\n"

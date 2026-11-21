@@ -2,13 +2,13 @@
  * Copyright 2004 James Bursa <bursa@users.sourceforge.net>
  * Copyright 2006 Rob Kendrick <rjek@rjek.com>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -125,7 +125,7 @@ static nserror messages_load_ctx(const char *path, struct hash_table **ctx)
 
 	nctx = messages_create_ctx(HASH_SIZE);
 	if (nctx == NULL) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Unable to create hash table for messages file %s",
 		      path);
@@ -179,7 +179,7 @@ nserror messages_add_from_file(const char *path)
 		return NSERROR_BAD_PARAMETER;
 	}
 
-	NSLOG(netsurfy, INFO, "Loading Messages from '%s'", path);
+	NSLOG(tinysurf, INFO, "Loading Messages from '%s'", path);
 
 	return messages_load_ctx(path, &messages_hash);
 }
@@ -193,7 +193,7 @@ nserror messages_add_from_inline(const uint8_t *data, size_t size)
 		messages_hash = messages_create_ctx(HASH_SIZE);
 	}
 	if (messages_hash == NULL) {
-		NSLOG(netsurfy, INFO, "Unable to create hash table");
+		NSLOG(tinysurf, INFO, "Unable to create hash table");
 		return NSERROR_NOMEM;
 	}
 	return hash_add_inline(messages_hash, data, size);
@@ -208,7 +208,7 @@ nserror messages_add_key_value(const char *key, const char *value)
 		messages_hash = messages_create_ctx(HASH_SIZE);
 	}
 	if (messages_hash == NULL) {
-		NSLOG(netsurfy, INFO, "Unable to create hash table");
+		NSLOG(tinysurf, INFO, "Unable to create hash table");
 		return NSERROR_NOMEM;
 	}
 	return hash_add(messages_hash, key, value);

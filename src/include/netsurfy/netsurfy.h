@@ -1,13 +1,13 @@
 /*
  * Copyright 2014 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -19,7 +19,7 @@
 /**
  * \file
  *
- * NetSurfy core interface registration, construction and destruction.
+ * TinySurf core interface registration, construction and destruction.
  */
 
 #ifndef _NETSURFY_NETSURFY_H_
@@ -31,23 +31,23 @@
 /**
  * Register operation table.
  *
- * @param table NetSurfy operations table.
+ * @param table TinySurf operations table.
  * @return NSERROR_OK on success or error code on faliure. On faliure
  *                    global table will not be initialised.
  */
-nserror netsurfy_register(struct netsurfy_table *table);
+nserror tinysurf_register(struct tinysurf_table *table);
 
 /**
- * Initialise netsurfy core.
+ * Initialise tinysurf core.
  *
  * @param store_path path to persistant storage.
  * @return NSERROR_OK on success or error code on faliure.
  */
-nserror netsurfy_init(const char *store_path);
+nserror tinysurf_init(const char *store_path);
 
 /**
- * Finalise NetSurfy core
+ * Finalise TinySurf core
  */
-extern void netsurfy_exit(void);
+extern void tinysurf_exit(void);
 
 #endif

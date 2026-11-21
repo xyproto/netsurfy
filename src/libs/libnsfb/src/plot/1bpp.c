@@ -1,7 +1,7 @@
 /*
  * Copyright 2008 Vincent Sanders <vince@simtec.co.uk>
  *
- * This file is part of NetSurf, https://github.com/xyproto/netsurfy
+ * This file is part of NetSurf, https://github.com/xyproto/tinysurf
  *
  * NetSurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

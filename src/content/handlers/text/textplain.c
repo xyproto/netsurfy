@@ -2,13 +2,13 @@
  * Copyright 2006 James Bursa <bursa@users.sourceforge.net>
  * Copyright 2006 Adrian Lees <adrianl@users.sourceforge.net>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -34,11 +34,11 @@
 #include "utils/utils.h"
 #include "utils/utf8.h"
 #include "utils/nsoption.h"
-#include "netsurfy/content.h"
-#include "netsurfy/keypress.h"
-#include "netsurfy/browser_window.h"
-#include "netsurfy/plotters.h"
-#include "netsurfy/layout.h"
+#include "tinysurf/content.h"
+#include "tinysurf/keypress.h"
+#include "tinysurf/browser_window.h"
+#include "tinysurf/plotters.h"
+#include "tinysurf/layout.h"
 #include "content/content_protected.h"
 #include "content/content_factory.h"
 #include "content/hlcache.h"
@@ -421,7 +421,7 @@ static void textplain_reformat(struct content *c, int width, int height)
 	size_t line_start;
 	nserror res;
 
-	NSLOG(netsurfy, INFO, "content %p w:%d h:%d", c, width, height);
+	NSLOG(tinysurf, INFO, "content %p w:%d h:%d", c, width, height);
 
 	/* compute available columns (assuming monospaced font) - use 8
 	 * characters for better accuracy
@@ -527,7 +527,7 @@ static void textplain_reformat(struct content *c, int width, int height)
 	return;
 
 no_memory:
-	NSLOG(netsurfy, INFO, "out of memory (line_count %lu)", line_count);
+	NSLOG(tinysurf, INFO, "out of memory (line_count %lu)", line_count);
 	return;
 }
 

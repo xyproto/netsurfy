@@ -1,13 +1,13 @@
 /*
  * Copyright 2015 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
@@ -46,11 +46,11 @@
 #ifdef __GNUC__
 extern const guint8 menu_cursor_pixdata[] __attribute__((__aligned__(4)));
 extern const guint8 favicon_pixdata[] __attribute__((__aligned__(4)));
-extern const guint8 netsurfy_pixdata[] __attribute__((__aligned__(4)));
+extern const guint8 tinysurf_pixdata[] __attribute__((__aligned__(4)));
 #else
 extern const guint8 menu_cursor_pixdata[];
 extern const guint8 favicon_pixdata[];
-extern const guint8 netsurfy_pixdata[];
+extern const guint8 tinysurf_pixdata[];
 #endif
 #endif
 
@@ -74,7 +74,7 @@ struct nsgtk_resource_s {
 
 /** resources that are used for gtk builder */
 static struct nsgtk_resource_s ui_resource[] = {
-	RES_ENTRY("netsurfy"),
+	RES_ENTRY("tinysurf"),
 	RES_ENTRY("tabcontents"),
 	RES_ENTRY("password"),
 	RES_ENTRY("toolbar"),
@@ -93,7 +93,7 @@ static struct nsgtk_resource_s ui_resource[] = {
 /** resources that are used as pixbufs */
 static struct nsgtk_resource_s pixbuf_resource[] = {
 	RES_ENTRY("favicon.png"),
-	RES_ENTRY("netsurfy.xpm"),
+	RES_ENTRY("tinysurf.xpm"),
 	RES_ENTRY("menu_cursor.png"),
 	RES_ENTRY("icons/local-history.png"),
 	RES_ENTRY("icons/show-cookie.png"),
@@ -127,7 +127,7 @@ static struct nsgtk_resource_s direct_resource[] = {
 	RES_ENTRY("adblock.css"),
 	RES_ENTRY("internal.css"),
 	RES_ENTRY("quirks.css"),
-	RES_ENTRY("netsurfy.png"),
+	RES_ENTRY("tinysurf.png"),
 	RES_ENTRY("default.ico"),
 	RES_ENTRY("icons/arrow-l.png"),
 	RES_ENTRY("icons/content.png"),
@@ -192,7 +192,7 @@ static nserror init_resource(char **respath, struct nsgtk_resource_s *resource)
 		/* allocate and fill a full resource name path buffer */
 		resnamelen = snprintf(NULL,
 				      0,
-				      "/org/netsurfy/%s/%s",
+				      "/org/tinysurf/%s/%s",
 				      langv[langc],
 				      resource->name);
 		resname = malloc(resnamelen + 1);
@@ -201,7 +201,7 @@ static nserror init_resource(char **respath, struct nsgtk_resource_s *resource)
 		}
 		snprintf(resname,
 			 resnamelen + 1,
-			 "/org/netsurfy/%s/%s",
+			 "/org/tinysurf/%s/%s",
 			 langv[langc],
 			 resource->name);
 
@@ -215,13 +215,13 @@ static nserror init_resource(char **respath, struct nsgtk_resource_s *resource)
 			/* found an entry in the resources */
 			resource->path = resname;
 			resource->type = NSGTK_RESOURCE_GLIB;
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      INFO,
 			      "Found gresource path %s",
 			      resource->path);
 			return NSERROR_OK;
 		}
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      DEEPDEBUG,
 		      "gresource \"%s\" not found",
 		      resname);
@@ -231,12 +231,12 @@ static nserror init_resource(char **respath, struct nsgtk_resource_s *resource)
 	}
 
 	/* allocate and fill a full resource name path buffer with no language*/
-	resnamelen = snprintf(NULL, 0, "/org/netsurfy/%s", resource->name);
+	resnamelen = snprintf(NULL, 0, "/org/tinysurf/%s", resource->name);
 	resname = malloc(resnamelen + 1);
 	if (resname == NULL) {
 		return NSERROR_NOMEM;
 	}
-	snprintf(resname, resnamelen + 1, "/org/netsurfy/%s", resource->name);
+	snprintf(resname, resnamelen + 1, "/org/tinysurf/%s", resource->name);
 
 	present = g_resources_get_info(
 		resname, G_RESOURCE_LOOKUP_FLAGS_NONE, NULL, NULL, NULL);
@@ -244,13 +244,13 @@ static nserror init_resource(char **respath, struct nsgtk_resource_s *resource)
 		/* found an entry in the resources */
 		resource->path = resname;
 		resource->type = NSGTK_RESOURCE_GLIB;
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Found gresource path %s",
 		      resource->path);
 		return NSERROR_OK;
 	}
-	NSLOG(netsurfy, DEEPDEBUG, "gresource \"%s\" not found", resname);
+	NSLOG(tinysurf, DEEPDEBUG, "gresource \"%s\" not found", resname);
 	free(resname);
 
 #endif
@@ -262,14 +262,14 @@ static nserror init_resource(char **respath, struct nsgtk_resource_s *resource)
 		resource->path = resname;
 		resource->type = NSGTK_RESOURCE_FILE;
 
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Found file resource path %s",
 		      resource->path);
 		return NSERROR_OK;
 	}
 
-	NSLOG(netsurfy,
+	NSLOG(tinysurf,
 	      INFO,
 	      "Unable to find resource %s on resource path",
 	      resource->name);
@@ -327,21 +327,21 @@ init_pixbuf_resource(char **respath, struct nsgtk_resource_s *resource)
 	if (strncmp(resource->name, "menu_cursor.png", resource->len) == 0) {
 		resource->path = (char *)&menu_cursor_pixdata[0];
 		resource->type = NSGTK_RESOURCE_INLINE;
-		NSLOG(netsurfy, INFO, "Found builtin for %s", resource->name);
+		NSLOG(tinysurf, INFO, "Found builtin for %s", resource->name);
 		return NSERROR_OK;
 	}
 
-	if (strncmp(resource->name, "netsurfy.xpm", resource->len) == 0) {
-		resource->path = (char *)&netsurfy_pixdata[0];
+	if (strncmp(resource->name, "tinysurf.xpm", resource->len) == 0) {
+		resource->path = (char *)&tinysurf_pixdata[0];
 		resource->type = NSGTK_RESOURCE_INLINE;
-		NSLOG(netsurfy, INFO, "Found builtin for %s", resource->name);
+		NSLOG(tinysurf, INFO, "Found builtin for %s", resource->name);
 		return NSERROR_OK;
 	}
 
 	if (strncmp(resource->name, "favicon.png", resource->len) == 0) {
 		resource->path = (char *)&favicon_pixdata[0];
 		resource->type = NSGTK_RESOURCE_INLINE;
-		NSLOG(netsurfy, INFO, "Found builtin for %s", resource->name);
+		NSLOG(tinysurf, INFO, "Found builtin for %s", resource->name);
 		return NSERROR_OK;
 	}
 #endif
@@ -408,7 +408,7 @@ find_resource_from_name(const char *resname, struct nsgtk_resource_s *resource)
  */
 static void list_gresource(void)
 {
-	const char *nspath = "/org/netsurfy";
+	const char *nspath = "/org/tinysurf";
 	char **reslist;
 	char **cur;
 	GError *gerror = NULL;
@@ -416,13 +416,13 @@ static void list_gresource(void)
 						 G_RESOURCE_LOOKUP_FLAGS_NONE,
 						 &gerror);
 	if (gerror) {
-		NSLOG(netsurfy, INFO, "gerror %s", gerror->message);
+		NSLOG(tinysurf, INFO, "gerror %s", gerror->message);
 		g_error_free(gerror);
 
 	} else {
 		cur = reslist;
 		while (cur != NULL && *cur != NULL) {
-			NSLOG(netsurfy, INFO, "gres %s", *cur);
+			NSLOG(tinysurf, INFO, "gres %s", *cur);
 			cur++;
 		}
 		g_strfreev(reslist);
@@ -517,7 +517,7 @@ nsgdk_pixbuf_new_from_resname(const char *resname, GdkPixbuf **pixbuf_out)
 
 	if (new_pixbuf == NULL) {
 		if (error != NULL) {
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      INFO,
 			      "Unable to create pixbuf from file for %s with path %s \"%s\"",
 			      resource->name,
@@ -525,7 +525,7 @@ nsgdk_pixbuf_new_from_resname(const char *resname, GdkPixbuf **pixbuf_out)
 			      error->message);
 			g_error_free(error);
 		} else {
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      INFO,
 			      "Unable to create pixbuf from file for %s with path %s",
 			      resource->name,
@@ -556,7 +556,7 @@ nsgtk_builder_new_from_resname(const char *resname, GtkBuilder **builder_out)
 	if (ui_res->type == NSGTK_RESOURCE_FILE) {
 		if (!gtk_builder_add_from_file(
 			    new_builder, ui_res->path, &error)) {
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      INFO,
 			      "Unable to add UI builder from file for %s with path %s \"%s\"",
 			      ui_res->name,
@@ -569,7 +569,7 @@ nsgtk_builder_new_from_resname(const char *resname, GtkBuilder **builder_out)
 	} else {
 		if (!nsgtk_builder_add_from_resource(
 			    new_builder, ui_res->path, &error)) {
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      INFO,
 			      "Unable to add UI builder from resource for %s with path %s \"%s\"",
 			      ui_res->name,

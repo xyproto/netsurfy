@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 
 '''
-NetSurfy automated test runner
+TinySurf automated test runner
 
-This script retrives a test plan from the NetSurfy infrastructure and
+This script retrives a test plan from the TinySurf infrastructure and
   executes it using the headless frontend
 '''
 

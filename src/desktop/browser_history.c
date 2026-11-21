@@ -2,13 +2,13 @@
  * Copyright 2006 James Bursa <bursa@users.sourceforge.net>
  * Copyright 2005 Richard Wilson <info@tinct.net>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -30,13 +30,13 @@
 
 #include "utils/log.h"
 #include "utils/utils.h"
-#include "netsurfy/layout.h"
-#include "netsurfy/content.h"
-#include "netsurfy/window.h"
-#include "netsurfy/browser_window.h"
+#include "tinysurf/layout.h"
+#include "tinysurf/content.h"
+#include "tinysurf/window.h"
+#include "tinysurf/browser_window.h"
 #include "content/hlcache.h"
 #include "content/urldb.h"
-#include "netsurfy/bitmap.h"
+#include "tinysurf/bitmap.h"
 #include "utils/corestrings.h"
 
 #include "desktop/gui_internal.h"
@@ -342,7 +342,7 @@ nserror browser_window_history_clone(const struct browser_window *existing,
 	new_history->start = browser_window_history__clone_entry(
 		new_history, new_history->start);
 	if (!new_history->start) {
-		NSLOG(netsurfy, INFO, "Insufficient memory to clone history");
+		NSLOG(tinysurf, INFO, "Insufficient memory to clone history");
 		browser_window_history_destroy(clone);
 		clone->history = NULL;
 		return NSERROR_NOMEM;
@@ -387,7 +387,7 @@ nserror browser_window_history_add(struct browser_window *bw,
 	entry->page.scroll_y = 0.0f;
 
 	/* create thumbnail for localhistory view */
-	NSLOG(netsurfy,
+	NSLOG(tinysurf,
 	      DEBUG,
 	      "Creating thumbnail for %s",
 	      nsurl_access(entry->page.url));
@@ -399,7 +399,7 @@ nserror browser_window_history_add(struct browser_window *bw,
 		ret = guit->bitmap->render(entry->page.bitmap, content);
 		if (ret != NSERROR_OK) {
 			/* Thumbnail render failed */
-			NSLOG(netsurfy, WARNING, "Thumbnail render failed");
+			NSLOG(tinysurf, WARNING, "Thumbnail render failed");
 		}
 	}
 
@@ -452,7 +452,7 @@ nserror browser_window_history_update(struct browser_window *bw,
 	if (title == NULL) {
 		return NSERROR_NOMEM;
 	}
-	NSLOG(netsurfy, INFO, "Updating history entry for %s", title);
+	NSLOG(tinysurf, INFO, "Updating history entry for %s", title);
 	free(history->current->page.title);
 	history->current->page.title = title;
 
@@ -476,7 +476,7 @@ nserror browser_window_history_update(struct browser_window *bw,
 						  (float)content_width;
 		history->current->page.scroll_y = (float)sy /
 						  (float)content_height;
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Updated scroll offsets to %g by %g",
 		      history->current->page.scroll_x,

@@ -1,13 +1,13 @@
 /*
  * Copyright 2020 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy.
+ * This file is part of TinySurf.
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -25,7 +25,7 @@
 #include <stddef.h>
 #include <stdio.h>
 
-#include "netsurfy/types.h"
+#include "tinysurf/types.h"
 #include "utils/errors.h"
 #include "utils/nsoption.h"
 
@@ -57,7 +57,7 @@ bool fetch_about_choices_handler(struct fetch_about_context *ctx)
 	slen = snprintf(
 		buffer,
 		sizeof buffer,
-		"# Automatically generated current NetSurfy browser Choices\n");
+		"# Automatically generated current TinySurf browser Choices\n");
 
 	do {
 		res = nsoption_snoptionf(buffer + slen,

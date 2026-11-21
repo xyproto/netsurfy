@@ -1,13 +1,13 @@
 /*
  * Copyright 2010 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy.
+ * This file is part of TinySurf.
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -44,7 +44,7 @@
 #endif
 #include <libwapcaplet/libwapcaplet.h>
 
-#include "netsurfy/inttypes.h"
+#include "tinysurf/inttypes.h"
 #include "utils/nsurl.h"
 #include "utils/dirent.h"
 #include "utils/corestrings.h"
@@ -54,7 +54,7 @@
 #include "utils/time.h"
 #include "utils/ring.h"
 #include "utils/file.h"
-#include "netsurfy/fetch.h"
+#include "tinysurf/fetch.h"
 #include "desktop/gui_internal.h"
 
 #include "content/fetch.h"
@@ -559,7 +559,7 @@ static nserror process_dir_ent(struct fetch_file_context *ctx,
 		return NSERROR_BAD_PARAMETER;
 	}
 
-	ret = netsurfy_mkpath(&urlpath, NULL, 2, ctx->path, ent->d_name);
+	ret = tinysurf_mkpath(&urlpath, NULL, 2, ctx->path, ent->d_name);
 	if (ret != NSERROR_OK) {
 		return ret;
 	}

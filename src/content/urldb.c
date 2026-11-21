@@ -2,13 +2,13 @@
  * Copyright 2006 John M Bell <jmb202@ecs.soton.ac.uk>
  * Copyright 2009 John Tytgat <joty@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -110,7 +110,7 @@
 #include "utils/nsurl.h"
 #include "utils/ascii.h"
 #include "utils/http.h"
-#include "netsurfy/bitmap.h"
+#include "tinysurf/bitmap.h"
 #include "desktop/cookie_manager.h"
 
 #include "content/content.h"
@@ -120,7 +120,7 @@
  * cookie entry.
  *
  * \warning This *must* be kept in sync with the public interface in
- *   netsurfy/cookie_db.h
+ *   tinysurf/cookie_db.h
  */
 struct cookie_internal_data {
 	struct cookie_internal_data *prev; /**< Previous in list */
@@ -179,7 +179,7 @@ struct prot_space_data {
 /**
  * meta data about a url
  *
- * \warning must be kept in sync with url_data structure in netsurfy/url_db.h
+ * \warning must be kept in sync with url_data structure in tinysurf/url_db.h
  */
 struct url_internal_data {
 	char *title; /**< Resource title */
@@ -673,7 +673,7 @@ static bool urldb__host_is_ip_address(const char *host)
 	 * For the time being, we will accept such calls; we check if there
 	 * is a / in the host parameter, and if there is, we take a copy and
 	 * replace the / with a \0.  This is not a permanent solution; we
-	 * should search through NetSurfy and find all the callers that are
+	 * should search through TinySurf and find all the callers that are
 	 * in error and fix them.  When doing this task, it might be wise
 	 * to replace the hideousness below with code that doesn't have to do
 	 * this, and add assert(strchr(host, '/') == NULL); somewhere.
@@ -688,7 +688,7 @@ static bool urldb__host_is_ip_address(const char *host)
 		c[slash - host] = '\0';
 		sane_host = c;
 		host_len = slash - host;
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "WARNING: called with non-host '%s'",
 		      host);
@@ -1312,7 +1312,7 @@ static struct path_data *urldb_match_path(const struct path_data *parent,
 	assert(parent->segment == NULL);
 
 	if (path[0] != '/') {
-		NSLOG(netsurfy, INFO, "path is %s", path);
+		NSLOG(tinysurf, INFO, "path is %s", path);
 	}
 
 	assert(path[0] == '/');
@@ -1445,16 +1445,16 @@ static void urldb_dump_paths(struct path_data *parent)
 
 	do {
 		if (p->segment != NULL) {
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      INFO,
 			      "\t%s : %u",
 			      lwc_string_data(p->scheme),
 			      p->port);
 
-			NSLOG(netsurfy, INFO, "\t\t'%s'", p->segment);
+			NSLOG(tinysurf, INFO, "\t\t'%s'", p->segment);
 
 			for (i = 0; i != p->frag_cnt; i++) {
-				NSLOG(netsurfy,
+				NSLOG(tinysurf,
 				      INFO,
 				      "\t\t\t#%s",
 				      p->fragment[i]);
@@ -1487,9 +1487,9 @@ static void urldb_dump_hosts(struct host_part *parent)
 	struct host_part *h;
 
 	if (parent->part) {
-		NSLOG(netsurfy, INFO, "%s", parent->part);
+		NSLOG(tinysurf, INFO, "%s", parent->part);
 
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "\t%s invalid SSL certs",
 		      parent->permit_invalid_certs ? "Permits" : "Denies");
@@ -1547,7 +1547,7 @@ static void urldb_dump_search(struct search_node *parent, int depth)
 	}
 	s[i] = 0;
 
-	NSLOG(netsurfy, INFO, "%s", s);
+	NSLOG(tinysurf, INFO, "%s", s);
 
 	urldb_dump_search(parent->right, depth + 1);
 }
@@ -3062,7 +3062,7 @@ void urldb_destroy(void)
 }
 
 
-/* exported interface documented in netsurfy/url_db.h */
+/* exported interface documented in tinysurf/url_db.h */
 nserror urldb_load(const char *filename)
 {
 #define MAXIMUM_URL_LENGTH 4096
@@ -3077,14 +3077,14 @@ nserror urldb_load(const char *filename)
 
 	assert(filename);
 
-	NSLOG(netsurfy, INFO, "Loading URL file %s", filename);
+	NSLOG(tinysurf, INFO, "Loading URL file %s", filename);
 
 	if (url_bloom == NULL)
 		url_bloom = bloom_create(BLOOM_SIZE);
 
 	fp = fopen(filename, "r");
 	if (!fp) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Failed to open file '%s' for reading",
 		      filename);
@@ -3098,12 +3098,12 @@ nserror urldb_load(const char *filename)
 
 	version = atoi(s);
 	if (version < MIN_URL_FILE_VERSION) {
-		NSLOG(netsurfy, INFO, "Unsupported URL file version.");
+		NSLOG(tinysurf, INFO, "Unsupported URL file version.");
 		fclose(fp);
 		return NSERROR_INVALID;
 	}
 	if (version > URL_FILE_VERSION) {
-		NSLOG(netsurfy, INFO, "Unknown URL file version.");
+		NSLOG(tinysurf, INFO, "Unknown URL file version.");
 		fclose(fp);
 		return NSERROR_INVALID;
 	}
@@ -3147,7 +3147,7 @@ nserror urldb_load(const char *filename)
 
 		h = urldb_add_host(host);
 		if (!h) {
-			NSLOG(netsurfy, INFO, "Failed adding host: '%s'", host);
+			NSLOG(tinysurf, INFO, "Failed adding host: '%s'", host);
 			fclose(fp);
 			return NSERROR_NOMEM;
 		}
@@ -3161,7 +3161,7 @@ nserror urldb_load(const char *filename)
 
 		/* no URLs => try next host */
 		if (urls == 0) {
-			NSLOG(netsurfy, INFO, "No URLs for '%s'", host);
+			NSLOG(tinysurf, INFO, "No URLs for '%s'", host);
 			continue;
 		}
 
@@ -3213,7 +3213,7 @@ nserror urldb_load(const char *filename)
 			 *       Need a nsurl_save too.
 			 */
 			if (nsurl_create(url, &nsurl) != NSERROR_OK) {
-				NSLOG(netsurfy,
+				NSLOG(tinysurf,
 				      INFO,
 				      "Failed inserting '%s'",
 				      url);
@@ -3231,7 +3231,7 @@ nserror urldb_load(const char *filename)
 				      NSURL_PATH | NSURL_QUERY,
 				      &path_query,
 				      &len) != NSERROR_OK) {
-				NSLOG(netsurfy,
+				NSLOG(tinysurf,
 				      INFO,
 				      "Failed inserting '%s'",
 				      url);
@@ -3249,7 +3249,7 @@ nserror urldb_load(const char *filename)
 					   fragment_lwc,
 					   nsurl);
 			if (!p) {
-				NSLOG(netsurfy,
+				NSLOG(tinysurf,
 				      INFO,
 				      "Failed inserting '%s'",
 				      url);
@@ -3297,13 +3297,13 @@ nserror urldb_load(const char *filename)
 	}
 
 	fclose(fp);
-	NSLOG(netsurfy, INFO, "Successfully loaded URL file");
+	NSLOG(tinysurf, INFO, "Successfully loaded URL file");
 #undef MAXIMUM_URL_LENGTH
 
 	return NSERROR_OK;
 }
 
-/* exported interface documented in netsurfy/url_db.h */
+/* exported interface documented in tinysurf/url_db.h */
 nserror urldb_save(const char *filename)
 {
 	FILE *fp;
@@ -3313,7 +3313,7 @@ nserror urldb_save(const char *filename)
 
 	fp = fopen(filename, "w");
 	if (!fp) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Failed to open file '%s' for writing",
 		      filename);
@@ -3516,7 +3516,7 @@ void urldb_reset_url_visit_data(nsurl *url)
 }
 
 
-/* exported interface documented in netsurfy/url_db.h */
+/* exported interface documented in tinysurf/url_db.h */
 const struct url_data *urldb_get_url_data(nsurl *url)
 {
 	struct path_data *p;
@@ -3549,7 +3549,7 @@ nsurl *urldb_get_url(nsurl *url)
 }
 
 
-/* exported interface documented in netsurfy/url_db.h */
+/* exported interface documented in tinysurf/url_db.h */
 void urldb_set_auth_details(nsurl *url, const char *realm, const char *auth)
 {
 	struct path_data *p, *pi;
@@ -3612,7 +3612,7 @@ void urldb_set_auth_details(nsurl *url, const char *realm, const char *auth)
 }
 
 
-/* exported interface documented in netsurfy/url_db.h */
+/* exported interface documented in tinysurf/url_db.h */
 const char *urldb_get_auth_details(nsurl *url, const char *realm)
 {
 	struct path_data *p, *p_cur, *p_top;
@@ -3661,7 +3661,7 @@ const char *urldb_get_auth_details(nsurl *url, const char *realm)
 }
 
 
-/* exported interface documented in netsurfy/url_db.h */
+/* exported interface documented in tinysurf/url_db.h */
 void urldb_set_cert_permissions(nsurl *url, bool permit)
 {
 	struct path_data *p;
@@ -3840,7 +3840,7 @@ bool urldb_get_hsts_enabled(struct nsurl *url)
 }
 
 
-/* exported interface documented in netsurfy/url_db.h */
+/* exported interface documented in tinysurf/url_db.h */
 void urldb_iterate_partial(const char *prefix,
 			   bool (*callback)(nsurl *url,
 					    const struct url_data *data))
@@ -3911,7 +3911,7 @@ void urldb_iterate_partial(const char *prefix,
 }
 
 
-/* exported interface documented in netsurfy/url_db.h */
+/* exported interface documented in tinysurf/url_db.h */
 void urldb_iterate_entries(bool (*callback)(nsurl *url,
 					    const struct url_data *data))
 {
@@ -4097,7 +4097,7 @@ bool urldb_set_cookie(const char *header, nsurl *url, nsurl *referer)
 		}
 		suffix = nspsl_getpublicsuffix(dot);
 		if (suffix == NULL) {
-			NSLOG(netsurfy,
+			NSLOG(tinysurf,
 			      INFO,
 			      "domain %s was a public suffix domain",
 			      dot);
@@ -4448,7 +4448,7 @@ void urldb_delete_cookie(const char *domain, const char *path, const char *name)
 }
 
 
-/* exported interface documented in netsurfy/cookie_db.h */
+/* exported interface documented in tinysurf/cookie_db.h */
 nserror urldb_load_cookies(const char *filename)
 {
 	FILE *fp;
@@ -4465,7 +4465,7 @@ nserror urldb_load_cookies(const char *filename)
 		for (; *p && *p != '\t'; p++)                                  \
 			; /* do nothing */                                     \
 		if (p >= end) {                                                \
-			NSLOG(netsurfy, INFO, "Overran input");                \
+			NSLOG(tinysurf, INFO, "Overran input");                \
 			continue;                                              \
 		}                                                              \
 		*p++ = '\0';                                                   \
@@ -4476,7 +4476,7 @@ nserror urldb_load_cookies(const char *filename)
 		for (; *p && *p == '\t'; p++)                                  \
 			; /* do nothing */                                     \
 		if (p >= end) {                                                \
-			NSLOG(netsurfy, INFO, "Overran input");                \
+			NSLOG(tinysurf, INFO, "Overran input");                \
 			continue;                                              \
 		}                                                              \
 	}
@@ -4506,7 +4506,7 @@ nserror urldb_load_cookies(const char *filename)
 
 			if (loaded_cookie_file_version <
 			    MIN_COOKIE_FILE_VERSION) {
-				NSLOG(netsurfy,
+				NSLOG(tinysurf,
 				      INFO,
 				      "Unsupported Cookie file version");
 				break;
@@ -4651,7 +4651,7 @@ nserror urldb_load_cookies(const char *filename)
 }
 
 
-/* exported interface documented in netsurfy/cookie_db.h */
+/* exported interface documented in tinysurf/cookie_db.h */
 nserror urldb_save_cookies(const char *filename)
 {
 	FILE *fp;
@@ -4665,7 +4665,7 @@ nserror urldb_save_cookies(const char *filename)
 		return NSERROR_NOT_FOUND;
 
 	fprintf(fp,
-		"# NetSurfy cookies file.\n"
+		"# TinySurf cookies file.\n"
 		"#\n"
 		"# Lines starting with a '#' are comments, "
 		"blank lines are ignored.\n"
@@ -4687,7 +4687,7 @@ nserror urldb_save_cookies(const char *filename)
 }
 
 
-/* exported interface documented in netsurfy/url_db.h */
+/* exported interface documented in tinysurf/url_db.h */
 void urldb_dump(void)
 {
 	int i;

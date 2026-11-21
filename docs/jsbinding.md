@@ -48,7 +48,7 @@ The IDL uses some slightly different terms than other object orientated
 JavaScript implementation
 -------------------------
 
-NetSurfy uses the system QuickJS-ng library to run the JavaScript
+TinySurf uses the system QuickJS-ng library to run the JavaScript
 used within the browser. The QuickJS API is declared and documented in
 `quickjs.h`, and https://quickjs-ng.github.io/quickjs/ describes the
 engine and its embedding API.
@@ -96,18 +96,18 @@ engine.
 
 The bindings are specific to a JavaScript engine, the DOM library, the
 CSS library and the browser. In this case that is the tuple of
-QuickJS, libdom, libcss and NetSurfy.
+QuickJS, libdom, libcss and TinySurf.
 
 In principle other engines or libraries could be substituted
-(historically NetSurfy unsuccessfully tried to use spidermonkey) but the
+(historically TinySurf unsuccessfully tried to use spidermonkey) but the
 engineering to do so is formidable.
 
-The bindings are kept the main [NetSurfy source code
-repository](https://github.com/xyproto/netsurfy) within the
+The bindings are kept the main [TinySurf source code
+repository](https://github.com/xyproto/tinysurf) within the
 QuickJS JavaScript handler directory `content/handlers/javascript/quickjs/`
 
 The root binding which contains all the interfaces introduced into
-the JavaScript programs initial execution context is netsurfy.bnd, this
+the JavaScript programs initial execution context is tinysurf.bnd, this
 references all the WebIDL to be bound and includes all additional
 binding definitions to implement the interfaces.
 
@@ -160,7 +160,7 @@ The getter and setter for the Window class attribute will be added to
     %{
     %}
 
-The top level `netsurfy.bnd` binding includes `Window.bnd` (using a
+The top level `tinysurf.bnd` binding includes `Window.bnd` (using a
 `#include` directive) which contains the implementation of the Window
 class. This is purely to split the bindings up into logical units.
 
@@ -230,7 +230,7 @@ the attribute example used `Window.bnd`
             nsurl *joined;
 
             if (priv_win == NULL || priv_win->win == NULL) {
-                    NSLOG(netsurfy, INFO, "failed to get browser context");
+                    NSLOG(tinysurf, INFO, "failed to get browser context");
                     return JS_UNDEFINED;
             }
 
@@ -295,12 +295,12 @@ The method binding will be added to `Window.bnd` as the attribute example
     method Window::alert()
     %{
             if (argc == 0) {
-                    NSLOG(netsurfy, INFO, "JS ALERT");
+                    NSLOG(tinysurf, INFO, "JS ALERT");
             } else {
                     size_t msg_len;
                     const char *msg = JS_ToCStringLen(ctx, &msg_len, argv[0]);
                     if (msg == NULL) return JS_EXCEPTION;
-                    NSLOG(netsurfy, INFO, "JS ALERT: %*s", (int)msg_len, msg);
+                    NSLOG(tinysurf, INFO, "JS ALERT: %*s", (int)msg_len, msg);
                     JS_FreeCString(ctx, msg);
             }
             return JS_UNDEFINED;

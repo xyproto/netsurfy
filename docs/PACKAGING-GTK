@@ -1,15 +1,15 @@
 --------------------------------------------------------------------------------
-  Packaging suggestions for NetSurfy                               30 July 2008
+  Packaging suggestions for TinySurf                               30 July 2008
 --------------------------------------------------------------------------------
 
   This document lays out some suggestions for people interested in packaging
-  NetSurfy for UNIX-like OSes.
+  TinySurf for UNIX-like OSes.
 
   We consider the Debian (and thus Ubuntu) packages excellent examples to
   crib from.  They do everything right.
 
 
-  Building NetSurfy
+  Building TinySurf
 ==================
 
   You should change Makefile.config to be specific (rather than rely on AUTO)
@@ -19,30 +19,30 @@
   from here should you require a smaller, lighter build.
 
 
-  Launching NetSurfy
+  Launching TinySurf
 ===================
 
-  The GTK port of NetSurfy requires access to some resources at run time.
+  The GTK port of TinySurf requires access to some resources at run time.
   These are stored in gtk/res/ in the source tree.  Some of these files are
   symlinks into the top level resources directory.  Not all of the files in the
   directory are required - the symlinks are used only as a way of making
   checkouts smaller and making sure changes to one set of resources updates
   the other.
 
-  The binary that the build system produces is called "netsurfy".
-  You should install netsurfy to `/usr/bin/netsurfy` (or wherever your
+  The binary that the build system produces is called "tinysurf".
+  You should install tinysurf to `/usr/bin/tinysurf` (or wherever your
   distribution's packaging policy suggests) and copy the contents of
-  gtk/res/ (dereferencing the symlinks, obviously) to /usr/share/netsurfy (or
+  gtk/res/ (dereferencing the symlinks, obviously) to /usr/share/tinysurf (or
   wherever your packaging policy suggests).
 
-  You will need to tell NetSurfy where to find its run time loaded
-  resources.  NetSurfy searches three locations by default when trying
+  You will need to tell TinySurf where to find its run time loaded
+  resources.  TinySurf searches three locations by default when trying
   to load them, in this order:
 
-    1. ~/.netsurfy/
+    1. ~/.tinysurf/
 
        This entry allows the user some flexibility in changing what
-        resources NetSurfy uses by placing resources in their home
+        resources TinySurf uses by placing resources in their home
         directory.
 
     2. $NETSURFYRES/
@@ -54,16 +54,16 @@
     3. NETSURFY_GTK_RES_PATH option
 
        This location is controlled by the option in Makefile.config
-        (defaulting to ${PREFIX}/share/netsurfy/ ). This configuration
+        (defaulting to ${PREFIX}/share/tinysurf/ ). This configuration
         is the recommended way for packagers to change the location
-        NetSurfy finds external resources. The first path element of the
+        TinySurf finds external resources. The first path element of the
         NETSURFY_GTK_RES_PATH option is used in the install target as
         the destination for installed resources.
 
   User agent string
 ===================
 
-  You may also want to change NetSurfy's user agent string to include the
+  You may also want to change TinySurf's user agent string to include the
   name of your distribution.  The user agent string is built by a function
   kept in utils/useragent.c - you'll want to change the macro called
   NETSURFY_UA_FORMAT_STRING.  It's processed via sprintf, so keep that in
@@ -71,7 +71,7 @@
   and the remainder are major and minor version numbers.  You might want
   to change this to something like:
 
-      "Mozilla/5.0 (%s; Debian GNU/Linux) NetSurfy/%d.%d"
+      "Mozilla/5.0 (%s; Debian GNU/Linux) TinySurf/%d.%d"
 
   or similar.
 
@@ -81,12 +81,12 @@
   Home page URL
 ===============
 
-  If the user hasn't specified a home page URL in their Preferences, NetSurfy
+  If the user hasn't specified a home page URL in their Preferences, TinySurf
   defaults to https://duckduckgo.com - if you wish to change this, you can do
   so by overriding the NETSURFY_HOMEPAGE URL in Makefile.config.
 
 
-  If you make significant changes to NetSurfy in your package, please ask your
+  If you make significant changes to TinySurf in your package, please ask your
   users to report bugs to your bug tracker, not ours.  We'd also be interested
   in seeing the diffs for these changes - we may be able to integrate them
   to make your job easier in future.

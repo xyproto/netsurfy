@@ -1,13 +1,13 @@
 /*
  * Copyright 2012 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -35,7 +35,7 @@
  * pointer to the active options table and be implemented as functions
  * within nsoptions.c
  *
- * Indirect access would have an impact on performance of NetSurfy as
+ * Indirect access would have an impact on performance of TinySurf as
  * the expected option lookup cost is currently that of a simple
  * dereference (which this current implementation keeps).
  */
@@ -107,7 +107,7 @@ enum nsoption_type_e {
 	OPTION_INTEGER, /**< Option is an integer. */
 	OPTION_UINT, /**< Option is an unsigned integer */
 	OPTION_STRING, /**< option is a heap allocated string. */
-	OPTION_COLOUR /**< Option  is a netsurfy colour. */
+	OPTION_COLOUR /**< Option  is a tinysurf colour. */
 };
 
 struct nsoption_s {
@@ -349,7 +349,7 @@ int nsoption_snoptionf(char *string,
 
 
 /**
- * Get the value of a netsurfy colour option.
+ * Get the value of a tinysurf colour option.
  *
  * Gets the value of an option assuming it is a colour type.
  * @note option type is unchecked so care must be taken in caller.

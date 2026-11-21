@@ -1,11 +1,11 @@
-NetSurfy Unit Testing
+TinySurf Unit Testing
 ====================
 
 [TOC]
 
 # Overview
 
-NetSurfy has unit tests integrated in the test directory. These tests
+TinySurf has unit tests integrated in the test directory. These tests
 use the check unit test framework for C [1].
 
 The tests are in a logical hierachy of "suite", "case" and individual

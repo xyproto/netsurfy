@@ -1,13 +1,13 @@
 /*
  * Copyright 2012 - 2013 Michael Drake <tlsa@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -31,7 +31,7 @@
 
 #include "desktop/global_history.h"
 #include "desktop/treeview.h"
-#include "netsurfy/browser_window.h"
+#include "tinysurf/browser_window.h"
 
 #define N_DAYS 28
 #define N_SEC_PER_DAY (60 * 60 * 24)
@@ -610,7 +610,7 @@ static nserror global_history_initialise_time(void)
 	/* get the current time */
 	t = time(NULL);
 	if (t == -1) {
-		NSLOG(netsurfy, INFO, "time info unaviable");
+		NSLOG(tinysurf, INFO, "time info unaviable");
 		return NSERROR_UNKNOWN;
 	}
 
@@ -621,7 +621,7 @@ static nserror global_history_initialise_time(void)
 	full_time->tm_hour = 0;
 	t = mktime(full_time);
 	if (t == -1) {
-		NSLOG(netsurfy, INFO, "mktime failed");
+		NSLOG(tinysurf, INFO, "mktime failed");
 		return NSERROR_UNKNOWN;
 	}
 
@@ -739,7 +739,7 @@ nserror global_history_init(void *core_window_handle)
 		return err;
 	}
 
-	NSLOG(netsurfy, INFO, "Loading global history");
+	NSLOG(tinysurf, INFO, "Loading global history");
 
 	/* Init. global history treeview time */
 	err = global_history_initialise_time();
@@ -798,7 +798,7 @@ nserror global_history_init(void *core_window_handle)
 	/* Inform client of window height */
 	treeview_get_height(gh_ctx.tree);
 
-	NSLOG(netsurfy, INFO, "Loaded global history");
+	NSLOG(tinysurf, INFO, "Loaded global history");
 
 	return NSERROR_OK;
 }
@@ -810,7 +810,7 @@ nserror global_history_fini(void)
 	int i;
 	nserror err;
 
-	NSLOG(netsurfy, INFO, "Finalising global history");
+	NSLOG(tinysurf, INFO, "Finalising global history");
 
 	gh_ctx.built = false;
 
@@ -827,7 +827,7 @@ nserror global_history_fini(void)
 		return err;
 	}
 
-	NSLOG(netsurfy, INFO, "Finalised global history");
+	NSLOG(tinysurf, INFO, "Finalised global history");
 
 	return err;
 }
@@ -844,7 +844,7 @@ nserror global_history_add(nsurl *url)
 
 	data = urldb_get_url_data(url);
 	if (data == NULL) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Can't add URL to history that's not present in urldb.");
 		return NSERROR_BAD_PARAMETER;
@@ -941,7 +941,7 @@ nserror global_history_export(const char *path, const char *title)
 		return NSERROR_SAVE_FAILED;
 
 	if (title == NULL)
-		title = "NetSurfy Browsing History";
+		title = "TinySurf Browsing History";
 
 	fputs("<!DOCTYPE html "
 	      "PUBLIC \"//W3C/DTD HTML 4.01//EN\" "

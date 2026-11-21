@@ -2,13 +2,13 @@
  * Copyright 2007 Rob Kendrick <rjek@netsurf-browser.org>
  * Copyright 2007 Vincent Sanders <vince@debian.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -87,7 +87,7 @@ void headless_fetch_filetype_init(const char *mimefile)
 	fh = fopen(mimefile, "r");
 
 	if (fh == NULL) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Unable to open a mime.types file, so using a minimal one for you.");
 		return;
@@ -195,7 +195,7 @@ const char *headless_fetch_filetype(const char *unix_path)
 		return "text/plain";
 	}
 	if (S_ISDIR(statbuf.st_mode)) {
-		return "application/x-netsurfy-directory";
+		return "application/x-tinysurf-directory";
 	}
 
 	l = strlen(unix_path);

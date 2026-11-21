@@ -3,13 +3,13 @@
  * Copyright 2007 James Bursa <bursa@users.sourceforge.net>
  * Copyright 2004 Andrew Timmins <atimmins@blueyonder.co.uk>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -26,7 +26,7 @@
 #include <libwapcaplet/libwapcaplet.h>
 #include <dom/dom.h>
 
-#include "netsurfy/inttypes.h"
+#include "tinysurf/inttypes.h"
 #include "utils/config.h"
 #include "utils/errors.h"
 #include "utils/nscolour.h"
@@ -49,13 +49,13 @@
 #include "html/html.h"
 #include "text/textplain.h"
 
-#include "netsurfy/browser_window.h"
+#include "tinysurf/browser_window.h"
 #include "desktop/system_colour.h"
 #include "desktop/page-info.h"
 #include "desktop/searchweb.h"
-#include "netsurfy/misc.h"
+#include "tinysurf/misc.h"
 #include "desktop/gui_internal.h"
-#include "netsurfy/netsurfy.h"
+#include "tinysurf/tinysurf.h"
 
 
 /** \todo QUERY - Remove this import later */
@@ -64,7 +64,7 @@
 /** speculative pre-conversion small image size
  *
  * Experimenting by visiting every page from default page in order and
- * then netsurfy homepage
+ * then tinysurf homepage
  *
  * 0    : Cache hit/miss/speculative miss/fail 604/147/  0/0 (80%/19%/ 0%/ 0%)
  * 2048 : Cache hit/miss/speculative miss/fail 622/119/ 17/0 (82%/15%/ 2%/ 0%)
@@ -97,9 +97,9 @@
 /** default time quantum with which to calculate bandwidth (ms) */
 #define LLCACHE_STORE_TIME_QUANTUM (100)
 
-static void netsurfy_lwc_iterator(lwc_string *str, void *pw)
+static void tinysurf_lwc_iterator(lwc_string *str, void *pw)
 {
-	NSLOG(netsurfy,
+	NSLOG(tinysurf,
 	      WARNING,
 	      "[%3" PRIu32 "] %.*s",
 	      str->refcnt,
@@ -107,8 +107,8 @@ static void netsurfy_lwc_iterator(lwc_string *str, void *pw)
 	      lwc_string_data(str));
 }
 
-/* exported interface documented in netsurfy/netsurfy.h */
-nserror netsurfy_init(const char *store_path)
+/* exported interface documented in tinysurf/tinysurf.h */
+nserror tinysurf_init(const char *store_path)
 {
 	nserror ret;
 	struct hlcache_parameters hlcache_parameters = {
@@ -148,7 +148,7 @@ nserror netsurfy_init(const char *store_path)
 
 	if (hlcache_parameters.llcache.limit < MINIMUM_MEMORY_CACHE_SIZE) {
 		hlcache_parameters.llcache.limit = MINIMUM_MEMORY_CACHE_SIZE;
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Setting minimum memory cache size %" PRIsizet,
 		      hlcache_parameters.llcache.limit);
@@ -232,29 +232,29 @@ nserror netsurfy_init(const char *store_path)
 
 
 /**
- * Clean up components used by gui NetSurfy.
+ * Clean up components used by gui TinySurf.
  */
 
-void netsurfy_exit(void)
+void tinysurf_exit(void)
 {
 	hlcache_stop();
 
-	NSLOG(netsurfy, INFO, "Closing GUI");
+	NSLOG(tinysurf, INFO, "Closing GUI");
 	guit->misc->quit();
 
-	NSLOG(netsurfy, INFO, "Finalising page-info module");
+	NSLOG(tinysurf, INFO, "Finalising page-info module");
 	page_info_fini();
 
-	NSLOG(netsurfy, INFO, "Finalising JavaScript");
+	NSLOG(tinysurf, INFO, "Finalising JavaScript");
 	js_finalise();
 
-	NSLOG(netsurfy, INFO, "Finalising Web Search");
+	NSLOG(tinysurf, INFO, "Finalising Web Search");
 	search_web_finalise();
 
-	NSLOG(netsurfy, INFO, "Finalising high-level cache");
+	NSLOG(tinysurf, INFO, "Finalising high-level cache");
 	hlcache_finalise();
 
-	NSLOG(netsurfy, INFO, "Closing fetches");
+	NSLOG(tinysurf, INFO, "Closing fetches");
 	fetcher_quit();
 	/* Now the fetchers are done, our user-agent string can go */
 	free_user_agent_string();
@@ -265,26 +265,26 @@ void netsurfy_exit(void)
 	/* Clean up after content handlers */
 	content_factory_fini();
 
-	NSLOG(netsurfy, INFO, "Closing utf8");
+	NSLOG(tinysurf, INFO, "Closing utf8");
 	utf8_finalise();
 
-	NSLOG(netsurfy, INFO, "Destroying URLdb");
+	NSLOG(tinysurf, INFO, "Destroying URLdb");
 	urldb_destroy();
 
-	NSLOG(netsurfy, INFO, "Destroying System colours");
+	NSLOG(tinysurf, INFO, "Destroying System colours");
 	ns_system_colour_finalize();
 
-	NSLOG(netsurfy, INFO, "Destroying Messages");
+	NSLOG(tinysurf, INFO, "Destroying Messages");
 	messages_destroy();
 
 	corestrings_fini();
 	if (dom_namespace_finalise() != DOM_NO_ERR) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      WARNING,
 		      "Unable to finalise DOM namespace strings");
 	}
-	NSLOG(netsurfy, INFO, "Remaining lwc strings:");
-	lwc_iterate_strings(netsurfy_lwc_iterator, NULL);
+	NSLOG(tinysurf, INFO, "Remaining lwc strings:");
+	lwc_iterate_strings(tinysurf_lwc_iterator, NULL);
 
-	NSLOG(netsurfy, INFO, "Exited successfully");
+	NSLOG(tinysurf, INFO, "Exited successfully");
 }

@@ -1,16 +1,16 @@
 --------------------------------------------------------------------------------
-  Build Instructions for Framebuffer NetSurfy                     16 March 2014
+  Build Instructions for Framebuffer TinySurf                     16 March 2014
 --------------------------------------------------------------------------------
 
   This document provides instructions for building the Framebuffer version of 
-  NetSurfy and provides guidance on obtaining NetSurfy's build dependencies.
+  TinySurf and provides guidance on obtaining TinySurf's build dependencies.
 
-  Framebuffer NetSurfy has been tested on Ubuntu and Debian.
+  Framebuffer TinySurf has been tested on Ubuntu and Debian.
 
   Depending on the framebuffer frontend selected the build may need specific
   libraries installed, e.g. the SDL port requires SDL1.2 or later
 
-  There are two ways to get NetSurfy building.  The QUICK-START (recommended),
+  There are two ways to get TinySurf building.  The QUICK-START (recommended),
   and the manual build.  Whichever you choose, you should read both the
   "Fonts", and "Selecting a frontend and appropriate options" sections below.
 
@@ -19,24 +19,24 @@
 =============
 
   See the QUICK-START document, which provides a simple environment with
-  which you can fetch, build and install NetSurfy and its dependencies.
+  which you can fetch, build and install TinySurf and its dependencies.
 
-  The QUICK-START is the recommended way to build NetSurfy.
+  The QUICK-START is the recommended way to build TinySurf.
 
 
   Manual building
 =================
 
   If you can't follow the quick start instructions, you will have to build
-  NetSurfy manually.  The instructions for doing this are given below.
+  TinySurf manually.  The instructions for doing this are given below.
 
 
   Obtaining the build dependencies
 ----------------------------------
 
-  Many of NetSurfy's dependencies are packaged on various operating systems.
+  Many of TinySurf's dependencies are packaged on various operating systems.
   The remainder must be installed manually.  Currently, some of the libraries
-  developed as part of the NetSurfy project have not had official releases.
+  developed as part of the TinySurf project have not had official releases.
   Hopefully they will soon be released with downloadable tarballs and packaged
   in common distros.  For now, you'll have to make do with Git checkouts.
 
@@ -51,7 +51,7 @@
   note that when it has not been built with OpenSSL, the SSL_CTX is not
   available and results that certification details won't be presented in case
   they are invalid.  But as this is currently unimplemented in the Framebuffer
-  flavour of NetSurfy, this won't make a difference at all.
+  flavour of TinySurf, this won't make a difference at all.
 
   Fedora:
 
@@ -65,20 +65,20 @@
   Preparing your workspace
 --------------------------
 
-  NetSurfy has a number of libraries which must be built in-order and
+  TinySurf has a number of libraries which must be built in-order and
   installed into your workspace. Each library depends on a core build
-  system which NetSurfy projects use. This build system relies on the
+  system which TinySurf projects use. This build system relies on the
   presence of things like pkg-config to find libraries and also certain
   environment variables in order to work correctly.
 
-  Assuming you are preparing a workspace in /home/dev-netsurfy/workspace then
+  Assuming you are preparing a workspace in /home/dev-tinysurf/workspace then
   the following steps will set you up:
 
   Make the workspace directory and change to it
   ---------------------------------------------
 
-  $ mkdir -p ${HOME}/dev-netsurfy/workspace
-  $ cd ${HOME}/dev-netsurfy/workspace
+  $ mkdir -p ${HOME}/dev-tinysurf/workspace
+  $ cd ${HOME}/dev-tinysurf/workspace
 
   Make the temporary install space
   --------------------------------
@@ -88,9 +88,9 @@
   Make an environment script
   --------------------------
   $ cat > env.sh <<'EOF'
-    export PKG_CONFIG_PATH=${HOME}/dev-netsurfy/workspace/inst/lib/pkgconfig::
-    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${HOME}/dev-netsurfy/workspace/inst/lib
-    export PREFIX=${HOME}/dev-netsurfy/workspace/inst
+    export PKG_CONFIG_PATH=${HOME}/dev-tinysurf/workspace/inst/lib/pkgconfig::
+    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${HOME}/dev-tinysurf/workspace/inst/lib
+    export PREFIX=${HOME}/dev-tinysurf/workspace/inst
     EOF
 
   Change to workspace and source the environment
@@ -98,17 +98,17 @@
 
   Whenever you wish to start development in a new shell, run the following:
 
-  $ cd ${HOME}/dev-netsurfy/workspace
+  $ cd ${HOME}/dev-tinysurf/workspace
   $ source env.sh
 
   From here on, any commands in this document assume you have sourced your
   shell environment.
 
 
-  The NetSurfy project's libraries
+  The TinySurf project's libraries
 ---------------------------------
 
-  The NetSurfy project has developed several libraries which are required by
+  The TinySurf project has developed several libraries which are required by
   the browser. These are:
 
   BuildSystem     --  Shared build system, needed to build the other libraries
@@ -139,20 +139,20 @@
   |       For more information, consult the libparserutils README file.
 
 
-  Getting the NetSurfy source
+  Getting the TinySurf source
 ----------------------------
 
-  From your workspace directory, run the following command to get the NetSurfy
+  From your workspace directory, run the following command to get the TinySurf
   source:
 
-     $ git clone https://github.com/xyproto/netsurfy
+     $ git clone https://github.com/xyproto/tinysurf
 
-  And change to the 'netsurfy' directory:
+  And change to the 'tinysurf' directory:
 
-     $ cd netsurfy
+     $ cd tinysurf
 
 
-  Building and executing NetSurfy
+  Building and executing TinySurf
 --------------------------------
 
   First of all, you should examine the contents of Makefile.defaults
@@ -162,37 +162,37 @@
   Others cannot be automatically detected from the Makefile, so you
   will either need to install the dependencies, or set them to NO.
   
-  You should then obtain NetSurfy's dependencies, keeping in mind which options
-  you have enabled in the configuration file.  See the "Obtaining NetSurfy's
+  You should then obtain TinySurf's dependencies, keeping in mind which options
+  you have enabled in the configuration file.  See the "Obtaining TinySurf's
   dependencies" section for specifics.
   
-  Once done, to build Framebuffer NetSurfy on a UNIX-like platform, simply run:
+  Once done, to build Framebuffer TinySurf on a UNIX-like platform, simply run:
 
       $ make TARGET=framebuffer
 
-  If that produces errors, you probably don't have some of NetSurfy's build
-  dependencies installed. See "Obtaining NetSurfy's dependencies" below.
+  If that produces errors, you probably don't have some of TinySurf's build
+  dependencies installed. See "Obtaining TinySurf's dependencies" below.
   Or turn off the complaining features in your Makefile.config.  You may
   need to "make clean" before attempting to build after installing the 
   dependencies.
 
-  Run NetSurfy by executing the "nsfb" program:
+  Run TinySurf by executing the "nsfb" program:
 
       $ ./nsfb
 
-  | Note: NetSurfy uses certain resources at run time.  In order to find these
+  | Note: TinySurf uses certain resources at run time.  In order to find these
   |       resources, it searches three locations:
   |
-  |           1. ~/.netsurfy/
+  |           1. ~/.tinysurf/
   |           2. $NETSURFYRES/
-  |           3. /usr/share/netsurfy/
+  |           3. /usr/share/tinysurf/
   |
   |       In the build tree, the resources are located at
   |
   |           framebuffer/res
   |
   |       Setting $NETSURFYRES to point at the resources in the build tree
-  |       will enable you to run NetSurfy from here without installation.
+  |       will enable you to run TinySurf from here without installation.
   |       To do this, run:
   |
   |           export NETSURFYRES=`pwd`/framebuffer/res
@@ -323,11 +323,11 @@ Index: framebuffer/font_freetype.c
 ==============================================  
 
   The framebuffer port interfaces to its input and output devices
-  using the NetSurfy Framebuffer library (libnsfb). This library
+  using the TinySurf Framebuffer library (libnsfb). This library
   provides an abstraction layer to input and output devices.
 
   The surface used by libnsfb is selected by using the -f switch to
-  NetSurfy when executed. A surface in this context is simply the
+  TinySurf when executed. A surface in this context is simply the
   combination of input and output devices.
 
   A surface output device may be any linearly mapped area of

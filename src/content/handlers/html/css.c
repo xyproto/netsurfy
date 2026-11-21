@@ -1,13 +1,13 @@
 /*
  * Copyright 2013 Vincent Sanders <vince@netsurf-browser.org>
  *
- * This file is part of NetSurfy, https://github.com/xyproto/netsurfy
+ * This file is part of TinySurf, https://github.com/xyproto/tinysurf
  *
- * NetSurfy is free software; you can redistribute it and/or modify
+ * TinySurf is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
  *
- * NetSurfy is distributed in the hope that it will be useful,
+ * TinySurf is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -33,9 +33,9 @@
 #include "utils/nsoption.h"
 #include "utils/corestrings.h"
 #include "utils/log.h"
-#include "netsurfy/inttypes.h"
-#include "netsurfy/misc.h"
-#include "netsurfy/content.h"
+#include "tinysurf/inttypes.h"
+#include "tinysurf/misc.h"
+#include "tinysurf/content.h"
 #include "content/hlcache.h"
 #include "css/css.h"
 #include "css/internal.h"
@@ -54,7 +54,7 @@ static nsurl *html_quirks_stylesheet_url;
 static nsurl *html_user_stylesheet_url;
 
 /**
- * Convert css error to netsurfy error.
+ * Convert css error to tinysurf error.
  */
 static nserror css_error_to_nserror(css_error error)
 {
@@ -113,17 +113,17 @@ static nserror html_convert_css_callback(hlcache_handle *css,
 	switch (event->type) {
 
 	case CONTENT_MSG_DONE:
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "done stylesheet slot %d '%s'",
 		      i,
 		      nsurl_access(hlcache_handle_get_url(css)));
 		parent->base.active--;
-		NSLOG(netsurfy, INFO, "%d fetches active", parent->base.active);
+		NSLOG(tinysurf, INFO, "%d fetches active", parent->base.active);
 		break;
 
 	case CONTENT_MSG_ERROR:
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "stylesheet %s failed: %s",
 		      nsurl_access(hlcache_handle_get_url(css)),
@@ -132,7 +132,7 @@ static nserror html_convert_css_callback(hlcache_handle *css,
 		hlcache_handle_release(css);
 		s->sheet = NULL;
 		parent->base.active--;
-		NSLOG(netsurfy, INFO, "%d fetches active", parent->base.active);
+		NSLOG(tinysurf, INFO, "%d fetches active", parent->base.active);
 		break;
 
 	case CONTENT_MSG_POINTER:
@@ -179,7 +179,7 @@ static nserror html_stylesheet_from_domnode(html_content *c,
 
 	exc = dom_node_get_text_content(node, &style);
 	if ((exc != DOM_NO_ERR) || (style == NULL)) {
-		NSLOG(netsurfy, INFO, "No text content");
+		NSLOG(tinysurf, INFO, "No text content");
 		return NSERROR_OK;
 	}
 
@@ -215,7 +215,7 @@ static nserror html_stylesheet_from_domnode(html_content *c,
 	nsurl_unref(url);
 
 	c->base.active++;
-	NSLOG(netsurfy, INFO, "%d fetches active", c->base.active);
+	NSLOG(tinysurf, INFO, "%d fetches active", c->base.active);
 
 	return NSERROR_OK;
 }
@@ -288,13 +288,13 @@ html_css_process_modified_style(html_content *c, struct html_stylesheet *s)
 
 	error = html_stylesheet_from_domnode(c, s->node, &sheet);
 	if (error != NSERROR_OK) {
-		NSLOG(netsurfy, INFO, "Failed to update sheet");
+		NSLOG(tinysurf, INFO, "Failed to update sheet");
 		content_broadcast_error(&c->base, error, NULL);
 		return false;
 	}
 
 	if (sheet != NULL) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Updating sheet %p with %p",
 		      s->sheet,
@@ -307,7 +307,7 @@ html_css_process_modified_style(html_content *c, struct html_stylesheet *s)
 			default:
 				hlcache_handle_abort(s->sheet);
 				c->base.active--;
-				NSLOG(netsurfy,
+				NSLOG(tinysurf,
 				      INFO,
 				      "%d fetches active",
 				      c->base.active);
@@ -489,7 +489,7 @@ bool html_css_update_style(html_content *c, dom_node *style)
 		s = html_create_style_element(c, style);
 	}
 	if (s == NULL) {
-		NSLOG(netsurfy,
+		NSLOG(tinysurf,
 		      INFO,
 		      "Could not find or create inline stylesheet for %p",
 		      style);
@@ -607,7 +607,7 @@ bool html_css_process_link(html_content *htmlc, dom_node *node)
 	}
 	dom_string_unref(href);
 
-	NSLOG(netsurfy,
+	NSLOG(tinysurf,
 	      INFO,
 	      "linked stylesheet %i '%s'",
 	      htmlc->stylesheet_count,
@@ -653,7 +653,7 @@ bool html_css_process_link(html_content *htmlc, dom_node *node)
 	htmlc->stylesheet_count++;
 
 	htmlc->base.active++;
-	NSLOG(netsurfy, INFO, "%d fetches active", htmlc->base.active);
+	NSLOG(tinysurf, INFO, "%d fetches active", htmlc->base.active);
 
 	return true;
 
@@ -748,7 +748,7 @@ nserror html_css_quirks_stylesheets(html_content *c)
 		}
 
 		c->base.active++;
-		NSLOG(netsurfy, INFO, "%d fetches active", c->base.active);
+		NSLOG(tinysurf, INFO, "%d fetches active", c->base.active);
 	}
 
 	return ns_error;
@@ -799,7 +799,7 @@ nserror html_css_new_stylesheets(html_content *c)
 	}
 
 	c->base.active++;
-	NSLOG(netsurfy, INFO, "%d fetches active", c->base.active);
+	NSLOG(tinysurf, INFO, "%d fetches active", c->base.active);
 
 
 	if (nsoption_bool(block_advertisements)) {
@@ -818,7 +818,7 @@ nserror html_css_new_stylesheets(html_content *c)
 		}
 
 		c->base.active++;
-		NSLOG(netsurfy, INFO, "%d fetches active", c->base.active);
+		NSLOG(tinysurf, INFO, "%d fetches active", c->base.active);
 	}
 
 	ns_error = hlcache_handle_retrieve(
@@ -836,7 +836,7 @@ nserror html_css_new_stylesheets(html_content *c)
 	}
 
 	c->base.active++;
-	NSLOG(netsurfy, INFO, "%d fetches active", c->base.active);
+	NSLOG(tinysurf, INFO, "%d fetches active", c->base.active);
 
 	return ns_error;
 }
